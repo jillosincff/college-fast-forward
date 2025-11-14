@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -107,22 +107,22 @@ export default function TalentSpotlight() {
       <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <Sparkles className="w-8 h-8" />
-            <h1 className="text-4xl md:text-5xl font-bold">Talent Spotlight</h1>
+            <Sparkles className="w-8 h-8 text-white" />
+            <h1 className="text-4xl md:text-5xl font-bold text-white">Talent Spotlight</h1>
           </div>
-          <p className="text-xl text-white/90 max-w-3xl">
+          <p className="text-xl text-white opacity-90 max-w-3xl">
             Discover exceptional Gator talent ready for opportunities. Browse rich profiles, view projects, and reach out directly to students who match your needs.
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
-            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2">
+            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2 hover:bg-white/30">
               <Star className="w-4 h-4 mr-2" />
               {students.length} Students Featured
             </Badge>
-            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2">
+            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2 hover:bg-white/30">
               <TrendingUp className="w-4 h-4 mr-2" />
               100% UF Verified
             </Badge>
-            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2">
+            <Badge className="bg-white/20 text-white border-white/40 px-4 py-2 hover:bg-white/30">
               <Award className="w-4 h-4 mr-2" />
               Top-Rated Profiles
             </Badge>
