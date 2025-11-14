@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RoommatePost } from '@/entities/RoommatePost';
 import { useAuth } from '@/components/auth/AuthContext';
@@ -174,22 +173,17 @@ export default function RoommatesPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <div
-        className="relative text-white mb-8"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 33, 165, 0.85), rgba(250, 70, 22, 0.85)), url('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/6104ed895_pexels-jea-tang-435429791-15312050.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-shadow-lg">
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Find Your Post-Graduation Roommate
           </h1>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto text-shadow-md">
+          <p className="text-xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
             Moving to a new city after graduation? Connect with fellow Gators for shared housing and trusted roommates.
           </p>
 
@@ -197,7 +191,7 @@ export default function RoommatesPage() {
             <Button
               onClick={() => setShowPostModal(true)}
               size="lg"
-              className="bg-[#FA4616] hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              className="bg-white text-[#FA4616] hover:bg-white/90 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
               Post a Listing

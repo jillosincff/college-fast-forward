@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -198,18 +199,14 @@ export default function GatorDirectory() {
   return (
     <div className="min-h-screen bg-slate-100">
       
-      {/* Gator Blue Hero Section */}
-      <div className="relative text-white overflow-hidden">
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/f025b6c93_image.png')`,
-            willChange: 'transform'
-          }}
-        />
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-blue-800/85 via-blue-700/80 to-orange-600/75" />
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        </div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-3xl" role="img" aria-label="alligator">🐊</span>
@@ -217,16 +214,16 @@ export default function GatorDirectory() {
                 Gator Network
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-shadow-lg">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
               Gator Directory
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 font-medium mb-4 leading-relaxed text-shadow-md">
+            <p className="text-xl md:text-2xl text-white opacity-90 font-medium mb-4 leading-relaxed">
               {isStudent 
                 ? 'Find parents and alumni with the expertise you need to succeed'
                 : 'Connect with fellow students, alumni, and parents from the Gator Nation'
               }
             </p>
-            <p className="text-lg text-blue-200 max-w-2xl mx-auto leading-relaxed text-shadow-sm">
+            <p className="text-lg text-white opacity-80 max-w-2xl mx-auto leading-relaxed">
               {isStudent
                 ? 'Search by industry, expertise, or type of help you need'
                 : 'Find mentors, make connections, and tap into the power of our community'
@@ -238,35 +235,35 @@ export default function GatorDirectory() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {/* Total Members */}
                 <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
-                  <div className="text-3xl font-bold text-orange-300 mb-1">{loading ? '...' : stats.members}</div>
-                  <div className="text-sm text-blue-200">Gator Members</div>
+                  <div className="text-3xl font-bold text-white mb-1">{loading ? '...' : stats.members}</div>
+                  <div className="text-sm text-white opacity-80">Gator Members</div>
                 </div>
                 
                 {/* Students */}
                 <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <GraduationCap className="w-5 h-5 text-blue-300" />
-                    <div className="text-3xl font-bold text-blue-300">{loading ? '...' : stats.students}</div>
+                    <GraduationCap className="w-5 h-5 text-white" />
+                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.students}</div>
                   </div>
-                  <div className="text-sm text-blue-200">Students</div>
+                  <div className="text-sm text-white opacity-80">Students</div>
                 </div>
                 
                 {/* Alumni */}
                 <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <Briefcase className="w-5 h-5 text-green-300" />
-                    <div className="text-3xl font-bold text-green-300">{loading ? '...' : stats.alumni}</div>
+                    <Briefcase className="w-5 h-5 text-white" />
+                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.alumni}</div>
                   </div>
-                  <div className="text-sm text-blue-200">Alumni</div>
+                  <div className="text-sm text-white opacity-80">Alumni</div>
                 </div>
                 
                 {/* Parents */}
                 <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <Heart className="w-5 h-5 text-purple-300" />
-                    <div className="text-3xl font-bold text-purple-300">{loading ? '...' : stats.parents}</div>
+                    <Heart className="w-5 h-5 text-white" />
+                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.parents}</div>
                   </div>
-                  <div className="text-sm text-blue-200">Parents</div>
+                  <div className="text-sm text-white opacity-80">Parents</div>
                 </div>
               </div>
             </div>
