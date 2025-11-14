@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Company } from '@/entities/Company';
 import { CompanyFollow } from '@/entities/CompanyFollow';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
   MapPin,
   Star,
   Briefcase,
+  TrendingUp,
   CheckCircle,
   Filter
 } from 'lucide-react';

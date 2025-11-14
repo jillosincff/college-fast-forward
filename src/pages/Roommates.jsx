@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RoommatePost } from '@/entities/RoommatePost';
 import { useAuth } from '@/components/auth/AuthContext';
 import RoommatePostCard from '@/components/roommates/RoommatePostCard';
+import RoommateFilters from '@/components/roommates/RoommateFilters';
 import PostListingModal from '@/components/roommates/PostListingModal';
 import MessageUserModal from '@/components/directory/MessageUserModal';
-import { Loader2, Plus, Search, Home, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, Plus, Search, Home, Users, TrendingUp, MapPin, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';

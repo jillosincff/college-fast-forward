@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Briefcase, X, Frown, GraduationCap, Heart, Award, Filter } from 'lucide-react';
+import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter } from 'lucide-react';
 import UserCard from '@/components/directory/UserCard';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import ProfileModal from '@/components/directory/ProfileModal';

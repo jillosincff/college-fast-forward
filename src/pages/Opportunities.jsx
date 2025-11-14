@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Opportunity } from '@/entities/Opportunity';
 import { OpportunityApplication } from '@/entities/OpportunityApplication';
@@ -29,6 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Checkbox } from '@/components/ui/checkbox';
 
 const useLocalStorageState = (key, defaultValue) => {
   const [state, setState] = useState(() => {
