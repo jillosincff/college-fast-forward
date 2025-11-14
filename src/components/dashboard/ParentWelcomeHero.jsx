@@ -1,10 +1,9 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
 import { User } from '@/entities/User';
-import { getGreeting } from '@/components/utils/greetingLogic';
+import { getGreeting, displayName } from '@/components/utils/greetingLogic';
 
 export default function ParentWelcomeHero({
   stats = { intros: 0, requestsViewed: 0, newParents: 0 }
@@ -46,20 +45,21 @@ export default function ParentWelcomeHero({
 
   return (
     <section
-      className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-gradient-to-br from-orange-50 to-white border"
+      className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-gradient-to-br from-[#0021A5] to-[#FA4616] border"
       aria-label="Parent dashboard welcome"
     >
       {/* soft background accents */}
       <div className="pointer-events-none absolute inset-0">
-        {/* Placeholder for any background SVG or elements */}
+        <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
       </div>
 
       <div className="relative">
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
           <span aria-hidden="true" className="mr-1">👋</span>
           {greeting}, {firstName}!
         </h1>
-        <p className="mt-2 max-w-2xl text-sm md:text-base text-gray-600">
+        <p className="mt-2 max-w-2xl text-sm md:text-base text-white opacity-90">
           Your experience is making a difference for Gators. Track your impact, conversations, and opportunities here.
         </p>
 
@@ -67,13 +67,13 @@ export default function ParentWelcomeHero({
         <div className="mt-5 flex flex-wrap gap-3">
           <button
             onClick={handlePostOpportunity}
-            className="inline-flex items-center rounded-xl bg-[#FA4616] px-4 py-2 text-white shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FA4616] transition-opacity"
+            className="inline-flex items-center rounded-xl bg-white text-[#FA4616] px-4 py-2 shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-opacity font-semibold"
           >
             Post an Opportunity
           </button>
           <button
             onClick={handleViewImpact}
-            className="inline-flex items-center rounded-xl border border-[#0021A5] px-4 py-2 text-[#0021A5] hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0021A5] transition-colors"
+            className="inline-flex items-center rounded-xl border border-white px-4 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-colors font-semibold"
           >
             View My Impact
           </button>
@@ -84,20 +84,20 @@ export default function ParentWelcomeHero({
           <div className="mt-6 flex flex-wrap gap-4 text-center">
             {stats.intros > 0 && (
               <div className="flex-1 min-w-[120px]">
-                <p className="text-3xl font-extrabold text-[#FA4616]">{stats.intros}</p>
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Intros</p>
+                <p className="text-3xl font-extrabold text-white">{stats.intros}</p>
+                <p className="text-xs text-white opacity-80 uppercase font-bold tracking-wider">Intros</p>
               </div>
             )}
             {stats.requestsViewed > 0 && (
               <div className="flex-1 min-w-[120px]">
-                <p className="text-3xl font-extrabold text-[#0021A5]">{stats.requestsViewed}</p>
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Requests Viewed</p>
+                <p className="text-3xl font-extrabold text-white">{stats.requestsViewed}</p>
+                <p className="text-xs text-white opacity-80 uppercase font-bold tracking-wider">Requests Viewed</p>
               </div>
             )}
             {stats.newParents > 0 && (
               <div className="flex-1 min-w-[120px]">
-                <p className="text-3xl font-extrabold text-[#28A745]">{stats.newParents}</p>
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">New Parents</p>
+                <p className="text-3xl font-extrabold text-white">{stats.newParents}</p>
+                <p className="text-xs text-white opacity-80 uppercase font-bold tracking-wider">New Parents</p>
               </div>
             )}
           </div>
