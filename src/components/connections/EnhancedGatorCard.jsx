@@ -1,0 +1,615 @@
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Globe2 } from 'lucide-react';
+import UserAvatar from '@/components/common/UserAvatar';
+import MessageUserModal from '@/components/directory/MessageUserModal';
+import { getDisplayName } from '@/components/utils/nameUtils';
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  }
+};
+
+export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showFullBio, setShowFullBio] = useState(false);
+
+  // FIXED: Use the proper name utility function
+  const fullName = getDisplayName(gator);
+  const graduationYear = gator.graduation_year ? `Class of ${gator.graduation_year}` : 'UF Student';
+  const major = gator.major || 'Undeclared';
+  const bio = gator.bio || request?.description || 'Connect with me to learn more!';
+  
+  // Truncate bio to 1-2 lines (approx 80 chars for tighter display)
+  const shouldTruncate = bio.length > 80;
+  const displayBio = showFullBio || !shouldTruncate ? bio : bio.substring(0, 80) + '...';
+
+  // Check for LinkedIn and Resume
+  const hasLinkedIn = !!gator.linkedin_url;
+  const hasResume = !!request?.resume_url;
+
+  // Get Intent (Internship, Full-time, Advice)
+  const getIntent = () => {
+    if (!request) return null;
+    
+    const jobType = request.job_type || request.role_type || '';
+    const role = request.role || request.target_industry || 'Opportunity';
+    
+    if (jobType === 'internship') {
+      return { type: 'Internship', role, color: 'intent-internship' };
+    } else if (jobType === 'full_time' || jobType === 'fulltime') {
+      return { type: 'Full-time', role, color: 'intent-fulltime' };
+    } else {
+      return { type: 'Advice', role: 'Career Guidance', color: 'intent-advice' };
+    }
+  };
+
+  // Get Location
+  const getLocation = () => {
+    if (request?.location_city && request?.location_state) {
+      return `${request.location_city}, ${request.location_state}`;
+    }
+    if (request?.location_preference) return request.location_preference;
+    if (request?.work_mode === 'remote') return 'Remote';
+    if (gator.location) return gator.location;
+    return 'Flexible';
+  };
+
+  // Get Start Timing
+  const getStartTiming = () => {
+    if (!request?.start_timing) return null;
+    
+    const timingMap = {
+      'immediate': 'Immediate',
+      'this_semester': 'This Semester',
+      'next_semester': 'Next Semester',
+      'summer': 'Summer'
+    };
+    
+    return timingMap[request.start_timing] || request.start_timing;
+  };
+
+  // Extract skills from bio
+  const getSkills = () => {
+    const skillKeywords = ['python', 'react', 'marketing', 'finance', 'design', 'leadership', 'javascript', 'ai', 'ml', 'excel', 'analytics'];
+    const found = [];
+    const bioLower = bio.toLowerCase();
+    skillKeywords.forEach(skill => {
+      if (bioLower.includes(skill)) found.push(skill);
+    });
+    return found.slice(0, 5);
+  };
+
+  const intent = getIntent();
+  const location = getLocation();
+  const startTiming = getStartTiming();
+  const skills = getSkills();
+
+  // Relocation and Visa flags
+  const isOpenToRelocate = request?.relocation_ok || false;
+  const needsVisaSponsorship = request?.visa_needed || false;
+
+  // Mock engagement stats
+  const messagesCount = Math.floor(Math.random() * 8) + 1;
+  const responsesCount = Math.floor(Math.random() * 3) + 1;
+
+  const handleMessage = () => {
+    if (onHelp) {
+      onHelp();
+    } else {
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleLinkedInClick = (e) => {
+    e.stopPropagation();
+    if (gator.linkedin_url) {
+      window.open(gator.linkedin_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleResumeDownload = (e) => {
+    e.stopPropagation();
+    if (request?.resume_url) {
+      window.open(request.resume_url, '_blank');
+    }
+  };
+
+  return (
+    <>
+      <motion.div
+        variants={cardVariants}
+        className={`gator-card-enhanced ${isFeatured ? 'featured' : ''}`}
+        whileHover={{ scale: 1.02, y: -4 }}
+        transition={{ duration: 0.2 }}
+      >
+        {isFeatured && (
+          <div className="featured-badge">
+            <Star className="w-3 h-3" fill="currentColor" />
+            Featured
+          </div>
+        )}
+
+        {/* Profile Photo */}
+        <div className="card-header">
+          <UserAvatar 
+            user={gator} 
+            className="profile-photo-enhanced"
+            showFallback={true}
+          />
+        </div>
+
+        {/* Student Details */}
+        <div className="card-content">
+          {/* Name with LinkedIn */}
+          <div className="name-section">
+            <h3 className="student-name-enhanced">{fullName}</h3>
+            {hasLinkedIn && (
+              <button
+                onClick={handleLinkedInClick}
+                className="linkedin-icon"
+                title="View on LinkedIn"
+                aria-label="View LinkedIn profile"
+              >
+                <Linkedin className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+          
+          {/* Academic Info */}
+          <div className="academic-info">
+            <span className="graduation-year">{graduationYear}</span>
+            {major && <span className="major-separator">•</span>}
+            <span className="major-field">{major}</span>
+          </div>
+
+          {/* Intent, Role, and Location Line */}
+          {intent && (
+            <div className="intent-location-section">
+              <span className={`intent-badge ${intent.color}`}>
+                {intent.type}
+              </span>
+              <span className="role-text">- {intent.role}</span>
+              <span className="location-divider">|</span>
+              <div className="location-group">
+                <MapPin className="location-icon" />
+                <span className="location-text">{location}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Details: Relocation, Visa, Start Timing */}
+          {(isOpenToRelocate || needsVisaSponsorship || startTiming) && (
+            <div className="additional-details">
+              {isOpenToRelocate && (
+                <span className="detail-badge relocation-badge" title="Open to relocate">
+                  <Plane className="w-3 h-3" />
+                  Open to Relocate
+                </span>
+              )}
+              {needsVisaSponsorship && (
+                <span className="detail-badge visa-badge" title="Needs visa sponsorship">
+                  <Globe2 className="w-3 h-3" />
+                  Needs Sponsorship
+                </span>
+              )}
+              {startTiming && (
+                <span className="detail-badge timing-badge" title="Start timing">
+                  <Calendar className="w-3 h-3" />
+                  Starting: {startTiming}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Bio */}
+          <p className="student-bio-enhanced">
+            {displayBio}
+            {shouldTruncate && (
+              <button 
+                onClick={() => setShowFullBio(!showFullBio)}
+                className="read-more-btn"
+              >
+                {showFullBio ? ' Show less' : ' Show more'}
+              </button>
+            )}
+          </p>
+
+          {/* Skills Tags */}
+          {skills.length > 0 && (
+            <div className="skills-section">
+              {skills.map((skill, idx) => (
+                <span key={idx} className="skill-tag-enhanced">
+                  {skill.charAt(0).toUpperCase() + skill.slice(1)}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Resume Icon */}
+          {hasResume && (
+            <button
+              onClick={handleResumeDownload}
+              className="resume-download"
+              title="Download Resume"
+              aria-label="Download resume"
+            >
+              <Paperclip className="w-4 h-4" />
+              <span>Resume attached</span>
+            </button>
+          )}
+
+          {/* Engagement Stats */}
+          <div className="engagement-stats">
+            {messagesCount > 0 && (
+              <span className="stat-text">Messaged by {messagesCount} alumni</span>
+            )}
+            {responsesCount > 0 && messagesCount > 0 && <span className="stat-separator">•</span>}
+            {responsesCount > 0 && (
+              <span className="stat-text">{responsesCount} response{responsesCount > 1 ? 's' : ''} received</span>
+            )}
+          </div>
+
+          {/* Single Message Button */}
+          <Button
+            onClick={handleMessage}
+            className="message-btn-primary"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Message
+          </Button>
+        </div>
+      </motion.div>
+
+      <MessageUserModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        recipientUser={gator}
+      />
+
+      <style jsx>{`
+        .gator-card-enhanced {
+          background: white;
+          border-radius: 12px;
+          padding: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          border: 2px solid transparent;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .gator-card-enhanced:hover {
+          border-color: #FA4616;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .gator-card-enhanced.featured {
+          border-color: #0021A5;
+          background: linear-gradient(135deg, rgba(0, 33, 165, 0.02) 0%, rgba(250, 70, 22, 0.02) 100%);
+        }
+
+        .featured-badge {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: #0021A5;
+          color: white;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 3px 8px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 12px;
+        }
+
+        .profile-photo-enhanced {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          border: 3px solid #0021A5;
+        }
+
+        .card-content {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          flex-grow: 1;
+        }
+
+        .name-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .student-name-enhanced {
+          font-size: 18px;
+          font-weight: 700;
+          color: #0021A5;
+          text-align: center;
+          margin: 0;
+        }
+
+        .linkedin-icon {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          color: #0077B5;
+          transition: transform 0.2s;
+          display: flex;
+          align-items: center;
+        }
+
+        .linkedin-icon:hover {
+          transform: scale(1.1);
+        }
+
+        .academic-info {
+          text-align: center;
+          font-size: 14px;
+          color: #6b7280;
+          font-style: italic;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .graduation-year {
+          color: #6b7280;
+        }
+
+        .major-separator {
+          color: #d1d5db;
+        }
+
+        .major-field {
+          color: #6b7280;
+        }
+
+        /* Intent and Location Section */
+        .intent-location-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex-wrap: wrap;
+          font-size: 14px;
+          font-weight: 600;
+          margin-top: 4px;
+        }
+
+        .intent-badge {
+          padding: 4px 10px;
+          border-radius: 6px;
+          color: white;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .intent-internship {
+          background: #0055D4;
+        }
+
+        .intent-fulltime {
+          background: #FA4616;
+        }
+
+        .intent-advice {
+          background: #6B7280;
+        }
+
+        .role-text {
+          color: #374151;
+          font-weight: 600;
+        }
+
+        .location-divider {
+          color: #d1d5db;
+          font-weight: 400;
+        }
+
+        .location-group {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .location-icon {
+          width: 16px;
+          height: 16px;
+          color: #6b7280;
+        }
+
+        .location-text {
+          color: #6b7280;
+          font-weight: 600;
+        }
+
+        /* Additional Details */
+        .additional-details {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          justify-content: center;
+        }
+
+        .detail-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          border: 1px solid;
+        }
+
+        .relocation-badge {
+          background: #DBEAFE;
+          color: #1E40AF;
+          border-color: #93C5FD;
+        }
+
+        .visa-badge {
+          background: #FEF3C7;
+          color: #92400E;
+          border-color: #FDE68A;
+        }
+
+        .timing-badge {
+          background: #DCFCE7;
+          color: #166534;
+          border-color: #86EFAC;
+        }
+
+        .student-bio-enhanced {
+          font-size: 14px;
+          color: #374151;
+          line-height: 1.5;
+          text-align: center;
+          margin: 0;
+        }
+
+        .read-more-btn {
+          background: none;
+          border: none;
+          color: #0021A5;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 0;
+          text-decoration: underline;
+        }
+
+        .skills-section {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          justify-content: center;
+        }
+
+        .skill-tag-enhanced {
+          background: #0021A5;
+          color: white;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 5px 10px;
+          border-radius: 12px;
+        }
+
+        .resume-download {
+          background: #FFF4ED;
+          border: 1px solid #FA4616;
+          color: #FA4616;
+          padding: 8px 12px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          width: 100%;
+          justify-content: center;
+        }
+
+        .resume-download:hover {
+          background: #FA4616;
+          color: white;
+        }
+
+        .engagement-stats {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          font-size: 12px;
+          color: #6b7280;
+          flex-wrap: wrap;
+        }
+
+        .stat-text {
+          font-size: 12px;
+        }
+
+        .stat-separator {
+          color: #d1d5db;
+        }
+
+        .message-btn-primary {
+          background: #FA4616;
+          color: white;
+          font-size: 14px;
+          font-weight: 700;
+          padding: 12px 24px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 44px;
+          margin-top: auto;
+        }
+
+        .message-btn-primary:hover {
+          background: #FF6F00;
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(250, 70, 22, 0.3);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+          .gator-card-enhanced {
+            padding: 14px;
+          }
+
+          .student-name-enhanced {
+            font-size: 16px;
+          }
+
+          .academic-info {
+            font-size: 13px;
+          }
+
+          .student-bio-enhanced {
+            font-size: 13px;
+          }
+
+          .intent-location-section {
+            font-size: 13px;
+          }
+        }
+      `}</style>
+    </>
+  );
+}

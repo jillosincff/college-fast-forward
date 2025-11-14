@@ -1,0 +1,119 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { v4 as uuidv4 } from 'npm:uuid';
+
+const isEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+Deno.serve(async (req) => {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
+    const { emails, role, campus, note, refSource } = await req.json();
+
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+        return new Response(JSON.stringify({ error: 'Emails must be a non-empty array.' }), { status: 400 });
+    }
+
+    // Rate Limiting
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentInvites } = await base44.asServiceRole.entities.CommunityInvite.filter({
+        inviter_user_id: user.id,
+        created_date: { $gte: twentyFourHoursAgo }
+    });
+
+    if (recentInvites.length >= 50) {
+        return new Response(JSON.stringify({ error: 'Daily invite limit reached. Please try again tomorrow.' }), { status: 429 });
+    }
+    if (emails.length > 10) {
+        return new Response(JSON.stringify({ error: 'You can send a maximum of 10 invites per request.' }), { status: 400 });
+    }
+
+    const validEmails = emails.filter(isEmail);
+    const invalid = emails.filter(e => !isEmail(e));
+    
+    // Check for existing users
+    const { data: existingUsers } = await base44.asServiceRole.entities.User.filter({ email: { $in: validEmails } });
+    const alreadyUsers = existingUsers.map(u => u.email);
+
+    const emailsToSend = validEmails.filter(e => !alreadyUsers.includes(e));
+
+    const results = {
+        sent: [],
+        alreadyUsers,
+        invalid,
+        duplicates: emails.filter((e, i) => emails.indexOf(e) !== i),
+    };
+
+    const appUrl = 'https://www.collegefastforward.com';
+    const inviterName = user.full_name || 'A Gator';
+
+    for (const email of emailsToSend) {
+        try {
+            const token = uuidv4();
+            const expires_at = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(); // 14 days
+
+            // Force campus to UF for College Fast Forward branding
+            await base44.asServiceRole.entities.CommunityInvite.create({
+                inviter_user_id: user.id,
+                email,
+                role,
+                campus: 'UF', // Force UF campus
+                note,
+                invite_token: token,
+                status: 'pending',
+                expires_at,
+            });
+
+            const inviteLink = `${appUrl}/#PreAuth?inviteToken=${token}`;
+            
+            // College Fast Forward branded email
+            const subject = `You're invited to College Fast Forward (UF)`;
+            const emailBody = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background-color: #0021A5; padding: 20px; text-align: center;">
+                        <div style="color: white; font-size: 24px; font-weight: bold;">College Fast Forward</div>
+                        <div style="color: #FA4616; font-size: 14px; margin-top: 5px;">UF</div>
+                        <div style="height: 3px; background-color: #FA4616; margin-top: 10px;"></div>
+                    </div>
+                    <div style="padding: 30px; background-color: #F5F8FF;">
+                        <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Hi there,</p>
+                        <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                            ${inviterName} invited you to join <strong>College Fast Forward (UF)</strong>—a community where parents & alumni help UF students find internships, jobs, and mentorship.
+                        </p>
+                        ${note ? `<div style="background: white; padding: 15px; border-left: 4px solid #FA4616; margin: 20px 0; font-style: italic;">"${note}" <br><br>– ${inviterName}</div>` : ''}
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${inviteLink}" style="background-color: #0021A5; color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; display: inline-block;">Join College Fast Forward (UF)</a>
+                        </div>
+                        <p style="color: #666; font-size: 14px; text-align: center;">
+                            Gators helping Gators—join the UF network for internships, jobs, and help.
+                        </p>
+                    </div>
+                    <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+                        <div style="height: 2px; background-color: #FA4616; margin-bottom: 10px; width: 60px; margin: 0 auto 10px auto;"></div>
+                        College Fast Forward (UF) • Connecting the Gator Community
+                    </div>
+                </div>
+            `;
+
+            await base44.asServiceRole.integrations.Core.SendEmail({
+                to: email,
+                subject: subject,
+                body: emailBody,
+                from_name: 'College Fast Forward'
+            });
+
+            results.sent.push(email);
+        } catch (err) {
+            console.error(`Failed to send invite to ${email}:`, err);
+            results.invalid.push(email); // Add to invalid if sending fails
+        }
+    }
+
+    return new Response(JSON.stringify(results), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+    });
+});

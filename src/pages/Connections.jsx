@@ -1,0 +1,950 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/auth/AuthContext';
+import { navigate } from '@/components/utils/navigation';
+import { trackEvent } from '@/components/utils/analytics';
+import { JobRequest } from '@/entities/JobRequest';
+import { base44 } from '@/api/base44Client';
+import { Search, Sparkles, TrendingUp } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
+import MessageAndHelpModal from '../components/connections/MessageAndHelpModal';
+import EnhancedGatorCard from '../components/connections/EnhancedGatorCard';
+import { useToast } from '@/components/ui/use-toast';
+
+export default function DiscoverEmergingGatorsPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [requests, setRequests] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    major: 'all',
+    graduationYear: 'all',
+    location: 'all',
+    skills: []
+  });
+  const [sortBy, setSortBy] = useState('relevance');
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(20);
+  
+  // Live stats
+  const [liveStats, setLiveStats] = useState({
+    seekingHelp: 0,
+    responsesToday: 0
+  });
+
+  // Skill suggestions for autocomplete
+  const skillSuggestions = [
+    'Software Engineering', 'Marketing', 'Finance', 'AI/ML', 
+    'Data Science', 'Consulting', 'Entrepreneurship', 'Design', 
+    'Product Management', 'Sales'
+  ];
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) loadData(true);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  const loadData = async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    
+    try {
+      // Load job requests
+      const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
+      
+      // FIXED: Use SDK to call backend function properly
+      const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
+      
+      const [jobRequests, directoryResponse] = await Promise.all([
+        jobRequestsPromise,
+        directoryUsersPromise
+      ]);
+      
+      setRequests(jobRequests || []);
+      
+      // Extract users from backend response
+      const users = directoryResponse?.data?.data || [];
+      setAllUsers(users);
+      
+      setLiveStats({
+        seekingHelp: jobRequests?.length || 0,
+        responsesToday: Math.floor(Math.random() * 50) + 80 // Mock data
+      });
+      
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      toast({
+        title: "Error loading data",
+        description: "We couldn't load some information. Please try refreshing the page.",
+        variant: "destructive"
+      });
+      
+      // Set empty arrays to prevent crashes
+      setRequests([]);
+      setAllUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOfferHelp = (request) => {
+    setSelectedRequest(request);
+    setShowHelpModal(true);
+    trackEvent('help_offer_clicked', { requestId: request.id });
+  };
+
+  const buildCombinedProfiles = () => {
+    const profiles = [];
+    const seenEmails = new Set();
+
+    requests.forEach(request => {
+      const requestCreatorEmail = request.created_by;
+      if (seenEmails.has(requestCreatorEmail)) return;
+      
+      seenEmails.add(requestCreatorEmail);
+      const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
+      
+      if (userProfile) {
+        profiles.push({
+          ...userProfile,
+          request: request,
+          hasRequest: true,
+          isFeatured: Math.random() > 0.8 // 20% featured
+        });
+      } else {
+        profiles.push({
+          id: request.id,
+          email: requestCreatorEmail,
+          full_name: requestCreatorEmail.split('@')[0],
+          bio: request.description,
+          major: request.target_industry,
+          request: request,
+          hasRequest: true,
+          isFeatured: false
+        });
+      }
+    });
+
+    allUsers.forEach(u => {
+      if (u.includeInDirectory && !seenEmails.has(u.email)) {
+        seenEmails.add(u.email);
+        profiles.push({
+          ...u,
+          hasRequest: false,
+          isFeatured: false
+        });
+      }
+    });
+
+    return profiles;
+  };
+
+  const allProfiles = buildCombinedProfiles();
+
+  const filteredProfiles = allProfiles.filter(profile => {
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesName = profile.full_name?.toLowerCase().includes(query);
+      const matchesMajor = profile.major?.toLowerCase().includes(query);
+      const matchesBio = profile.bio?.toLowerCase().includes(query);
+      if (!matchesName && !matchesMajor && !matchesBio) return false;
+    }
+
+    if (filters.major !== 'all' && profile.major !== filters.major) return false;
+    if (filters.graduationYear !== 'all' && profile.graduation_year?.toString() !== filters.graduationYear) return false;
+    if (filters.location !== 'all' && !profile.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
+
+    return true;
+  });
+
+  // Sort profiles
+  const sortedProfiles = [...filteredProfiles].sort((a, b) => {
+    if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
+    if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
+    // Default: relevance (featured first, then with requests)
+    if (a.isFeatured && !b.isFeatured) return -1;
+    if (!a.isFeatured && b.isFeatured) return 1;
+    if (a.hasRequest && !b.hasRequest) return -1;
+    if (!a.hasRequest && b.hasRequest) return 1;
+    return 0;
+  });
+
+  const displayedProfiles = sortedProfiles.slice(0, visibleCount);
+
+  return (
+    <>
+      <div className="discover-gators-page">
+        {/* Hero Banner */}
+        <motion.div 
+          className="hero-banner"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="hero-overlay"></div>
+          <div className="hero-gator-silhouette"></div>
+          <div className="hero-content">
+            <h1 className="hero-title">Discover Emerging Gators</h1>
+            <p className="hero-subtitle">
+              Connect with UF students seeking internships, jobs, and career advice.<br className="desktop-only" />
+              <span className="mobile-subtitle">Alumni and parents: Lend a hand!</span>
+            </p>
+            {user && (
+              <Button
+                onClick={() => navigate('PostRequest')}
+                className="hero-cta"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Post Your Request
+              </Button>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Search and Filters - Sticky */}
+        <div className="filters-section-sticky">
+          <div className="filters-container">
+            {/* Search Bar */}
+            <div className="search-wrapper">
+              <Search className="search-icon" />
+              <Input
+                type="text"
+                placeholder="Search by name, skills, interests, or career goals..."
+                className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Filter Controls */}
+            <div className="filter-controls">
+              <select
+                className="filter-select"
+                value={filters.major}
+                onChange={(e) => setFilters({...filters, major: e.target.value})}
+              >
+                <option value="all">All Majors</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Business">Business</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Marketing">Marketing</option>
+              </select>
+
+              <select
+                className="filter-select"
+                value={filters.graduationYear}
+                onChange={(e) => setFilters({...filters, graduationYear: e.target.value})}
+              >
+                <option value="all">All Graduation Years</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+
+              <select
+                className="filter-select"
+                value={filters.location}
+                onChange={(e) => setFilters({...filters, location: e.target.value})}
+              >
+                <option value="all">All Locations</option>
+                <option value="Florida">Florida</option>
+                <option value="Remote">Remote</option>
+                <option value="New York">New York</option>
+              </select>
+
+              <select
+                className="filter-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="relevance">Sort: Relevance</option>
+                <option value="newest">Sort: Newest Requests</option>
+                <option value="most_connected">Sort: Most Connected</option>
+              </select>
+            </div>
+
+            {/* Enhanced Live Stats with Pulse Animation */}
+            <div className="live-stats-enhanced">
+              <span className="stat-badge-pulsing">
+                <span className="pulse-dot"></span>
+                {liveStats.seekingHelp} students seeking help
+              </span>
+              <span className="stat-divider">•</span>
+              <span className="stat-badge-pulsing">
+                <span className="pulse-dot"></span>
+                {liveStats.responsesToday} responses today
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="main-content-area">
+          {/* Profile Grid */}
+          <div className="profile-grid-section">
+            {isLoading ? (
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <p>Loading Gators...</p>
+              </div>
+            ) : (
+              <>
+                <motion.div 
+                  className="profile-grid-4col"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: {
+                      transition: {
+                        staggerChildren: 0.05
+                      }
+                    }
+                  }}
+                >
+                  <AnimatePresence>
+                    {displayedProfiles.map((profile) => (
+                      <EnhancedGatorCard
+                        key={profile.id || profile.email}
+                        gator={profile}
+                        request={profile.request}
+                        onHelp={profile.request ? () => handleOfferHelp(profile.request) : null}
+                        isFeatured={profile.isFeatured}
+                        currentUser={user}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Load More */}
+                {sortedProfiles.length > visibleCount && (
+                  <div className="load-more-section">
+                    <Button 
+                      onClick={() => setVisibleCount(prev => prev + 20)}
+                      className="load-more-btn"
+                    >
+                      Load More Students
+                    </Button>
+                    <p className="results-count">
+                      Showing {displayedProfiles.length} of {sortedProfiles.length}
+                    </p>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {filteredProfiles.length === 0 && (
+                  <div className="empty-state">
+                    <div className="empty-icon">🔍</div>
+                    <h3>No matches found</h3>
+                    <p>Try adjusting your filters or search query</p>
+                    <Button onClick={() => { setSearchQuery(''); setFilters({ major: 'all', graduationYear: 'all', location: 'all', skills: [] }); }}>
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Sidebar (Desktop Only) - Collapsible on Mobile */}
+          <aside className="sidebar-section">
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">
+                <TrendingUp className="w-5 h-5" />
+                Featured Requests
+              </h3>
+              <div className="featured-requests">
+                {requests.slice(0, 3).map((req) => (
+                  <div key={req.id} className="featured-request-item">
+                    <p className="request-text">{req.description?.substring(0, 80)}...</p>
+                    <Button 
+                      size="sm" 
+                      className="quick-reply-btn"
+                      onClick={() => handleOfferHelp(req)}
+                    >
+                      Quick Reply
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">Success Stories</h3>
+              <div className="success-stories">
+                <div className="story-item">
+                  <p className="story-text">"Landed my dream job through a parent connection!"</p>
+                  <span className="story-author">- Sarah M., Class of '23</span>
+                </div>
+                <div className="story-item">
+                  <p className="story-text">"An alum's advice helped me ace my interview!"</p>
+                  <span className="story-author">- Mike R., Class of '24</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* Footer */}
+        <footer className="page-footer">
+          <div className="footer-content">
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
+              alt="College Fast Forward"
+              className="footer-logo"
+            />
+            <div className="footer-links">
+              <a href="#/Privacy">Privacy</a>
+              <a href="#/Terms">Terms</a>
+              <a href="#/Contact">Contact Support</a>
+            </div>
+            <p className="footer-copyright">© 2025 College Fast Forward. Go Gators! 🐊</p>
+          </div>
+        </footer>
+      </div>
+
+      <MessageAndHelpModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+        request={selectedRequest}
+      />
+
+      <style jsx>{`
+        .discover-gators-page {
+          min-height: 100vh;
+          background: #F9FAFB;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+          position: relative;
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(45deg, #0021A5, #FA4616);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .hero-overlay {
+          position: absolute;
+          inset: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 20 L60 40 L40 40 Z M30 60 L50 80 L70 60 Z" fill="white" opacity="0.05"/></svg>') center/contain no-repeat;
+        }
+
+        .hero-content {
+          position: relative;
+          z-index: 1;
+          text-align: center;
+          color: white;
+          padding: 0 20px;
+        }
+
+        .hero-title {
+          font-size: 32px;
+          font-weight: 800;
+          margin-bottom: 12px;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-subtitle {
+          font-size: 18px;
+          font-weight: 400;
+          margin-bottom: 24px;
+          line-height: 1.4;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .desktop-only {
+          display: inline;
+        }
+
+        .mobile-subtitle {
+          display: none;
+        }
+
+        .hero-cta {
+          background: #FA4616;
+          color: white;
+          font-size: 16px;
+          font-weight: 700;
+          padding: 12px 32px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 4px 12px rgba(250, 70, 22, 0.4);
+        }
+
+        .hero-cta:hover {
+          background: #E03D00;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(250, 70, 22, 0.5);
+        }
+
+        /* Filters Section - Sticky */
+        .filters-section-sticky {
+          position: sticky;
+          top: 64px;
+          z-index: 40;
+          background: white;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          padding: 20px 0;
+        }
+
+        .filters-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .search-wrapper {
+          position: relative;
+          width: 100%;
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6b7280;
+          width: 20px;
+          height: 20px;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 14px 14px 14px 48px;
+          border: 2px solid #e5e7eb;
+          border-radius: 10px;
+          font-size: 16px;
+          transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #0021A5;
+        }
+
+        .filter-controls {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 12px;
+        }
+
+        .filter-select {
+          padding: 10px 14px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 14px;
+          background: white;
+          color: #333;
+          cursor: pointer;
+          transition: border-color 0.2s;
+        }
+
+        .filter-select:focus {
+          outline: none;
+          border-color: #0021A5;
+        }
+
+        .live-stats-enhanced {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          justify-content: center;
+        }
+
+        .stat-badge-pulsing {
+          background: #FFF4ED;
+          color: #FA4616;
+          padding: 8px 14px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .pulse-dot {
+          width: 8px;
+          height: 8px;
+          background: #FA4616;
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+          }
+        }
+
+        .stat-divider {
+          color: #d1d5db;
+        }
+
+        /* Main Content Area */
+        .main-content-area {
+          max-width: 1400px;
+          margin: 32px auto;
+          padding: 0 20px;
+          display: grid;
+          grid-template-columns: 1fr 300px;
+          gap: 32px;
+        }
+
+        .profile-grid-section {
+          min-height: 600px;
+        }
+
+        .profile-grid-4col {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+        }
+
+        /* Loading State */
+        .loading-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 80px 20px;
+        }
+
+        .spinner {
+          width: 48px;
+          height: 48px;
+          border: 4px solid #f3f4f6;
+          border-top-color: #0021A5;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .loading-state p {
+          margin-top: 16px;
+          font-size: 16px;
+          color: #64748b;
+        }
+
+        /* Load More */
+        .load-more-section {
+          text-align: center;
+          padding: 32px 0;
+        }
+
+        .load-more-btn {
+          background: #0021A5;
+          color: white;
+          padding: 12px 32px;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+
+        .load-more-btn:hover {
+          background: #001580;
+        }
+
+        .results-count {
+          margin-top: 12px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        /* Empty State */
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 80px 20px;
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-icon {
+          font-size: 64px;
+          margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+          font-size: 24px;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 8px;
+        }
+
+        .empty-state p {
+          font-size: 16px;
+          color: #64748b;
+          margin-bottom: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar-section {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        .sidebar-card {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .featured-requests {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .featured-request-item {
+          padding: 12px;
+          background: #F9FAFB;
+          border-radius: 8px;
+          border-left: 3px solid #0021A5;
+        }
+
+        .request-text {
+          font-size: 14px;
+          color: #374151;
+          margin-bottom: 8px;
+          line-height: 1.4;
+        }
+
+        .quick-reply-btn {
+          background: #FA4616;
+          color: white;
+          font-size: 12px;
+          padding: 6px 12px;
+          border-radius: 6px;
+        }
+
+        .success-stories {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .story-item {
+          padding: 12px;
+          background: #FFF4ED;
+          border-radius: 8px;
+        }
+
+        .story-text {
+          font-size: 14px;
+          color: #374151;
+          font-style: italic;
+          margin-bottom: 8px;
+          line-height: 1.4;
+        }
+
+        .story-author {
+          font-size: 12px;
+          color: #FA4616;
+          font-weight: 600;
+        }
+
+        /* Footer */
+        .page-footer {
+          background: #0021A5;
+          color: white;
+          padding: 32px 0;
+          margin-top: 64px;
+        }
+
+        .footer-content {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          text-align: center;
+        }
+
+        .footer-logo {
+          height: 48px;
+          filter: brightness(0) invert(1);
+        }
+
+        .footer-links {
+          display: flex;
+          gap: 24px;
+        }
+
+        .footer-links a {
+          color: white;
+          text-decoration: none;
+          font-size: 14px;
+          transition: opacity 0.2s;
+        }
+
+        .footer-links a:hover {
+          opacity: 0.8;
+        }
+
+        .footer-copyright {
+          font-size: 14px;
+          opacity: 0.8;
+        }
+
+        /* Hero Gator Silhouette */
+        .hero-gator-silhouette {
+          position: absolute;
+          inset: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M100 40 L120 70 L80 70 Z M70 100 L100 140 L130 100 Z M50 150 L70 180 L90 150 Z M110 150 L130 180 L150 150 Z" fill="white" opacity="0.03"/></svg>') center/400px no-repeat;
+          pointer-events: none;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+          .main-content-area {
+            grid-template-columns: 1fr;
+          }
+          
+          .sidebar-section {
+            display: none;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .hero-banner {
+            height: 140px;
+          }
+
+          .hero-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+          }
+
+          .hero-subtitle {
+            font-size: 14px;
+            margin-bottom: 16px;
+          }
+
+          .desktop-only {
+            display: none;
+          }
+
+          .mobile-subtitle {
+            display: inline;
+          }
+
+          .hero-cta {
+            font-size: 14px;
+            padding: 10px 24px;
+          }
+
+          .filters-section-sticky {
+            top: 0;
+            padding: 12px 0;
+          }
+
+          .filters-container {
+            padding: 0 16px;
+            gap: 12px;
+          }
+
+          .search-input {
+            padding: 12px 12px 12px 44px;
+            font-size: 14px;
+          }
+
+          .filter-controls {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .filter-select {
+            padding: 10px 12px;
+            font-size: 13px;
+          }
+
+          .live-stats-enhanced {
+            flex-direction: column;
+            gap: 6px;
+          }
+
+          .stat-badge-pulsing {
+            font-size: 12px;
+            padding: 6px 12px;
+          }
+
+          .stat-divider {
+            display: none;
+          }
+
+          .main-content-area {
+            margin: 16px auto;
+            padding: 0 12px;
+          }
+
+          .profile-grid-4col {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .load-more-section {
+            padding: 24px 0;
+          }
+
+          .page-footer {
+            margin-top: 32px;
+            padding: 24px 0;
+          }
+
+          .footer-logo {
+            height: 40px;
+          }
+
+          .footer-links {
+            flex-direction: column;
+            gap: 12px;
+          }
+        }
+      `}</style>
+    </>
+  );
+}

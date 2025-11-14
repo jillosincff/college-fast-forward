@@ -1,0 +1,919 @@
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import { AuthProvider, useAuth } from './components/auth/AuthContext';
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from './components/theme/ThemeContext';
+import { Button as ShadButton } from '@/components/ui/button';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, Building2, FileText, Menu, Bell, Bookmark, TestTube, Mail } from 'lucide-react';
+import UserAvatar from './components/common/UserAvatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { navigate } from '@/components/utils/navigation';
+import './globals.css';
+import AppErrorBoundary from './components/common/AppErrorBoundary';
+import logger from './components/utils/logger';
+import { Message } from '@/entities/Message';
+import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
+import ErrorLogger from './components/debug/ErrorLogger';
+
+// App version for cache-busting - increment this when we need to force refresh for all users
+const APP_VERSION = 'v1.1.7';
+
+// Enhanced cache-busting utility with better error handling
+function handleCacheBusting() {
+  try {
+    const currentVersion = localStorage.getItem('cff_app_version');
+
+    if (currentVersion && currentVersion !== APP_VERSION) {
+      console.log('🔄 Updating app from version', currentVersion, 'to', APP_VERSION);
+
+      const keysToRemove = [
+        'cff_app_version',
+        'cff:firstLogin',
+        'cff:seenDashboardTour',
+        'pending_verification_email'
+      ];
+
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn('Could not remove localStorage key:', key);
+        }
+      });
+
+      try {
+        document.cookie = 'cff_new_user=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+      } catch (e) {
+        console.warn('Could not clear cookies');
+      }
+
+      localStorage.setItem('cff_app_version', APP_VERSION);
+      window.location.reload(true);
+      return true;
+    } else if (!currentVersion) {
+      localStorage.setItem('cff_app_version', APP_VERSION);
+    }
+  } catch (error) {
+    console.warn('Cache busting unavailable:', error);
+  }
+  return false;
+}
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-slate-50">
+      <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin text-[#0033A0]"></div>
+    </div>
+  );
+}
+
+// LAZY LOAD ALL PAGES
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Connections = React.lazy(() => import('./pages/Connections'));
+const Roommates = React.lazy(() => import('./pages/Roommates'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
+const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
+const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
+const Onboarding = React.lazy(() => import('./pages/Onboarding'));
+const Opportunities = React.lazy(() => import('./pages/Opportunities'));
+const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
+const PostRequest = React.lazy(() => import('./pages/PostRequest'));
+const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
+const GatorDirectory = React.lazy(() => import('./pages/GatorDirectory'));
+const MyRequests = React.lazy(() => import('./pages/MyRequests'));
+const MyImpact = React.lazy(() => import('./pages/MyImpact'));
+const MyApplications = React.lazy(() => import('./pages/MyApplications'));
+const MyMessages = React.lazy(() => import('./pages/MyMessages'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+import TestingDashboard from './pages/TestingDashboard';
+const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
+const Favorites = React.lazy(() => import('./pages/Favorites'));
+const Privacy = React.lazy(() => import('./pages/Privacy'));
+const Terms = React.lazy(() => import('./pages/Terms'));
+const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
+const Companies = React.lazy(() => import('./pages/Companies'));
+const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
+const Pricing = React.lazy(() => import('./pages/Pricing'));
+const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
+
+
+function SimpleHeader({ currentPage, onNavigate, user, logout }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [recentMessages, setRecentMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // Load unread message count - with robust error handling
+  useEffect(() => {
+    const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
+    const adminPages = ['AdminDashboard', 'TestingDashboard', 'AdminSetup'];
+    
+    if (publicPages.includes(currentPage) || adminPages.includes(currentPage)) {
+      console.log('Skipping message count fetch on public/admin page:', currentPage);
+      setUnreadCount(0);
+      return;
+    }
+
+    if (!user?.email) {
+      console.log('Skipping message count fetch - user not authenticated');
+      setUnreadCount(0);
+      return;
+    }
+
+    let isMounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 1;
+
+    const loadUnreadCount = async () => {
+      if (!user?.email || hasError) {
+        if (isMounted) setUnreadCount(0);
+        return;
+      }
+
+      console.log(`Attempting to load unread count (retry ${retryCount + 1}/${MAX_RETRIES + 1})...`);
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+          console.warn('Message count fetch timed out after 5 seconds.');
+        }, 5000);
+
+        let messages = [];
+        try {
+          messages = await Message.filter(
+            { recipient_email: user.email, is_read: false },
+            undefined,
+            5,
+            { signal: controller.signal }
+          );
+        } catch (fetchError) {
+          console.log('Message fetch unavailable (network error suppressed):', fetchError.message);
+          messages = [];
+          
+          if (isMounted) {
+            setHasError(true);
+            setUnreadCount(0);
+          }
+          clearTimeout(timeoutId);
+          return;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        if (isMounted && messages !== undefined) {
+          setUnreadCount(messages?.length || 0);
+          if (hasError) setHasError(false);
+          retryCount = 0;
+          console.log(`Unread messages loaded successfully: ${messages?.length || 0}`);
+        }
+      } catch (error) {
+        console.log('Error during message count load (suppressed):', error.message);
+        if (isMounted) {
+          setUnreadCount(0);
+          setHasError(true);
+        }
+      }
+    };
+
+    const initialLoadTimeout = setTimeout(() => {
+      if (isMounted && user?.email) {
+        loadUnreadCount();
+      }
+    }, 1000);
+
+    const interval = setInterval(() => {
+      if (!hasError && user?.email && !publicPages.includes(currentPage) && !adminPages.includes(currentPage)) {
+        console.log('Polling for unread messages...');
+        loadUnreadCount();
+      }
+    }, 300000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(initialLoadTimeout);
+      clearInterval(interval);
+      console.log('Cleanup for message count effect.');
+    };
+  }, [user?.email, hasError, currentPage]);
+
+  const loadRecentMessages = async () => {
+    const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
+    const adminPages = ['AdminDashboard', 'TestingDashboard', 'AdminSetup'];
+
+    if (!user?.email || loadingMessages || publicPages.includes(currentPage) || adminPages.includes(currentPage)) {
+        console.log('Skipping recent messages fetch (conditions not met).');
+        return;
+    }
+    
+    setLoadingMessages(true);
+    console.log('Loading recent messages for dropdown...');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.warn('Recent messages fetch timed out after 5 seconds.');
+      }, 5000);
+
+      let messages = [];
+      try {
+        messages = await Message.filter(
+          { recipient_email: user.email },
+          '-created_date',
+          5,
+          { signal: controller.signal }
+        );
+      } catch (fetchError) {
+        console.log('Recent messages temporarily unavailable (network error suppressed).');
+        messages = [];
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      setRecentMessages(messages || []);
+      console.log(`Recent messages loaded: ${messages?.length || 0}`);
+    } catch (error) {
+      console.log('Error during recent message load (suppressed).');
+      setRecentMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleBellClick = () => {
+    // If the user is on their messages page, we don't need to navigate to it again.
+    if (currentPage === 'MyMessages') {
+      document.dispatchEvent(new CustomEvent('cff:refresh-messages'));
+    } else {
+      onNavigate('MyMessages');
+    }
+  };
+
+  const markAsRead = async (messageId) => {
+    try {
+      await Message.update(messageId, { is_read: true });
+      setRecentMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark message as read:', error);
+      logger.error('Failed to mark message as read from notification dropdown', { error: error.message, messageId, userEmail: user?.email });
+    }
+  };
+
+  const allNavItems = useMemo(() => [
+    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
+    { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
+    { name: 'Talent Spotlight', page: 'TalentSpotlight', icon: Users, roles: ['gator', 'parent'] },
+    { name: 'Companies', page: 'Companies', icon: Building2, roles: ['gator', 'parent'] },
+    { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
+    { name: 'Opportunities', page: 'Opportunities', icon: Building2, roles: ['gator', 'parent'] },
+    { name: 'Roommates', page: 'Roommates', icon: Users, roles: ['gator', 'parent'] },
+    { name: 'Pricing', page: 'Pricing', icon: Users, roles: ['gator', 'parent', 'admin'], isPublic: true },
+  ], []);
+
+  const filteredNavItems = useMemo(() => {
+    if (!user || !user.persona) return [];
+    return allNavItems.filter(item => {
+      const hasRequiredRole = item.roles.includes(user.persona) || (user.roles && user.roles.some(role => item.roles.includes(role)));
+
+      if (item.name === 'Dashboard' && !user.onboarding_completed && user.persona !== 'admin') {
+        return false;
+      }
+
+      return hasRequiredRole;
+    });
+  }, [user, allNavItems]);
+
+  if (!user) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-24 items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <div onClick={() => onNavigate('LandingPage')} className="flex items-center cursor-pointer">
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                  alt="College Fast Forward"
+                  className="h-16 md:h-20"
+                />
+              </div>
+              <div className="hidden md:flex space-x-1">
+                <ShadButton
+                  variant="ghost"
+                  onClick={() => onNavigate('Pricing')}
+                  className={`font-medium transition-colors duration-200 text-sm ${
+                    currentPage === 'Pricing'
+                      ? 'text-blue-600 border-b-2 border-blue-600 rounded-none'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Pricing
+                </ShadButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  return (
+    <>
+      <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-24 items-center justify-between">
+            <div className="flex items-center space-x-4 md:space-x-8">
+                <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="flex items-center cursor-pointer">
+                    <img
+                      src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                      alt="College Fast Forward"
+                      className="h-16 md:h-20"
+                    />
+                </div>
+                {user && (
+                    <div className="hidden md:flex space-x-1">
+                        {filteredNavItems.map((item) => {
+                           let targetPageForNav = item.page;
+                            if (item.name === 'Dashboard') {
+                                if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
+                                else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
+                                else targetPageForNav = 'Dashboard'; // Gators go here
+                            }
+                            const isActive = currentPage === targetPageForNav;
+                            return (
+                                <ShadButton
+                                  key={item.name}
+                                  variant="ghost"
+                                  onClick={() => onNavigate(targetPageForNav)}
+                                  className={`font-medium transition-colors duration-200 text-sm ${
+                                    isActive
+                                      ? 'text-blue-600 border-b-2 border-blue-600 rounded-none'
+                                      : 'text-gray-600 hover:text-gray-900'
+                                  }`}
+                                >
+                                  {item.name}
+                                </ShadButton>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex items-center gap-2 md:gap-4">
+              {user && (
+                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                  <SheetTrigger asChild className="md:hidden">
+                    <ShadButton variant="ghost" className="h-10 w-10 rounded-full">
+                      <Menu className="h-5 w-5" />
+                      <span className="sr-only">Toggle navigation menu</span>
+                    </ShadButton>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-64 p-0">
+                    <div className="flex flex-col h-full">
+                      <div className="p-4 border-b">
+                        <img
+                          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                          alt="College Fast Forward"
+                          className="h-24"
+                        />
+                      </div>
+                      <nav className="flex-grow flex flex-col p-4 space-y-1">
+                        {filteredNavItems.map((item) => {
+                          let targetPageForNav = item.page;
+                          if (item.name === 'Dashboard') {
+                            if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
+                            else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
+                            else targetPageForNav = 'Dashboard';
+                          }
+
+                          const Icon = item.icon;
+                          const isActive = currentPage === targetPageForNav;
+                          return (
+                            <ShadButton
+                              key={item.name}
+                              variant="ghost"
+                              onClick={() => {
+                                onNavigate(targetPageForNav);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`justify-start flex items-center gap-2 font-semibold transition-colors duration-200 ${
+                                isActive
+                                  ? 'bg-blue-100 text-gator-blue'
+                                  : 'text-ink-60 hover:bg-slate-100 hover:text-gator-blue'
+                              }`}
+                            >
+                              <Icon className={`h-5 w-5 transition-colors duration-200 ${
+                                isActive
+                                  ? 'text-gator-blue'
+                                  : 'text-ink-40 group-hover:text-gator-blue'
+                              }`} />
+                              {item.name}
+                            </ShadButton>
+                          );
+                        })}
+                      </nav>
+                      <div className="p-4 border-t flex flex-col space-y-1">
+                        <ShadButton
+                          variant="ghost"
+                          onClick={() => {
+                            onNavigate('Profile');
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="justify-start flex items-center gap-2 font-semibold transition-colors duration-200 text-ink-60 hover:bg-slate-100 hover:text-gator-blue"
+                        >
+                            <UserIcon className="mr-2 h-5 w-5 text-ink-40 group-hover:text-gator-blue" />
+                            Profile
+                        </ShadButton>
+                        <ShadButton
+                          variant="ghost"
+                          onClick={() => {
+                            logout();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="justify-start flex items-center gap-2 font-semibold transition-colors duration-200 text-ink-60 hover:bg-slate-100 hover:text-gator-blue"
+                        >
+                          <LogOut className="mr-2 h-5 w-5 text-ink-40 group-hover:text-gator-blue" />
+                          Logout
+                        </ShadButton>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+
+              {user && currentPage !== 'AdminDashboard' && currentPage !== 'TestingDashboard' && currentPage !== 'AdminSetup' && !hasError && (
+                <Popover onOpenChange={(open) => { if (open) loadRecentMessages(); }}>
+                  <PopoverTrigger asChild>
+                    <ShadButton
+                      variant="ghost"
+                      className="h-9 w-9 rounded-full text-gray-600 hover:text-gray-900 hidden sm:inline-flex relative"
+                    >
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </ShadButton>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0" align="end">
+                    <div className="border-b p-4">
+                      <h3 className="font-semibold text-sm">Notifications</h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {unreadCount > 0 ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : 'No new messages'}
+                      </p>
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {loadingMessages ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                          Loading...
+                        </div>
+                      ) : recentMessages.length > 0 ? (
+                        <div className="divide-y">
+                          {recentMessages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                                !msg.is_read ? 'bg-blue-50' : ''
+                              }`}
+                              onClick={() => {
+                                if (!msg.is_read) markAsRead(msg.id);
+                                handleBellClick();
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-medium text-sm truncate">{msg.subject}</p>
+                                    {!msg.is_read && (
+                                      <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-gray-600 truncate">From: {msg.sender_email}</p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {new Date(msg.created_date).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-8 text-center text-gray-500">
+                          <Mail className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm">No messages yet</p>
+                        </div>
+                      )}
+                    </div>
+                    {recentMessages.length > 0 && (
+                      <div className="border-t p-3">
+                        <ShadButton
+                          variant="ghost"
+                          className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={handleBellClick}
+                        >
+                          View All Messages
+                        </ShadButton>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <ShadButton variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                      <UserAvatar
+                        user={user}
+                        className="h-8 w-8"
+                        showFallback={true}
+                      />
+                    </ShadButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>{user?.full_name || user?.email || 'My Account'}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onNavigate('Profile')}><UserIcon className="mr-2 h-4 w-4" />Profile</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onNavigate('MyApplications')}><FileText className="mr-2 h-4 w-4" />My Applications</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onNavigate('MyRequests')}><FileText className="mr-2 h-4 w-4" />My Requests</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onNavigate('MyMessages')}><MessageSquare className="mr-2 h-4 w-4" />My Messages</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onNavigate('Favorites')}><Bookmark className="mr-2 h-4 w-4" />My Favorites</DropdownMenuItem>
+                    {user?.roles?.includes('admin') && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onNavigate('TestingDashboard')} className="text-blue-600 focus:bg-blue-50 focus:text-blue-700">
+                            <TestTube className="mr-2 h-4 w-4" />
+                            Testing Dashboard
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout}><LogOut className="mr-2 h-4 w-4" />Logout</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
+  );
+}
+
+const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding'];
+const adminPages = ['AdminDashboard', 'TestingDashboard'];
+const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
+// Pages that require auth but NOT verification (can be accessed while unverified)
+const authOnlyPages = ['Opportunities', 'Companies', 'CompanyProfile', 'PublicProfile'];
+
+// Helper function to check if user is verified
+const isUserVerified = (user) => {
+  if (!user) return false;
+  
+  const email = user.email?.toLowerCase() || '';
+  
+  // @ufl.edu emails are auto-verified as Gators
+  if (email.endsWith('@ufl.edu')) {
+    return true;
+  }
+  
+  // Check for pending invite code
+  if (typeof window !== 'undefined') {
+    const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
+    if (pendingInviteCode) {
+      return true;
+    }
+  }
+  
+  // Parents with persona/role are verified
+  if (user.persona === 'parent' || user.roles?.includes('parent')) {
+    return true;
+  }
+  
+  // Gators with persona/role are verified
+  if (user.persona === 'gator' || user.roles?.includes('gator')) {
+    return true;
+  }
+  
+  // Admins are always verified
+  if (user.roles?.includes('admin')) return true;
+  
+  return false;
+};
+
+const getPageComponent = (pageName) => {
+  switch (pageName) {
+    case 'Dashboard': return Dashboard;
+    case 'ParentDashboard': return ParentDashboard;
+    case 'AdminDashboard': return AdminDashboard;
+    case 'Connections': return Connections;
+    case 'TalentSpotlight': return React.lazy(() => import('./pages/TalentSpotlight'));
+    case 'Companies': return Companies;
+    case 'CompanyProfile': return CompanyProfile;
+    case 'Opportunities': return Opportunities;
+    case 'PostOpportunity': return PostOpportunity;
+    case 'PostRequest': return PostRequest;
+    case 'Roommates': return Roommates;
+    case 'Profile': return Profile;
+    case 'ProfileEdit': return ProfileEdit;
+    case 'WelcomeRole': return WelcomeRole;
+    case 'StudentOnboarding': return StudentOnboarding;
+    case 'Onboarding': return Onboarding;
+    case 'GatorDirectory': return GatorDirectory;
+    case 'MyRequests': return MyRequests;
+    case 'MyImpact': return MyImpact;
+    case 'MyApplications': return MyApplications;
+    case 'MyMessages': return MyMessages;
+    case 'TestingDashboard': return TestingDashboard;
+    case 'AdminSetup': return AdminSetup;
+    case 'Favorites': return Favorites;
+    case 'Privacy': return Privacy;
+    case 'Terms': return Terms;
+    case 'CookiePolicy': return CookiePolicy;
+    case 'Pricing': return Pricing;
+    case 'PublicProfile': return PublicProfile;
+    case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
+    case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
+    default: return LandingPage;
+  }
+};
+
+function AppContent() {
+  const { user, isLoading, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState(null);
+  const [resolvedPage, setResolvedPage] = useState(null);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      let hash = window.location.hash.slice(1).split('?')[0] || 'LandingPage';
+      // Remove leading slash if present (e.g., "/Privacy" becomes "Privacy")
+      if (hash.startsWith('/')) {
+        hash = hash.slice(1);
+      }
+      setCurrentPage(hash);
+      setResolvedPage(null);
+    };
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || !currentPage) {
+      return;
+    }
+
+    // ALWAYS allow access to public policy pages and invite pages regardless of auth status
+    if (currentPage === 'Privacy' || currentPage === 'Terms' || currentPage === 'CookiePolicy' || currentPage === 'InviteRequired' || currentPage === 'RequestInvite' || currentPage === 'Pricing' || currentPage === 'PublicProfile') {
+      setResolvedPage(currentPage);
+      return;
+    }
+
+    if (currentPage === 'AdminSetup') {
+      setResolvedPage('AdminSetup');
+      return;
+    }
+
+    if (currentPage === 'TestingDashboard' && user?.roles?.includes('admin')) {
+      setResolvedPage('TestingDashboard');
+      return;
+    }
+
+    let finalPage = currentPage;
+    const isLandingPage = currentPage === 'LandingPage';
+    const isOnboardingPage = onboardingPages.includes(currentPage);
+    const isAdminPage = adminPages.includes(currentPage);
+    const isPublicPage = publicPages.includes(currentPage);
+    const isAuthOnlyPage = authOnlyPages.includes(currentPage);
+
+    if (user) {
+      console.log('🔍 Routing check for user:', {
+        email: user.email,
+        persona: user.persona,
+        roles: user.roles,
+        onboarding_completed: user.onboarding_completed,
+        currentPage
+      });
+
+      // PRIORITY 1: Redirect authenticated users away from LandingPage
+      if (isLandingPage) {
+        console.log('🚫 Authenticated user on LandingPage - redirecting');
+        
+        const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+        
+        if (hasNoRole) {
+          finalPage = 'WelcomeRole';
+          console.log('➡️ No role - redirecting to WelcomeRole');
+        } else {
+          const verified = isUserVerified(user);
+          if (!verified) {
+            finalPage = 'InviteRequired';
+            console.log('➡️ Not verified - redirecting to InviteRequired');
+          } else if (user.onboarding_completed === false || user.onboarding_completed === null || user.onboarding_completed === undefined) {
+            if (user.persona === 'gator' || user.roles?.includes('gator')) {
+              finalPage = 'StudentOnboarding';
+              console.log('➡️ Gator needs onboarding');
+            } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+              finalPage = 'Onboarding';
+              console.log('➡️ Parent needs onboarding');
+            } else {
+              finalPage = 'WelcomeRole';
+              console.log('➡️ Unknown state - WelcomeRole');
+            }
+          } else {
+            // Fully onboarded - go to dashboard
+            if (user.roles?.includes('admin')) {
+              finalPage = 'AdminDashboard';
+              console.log('➡️ Admin - AdminDashboard');
+            } else if (user.persona === 'parent') {
+              finalPage = 'ParentDashboard';
+              console.log('➡️ Parent - ParentDashboard');
+            } else {
+              finalPage = 'Dashboard';
+              console.log('➡️ Gator - Dashboard');
+            }
+          }
+        }
+      }
+      // PRIORITY 2: Allow browsing auth-only pages
+      else if (isAuthOnlyPage) {
+        console.log('✅ User browsing auth-only page');
+        setResolvedPage(currentPage);
+        return;
+      }
+      // PRIORITY 3: Allow staying on onboarding pages
+      else if (isOnboardingPage) {
+        console.log('✅ Allowing access to onboarding page');
+        setResolvedPage(currentPage);
+        return;
+      }
+      // PRIORITY 4: For other pages, check roles and verification
+      else {
+        const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+        if (hasNoRole) {
+          console.log('👤 No role - redirecting to WelcomeRole');
+          finalPage = 'WelcomeRole';
+        } else {
+          const verified = isUserVerified(user);
+          console.log('🔐 User has role. Verified:', verified);
+
+          if (!verified) {
+            console.log('🚫 Not verified - InviteRequired');
+            finalPage = 'InviteRequired';
+          } else if (user.onboarding_completed === false || user.onboarding_completed === null || user.onboarding_completed === undefined) {
+            console.log('📝 Verified but onboarding incomplete');
+            
+            if (user.persona === 'gator' || user.roles?.includes('gator')) {
+              finalPage = 'StudentOnboarding';
+            } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+              finalPage = 'Onboarding';
+            } else {
+              finalPage = 'WelcomeRole';
+            }
+          } else {
+            console.log('✅ Fully verified and onboarded');
+            
+            // Redirect to correct dashboard
+            if (currentPage === 'Dashboard') {
+              if (user.roles?.includes('admin')) {
+                finalPage = 'AdminDashboard';
+              } else if (user.persona === 'parent') {
+                finalPage = 'ParentDashboard';
+              }
+            }
+
+            // Admin page protection
+            if (isAdminPage && !user.roles?.includes('admin')) {
+              console.log('🚫 Non-admin trying to access admin page');
+              if (user.persona === 'parent') {
+                finalPage = 'ParentDashboard';
+              } else {
+                finalPage = 'Dashboard';
+              }
+            }
+          }
+        }
+      }
+
+    } else {
+      // Unauthenticated users
+      console.log('👤 Unauthenticated user accessing:', currentPage);
+      
+      if (isAuthOnlyPage) {
+        console.log('✅ Allowing unauthenticated access to auth-only page');
+        setResolvedPage(currentPage);
+        return;
+      }
+      
+      const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage;
+      if (isProtectedPage) {
+        console.log('🚫 Redirecting to LandingPage');
+        finalPage = 'LandingPage';
+      }
+    }
+
+    if (finalPage !== currentPage) {
+      console.log('🔄 Navigating:', currentPage, '→', finalPage);
+      navigate(finalPage);
+    } else {
+      console.log('✅ Staying on:', finalPage);
+      setResolvedPage(finalPage);
+    }
+  }, [user, isLoading, currentPage]);
+
+  if (!resolvedPage) {
+    return <PageLoader />;
+  }
+
+  const PageComponent = getPageComponent(resolvedPage);
+  const showHeader = resolvedPage !== 'LandingPage' && !onboardingPages.includes(resolvedPage) && !publicPages.includes(resolvedPage);
+
+  return (
+    <AppErrorBoundary name="MainApp">
+      <div className="min-h-screen flex flex-col bg-surface-subtle text-ink">
+        {showHeader && (
+          <AppErrorBoundary name="Header">
+            <SimpleHeader currentPage={resolvedPage} onNavigate={navigate} user={user} logout={logout} />
+          </AppErrorBoundary>
+        )}
+
+        <main className="flex-grow">
+          <AppErrorBoundary name={`Page-${resolvedPage}`}>
+            <Suspense fallback={<PageLoader />}>
+              <PageComponent />
+            </Suspense>
+          </AppErrorBoundary>
+        </main>
+
+        <footer className="bg-slate-100 border-t border-slate-200 mt-12">
+          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
+            <p>&copy; {new Date().getFullYear()} College Fast Forward. All Rights Reserved.</p>
+            <div className="flex justify-center gap-4 mt-2">
+              <a href="#Terms" className="hover:underline">Terms of Service</a>
+              <a href="#Privacy" className="hover:underline">Privacy Policy</a>
+              <a href="#CookiePolicy" className="hover:underline">Cookie Policy</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </AppErrorBoundary>
+  );
+}
+
+export default function Layout() {
+  useEffect(() => {
+    const isReloading = handleCacheBusting();
+    if (isReloading) {
+      return;
+    }
+
+    const isProduction = !window.location.hostname.includes('localhost') &&
+                        !window.location.hostname.includes('preview');
+
+    if (isProduction) {
+      reportWebVitals();
+    }
+
+    console.log(`🚀 College Fast Forward ${APP_VERSION} initialized`);
+    perfMonitor.start('app_init');
+    perfMonitor.end('app_init');
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--uf-orange', '#FA4616');
+    document.documentElement.style.setProperty('--uf-blue', '#0021A5');
+    document.documentElement.style.setProperty('--uf-secondary-orange', '#D32737');
+    document.documentElement.style.setProperty('--uf-yellow', '#F2A900');
+    document.documentElement.style.setProperty('--uf-dark-blue', '#002657');
+    document.documentElement.style.setProperty('--uf-pink', '#6A2A60');
+  }, []);
+
+  return (
+    <AppErrorBoundary name="App">
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+          <Toaster />
+          {/* Error Logger - only in development or for admins */}
+          {(window.location.hostname.includes('localhost') || 
+            window.location.hostname.includes('preview')) && (
+            <ErrorLogger />
+          )}
+        </AuthProvider>
+      </ThemeProvider>
+    </AppErrorBoundary>
+  );
+}
