@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { JobRequest } from '@/entities/JobRequest';
 import { base44 } from '@/api/base44Client';
-import { Search, Sparkles, TrendingUp } from 'lucide-react';
+import { Search, Plus, Filter, Sparkles, MessageSquare, UserPlus, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -456,6 +457,7 @@ export default function DiscoverEmergingGatorsPage() {
           font-weight: 800;
           margin-bottom: 12px;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          color: white;
         }
 
         .hero-subtitle {
@@ -464,6 +466,8 @@ export default function DiscoverEmergingGatorsPage() {
           margin-bottom: 24px;
           line-height: 1.4;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+          color: white;
+          opacity: 0.9;
         }
 
         .desktop-only {
