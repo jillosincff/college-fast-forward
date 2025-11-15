@@ -1,3 +1,4 @@
+
 // Utility functions for consistent formatting across the app
 
 export function formatOpportunityType(type) {
@@ -25,3 +26,15 @@ export function formatLocationDisplay(locationType, city, state) {
   if (state) return state;
   return locationType === 'hybrid' ? 'Hybrid' : 'On-site';
 }
+
+/**
+ * Formats snake_case or underscore-separated strings to Title Case
+ * e.g., "resume_feedback" -> "Resume Feedback"
+ */
+export const formatLabel = (str) => {
+  if (!str) return '';
+  return str
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertTriangle, Mail, Briefcase, GraduationCap, MapPin, Linkedin, MessageSquare, X, Handshake, Award, Building2, TrendingUp } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
+import { formatLabel } from '@/components/utils/format';
 
 export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
   const [profileUser, setProfileUser] = useState(null);
@@ -142,7 +143,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
                       <div className="flex flex-wrap gap-2">
                         {profileUser.expertise_areas.map((expertise, idx) => (
                           <Badge key={idx} className="bg-purple-100 text-purple-800 border-purple-300">
-                            {expertise}
+                            {formatLabel(expertise)}
                           </Badge>
                         ))}
                       </div>
@@ -156,7 +157,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
                       <div className="flex flex-wrap gap-2">
                         {profileUser.mentorship_topics.map((topic, idx) => (
                           <Badge key={idx} className="bg-blue-100 text-blue-800 border-blue-300">
-                            {topic}
+                            {formatLabel(topic)}
                           </Badge>
                         ))}
                       </div>
@@ -174,7 +175,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
                         {profileUser.ways_to_help.map((help, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-sm text-green-800 bg-white/50 px-3 py-2 rounded-lg">
                             <div className="w-1.5 h-1.5 bg-green-600 rounded-full flex-shrink-0" />
-                            <span>{help}</span>
+                            <span>{formatLabel(help)}</span>
                           </div>
                         ))}
                       </div>

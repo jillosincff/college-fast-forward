@@ -1,9 +1,11 @@
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase } from 'lucide-react';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
+import { formatLabel } from '@/components/utils/format';
 
 export default function UserCard({ user, onMessage, onViewProfile }) {
   const displayName = getDisplayName(user);
@@ -123,7 +125,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
             <div className="flex flex-wrap gap-1.5 ml-6">
               {user.expertise_areas.slice(0, 2).map((expertise, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                  {expertise}
+                  {formatLabel(expertise)}
                 </Badge>
               ))}
               {user.expertise_areas.length > 2 && (
@@ -145,7 +147,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
             <div className="flex flex-wrap gap-1.5 ml-6">
               {user.ways_to_help.slice(0, 3).map((help, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                  {help}
+                  {formatLabel(help)}
                 </Badge>
               ))}
               {user.ways_to_help.length > 3 && (
