@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { User } from '@/entities/User';
-import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertTriangle, Mail, Briefcase, GraduationCap, MapPin, Linkedin, MessageSquare, X, Handshake, Award, Building2, TrendingUp } from 'lucide-react';
@@ -19,8 +19,14 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
         setError(null);
         setProfileUser(null);
         try {
-          const userToDisplay = await User.get(userId);
-          setProfileUser(userToDisplay);
+          // Use the backend function to get public user info
+          const response = await base44.functions.invoke('getPublicUserInfo', { userId });
+          
+          if (response?.data?.data) {
+            setProfileUser(response.data.data);
+          } else {
+            throw new Error('Could not load profile data');
+          }
         } catch (err) {
           console.error("Failed to fetch profile for modal:", err);
           setError("Could not load profile. The user may not exist or there was a network issue.");
