@@ -66,13 +66,24 @@ export default function DiscoverEmergingGatorsPage() {
         directoryUsersPromise
       ]);
       
-      setRequests(jobRequests || []);
+      // Filter out test/demo requests
+      const realRequests = (jobRequests || []).filter(req => {
+        const description = req.description?.toLowerCase() || '';
+        const role = req.role?.toLowerCase() || '';
+        const isTestRequest = description.includes('test request') || 
+                            description.includes('notification testing') || 
+                            description.includes('demo') ||
+                            role.includes('test');
+        return !isTestRequest;
+      });
+      
+      setRequests(realRequests);
       
       const users = directoryResponse?.data?.data || [];
       setAllUsers(users);
       
       setLiveStats({
-        seekingHelp: jobRequests?.length || 0,
+        seekingHelp: realRequests?.length || 0,
         responsesToday: Math.floor(Math.random() * 50) + 80
       });
       
@@ -317,12 +328,14 @@ export default function DiscoverEmergingGatorsPage() {
 
                 {filteredProfiles.length === 0 && (
                   <div className="empty-state">
-                    <div className="empty-icon">🔍</div>
-                    <h3>No matches found</h3>
-                    <p>Try adjusting your filters or search query</p>
-                    <Button onClick={() => { setSearchQuery(''); setFilters({ major: 'all', graduationYear: 'all', location: 'all', skills: [] }); }}>
-                      Clear Filters
-                    </Button>
+                    <div className="empty-icon">🐊</div>
+                    <h3>No students yet</h3>
+                    <p>Check back soon! Students will appear here once they start posting their career requests.</p>
+                    {user?.persona === 'gator' && (
+                      <Button onClick={() => navigate('PostRequest')} className="mt-4">
+                        Post Your Request
+                      </Button>
+                    )}
                   </div>
                 )}
               </>
@@ -337,18 +350,24 @@ export default function DiscoverEmergingGatorsPage() {
                 Featured Requests
               </h3>
               <div className="featured-requests">
-                {requests.slice(0, 3).map((req) => (
-                  <div key={req.id} className="featured-request-item">
-                    <p className="request-text">{req.description?.substring(0, 80)}...</p>
-                    <Button 
-                      size="sm" 
-                      className="quick-reply-btn"
-                      onClick={() => handleOfferHelp(req)}
-                    >
-                      Quick Reply
-                    </Button>
+                {requests.length > 0 ? (
+                  requests.slice(0, 3).map((req) => (
+                    <div key={req.id} className="featured-request-item">
+                      <p className="request-text">{req.description?.substring(0, 80)}...</p>
+                      <Button 
+                        size="sm" 
+                        className="quick-reply-btn"
+                        onClick={() => handleOfferHelp(req)}
+                      >
+                        Quick Reply
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-sidebar-state">
+                    <p>Students will post their career requests here soon!</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -606,6 +625,8 @@ export default function DiscoverEmergingGatorsPage() {
           font-size: 16px;
           color: #64748b;
           margin-bottom: 24px;
+          text-align: center;
+          max-width: 400px;
         }
 
         .sidebar-section {
@@ -635,6 +656,19 @@ export default function DiscoverEmergingGatorsPage() {
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+
+        .empty-sidebar-state {
+          padding: 16px;
+          background: #F9FAFB;
+          border-radius: 8px;
+          text-align: center;
+        }
+
+        .empty-sidebar-state p {
+          font-size: 14px;
+          color: #6b7280;
+          line-height: 1.5;
         }
 
         .featured-request-item {
