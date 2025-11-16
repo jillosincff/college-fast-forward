@@ -103,15 +103,15 @@ export default function TalentSpotlight() {
         {HERO_TEXTURE_OVERLAY}
         {HERO_GLOW_EFFECTS}
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <Sparkles className="w-8 h-8 text-white" />
             <h1 className={HERO_HEADING_CLASSES}>Talent Spotlight</h1>
           </div>
-          <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mb-6`}>
+          <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mb-6 mx-auto`}>
             Discover exceptional Gator talent ready for opportunities
           </p>
-          <div className="mt-6 flex flex-wrap gap-4">
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
             <Badge className="bg-white/20 text-white border-white/40 px-4 py-2 hover:bg-white/30">
               <Star className="w-4 h-4 mr-2" />
               {students.length} Students Featured
