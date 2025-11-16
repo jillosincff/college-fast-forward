@@ -51,7 +51,7 @@ import InviteRequired from './pages/InviteRequired';
 import RequestInvite from './pages/RequestInvite';
 import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
-import Layout from './Layout.jsx';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -113,5 +113,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "LandingPage",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };

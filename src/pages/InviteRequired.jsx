@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { User } from '@/entities/User';
 import { Button } from '@/components/ui/button';
@@ -121,55 +121,6 @@ export default function InviteRequired() {
           </div>
         </div>
 
-        {/* UF Student Callout - ENHANCED with warning */}
-        <Card className="bg-gradient-to-r from-blue-600 to-blue-700 border-none mb-4">
-          <div className="p-5">
-            <div className="flex items-start gap-3 text-white">
-              <Info className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <div className="flex-grow">
-                <p className="font-bold text-base mb-1">
-                  🎓 Current UF Student?
-                </p>
-                <p className="text-sm text-blue-100 mb-3">
-                  Students with <strong>@ufl.edu</strong> emails don't need an invite code — just sign in with Google!
-                </p>
-                <Button
-                  onClick={handleUFStudentSignIn}
-                  className="bg-white hover:bg-blue-50 text-blue-700 font-bold w-full"
-                >
-                  Sign In with UF Email
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* IMPORTANT WARNING BANNER */}
-        <Card className="bg-yellow-50 border-2 border-yellow-400 mb-6">
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
-              <div className="flex-grow">
-                <p className="font-bold text-sm text-yellow-900 mb-2">
-                  ⚠️ IMPORTANT: You MUST Click "Continue with Google"
-                </p>
-                <ul className="text-xs text-yellow-800 space-y-1">
-                  <li>✅ <strong>DO:</strong> Click "Continue with Google" on the next page</li>
-                  <li>❌ <strong>DON'T:</strong> Use email/password fields (they require verification)</li>
-                  <li>💡 Google sign-in works instantly for @ufl.edu emails</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <div className="text-center mb-4">
-          <p className="text-sm text-slate-500 font-medium">
-            — OR —
-          </p>
-        </div>
-
         <Card className="bg-white border-2 border-slate-200 mb-6">
           <div className="p-6">
             <div className="space-y-6">
@@ -274,6 +225,59 @@ export default function InviteRequired() {
             </div>
           </div>
         </Card>
+
+        {/* UF Student Callout - Only show if parent is NOT selected */}
+        {selectedRole !== 'parent' && (
+          <>
+            <div className="text-center mb-4">
+              <p className="text-sm text-slate-500 font-medium">
+                — OR —
+              </p>
+            </div>
+
+            <Card className="bg-gradient-to-r from-blue-600 to-blue-700 border-none mb-4">
+              <div className="p-5">
+                <div className="flex items-start gap-3 text-white">
+                  <Info className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <div className="flex-grow">
+                    <p className="font-bold text-base mb-1">
+                      🎓 Current UF Student?
+                    </p>
+                    <p className="text-sm text-blue-100 mb-3">
+                      Students with <strong>@ufl.edu</strong> emails don't need an invite code — just sign in with Google!
+                    </p>
+                    <Button
+                      onClick={handleUFStudentSignIn}
+                      className="bg-white hover:bg-blue-50 text-blue-700 font-bold w-full"
+                    >
+                      Sign In with UF Email
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* IMPORTANT WARNING BANNER */}
+            <Card className="bg-yellow-50 border-2 border-yellow-400 mb-6">
+              <div className="p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
+                  <div className="flex-grow">
+                    <p className="font-bold text-sm text-yellow-900 mb-2">
+                      ⚠️ IMPORTANT: You MUST Click "Continue with Google"
+                    </p>
+                    <ul className="text-xs text-yellow-800 space-y-1">
+                      <li>✅ <strong>DO:</strong> Click "Continue with Google" on the next page</li>
+                      <li>❌ <strong>DON'T:</strong> Use email/password fields (they require verification)</li>
+                      <li>💡 Google sign-in works instantly for @ufl.edu emails</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
 
         <Card className="bg-gradient-to-br from-blue-50 to-orange-50 border-slate-200 mb-6">
           <div className="p-6">
