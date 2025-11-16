@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { 
   TestTube, 
@@ -14,7 +16,8 @@ import {
   UserPlus,
   Copy,
   ExternalLink,
-  Database
+  Database,
+  Ticket
 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
@@ -29,6 +32,11 @@ export default function TestingDashboard() {
   const [testUserInfo, setTestUserInfo] = useState(null);
   const [creatingSampleParents, setCreatingSampleParents] = useState(false);
   const [sampleParentsResult, setSampleParentsResult] = useState(null);
+  
+  // New state for custom invite code generation
+  const [customCode, setCustomCode] = useState('');
+  const [generatingCustomCode, setGeneratingCustomCode] = useState(false);
+  const [generatedCodeInfo, setGeneratedCodeInfo] = useState(null);
 
   useEffect(() => {
     if (!user || !user.roles?.includes('admin')) {
@@ -100,6 +108,49 @@ export default function TestingDashboard() {
       });
     } finally {
       setIsRunningInviteTest(false);
+    }
+  };
+
+  const generateCustomInviteCode = async () => {
+    if (!customCode.trim()) {
+      toast({ 
+        title: "Please enter a code name", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setGeneratingCustomCode(true);
+    setGeneratedCodeInfo(null);
+
+    try {
+      const response = await base44.functions.invoke('generateCommunityInvite', {
+        custom_code: customCode.trim().toUpperCase(),
+        group_name: 'Admin Testing',
+        target_role: 'parent',
+        max_uses: 5000,
+        expiration_days: 365
+      });
+
+      if (response.data.success) {
+        setGeneratedCodeInfo(response.data);
+        toast({
+          title: "✅ Custom Code Generated!",
+          description: `Code "${response.data.code}" is ready to use`,
+        });
+        setCustomCode('');
+      } else {
+        throw new Error(response.data.error || 'Failed to generate code');
+      }
+    } catch (error) {
+      console.error('Generate custom code failed:', error);
+      toast({
+        title: "Generation Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingCustomCode(false);
     }
   };
 
@@ -185,6 +236,105 @@ export default function TestingDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Generate Custom Invite Code - NEW */}
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ticket className="w-5 h-5 text-purple-600" />
+                Generate Custom Invite Code
+              </CardTitle>
+              <CardDescription>
+                Create your own custom invite code (e.g., "UFPARENTS", "GATORS2025")
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="custom-code">Custom Code Name</Label>
+                <Input
+                  id="custom-code"
+                  placeholder="UFPARENTS"
+                  value={customCode}
+                  onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
+                  maxLength={20}
+                  disabled={generatingCustomCode}
+                />
+                <p className="text-xs text-slate-500">
+                  Letters and numbers only, automatically converted to uppercase
+                </p>
+              </div>
+              
+              <Button
+                onClick={generateCustomInviteCode}
+                disabled={generatingCustomCode || !customCode.trim()}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+              >
+                {generatingCustomCode ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Ticket className="w-4 h-4 mr-2" />
+                    Generate Code
+                  </>
+                )}
+              </Button>
+
+              {generatedCodeInfo && (
+                <div className="space-y-3 mt-4">
+                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <p className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      Code Generated Successfully!
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between bg-white p-3 rounded border">
+                        <span className="font-mono text-xl font-bold text-purple-900">
+                          {generatedCodeInfo.code}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(generatedCodeInfo.code)}
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-purple-700">
+                        • Valid for {generatedCodeInfo.max_uses} uses
+                      </p>
+                      <p className="text-xs text-purple-700">
+                        • Type: {generatedCodeInfo.invite_type}
+                      </p>
+                      <p className="text-xs text-purple-700">
+                        • Expires: {new Date(generatedCodeInfo.expires_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm font-semibold text-blue-900 mb-2">
+                      📋 Share URL:
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs bg-white p-2 rounded flex-1 overflow-x-auto">
+                        {generatedCodeInfo.share_url}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(generatedCodeInfo.share_url)}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* E2E Tests Card */}
           <Card>
             <CardHeader>
@@ -376,7 +526,7 @@ export default function TestingDashboard() {
             </CardContent>
           </Card>
 
-          {/* Create Sample Parents Card - NEW */}
+          {/* Create Sample Parents Card */}
           <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
