@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
@@ -7,20 +7,7 @@ import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
 import { getPricingTier } from '@/functions/getPricingTier';
 import { getFoundingSpotsLeft } from '@/functions/getFoundingSpotsLeft';
-
-/**
- * PRICING PAGE
- * 
- * IMPORTANT: This page is INFORMATIONAL ONLY for now.
- * No Stripe checkout is active - payment collection will be added later.
- * 
- * PRICING STRUCTURE:
- * - Students: FREE forever
- * - Parents: First 1,000 = FREE (Founding Gators 👑)
- * - Parents: 1,001-4,999 = $9/month (when billing starts)
- * - Parents: 5,000+ = $19/month (when billing starts)
- * - All parents can earn free lifetime via 20 successful invites (2,000 points)
- */
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function Pricing() {
   const { user } = useAuth();
@@ -31,18 +18,15 @@ export default function Pricing() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Try to get founding spots count (works without auth)
         try {
           const spotsResult = await getFoundingSpotsLeft();
           if (spotsResult?.data?.success) {
             setFoundingSpotsLeft(spotsResult.data.spotsLeft);
           }
         } catch (spotsError) {
-          // Silently fail and use default value - function might still be deploying
           console.warn('Founding spots count unavailable, using default:', spotsError.message);
         }
 
-        // If user is logged in, get their pricing tier
         if (user) {
           try {
             const { data } = await getPricingTier();
@@ -50,7 +34,6 @@ export default function Pricing() {
               setPricingData(data);
             }
           } catch (tierError) {
-            // Don't fail the whole page if pricing tier fails
             console.warn('Pricing tier unavailable:', tierError.message);
           }
         }
@@ -72,7 +55,6 @@ export default function Pricing() {
         navigate('ParentDashboard');
       }
     }
-    // If not logged in, GoogleAuthButton will handle sign-in
   };
 
   const pricingTiers = [
@@ -143,31 +125,30 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-orange-500 opacity-10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900">
+      <div className="relative overflow-hidden text-white py-20 px-4" style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-6 relative z-10">
+            <h1 className={HERO_HEADING_CLASSES}>
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              🎓 <strong>Students:</strong> Always FREE forever. Focus on getting hired!
-              <br />
-              👨‍👩‍👧 <strong>Parents:</strong> Join early for the best pricing. First 1,000 are FREE!
+            <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mx-auto`}>
+              Students FREE forever · Parents join early for best pricing
             </p>
             
-            {/* Key Benefits */}
             <div className="flex flex-wrap justify-center gap-6 pt-6">
-              <div className="flex items-center gap-2 text-slate-700">
-                <Check className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-2 text-white">
+                <Check className="w-5 h-5 text-green-400" />
                 <span>No contracts</span>
               </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <Check className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-2 text-white">
+                <Check className="w-5 h-5 text-green-400" />
                 <span>Cancel anytime</span>
               </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <Check className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-2 text-white">
+                <Check className="w-5 h-5 text-green-400" />
                 <span>Earn free membership</span>
               </div>
             </div>
@@ -344,7 +325,6 @@ export default function Pricing() {
         </Card>
       </div>
 
-      {/* Final CTA */}
       {!user && foundingSpotsLeft > 0 && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white border-0 shadow-2xl">
@@ -368,7 +348,6 @@ export default function Pricing() {
         </div>
       )}
 
-      {/* Footer Note */}
       <div className="text-center pb-12 text-slate-500">
         <p className="text-sm">
           Questions? We're here to help. Go Gators! 🐊🧡💙

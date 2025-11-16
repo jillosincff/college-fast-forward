@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function RoommatesPage() {
   const { user } = useAuth();
@@ -70,7 +71,6 @@ export default function RoommatesPage() {
 
       console.log('🏠 Roommates: Loading posts (attempt', retryCount + 1, ')...');
 
-      // Add timeout wrapper
       const fetchWithTimeout = (timeoutMs = 15000) => {
         return Promise.race([
           RoommatePost.filter({ status: 'active' }, '-created_date', 50),
@@ -86,7 +86,6 @@ export default function RoommatesPage() {
       console.log(`✅ Roommates: Loaded ${validPosts.length} posts`);
       setPosts(validPosts);
 
-      // Calculate stats
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const newThisWeek = validPosts.filter(post =>
@@ -110,10 +109,9 @@ export default function RoommatesPage() {
     } catch (error) {
       console.error('❌ Roommates: Error loading posts:', error);
 
-      // Retry on network error
       if (retryCount < MAX_RETRIES && (error.message?.includes('Network Error') || error.message?.includes('timeout'))) {
         console.log(`🔄 Roommates: Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
-        setTimeout(() => loadPosts(retryCount + 1), 1000 * (retryCount + 1)); // Exponential backoff
+        setTimeout(() => loadPosts(retryCount + 1), 1000 * (retryCount + 1));
         return;
       }
 
@@ -142,7 +140,7 @@ export default function RoommatesPage() {
         title: "✅ Listing Deleted",
         description: "Your roommate listing has been removed.",
       });
-      loadPosts(); // Refresh the list
+      loadPosts();
     } catch (err) {
       console.error("Failed to delete post:", err);
       toast({
@@ -173,25 +171,23 @@ export default function RoommatesPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        </div>
+      <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+          <h1 className={HERO_HEADING_CLASSES}>
             Find Your Post-Graduation Roommate
           </h1>
-          <p className="text-xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
-            Moving to a new city after graduation? Connect with fellow Gators for shared housing and trusted roommates.
+          <p className={`${HERO_SUBHEADING_CLASSES} mb-8 max-w-3xl mx-auto mt-4`}>
+            Connect with fellow Gators for trusted housing wherever you go next
           </p>
 
           {user && (
             <Button
               onClick={() => setShowPostModal(true)}
               size="lg"
-              className="bg-white text-[#FA4616] hover:bg-white/90 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              className="bg-white text-[#0021A5] hover:bg-white/90 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
               Post a Listing
@@ -298,7 +294,6 @@ export default function RoommatesPage() {
         </section>
       </div>
 
-      {/* Modals */}
       <PostListingModal
         isOpen={showPostModal}
         onClose={() => {

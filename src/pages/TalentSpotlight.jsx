@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TalentSpotlightCard from '@/components/talent/TalentSpotlightCard';
 import ReachOutModal from '@/components/talent/ReachOutModal';
 import { trackEvent } from '@/components/utils/analytics';
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function TalentSpotlight() {
   const { user } = useAuth();
@@ -35,7 +36,6 @@ export default function TalentSpotlight() {
     setIsLoading(true);
     setError(null);
     try {
-      // Call the backend function to get talent spotlight students
       const response = await base44.functions.invoke('getTalentSpotlightStudents', {});
       
       if (response.data.success) {
@@ -61,7 +61,6 @@ export default function TalentSpotlight() {
   const applyFilters = () => {
     let filtered = [...students];
 
-    // Search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(s => 
@@ -73,17 +72,14 @@ export default function TalentSpotlight() {
       );
     }
 
-    // Graduation year
     if (filters.graduationYear !== 'all') {
       filtered = filtered.filter(s => s.graduation_year?.toString() === filters.graduationYear);
     }
 
-    // Major
     if (filters.major !== 'all') {
       filtered = filtered.filter(s => s.major === filters.major);
     }
 
-    // Looking for
     if (filters.lookingFor !== 'all') {
       filtered = filtered.filter(s => s.looking_for?.includes(filters.lookingFor));
     }
@@ -97,21 +93,23 @@ export default function TalentSpotlight() {
     setShowReachOutModal(true);
   };
 
-  // Get unique values for filters
   const uniqueGradYears = [...new Set(students.map(s => s.graduation_year).filter(Boolean))].sort();
   const uniqueMajors = [...new Set(students.map(s => s.major).filter(Boolean))].sort();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-8 h-8 text-white" />
-            <h1 className="text-4xl md:text-5xl font-bold text-white">Talent Spotlight</h1>
+            <h1 className={HERO_HEADING_CLASSES}>Talent Spotlight</h1>
           </div>
-          <p className="text-xl text-white opacity-90 max-w-3xl">
-            Discover exceptional Gator talent ready for opportunities. Browse rich profiles, view projects, and reach out directly to students who match your needs.
+          <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mb-6`}>
+            Discover exceptional Gator talent ready for opportunities
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
             <Badge className="bg-white/20 text-white border-white/40 px-4 py-2 hover:bg-white/30">
@@ -134,7 +132,6 @@ export default function TalentSpotlight() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="space-y-4">
-            {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
@@ -146,7 +143,6 @@ export default function TalentSpotlight() {
               />
             </div>
 
-            {/* Filter Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <select
                 className="px-4 py-3 border-2 rounded-lg focus:border-[#0021A5] focus:outline-none"
@@ -203,14 +199,12 @@ export default function TalentSpotlight() {
           </div>
         </div>
 
-        {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-[#0021A5] border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
-        {/* Error State */}
         {error && !isLoading && (
           <div className="bg-red-50 border-2 border-red-200 rounded-xl p-8 text-center">
             <div className="text-4xl mb-4">⚠️</div>
@@ -222,7 +216,6 @@ export default function TalentSpotlight() {
           </div>
         )}
 
-        {/* Student Grid */}
         {!isLoading && !error && filteredStudents.length > 0 && (
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -249,7 +242,6 @@ export default function TalentSpotlight() {
           </motion.div>
         )}
 
-        {/* Empty State */}
         {!isLoading && !error && filteredStudents.length === 0 && (
           <div className="bg-white rounded-xl shadow-lg p-12 text-center">
             <div className="text-6xl mb-4">🔍</div>
@@ -271,7 +263,6 @@ export default function TalentSpotlight() {
         )}
       </div>
 
-      {/* Reach Out Modal */}
       {selectedStudent && (
         <ReachOutModal
           isOpen={showReachOutModal}

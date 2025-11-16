@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Company } from '@/entities/Company';
@@ -27,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function CompaniesPage() {
   const { user } = useAuth();
@@ -85,7 +85,6 @@ export default function CompaniesPage() {
         }
         setFollowedCompanies(prev => prev.filter(id => id !== companyId));
         
-        // Update follower count
         const company = companies.find(c => c.id === companyId);
         if (company) {
           await Company.update(companyId, {
@@ -101,13 +100,11 @@ export default function CompaniesPage() {
         });
         setFollowedCompanies(prev => [...prev, companyId]);
         
-        // Update follower count
         await Company.update(companyId, {
           follower_count: (company.follower_count || 0) + 1
         });
       }
       
-      // Refresh companies to get updated counts
       loadCompanies();
     } catch (error) {
       console.error('Failed to toggle follow:', error);
@@ -131,11 +128,9 @@ export default function CompaniesPage() {
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        </div>
+      <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -143,14 +138,13 @@ export default function CompaniesPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+            <h1 className={HERO_HEADING_CLASSES}>
               Discover Companies
             </h1>
-            <p className="text-xl text-white opacity-90 max-w-2xl mx-auto mb-8">
-              Explore company profiles, read reviews, and follow organizations to stay updated on new opportunities
+            <p className={`${HERO_SUBHEADING_CLASSES} max-w-2xl mx-auto mb-8 mt-4`}>
+              Explore profiles, read reviews, and follow top organizations
             </p>
             
-            {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -268,7 +262,6 @@ export default function CompaniesPage() {
               >
                 <Card className="hover:shadow-lg transition-all cursor-pointer h-full">
                   <CardContent className="p-6">
-                    {/* Company Logo & Header */}
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
                         {company.logo_url ? (
@@ -293,7 +286,6 @@ export default function CompaniesPage() {
                       </div>
                     </div>
 
-                    {/* Badges */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {company.is_hiring && (
                         <Badge className="bg-green-100 text-green-800">
@@ -315,14 +307,12 @@ export default function CompaniesPage() {
                       )}
                     </div>
 
-                    {/* Description */}
                     {company.description && (
                       <p className="text-sm text-slate-600 mb-4 line-clamp-2">
                         {company.description}
                       </p>
                     )}
 
-                    {/* Stats */}
                     <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
                       {company.average_rating > 0 && (
                         <div className="flex items-center gap-1">
@@ -343,7 +333,6 @@ export default function CompaniesPage() {
                       )}
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
