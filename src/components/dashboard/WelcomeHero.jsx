@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES, HERO_DESCRIPTION_CLASSES } from '@/components/home/HeroStyles';
 
 export default function WelcomeHero({ user }) {
   const { greeting, firstName, isFirstTime } = getGreeting(user);
@@ -15,12 +16,11 @@ export default function WelcomeHero({ user }) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="rounded-3xl border p-6 md:p-8 shadow-sm relative overflow-hidden bg-gradient-to-br from-[#0021A5] to-[#FA4616]"
+        className="rounded-3xl border p-6 md:p-8 shadow-sm relative overflow-hidden"
+        style={HERO_BG_GRADIENT}
       >
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        </div>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
 
         <div className="relative">
           {isFirstTime && (
@@ -43,7 +43,7 @@ export default function WelcomeHero({ user }) {
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
             {greeting}, <span className="text-white opacity-90">{firstName}</span>!
           </h1>
-          <p className="mt-2 text-base md:text-lg text-white opacity-90">
+          <p className={`${HERO_DESCRIPTION_CLASSES} mt-2`}>
             {isFirstTime
               ? "Here's your starting point for connecting with the Gator network."
               : "Ready to make some connections and find opportunities?"}
