@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, Building2, FileText, Menu, Bell, Bookmark, TestTube, Mail } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ import AppErrorBoundary from './components/common/AppErrorBoundary';
 import logger from './components/utils/logger';
 import { Message } from '@/entities/Message';
 import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
+import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
 
 // App version for cache-busting - increment this when we need to force refresh for all users
@@ -101,7 +103,7 @@ const Favorites = React.lazy(() => import('./pages/Favorites'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
 const Terms = React.lazy(() => import('./pages/Terms'));
 const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
-const Companies = React.lazy(() => import('./pages/Companies'));
+// Removed Companies lazy load as it's no longer used for a top-level page
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
@@ -275,9 +277,9 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
     { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
     { name: 'Talent Spotlight', page: 'TalentSpotlight', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Companies', page: 'Companies', icon: Building2, roles: ['gator', 'parent'] },
+    // Removed 'Companies' item
     { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Opportunities', page: 'Opportunities', icon: Building2, roles: ['gator', 'parent'] },
+    { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] }, // Changed icon from Building2 to Briefcase
     { name: 'Roommates', page: 'Roommates', icon: Users, roles: ['gator', 'parent'] },
     { name: 'Pricing', page: 'Pricing', icon: Users, roles: ['gator', 'parent', 'admin'], isPublic: true },
   ], []);
@@ -577,7 +579,7 @@ const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
 const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
 // Pages that require auth but NOT verification (can be accessed while unverified)
-const authOnlyPages = ['Opportunities', 'Companies', 'CompanyProfile', 'PublicProfile'];
+const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile']; // Removed 'Companies'
 
 // Helper function to check if user is verified
 const isUserVerified = (user) => {
@@ -621,7 +623,7 @@ const getPageComponent = (pageName) => {
     case 'AdminDashboard': return AdminDashboard;
     case 'Connections': return Connections;
     case 'TalentSpotlight': return React.lazy(() => import('./pages/TalentSpotlight'));
-    case 'Companies': return Companies;
+    // Removed 'Companies' case
     case 'CompanyProfile': return CompanyProfile;
     case 'Opportunities': return Opportunities;
     case 'PostOpportunity': return PostOpportunity;

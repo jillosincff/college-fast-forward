@@ -44,7 +44,6 @@ import TalentSpotlight from './pages/TalentSpotlight';
 import JobSpotlightLibrary from './pages/JobSpotlightLibrary';
 import CareerWishlist from './pages/CareerWishlist';
 import InterviewPrep from './pages/InterviewPrep';
-import Companies from './pages/Companies';
 import CompanyProfile from './pages/CompanyProfile';
 import MyMessages from './pages/MyMessages';
 import InviteRequired from './pages/InviteRequired';
@@ -101,7 +100,6 @@ export const PAGES = {
     "JobSpotlightLibrary": JobSpotlightLibrary,
     "CareerWishlist": CareerWishlist,
     "InterviewPrep": InterviewPrep,
-    "Companies": Companies,
     "CompanyProfile": CompanyProfile,
     "MyMessages": MyMessages,
     "InviteRequired": InviteRequired,
