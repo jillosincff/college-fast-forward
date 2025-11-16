@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -21,7 +22,6 @@ export default function Dashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   
-  // Real-time stats
   const [stats, setStats] = useState({
     parentsViewed: 0,
     peerConnections: 0,
@@ -35,7 +35,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Redirect parents and admins to their respective dashboards
     if (user?.persona) {
       if (user.persona === 'parent') {
         navigate('ParentDashboard');
@@ -60,24 +59,20 @@ export default function Dashboard() {
     try {
       console.log('📥 Fetching dashboard data for:', user.email);
       
-      // Use backend function to bypass RLS for messages
       const { data: messagesResponse } = await getUserMessages();
       const myMessages = messagesResponse?.messages || [];
       
       console.log('✅ Messages loaded from backend:', myMessages?.length || 0);
       setMessages(myMessages);
 
-      // Load recommended opportunities (top 5)
       const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 5);
       console.log('✅ Opportunities loaded:', opps?.length || 0);
       setOpportunities(opps || []);
 
-      // Load recent help requests from network
       const reqs = await base44.entities.JobRequest.filter({ status: 'active' }, '-created_date', 3);
       console.log('✅ Requests loaded:', reqs?.length || 0);
       setRequests(reqs || []);
 
-      // Calculate real stats for the student
       await loadStudentStats(myMessages, opps);
 
     } catch (error) {
@@ -89,13 +84,11 @@ export default function Dashboard() {
 
   const loadStudentStats = async (myMessages, opps) => {
     try {
-      // Get all job requests created by this student
       const myRequests = await base44.entities.JobRequest.filter(
         { created_by: user.email },
         '-created_date'
       );
 
-      // Count help offers received on student's requests
       let helpOffersCount = 0;
       if (myRequests && myRequests.length > 0) {
         const requestIds = myRequests.map(req => req.id);
@@ -105,23 +98,18 @@ export default function Dashboard() {
         ).length;
       }
 
-      // Count intros made for student
       const intros = await base44.entities.Intro.filter(
         { student_id: user.id }
       );
       const introsCount = intros?.length || 0;
 
-      // Count messages received from parents (approximation of "parents viewed profile")
       const parentMessages = myMessages.filter(msg => {
-        // Messages from users who helped or reached out
         return msg.sender_email !== user.email;
       });
       const parentsViewedCount = Math.max(parentMessages.length, helpOffersCount);
 
-      // Peer connections: total help offers + intros
       const peerConnectionsCount = helpOffersCount + introsCount;
 
-      // Opportunities matched: active opportunities that match student's interests
       const matchedOpps = opps?.length || 0;
 
       setStats({
@@ -140,7 +128,6 @@ export default function Dashboard() {
 
     } catch (error) {
       console.error('❌ Failed to load student stats:', error);
-      // Set default values on error
       setStats({
         parentsViewed: 0,
         peerConnections: 0,
@@ -161,7 +148,6 @@ export default function Dashboard() {
     );
   }
 
-  // This dashboard is only for gators (students/alumni)
   if (user.persona !== 'gator' && !user.roles?.includes('gator')) {
     return null;
   }
@@ -172,17 +158,20 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section style={{ background: 'linear-gradient(135deg, #0021A5 0%, #FA4616 100%)' }} className="text-white py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative overflow-hidden text-white py-12 px-4" style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">
+            <h1 className={HERO_HEADING_CLASSES}>
               Leverage Your Gator Network to Get Hired
             </h1>
-            <p className="text-lg md:text-xl text-white/90 mb-6 max-w-2xl mx-auto">
-              Connect with parents and Gators who are ready to help you succeed.
+            <p className={`${HERO_SUBHEADING_CLASSES} mb-6 max-w-2xl mx-auto mt-4`}>
+              Connect with parents and Gators ready to help you succeed
             </p>
 
             {!loadingData && (
@@ -211,7 +200,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* MOVED: Quick Actions - Primary CTAs at the top */}
+        {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

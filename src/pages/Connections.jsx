@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -12,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MessageAndHelpModal from '../components/connections/MessageAndHelpModal';
 import EnhancedGatorCard from '../components/connections/EnhancedGatorCard';
 import { useToast } from '@/components/ui/use-toast';
+import EmergingGatorsHero from '@/components/connections/EmergingGatorsHero';
 
 export default function DiscoverEmergingGatorsPage() {
   const { user } = useAuth();
@@ -31,13 +31,11 @@ export default function DiscoverEmergingGatorsPage() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [visibleCount, setVisibleCount] = useState(20);
   
-  // Live stats
   const [liveStats, setLiveStats] = useState({
     seekingHelp: 0,
     responsesToday: 0
   });
 
-  // Skill suggestions for autocomplete
   const skillSuggestions = [
     'Software Engineering', 'Marketing', 'Finance', 'AI/ML', 
     'Data Science', 'Consulting', 'Entrepreneurship', 'Design', 
@@ -60,10 +58,7 @@ export default function DiscoverEmergingGatorsPage() {
     if (!silent) setIsLoading(true);
     
     try {
-      // Load job requests
       const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
-      
-      // FIXED: Use SDK to call backend function properly
       const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
       
       const [jobRequests, directoryResponse] = await Promise.all([
@@ -73,13 +68,12 @@ export default function DiscoverEmergingGatorsPage() {
       
       setRequests(jobRequests || []);
       
-      // Extract users from backend response
       const users = directoryResponse?.data?.data || [];
       setAllUsers(users);
       
       setLiveStats({
         seekingHelp: jobRequests?.length || 0,
-        responsesToday: Math.floor(Math.random() * 50) + 80 // Mock data
+        responsesToday: Math.floor(Math.random() * 50) + 80
       });
       
     } catch (error) {
@@ -90,7 +84,6 @@ export default function DiscoverEmergingGatorsPage() {
         variant: "destructive"
       });
       
-      // Set empty arrays to prevent crashes
       setRequests([]);
       setAllUsers([]);
     } finally {
@@ -102,6 +95,13 @@ export default function DiscoverEmergingGatorsPage() {
     setSelectedRequest(request);
     setShowHelpModal(true);
     trackEvent('help_offer_clicked', { requestId: request.id });
+  };
+
+  const handleBrowse = () => {
+    const listingsSection = document.getElementById('listings-section');
+    if (listingsSection) {
+      listingsSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const buildCombinedProfiles = () => {
@@ -120,7 +120,7 @@ export default function DiscoverEmergingGatorsPage() {
           ...userProfile,
           request: request,
           hasRequest: true,
-          isFeatured: Math.random() > 0.8 // 20% featured
+          isFeatured: Math.random() > 0.8
         });
       } else {
         profiles.push({
@@ -168,11 +168,9 @@ export default function DiscoverEmergingGatorsPage() {
     return true;
   });
 
-  // Sort profiles
   const sortedProfiles = [...filteredProfiles].sort((a, b) => {
     if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
     if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
-    // Default: relevance (featured first, then with requests)
     if (a.isFeatured && !b.isFeatured) return -1;
     if (!a.isFeatured && b.isFeatured) return 1;
     if (a.hasRequest && !b.hasRequest) return -1;
@@ -186,34 +184,10 @@ export default function DiscoverEmergingGatorsPage() {
     <>
       <div className="discover-gators-page">
         {/* Hero Banner */}
-        <motion.div 
-          className="hero-banner"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="hero-overlay"></div>
-          <div className="hero-gator-silhouette"></div>
-          <div className="hero-content">
-            <h1 className="hero-title">Discover Emerging Gators</h1>
-            <p className="hero-subtitle">
-              Connect with UF students seeking internships, jobs, and career advice.<br className="desktop-only" />
-              <span className="mobile-subtitle">Alumni and parents: Lend a hand!</span>
-            </p>
-            {user && (
-              <Button
-                onClick={() => navigate('PostRequest')}
-                className="hero-cta"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Post Your Request
-              </Button>
-            )}
-          </div>
-        </motion.div>
+        <EmergingGatorsHero onBrowse={handleBrowse} />
 
         {/* Search and Filters - Sticky */}
-        <div className="filters-section-sticky">
+        <div className="filters-section-sticky" id="listings-section">
           <div className="filters-container">
             {/* Search Bar */}
             <div className="search-wrapper">
@@ -275,7 +249,7 @@ export default function DiscoverEmergingGatorsPage() {
               </select>
             </div>
 
-            {/* Enhanced Live Stats with Pulse Animation */}
+            {/* Live Stats */}
             <div className="live-stats-enhanced">
               <span className="stat-badge-pulsing">
                 <span className="pulse-dot"></span>
@@ -327,7 +301,6 @@ export default function DiscoverEmergingGatorsPage() {
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Load More */}
                 {sortedProfiles.length > visibleCount && (
                   <div className="load-more-section">
                     <Button 
@@ -342,7 +315,6 @@ export default function DiscoverEmergingGatorsPage() {
                   </div>
                 )}
 
-                {/* Empty State */}
                 {filteredProfiles.length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🔍</div>
@@ -357,7 +329,7 @@ export default function DiscoverEmergingGatorsPage() {
             )}
           </div>
 
-          {/* Sidebar (Desktop Only) - Collapsible on Mobile */}
+          {/* Sidebar */}
           <aside className="sidebar-section">
             <div className="sidebar-card">
               <h3 className="sidebar-title">
@@ -422,79 +394,8 @@ export default function DiscoverEmergingGatorsPage() {
 
       <style jsx>{`
         .discover-gators-page {
-          min-height: 100vh;
+          min-h-screen;
           background: #F9FAFB;
-        }
-
-        /* Hero Banner */
-        .hero-banner {
-          position: relative;
-          width: 100%;
-          height: 200px;
-          background: linear-gradient(45deg, #0021A5, #FA4616);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-
-        .hero-overlay {
-          position: absolute;
-          inset: 0;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 20 L60 40 L40 40 Z M30 60 L50 80 L70 60 Z" fill="white" opacity="0.05"/></svg>') center/contain no-repeat;
-        }
-
-        .hero-content {
-          position: relative;
-          z-index: 1;
-          text-align: center;
-          color: white;
-          padding: 0 20px;
-        }
-
-        .hero-title {
-          font-size: 32px;
-          font-weight: 800;
-          margin-bottom: 12px;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          color: white;
-        }
-
-        .hero-subtitle {
-          font-size: 18px;
-          font-weight: 400;
-          margin-bottom: 24px;
-          line-height: 1.4;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-          color: white;
-          opacity: 0.9;
-        }
-
-        .desktop-only {
-          display: inline;
-        }
-
-        .mobile-subtitle {
-          display: none;
-        }
-
-        .hero-cta {
-          background: #FA4616;
-          color: white;
-          font-size: 16px;
-          font-weight: 700;
-          padding: 12px 32px;
-          border-radius: 8px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(250, 70, 22, 0.4);
-        }
-
-        .hero-cta:hover {
-          background: #E03D00;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(250, 70, 22, 0.5);
         }
 
         /* Filters Section - Sticky */
@@ -609,7 +510,6 @@ export default function DiscoverEmergingGatorsPage() {
           color: #d1d5db;
         }
 
-        /* Main Content Area */
         .main-content-area {
           max-width: 1400px;
           margin: 32px auto;
@@ -629,7 +529,6 @@ export default function DiscoverEmergingGatorsPage() {
           gap: 20px;
         }
 
-        /* Loading State */
         .loading-state {
           display: flex;
           flex-direction: column;
@@ -657,7 +556,6 @@ export default function DiscoverEmergingGatorsPage() {
           color: #64748b;
         }
 
-        /* Load More */
         .load-more-section {
           text-align: center;
           padding: 32px 0;
@@ -681,7 +579,6 @@ export default function DiscoverEmergingGatorsPage() {
           color: #6b7280;
         }
 
-        /* Empty State */
         .empty-state {
           display: flex;
           flex-direction: column;
@@ -711,7 +608,6 @@ export default function DiscoverEmergingGatorsPage() {
           margin-bottom: 24px;
         }
 
-        /* Sidebar */
         .sidebar-section {
           display: flex;
           flex-direction: column;
@@ -789,7 +685,6 @@ export default function DiscoverEmergingGatorsPage() {
           font-weight: 600;
         }
 
-        /* Footer */
         .page-footer {
           background: #0021A5;
           color: white;
@@ -834,15 +729,6 @@ export default function DiscoverEmergingGatorsPage() {
           opacity: 0.8;
         }
 
-        /* Hero Gator Silhouette */
-        .hero-gator-silhouette {
-          position: absolute;
-          inset: 0;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M100 40 L120 70 L80 70 Z M70 100 L100 140 L130 100 Z M50 150 L70 180 L90 150 Z M110 150 L130 180 L150 150 Z" fill="white" opacity="0.03"/></svg>') center/400px no-repeat;
-          pointer-events: none;
-        }
-
-        /* Mobile Responsiveness */
         @media (max-width: 1200px) {
           .main-content-area {
             grid-template-columns: 1fr;
@@ -854,33 +740,6 @@ export default function DiscoverEmergingGatorsPage() {
         }
 
         @media (max-width: 768px) {
-          .hero-banner {
-            height: 140px;
-          }
-
-          .hero-title {
-            font-size: 24px;
-            margin-bottom: 8px;
-          }
-
-          .hero-subtitle {
-            font-size: 14px;
-            margin-bottom: 16px;
-          }
-
-          .desktop-only {
-            display: none;
-          }
-
-          .mobile-subtitle {
-            display: inline;
-          }
-
-          .hero-cta {
-            font-size: 14px;
-            padding: 10px 24px;
-          }
-
           .filters-section-sticky {
             top: 0;
             padding: 12px 0;
