@@ -34,10 +34,10 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
     }
   };
 
-  // Glow border styles
+  // Enhanced glow border styles
   const cardBorderClass = isParent 
-    ? 'border-2 border-orange-400/60 shadow-[0_0_20px_rgba(250,70,22,0.15)]' 
-    : 'border-2 border-blue-400/60 shadow-[0_0_20px_rgba(0,33,165,0.15)]';
+    ? 'border-2 border-orange-400/70 shadow-[0_0_25px_rgba(250,70,22,0.25)]' 
+    : 'border-2 border-blue-400/70 shadow-[0_0_25px_rgba(0,33,165,0.25)]';
 
   const isParentOrAlumni = user.persona === 'alumni' || user.persona === 'parent';
   const hasExpertise = user.expertise_areas && user.expertise_areas.length > 0;
@@ -60,7 +60,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
   };
 
   return (
-    <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 bg-white ${cardBorderClass} group`}>
+    <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 bg-white ${cardBorderClass} group`}>
       <div className="p-6">
         {/* Header with Avatar and Name */}
         <div className="flex items-start gap-4 mb-4">
@@ -76,8 +76,15 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
               {displayName}
             </h3>
             <div className="flex flex-wrap gap-1 mt-1">
-              <Badge className={`${getRoleBadgeColor()} flex items-center gap-1`}>
-                {isParent && <Crown className="w-3 h-3 text-yellow-600" />}
+              <Badge className={`${getRoleBadgeColor()} flex items-center gap-1.5`}>
+                {isParent && (
+                  <div className="relative">
+                    <div className="absolute inset-0 blur-sm">
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                    </div>
+                    <Crown className="w-4 h-4 text-yellow-500 relative drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" />
+                  </div>
+                )}
                 {getRoleDisplay()}
               </Badge>
               {canProvideReferrals && (

@@ -198,7 +198,7 @@ export default function GatorDirectory() {
   const isStudent = user?.persona === 'gator';
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
       
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{
@@ -240,12 +240,17 @@ export default function GatorDirectory() {
                 </div>
               </div>
               
-              {/* Parents Pill with Crown */}
+              {/* Parents Pill with BIGGER Glowing Crown */}
               <div className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur opacity-40 group-hover:opacity-60 transition"></div>
                 <div className="relative px-8 py-4 bg-[#FA4616] rounded-full border-2 border-orange-400/50 shadow-xl">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <Crown className="w-6 h-6 text-yellow-300" />
+                  <div className="flex items-center justify-center gap-3 mb-1">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-sm">
+                        <Crown className="w-8 h-8 text-yellow-300" />
+                      </div>
+                      <Crown className="w-8 h-8 text-yellow-300 relative drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
+                    </div>
                     <div className="text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
                   </div>
                   <div className="text-sm text-orange-100 font-medium uppercase tracking-wide">Parents</div>
@@ -253,8 +258,8 @@ export default function GatorDirectory() {
               </div>
             </div>
 
-            {/* Empty state FOMO message (show if < 50 users) */}
-            {!loading && stats.members < 50 && (
+            {/* ALWAYS show Founding Gators banner */}
+            {!loading && (
               <div className="mt-8 inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                 <p className="text-white/90 text-sm font-medium">
                   Only <span className="text-[#FA4616] font-bold">{stats.members}</span> Founding Gators — be next
@@ -269,7 +274,7 @@ export default function GatorDirectory() {
         <div className="px-4 sm:px-0">
           
           {/* Filters Bar */}
-          <div className="bg-white p-6 rounded-xl shadow-lg mb-8 sticky top-[80px] z-30">
+          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-8 sticky top-[80px] z-30">
             {/* Search Bar */}
             <div className="mb-4">
               <label htmlFor="search-directory" className="block text-sm font-medium text-slate-700 mb-2">
@@ -457,21 +462,9 @@ export default function GatorDirectory() {
               </div>
             )}
           </div>
-
-          {/* Results Count */}
-          {!loading && !error && (
-            <div className="mb-4 text-sm text-slate-600">
-              Showing <strong>{filteredUsers.length}</strong> of <strong>{allUsers.length}</strong> members
-              {hasActiveFilters && filteredUsers.length < allUsers.length && (
-                <span className="text-blue-600 ml-2">
-                  ({allUsers.length - filteredUsers.length} hidden by filters)
-                </span>
-              )}
-            </div>
-          )}
           
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
                   <div className="flex items-center gap-4">
@@ -487,15 +480,22 @@ export default function GatorDirectory() {
           ) : error ? (
             <ErrorState error={error} onRetry={loadDirectoryData} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map(user => (
                   <UserCard key={user.id} user={user} onMessage={handleMessageUser} onViewProfile={handleViewProfile} />
                 ))
               ) : (
-                <div className="col-span-full text-center py-16 bg-white rounded-lg shadow">
-                  <Search className="mx-auto h-12 w-12 text-slate-400" />
-                  <h3 className="mt-2 text-lg font-medium text-slate-900">No Gators Found</h3>
+                <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-2 border-[#FA4616]/30">
+                  <div className="mb-4">
+                    <div className="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full">
+                      <p className="text-white font-bold text-lg">
+                        Only {stats.members} Founding Gators — be next
+                      </p>
+                    </div>
+                  </div>
+                  <Search className="mx-auto h-12 w-12 text-slate-400 mb-3" />
+                  <h3 className="mt-2 text-lg font-medium text-slate-900">No matches for your filters</h3>
                   <p className="mt-1 text-sm text-slate-500">
                     Try adjusting your search or filters.
                   </p>
