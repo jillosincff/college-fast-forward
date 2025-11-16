@@ -46,34 +46,25 @@ export default function Dashboard() {
     }
 
     // User is a gator, load data
-    console.log('🔍 Loading dashboard data for user:', user.email);
-    trackEvent('dashboard_viewed', { userId: user.id, persona: user.persona });
     loadDashboardData();
   }, [user, isLoading]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      console.log('📥 Fetching dashboard data for:', user.email);
-      
       const { data: messagesResponse } = await getUserMessages();
       const myMessages = messagesResponse?.messages || [];
-      
-      console.log('✅ Messages loaded from backend:', myMessages?.length || 0);
       setMessages(myMessages);
 
       const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 5);
-      console.log('✅ Opportunities loaded:', opps?.length || 0);
       setOpportunities(opps || []);
 
       const reqs = await base44.entities.JobRequest.filter({ status: 'active' }, '-created_date', 3);
-      console.log('✅ Requests loaded:', reqs?.length || 0);
       setRequests(reqs || []);
 
       await loadStudentStats(myMessages, opps);
-
     } catch (error) {
-      console.error('❌ Failed to load dashboard data:', error);
+      console.error('Failed to load dashboard data:', error);
     } finally {
       setLoadingData(false);
     }
@@ -115,16 +106,8 @@ export default function Dashboard() {
         warmIntros: introsCount,
         opportunitiesMatched: matchedOpps
       });
-
-      console.log('📊 Stats calculated:', {
-        parentsViewed: parentsViewedCount,
-        peerConnections: peerConnectionsCount,
-        warmIntros: introsCount,
-        opportunitiesMatched: matchedOpps
-      });
-
     } catch (error) {
-      console.error('❌ Failed to load student stats:', error);
+      console.error('Failed to load student stats:', error);
       setStats({
         parentsViewed: 0,
         peerConnections: 0,
@@ -145,19 +128,7 @@ export default function Dashboard() {
     );
   }
 
-  if (user.persona !== 'gator' && !user.roles?.includes('gator')) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-slate-50">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
-
   const unreadCount = messages.filter(m => !m.is_read).length;
-  console.log('📊 Dashboard stats - Total messages:', messages.length, 'Unread:', unreadCount);
 
   return (
     <div className="min-h-screen bg-slate-50">
