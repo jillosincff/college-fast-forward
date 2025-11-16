@@ -289,9 +289,11 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     return allNavItems.filter(item => {
       const hasRequiredRole = item.roles.includes(user.persona) || (user.roles && user.roles.some(role => item.roles.includes(role)));
 
-      if (item.name === 'Dashboard' && !user.onboarding_completed && user.persona !== 'admin') {
-        return false;
-      }
+      // The original condition for Dashboard and onboarding was:
+      // if (item.name === 'Dashboard' && !user.onboarding_completed && user.persona !== 'admin') {
+      //   return false;
+      // }
+      // This condition has been removed as per the change request.
 
       return hasRequiredRole;
     });
