@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Users, Mail, ArrowRight, Loader2, Briefcase, Edit, Eye } from 'lucide-react';
+import { MessageSquare, TrendingUp, Users, Mail, ArrowRight, Loader2, Briefcase, Edit, Trash2, Eye } from 'lucide-react';
 import { Message } from '@/entities/Message';
 import { HelpOffer } from '@/entities/HelpOffer';
-import { Intro } from '@/entities/Intro';
 import { Opportunity } from '@/entities/Opportunity';
 import { OpportunityApplication } from '@/entities/OpportunityApplication';
 import { navigate } from '@/components/utils/navigation';
@@ -22,7 +21,6 @@ export default function ParentActivityWidget() {
   const [activeTab, setActiveTab] = useState('messages');
   const [messages, setMessages] = useState([]);
   const [helpOffers, setHelpOffers] = useState([]);
-  const [intros, setIntros] = useState([]);
   const [myOpportunities, setMyOpportunities] = useState([]);
   const [opportunityApplications, setOpportunityApplications] = useState({});
   const [loading, setLoading] = useState(true);
@@ -54,10 +52,9 @@ export default function ParentActivityWidget() {
     
     try {
       // Load all activity data in parallel with individual error handling
-      const [messagesResult, helpOffersResult, introsResult, opportunitiesResult] = await Promise.allSettled([
+      const [messagesResult, helpOffersResult, opportunitiesResult] = await Promise.allSettled([
         loadMessages(),
         loadHelpOffers(),
-        loadIntros(),
         loadOpportunities()
       ]);
 
@@ -75,14 +72,6 @@ export default function ParentActivityWidget() {
       } else {
         console.log('Help offers temporarily unavailable');
         setHelpOffers([]);
-      }
-
-      // Process intros
-      if (introsResult.status === 'fulfilled') {
-        setIntros(introsResult.value || []);
-      } else {
-        console.log('Intros temporarily unavailable');
-        setIntros([]);
       }
 
       // Process opportunities
@@ -148,20 +137,6 @@ export default function ParentActivityWidget() {
       return data || [];
     } catch (error) {
       console.log('Help offers temporarily unavailable');
-      return [];
-    }
-  };
-
-  const loadIntros = async () => {
-    try {
-      const data = await Intro.filter(
-        { helper_user_id: user.id },
-        '-created_date',
-        5
-      );
-      return data || [];
-    } catch (error) {
-      console.log('Intros temporarily unavailable');
       return [];
     }
   };
@@ -328,56 +303,6 @@ export default function ParentActivityWidget() {
     );
   };
 
-  const renderIntros = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-        </div>
-      );
-    }
-
-    if (intros.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600">No introductions yet</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Make your first intro to track it here
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-2">
-        {intros.map((intro) => (
-          <div
-            key={intro.id}
-            className="p-4 rounded-lg border bg-white border-gray-200"
-          >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <p className="font-medium text-sm">
-                  Intro to {intro.recipient_name}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {intro.recipient_company} • {intro.recipient_role}
-                </p>
-                <Badge className="mt-2 text-xs">
-                  {intro.status}
-                </Badge>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400">
-              {formatDistanceToNow(new Date(intro.created_date), { addSuffix: true })}
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   const renderJobPosts = () => {
     if (loading) {
       return (
@@ -496,7 +421,7 @@ export default function ParentActivityWidget() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="messages" className="relative">
                 Messages
                 {unreadCount > 0 && (
@@ -506,7 +431,6 @@ export default function ParentActivityWidget() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="help">Help Offers</TabsTrigger>
-              <TabsTrigger value="intros">Introductions</TabsTrigger>
               <TabsTrigger value="jobs">My Job Posts</TabsTrigger>
             </TabsList>
 
@@ -516,10 +440,6 @@ export default function ParentActivityWidget() {
 
             <TabsContent value="help" className="mt-4">
               {renderHelpOffers()}
-            </TabsContent>
-
-            <TabsContent value="intros" className="mt-4">
-              {renderIntros()}
             </TabsContent>
 
             <TabsContent value="jobs" className="mt-4">
