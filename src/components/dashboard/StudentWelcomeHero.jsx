@@ -1,11 +1,12 @@
-
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Briefcase, Users } from 'lucide-react';
+import { Briefcase, Users, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { getGreeting } from '@/components/utils/greetingLogic';
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES, HERO_DESCRIPTION_CLASSES } from '@/components/home/HeroStyles';
 
 export default function StudentWelcomeHero() {
   const { user } = useAuth();
@@ -27,9 +28,9 @@ export default function StudentWelcomeHero() {
 
   const getHeroMessage = () => {
     if (isFirstTime) {
-      return "You're now connected to thousands of Gators ready to help you succeed. Let's get you started with your first connection.";
+      return "You're now connected to thousands of Gators ready to help you succeed.";
     }
-    return "Land a summer internship or full-time job—snag a post-college roommate for wherever you go next. Your Gator network is here to help.";
+    return "Land a summer internship or full-time job—snag a post-college roommate for wherever you go next.";
   };
 
   return (
@@ -37,13 +38,11 @@ export default function StudentWelcomeHero() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="relative overflow-hidden rounded-3xl p-8 text-white mb-8"
-      style={{
-        background: 'linear-gradient(135deg, var(--uf-blue) 0%, var(--uf-orange) 100%)'
-      }}
+      style={HERO_BG_GRADIENT}
     >
-      <div className="absolute inset-0 bg-black/10" />
+      {HERO_TEXTURE_OVERLAY}
+      {HERO_GLOW_EFFECTS}
 
-      {/* Animated Gator Mascot */}
       <motion.div
         initial={{ opacity: 0, x: 30, scale: isFirstTime ? 0.8 : 1 }}
         animate={{
@@ -56,7 +55,7 @@ export default function StudentWelcomeHero() {
           duration: isFirstTime ? 1.2 : 0.8,
           scale: isFirstTime ? { times: [0, 0.7, 1], duration: 1.2 } : {}
         }}
-        className="absolute top-4 right-4 text-6xl"
+        className="absolute top-4 right-4 text-6xl z-10"
       >
         🐊
       </motion.div>
@@ -67,7 +66,7 @@ export default function StudentWelcomeHero() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className={`font-bold mb-4 ${
+            className={`font-extrabold text-white mb-4 ${
               isFirstTime ? 'text-4xl md:text-5xl' : 'text-3xl md:text-4xl'
             }`}
           >
@@ -78,12 +77,11 @@ export default function StudentWelcomeHero() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl leading-relaxed"
+            className={`${HERO_SUBHEADING_CLASSES} mb-8 max-w-2xl leading-relaxed`}
           >
             {getHeroMessage()}
           </motion.p>
 
-          {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -92,8 +90,7 @@ export default function StudentWelcomeHero() {
           >
             <Button
               onClick={handleNavigateToConnections}
-              className="font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              style={{ backgroundColor: 'var(--uf-orange)', color: 'white' }}
+              className="bg-white text-[#0021A5] hover:bg-white/90 font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               <Briefcase className="w-5 h-5 mr-2" />
               Find Job Connections
@@ -109,13 +106,6 @@ export default function StudentWelcomeHero() {
           </motion.div>
         </div>
       </div>
-
-      {/* Background decorative elements */}
-      <div className={`absolute top-4 right-4 w-32 h-32 bg-white/10 rounded-full blur-xl ${isFirstTime ? 'animate-pulse' : ''}`} />
-      <div className="absolute bottom-4 right-16 w-20 h-20 bg-[#0021A5]/20 rounded-full blur-lg" />
-      {isFirstTime && (
-        <div className="absolute top-1/2 left-4 w-16 h-16 bg-orange-400/20 rounded-full blur-lg animate-pulse" />
-      )}
     </motion.div>
   );
 }

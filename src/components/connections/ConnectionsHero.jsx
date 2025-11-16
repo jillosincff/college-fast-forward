@@ -2,6 +2,7 @@ import React from 'react'
 import { Button } from "@/components/ui/button";
 import { Users, Zap, PlusCircle } from "lucide-react";
 import { navigate } from "@/components/utils/navigation";
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function ConnectionsHero({ totalRequests = 132, totalHelpers = 847, onPostRequest }) {
     const scrollDown = () => {
@@ -12,25 +13,23 @@ export default function ConnectionsHero({ totalRequests = 132, totalHelpers = 84
     };
 
     return <div
-        className="relative bg-gradient-to-br from-[#0021A5] to-[#FA4616] text-center py-16 px-4 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        </div>
+        className="relative text-center py-16 px-4 sm:px-6 lg:px-8"
+        style={HERO_BG_GRADIENT}>
+        {HERO_TEXTURE_OVERLAY}
+        {HERO_GLOW_EFFECTS}
 
         <div className="relative z-10">
             <div
                 className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
                 Gator Network Hub
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight">
-                Meet the <span className="opacity-90">Emerging Gators</span>
+            <h1 className={HERO_HEADING_CLASSES}>
+                Meet the <span className="text-white">Emerging Gators</span>
             </h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-white opacity-90">
-                A dedicated space for students to seek help and for alumni & parents to provide invaluable career support.
+            <p className={`${HERO_SUBHEADING_CLASSES} mt-4 max-w-2xl mx-auto`}>
+                Your network could be their breakthrough
             </p>
             
-            {/* New CTA Buttons */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 
                 size="lg" 

@@ -1,6 +1,7 @@
-
+import React from 'react';
 import { motion } from 'framer-motion';
 import { HandHeart, Building, Users } from 'lucide-react';
+import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS } from '@/components/home/HeroStyles';
 
 const StatPill = ({ icon: Icon, value, label, color }) => (
   <div className="flex items-center gap-3">
@@ -16,14 +17,13 @@ const StatPill = ({ icon: Icon, value, label, color }) => (
 
 export default function AlumniHero({ user, stats, isFirstLogin }) {
   return (
-    <div className="relative bg-gradient-to-br from-[#0021A5] to-[#FA4616] text-white overflow-hidden">
-      <div className="absolute inset-0 bg-black/10"></div>
-      <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+    <div className="relative text-white overflow-hidden" style={HERO_BG_GRADIENT}>
+      {HERO_TEXTURE_OVERLAY}
+      {HERO_GLOW_EFFECTS}
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <motion.h1
-          className="text-4xl md:text-5xl font-bold text-white mb-2"
+          className="text-4xl md:text-5xl font-extrabold text-white mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -31,7 +31,7 @@ export default function AlumniHero({ user, stats, isFirstLogin }) {
           {isFirstLogin ? `Welcome, ${user?.full_name?.split(' ')[0]}!` : `Welcome back, ${user?.full_name?.split(' ')[0]}!`}
         </motion.h1>
         <motion.p
-          className="text-lg text-white/80 max-w-2xl mx-auto"
+          className="text-xl text-[#FA4616] font-semibold max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
