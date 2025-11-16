@@ -63,6 +63,16 @@ export default function GatorDirectory() {
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Scroll detection for sticky search bar
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const loadDirectoryData = useCallback(async () => {
     try {
@@ -270,28 +280,37 @@ export default function GatorDirectory() {
         </div>
       </div>
 
+      {/* Sticky Search Bar */}
+      <div className={`sticky top-0 z-100 transition-all duration-300 ${
+        isScrolled ? 'shadow-lg' : 'shadow-none'
+      }`} style={{ zIndex: 100 }}>
+        <div className="bg-white px-4 sm:px-6 lg:px-8 transition-all duration-300" style={{
+          padding: isScrolled ? '12px 2rem' : '1.5rem 2rem'
+        }}>
+          <div className="max-w-7xl mx-auto">
+            <div className="relative">
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 ${
+                isScrolled ? 'h-4 w-4' : 'h-5 w-5'
+              }`} />
+              <Input
+                id="search-directory"
+                placeholder="Search by name, company, expertise..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`pl-10 transition-all duration-300 ${
+                  isScrolled ? 'h-10 text-sm' : 'h-11'
+                }`}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
           
-          {/* Filters Bar */}
-          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-8 sticky top-[80px] z-30">
-            {/* Search Bar */}
-            <div className="mb-4">
-              <label htmlFor="search-directory" className="block text-sm font-medium text-slate-700 mb-2">
-                Search by name, company, expertise...
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <Input
-                  id="search-directory"
-                  placeholder="e.g., 'Product Manager', 'Software Engineering', 'Career Advice'"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-11"
-                />
-              </div>
-            </div>
-
+          {/* Filters Bar - Scrolls Normally */}
+          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-8">
             {/* Basic Filters */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
