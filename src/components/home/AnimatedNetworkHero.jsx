@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Typewriter } from '@/components/ui/typewriter';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react';
+import { LogOut, Info } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import {
   Dialog,
@@ -49,7 +50,6 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
     trackEvent('cta_join_clicked');
     
     if (user) { 
-      // User is logged in - route to appropriate page
       if (user.onboarding_completed) {
         if (user.persona === 'parent') {
           navigate('ParentDashboard');
@@ -59,7 +59,6 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
           navigate('Dashboard');
         }
       } else {
-        // Not onboarded
         if (user.persona === 'gator') {
           navigate('StudentOnboarding');
         } else if (user.persona === 'parent') {
@@ -80,7 +79,6 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
     console.log('🟢 Proceeding to auth...');
     setIsModalOpen(false);
     
-    // Use external handler if provided, otherwise default behavior
     if (onProceedToAuth) {
       onProceedToAuth();
     } else {
@@ -138,14 +136,7 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
       }
       
       .animated-hero { 
-        background: linear-gradient(135deg, #0021A5 0%, #0021A5 42%, #5A2D7E 70%, #FA4616 100%);
-        background-image: 
-          linear-gradient(135deg, rgba(0, 33, 165, 0.85) 0%, rgba(0, 33, 165, 0.75) 42%, rgba(90, 45, 126, 0.8) 70%, rgba(250, 70, 22, 0.85) 100%),
-          url('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/c035843a2_IMG_0892.jpg');
-        background-size: cover;
-        background-position: center 60%;
-        background-repeat: no-repeat;
-        background-attachment: scroll;
+        background: linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%);
         min-height: 100vh; 
         display: flex; 
         flex-direction: column; 
@@ -161,31 +152,41 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
       .animated-hero::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
+        inset: 0;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         z-index: 1;
       }
       
       .animated-hero::after {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.15)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.12)"/><circle cx="40" cy="60" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="70" cy="80" r="1.2" fill="rgba(255,255,255,0.15)"/><circle cx="10" cy="70" r="0.8" fill="rgba(255,255,255,0.08)"/></svg>') repeat;
-        animation: float 25s ease-in-out infinite;
+        inset: 0;
+        pointer-events: none;
+      }
+      
+      .glow-top {
+        position: absolute;
+        top: 10%;
+        right: 25%;
+        height: 24rem;
+        width: 24rem;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.1);
+        filter: blur(80px);
         z-index: 2;
       }
       
-      @keyframes float {
-        0%, 100% { transform: translateY(0px) translateX(0px); }
-        25% { transform: translateY(-15px) translateX(8px); }
-        50% { transform: translateY(-8px) translateX(-5px); }
-        75% { transform: translateY(-12px) translateX(10px); }
+      .glow-bottom {
+        position: absolute;
+        bottom: 10%;
+        left: 25%;
+        height: 24rem;
+        width: 24rem;
+        border-radius: 50%;
+        background: rgba(250, 70, 22, 0.1);
+        filter: blur(80px);
+        z-index: 2;
       }
       
       .hero-content { 
@@ -194,26 +195,35 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
         position: relative; 
       }
       
+      .animated-hero h1 { 
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+      
       .animated-hero h1 .highlight { 
         color: #FA4616;
-        position: relative;
-        text-shadow: 
-          0 3px 6px rgba(0, 0, 0, 0.7),
-          0 6px 12px rgba(250, 70, 22, 0.4);
+        font-weight: 800;
+      }
+      
+      @media (min-width: 768px) {
+        .animated-hero h1 {
+          font-size: 4rem;
+        }
+      }
+      
+      @media (min-width: 1024px) {
+        .animated-hero h1 {
+          font-size: 5rem;
+        }
       }
       
       @media (max-width: 768px) { 
         .animated-hero {
-          background-attachment: scroll;
-          background-position: center 55%;
           min-height: 100vh;
           padding: 1.5rem;
-        }
-      }
-      
-      @media (prefers-contrast: high) {
-        .animated-hero::before {
-          background: rgba(0, 0, 0, 0.7);
         }
       }
       
@@ -236,10 +246,6 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
       .countdown-badge {
         animation: pulse-border 2s ease-in-out infinite;
       }
-
-      :root {
-        --uf-orange: #FA4616;
-      }
     `;
     document.head.appendChild(style);
     
@@ -254,7 +260,6 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
         Skip to content
       </a>
       
-      {/* Auth Instructions Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md z-[9999]">
           <DialogHeader>
@@ -332,6 +337,9 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
         role="region" 
         aria-labelledby="hero-title"
       >
+        <div className="glow-top" />
+        <div className="glow-bottom" />
+        
         <div className="hero-content">
           {!user && spotsLeft > 0 && (
             <div className="mb-6 flex justify-center">
@@ -341,14 +349,14 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
             </div>
           )}
 
-          <h1 id="hero-title" className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white text-center mb-6 leading-tight">
+          <h1 id="hero-title">
             Get <span className="highlight">Gators</span> Hired.
           </h1>
 
-          <div className="text-center max-w-2xl mx-auto mb-2 px-4">
-            <div className="text-xl md:text-2xl font-bold mb-3">
-              <span className="text-white">College Fast Forward: </span>
-              <span style={{ color: '#FA4616' }}>Turning parents' connections into</span>
+          <div className="text-center max-w-2xl mx-auto mb-2 px-4 mt-6">
+            <div className="text-xl md:text-2xl mb-3">
+              <span className="text-white font-semibold">College Fast Forward: </span>
+              <span className="text-[#FA4616] font-semibold">Turning parents' connections into</span>
             </div>
             <div className="flex justify-center items-center" style={{ minHeight: '2.5rem' }}>
               <div style={{ minWidth: '200px' }} className="text-center">
