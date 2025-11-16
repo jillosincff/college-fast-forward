@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Message } from '@/entities/Message';
@@ -21,6 +21,7 @@ import JobMarketInsightsWidget from '@/components/dashboard/parent/JobMarketInsi
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
 import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
+import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 
@@ -234,7 +235,7 @@ export default function ParentDashboard() {
               variant="secondary"
               className="bg-white text-blue-700 hover:bg-white hover:text-blue-800 font-bold px-8 py-6 shadow-lg border-0"
             >
-              Generate Invite Code
+              Invite My Student
             </Button>
           </div>
         </div>
@@ -431,15 +432,13 @@ export default function ParentDashboard() {
 
       </div>
 
-      {/* Student Invite Modal */}
-      <GenerateInviteModal
+      {/* Student Invite Modal - NEW */}
+      <InviteGatorModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
-        inviteType="parent_to_gator"
-        userPersona="parent"
       />
 
-      {/* NEW: Parent Invite Modal */}
+      {/* Parent Invite Modal */}
       <GenerateInviteModal
         isOpen={showParentInviteModal}
         onClose={() => setShowParentInviteModal(false)}
