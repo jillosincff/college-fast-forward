@@ -20,11 +20,10 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
         setError(null);
         setProfileUser(null);
         try {
-          // Use the backend function to get public user info
           const response = await base44.functions.invoke('getPublicUserInfo', { userId });
           
-          if (response?.data?.data) {
-            setProfileUser(response.data.data);
+          if (response?.data) {
+            setProfileUser(response.data);
           } else {
             throw new Error('Could not load profile data');
           }
@@ -42,7 +41,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
   const handleMessageClick = () => {
     if (onMessage && profileUser) {
       onMessage(profileUser);
-      onClose(); // Close profile to open message modal
+      onClose();
     }
   };
   
