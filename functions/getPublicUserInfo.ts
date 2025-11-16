@@ -47,9 +47,11 @@ Deno.serve(async (req) => {
         
         console.log('Found user:', userToDisplay.email);
 
-        // Return comprehensive user data
+        // Return comprehensive user data including first_name and last_name for proper name display
         const userData = {
             id: userToDisplay.id,
+            first_name: userToDisplay.first_name,
+            last_name: userToDisplay.last_name,
             full_name: userToDisplay.full_name,
             email: userToDisplay.email,
             bio: userToDisplay.bio,
