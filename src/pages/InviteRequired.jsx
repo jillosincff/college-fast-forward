@@ -23,6 +23,13 @@ export default function InviteRequired() {
     if (pendingCode) {
       setInviteCode(pendingCode);
     }
+
+    // Check for previously selected role from WelcomeRole page
+    const pendingRole = sessionStorage.getItem('pending_role_selection');
+    if (pendingRole) {
+      setSelectedRole(pendingRole);
+      console.log('Auto-selected role from previous page:', pendingRole);
+    }
   }, []);
 
   const handleVerifyAndSetRole = async () => {
@@ -77,6 +84,7 @@ export default function InviteRequired() {
       sessionStorage.removeItem('pending_invite_code');
       sessionStorage.removeItem('pending_invite_type');
       sessionStorage.removeItem('pending_inviter_name');
+      sessionStorage.removeItem('pending_role_selection');
 
       await refreshUser();
       
@@ -145,8 +153,8 @@ export default function InviteRequired() {
                 </p>
               </div>
 
-              {/* Role Selection - Only show after code is entered */}
-              {inviteCode.trim().length > 0 && (
+              {/* Role Selection - Only show if NOT already selected from previous page */}
+              {!selectedRole && inviteCode.trim().length > 0 && (
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-slate-700">
                     I am a...
@@ -154,11 +162,7 @@ export default function InviteRequired() {
                   
                   <button
                     onClick={() => setSelectedRole('gator')}
-                    className={`w-full p-4 rounded-lg border-2 transition-all ${
-                      selectedRole === 'gator'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-slate-200 hover:border-blue-300'
-                    }`}
+                    className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-blue-300 transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-3xl">🐊</span>
@@ -166,21 +170,12 @@ export default function InviteRequired() {
                         <p className="font-bold text-slate-900">Gator (Student or Alum)</p>
                         <p className="text-sm text-slate-600">Forever free — find jobs & get hired</p>
                       </div>
-                      {selectedRole === 'gator' && (
-                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
-                        </div>
-                      )}
                     </div>
                   </button>
 
                   <button
                     onClick={() => setSelectedRole('parent')}
-                    className={`w-full p-4 rounded-lg border-2 transition-all ${
-                      selectedRole === 'parent'
-                        ? 'border-orange-500 bg-orange-50'
-                        : 'border-slate-200 hover:border-orange-300'
-                    }`}
+                    className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-orange-300 transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-3xl">🧡</span>
@@ -188,13 +183,27 @@ export default function InviteRequired() {
                         <p className="font-bold text-slate-900">Gator Parent</p>
                         <p className="text-sm text-slate-600">Help Gators get hired — open your network</p>
                       </div>
-                      {selectedRole === 'parent' && (
-                        <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
-                        </div>
-                      )}
                     </div>
                   </button>
+                </div>
+              )}
+
+              {/* Show selected role if it was pre-selected */}
+              {selectedRole && (
+                <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{selectedRole === 'parent' ? '🧡' : '🐊'}</span>
+                    <div className="flex-grow">
+                      <p className="font-bold text-slate-900">
+                        {selectedRole === 'parent' ? 'Gator Parent' : 'Gator (Student or Alum)'}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {selectedRole === 'parent' 
+                          ? 'Help Gators get hired — open your network' 
+                          : 'Forever free — find jobs & get hired'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
