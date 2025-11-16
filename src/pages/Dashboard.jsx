@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
   
   const [stats, setStats] = useState({
     parentsViewed: 0,
@@ -46,17 +45,11 @@ export default function Dashboard() {
       return;
     }
 
-    // User is a gator, allow rendering
-    setShouldRender(true);
+    // User is a gator, load data
+    console.log('🔍 Loading dashboard data for user:', user.email);
+    trackEvent('dashboard_viewed', { userId: user.id, persona: user.persona });
+    loadDashboardData();
   }, [user, isLoading]);
-
-  useEffect(() => {
-    if (user && shouldRender) {
-      console.log('🔍 Loading dashboard data for user:', user.email);
-      trackEvent('dashboard_viewed', { userId: user.id, persona: user.persona });
-      loadDashboardData();
-    }
-  }, [user, shouldRender]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
@@ -141,8 +134,7 @@ export default function Dashboard() {
     }
   };
 
-  // Show loading while auth is loading
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50">
         <div className="text-center">
@@ -153,9 +145,15 @@ export default function Dashboard() {
     );
   }
 
-  // Don't render until we've confirmed the user should see this page
-  if (!shouldRender || !user) {
-    return null;
+  if (user.persona !== 'gator' && !user.roles?.includes('gator')) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   const unreadCount = messages.filter(m => !m.is_read).length;
