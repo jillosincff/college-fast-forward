@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter } from 'lucide-react';
+import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter, Crown } from 'lucide-react';
 import UserCard from '@/components/directory/UserCard';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import ProfileModal from '@/components/directory/ProfileModal';
@@ -48,7 +47,8 @@ export default function GatorDirectory() {
     connections: 1247,
     students: 0,
     alumni: 0,
-    parents: 0
+    parents: 0,
+    gators: 0
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ 
@@ -80,7 +80,7 @@ export default function GatorDirectory() {
       setAllUsers(validUsers);
       
       // Calculate persona breakdown
-      const studentCount = validUsers.filter(u => u.persona === 'student').length;
+      const studentCount = validUsers.filter(u => u.persona === 'student' || u.persona === 'gator').length;
       const alumniCount = validUsers.filter(u => u.persona === 'alumni').length;
       const parentCount = validUsers.filter(u => u.persona === 'parent').length;
       
@@ -89,7 +89,8 @@ export default function GatorDirectory() {
         members: validUsers.length,
         students: studentCount,
         alumni: alumniCount,
-        parents: parentCount
+        parents: parentCount,
+        gators: studentCount + alumniCount
       }));
       logger.info(`[GatorDirectory] Loaded ${validUsers.length} users.`);
 
@@ -197,76 +198,69 @@ export default function GatorDirectory() {
   const isStudent = user?.persona === 'gator';
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-50">
       
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white py-16 px-4 relative overflow-hidden">
+      {/* Hero Section - Gator Stadium Night Sky */}
+      <div className="relative text-white py-20 px-4 overflow-hidden" style={{
+        background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
+      }}>
+        {/* Stadium crowd texture overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+        }} />
+        
+        {/* Atmospheric glow effects */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute top-10 right-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute bottom-10 left-1/4 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-3xl" role="img" aria-label="alligator">🐊</span>
-              <span className="px-3 py-1 bg-white/20 text-white text-sm font-semibold rounded-full backdrop-blur-sm">
-                Gator Network
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
-              Gator Directory
+            {/* Title */}
+            <h1 className="text-5xl md:text-6xl font-extrabold mb-3 leading-tight text-white tracking-tight">
+              Your Gator Network
             </h1>
-            <p className="text-xl md:text-2xl text-white opacity-90 font-medium mb-4 leading-relaxed">
-              {isStudent 
-                ? 'Find parents and alumni with the expertise you need to succeed'
-                : 'Connect with fellow students, alumni, and parents from the Gator Nation'
-              }
-            </p>
-            <p className="text-lg text-white opacity-80 max-w-2xl mx-auto leading-relaxed">
-              {isStudent
-                ? 'Search by industry, expertise, or type of help you need'
-                : 'Find mentors, make connections, and tap into the power of our community'
-              }
+            
+            {/* Subtitle with emphasis */}
+            <p className="text-xl md:text-2xl mb-8 flex items-center justify-center gap-2 flex-wrap">
+              <span className="text-white/90 font-medium">Invite-Only</span>
+              <span className="text-white/50">•</span>
+              <span className="text-[#FA4616] font-semibold">Parents open doors</span>
             </p>
             
-            {/* Stats Row - Enhanced with Persona Breakdown */}
-            <div className="mt-8 flex justify-center">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {/* Total Members */}
-                <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
-                  <div className="text-3xl font-bold text-white mb-1">{loading ? '...' : stats.members}</div>
-                  <div className="text-sm text-white opacity-80">Gator Members</div>
+            {/* Big Counter Pills */}
+            <div className="mt-10 flex justify-center gap-4 flex-wrap">
+              {/* Gators Pill */}
+              <div className="group relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
+                <div className="relative px-8 py-4 bg-[#0021A5] rounded-full border-2 border-blue-400/50 shadow-xl">
+                  <div className="text-4xl font-bold text-white mb-1">{loading ? '...' : stats.gators}</div>
+                  <div className="text-sm text-blue-200 font-medium uppercase tracking-wide">Gators</div>
                 </div>
-                
-                {/* Students */}
-                <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
+              </div>
+              
+              {/* Parents Pill with Crown */}
+              <div className="group relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
+                <div className="relative px-8 py-4 bg-[#FA4616] rounded-full border-2 border-orange-400/50 shadow-xl">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <GraduationCap className="w-5 h-5 text-white" />
-                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.students}</div>
+                    <Crown className="w-6 h-6 text-yellow-300" />
+                    <div className="text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
                   </div>
-                  <div className="text-sm text-white opacity-80">Students</div>
-                </div>
-                
-                {/* Alumni */}
-                <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <Briefcase className="w-5 h-5 text-white" />
-                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.alumni}</div>
-                  </div>
-                  <div className="text-sm text-white opacity-80">Alumni</div>
-                </div>
-                
-                {/* Parents */}
-                <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 min-w-[140px]">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <Heart className="w-5 h-5 text-white" />
-                    <div className="text-3xl font-bold text-white">{loading ? '...' : stats.parents}</div>
-                  </div>
-                  <div className="text-sm text-white opacity-80">Parents</div>
+                  <div className="text-sm text-orange-100 font-medium uppercase tracking-wide">Parents</div>
                 </div>
               </div>
             </div>
+
+            {/* Empty state FOMO message (show if < 50 users) */}
+            {!loading && stats.members < 50 && (
+              <div className="mt-8 inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+                <p className="text-white/90 text-sm font-medium">
+                  Only <span className="text-[#FA4616] font-bold">{stats.members}</span> Founding Gators — be next
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

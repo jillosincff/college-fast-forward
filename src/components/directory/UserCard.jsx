@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase } from 'lucide-react';
+import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase, Crown } from 'lucide-react';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import { formatLabel } from '@/components/utils/format';
 
@@ -11,33 +11,56 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
 
+  const isParent = user.persona === 'parent';
+  const isGator = user.persona === 'student' || user.persona === 'gator' || user.persona === 'alumni';
+  
   const getRoleBadgeColor = () => {
     switch (user.persona) {
       case 'student': return 'bg-blue-100 text-blue-800';
       case 'gator': return 'bg-blue-100 text-blue-800';
-      case 'alumni': return 'bg-green-100 text-green-800';
-      case 'parent': return 'bg-purple-100 text-purple-800';
+      case 'alumni': return 'bg-blue-100 text-blue-800';
+      case 'parent': return 'bg-orange-100 text-orange-800';
       default: return 'bg-slate-100 text-slate-800';
     }
   };
 
   const getRoleDisplay = () => {
     switch (user.persona) {
-      case 'student': return 'Student';
+      case 'student': return 'Gator';
       case 'gator': return 'Gator';
-      case 'alumni': return 'Alumni';
-      case 'parent': return 'Parent';
+      case 'alumni': return 'Gator';
+      case 'parent': return 'Gator Parent';
       default: return 'Member';
     }
   };
+
+  // Glow border styles
+  const cardBorderClass = isParent 
+    ? 'border-2 border-orange-400/60 shadow-[0_0_20px_rgba(250,70,22,0.15)]' 
+    : 'border-2 border-blue-400/60 shadow-[0_0_20px_rgba(0,33,165,0.15)]';
 
   const isParentOrAlumni = user.persona === 'alumni' || user.persona === 'parent';
   const hasExpertise = user.expertise_areas && user.expertise_areas.length > 0;
   const hasWaysToHelp = user.ways_to_help && user.ways_to_help.length > 0;
   const canProvideReferrals = user.can_provide_referrals === true;
 
+  // Map ways_to_help to color-coded chips
+  const getHelpChipColor = (help) => {
+    const helpLower = help.toLowerCase();
+    if (helpLower.includes('introduce') || helpLower.includes('introduction')) {
+      return 'bg-green-100 text-green-800 border-green-300';
+    }
+    if (helpLower.includes('career') || helpLower.includes('advice')) {
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    }
+    if (helpLower.includes('lead') || helpLower.includes('referral')) {
+      return 'bg-purple-100 text-purple-800 border-purple-300';
+    }
+    return 'bg-slate-100 text-slate-700 border-slate-300';
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-white border border-slate-200">
+    <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 bg-white ${cardBorderClass} group`}>
       <div className="p-6">
         {/* Header with Avatar and Name */}
         <div className="flex items-start gap-4 mb-4">
@@ -53,7 +76,8 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
               {displayName}
             </h3>
             <div className="flex flex-wrap gap-1 mt-1">
-              <Badge className={getRoleBadgeColor()}>
+              <Badge className={`${getRoleBadgeColor()} flex items-center gap-1`}>
+                {isParent && <Crown className="w-3 h-3 text-yellow-600" />}
                 {getRoleDisplay()}
               </Badge>
               {canProvideReferrals && (
@@ -137,7 +161,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           </div>
         )}
 
-        {/* Ways to Help - Parents/Alumni Only */}
+        {/* Ways to Help - Color Coded - Parents/Alumni Only */}
         {isParentOrAlumni && hasWaysToHelp && (
           <div className="mb-4">
             <div className="flex items-start gap-2 mb-2">
@@ -146,7 +170,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
             </div>
             <div className="flex flex-wrap gap-1.5 ml-6">
               {user.ways_to_help.slice(0, 3).map((help, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                <Badge key={idx} variant="outline" className={`text-xs border ${getHelpChipColor(help)}`}>
                   {formatLabel(help)}
                 </Badge>
               ))}
@@ -159,7 +183,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Buttons with Pulse Animation on Message Button */}
         <div className="flex gap-2">
           <Button
             onClick={() => onViewProfile(user.id)}
@@ -173,7 +197,7 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           <Button
             onClick={() => onMessage(user)}
             size="sm"
-            className="flex-1 gap-2 bg-[#0021A5] hover:bg-[#001580] text-white"
+            className="flex-1 gap-2 bg-[#0021A5] hover:bg-[#001580] text-white relative group-hover:animate-pulse"
           >
             <MessageSquare className="w-4 h-4" />
             Message
