@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
   
   const [stats, setStats] = useState({
     parentsViewed: 0,
@@ -30,29 +31,32 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading) return;
+    
+    if (!user) {
       navigate('LandingPage');
       return;
     }
 
-    if (user?.persona) {
-      if (user.persona === 'parent') {
-        navigate('ParentDashboard');
-        return;
-      } else if (user.roles?.includes('admin')) {
-        navigate('AdminDashboard');
-        return;
-      }
+    if (user.persona === 'parent') {
+      navigate('ParentDashboard');
+      return;
+    } else if (user.roles?.includes('admin')) {
+      navigate('AdminDashboard');
+      return;
     }
+
+    // User is a gator, allow rendering
+    setShouldRender(true);
   }, [user, isLoading]);
 
   useEffect(() => {
-    if (user) {
+    if (user && shouldRender) {
       console.log('🔍 Loading dashboard data for user:', user.email);
       trackEvent('dashboard_viewed', { userId: user.id, persona: user.persona });
       loadDashboardData();
     }
-  }, [user]);
+  }, [user, shouldRender]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
@@ -137,7 +141,8 @@ export default function Dashboard() {
     }
   };
 
-  if (isLoading || !user) {
+  // Show loading while auth is loading
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50">
         <div className="text-center">
@@ -148,7 +153,8 @@ export default function Dashboard() {
     );
   }
 
-  if (user.persona !== 'gator' && !user.roles?.includes('gator')) {
+  // Don't render until we've confirmed the user should see this page
+  if (!shouldRender || !user) {
     return null;
   }
 
