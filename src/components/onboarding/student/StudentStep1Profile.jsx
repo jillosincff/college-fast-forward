@@ -1,12 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, User, AlertCircle, UploadCloud, Loader2, Trash2, ArrowLeft, Linkedin } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UploadFile } from '@/integrations/Core';
-import { useToast } from "@/components/ui/use-toast";
+import { ArrowRight, User, GraduationCap, AlertCircle, ArrowLeft, Linkedin } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 
 // Common majors and locations
@@ -20,8 +18,6 @@ const commonLocations = [
 ];
 
 export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack }) {
-  const { toast } = useToast();
-  const photoInputRef = useRef(null);
 
   const [localData, setLocalData] = useState({
     first_name: formData?.first_name || '',
@@ -30,12 +26,10 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
     graduation_year: formData?.graduation_year || new Date().getFullYear() + 2,
     major: formData?.major || '',
     location: formData?.location || '',
-    profile_image_url: formData?.profile_image_url || '',
     linkedin_url: formData?.linkedin_url || '',
     includeInDirectory: formData?.includeInDirectory !== false,
   });
 
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [errors, setErrors] = useState({});
   const [majorSuggestions, setMajorSuggestions] = useState([]);
   const [locationSuggestions, setLocationSuggestions] = useState([]);
@@ -55,42 +49,6 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
       onUpdate({ ...localData, full_name: '' });
     }
   }, [localData.first_name, localData.last_name, localData.full_name, onUpdate, localData]);
-
-  const handleUpdateAndBubble = (field, value) => {
-    const updatedData = { ...localData, [field]: value };
-    setLocalData(updatedData);
-    onUpdate(updatedData);
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const acceptedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-
-    if (file.size > maxSize) {
-      toast({ variant: 'destructive', title: 'File Too Large', description: `The photo must be under 5MB.` });
-      return;
-    }
-    if (!acceptedTypes.includes(file.type)) {
-      toast({ variant: 'destructive', title: 'Invalid File Type', description: `Please upload a JPG or PNG file.` });
-      return;
-    }
-
-    setIsUploadingPhoto(true);
-    try {
-      const { file_url } = await UploadFile({ file });
-      handleUpdateAndBubble('profile_image_url', file_url);
-      toast({ title: `✅ Photo uploaded!`, description: 'Your file has been saved.' });
-    } catch (error) {
-      console.error(`Error uploading photo:`, error);
-      toast({ variant: 'destructive', title: 'Upload Failed', description: `There was an error uploading your photo. Please try again.` });
-    } finally {
-      setIsUploadingPhoto(false);
-      if (e.target) e.target.value = '';
-    }
-  };
 
   const handleChange = (field, value) => {
     const updatedData = { ...localData, [field]: value };
@@ -119,7 +77,7 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
   const validateField = (field, value) => {
     const newErrors = { ...errors };
     if (!value || (typeof value === 'string' && !value.trim())) {
-      if (field !== 'linkedin_url' && field !== 'profile_image_url' && field !== 'location') {
+      if (field !== 'linkedin_url' && field !== 'location') {
          newErrors[field] = 'This field is required';
       } else {
         delete newErrors[field];
@@ -216,32 +174,14 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
 
       <div className="space-y-6">
 
-        {/* Profile Photo Upload */}
+        {/* Profile Avatar - Initials Only */}
         <div className="flex flex-col items-center gap-4 p-4 bg-slate-50/80 rounded-lg border">
-          <h3 className="text-sm font-medium text-slate-700">Profile Photo (optional)</h3>
-          <div className="flex items-center gap-4">
-            <Avatar className="w-20 h-20 text-3xl">
-              <AvatarImage src={localData.profile_image_url} alt="Profile Photo" />
-              <AvatarFallback className="bg-slate-200">{getInitials(localData.first_name, localData.last_name)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-2">
-              <Button 
-                onClick={() => photoInputRef.current?.click()}
-                disabled={isUploadingPhoto}
-                variant="outline"
-                className="bg-white"
-              >
-                {isUploadingPhoto ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
-                {localData.profile_image_url ? 'Replace Photo' : 'Upload Photo'}
-              </Button>
-              {localData.profile_image_url && (
-                <Button onClick={() => handleUpdateAndBubble('profile_image_url', '')} variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                  <Trash2 className="w-4 h-4 mr-1" /> Remove
-                </Button>
-              )}
-            </div>
-          </div>
-          <Input ref={photoInputRef} type="file" className="hidden" accept="image/jpeg, image/png, image/jpg" onChange={handleFileChange} />
+          <h3 className="text-sm font-medium text-slate-700">Your Profile</h3>
+          <Avatar className="w-12 h-12">
+            <AvatarFallback className="bg-[#0021A5] text-white font-bold text-xl">
+              {getInitials(localData.first_name, localData.last_name)}
+            </AvatarFallback>
+          </Avatar>
         </div>
 
         {/* First Name and Last Name */}
