@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -481,14 +480,7 @@ export default function Onboarding() {
       sessionStorage.removeItem('pending_invite_type');
       sessionStorage.removeItem('pending_inviter_name');
 
-      toast({
-        title: "✅ Profile Complete!",
-        description: "Welcome to the Gator village.",
-      });
-
-      setTimeout(() => {
-        navigate('ParentDashboard', { first: '1' });
-      }, 100);
+      navigate('ParentDashboard', { first: '1' });
 
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
