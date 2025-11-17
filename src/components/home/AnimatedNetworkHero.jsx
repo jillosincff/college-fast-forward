@@ -26,7 +26,7 @@ const AnimatedNetworkHero = ({
 }) => {
   const { user, logout } = useAuth();
   const [announceMessage, setAnnounceMessage] = useState('');
-  const [userCount, setUserCount] = useState(32);
+  const [userCount, setUserCount] = useState(0);
   const [internalShowAuthInstructions, setInternalShowAuthInstructions] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -34,14 +34,17 @@ const AnimatedNetworkHero = ({
   const setIsModalOpen = setShowAuthInstructions || setInternalShowAuthInstructions;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setUserCount(prev => {
-        const increment = Math.random() > 0.7 ? Math.floor(Math.random() * 2) : 0;
-        return Math.min(prev + increment, 999);
-      });
-    }, 15000);
+    const fetchUserCount = async () => {
+      try {
+        const users = await base44.asServiceRole.entities.User.list();
+        setUserCount(users.length);
+      } catch (error) {
+        console.error('Failed to fetch user count:', error);
+        setUserCount(150); // Fallback value
+      }
+    };
 
-    return () => clearInterval(interval);
+    fetchUserCount();
   }, []);
 
   const spotsLeft = Math.max(0, 1000 - userCount);
