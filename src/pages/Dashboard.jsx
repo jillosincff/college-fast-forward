@@ -3,9 +3,10 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRight } from 'lucide-react';
+import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
+import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
 import { UserPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
@@ -15,12 +16,13 @@ import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function Dashboard() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
   const [requests, setRequests] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showSpotlightModal, setShowSpotlightModal] = useState(false);
   
   const [stats, setStats] = useState({
     parentsViewed: 0,
@@ -117,6 +119,11 @@ export default function Dashboard() {
     }
   };
 
+  const handleSpotlightSuccess = async () => {
+    await refreshUser();
+    await loadDashboardData();
+  };
+
   if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50">
@@ -129,6 +136,7 @@ export default function Dashboard() {
   }
 
   const unreadCount = messages.filter(m => !m.is_read).length;
+  const isSpotlightActive = user?.talent_spotlight_enabled && user?.spotlight_enabled_date;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -235,11 +243,58 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
+        {/* Talent Spotlight Widget */}
+        {!isSpotlightActive && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 border-0 shadow-2xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+              <CardContent className="pt-6 pb-6 relative z-10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="w-7 h-7" />
+                      <h3 className="text-2xl font-bold">⭐ Get Featured in Talent Spotlight</h3>
+                    </div>
+                    <p className="text-white/95 text-lg mb-2">
+                      70,000+ alumni & parents are looking to hire. Get discovered for 30 days!
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
+                        <Sparkles className="w-4 h-4" />
+                        Profile + Skills
+                      </span>
+                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                        💼 Projects
+                      </span>
+                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                        🎥 Video Intro
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setShowSpotlightModal(true)}
+                    size="lg"
+                    className="bg-white text-orange-600 hover:bg-slate-100 font-bold px-8 py-6 text-lg shadow-xl"
+                  >
+                    <Star className="w-5 h-5 mr-2" />
+                    Set Up Spotlight
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Membership Status Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: isSpotlightActive ? 0.15 : 0.2 }}
         >
           <MembershipStatusCard />
         </motion.div>
@@ -248,7 +303,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: isSpotlightActive ? 0.2 : 0.25 }}
           className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6"
         >
           <h2 className="text-lg font-bold text-slate-900 mb-4 text-center">
@@ -291,7 +346,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
         >
           <Card className="bg-gradient-to-r from-purple-600 to-pink-600 border-0 shadow-xl">
             <CardContent className="pt-6 pb-6">
@@ -321,7 +376,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: isSpotlightActive ? 0.3 : 0.35 }}
           >
             <Card className="border-2 border-blue-200 shadow-lg">
               <CardContent className="pt-6">
@@ -389,7 +444,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: isSpotlightActive ? 0.35 : 0.4 }}
           >
             <Card>
               <CardContent className="pt-6">
@@ -438,7 +493,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: isSpotlightActive ? 0.4 : 0.45 }}
           >
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50">
               <CardContent className="pt-6">
@@ -466,12 +521,19 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Invite Modal */}
+      {/* Modals */}
       <GenerateInviteModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         inviteType="student_to_parent"
         userPersona="gator"
+      />
+
+      <TalentSpotlightSetupModal
+        isOpen={showSpotlightModal}
+        onClose={() => setShowSpotlightModal(false)}
+        user={user}
+        onSuccess={handleSpotlightSuccess}
       />
     </div>
   );
