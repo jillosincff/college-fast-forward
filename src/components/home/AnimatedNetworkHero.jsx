@@ -7,6 +7,7 @@ import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
 import { LogOut, Info, UserPlus, Send } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getUserCount } from '@/functions/getUserCount';
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,7 @@ const AnimatedNetworkHero = ({
   useEffect(() => {
     const fetchUserCount = async () => {
       try {
-        const response = await base44.functions.invoke('getUserCount');
+        const response = await getUserCount({});
         if (response.data?.success) {
           setUserCount(response.data.count);
         }
