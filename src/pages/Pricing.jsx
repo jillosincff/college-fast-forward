@@ -124,7 +124,7 @@ export default function Pricing() {
     },
     {
       name: 'Early Adopter',
-      badge: '⚡ After Founding spots fill',
+      badge: '⚡ Price increase after 1,000 members',
       price: 9,
       priceLabel: '$9 / month FOREVER',
       description: '',
@@ -144,7 +144,7 @@ export default function Pricing() {
     },
     {
       name: 'Standard',
-      badge: '🐊 After 5,000 members',
+      badge: '🐊 Price increase after 5,000 members',
       price: 19,
       priceLabel: '$19 / month FOREVER',
       description: '',
@@ -248,7 +248,6 @@ export default function Pricing() {
             const Icon = tier.icon;
             const isActive = pricingData?.tierName?.includes(tier.name);
             const isLoading = checkoutLoading === tier.stripePriceId;
-            const isLocked = foundingSpotsLeft > 0 && tier.stripePriceId !== null;
             
             return (
               <Card
@@ -258,8 +257,6 @@ export default function Pricing() {
                     ? 'ring-4 ring-yellow-400 shadow-2xl scale-105'
                     : isActive
                     ? 'ring-2 ring-blue-400 shadow-xl'
-                    : isLocked
-                    ? 'shadow-lg opacity-60'
                     : 'shadow-lg hover:shadow-xl'
                 }`}
               >
@@ -273,14 +270,9 @@ export default function Pricing() {
                     ✨ Your Current Plan
                   </div>
                 )}
-                {isLocked && (
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-400 to-slate-500 text-white text-center py-2 font-bold text-sm">
-                    🔒 Available after founding spots fill
-                  </div>
-                )}
 
-                <CardHeader className={tier.highlighted || isActive || isLocked ? 'pt-12' : 'pt-6'}>
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4 ${isLocked ? 'opacity-50' : ''}`}>
+                <CardHeader className={tier.highlighted || isActive ? 'pt-12' : 'pt-6'}>
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   
@@ -301,11 +293,11 @@ export default function Pricing() {
                     {tier.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         {feature === '—' ? (
-                          <span className={`text-slate-400 ${isLocked ? 'opacity-50' : ''}`}>—</span>
+                          <span className="text-slate-400">—</span>
                         ) : (
                           <>
-                            <Check className={`w-5 h-5 text-green-600 flex-shrink-0 mt-0.5 ${isLocked ? 'opacity-50' : ''}`} />
-                            <span className={`text-slate-700 ${isLocked ? 'opacity-50' : ''}`}>{feature}</span>
+                            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                            <span className="text-slate-700">{feature}</span>
                           </>
                         )}
                       </li>
@@ -315,24 +307,17 @@ export default function Pricing() {
                   {user ? (
                     tier.stripePriceId ? (
                       <Button
-                        onClick={() => !isLocked && handleCheckout(tier.stripePriceId)}
-                        disabled={checkoutLoading !== null || isActive || isLocked}
+                        onClick={() => handleCheckout(tier.stripePriceId)}
+                        disabled={checkoutLoading !== null || isActive}
                         className={`w-full py-6 text-lg font-bold ${
-                          isLocked
-                            ? 'bg-slate-400 cursor-not-allowed'
-                            : tier.highlighted
+                          tier.highlighted
                             ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
                             : isActive
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                             : 'bg-slate-900 hover:bg-slate-800'
                         }`}
                       >
-                        {isLocked ? (
-                          <>
-                            <Lock className="mr-2 w-5 h-5" />
-                            Coming Soon
-                          </>
-                        ) : isLoading ? (
+                        {isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
@@ -356,26 +341,16 @@ export default function Pricing() {
                       </Button>
                     )
                   ) : (
-                    isLocked ? (
-                      <Button
-                        disabled
-                        className="w-full py-6 text-lg font-bold bg-slate-400 cursor-not-allowed"
-                      >
-                        <Lock className="mr-2 w-5 h-5" />
-                        Coming Soon
-                      </Button>
-                    ) : (
-                      <GoogleAuthButton
-                        className={`w-full py-6 text-lg font-bold ${
-                          tier.highlighted
-                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                            : 'bg-slate-900 hover:bg-slate-800'
-                        }`}
-                      >
-                        {tier.cta}
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </GoogleAuthButton>
-                    )
+                    <GoogleAuthButton
+                      className={`w-full py-6 text-lg font-bold ${
+                        tier.highlighted
+                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                          : 'bg-slate-900 hover:bg-slate-800'
+                      }`}
+                    >
+                      {tier.cta}
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </GoogleAuthButton>
                   )}
                 </CardContent>
               </Card>
@@ -386,7 +361,7 @@ export default function Pricing() {
         {/* Urgency Message */}
         <div className="text-center mt-12">
           <p className="text-xl font-bold text-slate-900">
-            Only {foundingSpotsLeft} Founding spots left — price goes up forever when they're gone.
+            Only {foundingSpotsLeft} Founding spots left — price increases forever when they're gone.
           </p>
         </div>
       </div>
