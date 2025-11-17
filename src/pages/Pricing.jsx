@@ -248,6 +248,7 @@ export default function Pricing() {
             const Icon = tier.icon;
             const isActive = pricingData?.tierName?.includes(tier.name);
             const isLoading = checkoutLoading === tier.stripePriceId;
+            const isLocked = foundingSpotsLeft > 0 && tier.stripePriceId !== null;
             
             return (
               <Card
@@ -257,6 +258,8 @@ export default function Pricing() {
                     ? 'ring-4 ring-yellow-400 shadow-2xl scale-105'
                     : isActive
                     ? 'ring-2 ring-blue-400 shadow-xl'
+                    : isLocked
+                    ? 'shadow-lg opacity-50'
                     : 'shadow-lg hover:shadow-xl'
                 }`}
               >
@@ -272,17 +275,17 @@ export default function Pricing() {
                 )}
 
                 <CardHeader className={tier.highlighted || isActive ? 'pt-12' : 'pt-6'}>
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4`}>
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4 ${isLocked ? 'opacity-50' : ''}`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   
-                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
-                  <div className="text-sm text-slate-600 mb-4">
+                  <CardTitle className={`text-2xl font-bold mb-2 ${isLocked ? 'text-slate-400' : ''}`}>{tier.name}</CardTitle>
+                  <div className={`text-sm mb-4 ${isLocked ? 'text-slate-400' : 'text-slate-600'}`}>
                     {tier.badge}
                   </div>
                   
                   <div className="mt-4">
-                    <div className="text-4xl font-extrabold text-slate-900 mb-1">
+                    <div className={`text-4xl font-extrabold mb-1 ${isLocked ? 'text-slate-400' : 'text-slate-900'}`}>
                       {tier.priceLabel}
                     </div>
                   </div>
@@ -293,11 +296,11 @@ export default function Pricing() {
                     {tier.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         {feature === '—' ? (
-                          <span className="text-slate-400">—</span>
+                          <span className={isLocked ? 'text-slate-300' : 'text-slate-400'}>—</span>
                         ) : (
                           <>
-                            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                            <span className="text-slate-700">{feature}</span>
+                            <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isLocked ? 'text-slate-300' : 'text-green-600'}`} />
+                            <span className={isLocked ? 'text-slate-400' : 'text-slate-700'}>{feature}</span>
                           </>
                         )}
                       </li>
@@ -307,17 +310,24 @@ export default function Pricing() {
                   {user ? (
                     tier.stripePriceId ? (
                       <Button
-                        onClick={() => handleCheckout(tier.stripePriceId)}
-                        disabled={checkoutLoading !== null || isActive}
+                        onClick={() => !isLocked && handleCheckout(tier.stripePriceId)}
+                        disabled={checkoutLoading !== null || isActive || isLocked}
                         className={`w-full py-6 text-lg font-bold ${
-                          tier.highlighted
+                          isLocked
+                            ? 'bg-slate-300 cursor-not-allowed text-slate-500'
+                            : tier.highlighted
                             ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
                             : isActive
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                             : 'bg-slate-900 hover:bg-slate-800'
                         }`}
                       >
-                        {isLoading ? (
+                        {isLocked ? (
+                          <>
+                            <Lock className="mr-2 w-5 h-5" />
+                            Coming Soon
+                          </>
+                        ) : isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
@@ -341,16 +351,26 @@ export default function Pricing() {
                       </Button>
                     )
                   ) : (
-                    <GoogleAuthButton
-                      className={`w-full py-6 text-lg font-bold ${
-                        tier.highlighted
-                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                          : 'bg-slate-900 hover:bg-slate-800'
-                      }`}
-                    >
-                      {tier.cta}
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </GoogleAuthButton>
+                    isLocked ? (
+                      <Button
+                        disabled
+                        className="w-full py-6 text-lg font-bold bg-slate-300 cursor-not-allowed text-slate-500"
+                      >
+                        <Lock className="mr-2 w-5 h-5" />
+                        Coming Soon
+                      </Button>
+                    ) : (
+                      <GoogleAuthButton
+                        className={`w-full py-6 text-lg font-bold ${
+                          tier.highlighted
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                            : 'bg-slate-900 hover:bg-slate-800'
+                        }`}
+                      >
+                        {tier.cta}
+                        <ArrowRight className="ml-2 w-5 h-5" />
+                      </GoogleAuthButton>
+                    )
                   )}
                 </CardContent>
               </Card>
