@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -25,10 +24,8 @@ import { perfMonitor, reportWebVitals } from './components/utils/performanceMoni
 import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
 
-// App version for cache-busting - increment this when we need to force refresh for all users
 const APP_VERSION = 'v1.1.7';
 
-// Enhanced cache-busting utility with better error handling
 function handleCacheBusting() {
   try {
     const currentVersion = localStorage.getItem('cff_app_version');
@@ -77,7 +74,6 @@ function PageLoader() {
   );
 }
 
-// LAZY LOAD ALL PAGES
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Connections = React.lazy(() => import('./pages/Connections'));
@@ -103,7 +99,6 @@ const Favorites = React.lazy(() => import('./pages/Favorites'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
 const Terms = React.lazy(() => import('./pages/Terms'));
 const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
-// Removed Companies lazy load as it's no longer used for a top-level page
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
@@ -116,7 +111,6 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Load unread message count - with robust error handling
   useEffect(() => {
     const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
     const adminPages = ['AdminDashboard', 'TestingDashboard', 'AdminSetup'];
@@ -254,7 +248,6 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   };
 
   const handleBellClick = () => {
-    // If the user is on their messages page, we don't need to navigate to it again.
     if (currentPage === 'MyMessages') {
       document.dispatchEvent(new CustomEvent('cff:refresh-messages'));
     } else {
@@ -277,15 +270,17 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
     { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
     { name: 'Talent Spotlight', page: 'TalentSpotlight', icon: Users, roles: ['gator', 'parent'] },
-    // Removed 'Companies' item
     { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] }, // Changed icon from Building2 to Briefcase
+    { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
     { name: 'Roommates', page: 'Roommates', icon: Users, roles: ['gator', 'parent'] },
     { name: 'Pricing', page: 'Pricing', icon: Users, roles: ['gator', 'parent', 'admin'], isPublic: true },
   ], []);
 
   const filteredNavItems = useMemo(() => {
-    if (!user) return [];
+    if (!user) {
+      console.log('🚫 No user - returning empty nav items');
+      return [];
+    }
     
     console.log('🔍 Filtering nav items for user:', { 
       email: user.email, 
@@ -294,7 +289,6 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     });
     
     const filtered = allNavItems.filter(item => {
-      // Check if user has required role through persona OR roles array
       const hasRequiredRole = 
         (user.persona && item.roles.includes(user.persona)) || 
         (user.roles && user.roles.some(role => item.roles.includes(role)));
@@ -359,7 +353,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                             if (item.name === 'Dashboard') {
                                 if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
                                 else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
-                                else targetPageForNav = 'Dashboard'; // Gators go here
+                                else targetPageForNav = 'Dashboard';
                             }
                             const isActive = currentPage === targetPageForNav;
                             return (
@@ -587,21 +581,17 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
 const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
-// Pages that require auth but NOT verification (can be accessed while unverified)
-const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile']; // Removed 'Companies'
+const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile'];
 
-// Helper function to check if user is verified
 const isUserVerified = (user) => {
   if (!user) return false;
   
   const email = user.email?.toLowerCase() || '';
   
-  // @ufl.edu emails are auto-verified as Gators
   if (email.endsWith('@ufl.edu')) {
     return true;
   }
   
-  // Check for pending invite code
   if (typeof window !== 'undefined') {
     const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
     if (pendingInviteCode) {
@@ -609,17 +599,14 @@ const isUserVerified = (user) => {
     }
   }
   
-  // Parents with persona/role are verified
   if (user.persona === 'parent' || user.roles?.includes('parent')) {
     return true;
   }
   
-  // Gators with persona/role are verified
   if (user.persona === 'gator' || user.roles?.includes('gator')) {
     return true;
   }
   
-  // Admins are always verified
   if (user.roles?.includes('admin')) return true;
   
   return false;
@@ -632,7 +619,6 @@ const getPageComponent = (pageName) => {
     case 'AdminDashboard': return AdminDashboard;
     case 'Connections': return Connections;
     case 'TalentSpotlight': return React.lazy(() => import('./pages/TalentSpotlight'));
-    // Removed 'Companies' case
     case 'CompanyProfile': return CompanyProfile;
     case 'Opportunities': return Opportunities;
     case 'PostOpportunity': return PostOpportunity;
@@ -670,7 +656,6 @@ function AppContent() {
   useEffect(() => {
     const handleHashChange = () => {
       let hash = window.location.hash.slice(1).split('?')[0] || 'LandingPage';
-      // Remove leading slash if present (e.g., "/Privacy" becomes "Privacy")
       if (hash.startsWith('/')) {
         hash = hash.slice(1);
       }
@@ -687,7 +672,6 @@ function AppContent() {
       return;
     }
 
-    // ALWAYS allow access to public policy pages and invite pages regardless of auth status
     if (currentPage === 'Privacy' || currentPage === 'Terms' || currentPage === 'CookiePolicy' || currentPage === 'InviteRequired' || currentPage === 'RequestInvite' || currentPage === 'Pricing' || currentPage === 'PublicProfile') {
       setResolvedPage(currentPage);
       return;
@@ -719,7 +703,6 @@ function AppContent() {
         currentPage
       });
 
-      // PRIORITY 1: Redirect authenticated users away from LandingPage
       if (isLandingPage) {
         console.log('🚫 Authenticated user on LandingPage - redirecting');
         
@@ -745,7 +728,6 @@ function AppContent() {
               console.log('➡️ Unknown state - WelcomeRole');
             }
           } else {
-            // Fully onboarded - go to dashboard
             if (user.roles?.includes('admin')) {
               finalPage = 'AdminDashboard';
               console.log('➡️ Admin - AdminDashboard');
@@ -759,19 +741,16 @@ function AppContent() {
           }
         }
       }
-      // PRIORITY 2: Allow browsing auth-only pages
       else if (isAuthOnlyPage) {
         console.log('✅ User browsing auth-only page');
         setResolvedPage(currentPage);
         return;
       }
-      // PRIORITY 3: Allow staying on onboarding pages
       else if (isOnboardingPage) {
         console.log('✅ Allowing access to onboarding page');
         setResolvedPage(currentPage);
         return;
       }
-      // PRIORITY 4: For other pages, check roles and verification
       else {
         const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
         if (hasNoRole) {
@@ -797,7 +776,6 @@ function AppContent() {
           } else {
             console.log('✅ Fully verified and onboarded');
             
-            // Redirect to correct dashboard
             if (currentPage === 'Dashboard') {
               if (user.roles?.includes('admin')) {
                 finalPage = 'AdminDashboard';
@@ -806,7 +784,6 @@ function AppContent() {
               }
             }
 
-            // Admin page protection
             if (isAdminPage && !user.roles?.includes('admin')) {
               console.log('🚫 Non-admin trying to access admin page');
               if (user.persona === 'parent') {
@@ -820,7 +797,6 @@ function AppContent() {
       }
 
     } else {
-      // Unauthenticated users
       console.log('👤 Unauthenticated user accessing:', currentPage);
       
       if (isAuthOnlyPage) {
@@ -918,7 +894,6 @@ export default function Layout() {
         <AuthProvider>
           <AppContent />
           <Toaster />
-          {/* Error Logger - only in development or for admins */}
           {(window.location.hostname.includes('localhost') || 
             window.location.hostname.includes('preview')) && (
             <ErrorLogger />
