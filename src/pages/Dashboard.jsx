@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -254,24 +255,26 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
               <CardContent className="pt-6 pb-6 relative z-10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-7 h-7" />
-                      <h3 className="text-2xl font-bold">⭐ Get Featured in Talent Spotlight</h3>
+                      <Star className="w-7 h-7 text-slate-900 drop-shadow-md" />
+                      <h3 className="text-2xl font-bold text-slate-900" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        ⭐ Get Featured in Talent Spotlight
+                      </h3>
                     </div>
-                    <p className="text-white/95 text-lg mb-2">
+                    <p className="text-slate-900 font-medium text-lg mb-2" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                       70,000+ alumni & parents are looking to hire. Get discovered for 30 days!
                     </p>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
+                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 font-medium">
                         <Sparkles className="w-4 h-4" />
                         Profile + Skills
                       </span>
-                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full font-medium">
                         💼 Projects
                       </span>
-                      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full font-medium">
                         🎥 Video Intro
                       </span>
                     </div>
@@ -279,7 +282,7 @@ export default function Dashboard() {
                   <Button
                     onClick={() => setShowSpotlightModal(true)}
                     size="lg"
-                    className="bg-white text-orange-600 hover:bg-slate-100 font-bold px-8 py-6 text-lg shadow-xl"
+                    className="bg-slate-900 text-white hover:bg-slate-800 font-bold px-8 py-6 text-lg shadow-xl"
                   >
                     <Star className="w-5 h-5 mr-2" />
                     Set Up Spotlight
