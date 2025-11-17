@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -139,7 +140,7 @@ export default function Pricing() {
       highlighted: false,
       gradient: 'from-purple-400 to-blue-500',
       icon: Zap,
-      stripePriceId: 'price_test_example_9'
+      stripePriceId: 'price_1SUJ2g873TV7WMcTBYvmzGYU'
     },
     {
       name: 'Standard',
