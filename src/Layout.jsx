@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -288,9 +289,14 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
       roles: user.roles 
     });
     
+    // Determine effective persona - @ufl.edu users are always gators
+    const effectivePersona = user.email?.toLowerCase().endsWith('@ufl.edu') 
+      ? 'gator' 
+      : user.persona;
+    
     const filtered = allNavItems.filter(item => {
       const hasRequiredRole = 
-        (user.persona && item.roles.includes(user.persona)) || 
+        (effectivePersona && item.roles.includes(effectivePersona)) || 
         (user.roles && user.roles.some(role => item.roles.includes(role)));
       
       return hasRequiredRole;
