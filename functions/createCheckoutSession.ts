@@ -28,6 +28,21 @@ Deno.serve(async (req) => {
     // Create or get Stripe customer
     let customerId = user.stripe_customer_id;
     
+    if (customerId) {
+      // Verify customer exists in Stripe
+      try {
+        await stripe.customers.retrieve(customerId);
+        console.log('Using existing customer:', customerId);
+      } catch (error) {
+        if (error.code === 'resource_missing') {
+          console.log('Stored customer ID invalid, creating new customer');
+          customerId = null;
+        } else {
+          throw error;
+        }
+      }
+    }
+    
     if (!customerId) {
       console.log('Creating new Stripe customer for:', user.email);
       const customer = await stripe.customers.create({
@@ -45,8 +60,6 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.User.update(user.id, {
         stripe_customer_id: customerId
       });
-    } else {
-      console.log('Using existing customer:', customerId);
     }
 
     // Create checkout session
