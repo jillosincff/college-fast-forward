@@ -285,18 +285,25 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   ], []);
 
   const filteredNavItems = useMemo(() => {
-    if (!user || !user.persona) return [];
-    return allNavItems.filter(item => {
-      const hasRequiredRole = item.roles.includes(user.persona) || (user.roles && user.roles.some(role => item.roles.includes(role)));
-
-      // The original condition for Dashboard and onboarding was:
-      // if (item.name === 'Dashboard' && !user.onboarding_completed && user.persona !== 'admin') {
-      //   return false;
-      // }
-      // This condition has been removed as per the change request.
-
+    if (!user) return [];
+    
+    console.log('🔍 Filtering nav items for user:', { 
+      email: user.email, 
+      persona: user.persona, 
+      roles: user.roles 
+    });
+    
+    const filtered = allNavItems.filter(item => {
+      // Check if user has required role through persona OR roles array
+      const hasRequiredRole = 
+        (user.persona && item.roles.includes(user.persona)) || 
+        (user.roles && user.roles.some(role => item.roles.includes(role)));
+      
       return hasRequiredRole;
     });
+    
+    console.log('✅ Filtered nav items:', filtered.length, filtered.map(i => i.name));
+    return filtered;
   }, [user, allNavItems]);
 
   if (!user) {
