@@ -26,7 +26,7 @@ const AnimatedNetworkHero = ({
 }) => {
   const { user, logout } = useAuth();
   const [announceMessage, setAnnounceMessage] = useState('');
-  const [userCount, setUserCount] = useState(0);
+  const [userCount, setUserCount] = useState(150);
   const [internalShowAuthInstructions, setInternalShowAuthInstructions] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -36,11 +36,12 @@ const AnimatedNetworkHero = ({
   useEffect(() => {
     const fetchUserCount = async () => {
       try {
-        const users = await base44.asServiceRole.entities.User.list();
-        setUserCount(users.length);
+        const response = await base44.functions.invoke('getUserCount');
+        if (response.data?.success) {
+          setUserCount(response.data.count);
+        }
       } catch (error) {
         console.error('Failed to fetch user count:', error);
-        setUserCount(150); // Fallback value
       }
     };
 
