@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -17,7 +16,7 @@ export default function Pricing() {
   const { toast } = useToast();
   const [pricingData, setPricingData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [foundingSpotsLeft, setFoundingSpotsLeft] = useState(965);
 
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function Pricing() {
       return;
     }
 
-    setCheckoutLoading(true);
+    setCheckoutLoading(priceId);
     try {
       const appHost = window.location.origin;
       const { data } = await createCheckoutSession({
@@ -83,7 +82,7 @@ export default function Pricing() {
         description: error.message || "Please try again or contact support",
         variant: "destructive"
       });
-      setCheckoutLoading(false);
+      setCheckoutLoading(null);
     }
   };
 
@@ -249,6 +248,7 @@ export default function Pricing() {
           {pricingTiers.map((tier) => {
             const Icon = tier.icon;
             const isActive = pricingData?.tierName?.includes(tier.name);
+            const isLoading = checkoutLoading === tier.stripePriceId;
             
             return (
               <Card
@@ -306,7 +306,7 @@ export default function Pricing() {
                     tier.stripePriceId ? (
                       <Button
                         onClick={() => handleCheckout(tier.stripePriceId)}
-                        disabled={checkoutLoading || isActive}
+                        disabled={checkoutLoading !== null || isActive}
                         className={`w-full py-6 text-lg font-bold ${
                           tier.highlighted
                             ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
@@ -315,7 +315,7 @@ export default function Pricing() {
                             : 'bg-slate-900 hover:bg-slate-800'
                         }`}
                       >
-                        {checkoutLoading ? (
+                        {isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
