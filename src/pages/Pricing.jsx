@@ -161,7 +161,7 @@ export default function Pricing() {
       highlighted: false,
       gradient: 'from-blue-400 to-indigo-500',
       icon: TrendingUp,
-      stripePriceId: 'price_1SUJ2g873TV7WMcTBYvmzGYU'
+      stripePriceId: 'price_1SUJ7I873TV7WMcT1plkAZpz'
     }
   ];
 
