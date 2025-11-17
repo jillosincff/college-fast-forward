@@ -883,6 +883,17 @@ export default function Layout() {
     console.log(`🚀 College Fast Forward ${APP_VERSION} initialized`);
     perfMonitor.start('app_init');
     perfMonitor.end('app_init');
+    
+    // Set favicon
+    const setFavicon = () => {
+      const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    };
+    
+    setFavicon();
   }, []);
 
   useEffect(() => {
