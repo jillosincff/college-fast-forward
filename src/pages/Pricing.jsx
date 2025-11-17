@@ -71,7 +71,12 @@ export default function Pricing() {
       });
 
       if (data.url) {
-        window.location.href = data.url;
+        // Break out of iframe if in one (for Base44 preview)
+        if (window.top !== window.self) {
+          window.top.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
       } else {
         throw new Error('No checkout URL returned');
       }
