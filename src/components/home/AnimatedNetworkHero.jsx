@@ -38,23 +38,17 @@ const AnimatedNetworkHero = ({
     const fetchUserCount = async () => {
       try {
         setIsLoadingCount(true);
-        const response = await fetch(`${window.location.origin}/api/functions/getUserCount`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({})
-        });
-        const data = await response.json();
-        if (data.success) {
-          console.log('✅ User count fetched:', data.count);
-          setUserCount(data.count);
-        } else {
-          console.error('❌ Failed to fetch user count:', data);
-          setUserCount(150);
-        }
+        console.log('🔍 Fetching user count from base44...');
+        
+        // Fetch all users using the service role
+        const users = await base44.asServiceRole.entities.User.list();
+        const count = users?.length || 0;
+        
+        console.log('✅ User count fetched successfully:', count);
+        setUserCount(count);
       } catch (error) {
         console.error('❌ Error fetching user count:', error);
+        // Fallback to 150
         setUserCount(150);
       } finally {
         setIsLoadingCount(false);
@@ -65,6 +59,8 @@ const AnimatedNetworkHero = ({
   }, []);
 
   const spotsLeft = userCount !== null ? Math.max(0, 1000 - userCount) : 850;
+
+  console.log('📊 Display values:', { userCount, spotsLeft, isLoadingCount });
 
   const trackEvent = (eventName, properties = {}) => {
     try {
@@ -405,7 +401,7 @@ const AnimatedNetworkHero = ({
         <div className="glow-bottom" />
         
         <div className="hero-content">
-          {!user && spotsLeft > 0 && (
+          {!user && !isLoadingCount && spotsLeft > 0 && (
             <div className="mb-6 flex justify-center">
               <Badge className="countdown-badge bg-[#FA4616] text-white border-2 border-white/40 px-4 py-2 text-sm md:text-base font-bold shadow-xl">
                 🔥 Free for first 1,000 Gators — {spotsLeft} spots left
