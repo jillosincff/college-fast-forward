@@ -105,38 +105,6 @@ export default function LandingPage() {
       `}</style>
 
       <div className="min-h-screen bg-white">
-        {/* Context-Aware Top Right Buttons */}
-        <div className="fixed top-6 right-6 z-[100] flex gap-2">
-          {!user ? (
-            <>
-              <Button
-                variant="outline"
-                onClick={handleRequestInvite}
-                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Request an Invite
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleTopRightJoinClick}
-                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
-              >
-                Join / Sign In
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outline"
-              onClick={handleInviteFriend}
-              className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
-            >
-              <Send className="w-4 h-4 mr-2" />
-              Invite a Friend
-            </Button>
-          )}
-        </div>
-
         {selectedFeature && (
            <FeaturePreviewModal
               isOpen={showPreviewModal}
@@ -162,6 +130,10 @@ export default function LandingPage() {
           showAuthInstructions={showAuthInstructions}
           setShowAuthInstructions={setShowAuthInstructions}
           onProceedToAuth={handleProceedToAuth}
+          onRequestInvite={handleRequestInvite}
+          onTopRightJoinClick={handleTopRightJoinClick}
+          onInviteFriend={handleInviteFriend}
+          showTopButtons={true}
         />
         
         <Suspense fallback={<PageLoader />}>
