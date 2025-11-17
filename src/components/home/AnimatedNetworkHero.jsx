@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Typewriter } from '@/components/ui/typewriter';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
-import { LogOut, Info } from 'lucide-react';
+import { LogOut, Info, UserPlus, Send } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import {
   Dialog,
@@ -15,7 +15,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, onProceedToAuth }) => {
+const AnimatedNetworkHero = ({ 
+  showAuthInstructions, 
+  setShowAuthInstructions, 
+  onProceedToAuth,
+  onRequestInvite,
+  onTopRightJoinClick,
+  onInviteFriend,
+  showTopButtons = true
+}) => {
   const { user, logout } = useAuth();
   const [announceMessage, setAnnounceMessage] = useState('');
   const [userCount, setUserCount] = useState(32);
@@ -146,6 +154,7 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
         color: white; 
         position: relative; 
         padding: 2rem; 
+        padding-top: 6rem;
         overflow: hidden; 
       }
       
@@ -224,6 +233,7 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
         .animated-hero {
           min-height: 100vh;
           padding: 1.5rem;
+          padding-top: 5rem;
         }
       }
       
@@ -259,6 +269,40 @@ const AnimatedNetworkHero = ({ showAuthInstructions, setShowAuthInstructions, on
       <a href="#main" className="skip-link">
         Skip to content
       </a>
+      
+      {/* Top Right Buttons */}
+      {showTopButtons && (
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          {!user ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={onRequestInvite}
+                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Request an Invite
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onTopRightJoinClick}
+                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
+              >
+                Join / Sign In
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={onInviteFriend}
+              className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Invite a Friend
+            </Button>
+          )}
+        </div>
+      )}
       
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md z-[9999]">
