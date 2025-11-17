@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
+import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles, CreditCard } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthContext';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
 import { getPricingTier } from '@/functions/getPricingTier';
 import { getFoundingSpotsLeft } from '@/functions/getFoundingSpotsLeft';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function Pricing() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [pricingData, setPricingData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [foundingSpotsLeft, setFoundingSpotsLeft] = useState(965);
 
   useEffect(() => {
@@ -47,6 +51,41 @@ export default function Pricing() {
     loadData();
   }, [user]);
 
+  const handleCheckout = async (priceId) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to continue with payment",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      const appHost = window.location.origin;
+      const { data } = await createCheckoutSession({
+        priceId,
+        successUrl: `${appHost}/#PaymentSuccess?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${appHost}/#Pricing`
+      });
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout failed",
+        description: error.message || "Please try again or contact support",
+        variant: "destructive"
+      });
+      setCheckoutLoading(false);
+    }
+  };
+
   const handleCTAClick = (role) => {
     if (user) {
       if (role === 'student') {
@@ -78,7 +117,8 @@ export default function Pricing() {
       highlighted: foundingSpotsLeft > 0,
       gradient: 'from-yellow-400 to-orange-500',
       icon: Crown,
-      spotsLeft: foundingSpotsLeft
+      spotsLeft: foundingSpotsLeft,
+      stripePriceId: null
     },
     {
       name: 'Early Adopter',
@@ -94,11 +134,12 @@ export default function Pricing() {
         'Standard support',
         'Earn points to unlock free membership'
       ],
-      cta: user ? 'Go to Dashboard' : 'Join as Early Adopter',
+      cta: 'Subscribe Now',
       ctaRole: 'parent',
       highlighted: false,
       gradient: 'from-purple-400 to-blue-500',
-      icon: Zap
+      icon: Zap,
+      stripePriceId: 'price_test_example_9'
     },
     {
       name: 'Standard',
@@ -114,11 +155,12 @@ export default function Pricing() {
         'Standard support',
         'Earn points to unlock free membership'
       ],
-      cta: user ? 'Go to Dashboard' : 'Get Started',
+      cta: 'Subscribe Now',
       ctaRole: 'parent',
       highlighted: false,
       gradient: 'from-blue-400 to-indigo-500',
-      icon: TrendingUp
+      icon: TrendingUp,
+      stripePriceId: 'price_test_example_19'
     }
   ];
 
@@ -260,18 +302,40 @@ export default function Pricing() {
                   </ul>
 
                   {user ? (
-                    <Button
-                      onClick={() => handleCTAClick(tier.ctaRole)}
-                      className={`w-full py-6 text-lg font-bold ${
-                        tier.highlighted
-                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                          : isActive
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-500'
-                          : 'bg-slate-900 hover:bg-slate-800'
-                      }`}
-                    >
-                      {tier.cta}
-                    </Button>
+                    tier.stripePriceId ? (
+                      <Button
+                        onClick={() => handleCheckout(tier.stripePriceId)}
+                        disabled={checkoutLoading || isActive}
+                        className={`w-full py-6 text-lg font-bold ${
+                          tier.highlighted
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                            : isActive
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500'
+                            : 'bg-slate-900 hover:bg-slate-800'
+                        }`}
+                      >
+                        {checkoutLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Processing...
+                          </>
+                        ) : isActive ? (
+                          'Current Plan'
+                        ) : (
+                          <>
+                            <CreditCard className="mr-2 w-5 h-5" />
+                            {tier.cta}
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleCTAClick(tier.ctaRole)}
+                        className="w-full py-6 text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                      >
+                        {tier.cta}
+                      </Button>
+                    )
                   ) : (
                     <GoogleAuthButton
                       className={`w-full py-6 text-lg font-bold ${
