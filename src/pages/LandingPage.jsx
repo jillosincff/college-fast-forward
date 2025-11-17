@@ -1,6 +1,6 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
-import { UserPlus, Send } from "lucide-react";
+import { ArrowRight, UserPlus, Send } from "lucide-react";
 import { useAuth } from '@/components/auth/AuthContext';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
@@ -106,13 +106,13 @@ export default function LandingPage() {
 
       <div className="min-h-screen bg-white">
         {/* Context-Aware Top Right Buttons */}
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <div className="fixed top-6 right-6 z-[100] flex gap-2">
           {!user ? (
             <>
               <Button
                 variant="outline"
                 onClick={handleRequestInvite}
-                className="bg-white/80 backdrop-blur-sm ring-1 ring-slate-900/10 text-slate-700 hover:bg-white hover:text-slate-900"
+                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Request an Invite
@@ -120,7 +120,7 @@ export default function LandingPage() {
               <Button
                 variant="outline"
                 onClick={handleTopRightJoinClick}
-                className="bg-white/80 backdrop-blur-sm ring-1 ring-slate-900/10 text-slate-700 hover:bg-white hover:text-slate-900"
+                className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
               >
                 Join / Sign In
               </Button>
@@ -129,7 +129,7 @@ export default function LandingPage() {
             <Button
               variant="outline"
               onClick={handleInviteFriend}
-              className="bg-white/80 backdrop-blur-sm ring-1 ring-slate-900/10 text-slate-700 hover:bg-white hover:text-slate-900"
+              className="bg-white/95 backdrop-blur-sm shadow-lg border-2 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-300"
             >
               <Send className="w-4 h-4 mr-2" />
               Invite a Friend
