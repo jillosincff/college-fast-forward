@@ -71,7 +71,6 @@ export default function Pricing() {
       });
 
       if (data.url) {
-        // Break out of iframe if in one (for Base44 preview)
         if (window.top !== window.self) {
           window.top.location.href = data.url;
         } else {
@@ -103,21 +102,19 @@ export default function Pricing() {
 
   const pricingTiers = [
     {
-      name: 'Founding Gator',
-      badge: '👑 Limited Spots',
+      name: 'Founding Gator Parent',
+      badge: '👑 Limited Spots – 1,000 total',
       price: 0,
-      priceLabel: 'Free Forever',
-      description: 'First 1,000 members get lifetime free access',
+      priceLabel: '$0 / month FOREVER',
+      description: '',
       features: [
         'Full platform access',
         'Connect with all Gators',
-        'Post unlimited opportunities',
-        'Network with parents & alumni',
-        'Priority support',
-        'Founding member badge',
-        'Exclusive founder community'
+        'Priority intros',
+        'Founding badge',
+        'Exclusive founder perks'
       ],
-      cta: user ? 'Go to Dashboard' : 'Join Now - Free Forever',
+      cta: user ? 'Go to Dashboard' : 'Lock in Founding Price',
       ctaRole: 'parent',
       highlighted: foundingSpotsLeft > 0,
       gradient: 'from-yellow-400 to-orange-500',
@@ -127,19 +124,18 @@ export default function Pricing() {
     },
     {
       name: 'Early Adopter',
-      badge: '⚡ Best Value',
+      badge: '⚡ After Founding spots fill',
       price: 9,
-      priceLabel: '$9/month',
-      description: 'For members 1,001-4,999',
+      priceLabel: '$9 / month FOREVER',
+      description: '',
       features: [
         'Full platform access',
         'Connect with all Gators',
-        'Post unlimited opportunities',
-        'Network with parents & alumni',
-        'Standard support',
-        'Earn points to unlock free membership'
+        'Priority intros',
+        'Early badge',
+        '—'
       ],
-      cta: 'Subscribe Now',
+      cta: 'Join at $9/mo',
       ctaRole: 'parent',
       highlighted: false,
       gradient: 'from-purple-400 to-blue-500',
@@ -148,19 +144,18 @@ export default function Pricing() {
     },
     {
       name: 'Standard',
-      badge: '🐊 Join Anytime',
+      badge: '🐊 After 5,000 members',
       price: 19,
-      priceLabel: '$19/month',
-      description: 'For members 5,000+',
+      priceLabel: '$19 / month FOREVER',
+      description: '',
       features: [
         'Full platform access',
         'Connect with all Gators',
-        'Post unlimited opportunities',
-        'Network with parents & alumni',
-        'Standard support',
-        'Earn points to unlock free membership'
+        'Priority intros',
+        'Standard',
+        '—'
       ],
-      cta: 'Subscribe Now',
+      cta: 'Join at $19/mo',
       ctaRole: 'parent',
       highlighted: false,
       gradient: 'from-blue-400 to-indigo-500',
@@ -182,7 +177,7 @@ export default function Pricing() {
               Simple, Transparent Pricing
             </h1>
             <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mx-auto`}>
-              Students FREE forever · Parents join early for best pricing
+              Students FREE forever · Parents lock in the lowest price by joining early
             </p>
             
             <div className="flex flex-wrap justify-center gap-6 pt-6">
@@ -196,7 +191,7 @@ export default function Pricing() {
               </div>
               <div className="flex items-center gap-2 text-white">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>Earn free membership</span>
+                <span>Earn free lifetime membership</span>
               </div>
             </div>
           </div>
@@ -212,7 +207,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold mb-2">🎓 UF Students</div>
                 <h3 className="text-3xl font-extrabold mb-2">100% FREE Forever</h3>
                 <p className="text-lg text-white/90">
-                  No credit card. No hidden fees. Just focus on landing your dream job!
+                  No credit card. No hidden fees. Just focus on landing your dream job.
                 </p>
               </div>
               <div className="flex-shrink-0">
@@ -243,10 +238,9 @@ export default function Pricing() {
       {/* Pricing Tiers */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-4xl font-bold text-center text-slate-900 mb-4">
-          👨‍👩‍👧 Parent Pricing
+          Parent Pricing – The earlier you join, the lower your price. Forever.
         </h2>
         <p className="text-center text-slate-600 mb-12 text-lg">
-          The earlier you join, the better the price. First 1,000 members get FREE forever!
         </p>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -271,7 +265,7 @@ export default function Pricing() {
               >
                 {tier.highlighted && (
                   <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-center py-2 font-bold">
-                    ⏰ {tier.spotsLeft} spots left!
+                    ⏰ Only {tier.spotsLeft} spots left!
                   </div>
                 )}
                 {isActive && (
@@ -290,18 +284,15 @@ export default function Pricing() {
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   
-                  <div className="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold mb-2">
+                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
+                  <div className="text-sm text-slate-600 mb-4">
                     {tier.badge}
                   </div>
                   
-                  <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
-                  <CardDescription className="text-base">{tier.description}</CardDescription>
-                  
                   <div className="mt-4">
-                    <div className="text-5xl font-extrabold text-slate-900">
-                      {tier.price === 0 ? 'FREE' : `$${tier.price}`}
+                    <div className="text-4xl font-extrabold text-slate-900 mb-1">
+                      {tier.priceLabel}
                     </div>
-                    <div className="text-slate-600">{tier.price > 0 && '/month'}</div>
                   </div>
                 </CardHeader>
 
@@ -309,8 +300,14 @@ export default function Pricing() {
                   <ul className="space-y-3">
                     {tier.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <Check className={`w-5 h-5 text-green-600 flex-shrink-0 mt-0.5 ${isLocked ? 'opacity-50' : ''}`} />
-                        <span className={`text-slate-700 ${isLocked ? 'opacity-50' : ''}`}>{feature}</span>
+                        {feature === '—' ? (
+                          <span className={`text-slate-400 ${isLocked ? 'opacity-50' : ''}`}>—</span>
+                        ) : (
+                          <>
+                            <Check className={`w-5 h-5 text-green-600 flex-shrink-0 mt-0.5 ${isLocked ? 'opacity-50' : ''}`} />
+                            <span className={`text-slate-700 ${isLocked ? 'opacity-50' : ''}`}>{feature}</span>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -344,8 +341,8 @@ export default function Pricing() {
                           'Current Plan'
                         ) : (
                           <>
-                            <CreditCard className="mr-2 w-5 h-5" />
                             {tier.cta}
+                            <ArrowRight className="ml-2 w-5 h-5" />
                           </>
                         )}
                       </Button>
@@ -355,6 +352,7 @@ export default function Pricing() {
                         className="w-full py-6 text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
                       >
                         {tier.cta}
+                        <ArrowRight className="ml-2 w-5 h-5" />
                       </Button>
                     )
                   ) : (
@@ -375,6 +373,7 @@ export default function Pricing() {
                         }`}
                       >
                         {tier.cta}
+                        <ArrowRight className="ml-2 w-5 h-5" />
                       </GoogleAuthButton>
                     )
                   )}
@@ -382,6 +381,13 @@ export default function Pricing() {
               </Card>
             );
           })}
+        </div>
+
+        {/* Urgency Message */}
+        <div className="text-center mt-12">
+          <p className="text-xl font-bold text-slate-900">
+            Only {foundingSpotsLeft} Founding spots left — price goes up forever when they're gone.
+          </p>
         </div>
       </div>
 
@@ -398,20 +404,12 @@ export default function Pricing() {
                   🎉 Earn Free Lifetime Membership!
                 </h3>
                 <p className="text-slate-700 text-lg mb-4">
-                  <strong>Parents:</strong> Invite 20 people to join and get <strong>FREE membership for life</strong> - no matter which tier you're in!
+                  Invite 20 people = 2,000 points = FREE forever (no matter the price later)
                 </p>
                 <ul className="space-y-2 text-slate-700">
                   <li className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-green-600" />
                     <span>100 points per successful invite</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-green-600" />
-                    <span>2,000 points = Free lifetime access</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-green-600" />
-                    <span>Help build the Gator network & save money!</span>
                   </li>
                 </ul>
               </div>
@@ -420,22 +418,23 @@ export default function Pricing() {
         </Card>
       </div>
 
+      {/* Final CTA */}
       {!user && foundingSpotsLeft > 0 && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white border-0 shadow-2xl">
             <CardContent className="p-12 text-center">
               <Crown className="w-16 h-16 mx-auto mb-4 text-white" />
               <h3 className="text-4xl font-extrabold mb-4">
-                🚨 Only {foundingSpotsLeft} Founding Member Spots Left!
+                Parents — this is the best deal you'll ever get.
               </h3>
               <p className="text-xl mb-8 text-white/90">
-                Join now and get FREE lifetime access. Once we hit 1,000 members, pricing starts at $9/month.
+                Join now. Secure your price. Help your Gator.
               </p>
               <GoogleAuthButton
                 size="lg"
                 className="bg-white text-orange-600 hover:bg-slate-100 font-bold px-12 py-8 text-2xl shadow-2xl"
               >
-                Claim Your Founding Member Spot
+                Lock in Founding Price
                 <ArrowRight className="ml-3 w-6 h-6" />
               </GoogleAuthButton>
             </CardContent>
@@ -445,7 +444,7 @@ export default function Pricing() {
 
       <div className="text-center pb-12 text-slate-500">
         <p className="text-sm">
-          Questions? We're here to help. Go Gators! 🐊🧡💙
+          Questions? We're here to help. Go Gators! 🐊
         </p>
       </div>
     </div>
