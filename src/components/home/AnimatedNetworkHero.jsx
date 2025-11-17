@@ -7,7 +7,6 @@ import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
 import { LogOut, Info, UserPlus, Send } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { getUserCount } from '@/functions/getUserCount';
 import {
   Dialog,
   DialogContent,
@@ -27,7 +26,8 @@ const AnimatedNetworkHero = ({
 }) => {
   const { user, logout } = useAuth();
   const [announceMessage, setAnnounceMessage] = useState('');
-  const [userCount, setUserCount] = useState(150);
+  const [userCount, setUserCount] = useState(null);
+  const [isLoadingCount, setIsLoadingCount] = useState(true);
   const [internalShowAuthInstructions, setInternalShowAuthInstructions] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -37,19 +37,34 @@ const AnimatedNetworkHero = ({
   useEffect(() => {
     const fetchUserCount = async () => {
       try {
-        const response = await getUserCount({});
-        if (response.data?.success) {
-          setUserCount(response.data.count);
+        setIsLoadingCount(true);
+        const response = await fetch(`${window.location.origin}/api/functions/getUserCount`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({})
+        });
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ User count fetched:', data.count);
+          setUserCount(data.count);
+        } else {
+          console.error('❌ Failed to fetch user count:', data);
+          setUserCount(150);
         }
       } catch (error) {
-        console.error('Failed to fetch user count:', error);
+        console.error('❌ Error fetching user count:', error);
+        setUserCount(150);
+      } finally {
+        setIsLoadingCount(false);
       }
     };
 
     fetchUserCount();
   }, []);
 
-  const spotsLeft = Math.max(0, 1000 - userCount);
+  const spotsLeft = userCount !== null ? Math.max(0, 1000 - userCount) : 850;
 
   const trackEvent = (eventName, properties = {}) => {
     try {
