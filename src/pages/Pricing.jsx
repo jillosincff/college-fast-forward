@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles, CreditCard } from 'lucide-react';
+import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles, CreditCard, Lock } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthContext';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
@@ -254,6 +254,7 @@ export default function Pricing() {
             const Icon = tier.icon;
             const isActive = pricingData?.tierName?.includes(tier.name);
             const isLoading = checkoutLoading === tier.stripePriceId;
+            const isLocked = foundingSpotsLeft > 0 && tier.stripePriceId !== null;
             
             return (
               <Card
@@ -263,6 +264,8 @@ export default function Pricing() {
                     ? 'ring-4 ring-yellow-400 shadow-2xl scale-105'
                     : isActive
                     ? 'ring-2 ring-blue-400 shadow-xl'
+                    : isLocked
+                    ? 'shadow-lg opacity-60'
                     : 'shadow-lg hover:shadow-xl'
                 }`}
               >
@@ -276,9 +279,14 @@ export default function Pricing() {
                     ✨ Your Current Plan
                   </div>
                 )}
+                {isLocked && (
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-400 to-slate-500 text-white text-center py-2 font-bold text-sm">
+                    🔒 Available after founding spots fill
+                  </div>
+                )}
 
-                <CardHeader className={tier.highlighted || isActive ? 'pt-12' : 'pt-6'}>
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4`}>
+                <CardHeader className={tier.highlighted || isActive || isLocked ? 'pt-12' : 'pt-6'}>
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4 ${isLocked ? 'opacity-50' : ''}`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   
@@ -301,8 +309,8 @@ export default function Pricing() {
                   <ul className="space-y-3">
                     {tier.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700">{feature}</span>
+                        <Check className={`w-5 h-5 text-green-600 flex-shrink-0 mt-0.5 ${isLocked ? 'opacity-50' : ''}`} />
+                        <span className={`text-slate-700 ${isLocked ? 'opacity-50' : ''}`}>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -310,17 +318,24 @@ export default function Pricing() {
                   {user ? (
                     tier.stripePriceId ? (
                       <Button
-                        onClick={() => handleCheckout(tier.stripePriceId)}
-                        disabled={checkoutLoading !== null || isActive}
+                        onClick={() => !isLocked && handleCheckout(tier.stripePriceId)}
+                        disabled={checkoutLoading !== null || isActive || isLocked}
                         className={`w-full py-6 text-lg font-bold ${
-                          tier.highlighted
+                          isLocked
+                            ? 'bg-slate-400 cursor-not-allowed'
+                            : tier.highlighted
                             ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
                             : isActive
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                             : 'bg-slate-900 hover:bg-slate-800'
                         }`}
                       >
-                        {isLoading ? (
+                        {isLocked ? (
+                          <>
+                            <Lock className="mr-2 w-5 h-5" />
+                            Coming Soon
+                          </>
+                        ) : isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
@@ -343,15 +358,25 @@ export default function Pricing() {
                       </Button>
                     )
                   ) : (
-                    <GoogleAuthButton
-                      className={`w-full py-6 text-lg font-bold ${
-                        tier.highlighted
-                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                          : 'bg-slate-900 hover:bg-slate-800'
-                      }`}
-                    >
-                      {tier.cta}
-                    </GoogleAuthButton>
+                    isLocked ? (
+                      <Button
+                        disabled
+                        className="w-full py-6 text-lg font-bold bg-slate-400 cursor-not-allowed"
+                      >
+                        <Lock className="mr-2 w-5 h-5" />
+                        Coming Soon
+                      </Button>
+                    ) : (
+                      <GoogleAuthButton
+                        className={`w-full py-6 text-lg font-bold ${
+                          tier.highlighted
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                            : 'bg-slate-900 hover:bg-slate-800'
+                        }`}
+                      >
+                        {tier.cta}
+                      </GoogleAuthButton>
+                    )
                   )}
                 </CardContent>
               </Card>
