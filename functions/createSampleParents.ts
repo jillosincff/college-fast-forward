@@ -118,7 +118,6 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    // Only admins can create sample data
     if (!user || !user.roles?.includes('admin')) {
       return Response.json({ 
         error: 'Unauthorized. Admin access required.' 
@@ -130,24 +129,35 @@ Deno.serve(async (req) => {
 
     for (const parentData of sampleParents) {
       try {
-        // Check if user already exists
-        const existingUsers = await base44.asServiceRole.entities.User.filter({
-          email: parentData.email
-        });
+        const allUsers = await base44.asServiceRole.entities.User.list();
+        const existingUser = allUsers.find(u => u.email === parentData.email);
 
-        if (existingUsers.length > 0) {
-          // Update existing user
+        if (existingUser) {
           await base44.asServiceRole.entities.User.update(
-            existingUsers[0].id,
+            existingUser.id,
             parentData
           );
           created.push({ email: parentData.email, status: 'updated' });
         } else {
-          // Create new user
-          const newUser = await base44.asServiceRole.entities.User.create(parentData);
-          created.push({ email: parentData.email, status: 'created', id: newUser.id });
+          const randomPassword = `Demo${Math.random().toString(36).slice(2, 10)}!`;
+          
+          const newUser = await base44.asServiceRole.auth.register({
+            email: parentData.email,
+            password: randomPassword,
+            full_name: parentData.full_name
+          });
+
+          if (newUser?.id) {
+            await base44.asServiceRole.entities.User.update(newUser.id, {
+              ...parentData,
+              email: parentData.email,
+              full_name: parentData.full_name
+            });
+            created.push({ email: parentData.email, status: 'created', id: newUser.id });
+          }
         }
       } catch (error) {
+        console.error(`Error with ${parentData.email}:`, error);
         errors.push({ 
           email: parentData.email, 
           error: error.message 
@@ -165,7 +175,8 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error creating sample parents:', error);
     return Response.json({ 
-      error: error.message 
+      error: error.message,
+      stack: error.stack
     }, { status: 500 });
   }
 });
