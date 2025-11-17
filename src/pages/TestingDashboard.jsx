@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -6,18 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  TestTube, 
-  Play, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  TestTube,
+  Play,
+  CheckCircle2,
+  AlertCircle,
   Loader2,
   Users,
   UserPlus,
   Copy,
   ExternalLink,
   Database,
-  Ticket
+  Ticket,
+  ListChecks
 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
@@ -32,17 +34,46 @@ export default function TestingDashboard() {
   const [testUserInfo, setTestUserInfo] = useState(null);
   const [creatingSampleParents, setCreatingSampleParents] = useState(false);
   const [sampleParentsResult, setSampleParentsResult] = useState(null);
-  
+
   // New state for custom invite code generation
   const [customCode, setCustomCode] = useState('');
   const [generatingCustomCode, setGeneratingCustomCode] = useState(false);
   const [generatedCodeInfo, setGeneratedCodeInfo] = useState(null);
+
+  // New state for invite codes history
+  const [inviteCodes, setInviteCodes] = useState([]);
+  const [loadingCodes, setLoadingCodes] = useState(false);
 
   useEffect(() => {
     if (!user || !user.roles?.includes('admin')) {
       navigate('Dashboard');
     }
   }, [user]);
+
+  // New useEffect to load invite codes when the component mounts (if user is admin)
+  useEffect(() => {
+    if (user?.roles?.includes('admin')) {
+      loadInviteCodes();
+    }
+  }, [user]);
+
+  // New function to load invite codes
+  const loadInviteCodes = async () => {
+    setLoadingCodes(true);
+    try {
+      const codes = await base44.entities.InviteCode.list('-created_date', 100);
+      setInviteCodes(codes);
+    } catch (error) {
+      console.error('Failed to load invite codes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load invite codes",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingCodes(false);
+    }
+  };
 
   const runE2ETests = async () => {
     setIsRunning(true);
@@ -113,9 +144,9 @@ export default function TestingDashboard() {
 
   const generateCustomInviteCode = async () => {
     if (!customCode.trim()) {
-      toast({ 
-        title: "Please enter a code name", 
-        variant: "destructive" 
+      toast({
+        title: "Please enter a code name",
+        variant: "destructive"
       });
       return;
     }
@@ -139,6 +170,7 @@ export default function TestingDashboard() {
           description: `Code "${response.data.code}" is ready to use`,
         });
         setCustomCode('');
+        loadInviteCodes(); // Refresh the list of invite codes
       } else {
         throw new Error(response.data.error || 'Failed to generate code');
       }
@@ -159,7 +191,7 @@ export default function TestingDashboard() {
     setTestUserInfo(null);
 
     try {
-      const response = await base44.functions.invoke('createTestUser', {}); 
+      const response = await base44.functions.invoke('createTestUser', {});
 
       if (response.data.success) {
         setTestUserInfo(response.data);
@@ -218,6 +250,20 @@ export default function TestingDashboard() {
     });
   };
 
+  // Helper function to render status badge for invite codes
+  const getStatusBadge = (code) => {
+    const expiresAt = new Date(code.expires_at);
+    const now = new Date();
+
+    if (code.current_uses >= code.max_uses) {
+      return <span className="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded">Used Up</span>;
+    }
+    if (expiresAt < now) {
+      return <span className="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded">Expired</span>;
+    }
+    return <span className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">Active</span>;
+  };
+
   if (!user || !user.roles?.includes('admin')) {
     return null;
   }
@@ -235,8 +281,100 @@ export default function TestingDashboard() {
           </p>
         </div>
 
+        {/* Invite Codes History - NEW */}
+        <Card className="mb-6 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-blue-600" />
+                  Invite Codes History
+                </CardTitle>
+                <CardDescription>
+                  All generated invite codes and their usage statistics
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadInviteCodes}
+                disabled={loadingCodes}
+              >
+                {loadingCodes ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Refresh'
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loadingCodes ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              </div>
+            ) : inviteCodes.length === 0 ? (
+              <p className="text-center text-slate-500 py-8">No invite codes generated yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[700px] text-sm"> {/* Added min-w for better display on smaller screens */}
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Code</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Status</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Usage</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Type</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Creator</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Created</th>
+                      <th className="text-left py-3 px-2 font-semibold text-slate-700">Expires</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inviteCodes.map((code) => (
+                      <tr key={code.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="py-3 px-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-slate-900">{code.code}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => copyToClipboard(code.code)}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </td>
+                        <td className="py-3 px-2">{getStatusBadge(code)}</td>
+                        <td className="py-3 px-2">
+                          <span className="font-semibold text-slate-900">{code.current_uses || 0}</span>
+                          <span className="text-slate-500"> / {code.max_uses || 1}</span>
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className="text-xs text-slate-600">
+                            {code.is_community_invite ? code.group_name || 'Community' : code.invite_type?.replace('_', ' → ')}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-xs text-slate-600">
+                          {code.inviter_name || code.inviter_email}
+                        </td>
+                        <td className="py-3 px-2 text-xs text-slate-600">
+                          {new Date(code.created_date).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-2 text-xs text-slate-600">
+                          {new Date(code.expires_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Generate Custom Invite Code - NEW */}
+          {/* Generate Custom Invite Code */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -262,7 +400,7 @@ export default function TestingDashboard() {
                   Letters and numbers only, automatically converted to uppercase
                 </p>
               </div>
-              
+
               <Button
                 onClick={generateCustomInviteCode}
                 disabled={generatingCustomCode || !customCode.trim()}
@@ -636,7 +774,7 @@ export default function TestingDashboard() {
                       <CheckCircle2 className="w-5 h-5 text-green-600" />
                       Follow These Steps:
                     </p>
-                    
+
                     <ol className="space-y-3 text-sm text-slate-700">
                       <li className="flex gap-3">
                         <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
@@ -649,7 +787,7 @@ export default function TestingDashboard() {
                           </p>
                         </div>
                       </li>
-                      
+
                       <li className="flex gap-3">
                         <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
                           2
@@ -664,7 +802,7 @@ export default function TestingDashboard() {
                           </p>
                         </div>
                       </li>
-                      
+
                       <li className="flex gap-3">
                         <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
                           3
@@ -676,7 +814,7 @@ export default function TestingDashboard() {
                           </p>
                         </div>
                       </li>
-                      
+
                       <li className="flex gap-3">
                         <span className="bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
                           4
@@ -688,7 +826,7 @@ export default function TestingDashboard() {
                           </p>
                         </div>
                       </li>
-                      
+
                       <li className="flex gap-3">
                         <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
                           5
@@ -712,7 +850,7 @@ export default function TestingDashboard() {
                           </div>
                         </div>
                       </li>
-                      
+
                       <li className="flex gap-3">
                         <span className="bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs">
                           6
