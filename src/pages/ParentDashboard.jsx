@@ -5,6 +5,7 @@ import { Message } from '@/entities/Message';
 import { HelpOffer } from '@/entities/HelpOffer';
 import { Intro } from '@/entities/Intro';
 import { Opportunity } from '@/entities/Opportunity';
+import { JobRequest } from '@/entities/JobRequest';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
