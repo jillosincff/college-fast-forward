@@ -120,7 +120,12 @@ export default function ParentDashboard() {
         messagesReceived: messages.length
       };
       
-      console.log('Dashboard stats calculated:', newStats);
+      console.log('=== FINAL STATS ===');
+      console.log('Students helped:', newStats.studentsHelped);
+      console.log('Jobs posted:', newStats.jobsPosted);
+      console.log('Messages received:', newStats.messagesReceived);
+      console.log('=== END ===');
+      
       setStats(newStats);
 
     } catch (error) {
