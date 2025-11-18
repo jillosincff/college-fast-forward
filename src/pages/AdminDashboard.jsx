@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,23 +52,19 @@ const AdminDashboard = () => {
   }, [user]);
 
   const loadAnalytics = async (isManualRefresh = false) => {
-    // Don't auto-load on mount if we already have data and it's not a manual refresh
-    if (!isManualRefresh && analytics) {
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
     
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-      const response = await base44.functions.invoke('getAdminAnalytics', {}, {
+      // Force cache bypass with timestamp
+      const response = await base44.functions.invoke('getAdminAnalytics', {
+        _cacheBust: Date.now()
+      }, {
         signal: controller.signal
       }).catch((err) => {
-        // Suppress network errors and AbortError completely
         if (err.message?.includes('Network Error') || err.name === 'AbortError') {
           throw new Error('SILENT_NETWORK_ERROR');
         }
