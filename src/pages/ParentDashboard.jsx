@@ -53,18 +53,19 @@ export default function ParentDashboard() {
     }
     
     try {
-      // Add timestamp to prevent caching
-      const timestamp = Date.now();
-      console.log(`Loading dashboard data at ${timestamp}`, { forceRefresh, userEmail: user.email, userId: user.id });
+      console.log('=== DASHBOARD DATA LOAD START ===');
+      console.log('User:', user.email, 'ID:', user.id);
+      console.log('Linked students:', user.linked_students);
+      console.log('Force refresh:', forceRefresh);
       
-      // Load all stats in parallel - force fresh data each time
-      const [helpOffersResult, introsResult, messagesResult, jobsResult, boostedRequestsResult] = await Promise.allSettled([
-        HelpOffer.list().then(all => all.filter(h => h.offerer_email === user.email)),
-        Intro.list().then(all => all.filter(i => i.helper_user_id === user.id)),
-        Message.list().then(all => all.filter(m => m.recipient_email === user.email)),
-        Opportunity.list().then(all => all.filter(o => o.created_by === user.email)),
-        // Get all job requests that this parent has boosted
-        JobRequest.list().then(all => all.filter(req => req.is_boosted === true && req.boost_expires_at))
+      // Load with explicit cache-busting query params
+      const cacheBuster = `_cb=${Date.now()}`;
+      const [helpOffersResult, introsResult, messagesResult, jobsResult, allJobRequestsResult] = await Promise.allSettled([
+        fetch(`/api/entities/HelpOffer/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(h => h.offerer_email === user.email)),
+        fetch(`/api/entities/Intro/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(i => i.helper_user_id === user.id)),
+        fetch(`/api/entities/Message/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(m => m.recipient_email === user.email)),
+        fetch(`/api/entities/Opportunity/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(o => o.created_by === user.email)),
+        fetch(`/api/entities/JobRequest/list?${cacheBuster}`).then(r => r.json())
       ]);
       
       console.log('Raw results:', {
