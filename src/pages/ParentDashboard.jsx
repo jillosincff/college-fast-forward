@@ -54,15 +54,23 @@ export default function ParentDashboard() {
     try {
       // Add timestamp to prevent caching
       const timestamp = Date.now();
-      console.log(`Loading dashboard data at ${timestamp}`, { forceRefresh });
+      console.log(`Loading dashboard data at ${timestamp}`, { forceRefresh, userEmail: user.email, userId: user.id });
       
-      // Load all stats in parallel with individual error handling
+      // Load all stats in parallel with cache-busting
+      // Force fresh data by using list() instead of filter() which might be cached
       const [helpOffersResult, introsResult, messagesResult, jobsResult] = await Promise.allSettled([
-        HelpOffer.filter({ offerer_email: user.email }),
-        Intro.filter({ helper_user_id: user.id }),
-        Message.filter({ recipient_email: user.email }),
-        Opportunity.filter({ created_by: user.email })
+        HelpOffer.list().then(all => all.filter(h => h.offerer_email === user.email)),
+        Intro.list().then(all => all.filter(i => i.helper_user_id === user.id)),
+        Message.list().then(all => all.filter(m => m.recipient_email === user.email)),
+        Opportunity.list().then(all => all.filter(o => o.created_by === user.email))
       ]);
+      
+      console.log('Raw results:', {
+        helpOffers: helpOffersResult.status === 'fulfilled' ? helpOffersResult.value.length : 'error',
+        intros: introsResult.status === 'fulfilled' ? introsResult.value.length : 'error',
+        messages: messagesResult.status === 'fulfilled' ? messagesResult.value.length : 'error',
+        jobs: jobsResult.status === 'fulfilled' ? jobsResult.value.length : 'error'
+      });
 
       const helpOffers = helpOffersResult.status === 'fulfilled' ? (helpOffersResult.value || []) : [];
       const intros = introsResult.status === 'fulfilled' ? (introsResult.value || []) : [];
