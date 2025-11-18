@@ -4,52 +4,37 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    console.log('🔍 getUserCount: Starting user count fetch...');
+    // Get ALL users using service role
+    const allUsers = await base44.asServiceRole.entities.User.list();
     
-    // Use service role to get all users
-    const users = await base44.asServiceRole.entities.User.list();
-    
-    console.log('📊 getUserCount: Raw users data:', { 
-      usersLength: users?.length,
-      usersType: typeof users,
-      isArray: Array.isArray(users),
-      firstUser: users?.[0] ? {
-        email: users[0].email,
-        persona: users[0].persona,
-        roles: users[0].roles
-      } : null
-    });
-    
-    // Count students (gators)
-    const students = users.filter(u => 
+    // Count by type
+    const gators = allUsers.filter(u => 
       u.persona === 'gator' || 
       u.roles?.includes('gator') || 
       u.email?.toLowerCase().endsWith('@ufl.edu')
     );
     
-    const result = {
-      success: true,
-      count: users.length,
-      studentCount: students.length,
-      spotsLeft: Math.max(0, 1000 - users.length)
-    };
+    const parents = allUsers.filter(u => 
+      u.persona === 'parent' || 
+      u.roles?.includes('parent')
+    );
     
-    console.log('✅ getUserCount: Returning result:', result);
+    const result = {
+      totalUsers: allUsers.length,
+      gatorCount: gators.length,
+      parentCount: parents.length,
+      spotsLeft: Math.max(0, 1000 - allUsers.length)
+    };
     
     return Response.json(result);
   } catch (error) {
-    console.error('❌ getUserCount error:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-    
+    console.error('getUserCount error:', error);
     return Response.json({
-      success: false,
-      error: error.message,
-      count: 0,
-      studentCount: 0,
-      spotsLeft: 1000
+      totalUsers: 0,
+      gatorCount: 0,
+      parentCount: 0,
+      spotsLeft: 1000,
+      error: error.message
     }, { status: 500 });
   }
 });
