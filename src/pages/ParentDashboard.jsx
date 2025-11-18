@@ -39,14 +39,23 @@ export default function ParentDashboard() {
   const [showParentInviteModal, setShowParentInviteModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.email) {
       setLoading(false);
       return;
     }
     
-    setLoading(true);
+    if (forceRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
+      // Add timestamp to prevent caching
+      const timestamp = Date.now();
+      console.log(`Loading dashboard data at ${timestamp}`, { forceRefresh });
+      
       // Load all stats in parallel with individual error handling
       const [helpOffersResult, introsResult, messagesResult, jobsResult] = await Promise.allSettled([
         HelpOffer.filter({ offerer_email: user.email }),
