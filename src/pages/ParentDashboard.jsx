@@ -98,8 +98,13 @@ export default function ParentDashboard() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [user]);
+
+  const handleRefresh = async () => {
+    await loadDashboardData(true);
+  };
 
   useEffect(() => {
     loadDashboardData();
