@@ -1,13 +1,13 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Opportunity } from '@/entities/Opportunity';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Briefcase } from 'lucide-react';
+import { CheckCircle, ArrowRight, Briefcase } from 'lucide-react';
 import RoleAwareOpportunityForm from '@/components/opportunities/RoleAwareOpportunityForm';
+import { boostStudentRequests } from '@/functions/boostStudentRequests';
 
 export default function PostOpportunityPage() {
   const { user } = useAuth();
@@ -17,7 +17,7 @@ export default function PostOpportunityPage() {
 
   const handleSubmit = async (formData, e) => {
     if (e) {
-      e.preventDefault(); // Prevent default form submission if an event object is provided
+      e.preventDefault();
     }
     
     if (!user) {
@@ -32,7 +32,6 @@ export default function PostOpportunityPage() {
     setIsSubmitting(true);
     
     try {
-      // Ensure all required fields are set with proper defaults
       const opportunityData = {
         ...formData,
         status: 'active',
@@ -47,8 +46,27 @@ export default function PostOpportunityPage() {
 
       const result = await Opportunity.create(opportunityData);
       
+      // PARENT POWER BOOST: If parent has linked students, boost their requests
+      if ((user.persona === 'parent' || user.roles?.includes('parent')) && 
+          user.linked_students && user.linked_students.length > 0) {
+        try {
+          const { data: boostResult } = await boostStudentRequests({ 
+            opportunityId: result.id 
+          });
+          
+          if (boostResult.boostedCount > 0) {
+            toast({
+              title: "⭐ Parent Power Boost Activated!",
+              description: `${boostResult.boostedCount} student request(s) have been boosted for 14 days!`,
+            });
+          }
+        } catch (boostError) {
+          console.error('Boost error:', boostError);
+        }
+      }
+      
       toast({
-        title: "✅ Opportunity posted!", // Updated title as per outline
+        title: "✅ Opportunity posted!",
         description: "This listing will be live for 30 days. Your opportunity has been posted and is now live.",
       });
 
@@ -58,7 +76,6 @@ export default function PostOpportunityPage() {
         has_wage: !!formData.hourly_wage,
       });
 
-      // Save the new opportunity to sessionStorage for immediate visibility on dashboard
       const newOpportunityPayload = {
         ...result,
         timestamp: Date.now()
@@ -68,7 +85,6 @@ export default function PostOpportunityPage() {
 
       setShowSuccess(true);
       
-      // Navigate back to the appropriate dashboard based on user persona
       setTimeout(() => {
         let dashboardPage = 'Dashboard';
         if (user.persona === 'parent') dashboardPage = 'ParentDashboard';
@@ -114,7 +130,6 @@ export default function PostOpportunityPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Briefcase className="w-8 h-8 text-blue-600" />
@@ -125,9 +140,20 @@ export default function PostOpportunityPage() {
           <p className="text-slate-600">
             Share internships, jobs, and student gigs with the Gator community.
           </p>
+          
+          {(user?.persona === 'parent' || user?.roles?.includes('parent')) && 
+           user?.linked_students && user?.linked_students.length > 0 && (
+            <div className="mt-4 p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
+              <p className="text-orange-900 font-semibold flex items-center justify-center gap-2">
+                ⭐ Parent Power Boost Active!
+              </p>
+              <p className="text-sm text-orange-800 mt-1">
+                When you post this opportunity, {user.linked_students.length} student request(s) will be pinned to the top for 14 days!
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Form */}
         <Card>
           <CardHeader>
             <CardTitle>Opportunity Details</CardTitle>
@@ -141,7 +167,6 @@ export default function PostOpportunityPage() {
           </CardContent>
         </Card>
 
-        {/* Help Text */}
         <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
           <h3 className="font-semibold text-blue-900 mb-2">💡 Tips for Great Opportunities</h3>
           <ul className="text-sm text-blue-800 space-y-1">
