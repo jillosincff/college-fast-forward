@@ -68,30 +68,38 @@ export default function ParentDashboard() {
         fetch(`/api/entities/JobRequest/list?${cacheBuster}`).then(r => r.json())
       ]);
       
-      console.log('Raw results:', {
-        helpOffers: helpOffersResult.status === 'fulfilled' ? helpOffersResult.value.length : 'error',
-        intros: introsResult.status === 'fulfilled' ? introsResult.value.length : 'error',
-        messages: messagesResult.status === 'fulfilled' ? messagesResult.value.length : 'error',
-        jobs: jobsResult.status === 'fulfilled' ? jobsResult.value.length : 'error',
-        boostedRequests: boostedRequestsResult.status === 'fulfilled' ? boostedRequestsResult.value.length : 'error'
-      });
-
       const helpOffers = helpOffersResult.status === 'fulfilled' ? (helpOffersResult.value || []) : [];
       const intros = introsResult.status === 'fulfilled' ? (introsResult.value || []) : [];
       const messages = messagesResult.status === 'fulfilled' ? (messagesResult.value || []) : [];
       const jobs = jobsResult.status === 'fulfilled' ? (jobsResult.value || []) : [];
-      const boostedRequests = boostedRequestsResult.status === 'fulfilled' ? (boostedRequestsResult.value || []) : [];
+      const allJobRequests = allJobRequestsResult.status === 'fulfilled' ? (allJobRequestsResult.value || []) : [];
 
-      // Get unique student emails from boosted requests via linked students
-      // First, get all linked students for this parent
+      console.log('Fetched data:', {
+        helpOffers: helpOffers.length,
+        intros: intros.length,
+        messages: messages.length,
+        jobs: jobs.length,
+        allJobRequests: allJobRequests.length
+      });
+
+      // Get linked student emails (normalized to lowercase)
       const linkedStudents = user.linked_students || [];
       const linkedStudentEmails = linkedStudents.map(s => s.email?.toLowerCase()).filter(Boolean);
       
-      console.log('Linked students:', linkedStudentEmails);
+      console.log('Linked student emails:', linkedStudentEmails);
       
-      // Get emails of students whose requests are currently boosted by this parent's actions
-      const boostedStudentEmails = boostedRequests
-        .filter(req => linkedStudentEmails.includes(req.created_by?.toLowerCase()))
+      // Filter for currently boosted requests created by linked students
+      const boostedRequestsByLinkedStudents = allJobRequests.filter(req => 
+        req.is_boosted === true && 
+        req.boost_expires_at &&
+        new Date(req.boost_expires_at) > new Date() &&
+        linkedStudentEmails.includes(req.created_by?.toLowerCase())
+      );
+      
+      console.log('Boosted requests by linked students:', boostedRequestsByLinkedStudents.length, boostedRequestsByLinkedStudents);
+
+      // Get unique student emails who have been boosted
+      const boostedStudentEmails = boostedRequestsByLinkedStudents
         .map(req => req.created_by)
         .filter(Boolean);
       
@@ -103,6 +111,8 @@ export default function ParentDashboard() {
         ...intros.map(i => i.student_id).filter(Boolean),
         ...boostedStudentEmails
       ]);
+      
+      console.log('All unique student emails helped:', Array.from(uniqueStudentEmails));
 
       const newStats = {
         studentsHelped: uniqueStudentEmails.size,
