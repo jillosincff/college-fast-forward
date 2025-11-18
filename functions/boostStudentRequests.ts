@@ -41,9 +41,15 @@ Deno.serve(async (req) => {
     // Boost each linked student's active requests
     for (const studentId of linkedStudents) {
       try {
+        // Get student info
+        const allUsers = await base44.asServiceRole.entities.User.list();
+        const student = allUsers.find(u => u.id === studentId);
+        
+        if (!student) continue;
+        
         // Find student's active requests
         const studentRequests = await base44.asServiceRole.entities.JobRequest.filter({
-          created_by: studentId,
+          created_by: student.email,
           status: 'active'
         });
         
@@ -61,6 +67,20 @@ Deno.serve(async (req) => {
             studentId: studentId,
             title: request.title || request.role
           });
+          
+          // Send email notification to student
+          if (student.email) {
+            try {
+              await base44.asServiceRole.integrations.Core.SendEmail({
+                to: student.email,
+                from_name: 'College Fast Forward',
+                subject: '⭐ Your Request Has Been Boosted!',
+                body: `Hi ${student.full_name || 'there'},\n\nGreat news! Your parent just posted an opportunity, and your job request "${request.title || request.role}" has been boosted to the top of the feed for the next 14 days!\n\n🚀 What this means for you:\n• Your request will be pinned at the top with a ⭐ star badge\n• More parents and alumni will see your request\n• Higher chance of getting introductions and help\n\nThis boost expires on ${new Date(boostExpiresAt).toLocaleDateString()}.\n\nGood luck!\n\nThe College Fast Forward Team\nhttps://collegefastforward.com`
+              });
+            } catch (emailErr) {
+              console.error(`Failed to send email to ${student.email}:`, emailErr);
+            }
+          }
         }
       } catch (err) {
         console.error(`Error boosting requests for student ${studentId}:`, err);
