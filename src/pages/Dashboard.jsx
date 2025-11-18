@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSpotlightModal, setShowSpotlightModal] = useState(false);
+  const [totalUsers, setTotalUsers] = useState(null); // New state variable
   
   const [stats, setStats] = useState({
     parentsViewed: 0,
@@ -55,6 +56,14 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
+      // Fetch total user count
+      try {
+        const allUsers = await base44.asServiceRole.entities.User.list();
+        setTotalUsers(allUsers?.length || 0);
+      } catch (error) {
+        console.error('Failed to fetch user count:', error);
+      }
+
       const { data: messagesResponse } = await getUserMessages();
       const myMessages = messagesResponse?.messages || [];
       setMessages(myMessages);
@@ -138,6 +147,7 @@ export default function Dashboard() {
 
   const unreadCount = messages.filter(m => !m.is_read).length;
   const isSpotlightActive = user?.talent_spotlight_enabled && user?.spotlight_enabled_date;
+  const spotsLeft = totalUsers !== null ? Math.max(0, 1000 - totalUsers) : null; // New calculation
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -151,6 +161,15 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
+            {/* New founding member spots banner */}
+            {spotsLeft !== null && spotsLeft > 0 && (
+              <div className="mb-4">
+                <div className="inline-block bg-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg">
+                  🔥 {spotsLeft} founding member spots left out of 1,000
+                </div>
+              </div>
+            )}
+
             <h1 className={HERO_HEADING_CLASSES}>
               Leverage Your Gator Network to Get Hired
             </h1>
@@ -160,6 +179,12 @@ export default function Dashboard() {
 
             {!loadingData && (
               <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm md:text-base">
+                {/* New total users stat */}
+                {totalUsers !== null && (
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <span>🎓 {totalUsers} Gators in the network</span>
+                  </div>
+                )}
                 {stats.parentsViewed > 0 && (
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
                     <span>👨‍💼 {stats.parentsViewed} parent{stats.parentsViewed !== 1 ? 's' : ''} reached out</span>
