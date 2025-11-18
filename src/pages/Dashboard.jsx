@@ -12,6 +12,7 @@ import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
+import { getUserCount } from '@/functions/getUserCount';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
@@ -58,10 +59,13 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      // Fetch network statistics
+      // Fetch total user count from backend function
       try {
+        const response = await getUserCount();
+        const totalUsers = response.data?.count || 0;
+        
+        // Fetch all users to count students
         const allUsers = await base44.asServiceRole.entities.User.list();
-        const totalUsers = allUsers?.length || 0;
         const students = allUsers?.filter(u => 
           u.persona === 'gator' || 
           u.roles?.includes('gator') || 
