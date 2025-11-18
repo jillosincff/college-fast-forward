@@ -1,4 +1,3 @@
-
 import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
 
 const corsHeaders = {
@@ -57,7 +56,7 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Fetch entities with reduced limits for faster response
+    // Fetch ALL users for accurate count, limited data for other entities
     const [
       users,
       jobRequests,
@@ -65,11 +64,11 @@ Deno.serve(async (req) => {
       opportunities,
       roommatePosts
     ] = await Promise.all([
-      fetchEntity('User', 150), // Reduced from 200
-      fetchEntity('JobRequest', 75), // Reduced from 100
-      fetchEntity('Message', 50), // Reduced from 100
-      fetchEntity('Opportunity', 75), // Reduced from 100
-      fetchEntity('RoommatePost', 30) // Reduced from 50
+      fetchEntity('User', 9999), // Fetch all users for accurate analytics
+      fetchEntity('JobRequest', 75),
+      fetchEntity('Message', 50),
+      fetchEntity('Opportunity', 75),
+      fetchEntity('RoommatePost', 30)
     ]);
 
     console.log('Data fetched successfully:', {
