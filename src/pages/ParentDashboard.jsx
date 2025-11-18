@@ -103,6 +103,13 @@ export default function ParentDashboard() {
   }, [user]);
 
   const handleRefresh = async () => {
+    // Clear existing stats to force UI update
+    setStats({ studentsHelped: 0, jobsPosted: 0, messagesReceived: 0 });
+    
+    // Small delay to ensure state clears
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Force reload with cache bypass
     await loadDashboardData(true);
   };
 
