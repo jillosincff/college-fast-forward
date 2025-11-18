@@ -526,9 +526,9 @@ const AdminDashboard = () => {
                 />
                 <MetricCard
                   title="Students"
-                  value={analytics.userGrowth?.byType?.student || 0}
+                  value={analytics.userGrowth?.byType?.gator || 0}
                   percentage={analytics.userGrowth?.total > 0 ? 
-                    Math.round((analytics.userGrowth?.byType?.student || 0) / analytics.userGrowth.total * 100) : 0}
+                    Math.round((analytics.userGrowth?.byType?.gator || 0) / analytics.userGrowth.total * 100) : 0}
                   icon={Users}
                   color="purple"
                 />
@@ -541,6 +541,24 @@ const AdminDashboard = () => {
                   color="orange"
                 />
               </div>
+
+              {(analytics.userGrowth?.byType?.unknown || 0) > 0 && (
+                <Card className="border-yellow-200 bg-yellow-50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-yellow-900">
+                          {analytics.userGrowth?.byType?.unknown} users with no persona
+                        </p>
+                        <p className="text-sm text-yellow-700 mt-1">
+                          These users likely registered but haven't completed onboarding yet. Use the search tool above to investigate individual accounts.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <GrowthChart data={analytics.userGrowth?.dailySignups || []} />
               <UserBreakdownChart data={analytics.userGrowth?.byType || {}} />
