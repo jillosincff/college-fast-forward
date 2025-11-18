@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -24,7 +23,11 @@ export default function Dashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSpotlightModal, setShowSpotlightModal] = useState(false);
-  const [totalUsers, setTotalUsers] = useState(null); // New state variable
+  const [networkStats, setNetworkStats] = useState({
+    totalUsers: 0,
+    totalStudents: 0,
+    spotsLeft: 1000
+  });
   
   const [stats, setStats] = useState({
     parentsViewed: 0,
@@ -49,19 +52,35 @@ export default function Dashboard() {
       return;
     }
 
-    // User is a gator, load data
     loadDashboardData();
   }, [user, isLoading]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      // Fetch total user count
+      // Fetch network statistics
       try {
         const allUsers = await base44.asServiceRole.entities.User.list();
-        setTotalUsers(allUsers?.length || 0);
+        const totalUsers = allUsers?.length || 0;
+        const students = allUsers?.filter(u => 
+          u.persona === 'gator' || 
+          u.roles?.includes('gator') || 
+          u.email?.toLowerCase().endsWith('@ufl.edu')
+        ) || [];
+        
+        setNetworkStats({
+          totalUsers,
+          totalStudents: students.length,
+          spotsLeft: Math.max(0, 1000 - totalUsers)
+        });
+
+        console.log('📊 Network Stats:', {
+          totalUsers,
+          totalStudents: students.length,
+          spotsLeft: Math.max(0, 1000 - totalUsers)
+        });
       } catch (error) {
-        console.error('Failed to fetch user count:', error);
+        console.error('Failed to fetch network stats:', error);
       }
 
       const { data: messagesResponse } = await getUserMessages();
@@ -147,7 +166,6 @@ export default function Dashboard() {
 
   const unreadCount = messages.filter(m => !m.is_read).length;
   const isSpotlightActive = user?.talent_spotlight_enabled && user?.spotlight_enabled_date;
-  const spotsLeft = totalUsers !== null ? Math.max(0, 1000 - totalUsers) : null; // New calculation
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -161,11 +179,10 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {/* New founding member spots banner */}
-            {spotsLeft !== null && spotsLeft > 0 && (
+            {networkStats.spotsLeft > 0 && (
               <div className="mb-4">
                 <div className="inline-block bg-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg">
-                  🔥 {spotsLeft} founding member spots left out of 1,000
+                  🔥 {networkStats.spotsLeft} founding member spots left out of 1,000
                 </div>
               </div>
             )}
@@ -179,25 +196,15 @@ export default function Dashboard() {
 
             {!loadingData && (
               <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm md:text-base">
-                {/* New total users stat */}
-                {totalUsers !== null && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span>🎓 {totalUsers} Gators in the network</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <span>🎓 {networkStats.totalStudents} students in network</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <span>👥 {networkStats.totalUsers} total Gators</span>
+                </div>
                 {stats.parentsViewed > 0 && (
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
                     <span>👨‍💼 {stats.parentsViewed} parent{stats.parentsViewed !== 1 ? 's' : ''} reached out</span>
-                  </div>
-                )}
-                {stats.peerConnections > 0 && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span>👥 {stats.peerConnections} network connection{stats.peerConnections !== 1 ? 's' : ''}</span>
-                  </div>
-                )}
-                {stats.parentsViewed === 0 && stats.peerConnections === 0 && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span>🚀 Ready to connect with your network</span>
                   </div>
                 )}
               </div>
@@ -269,7 +276,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Talent Spotlight Widget */}
         {!isSpotlightActive && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -318,7 +324,6 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Membership Status Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -327,7 +332,6 @@ export default function Dashboard() {
           <MembershipStatusCard />
         </motion.div>
 
-        {/* Quick Navigation Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -370,7 +374,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Invite Parent Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -399,7 +402,6 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Messages Preview Widget */}
         {!loadingData && messages.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -467,7 +469,6 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Recommended For You */}
         {opportunities.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -516,7 +517,6 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Network in Action */}
         {!loadingData && (stats.warmIntros > 0 || stats.opportunitiesMatched > 0 || stats.peerConnections > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -549,7 +549,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Modals */}
       <GenerateInviteModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
