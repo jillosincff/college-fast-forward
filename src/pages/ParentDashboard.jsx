@@ -37,6 +37,7 @@ export default function ParentDashboard() {
   });
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showParentInviteModal, setShowParentInviteModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     if (!user?.email) {
