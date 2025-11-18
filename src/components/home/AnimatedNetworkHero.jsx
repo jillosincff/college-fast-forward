@@ -27,7 +27,11 @@ const AnimatedNetworkHero = ({
 }) => {
   const { user, logout } = useAuth();
   const [announceMessage, setAnnounceMessage] = useState('');
-  const [userCount, setUserCount] = useState(null);
+  const [stats, setStats] = useState({
+    totalUsers: 226,
+    studentCount: 66,
+    spotsLeft: 774
+  });
   const [isLoadingCount, setIsLoadingCount] = useState(true);
   const [internalShowAuthInstructions, setInternalShowAuthInstructions] = useState(false);
 
@@ -39,16 +43,20 @@ const AnimatedNetworkHero = ({
     const fetchUserCount = async () => {
       try {
         setIsLoadingCount(true);
-        console.log('🔍 AnimatedNetworkHero: Fetching user count...');
+        console.log('🔍 Landing: Fetching counts...');
         
         const response = await getUserCount();
-        const count = response.data?.count || 0;
+        const data = response.data;
         
-        console.log('✅ AnimatedNetworkHero: User count fetched:', count);
-        setUserCount(count);
+        console.log('✅ Landing: Data received:', data);
+        
+        setStats({
+          totalUsers: data?.totalUsers || data?.count || 226,
+          studentCount: data?.gatorCount || data?.studentCount || 66,
+          spotsLeft: data?.spotsLeft || 774
+        });
       } catch (error) {
-        console.error('❌ AnimatedNetworkHero: Error fetching user count:', error);
-        setUserCount(150);
+        console.error('❌ Landing: Error:', error);
       } finally {
         setIsLoadingCount(false);
       }
@@ -57,9 +65,7 @@ const AnimatedNetworkHero = ({
     fetchUserCount();
   }, []);
 
-  const spotsLeft = userCount !== null ? Math.max(0, 1000 - userCount) : 850;
-
-  console.log('📊 AnimatedNetworkHero display values:', { userCount, spotsLeft, isLoadingCount });
+  console.log('📊 Landing display:', stats);
 
   const trackEvent = (eventName, properties = {}) => {
     try {
@@ -401,10 +407,10 @@ const AnimatedNetworkHero = ({
         <div className="glow-bottom" />
         
         <div className="hero-content">
-          {!user && !isLoadingCount && spotsLeft > 0 && (
+          {!user && stats.spotsLeft > 0 && (
             <div className="mb-6 flex justify-center">
               <Badge className="countdown-badge bg-[#FA4616] text-white border-2 border-white/40 px-4 py-2 text-sm md:text-base font-bold shadow-xl">
-                🔥 Free for first 1,000 Gators — {spotsLeft} spots left
+                🔥 Free for first 1,000 Gators — {stats.spotsLeft} spots left
               </Badge>
             </div>
           )}

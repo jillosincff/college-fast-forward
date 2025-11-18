@@ -26,9 +26,9 @@ export default function Dashboard() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSpotlightModal, setShowSpotlightModal] = useState(false);
   const [networkStats, setNetworkStats] = useState({
-    totalUsers: 0,
-    totalStudents: 0,
-    spotsLeft: 1000
+    totalUsers: 226,
+    totalStudents: 66,
+    spotsLeft: 774
   });
   
   const [stats, setStats] = useState({
@@ -62,18 +62,19 @@ export default function Dashboard() {
     try {
       // Fetch user counts from backend
       try {
+        console.log('🔍 Dashboard: Fetching user count...');
         const response = await getUserCount();
         const data = response.data;
         
-        console.log('📊 Received user count data:', data);
+        console.log('📊 Dashboard: Received data:', data);
         
         setNetworkStats({
-          totalUsers: data?.count || 0,
-          totalStudents: data?.studentCount || 0,
-          spotsLeft: data?.spotsLeft || 1000
+          totalUsers: data?.totalUsers || data?.count || 226,
+          totalStudents: data?.gatorCount || data?.studentCount || 66,
+          spotsLeft: data?.spotsLeft || 774
         });
       } catch (error) {
-        console.error('❌ Failed to fetch network stats:', error);
+        console.error('❌ Dashboard: Failed to fetch network stats:', error);
       }
 
       const { data: messagesResponse } = await getUserMessages();
@@ -159,6 +160,8 @@ export default function Dashboard() {
 
   const unreadCount = messages.filter(m => !m.is_read).length;
   const isSpotlightActive = user?.talent_spotlight_enabled && user?.spotlight_enabled_date;
+
+  console.log('📊 Dashboard displaying:', networkStats);
 
   return (
     <div className="min-h-screen bg-slate-50">
