@@ -75,11 +75,14 @@ export default function ParentDashboard() {
         ...intros.map(i => i.student_id).filter(Boolean)
       ]);
 
-      setStats({
+      const newStats = {
         studentsHelped: uniqueStudentEmails.size,
         jobsPosted: jobs.length,
         messagesReceived: messages.length
-      });
+      };
+      
+      console.log('Dashboard stats calculated:', newStats);
+      setStats(newStats);
 
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
