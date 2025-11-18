@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -6,7 +7,7 @@ import { Typewriter } from '@/components/ui/typewriter';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
 import { LogOut, Info, UserPlus, Send } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { getUserCount } from '@/functions/getUserCount';
 import {
   Dialog,
   DialogContent,
@@ -38,17 +39,15 @@ const AnimatedNetworkHero = ({
     const fetchUserCount = async () => {
       try {
         setIsLoadingCount(true);
-        console.log('🔍 Fetching user count from base44...');
+        console.log('🔍 AnimatedNetworkHero: Fetching user count...');
         
-        // Fetch all users using the service role
-        const users = await base44.asServiceRole.entities.User.list();
-        const count = users?.length || 0;
+        const response = await getUserCount();
+        const count = response.data?.count || 0;
         
-        console.log('✅ User count fetched successfully:', count);
+        console.log('✅ AnimatedNetworkHero: User count fetched:', count);
         setUserCount(count);
       } catch (error) {
-        console.error('❌ Error fetching user count:', error);
-        // Fallback to 150
+        console.error('❌ AnimatedNetworkHero: Error fetching user count:', error);
         setUserCount(150);
       } finally {
         setIsLoadingCount(false);
@@ -60,7 +59,7 @@ const AnimatedNetworkHero = ({
 
   const spotsLeft = userCount !== null ? Math.max(0, 1000 - userCount) : 850;
 
-  console.log('📊 Display values:', { userCount, spotsLeft, isLoadingCount });
+  console.log('📊 AnimatedNetworkHero display values:', { userCount, spotsLeft, isLoadingCount });
 
   const trackEvent = (eventName, properties = {}) => {
     try {
@@ -107,6 +106,7 @@ const AnimatedNetworkHero = ({
       onProceedToAuth();
     } else {
       setTimeout(() => {
+        const base44 = require('@/api/base44Client').base44;
         base44.auth.redirectToLogin(window.location.href);
       }, 200);
     }
