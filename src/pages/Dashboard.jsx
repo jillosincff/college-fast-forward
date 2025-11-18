@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -59,32 +60,20 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      // Fetch total user count from backend function
+      // Fetch user counts from backend
       try {
         const response = await getUserCount();
-        const totalUsers = response.data?.count || 0;
+        const data = response.data;
         
-        // Fetch all users to count students
-        const allUsers = await base44.asServiceRole.entities.User.list();
-        const students = allUsers?.filter(u => 
-          u.persona === 'gator' || 
-          u.roles?.includes('gator') || 
-          u.email?.toLowerCase().endsWith('@ufl.edu')
-        ) || [];
+        console.log('📊 Received user count data:', data);
         
         setNetworkStats({
-          totalUsers,
-          totalStudents: students.length,
-          spotsLeft: Math.max(0, 1000 - totalUsers)
-        });
-
-        console.log('📊 Network Stats:', {
-          totalUsers,
-          totalStudents: students.length,
-          spotsLeft: Math.max(0, 1000 - totalUsers)
+          totalUsers: data?.count || 0,
+          totalStudents: data?.studentCount || 0,
+          spotsLeft: data?.spotsLeft || 1000
         });
       } catch (error) {
-        console.error('Failed to fetch network stats:', error);
+        console.error('❌ Failed to fetch network stats:', error);
       }
 
       const { data: messagesResponse } = await getUserMessages();
@@ -565,7 +554,7 @@ export default function Dashboard() {
         onClose={() => setShowSpotlightModal(false)}
         user={user}
         onSuccess={handleSpotlightSuccess}
-      />
+        />
     </div>
   );
 }
