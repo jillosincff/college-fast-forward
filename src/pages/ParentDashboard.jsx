@@ -263,6 +263,26 @@ export default function ParentDashboard() {
           </div>
         </div>
 
+        {/* Parent Power Boost Blurb - NEW */}
+        <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 rounded-2xl p-6 shadow-xl border-2 border-orange-400">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                🚀 Post a job or share a lead — your Gator goes to the top
+              </h3>
+              <p className="text-white text-lg mb-2">
+                Every time you help another Gator, your kid's request gets <strong className="text-yellow-200">starred and pinned at the top for 14 days</strong>.
+              </p>
+              <p className="text-white/90 text-base font-semibold">
+                Your action = your kid seen first.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <Card>
           <CardHeader>
