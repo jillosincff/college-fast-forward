@@ -16,7 +16,8 @@ import {
   Star,
   BookOpen,
   Users2,
-  Crown
+  Crown,
+  RefreshCw
 } from 'lucide-react';
 import JobMarketInsightsWidget from '@/components/dashboard/parent/JobMarketInsightsWidget';
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
