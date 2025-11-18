@@ -173,7 +173,7 @@ export default function ParentDashboard() {
       <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] py-8 mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-2">
                 {greeting}, {firstName}! 🧡💙
               </h1>
@@ -181,12 +181,23 @@ export default function ParentDashboard() {
                 Your network opens doors for Gators everywhere
               </p>
             </div>
-            {stats.studentsHelped > 0 && (
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 text-white">
-                <div className="text-3xl font-bold">{stats.studentsHelped}</div>
-                <div className="text-sm">Student{stats.studentsHelped !== 1 ? 's' : ''} Helped</div>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {stats.studentsHelped > 0 && (
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 text-white">
+                  <div className="text-3xl font-bold">{stats.studentsHelped}</div>
+                  <div className="text-sm">Student{stats.studentsHelped !== 1 ? 's' : ''} Helped</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
