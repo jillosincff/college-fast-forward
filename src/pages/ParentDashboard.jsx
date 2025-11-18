@@ -15,7 +15,8 @@ import {
   Sparkles,
   Star,
   BookOpen,
-  Users2 
+  Users2,
+  Crown
 } from 'lucide-react';
 import JobMarketInsightsWidget from '@/components/dashboard/parent/JobMarketInsightsWidget';
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
