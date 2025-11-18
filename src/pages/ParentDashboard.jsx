@@ -57,31 +57,50 @@ export default function ParentDashboard() {
       const timestamp = Date.now();
       console.log(`Loading dashboard data at ${timestamp}`, { forceRefresh, userEmail: user.email, userId: user.id });
       
-      // Load all stats in parallel with cache-busting
-      // Force fresh data by using list() instead of filter() which might be cached
-      const [helpOffersResult, introsResult, messagesResult, jobsResult] = await Promise.allSettled([
+      // Load all stats in parallel - force fresh data each time
+      const [helpOffersResult, introsResult, messagesResult, jobsResult, boostedRequestsResult] = await Promise.allSettled([
         HelpOffer.list().then(all => all.filter(h => h.offerer_email === user.email)),
         Intro.list().then(all => all.filter(i => i.helper_user_id === user.id)),
         Message.list().then(all => all.filter(m => m.recipient_email === user.email)),
-        Opportunity.list().then(all => all.filter(o => o.created_by === user.email))
+        Opportunity.list().then(all => all.filter(o => o.created_by === user.email)),
+        // Get all job requests that this parent has boosted
+        JobRequest.list().then(all => all.filter(req => req.is_boosted === true && req.boost_expires_at))
       ]);
       
       console.log('Raw results:', {
         helpOffers: helpOffersResult.status === 'fulfilled' ? helpOffersResult.value.length : 'error',
         intros: introsResult.status === 'fulfilled' ? introsResult.value.length : 'error',
         messages: messagesResult.status === 'fulfilled' ? messagesResult.value.length : 'error',
-        jobs: jobsResult.status === 'fulfilled' ? jobsResult.value.length : 'error'
+        jobs: jobsResult.status === 'fulfilled' ? jobsResult.value.length : 'error',
+        boostedRequests: boostedRequestsResult.status === 'fulfilled' ? boostedRequestsResult.value.length : 'error'
       });
 
       const helpOffers = helpOffersResult.status === 'fulfilled' ? (helpOffersResult.value || []) : [];
       const intros = introsResult.status === 'fulfilled' ? (introsResult.value || []) : [];
       const messages = messagesResult.status === 'fulfilled' ? (messagesResult.value || []) : [];
       const jobs = jobsResult.status === 'fulfilled' ? (jobsResult.value || []) : [];
+      const boostedRequests = boostedRequestsResult.status === 'fulfilled' ? (boostedRequestsResult.value || []) : [];
 
-      // Calculate unique students helped (from both help offers and intros)
+      // Get unique student emails from boosted requests via linked students
+      // First, get all linked students for this parent
+      const linkedStudents = user.linked_students || [];
+      const linkedStudentEmails = linkedStudents.map(s => s.email?.toLowerCase()).filter(Boolean);
+      
+      console.log('Linked students:', linkedStudentEmails);
+      
+      // Get emails of students whose requests are currently boosted by this parent's actions
+      const boostedStudentEmails = boostedRequests
+        .filter(req => linkedStudentEmails.includes(req.created_by?.toLowerCase()))
+        .map(req => req.created_by)
+        .filter(Boolean);
+      
+      console.log('Boosted student emails:', boostedStudentEmails);
+
+      // Calculate unique students helped (from help offers, intros, AND boosts)
       const uniqueStudentEmails = new Set([
         ...helpOffers.map(h => h.request_creator_email).filter(Boolean),
-        ...intros.map(i => i.student_id).filter(Boolean)
+        ...intros.map(i => i.student_id).filter(Boolean),
+        ...boostedStudentEmails
       ]);
 
       const newStats = {
