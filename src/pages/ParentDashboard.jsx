@@ -220,149 +220,145 @@ export default function ParentDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
-      {/* Hero Banner - Compact */}
-      <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] py-8 mb-6">
+      {/* Clean Header Section */}
+      <div className="bg-white border-b border-slate-200 py-6 mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-slate-900 mb-1">
                 {greeting}, {firstName}! 🧡💙
               </h1>
-              <p className="text-white/90">
+              <p className="text-slate-600">
                 Your network opens doors for Gators everywhere
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-0"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              {stats.studentsHelped > 0 && (
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 text-white">
-                  <div className="text-3xl font-bold">{stats.studentsHelped}</div>
-                  <div className="text-sm">Student{stats.studentsHelped !== 1 ? 's' : ''} Helped</div>
-                </div>
-              )}
-            </div>
+            <Button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Membership Status Card - NEW */}
+        {/* Membership Status Card */}
         <MembershipStatusCard />
         
-        {/* Quick Stats - Simplified to 3 key metrics */}
+        {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-red-500" />
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <Heart className="w-6 h-6 text-blue-600" />
+                </div>
+                <span className="text-3xl font-bold text-slate-900">{stats.studentsHelped}</span>
               </div>
-              <span className="text-sm text-gray-600 font-medium">Students Helped</span>
-            </div>
-            <p className="text-4xl font-bold text-gray-900">{stats.studentsHelped}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              Through intros, advice, and connections
-            </p>
-          </div>
+              <h3 className="font-semibold text-slate-900 mb-1">Students Helped</h3>
+              <p className="text-xs text-slate-600">Through intros and connections</p>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-purple-500" />
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <Briefcase className="w-6 h-6 text-purple-600" />
+                </div>
+                <span className="text-3xl font-bold text-slate-900">{stats.jobsPosted}</span>
               </div>
-              <span className="text-sm text-gray-600 font-medium">Jobs Posted</span>
-            </div>
-            <p className="text-4xl font-bold text-gray-900">{stats.jobsPosted}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              Opportunities shared with students
-            </p>
-          </div>
+              <h3 className="font-semibold text-slate-900 mb-1">Jobs Posted</h3>
+              <p className="text-xs text-slate-600">Opportunities shared</p>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-orange-500" />
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-orange-600" />
+                </div>
+                <span className="text-3xl font-bold text-slate-900">{stats.messagesReceived}</span>
               </div>
-              <span className="text-sm text-gray-600 font-medium">Messages</span>
-            </div>
-            <p className="text-4xl font-bold text-gray-900">{stats.messagesReceived}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              Conversations with students
-            </p>
-          </div>
+              <h3 className="font-semibold text-slate-900 mb-1">Messages</h3>
+              <p className="text-xs text-slate-600">Active conversations</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Invite Student Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Users2 className="w-6 h-6" />
-                <h3 className="text-xl font-bold">🔑 Invite Your Gator Student</h3>
+        {/* Action Banners - Clean Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+                  <Users2 className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-slate-900 mb-1">Invite Your Gator Student</h3>
+                  <p className="text-sm text-slate-600 mb-3">
+                    Give them access to the network. Earn +100 points!
+                  </p>
+                  <Button
+                    onClick={() => setShowInviteModal(true)}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Send Invite
+                  </Button>
+                </div>
               </div>
-              <p className="text-white/90">
-                Give them exclusive access to our private network. Earn +100 points!
-              </p>
-            </div>
-            <Button
-              onClick={() => setShowInviteModal(true)}
-              variant="secondary"
-              className="bg-white text-blue-700 hover:bg-white hover:text-blue-800 font-bold px-8 py-6 shadow-lg border-0"
-            >
-              Invite My Student
-            </Button>
-          </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/50 hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0">
+                  <Users2 className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-slate-900 mb-1">Invite Another UF Parent</h3>
+                  <p className="text-sm text-slate-600 mb-3">
+                    Grow the network. You both earn +100 points!
+                  </p>
+                  <Button
+                    onClick={() => setShowParentInviteModal(true)}
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Send Invite
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* NEW: Invite Another Parent Banner */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white shadow-lg">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Users2 className="w-6 h-6" />
-                <h3 className="text-xl font-bold">👨‍👩‍👧‍👦 Invite Another UF Parent</h3>
+        {/* Power Boost Info */}
+        <Card className="border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
+                <Crown className="w-6 h-6 text-white" />
               </div>
-              <p className="text-white/90">
-                Grow the parent network! They get access, you both earn +100 points.
-              </p>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">
+                  🚀 Boost Your Gator to the Top
+                </h3>
+                <p className="text-sm text-slate-700">
+                  Every time you help another Gator, your student's request gets <strong>starred and pinned at the top for 14 days</strong>. Your action = your kid seen first.
+                </p>
+              </div>
             </div>
-            <Button
-              onClick={() => setShowParentInviteModal(true)}
-              variant="secondary"
-              className="bg-white text-orange-700 hover:bg-white hover:text-orange-800 font-bold px-8 py-6 shadow-lg border-0"
-            >
-              Invite UF Parent
-            </Button>
-          </div>
-        </div>
-
-        {/* Parent Power Boost Blurb - NEW */}
-        <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 rounded-2xl p-6 shadow-xl border-2 border-orange-400">
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-              <Crown className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                🚀 Post a job or share a lead — your Gator goes to the top
-              </h3>
-              <p className="text-white text-lg mb-2">
-                Every time you help another Gator, your kid's request gets <strong className="text-yellow-200">starred and pinned at the top for 14 days</strong>.
-              </p>
-              <p className="text-white/90 text-base font-semibold">
-                Your action = your kid seen first.
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
         <Card>
