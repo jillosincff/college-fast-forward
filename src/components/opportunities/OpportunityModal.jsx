@@ -379,16 +379,19 @@ export default function OpportunityModal({ isOpen, onClose, opportunity, onApply
                     </a>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => {
-                    const url = opportunity.external_apply_url || opportunity.contact_url;
-                    handleUserApply('external');
-                    window.location.href = url;
-                  }}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 text-base"
+                <a 
+                  href={opportunity.external_apply_url || opportunity.contact_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleUserApply('external')}
+                  className="block w-full"
                 >
-                  Apply on External Site →
-                </Button>
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 text-base"
+                  >
+                    Apply on External Site →
+                  </Button>
+                </a>
               </div>
             ) : (
               <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-5 text-center">
