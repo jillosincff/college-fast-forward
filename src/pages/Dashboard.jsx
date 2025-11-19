@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -381,7 +380,7 @@ export default function Dashboard() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <UserPlus className="w-6 h-6" />
-                    <h3 className="text-xl font-bold">👨‍👩‍👧‍👦 Invite Your Parent</h3>
+                    <h3 className="text-xl font-bold text-white">👨‍👩‍👧‍👦 Invite Your Parent</h3>
                   </div>
                   <p className="text-white/90">
                     Give them access to help you + unlock their professional network. Earn +100 points!
