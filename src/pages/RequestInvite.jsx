@@ -72,11 +72,36 @@ export default function RequestInvite() {
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                Request Submitted!
+                Request Submitted! 🎉
               </h2>
-              <p className="text-slate-600 mb-6">
-                We'll review your request within 24-48 hours and send an invite code to <strong>{email}</strong>
-              </p>
+              <div className="text-slate-600 mb-6 space-y-3">
+                <p>
+                  Your invite request has been received! Here's what happens next:
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left text-sm space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
+                    <div>
+                      <strong>Confirmation Email:</strong> Check <strong>{email}</strong> for confirmation (may take a few minutes)
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
+                    <div>
+                      <strong>Review:</strong> Our team reviews your request (usually within 24-48 hours)
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">3</div>
+                    <div>
+                      <strong>Invite Code:</strong> You'll receive an email with your unique invite code to complete registration
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500">
+                  💡 Check your spam folder if you don't see our emails
+                </p>
+              </div>
               <Button
                 onClick={() => navigate('LandingPage')}
                 variant="outline"
