@@ -47,11 +47,24 @@ export default function RequestInvite() {
 
       if (response.data?.success) {
         console.log('✅ Success! Showing confirmation page');
+        console.log('Email sent status:', response.data.emailSent);
+        console.log('Admin notifications:', response.data.adminNotificationsSent);
+        
         setSubmitted(true);
-        toast({
-          title: "Request Submitted! ✅",
-          description: "Check your email for confirmation",
-        });
+        
+        // Show appropriate toast based on email status
+        if (response.data.emailSent) {
+          toast({
+            title: "Request Submitted! ✅",
+            description: "Check your email for confirmation",
+          });
+        } else {
+          toast({
+            title: "Request Received ⚠️",
+            description: "Your request was saved but confirmation email may be delayed. We'll contact you soon!",
+            variant: "default"
+          });
+        }
       } else {
         console.error('❌ Function returned error:', response.data);
         throw new Error(response.data?.error || 'Failed to submit');
