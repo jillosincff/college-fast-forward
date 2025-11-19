@@ -32,7 +32,10 @@ export default function RequestInvite() {
     }
 
     setLoading(true);
+    console.log('🚀 Submitting invite request...', { email, fullName, userType });
+    
     try {
+      console.log('📞 Calling sendInvite function...');
       const response = await base44.functions.invoke('sendInvite', {
         email: email.toLowerCase().trim(),
         full_name: fullName.trim(),
@@ -40,18 +43,23 @@ export default function RequestInvite() {
         reason: reason.trim() || 'No reason provided'
       });
 
+      console.log('✅ Function response:', response);
+
       if (response.data?.success) {
+        console.log('✅ Success! Showing confirmation page');
         setSubmitted(true);
         toast({
           title: "Request Submitted! ✅",
           description: "Check your email for confirmation",
         });
       } else {
+        console.error('❌ Function returned error:', response.data);
         throw new Error(response.data?.error || 'Failed to submit');
       }
 
     } catch (error) {
-      console.error('Error submitting invite request:', error);
+      console.error('❌ Error submitting invite request:', error);
+      console.error('Error details:', { message: error.message, stack: error.stack });
       toast({
         title: "Error",
         description: error.message || "Failed to submit request. Please try again.",
@@ -59,6 +67,7 @@ export default function RequestInvite() {
       });
     } finally {
       setLoading(false);
+      console.log('🏁 Request completed');
     }
   };
 
