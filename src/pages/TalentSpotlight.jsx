@@ -128,8 +128,22 @@ export default function TalentSpotlight() {
         </div>
       </div>
 
+      {/* Coming Soon Banner */}
+      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
+        <div className="bg-gradient-to-r from-orange-500 to-blue-600 rounded-2xl shadow-xl p-8 text-center text-white border-4 border-white/20">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Sparkles className="w-8 h-8 animate-pulse" />
+            <h2 className="text-3xl font-bold">Coming Soon!</h2>
+            <Sparkles className="w-8 h-8 animate-pulse" />
+          </div>
+          <p className="text-xl font-medium text-white/90">
+            We're building something amazing to showcase Gator talent. Stay tuned! 🐊
+          </p>
+        </div>
+      </div>
+
       {/* Search and Filters */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 pb-8">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="space-y-4">
             <div className="relative">
