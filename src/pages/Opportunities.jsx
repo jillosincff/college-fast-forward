@@ -337,6 +337,10 @@ export default function OpportunitiesPage() {
       const externalUrl = opportunity.external_apply_url || opportunity.contact_url;
       
       if (externalUrl) {
+        // Open the URL immediately for mobile compatibility
+        window.location.href = externalUrl;
+        
+        // Track application in background
         try {
           const applicationData = {
             opportunity_id: opportunity.id,
@@ -349,18 +353,14 @@ export default function OpportunitiesPage() {
             opportunity_deleted: false
           };
           
-          await OpportunityApplication.create(applicationData);
+          OpportunityApplication.create(applicationData).catch(err => 
+            console.error('Failed to track external application:', err)
+          );
           
-          toast({
-            title: "Redirecting to apply...",
-            description: "Opening the application page in a new tab.",
-          });
+          setAppliedOpportunityIds(prev => [...new Set([...prev, opportunity.id])]);
         } catch (error) {
           console.error('Failed to track external application:', error);
         }
-        
-        window.open(externalUrl, '_blank', 'noopener,noreferrer');
-        setAppliedOpportunityIds(prev => [...new Set([...prev, opportunity.id])]);
       }
       return;
     }
