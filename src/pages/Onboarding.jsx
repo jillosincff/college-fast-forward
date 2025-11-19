@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +18,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
 import { linkStudentsToParent } from '@/functions/linkStudentsToParent';
 
@@ -435,7 +435,7 @@ const LinkStudentsStep = ({ onNext, onBack, parentData, setParentData }) => {
 
 
 const OptionalExtrasStep = ({ onFinish, onBack, parentData, setParentData }) => {
-  const { linkedin_url = '', ways_to_help = [] } = parentData;
+  const { linkedin_url = '', ways_to_help = [], description_of_work = '' } = parentData;
 
   const helpOptions = [
     { id: 'introduce', label: 'Introduce students to my network' },
@@ -488,6 +488,17 @@ const OptionalExtrasStep = ({ onFinish, onBack, parentData, setParentData }) => 
           </div>
         </div>
         <div>
+          <Label htmlFor="description_of_work">Briefly explain what you do</Label>
+          <Textarea
+            id="description_of_work"
+            value={description_of_work}
+            onChange={(e) => setParentData({ ...parentData, description_of_work: e.target.value })}
+            placeholder="e.g., I lead a team of software engineers building innovative AI products at Google."
+            className="mt-1 min-h-[80px]"
+          />
+          <p className="text-xs text-slate-500 mt-1">This helps students understand what you do and how you can help.</p>
+        </div>
+        <div>
           <Label>Gator Directory</Label>
           <div className="flex items-center justify-between mt-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
             <div className="pr-4">
@@ -533,6 +544,7 @@ export default function Onboarding() {
     location: user?.location || '',
     linkedin_url: user?.linkedin_url || '',
     ways_to_help: user?.ways_to_help || [],
+    description_of_work: user?.description_of_work || '',
     includeInDirectory: user?.includeInDirectory !== false, // Default to true if not explicitly false
     student_links: [], // New field for student links
   });

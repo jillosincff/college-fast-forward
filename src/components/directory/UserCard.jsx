@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import { formatLabel } from '@/components/utils/format';
 
 export default function UserCard({ user, onMessage, onViewProfile }) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
 
@@ -101,6 +102,24 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           <p className="text-sm text-slate-600 line-clamp-2 mb-4">
             {user.bio}
           </p>
+        )}
+
+        {/* Description of Work - Parents/Alumni Only */}
+        {isParentOrAlumni && user.description_of_work && (
+          <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <p className="text-xs font-semibold text-slate-700 mb-1">What they do:</p>
+            <p className={`text-sm text-slate-600 ${!isDescriptionExpanded && user.description_of_work.length > 100 ? 'line-clamp-2' : ''}`}>
+              {user.description_of_work}
+            </p>
+            {user.description_of_work.length > 100 && (
+              <button
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                className="text-xs text-blue-600 hover:text-blue-800 mt-1 font-medium"
+              >
+                {isDescriptionExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </div>
         )}
 
         {/* Key Info */}
