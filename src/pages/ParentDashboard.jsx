@@ -341,27 +341,6 @@ export default function ParentDashboard() {
           </Card>
         </div>
 
-        {/* Boost Your Gator to the Top Banner */}
-        <div className="bg-gradient-to-br from-blue-700 to-blue-500 rounded-2xl p-12 md:p-16 text-center text-white shadow-2xl">
-          <span className="text-5xl block mb-4 animate-bounce">🚀</span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
-            Boost Your Gator to the Top
-          </h1>
-          <p className="text-xl md:text-2xl mb-3 font-medium opacity-95">
-            Post jobs or share leads to give your student <span className="text-yellow-400 font-semibold">priority visibility ⭐</span>
-          </p>
-          <p className="text-lg md:text-xl mb-10 opacity-90">
-            Every contribution pins their profile for 3 days
-          </p>
-          <Button
-            onClick={() => navigate('PostOpportunity')}
-            className="bg-white text-blue-700 hover:bg-slate-50 font-semibold text-lg px-9 py-6 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Start Helping Now
-            <span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-          </Button>
-        </div>
-
         {/* Quick Actions */}
         <Card>
           <CardHeader>
@@ -390,17 +369,27 @@ export default function ParentDashboard() {
 
               <button
                 onClick={() => navigate('PostOpportunity')}
-                className="p-6 rounded-xl border-2 border-slate-200 hover:border-green-500 hover:bg-green-50 transition-all text-left group"
+                className="p-6 rounded-xl border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 hover:border-orange-500 hover:shadow-lg transition-all text-left group relative overflow-hidden"
               >
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
-                  <Briefcase className="w-6 h-6 text-green-600" />
+                <div className="absolute top-2 right-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
+                    🚀 Boost
+                  </span>
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">Post a Job</h3>
-                <p className="text-sm text-slate-600 mb-3">
-                  Share internships and job opportunities with students
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Briefcase className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  Post a Job <Star className="w-4 h-4 text-yellow-500" />
+                </h3>
+                <p className="text-xs text-orange-600 font-semibold mb-2">
+                  3 days priority visibility
                 </p>
-                <div className="flex items-center text-green-600 text-sm font-medium">
-                  Create Posting <ArrowRight className="w-4 h-4 ml-1" />
+                <p className="text-sm text-slate-600 mb-3">
+                  Share opportunities and boost your Gator's profile
+                </p>
+                <div className="flex items-center text-orange-600 text-sm font-medium">
+                  Start Helping <ArrowRight className="w-4 h-4 ml-1" />
                 </div>
               </button>
 
