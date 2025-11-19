@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,25 +33,28 @@ export default function RequestInvite() {
 
     setLoading(true);
     try {
-      await base44.entities.InviteRequest.create({
+      const response = await base44.functions.invoke('sendInvite', {
         email: email.toLowerCase().trim(),
         full_name: fullName.trim(),
         user_type: userType,
-        reason: reason.trim() || 'No reason provided',
-        status: 'pending'
+        reason: reason.trim() || 'No reason provided'
       });
 
-      setSubmitted(true);
-      toast({
-        title: "Request Submitted! ✅",
-        description: "We'll review your request and email you an invite code",
-      });
+      if (response.data?.success) {
+        setSubmitted(true);
+        toast({
+          title: "Request Submitted! ✅",
+          description: "Check your email for confirmation",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to submit');
+      }
 
     } catch (error) {
       console.error('Error submitting invite request:', error);
       toast({
         title: "Error",
-        description: "Failed to submit request. Please try again.",
+        description: error.message || "Failed to submit request. Please try again.",
         variant: "destructive"
       });
     } finally {
