@@ -360,7 +360,7 @@ const AnimatedNetworkHero = ({
 
             <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
               <p className="font-bold text-orange-900 mb-3 text-sm">
-                🧡 Gators & Parents:
+                🧡 Parents and UF Alumni:
               </p>
               <ol className="space-y-2 text-sm text-slate-700">
                 <li className="flex gap-2">
