@@ -1,11 +1,13 @@
-
-import { useEffect, useState } from 'react';
-import { X, ArrowUpRight, MessageSquare, Heart, Share2, Briefcase, Zap, Mail, ExternalLink } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, ArrowUpRight, MessageSquare, Bookmark, Heart, Share2, Copy, Briefcase, Zap, Mail, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
+import { Opportunity } from '@/entities/Opportunity';
+import { OpportunityApplication } from '@/entities/OpportunityApplication';
 import { useAuth } from '@/components/auth/AuthContext';
 import { formatOpportunityType, formatLocationDisplay } from '@/components/utils/format';
 import { trackEvent } from '@/components/utils/analytics';
@@ -379,8 +381,9 @@ export default function OpportunityModal({ isOpen, onClose, opportunity, onApply
                 </div>
                 <Button 
                   onClick={() => {
-                    window.open(opportunity.external_apply_url || opportunity.contact_url, '_blank');
+                    const url = opportunity.external_apply_url || opportunity.contact_url;
                     handleUserApply('external');
+                    window.location.href = url;
                   }}
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 text-base"
                 >
