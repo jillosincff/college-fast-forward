@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -374,9 +373,21 @@ const AnimatedNetworkHero = ({
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-orange-600">3.</span>
-                  <span>Enter your code (e.g., UFPARENTS or GATORS2025)</span>
+                  <span>Enter your code</span>
                 </li>
               </ol>
+            </div>
+            
+            <div className="text-center mt-2">
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  if (onRequestInvite) onRequestInvite();
+                }}
+                className="text-sm text-slate-600 hover:text-slate-900 underline"
+              >
+                Don't have a code? Request an invite
+              </button>
             </div>
           </div>
 
