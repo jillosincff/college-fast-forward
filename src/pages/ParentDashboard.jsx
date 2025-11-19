@@ -341,21 +341,24 @@ export default function ParentDashboard() {
           </Card>
         </div>
 
-        {/* Boost Your Gator to the Top - Crystal Clear CTA */}
-        <div className="bg-[#0021A5] rounded-2xl p-8 text-center shadow-lg">
-          <h3 className="text-3xl font-extrabold mb-4 text-white">🚀 Boost Your Gator to the Top</h3>
-          <p className="text-xl font-bold mb-3 text-[#FA4616]">
-            Every time you <span className="underline decoration-2">Post a Job or Share a Lead</span> (from anywhere),<br />
-            <span className="text-[#FA4616]">your student's request gets starred ⭐ and pinned to the top for 3 days.</span>
+        {/* Boost Your Gator to the Top Banner */}
+        <div className="bg-gradient-to-br from-blue-700 to-blue-500 rounded-2xl p-12 md:p-16 text-center text-white shadow-2xl">
+          <span className="text-5xl block mb-4 animate-bounce">🚀</span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
+            Boost Your Gator to the Top
+          </h1>
+          <p className="text-xl md:text-2xl mb-3 font-medium opacity-95">
+            Post jobs or share leads to give your student <span className="text-yellow-400 font-semibold">priority visibility ⭐</span>
           </p>
-          <p className="text-lg font-semibold mb-6 text-[#FA4616]">
-            Your action = your kid seen first.
+          <p className="text-lg md:text-xl mb-10 opacity-90">
+            Every contribution pins their profile for 3 days
           </p>
           <Button
             onClick={() => navigate('PostOpportunity')}
-            className="bg-white text-[#FA4616] hover:bg-slate-100 font-bold text-lg px-8 py-6 shadow-xl"
+            className="bg-white text-blue-700 hover:bg-slate-50 font-semibold text-lg px-9 py-6 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
           >
-            Post Job / Share Lead →
+            Start Helping Now
+            <span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Button>
         </div>
 
