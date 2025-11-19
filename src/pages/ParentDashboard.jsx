@@ -343,12 +343,12 @@ export default function ParentDashboard() {
 
         {/* Boost Your Gator to the Top - Crystal Clear CTA */}
         <div className="bg-[#FA4616] rounded-2xl p-8 text-white text-center shadow-lg">
-          <h3 className="text-2xl font-bold mb-3">🚀 Boost Your Gator to the Top</h3>
-          <p className="text-lg mb-2">
-            Every time you <strong>Post a Job or Share a Lead</strong> (from anywhere),<br />
-            <strong>your student's request gets starred ⭐ and pinned to the top for 3 days.</strong>
+          <h3 className="text-3xl font-extrabold mb-4 text-shadow-lg">🚀 Boost Your Gator to the Top</h3>
+          <p className="text-xl font-bold mb-3 text-shadow-md">
+            Every time you <span className="underline decoration-2">Post a Job or Share a Lead</span> (from anywhere),<br />
+            <span className="text-yellow-200">your student's request gets starred ⭐ and pinned to the top for 3 days.</span>
           </p>
-          <p className="text-base mb-6">
+          <p className="text-lg font-semibold mb-6 text-shadow">
             Your action = your kid seen first.
           </p>
           <Button
