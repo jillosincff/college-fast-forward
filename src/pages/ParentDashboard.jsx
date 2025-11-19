@@ -341,24 +341,23 @@ export default function ParentDashboard() {
           </Card>
         </div>
 
-        {/* Power Boost Info */}
-        <Card className="border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
-                <Crown className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  🚀 Boost Your Gator to the Top
-                </h3>
-                <p className="text-sm text-slate-700">
-                  Every time you help another Gator, your student's request gets <strong>starred and pinned at the top for 14 days</strong>. Your action = your kid seen first.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Boost Your Gator to the Top - Crystal Clear CTA */}
+        <div className="bg-[#FA4616] rounded-2xl p-8 text-white text-center shadow-lg">
+          <h3 className="text-2xl font-bold mb-3">🚀 Boost Your Gator to the Top</h3>
+          <p className="text-lg mb-2">
+            Every time you <strong>Post a Job or Share a Lead</strong> (from anywhere),<br />
+            <strong>your student's request gets starred ⭐ and pinned to the top for 3 days.</strong>
+          </p>
+          <p className="text-base mb-6">
+            Your action = your kid seen first.
+          </p>
+          <Button
+            onClick={() => navigate('PostOpportunity')}
+            className="bg-white text-[#FA4616] hover:bg-slate-100 font-bold text-lg px-8 py-6 shadow-xl"
+          >
+            Post Job / Share Lead →
+          </Button>
+        </div>
 
         {/* Quick Actions */}
         <Card>
