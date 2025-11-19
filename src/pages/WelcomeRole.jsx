@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -47,8 +47,8 @@ export default function WelcomeRole() {
     {
       id: 'gator',
       icon: GraduationCap,
-      title: 'UF Gator',
-      description: '@ufl.edu verified • Students, alumni',
+      title: "I'm a Gator (student or alum)",
+      description: 'Forever free — find jobs & get hired',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       emoji: '🐊'
@@ -56,11 +56,11 @@ export default function WelcomeRole() {
     {
       id: 'parent',
       icon: Users,
-      title: 'UF Parent',
-      description: 'Support Gators and share opportunities',
+      title: "I'm a Gator parent",
+      description: 'Help Gators get hired — open your network',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      emoji: '👨‍👩‍👧'
+      emoji: '🧡'
     }
   ];
 
@@ -81,24 +81,57 @@ export default function WelcomeRole() {
       const userEmail = user.email?.toLowerCase() || '';
       const hasUFLEmail = userEmail.endsWith('@ufl.edu');
       
-      // GATOR ROLE: Must have @ufl.edu email
+      // GATOR ROLE: @ufl.edu gets instant access, others need invite code
       if (selectedRole === 'gator') {
-        if (!hasUFLEmail) {
+        if (hasUFLEmail) {
+          console.log('✅ @ufl.edu Gator - instant access!');
+          
           toast({
-            title: "Verification Required",
-            description: "Gators must have a @ufl.edu email address.",
-            variant: "destructive"
+            title: "Welcome Gator! 🎉",
+            description: "You earned 50 points for joining with @ufl.edu!",
           });
-          setIsSubmitting(false);
-          return;
+        } else {
+          // Alumni without @ufl.edu need invite code
+          if (!inviteInfo || !inviteInfo.code) {
+            console.log('Alumni without @ufl.edu - needs invite code');
+            
+            sessionStorage.setItem('pending_role_selection', 'gator');
+            navigate('InviteRequired');
+            return;
+          }
+
+          console.log('Verifying alumni invite code...');
+          
+          const result = await verifyInviteCode({
+            code: inviteInfo.code,
+            invite_type: inviteInfo.type
+          });
+
+          if (!result.data.success) {
+            toast({
+              title: "Invite Verification Failed",
+              description: result.data.error || "Invalid invite code",
+              variant: "destructive"
+            });
+            
+            sessionStorage.removeItem('pending_invite_code');
+            sessionStorage.removeItem('pending_invite_type');
+            sessionStorage.removeItem('pending_inviter_name');
+            setInviteInfo(null);
+            setIsSubmitting(false);
+            return;
+          }
+
+          console.log('✅ Alumni invite verified successfully!');
+          toast({
+            title: "Welcome Gator! 🎉",
+            description: `Invited by ${result.data.inviter_name}. You earned 50 points!`,
+          });
+
+          sessionStorage.removeItem('pending_invite_code');
+          sessionStorage.removeItem('pending_invite_type');
+          sessionStorage.removeItem('pending_inviter_name');
         }
-        
-        console.log('✅ @ufl.edu Gator - instant access!');
-        
-        toast({
-          title: "Welcome Gator! 🎉",
-          description: "You earned 50 points for joining with @ufl.edu!",
-        });
       } 
       // PARENT ROLE: Must have invite code
       else if (selectedRole === 'parent') {
@@ -150,7 +183,8 @@ export default function WelcomeRole() {
         roles: [selectedRole],
         persona: selectedRole,
         onboarding_completed: false,
-        profile_completion_score: 10
+        profile_completion_score: 10,
+        gator_points: 50
       };
       
       console.log('🔄 WelcomeRole: Updating user with:', updateData);

@@ -144,13 +144,21 @@ export default function InviteRequired() {
                     setInviteCode(e.target.value.toUpperCase());
                     setErrorMessage('');
                   }}
-                  placeholder="e.g., UFPARENTS or XFG23H7K"
+                  placeholder="Enter your code"
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all uppercase tracking-wider text-center text-lg font-mono"
                   maxLength={15}
                 />
                 <p className="text-xs text-slate-500 mt-1 text-center">
                   For alumni & parents without @ufl.edu emails
                 </p>
+                <div className="text-center mt-3">
+                  <button
+                    onClick={() => navigate('RequestInvite')}
+                    className="text-sm text-slate-600 hover:text-slate-900 underline"
+                  >
+                    Don't have a code? Request an invite
+                  </button>
+                </div>
               </div>
 
               {/* Role Selection - Only show if NOT already selected from previous page */}
@@ -161,29 +169,29 @@ export default function InviteRequired() {
                   </label>
                   
                   <button
-                    onClick={() => setSelectedRole('gator')}
-                    className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-blue-300 transition-all"
+                   onClick={() => setSelectedRole('gator')}
+                   className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-blue-300 transition-all"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">🐊</span>
-                      <div className="text-left flex-grow">
-                        <p className="font-bold text-slate-900">Gator (Student or Alum)</p>
-                        <p className="text-sm text-slate-600">Forever free — find jobs & get hired</p>
-                      </div>
-                    </div>
+                   <div className="flex items-center gap-3">
+                     <span className="text-3xl">🐊</span>
+                     <div className="text-left flex-grow">
+                       <p className="font-bold text-slate-900">I'm a Gator (student or alum)</p>
+                       <p className="text-sm text-slate-600">Forever free — find jobs & get hired</p>
+                     </div>
+                   </div>
                   </button>
 
                   <button
-                    onClick={() => setSelectedRole('parent')}
-                    className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-orange-300 transition-all"
+                   onClick={() => setSelectedRole('parent')}
+                   className="w-full p-4 rounded-lg border-2 border-slate-200 hover:border-orange-300 transition-all"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">🧡</span>
-                      <div className="text-left flex-grow">
-                        <p className="font-bold text-slate-900">Gator Parent</p>
-                        <p className="text-sm text-slate-600">Help Gators get hired — open your network</p>
-                      </div>
-                    </div>
+                   <div className="flex items-center gap-3">
+                     <span className="text-3xl">🧡</span>
+                     <div className="text-left flex-grow">
+                       <p className="font-bold text-slate-900">I'm a Gator parent</p>
+                       <p className="text-sm text-slate-600">Help Gators get hired — open your network</p>
+                     </div>
+                   </div>
                   </button>
                 </div>
               )}
@@ -195,7 +203,7 @@ export default function InviteRequired() {
                     <span className="text-3xl">{selectedRole === 'parent' ? '🧡' : '🐊'}</span>
                     <div className="flex-grow">
                       <p className="font-bold text-slate-900">
-                        {selectedRole === 'parent' ? 'Gator Parent' : 'Gator (Student or Alum)'}
+                        {selectedRole === 'parent' ? "I'm a Gator parent" : "I'm a Gator (student or alum)"}
                       </p>
                       <p className="text-sm text-slate-600">
                         {selectedRole === 'parent' 
