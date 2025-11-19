@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
   try {
@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
             const emailBody = `Someone just joined College Fast Forward using your community invite code!
 
 New Member: ${currentUser.full_name || currentUser.email}
+
 Community: ${invite.group_name}
 Code Used: ${invite.code}
 
@@ -83,6 +84,7 @@ You earned +100 points! 🎊
 Keep sharing your code to help more Gators get hired!
 
 Go Gators! 🐊🧡💙
+
 College Fast Forward Team`;
 
             // Fire and forget - don't await
@@ -147,6 +149,7 @@ College Fast Forward Team`;
           const emailBody = `Great news! Someone just joined College Fast Forward using your invite code!
 
 New Member: ${currentUser.full_name || currentUser.email}
+
 Code Used: ${invite.code}
 
 You earned +100 points! 🎊
@@ -154,6 +157,7 @@ You earned +100 points! 🎊
 Keep inviting to build the Gator network!
 
 Go Gators! 🐊🧡💙
+
 College Fast Forward Team`;
 
           base44.asServiceRole.integrations.Core.SendEmail({
