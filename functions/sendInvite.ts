@@ -49,11 +49,20 @@ Go Gators! 🐊🧡💙
 
 College Fast Forward Team`;
 
-        await base44.asServiceRole.integrations.Core.SendEmail({
-            to: email,
-            subject: confirmationSubject,
-            body: confirmationBody
-        });
+        console.log(`Attempting to send confirmation email to: ${email}`);
+        
+        try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+                to: email,
+                subject: confirmationSubject,
+                body: confirmationBody,
+                from_name: 'College Fast Forward'
+            });
+            console.log(`Successfully sent confirmation email to: ${email}`);
+        } catch (emailError) {
+            console.error(`Failed to send confirmation email to ${email}:`, emailError);
+            // Don't throw - we still want to save the request even if email fails
+        }
 
         // Get all admin users to notify them
         const adminUsers = await base44.asServiceRole.entities.User.filter({
