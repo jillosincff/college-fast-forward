@@ -10,25 +10,33 @@ Deno.serve(async (req) => {
         return new Response('ok', { headers: corsHeaders });
     }
 
+    console.log('🚀 sendInvite function called');
+
     try {
         const base44 = createClientFromRequest(req);
+        
+        console.log('📧 Parsing request body...');
         const { email, full_name, user_type, reason } = await req.json();
+        console.log('📧 Request data:', { email, full_name, user_type, hasReason: !!reason });
 
-        if (!email || !full_name || !user_type || !reason) {
+        if (!email || !full_name || !user_type) {
+            console.error('❌ Missing required fields');
             return Response.json({ 
                 success: false, 
-                error: 'Missing required fields: email, full_name, user_type, reason' 
+                error: 'Missing required fields: email, full_name, user_type' 
             }, { status: 400 });
         }
 
+        console.log('💾 Creating InviteRequest entity...');
         // Create an InviteRequest entity
-        await base44.asServiceRole.entities.InviteRequest.create({
+        const inviteRequest = await base44.asServiceRole.entities.InviteRequest.create({
             email,
             full_name,
             user_type,
-            reason,
+            reason: reason || 'No reason provided',
             status: 'pending'
         });
+        console.log('✅ InviteRequest created:', inviteRequest.id);
 
         // Send confirmation email to the requester
         const confirmationSubject = 'Your College Fast Forward Invite Request Received! 🐊';
@@ -49,27 +57,36 @@ Go Gators! 🐊🧡💙
 
 College Fast Forward Team`;
 
-        console.log(`Attempting to send confirmation email to: ${email}`);
+        console.log(`📧 Attempting to send confirmation email to: ${email}`);
+        
+        let emailSent = false;
+        let emailError = null;
         
         try {
-            await base44.asServiceRole.integrations.Core.SendEmail({
+            const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
                 to: email,
                 subject: confirmationSubject,
                 body: confirmationBody,
                 from_name: 'College Fast Forward'
             });
-            console.log(`Successfully sent confirmation email to: ${email}`);
-        } catch (emailError) {
-            console.error(`Failed to send confirmation email to ${email}:`, emailError);
+            console.log('✅ Confirmation email sent successfully:', emailResult);
+            emailSent = true;
+        } catch (error) {
+            console.error(`❌ Failed to send confirmation email to ${email}:`, error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            emailError = error.message;
             // Don't throw - we still want to save the request even if email fails
         }
 
         // Get all admin users to notify them
+        console.log('👥 Fetching admin users...');
         const adminUsers = await base44.asServiceRole.entities.User.filter({
             role: 'admin'
         });
+        console.log(`Found ${adminUsers.length} admin users`);
 
         // Send notification to all admins
+        let adminNotificationsSent = 0;
         for (const admin of adminUsers) {
             const adminNotificationSubject = `New Invite Request: ${full_name} (${user_type})`;
             const adminNotificationBody = `A new invite request has been submitted:
@@ -79,24 +96,36 @@ Email: ${email}
 User Type: ${user_type}
 
 Reason:
-${reason}
+${reason || 'No reason provided'}
 
 Please review this request in the Admin Dashboard and approve/generate an invite code.`;
 
-            await base44.asServiceRole.integrations.Core.SendEmail({
-                to: admin.email,
-                subject: adminNotificationSubject,
-                body: adminNotificationBody
-            }).catch(err => {
-                console.log(`Failed to notify admin ${admin.email}:`, err.message);
-            });
+            try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
+                    to: admin.email,
+                    subject: adminNotificationSubject,
+                    body: adminNotificationBody,
+                    from_name: 'College Fast Forward'
+                });
+                console.log(`✅ Admin notification sent to ${admin.email}`);
+                adminNotificationsSent++;
+            } catch (err) {
+                console.error(`❌ Failed to notify admin ${admin.email}:`, err);
+                console.error('Admin email error details:', JSON.stringify(err, null, 2));
+            }
         }
         
-        console.log(`Invite request recorded and confirmation email sent to ${email}`);
+        console.log(`📊 Summary: Request created, ${emailSent ? 'confirmation email sent' : 'confirmation email FAILED'}, ${adminNotificationsSent}/${adminUsers.length} admin notifications sent`);
+        
+        const message = emailSent 
+            ? 'Invite request submitted successfully! Check your email for confirmation.'
+            : 'Invite request submitted, but we had trouble sending the confirmation email. Our team will still review your request and contact you at ' + email;
         
         return new Response(JSON.stringify({ 
             success: true, 
-            message: 'Invite request submitted successfully! Check your email for confirmation.' 
+            message,
+            emailSent,
+            adminNotificationsSent 
         }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
