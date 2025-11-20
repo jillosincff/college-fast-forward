@@ -879,6 +879,17 @@ export default function Layout() {
       reportWebVitals();
     }
 
+    // Suppress non-critical WebSocket errors
+    const originalError = console.error;
+    console.error = (...args) => {
+      const errorStr = args.join(' ');
+      if (errorStr.includes('WebSocket closed without opened')) {
+        // Suppress this specific non-critical error
+        return;
+      }
+      originalError.apply(console, args);
+    };
+
     console.log(`🚀 College Fast Forward ${APP_VERSION} initialized`);
     perfMonitor.start('app_init');
     perfMonitor.end('app_init');
