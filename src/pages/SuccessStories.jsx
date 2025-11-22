@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { SuccessStory } from '@/entities/SuccessStory';
 import { Button } from '@/components/ui/button';
 import StoryCard from '../components/stories/StoryCard';
