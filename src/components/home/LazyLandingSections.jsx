@@ -6,6 +6,7 @@ import { ArrowRight, Users, Home, Briefcase, Send, UserCheck, Handshake, CheckCi
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { getUserCount } from '@/functions/getUserCount';
 import {
   Dialog,
   DialogContent,
@@ -66,7 +67,6 @@ export default function LazyLandingSections() {
       try {
         console.log('🔍 LazyLandingSections: Fetching counts...');
         
-        const { getUserCount } = await import('@/functions/getUserCount');
         const response = await getUserCount();
         const data = response.data;
         
