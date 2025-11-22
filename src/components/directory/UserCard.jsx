@@ -106,9 +106,12 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
 
         {/* Description of Work - Parents/Alumni Only */}
         {isParentOrAlumni && user.description_of_work && (
-          <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <p className="text-xs font-semibold text-slate-700 mb-1">What they do:</p>
-            <p className={`text-sm text-slate-600 ${!isDescriptionExpanded && user.description_of_work.length > 100 ? 'line-clamp-2' : ''}`}>
+          <div className="mb-4 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <p className="text-xs font-semibold text-slate-800 mb-1 flex items-center gap-1">
+              <Briefcase className="w-3 h-3" />
+              What they do:
+            </p>
+            <p className={`text-sm text-slate-700 ${!isDescriptionExpanded && user.description_of_work.length > 100 ? 'line-clamp-2' : ''}`}>
               {user.description_of_work}
             </p>
             {user.description_of_work.length > 100 && (
@@ -118,6 +121,27 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
               >
                 {isDescriptionExpanded ? 'Show less' : 'Read more'}
               </button>
+            )}
+          </div>
+        )}
+
+        {/* Skills & Quick Info Badges */}
+        {(user.skills?.length > 0 || user.open_to_coffee_chats) && (
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {user.open_to_coffee_chats && (
+              <Badge className="bg-green-100 text-green-800 text-xs border border-green-300">
+                ☕ Open to coffee chats
+              </Badge>
+            )}
+            {user.skills?.slice(0, 3).map((skill, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                {skill}
+              </Badge>
+            ))}
+            {user.skills?.length > 3 && (
+              <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600">
+                +{user.skills.length - 3}
+              </Badge>
             )}
           </div>
         )}

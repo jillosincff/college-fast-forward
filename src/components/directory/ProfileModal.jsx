@@ -183,6 +183,77 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
                 </div>
               )}
 
+              {/* Skills Section */}
+              {profileUser.skills && profileUser.skills.length > 0 && (
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    Skills & Expertise
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {profileUser.skills.map((skill, idx) => (
+                      <Badge key={idx} className="bg-blue-100 text-blue-800 border-blue-300">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Industries of Interest */}
+              {profileUser.industries_of_interest && profileUser.industries_of_interest.length > 0 && (
+                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                  <h3 className="text-sm font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    Industries of Interest
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {profileUser.industries_of_interest.map((industry, idx) => (
+                      <Badge key={idx} className="bg-purple-100 text-purple-800 border-purple-300">
+                        {industry}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Communication Preferences */}
+              {(profileUser.open_to_coffee_chats || profileUser.preferred_communication || profileUser.response_time) && (
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <h3 className="text-sm font-semibold text-green-900 mb-3">Communication Preferences</h3>
+                  <div className="space-y-2 text-sm">
+                    {profileUser.open_to_coffee_chats && (
+                      <div className="flex items-center gap-2 text-green-800">
+                        <div className="w-2 h-2 bg-green-600 rounded-full" />
+                        <span>Open to informal coffee chats</span>
+                      </div>
+                    )}
+                    {profileUser.preferred_communication && (
+                      <div className="flex items-center gap-2 text-green-800">
+                        <div className="w-2 h-2 bg-green-600 rounded-full" />
+                        <span>Prefers: {profileUser.preferred_communication}</span>
+                      </div>
+                    )}
+                    {profileUser.response_time && (
+                      <div className="flex items-center gap-2 text-green-800">
+                        <div className="w-2 h-2 bg-green-600 rounded-full" />
+                        <span>Usually responds within: {profileUser.response_time.replace('_', ' ')}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Description of Work */}
+              {isParentOrAlumni && profileUser.description_of_work && (
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-800 mb-2">About Their Work</h3>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {profileUser.description_of_work}
+                  </p>
+                </div>
+              )}
+
               {/* Professional Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
