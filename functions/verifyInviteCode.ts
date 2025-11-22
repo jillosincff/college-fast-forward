@@ -5,7 +5,10 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { code } = await req.json();
 
+    console.log('🔑 Verifying invite code:', code);
+
     if (!code) {
+      console.error('❌ No code provided');
       return Response.json({ 
         success: false, 
         error: 'Invite code is required' 
@@ -13,11 +16,15 @@ Deno.serve(async (req) => {
     }
 
     // Find the invite code (case-insensitive)
+    console.log('🔍 Searching for code:', code.toUpperCase());
     const invites = await base44.asServiceRole.entities.InviteCode.filter({
       code: code.toUpperCase()
     });
 
+    console.log('📊 Found invites:', invites.length);
+
     if (invites.length === 0) {
+      console.error('❌ No matching invite code found');
       return Response.json({
         success: false,
         error: 'Invalid invite code'
@@ -25,9 +32,18 @@ Deno.serve(async (req) => {
     }
 
     const invite = invites[0];
+    console.log('✅ Found invite:', {
+      code: invite.code,
+      is_community: invite.is_community_invite,
+      current_uses: invite.current_uses,
+      max_uses: invite.max_uses,
+      status: invite.status,
+      expires_at: invite.expires_at
+    });
 
     // Check if expired
-    if (new Date(invite.expires_at) < new Date()) {
+    if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+      console.error('❌ Invite code expired:', invite.expires_at);
       return Response.json({
         success: false,
         error: 'This invite code has expired'
@@ -36,17 +52,23 @@ Deno.serve(async (req) => {
 
     // Check if community invite has reached max uses
     if (invite.is_community_invite) {
+      console.log('🏘️ Community invite - checking usage limits');
       if (invite.current_uses >= invite.max_uses) {
+        console.error('❌ Max uses reached:', invite.current_uses, '>=', invite.max_uses);
         return Response.json({
           success: false,
           error: 'This invite code has reached its maximum usage limit'
         });
       }
+      
+      console.log('✅ Usage limit OK:', invite.current_uses, '<', invite.max_uses);
 
       // Increment usage count
+      console.log('📈 Incrementing usage count from', invite.current_uses, 'to', invite.current_uses + 1);
       await base44.asServiceRole.entities.InviteCode.update(invite.id, {
         current_uses: invite.current_uses + 1
       });
+      console.log('✅ Usage count updated');
 
       // Get current user for notification (if authenticated)
       let currentUser = null;
@@ -185,7 +207,12 @@ College Fast Forward Team`;
     });
 
   } catch (error) {
-    console.error('Verify invite code error:', error);
+    console.error('❌ CRITICAL: Verify invite code error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return Response.json({ 
       success: false,
       error: error.message || 'Failed to verify invite code' 
