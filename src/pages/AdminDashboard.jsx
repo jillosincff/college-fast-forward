@@ -509,7 +509,7 @@ const AdminDashboard = () => {
                 className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <UserPlus className="w-4 h-4 mr-1" />
-                Add User
+                Manual Invite
               </TabsTrigger>
             </TabsList>
 
@@ -799,10 +799,10 @@ const ManualUserCreation = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [persona, setPersona] = useState('gator');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleGenerateInvite = async (e) => {
     e.preventDefault();
     
     if (!email || !fullName || !persona) {
@@ -816,43 +816,30 @@ const ManualUserCreation = () => {
 
     setLoading(true);
     try {
-      const response = await base44.functions.invoke('manualUserCreation', {
-        email: email.toLowerCase().trim(),
-        full_name: fullName.trim(),
-        persona: persona,
-        password: password.trim() || undefined
+      const response = await base44.functions.invoke('generateInviteCode', {
+        admin_email: email.toLowerCase().trim(),
+        note: `Manual invite for ${fullName}`,
+        max_uses: 1
       });
 
-      if (response.data?.success) {
-        // Show password if auto-generated
-        if (response.data.password) {
-          toast({
-            title: "✅ User Created!",
-            description: `Password: ${response.data.password} (Copy this now - it won't be shown again!)`,
-            duration: 60000, // Keep visible for 1 minute
-          });
-          
-          // Also show in alert for easy copying
-          alert(`User created successfully!\n\nEmail: ${email}\nPassword: ${response.data.password}\n\nCopy this password and send it to the user. They can change it after logging in.`);
-        } else {
-          toast({
-            title: "✅ User Created!",
-            description: `${fullName} has been added with the password you set.`,
-          });
-        }
+      if (response.data?.code) {
+        setInviteCode(response.data.code);
         
-        // Reset form
-        setEmail('');
-        setFullName('');
-        setPersona('gator');
-        setPassword('');
+        toast({
+          title: "✅ Invite Code Generated!",
+          description: `Send this code to ${fullName}`,
+          duration: 10000,
+        });
+        
+        // Show code in alert for easy copying
+        alert(`Invite Code Generated!\n\nCode: ${response.data.code}\n\nSend this code to ${email}. They should:\n1. Go to your app's landing page\n2. Click "Request Invite" or "Enter Invite Code"\n3. Enter this code to get access\n4. They'll then login with Google/Facebook`);
       } else {
-        throw new Error(response.data?.error || 'Failed to create user');
+        throw new Error(response.data?.error || 'Failed to generate invite');
       }
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error('Failed to generate invite:', error);
       toast({
-        title: "Error Creating User",
+        title: "Error",
         description: error.message || "Please try again",
         variant: "destructive"
       });
@@ -864,13 +851,13 @@ const ManualUserCreation = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Manually Add User</CardTitle>
+        <CardTitle className="text-lg">Generate Invite Code</CardTitle>
         <p className="text-sm text-slate-600 mt-2">
-          Create a user account directly when signup isn't working. User will be able to login immediately.
+          Create a single-use invite code for a user who's having trouble signing up.
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleGenerateInvite} className="space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700 mb-2 block">
               Full Name *
@@ -915,27 +902,37 @@ const ManualUserCreation = () => {
             </select>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
-              Password (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="Leave blank for auto-generated"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p className="text-xs text-slate-500 mt-1">
-              If left blank, a random secure password will be generated
-            </p>
-          </div>
+          {inviteCode && (
+            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+              <p className="text-sm font-semibold text-green-900 mb-2">Invite Code Generated:</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-white px-3 py-2 rounded border border-green-200 text-lg font-mono text-green-900">
+                  {inviteCode}
+                </code>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteCode);
+                    toast({ title: "Copied!", description: "Invite code copied to clipboard" });
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              💡 <strong>After creating:</strong> The user can login immediately with their email and password. 
-              They'll be prompted to complete onboarding when they first login.
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>📋 Instructions for the user:</strong>
             </p>
+            <ol className="text-xs text-blue-700 space-y-1 ml-4 list-decimal">
+              <li>Go to the app's landing page</li>
+              <li>Click "Request Invite" or enter the invite code</li>
+              <li>Enter the code you provide them</li>
+              <li>Complete registration by logging in with Google or Facebook</li>
+            </ol>
           </div>
 
           <Button 
@@ -946,12 +943,12 @@ const ManualUserCreation = () => {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating User...
+                Generating Code...
               </>
             ) : (
               <>
                 <UserPlus className="w-4 h-4 mr-2" />
-                Create User Account
+                Generate Invite Code
               </>
             )}
           </Button>
