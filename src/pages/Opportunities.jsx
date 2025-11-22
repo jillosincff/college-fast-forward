@@ -440,7 +440,7 @@ export default function OpportunitiesPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12">
       {selectedOpportunity && showApplyModal && (
         <ApplyModal 
           isOpen={showApplyModal} 
@@ -526,7 +526,7 @@ export default function OpportunitiesPage() {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto max-h-screen">
                 <SheetHeader>
                   <SheetTitle>Advanced Filters</SheetTitle>
                   <SheetDescription>
