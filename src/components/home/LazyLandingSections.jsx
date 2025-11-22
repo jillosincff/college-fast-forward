@@ -579,7 +579,10 @@ export default function LazyLandingSections() {
                 />
                 {!isLoadingCount && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white font-bold text-base md:text-lg px-2 drop-shadow-lg">
+                    <span className="font-bold text-base md:text-lg px-2" style={{
+                      color: '#0021A5',
+                      textShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 4px rgba(255,255,255,0.8)'
+                    }}>
                       {stats.totalUsers} / 1,000
                     </span>
                   </div>
