@@ -197,6 +197,27 @@ export default function DiscoverEmergingGatorsPage() {
         {/* Hero Banner */}
         <EmergingGatorsHero onBrowse={handleBrowse} />
 
+        {/* CTA Banner for Students */}
+        {user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
+          <div className="cta-banner-students">
+            <div className="cta-content">
+              <div className="cta-icon">🎯</div>
+              <div className="cta-text">
+                <h3>Get noticed by parents and alumni!</h3>
+                <p>Post what you're looking for and let the network help you. Takes 2 minutes.</p>
+              </div>
+              <Button 
+                onClick={() => navigate('PostRequest')}
+                className="cta-button"
+                size="lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Post Your Career Request
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Search and Filters - Sticky */}
         <div className="filters-section-sticky" id="listings-section">
           <div className="filters-container">
@@ -329,13 +350,30 @@ export default function DiscoverEmergingGatorsPage() {
                 {filteredProfiles.length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🐊</div>
-                    <h3>No students yet</h3>
-                    <p>Check back soon! Students will appear here once they start posting their career requests.</p>
+                    <h3>{user?.persona === 'gator' ? 'Be the first!' : 'No students yet'}</h3>
+                    <p>
+                      {user?.persona === 'gator' 
+                        ? "Be among the first students to post what you're looking for. Parents and alumni are waiting to help!"
+                        : "Encourage students to post their career requests. Once they do, you'll see them here and can offer help!"}
+                    </p>
                     {user?.persona === 'gator' && (
-                      <Button onClick={() => navigate('PostRequest')} className="mt-4">
-                        Post Your Request
+                      <Button onClick={() => navigate('PostRequest')} size="lg" className="mt-4 bg-[#FA4616] hover:bg-orange-600">
+                        <Plus className="w-5 h-5 mr-2" />
+                        Post Your Career Request Now
                       </Button>
                     )}
+                  </div>
+                )}
+                
+                {filteredProfiles.length > 0 && filteredProfiles.length < 5 && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
+                  <div className="encourage-post-card">
+                    <div className="encourage-content">
+                      <h4>🌟 Stand out to the network!</h4>
+                      <p>Only {filteredProfiles.length} students have posted so far. Post your career goals and get personalized help from parents and alumni.</p>
+                      <Button onClick={() => navigate('PostRequest')} className="mt-3" variant="outline">
+                        Post What You're Looking For
+                      </Button>
+                    </div>
                   </div>
                 )}
               </>
@@ -763,6 +801,79 @@ export default function DiscoverEmergingGatorsPage() {
           opacity: 0.8;
         }
 
+        .cta-banner-students {
+          max-width: 1400px;
+          margin: -16px auto 32px;
+          padding: 0 20px;
+        }
+
+        .cta-content {
+          background: linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%);
+          border-radius: 16px;
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          box-shadow: 0 8px 16px rgba(250, 70, 22, 0.2);
+        }
+
+        .cta-icon {
+          font-size: 48px;
+          flex-shrink: 0;
+        }
+
+        .cta-text {
+          flex: 1;
+          color: white;
+        }
+
+        .cta-text h3 {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+
+        .cta-text p {
+          font-size: 16px;
+          opacity: 0.95;
+        }
+
+        .cta-button {
+          background: white !important;
+          color: #FA4616 !important;
+          font-weight: 700;
+          padding: 12px 24px;
+          flex-shrink: 0;
+        }
+
+        .cta-button:hover {
+          background: #f8f9fa !important;
+          transform: scale(1.05);
+        }
+
+        .encourage-post-card {
+          grid-column: 1 / -1;
+          background: linear-gradient(135deg, #FFF4ED 0%, #FFE8D9 100%);
+          border: 2px dashed #FA4616;
+          border-radius: 12px;
+          padding: 24px;
+          text-align: center;
+        }
+
+        .encourage-content h4 {
+          font-size: 20px;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 8px;
+        }
+
+        .encourage-content p {
+          font-size: 16px;
+          color: #64748b;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
         @media (max-width: 1200px) {
           .main-content-area {
             grid-template-columns: 1fr;
@@ -774,6 +885,46 @@ export default function DiscoverEmergingGatorsPage() {
         }
 
         @media (max-width: 768px) {
+          .cta-banner-students {
+            margin: -8px auto 16px;
+            padding: 0 12px;
+          }
+
+          .cta-content {
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+            gap: 16px;
+          }
+
+          .cta-icon {
+            font-size: 40px;
+          }
+
+          .cta-text h3 {
+            font-size: 20px;
+          }
+
+          .cta-text p {
+            font-size: 14px;
+          }
+
+          .cta-button {
+            width: 100%;
+          }
+
+          .encourage-post-card {
+            padding: 20px;
+          }
+
+          .encourage-content h4 {
+            font-size: 18px;
+          }
+
+          .encourage-content p {
+            font-size: 14px;
+          }
+
           .filters-section-sticky {
             top: 0;
             padding: 12px 0;
