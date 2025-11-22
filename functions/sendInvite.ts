@@ -20,23 +20,30 @@ Deno.serve(async (req) => {
         console.log('📧 Request data:', { email, full_name, user_type, hasReason: !!reason });
 
         if (!email || !full_name || !user_type) {
-            console.error('❌ Missing required fields');
+            console.error('❌ Missing required fields', { email: !!email, full_name: !!full_name, user_type: !!user_type });
             return Response.json({ 
                 success: false, 
                 error: 'Missing required fields: email, full_name, user_type' 
-            }, { status: 400 });
+            }, { status: 400, headers: corsHeaders });
         }
 
         console.log('💾 Creating InviteRequest entity...');
         // Create an InviteRequest entity
-        const inviteRequest = await base44.asServiceRole.entities.InviteRequest.create({
-            email,
-            full_name,
-            user_type,
-            reason: reason || 'No reason provided',
-            status: 'pending'
-        });
-        console.log('✅ InviteRequest created:', inviteRequest.id);
+        let inviteRequest;
+        try {
+            inviteRequest = await base44.asServiceRole.entities.InviteRequest.create({
+                email,
+                full_name,
+                user_type,
+                reason: reason || 'No reason provided',
+                status: 'pending'
+            });
+            console.log('✅ InviteRequest created:', inviteRequest.id);
+        } catch (dbError) {
+            console.error('❌ CRITICAL: Failed to create InviteRequest entity:', dbError);
+            console.error('Database error details:', JSON.stringify(dbError, null, 2));
+            throw new Error('Failed to save invite request to database: ' + dbError.message);
+        }
 
         // Send confirmation email to the requester
         const confirmationSubject = 'Your College Fast Forward Invite Request Received! 🐊';

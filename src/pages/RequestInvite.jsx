@@ -32,15 +32,24 @@ export default function RequestInvite() {
     }
 
     setLoading(true);
-    console.log('🚀 Submitting invite request...', { email, fullName, userType });
+    const requestData = {
+      email: email.toLowerCase().trim(),
+      full_name: fullName.trim(),
+      user_type: userType,
+      reason: reason.trim() || 'No reason provided',
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+    
+    console.log('🚀 Submitting invite request...', requestData);
     
     try {
       console.log('📞 Calling sendInvite function...');
       const response = await base44.functions.invoke('sendInvite', {
-        email: email.toLowerCase().trim(),
-        full_name: fullName.trim(),
-        user_type: userType,
-        reason: reason.trim() || 'No reason provided'
+        email: requestData.email,
+        full_name: requestData.full_name,
+        user_type: requestData.user_type,
+        reason: requestData.reason
       });
 
       console.log('✅ Function response:', response);
@@ -49,6 +58,14 @@ export default function RequestInvite() {
         console.log('✅ Success! Showing confirmation page');
         console.log('Email sent status:', response.data.emailSent);
         console.log('Admin notifications:', response.data.adminNotificationsSent);
+        
+        // Log success for debugging
+        console.log('📊 SUCCESS LOG:', {
+          email: requestData.email,
+          timestamp: requestData.timestamp,
+          emailSent: response.data.emailSent,
+          adminNotifications: response.data.adminNotificationsSent
+        });
         
         setSubmitted(true);
         
@@ -67,16 +84,39 @@ export default function RequestInvite() {
         }
       } else {
         console.error('❌ Function returned error:', response.data);
+        
+        // Log failure for debugging
+        console.error('📊 FAILURE LOG:', {
+          email: requestData.email,
+          timestamp: requestData.timestamp,
+          error: response.data?.error,
+          fullResponse: response
+        });
+        
         throw new Error(response.data?.error || 'Failed to submit');
       }
 
     } catch (error) {
       console.error('❌ Error submitting invite request:', error);
       console.error('Error details:', { message: error.message, stack: error.stack });
+      
+      // Comprehensive error logging
+      console.error('📊 ERROR LOG:', {
+        email: requestData.email,
+        timestamp: requestData.timestamp,
+        errorMessage: error.message,
+        errorType: error.name,
+        errorStack: error.stack,
+        userAgent: requestData.userAgent
+      });
+      
+      // Show detailed error to user
+      const errorMsg = error.message || "Failed to submit request. Please try again.";
       toast({
-        title: "Error",
-        description: error.message || "Failed to submit request. Please try again.",
-        variant: "destructive"
+        title: "Error Submitting Request",
+        description: `${errorMsg}. If this persists, please email us directly with your details.`,
+        variant: "destructive",
+        duration: 10000
       });
     } finally {
       setLoading(false);
