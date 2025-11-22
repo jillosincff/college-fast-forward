@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Generate password if not provided
+    const userPassword = password || Math.random().toString(36).slice(-12) + 'Aa1!';
+
     // Initialize Supabase admin client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -50,7 +53,7 @@ Deno.serve(async (req) => {
     // Create user in Supabase Auth
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: email.toLowerCase().trim(),
-      password: password || Math.random().toString(36).slice(-12) + 'Aa1!',
+      password: userPassword,
       email_confirm: true,
       user_metadata: {
         full_name: full_name.trim(),
@@ -86,8 +89,8 @@ Deno.serve(async (req) => {
         full_name: full_name.trim(),
         persona: persona
       },
-      message: 'User created successfully',
-      password_sent: !password
+      password: password ? null : userPassword,
+      message: 'User created successfully'
     }, { headers: corsHeaders });
 
   } catch (error) {

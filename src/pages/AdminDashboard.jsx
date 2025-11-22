@@ -824,10 +824,22 @@ const ManualUserCreation = () => {
       });
 
       if (response.data?.success) {
-        toast({
-          title: "✅ User Created!",
-          description: `${fullName} has been added to the system. ${response.data.password_sent ? 'A temporary password was generated.' : ''}`,
-        });
+        // Show password if auto-generated
+        if (response.data.password) {
+          toast({
+            title: "✅ User Created!",
+            description: `Password: ${response.data.password} (Copy this now - it won't be shown again!)`,
+            duration: 60000, // Keep visible for 1 minute
+          });
+          
+          // Also show in alert for easy copying
+          alert(`User created successfully!\n\nEmail: ${email}\nPassword: ${response.data.password}\n\nCopy this password and send it to the user. They can change it after logging in.`);
+        } else {
+          toast({
+            title: "✅ User Created!",
+            description: `${fullName} has been added with the password you set.`,
+          });
+        }
         
         // Reset form
         setEmail('');
