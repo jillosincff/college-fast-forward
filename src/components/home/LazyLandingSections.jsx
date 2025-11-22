@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -51,43 +50,42 @@ const testimonials = [
 
 export default function LazyLandingSections() {
   const { user } = useAuth();
-  const [totalGatorsCount, setTotalGatorsCount] = useState(33);
+  const [stats, setStats] = useState({
+    totalUsers: 485,
+    studentCount: 66,
+    spotsLeft: 515
+  });
   const [isLoadingCount, setIsLoadingCount] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [showAuthInstructions, setShowAuthInstructions] = useState(false);
 
-  // Fetch actual user count on mount - ONLY if user is authenticated
+  // Fetch actual user count on mount
   useEffect(() => {
     const fetchUserCount = async () => {
-      if (!user) {
-        console.log('User not authenticated, using default count');
-        return;
-      }
-
       setIsLoadingCount(true);
       try {
-        const users = await base44.entities.User.filter({
-          persona: { $in: ['gator', 'parent'] }
+        console.log('🔍 LazyLandingSections: Fetching counts...');
+        
+        const { getUserCount } = await import('@/functions/getUserCount');
+        const response = await getUserCount();
+        const data = response.data;
+        
+        console.log('✅ LazyLandingSections: Data received:', data);
+        
+        setStats({
+          totalUsers: data?.totalUsers || data?.count || 485,
+          studentCount: data?.gatorCount || data?.studentCount || 66,
+          spotsLeft: data?.spotsLeft || 515
         });
-        setTotalGatorsCount(users.length);
       } catch (error) {
-        console.log('Could not fetch user count, using default:', error);
-        setTotalGatorsCount(33);
+        console.error('❌ LazyLandingSections: Error:', error);
       } finally {
         setIsLoadingCount(false);
       }
     };
 
     fetchUserCount();
-
-    if (user) {
-      const interval = setInterval(() => {
-        fetchUserCount();
-      }, 60000);
-
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -141,8 +139,8 @@ export default function LazyLandingSections() {
     }, 200);
   };
 
-  const progressPercentage = Math.min((totalGatorsCount / 1000) * 100, 100);
-  const remainingToGoal = Math.max(0, 1000 - totalGatorsCount);
+  const progressPercentage = Math.min((stats.totalUsers / 1000) * 100, 100);
+  const remainingToGoal = stats.spotsLeft;
 
   return (
     <>
@@ -582,7 +580,7 @@ export default function LazyLandingSections() {
                 {!isLoadingCount && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-white font-bold text-base md:text-lg px-2 drop-shadow-lg">
-                      {totalGatorsCount} / 1,000
+                      {stats.totalUsers} / 1,000
                     </span>
                   </div>
                 )}
