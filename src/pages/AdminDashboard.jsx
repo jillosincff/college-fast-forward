@@ -461,7 +461,7 @@ const AdminDashboard = () => {
 
         {analytics && (
           <Tabs defaultValue="growth" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 gap-2 h-auto p-2 bg-white border border-slate-200">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-7 gap-2 h-auto p-2 bg-white border border-slate-200">
               <TabsTrigger 
                 value="growth" 
                 className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -503,6 +503,13 @@ const AdminDashboard = () => {
               >
                 <Share2 className="w-4 h-4 mr-1" />
                 Community Invites
+              </TabsTrigger>
+              <TabsTrigger 
+                value="manual" 
+                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                <UserPlus className="w-4 h-4 mr-1" />
+                Add User
               </TabsTrigger>
             </TabsList>
 
@@ -774,10 +781,171 @@ const AdminDashboard = () => {
             <TabsContent value="community" className="space-y-6">
               <CommunityInviteManager />
             </TabsContent>
+
+            {/* Manual User Creation Tab */}
+            <TabsContent value="manual" className="space-y-6">
+              <ManualUserCreation />
+            </TabsContent>
           </Tabs>
         )}
       </div>
     </div>
+  );
+};
+
+// Manual User Creation Component
+const ManualUserCreation = () => {
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [persona, setPersona] = useState('gator');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!email || !fullName || !persona) {
+      toast({
+        title: "Missing Fields",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await base44.functions.invoke('manualUserCreation', {
+        email: email.toLowerCase().trim(),
+        full_name: fullName.trim(),
+        persona: persona,
+        password: password.trim() || undefined
+      });
+
+      if (response.data?.success) {
+        toast({
+          title: "✅ User Created!",
+          description: `${fullName} has been added to the system. ${response.data.password_sent ? 'A temporary password was generated.' : ''}`,
+        });
+        
+        // Reset form
+        setEmail('');
+        setFullName('');
+        setPersona('gator');
+        setPassword('');
+      } else {
+        throw new Error(response.data?.error || 'Failed to create user');
+      }
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      toast({
+        title: "Error Creating User",
+        description: error.message || "Please try again",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Manually Add User</CardTitle>
+        <p className="text-sm text-slate-600 mt-2">
+          Create a user account directly when signup isn't working. User will be able to login immediately.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              placeholder="Jane Smith"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              placeholder="jane@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              User Type *
+            </label>
+            <select
+              value={persona}
+              onChange={(e) => setPersona(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="gator">Student (Gator)</option>
+              <option value="parent">Parent</option>
+              <option value="alumni">Alumni</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Password (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Leave blank for auto-generated"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              If left blank, a random secure password will be generated
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              💡 <strong>After creating:</strong> The user can login immediately with their email and password. 
+              They'll be prompted to complete onboarding when they first login.
+            </p>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Creating User...
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create User Account
+              </>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
