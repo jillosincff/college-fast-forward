@@ -1,323 +1,510 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { User } from '@/entities/User';
+import { JobRequest } from '@/entities/JobRequest';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, LogOut, Sparkles, ArrowRight } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { LogOut, Sparkles, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-// Import student onboarding steps - ONLY StudentStep1Profile
-import StudentStep1Profile from '@/components/onboarding/student/StudentStep1Profile';
+const PRIMARY_GOALS = [
+  { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
+  { value: 'summer_2026', label: 'Summer 2026 internship', icon: '☀️' },
+  { value: 'spring_fall_2026', label: 'Spring/Fall 2026 internship', icon: '🍂' },
+  { value: 'part_time', label: 'Part-time / side gig now', icon: '⏰' },
+  { value: 'mentorship', label: 'Advice / mentorship / coffee chat', icon: '☕' },
+  { value: 'resume_help', label: 'Resume or interview help only', icon: '📄' }
+];
 
-// Helper function to capitalize names
-const capitalizeName = (name) => {
-  if (!name) return '';
-  return name.trim().split(' ').map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(' ');
-};
+const POPULAR_ROLES = [
+  'Software Engineer', 'Data Analyst', 'Investment Banking', 'Consulting',
+  'Product Management', 'Marketing', 'Finance', 'Sales', 'UX/UI', 'Healthcare'
+];
+
+const INDUSTRIES = [
+  'Tech', 'Finance', 'Consulting', 'Healthcare', 'Consumer / Retail',
+  'Government / Non-profit', 'Media / Entertainment', 'Real Estate', 'Other'
+];
+
+const LOCATIONS = [
+  'Open to anywhere / remote', 'Gainesville area', 'Orlando / Central Florida',
+  'Jacksonville', 'Tampa / St. Pete', 'Miami / South Florida',
+  'Atlanta, NYC, D.C., or other major cities'
+];
+
+const TIMELINES = [
+  { value: 'asap', label: 'As soon as possible' },
+  { value: 'summer_2026', label: 'Summer 2026' },
+  { value: 'fall_2026', label: 'Fall 2026' },
+  { value: 'after_grad_2026', label: 'After graduation 2026' },
+  { value: 'after_grad_2027', label: 'After graduation 2027' },
+  { value: 'after_grad_2028', label: 'After graduation 2028' }
+];
 
 export default function StudentOnboarding() {
-  const { user, refreshUser, logout, onSignupComplete } = useAuth();
-  const [currentStep, setCurrentStep] = useState(0); // Start at 0 for welcome
+  const { user, refreshUser, logout } = useAuth();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showExitModal, setShowExitModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [liveViewCount, setLiveViewCount] = useState(0);
 
-  // Simplified form data for onboarding
   const [formData, setFormData] = useState({
-    first_name: user?.first_name || '',
-    last_name: user?.last_name || '',
-    full_name: user?.full_name || '',
-    graduation_year: user?.graduation_year || new Date().getFullYear() + 2,
-    major: user?.major || '',
-    school: user?.school || 'University of Florida',
-    location: user?.location || '',
-    linkedin_url: user?.linkedin_url || '',
-    bio: user?.bio || '',
-    profile_image_url: user?.profile_image_url || '',
-    includeInDirectory: user?.includeInDirectory !== false,
+    primary_goal: '',
+    target_roles: [],
+    custom_role: '',
+    target_industries: [],
+    dream_companies: '',
+    location_preferences: [],
+    custom_location: '',
+    timeline: '',
+    one_sentence_pitch: ''
   });
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
-  const prevStep = () => setCurrentStep(prev => Math.max(0, prev - 1));
+  // Auto-save every 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (Object.values(formData).some(v => v !== '' && v.length !== 0)) {
+        localStorage.setItem('student_onboarding_draft', JSON.stringify(formData));
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [formData]);
 
-  const handleUpdate = (data) => {
-    // Capitalize names when updated
-    const updates = { ...data };
-    if (data.first_name !== undefined) {
-      updates.first_name = capitalizeName(data.first_name);
+  // Load draft on mount
+  useEffect(() => {
+    const draft = localStorage.getItem('student_onboarding_draft');
+    if (draft) {
+      try {
+        setFormData(JSON.parse(draft));
+      } catch (e) {
+        console.error('Failed to load draft');
+      }
     }
-    if (data.last_name !== undefined) {
-      updates.last_name = capitalizeName(data.last_name);
-    }
+  }, []);
 
-    // Auto-construct full_name if first_name or last_name are being updated
-    if (data.first_name !== undefined || data.last_name !== undefined) {
-      const currentFirstName = updates.first_name !== undefined ? updates.first_name : formData.first_name;
-      const currentLastName = updates.last_name !== undefined ? updates.last_name : formData.last_name;
-      updates.full_name = `${currentFirstName} ${currentLastName}`.trim();
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleMultiSelect = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].includes(value)
+        ? prev[field].filter(v => v !== value)
+        : [...prev[field], value]
+    }));
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 1: return formData.primary_goal !== '';
+      case 2: return formData.target_roles.length > 0 || formData.custom_role !== '';
+      case 3: return formData.target_industries.length > 0;
+      case 4: return true; // Dream companies optional
+      case 5: return formData.location_preferences.length > 0 || formData.custom_location !== '';
+      case 6: return formData.timeline !== '';
+      case 7: return formData.one_sentence_pitch.trim().length >= 20;
+      default: return false;
     }
-    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleNext = () => {
+    if (canProceed()) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(1, prev - 1));
   };
 
   const handleSubmit = async () => {
+    if (!canProceed()) return;
+    
     setIsSubmitting(true);
-
     try {
-      // First verify we have a valid user context
-      if (!user || !user.id || !user.email) {
-        throw new Error('User authentication is required. Please sign in again.');
-      }
-
-      // Construct full_name from first and last name if not already set, ensuring capitalization
-      const firstName = capitalizeName(formData.first_name);
-      const lastName = capitalizeName(formData.last_name);
-      const fullName = `${firstName} ${lastName}`.trim();
-
-      // Ensure graduation_year is a number if provided
-      const updateData = {
-        ...formData,
-        first_name: firstName,
-        last_name: lastName,
-        full_name: fullName,
-        graduation_year: formData.graduation_year ? parseInt(formData.graduation_year) : null,
-        major: formData.major || null,
-        school: formData.school || null,
-        location: formData.location || null,
-        linkedin_url: formData.linkedin_url || null,
-        bio: formData.bio || null,
-        profile_image_url: formData.profile_image_url || null,
-        includeInDirectory: Boolean(formData.includeInDirectory),
-        onboarding_completed: true,
-        profile_completion_score: 75,
-      };
-
-      // Validate required fields
-      if (!updateData.first_name || updateData.first_name.trim() === '') {
-        throw new Error('First name is required');
-      }
-      if (!updateData.last_name || updateData.last_name.trim() === '') {
-        throw new Error('Last name is required');
-      }
-
-      // Try to refresh user first to ensure valid session
-      await refreshUser();
-
-      await User.updateMyUserData(updateData);
-
-      // Refresh to get the updated user object
-      await refreshUser();
+      // Build the job request description
+      const roles = formData.target_roles.length > 0 
+        ? formData.target_roles.join(', ') 
+        : formData.custom_role;
       
-      // Get the fresh user data
-      const updatedUser = await User.me();
+      const description = `${formData.one_sentence_pitch}\n\nLooking for: ${roles} in ${formData.target_industries.join(', ')}`;
+      
+      const locations = formData.location_preferences.length > 0
+        ? formData.location_preferences.join(', ')
+        : formData.custom_location;
 
-      // Clear invite session data after successful onboarding
+      // Create job request
+      await JobRequest.create({
+        role: roles.split(',')[0].trim(), // First role as main role
+        title: `${formData.primary_goal.replace(/_/g, ' ')} - ${roles.split(',')[0].trim()}`,
+        description: description,
+        target_industry: formData.target_industries[0] || 'Various',
+        location_preference: locations,
+        start_timing: formData.timeline,
+        status: 'active',
+        target_helpers: ['alumni', 'parents']
+      });
+
+      // Mark onboarding complete
+      await User.updateMyUserData({
+        onboarding_completed: true,
+        profile_completion_score: 90
+      });
+
+      localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
-      sessionStorage.removeItem('pending_invite_type');
-      sessionStorage.removeItem('pending_inviter_name');
 
-      // Call onSignupComplete to handle proper routing
-      if (onSignupComplete) {
-        onSignupComplete(updatedUser);
-      } else {
-        // Fallback if onSignupComplete is not available
-        navigate('Dashboard');
-      }
+      // Success animation
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FA4616', '#0021A5', '#FF6B35']
+      });
+
+      setShowSuccess(true);
+      
+      // Simulate live counter
+      let count = Math.floor(Math.random() * 20) + 30;
+      setLiveViewCount(count);
+      const interval = setInterval(() => {
+        count += Math.floor(Math.random() * 3);
+        setLiveViewCount(count);
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        refreshUser().then(() => navigate('Dashboard'));
+      }, 5000);
 
     } catch (error) {
-      let userFriendlyMessage = 'There was an error completing your profile. ';
-
-      if (error.status === 401 || error.message?.includes('authentication') || error.message?.includes('Unauthorized')) {
-        userFriendlyMessage = 'Your session has expired. Please sign in again to complete your profile.';
-        setTimeout(() => {
-          navigate('LandingPage');
-        }, 2000);
-      } else if (error.message?.includes('required')) {
-        userFriendlyMessage += 'Please make sure all required fields are filled out.';
-      } else if (error.message?.includes('validation')) {
-        userFriendlyMessage += 'Please check your information format.';
-      } else if (error.status === 403) {
-        userFriendlyMessage += 'Permission denied. Please contact support.';
-      } else {
-        userFriendlyMessage += `Error: ${error.message}`;
-      }
-
-      alert(userFriendlyMessage);
+      console.error('Failed to submit onboarding:', error);
+      alert('Failed to submit your request. Please try again.');
       setIsSubmitting(false);
     }
   };
 
-  const handleExitClick = () => {
-    if (currentStep > 0) {
-      setShowExitModal(true);
-    } else {
-      navigate('LandingPage');
-    }
-  };
-
-  const handleConfirmExit = () => {
-    setShowExitModal(false);
-    logout();
-    navigate('LandingPage');
-  };
-
-  // Welcome step component
-  const WelcomeStep = () => {
-    const [showContent, setShowContent] = useState(false);
-
-    useEffect(() => {
-      // Trigger confetti
-      const duration = 3000;
-      const end = Date.now() + duration;
-      const colors = ['#0021A5', '#FA4616', '#FF6B35', '#004E98'];
-
-      (function frame() {
-        confetti({
-          particleCount: 3,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: colors
-        });
-        confetti({
-          particleCount: 3,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: colors
-        });
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      }());
-
-      setTimeout(() => setShowContent(true), 500);
-    }, []);
-
-    const userName = capitalizeName(user?.first_name || user?.full_name?.split(' ')[0] || 'Gator');
-
+  if (showSuccess) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="p-8 md:p-12 text-center min-h-[500px] flex flex-col items-center justify-center"
-      >
+      <div className="min-h-screen bg-gradient-to-br from-[#FA4616] to-[#0021A5] flex items-center justify-center p-4">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-          className="mb-6"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="max-w-2xl w-full bg-white rounded-3xl p-12 text-center shadow-2xl"
         >
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-2xl">
-            <span className="text-5xl">🐊</span>
+          <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="w-12 h-12 text-white" />
           </div>
+          <h1 className="text-4xl font-bold text-[#0021A5] mb-4">
+            Your request is live in the Gator Network!
+          </h1>
+          <div className="text-6xl font-bold text-[#FA4616] mb-2">
+            {liveViewCount}
+          </div>
+          <p className="text-lg text-slate-600 mb-6">
+            Gators have already seen it in the last 5 minutes
+          </p>
+          <div className="text-6xl mb-4">🐊</div>
+          <p className="text-slate-500">Redirecting you to your dashboard...</p>
         </motion.div>
-
-        {showContent && (
-          <>
-            <motion.h1
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl font-bold text-slate-900 mb-4"
-            >
-              Welcome, {userName}! 🎉
-            </motion.h1>
-
-            <motion.p
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl text-slate-600 mb-6 max-w-lg"
-            >
-              You're now part of the Gator network! Let's set up your profile to unlock opportunities.
-            </motion.p>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center gap-3 text-blue-600 mb-8"
-            >
-              <Sparkles className="w-5 h-5" />
-              <span className="font-medium">Takes just 2 minutes</span>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Button
-                onClick={nextStep}
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                Let's Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </motion.div>
-          </>
-        )}
-      </motion.div>
+      </div>
     );
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative">
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 md:top-6 md:left-6 text-slate-600 hover:text-slate-900 z-10"
-        onClick={handleExitClick}
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Home
-      </Button>
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <img
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+            alt="College Fast Forward"
+            className="h-12"
+          />
+          <Button variant="ghost" onClick={() => logout()} size="sm">
+            <LogOut className="w-4 h-4 mr-2" />
+            Start Over
+          </Button>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="h-2 bg-slate-200">
+          <motion.div
+            className="h-full bg-gradient-to-r from-[#FA4616] to-[#FF8C42]"
+            initial={{ width: 0 }}
+            animate={{ width: `${(currentStep / 7) * 100}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+      </div>
 
-      <Button
-        variant="ghost"
-        className="absolute top-4 right-4 md:top-6 md:right-6 text-slate-600 hover:text-slate-900 z-10"
-        onClick={() => logout()}
-        aria-label="Start Over"
-      >
-        <LogOut className="w-4 h-4 mr-2" />
-        Start Over
-      </Button>
+      <div className="pt-28 pb-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Title Section */}
+          <motion.div
+            key="header"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-5xl font-black text-[#FA4616] mb-3">
+              Unlock Your Gator Network
+            </h1>
+            <p className="text-2xl font-semibold text-[#0021A5] mb-2">
+              Tell us what you need — Gator parents & alumni are ready to help
+            </p>
+            <div className="flex items-center justify-center gap-2 text-slate-600">
+              <Sparkles className="w-5 h-5" />
+              <span>Takes 90 seconds. The more detail, the faster you'll get responses.</span>
+            </div>
+          </motion.div>
 
-      <Card className="w-full max-w-2xl mx-auto shadow-2xl bg-white/80 backdrop-blur-sm border-0">
-        <CardContent className="p-0">
-          {currentStep === 0 && <WelcomeStep />}
-          {currentStep === 1 && (
-            <StudentStep1Profile
-              formData={formData}
-              onUpdate={handleUpdate}
-              onNext={handleSubmit}
-              onBack={prevStep}
-            />
-          )}
-        </CardContent>
-      </Card>
+          <Card className="shadow-xl border-2 border-slate-200">
+            <CardContent className="p-8">
+              <AnimatePresence mode="wait">
+                {/* Step 1: Primary Goal */}
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Primary Goal</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {PRIMARY_GOALS.map(goal => (
+                        <button
+                          key={goal.value}
+                          onClick={() => updateField('primary_goal', goal.value)}
+                          className={`p-4 rounded-xl border-2 transition-all text-left ${
+                            formData.primary_goal === goal.value
+                              ? 'border-[#0021A5] bg-blue-50 shadow-md'
+                              : 'border-slate-200 hover:border-slate-300 hover:shadow'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">{goal.icon}</span>
+                            <span className="font-semibold text-slate-800">{goal.label}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
 
-      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you sure you want to exit?</DialogTitle>
-            <DialogDescription>
-              Your changes won't be saved if you leave onboarding.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowExitModal(false)}>Stay</Button>
-            <Button variant="destructive" onClick={handleConfirmExit}>Exit</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                {/* Step 2: Target Roles */}
+                {currentStep === 2 && (
+                  <motion.div
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Target Roles</h2>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {POPULAR_ROLES.map(role => (
+                        <Badge
+                          key={role}
+                          onClick={() => toggleMultiSelect('target_roles', role)}
+                          className={`cursor-pointer py-2 px-4 text-sm ${
+                            formData.target_roles.includes(role)
+                              ? 'bg-[#0021A5] text-white'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Input
+                      placeholder="Or type other roles..."
+                      value={formData.custom_role}
+                      onChange={(e) => updateField('custom_role', e.target.value)}
+                      className="mt-4"
+                    />
+                  </motion.div>
+                )}
+
+                {/* Step 3: Target Industries */}
+                {currentStep === 3 && (
+                  <motion.div
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Target Industries</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {INDUSTRIES.map(industry => (
+                        <Badge
+                          key={industry}
+                          onClick={() => toggleMultiSelect('target_industries', industry)}
+                          className={`cursor-pointer py-2 px-4 text-sm ${
+                            formData.target_industries.includes(industry)
+                              ? 'bg-[#0021A5] text-white'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {industry}
+                        </Badge>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 4: Dream Companies */}
+                {currentStep === 4 && (
+                  <motion.div
+                    key="step4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">Dream Companies</h2>
+                    <p className="text-sm text-slate-600 mb-6">Optional but strongly encouraged</p>
+                    <Textarea
+                      placeholder="e.g. Google, Deloitte, Disney, Mayo Clinic, NASA, startups in Miami…"
+                      value={formData.dream_companies}
+                      onChange={(e) => updateField('dream_companies', e.target.value)}
+                      rows={4}
+                      className="mb-3"
+                    />
+                    <p className="text-sm text-[#0021A5] font-medium">
+                      💡 Name 3–5 if you have them — Gator parents at these companies will see your request first
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Step 5: Location Preferences */}
+                {currentStep === 5 && (
+                  <motion.div
+                    key="step5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Location Preferences</h2>
+                    <div className="space-y-2 mb-4">
+                      {LOCATIONS.map(location => (
+                        <button
+                          key={location}
+                          onClick={() => toggleMultiSelect('location_preferences', location)}
+                          className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                            formData.location_preferences.includes(location)
+                              ? 'border-[#0021A5] bg-blue-50'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          {location}
+                        </button>
+                      ))}
+                    </div>
+                    <Input
+                      placeholder="Or type specific cities..."
+                      value={formData.custom_location}
+                      onChange={(e) => updateField('custom_location', e.target.value)}
+                    />
+                  </motion.div>
+                )}
+
+                {/* Step 6: Timeline */}
+                {currentStep === 6 && (
+                  <motion.div
+                    key="step6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Timeline</h2>
+                    <div className="space-y-2">
+                      {TIMELINES.map(timeline => (
+                        <button
+                          key={timeline.value}
+                          onClick={() => updateField('timeline', timeline.value)}
+                          className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                            formData.timeline === timeline.value
+                              ? 'border-[#0021A5] bg-blue-50 shadow-md'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className="font-semibold text-slate-800">{timeline.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 7: One-Sentence Pitch */}
+                {currentStep === 7 && (
+                  <motion.div
+                    key="step7"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">In one sentence, what makes you stand out?</h2>
+                    <p className="text-sm text-slate-600 mb-6">This is your magic moment — make it count!</p>
+                    <Textarea
+                      placeholder="e.g. Finance senior with two Big 4 internships · UF Honors · built a trading bot with 40% returns · former Gator swimmer · fluent in Portuguese…"
+                      value={formData.one_sentence_pitch}
+                      onChange={(e) => updateField('one_sentence_pitch', e.target.value)}
+                      rows={5}
+                      className="text-base"
+                    />
+                    <p className="text-sm text-slate-500 mt-2">
+                      {formData.one_sentence_pitch.length} characters
+                      {formData.one_sentence_pitch.length < 20 && ' (minimum 20)'}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Navigation */}
+              <div className="flex gap-3 mt-8">
+                {currentStep > 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    Back
+                  </Button>
+                )}
+                {currentStep < 7 ? (
+                  <Button
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="flex-1 bg-[#0021A5] hover:bg-[#001580] text-white"
+                  >
+                    Continue
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!canProceed() || isSubmitting}
+                    className="flex-1 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg py-6"
+                  >
+                    {isSubmitting ? 'Posting...' : 'Post My Request & Unlock Gator Nation →'}
+                  </Button>
+                )}
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="text-center mt-6 text-sm text-slate-500">
+                Step {currentStep} of 7
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
