@@ -140,7 +140,34 @@ Deno.serve(async (req) => {
             console.log('⚠️ Could not update metrics (non-critical):', updateErr.message);
         }
 
-        console.log('Step 6: Return success');
+        // Step 6: If parent is helping, trigger boost for linked students
+        console.log('Step 6: Check if parent boost should trigger');
+        if (helperPersona === 'parent') {
+            console.log('🚀 Parent helped student - triggering boost...');
+            try {
+                // Get helper's full user record to find linked students
+                const helper = await base44.asServiceRole.entities.User.filter({ email: helperEmail });
+                if (helper && helper.length > 0) {
+                    const helperUser = helper[0];
+                    console.log('Helper user found:', helperUser.id);
+                    
+                    // Trigger boost asynchronously (don't wait for response)
+                    base44.asServiceRole.functions.invoke('boostStudentRequests', {
+                        parentId: helperUser.id,
+                        parentEmail: helperEmail,
+                        actionType: 'help_offer_sent'
+                    }).then(() => {
+                        console.log('✅ Boost triggered successfully');
+                    }).catch(err => {
+                        console.error('❌ Boost failed (non-critical):', err.message);
+                    });
+                }
+            } catch (boostErr) {
+                console.log('⚠️ Could not trigger boost (non-critical):', boostErr.message);
+            }
+        }
+
+        console.log('Step 7: Return success');
         return new Response(JSON.stringify({
             success: messageCreated || emailSent,
             messageCreated,

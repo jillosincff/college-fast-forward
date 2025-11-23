@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Message } from '@/entities/Message';
 import { base44 } from '@/api/base44Client';
@@ -81,6 +81,25 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
           // Silent fail - message was already saved
         }
       }, 100);
+
+      // If parent is messaging a student, trigger boost for linked students
+      if ((user.persona === 'parent' || user.roles?.includes('parent')) && 
+          (recipientUser.persona === 'gator' || recipientUser.roles?.includes('gator'))) {
+        console.log('🚀 Parent messaged student - triggering boost...');
+        setTimeout(async () => {
+          try {
+            await base44.functions.invoke('boostStudentRequests', {
+              parentId: user.id,
+              parentEmail: user.email,
+              actionType: 'message_sent'
+            });
+            console.log('✅ Boost triggered successfully');
+          } catch (boostError) {
+            console.error('❌ Boost failed (background):', boostError);
+            // Silent fail - message was already sent
+          }
+        }, 200);
+      }
 
     } catch (error) {
       console.error('❌ Failed to send message:', error);
