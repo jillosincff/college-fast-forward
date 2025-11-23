@@ -34,7 +34,7 @@ export default function Onboarding() {
   const [startTime] = useState(Date.now());
 
   const [formData, setFormData] = useState({
-    graduation_years: '',
+    full_name: user?.full_name || '',
     current_company: '',
     current_position: '',
     industries: [],
@@ -73,7 +73,7 @@ export default function Onboarding() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.graduation_years?.trim()) newErrors.graduation_years = 'Required';
+    if (!formData.full_name?.trim()) newErrors.full_name = 'Required';
     if (!formData.current_company?.trim()) newErrors.current_company = 'Required';
     if (!formData.current_position?.trim()) newErrors.current_position = 'Required';
     if (!formData.industries?.length) newErrors.industries = 'Select at least 1';
@@ -98,7 +98,7 @@ export default function Onboarding() {
 
     try {
       await base44.auth.updateMe({
-        graduation_years: formData.graduation_years,
+        full_name: formData.full_name,
         current_company: formData.current_company,
         current_position: formData.current_position,
         industries: formData.industries,
@@ -181,17 +181,18 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-12 px-4">
+    <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="text-5xl font-bold mb-4" style={{ color: '#FA4616' }}>
-            Unlock the full Gator Network
+          <h1 className="text-[32px] font-bold mb-2 relative inline-block" style={{ color: '#FA4616' }}>
+            Thank You for Empowering Future Gators
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FA4616] to-transparent opacity-30"></div>
           </h1>
-          <p className="text-xl" style={{ color: '#0021A5' }}>
+          <p className="text-[18px] leading-[1.5] mt-4" style={{ color: '#0021A5' }}>
             In less than a minute, students will be able to find YOU when they need advice, internships, or job leads.
           </p>
         </motion.div>
@@ -199,36 +200,38 @@ export default function Onboarding() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl shadow-xl p-8 space-y-8"
+          className="bg-white rounded-lg shadow-lg p-8"
         >
           {/* Mandatory Fields */}
           <div className="space-y-6">
             <div>
-              <Label className="text-base font-semibold flex items-center gap-2">
-                <span className="text-2xl">🐊</span> Your Graduation Year(s)
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
+                Full Name <span className="text-[#FF0000]">*</span>
               </Label>
               <Input
-                value={formData.graduation_years}
-                onChange={(e) => setFormData({...formData, graduation_years: e.target.value})}
-                placeholder="e.g., 1998, 2012 MBA"
-                className={`h-12 mt-2 ${errors.graduation_years ? 'border-red-500' : ''}`}
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                placeholder="John Doe"
+                className={`h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] ${errors.full_name ? 'border-red-500' : ''}`}
+                style={{ borderWidth: '1px' }}
               />
-              {errors.graduation_years && (
+              {errors.full_name && (
                 <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> {errors.graduation_years}
+                  <AlertTriangle className="w-3 h-3" /> {errors.full_name}
                 </p>
               )}
             </div>
 
             <div>
-              <Label className="text-base font-semibold flex items-center gap-2">
-                <span className="text-2xl">🐊</span> Current Company
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
+                Current Company <span className="text-[#FF0000]">*</span>
               </Label>
               <Input
                 value={formData.current_company}
                 onChange={(e) => setFormData({...formData, current_company: e.target.value})}
-                placeholder="e.g., Google, Goldman Sachs"
-                className={`h-12 mt-2 ${errors.current_company ? 'border-red-500' : ''}`}
+                placeholder="Google, Goldman Sachs"
+                className={`h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] ${errors.current_company ? 'border-red-500' : ''}`}
+                style={{ borderWidth: '1px' }}
               />
               {errors.current_company && (
                 <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
@@ -238,14 +241,15 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <Label className="text-base font-semibold flex items-center gap-2">
-                <span className="text-2xl">🐊</span> Current Job Title
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
+                Current Job Title <span className="text-[#FF0000]">*</span>
               </Label>
               <Input
                 value={formData.current_position}
                 onChange={(e) => setFormData({...formData, current_position: e.target.value})}
-                placeholder="e.g., Senior Product Manager"
-                className={`h-12 mt-2 ${errors.current_position ? 'border-red-500' : ''}`}
+                placeholder="Senior Product Manager"
+                className={`h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] ${errors.current_position ? 'border-red-500' : ''}`}
+                style={{ borderWidth: '1px' }}
               />
               {errors.current_position && (
                 <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
@@ -255,8 +259,8 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <Label className="text-base font-semibold flex items-center gap-2 mb-3">
-                <span className="text-2xl">🐊</span> Industry (max 3)
+              <Label className="text-[16px] font-bold mb-3 block" style={{ color: '#0021A5' }}>
+                Industry (max 3) <span className="text-[#FF0000]">*</span>
               </Label>
               <div className="flex flex-wrap gap-2">
                 {industries.map((industry) => (
@@ -266,9 +270,13 @@ export default function Onboarding() {
                     onClick={() => handleIndustryToggle(industry)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       formData.industries?.includes(industry)
-                        ? 'bg-orange-500 text-white shadow-md'
+                        ? 'text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
+                    style={formData.industries?.includes(industry) ? {
+                      backgroundColor: '#FA4616',
+                      border: '2px solid #FA4616'
+                    } : {}}
                   >
                     {industry}
                   </button>
@@ -282,23 +290,28 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <Label className="text-base font-semibold flex items-center gap-2 mb-3">
-                <span className="text-2xl">🐊</span> Primary Goal – What are you most excited to help Gator students with?
+              <Label className="text-[16px] font-bold mb-3 block" style={{ color: '#0021A5' }}>
+                Primary Goal – What are you most excited to help Gator students with? <span className="text-[#FF0000]">*</span>
               </Label>
               <div className="space-y-2">
                 {primaryGoals.map((goal) => (
-                  <button
+                  <label
                     key={goal.id}
-                    type="button"
-                    onClick={() => setFormData({...formData, primary_goal: goal.id})}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-[6px] cursor-pointer border transition-all ${
                       formData.primary_goal === goal.id
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        ? 'bg-blue-50 border-[#0021A5]'
+                        : 'bg-white border-[#E0E0E0] hover:bg-slate-50'
                     }`}
                   >
-                    {goal.label}
-                  </button>
+                    <input
+                      type="radio"
+                      name="primary_goal"
+                      checked={formData.primary_goal === goal.id}
+                      onChange={() => setFormData({...formData, primary_goal: goal.id})}
+                      className="w-5 h-5 accent-[#0021A5]"
+                    />
+                    <span className="text-[14px] font-medium" style={{ color: '#333333' }}>{goal.label}</span>
+                  </label>
                 ))}
               </div>
               {errors.primary_goal && (
@@ -310,32 +323,38 @@ export default function Onboarding() {
           </div>
 
           {/* Optional Section */}
-          <div className="border-t-2 border-slate-200 pt-8 space-y-6">
-            <h3 className="text-2xl font-bold text-orange-600 flex items-center gap-2">
-              <Sparkles className="w-6 h-6" />
+          <div className="border-t border-[#E0E0E0] mt-8 pt-8 space-y-6">
+            <h3 className="text-[20px] font-bold flex items-center gap-2" style={{ color: '#FA4616' }}>
+              <span className="text-[20px]">★</span>
               Supercharge your impact
             </h3>
 
             <div>
-              <Label className="text-base font-semibold">Dream Companies you can open doors at</Label>
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
+                Dream Companies you can open doors at
+              </Label>
               <Input
                 value={formData.dream_companies}
                 onChange={(e) => setFormData({...formData, dream_companies: e.target.value})}
-                placeholder="e.g., Disney, Microsoft, Tesla (comma-separated)"
-                className="h-12 mt-2"
+                placeholder="Disney, Microsoft, Tesla"
+                className="h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575]"
+                style={{ borderWidth: '1px' }}
               />
             </div>
 
             <div>
-              <Label className="text-base font-semibold">Short bio / fun fact (max 140 chars)</Label>
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
+                Short bio (max 140 chars)
+              </Label>
               <Textarea
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value.slice(0, 140)})}
                 placeholder="Ex: Former Disney Imagineer turned VC – happy to help Gators break into entertainment & startups."
-                className="mt-2 min-h-[80px]"
+                className="border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] min-h-[80px]"
+                style={{ borderWidth: '1px' }}
                 maxLength={140}
               />
-              <p className="text-xs text-slate-500 mt-1">{formData.bio?.length || 0}/140 characters</p>
+              <p className="text-xs mt-1" style={{ color: '#757575' }}>{formData.bio?.length || 0}/140 characters</p>
             </div>
           </div>
         </motion.div>
@@ -351,19 +370,20 @@ export default function Onboarding() {
             onClick={handleSubmit}
             disabled={isSubmitting}
             size="lg"
-            className="w-full h-16 text-xl font-bold shadow-2xl"
+            className="w-full h-16 text-[18px] font-bold rounded-[8px] shadow-2xl hover:opacity-90 transition-opacity"
             style={{
               backgroundColor: '#FA4616',
-              color: '#0021A5'
+              color: '#0021A5',
+              padding: '16px'
             }}
           >
             {isSubmitting ? (
               <>
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
-                Joining the Swarm...
+                <div className="w-5 h-5 border-2 border-[#0021A5] border-t-transparent rounded-full animate-spin mr-2" />
+                Joining Gator Nation...
               </>
             ) : (
-              'Join Gator Nation'
+              'Join Gator Nation →'
             )}
           </Button>
         </motion.div>
