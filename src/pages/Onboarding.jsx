@@ -351,7 +351,7 @@ export default function Onboarding() {
             onClick={handleSubmit}
             disabled={isSubmitting}
             size="lg"
-            className="w-full h-16 text-xl font-bold shadow-2xl animate-pulse"
+            className="w-full h-16 text-xl font-bold shadow-2xl"
             style={{
               backgroundColor: '#FA4616',
               color: '#0021A5'
