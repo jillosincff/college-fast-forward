@@ -83,6 +83,7 @@ const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
+const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
 const Opportunities = React.lazy(() => import('./pages/Opportunities'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
@@ -583,7 +584,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding'];
+const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
 const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile'];
@@ -634,6 +635,7 @@ const getPageComponent = (pageName) => {
     case 'WelcomeRole': return WelcomeRole;
     case 'StudentOnboarding': return StudentOnboarding;
     case 'Onboarding': return Onboarding;
+    case 'ShareExpertise': return ShareExpertise;
     case 'GatorDirectory': return GatorDirectory;
     case 'MyRequests': return MyRequests;
     case 'MyImpact': return MyImpact;
@@ -770,7 +772,7 @@ function AppContent() {
             finalPage = 'InviteRequired';
           } else if (user.onboarding_completed === false || user.onboarding_completed === null || user.onboarding_completed === undefined) {
             console.log('📝 Verified but onboarding incomplete');
-            
+
             if (user.persona === 'gator' || user.roles?.includes('gator')) {
               finalPage = 'StudentOnboarding';
             } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
@@ -778,9 +780,12 @@ function AppContent() {
             } else {
               finalPage = 'WelcomeRole';
             }
+          } else if ((user.persona === 'parent' || user.roles?.includes('parent')) && !user.expertise_shared) {
+            console.log('📝 Parent needs to share expertise');
+            finalPage = 'ShareExpertise';
           } else {
             console.log('✅ Fully verified and onboarded');
-            
+
             if (currentPage === 'Dashboard') {
               if (user.roles?.includes('admin')) {
                 finalPage = 'AdminDashboard';
