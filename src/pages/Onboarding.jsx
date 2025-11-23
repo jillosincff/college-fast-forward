@@ -359,12 +359,12 @@ export default function Onboarding() {
           </div>
         </motion.div>
 
-        {/* Sticky CTA */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="sticky bottom-4 mt-8"
+          className="mt-8"
         >
           <Button
             onClick={handleSubmit}
@@ -373,13 +373,13 @@ export default function Onboarding() {
             className="w-full h-16 text-[18px] font-bold rounded-[8px] shadow-2xl hover:opacity-90 transition-opacity"
             style={{
               backgroundColor: '#FA4616',
-              color: '#0021A5',
+              color: '#FFFFFF',
               padding: '16px'
             }}
           >
             {isSubmitting ? (
               <>
-                <div className="w-5 h-5 border-2 border-[#0021A5] border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                 Joining Gator Nation...
               </>
             ) : (
