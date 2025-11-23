@@ -611,7 +611,16 @@ export default function Onboarding() {
       sessionStorage.removeItem('pending_invite_type');
       sessionStorage.removeItem('pending_inviter_name');
 
-      navigate('ParentDashboard', { first: '1' });
+      console.log('✅ Profile saved! Redirecting to expertise sharing...');
+      toast({
+        title: "Almost Done! 🎉",
+        description: "One more step to help students find you."
+      });
+      
+      // Small delay to show success message
+      setTimeout(() => {
+        navigate('ShareExpertise');
+      }, 1000);
 
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
