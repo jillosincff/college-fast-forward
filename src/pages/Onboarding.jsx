@@ -74,8 +74,6 @@ export default function Onboarding() {
     const newErrors = {};
     
     if (!formData.full_name?.trim()) newErrors.full_name = 'Required';
-    if (!formData.current_company?.trim()) newErrors.current_company = 'Required';
-    if (!formData.current_position?.trim()) newErrors.current_position = 'Required';
     if (!formData.industries?.length) newErrors.industries = 'Select at least 1';
     if (!formData.primary_goal) newErrors.primary_goal = 'Required';
     
@@ -224,38 +222,34 @@ export default function Onboarding() {
 
             <div>
               <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
-                Current Company <span className="text-[#FF0000]">*</span>
+                Current Company
               </Label>
               <Input
                 value={formData.current_company}
                 onChange={(e) => setFormData({...formData, current_company: e.target.value})}
                 placeholder="Google, Goldman Sachs"
-                className={`h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] ${errors.current_company ? 'border-red-500' : ''}`}
+                className="h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575]"
                 style={{ borderWidth: '1px' }}
               />
-              {errors.current_company && (
-                <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> {errors.current_company}
-                </p>
-              )}
             </div>
 
             <div>
               <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#0021A5' }}>
-                Current Job Title <span className="text-[#FF0000]">*</span>
+                Current Job Title
               </Label>
               <Input
                 value={formData.current_position}
                 onChange={(e) => setFormData({...formData, current_position: e.target.value})}
                 placeholder="Senior Product Manager"
-                className={`h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575] ${errors.current_position ? 'border-red-500' : ''}`}
+                className="h-[44px] border-[#E0E0E0] rounded-[6px] focus:shadow-[0_0_0_3px_rgba(33,150,243,0.1)] placeholder:text-[#757575]"
                 style={{ borderWidth: '1px' }}
               />
-              {errors.current_position && (
-                <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> {errors.current_position}
-                </p>
-              )}
+            </div>
+            
+            <div className="bg-blue-50 border-l-4 border-[#0021A5] p-4 rounded-r-lg">
+              <p className="text-sm" style={{ color: '#0021A5' }}>
+                💡 <strong>Pro tip:</strong> The more we know about your background and connections, the easier it is to match you with students who need your specific expertise.
+              </p>
             </div>
 
             <div>
