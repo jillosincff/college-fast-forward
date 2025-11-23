@@ -255,9 +255,6 @@ export default function ParentDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Membership Status Card */}
-        <MembershipStatusCard />
-        
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="border-slate-200 hover:shadow-md transition-shadow">
