@@ -225,9 +225,17 @@ export default function ParentDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-900 mb-1">
-                {greeting}, {firstName}! 🧡💙
-              </h1>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-3xl font-bold text-slate-900">
+                  {greeting}, {firstName}! 🧡💙
+                </h1>
+                {user?.is_founding_member && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">
+                    <Crown className="w-3 h-3" />
+                    Founder
+                  </span>
+                )}
+              </div>
               <p className="text-slate-600">
                 Your network opens doors for Gators everywhere
               </p>

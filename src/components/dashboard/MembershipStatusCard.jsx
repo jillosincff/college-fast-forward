@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -89,34 +89,9 @@ export default function MembershipStatusCard() {
     );
   }
 
-  // **FOUNDING GATORS (Parents who joined early)**
+  // **FOUNDING GATORS (Parents who joined early)** - Subtle display
   if (pricingData.isFounding) {
-    return (
-      <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 shadow-lg">
-        <CardContent className="pt-6 pb-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center flex-shrink-0">
-              <Crown className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                👑 Founding Gator - Free Forever!
-              </h3>
-              <p className="text-slate-600 mb-2">
-                Thank you for being one of the first 1,000 members! Your membership is <strong>free for life</strong>.
-              </p>
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
-                #️⃣ Founder #{pricingData.userPosition}
-              </span>
-            </div>
-            <div className="flex-shrink-0 text-right">
-              <div className="text-3xl font-bold text-slate-900">$0</div>
-              <div className="text-sm text-slate-600">forever</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null; // Don't show membership card for founding members
   }
 
   // **EARNED FREE MEMBERSHIP (through invites)**
