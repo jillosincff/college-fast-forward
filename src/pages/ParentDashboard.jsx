@@ -298,6 +298,64 @@ export default function ParentDashboard() {
           </Card>
         </div>
 
+        {/* How Parent Boosts Work - Show for parents with linked students */}
+        {user.linked_students?.length > 0 && (
+          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700">
+                <Sparkles className="w-6 h-6 text-green-600" />
+                How Your Parent Power Boost Works!
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-lg">1</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 mb-1">You're Linked with Your Gator!</h4>
+                    <p className="text-sm text-slate-600">
+                      We've confirmed your connection to your student(s) – they're all set for a boost.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-lg">2</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 mb-1">Take Action: Help a Student or Post a Lead</h4>
+                    <p className="text-sm text-slate-600 mb-2">
+                      When you take any of these actions, you're making an impact:
+                    </p>
+                    <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                      <li>• Message a student</li>
+                      <li>• Offer help on a student request</li>
+                      <li>• Post or share a job/internship opportunity</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                      Your Student's Request Gets Boosted! 🚀
+                    </h4>
+                    <p className="text-sm text-slate-600">
+                      For <strong>14 days</strong>, your linked student's help requests will be pinned to the top of the feed for everyone to see. Go Gators!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Action Banners - Clean Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:shadow-lg transition-shadow">
