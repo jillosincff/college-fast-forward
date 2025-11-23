@@ -50,6 +50,7 @@ import InviteRequired from './pages/InviteRequired';
 import RequestInvite from './pages/RequestInvite';
 import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
+import ShareExpertise from './pages/ShareExpertise';
 import __Layout from './Layout.jsx';
 
 
@@ -106,6 +107,7 @@ export const PAGES = {
     "RequestInvite": RequestInvite,
     "Pricing": Pricing,
     "PublicProfile": PublicProfile,
+    "ShareExpertise": ShareExpertise,
 }
 
 export const pagesConfig = {
