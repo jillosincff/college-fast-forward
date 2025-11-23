@@ -25,6 +25,27 @@ export default function ShareExpertise() {
   const [yearsExperience, setYearsExperience] = useState('');
   const [isVisible, setIsVisible] = useState(true);
 
+  // Redirect existing parents who already have profile data
+  useEffect(() => {
+    if (user) {
+      // If parent has any of these fields filled, they're an existing user - skip this step
+      const hasExistingProfile = user.current_position || user.current_company || 
+                                 user.description_of_work || user.ways_to_help?.length > 0 ||
+                                 (user.linkedin_url && user.linkedin_url.length > 0);
+      
+      if (hasExistingProfile) {
+        console.log('Existing parent with profile data - marking expertise_shared and redirecting');
+        // Mark as shared and redirect
+        base44.auth.updateMe({ expertise_shared: true }).then(() => {
+          navigate('ParentDashboard');
+        }).catch(err => {
+          console.error('Failed to update expertise_shared:', err);
+          navigate('ParentDashboard'); // Redirect anyway
+        });
+      }
+    }
+  }, [user]);
+
   // Pre-fill LinkedIn if available from SSO
   useEffect(() => {
     if (user?.linkedin_url) {
@@ -310,6 +331,18 @@ export default function ShareExpertise() {
         <p className="text-center text-sm text-slate-500 mt-4">
           Required to access your dashboard
         </p>
+
+        <Button
+          onClick={async () => {
+            await base44.auth.updateMe({ expertise_shared: true, visible_in_directory: false });
+            await refreshUser();
+            navigate('ParentDashboard');
+          }}
+          variant="ghost"
+          className="w-full mt-2 text-slate-500 hover:text-slate-700"
+        >
+          Skip for now
+        </Button>
       </div>
     </div>
   );
