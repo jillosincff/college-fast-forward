@@ -350,7 +350,7 @@ export default function ParentDashboard() {
                     Your Student's Request Gets Boosted! 🚀
                   </h4>
                   <p className="text-sm text-slate-600">
-                    For <strong>14 days</strong>, your linked student's help requests will be pinned to the top of the feed for everyone to see. Go Gators!
+                    For <strong>7 days</strong>, your linked student's help requests will be pinned to the top of the feed for everyone to see. Go Gators!
                   </p>
                 </div>
               </div>
