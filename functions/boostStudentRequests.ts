@@ -31,9 +31,9 @@ Deno.serve(async (req) => {
       });
     }
     
-    // Calculate boost expiration (14 days from now)
+    // Calculate boost expiration (7 days from now)
     const boostExpiresAt = new Date();
-    boostExpiresAt.setDate(boostExpiresAt.getDate() + 14);
+    boostExpiresAt.setDate(boostExpiresAt.getDate() + 7);
     
     let boostedCount = 0;
     const boostedRequests = [];
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
                 to: student.email,
                 from_name: 'College Fast Forward',
                 subject: '⭐ Your Request Has Been Boosted!',
-                body: `Hi ${student.full_name || 'there'},\n\nGreat news! Your parent just posted an opportunity, and your job request "${request.title || request.role}" has been boosted to the top of the feed for the next 14 days!\n\n🚀 What this means for you:\n• Your request will be pinned at the top with a ⭐ star badge\n• More parents and alumni will see your request\n• Higher chance of getting introductions and help\n\nThis boost expires on ${new Date(boostExpiresAt).toLocaleDateString()}.\n\nGood luck!\n\nThe College Fast Forward Team\nhttps://collegefastforward.com`
+                body: `Hi ${student.full_name || 'there'},\n\nGreat news! Your parent just posted an opportunity, and your job request "${request.title || request.role}" has been boosted to the top of the feed for the next 7 days!\n\n🚀 What this means for you:\n• Your request will be pinned at the top with a ⭐ star badge\n• More parents and alumni will see your request\n• Higher chance of getting introductions and help\n\nThis boost expires on ${new Date(boostExpiresAt).toLocaleDateString()}.\n\nGood luck!\n\nThe College Fast Forward Team\nhttps://collegefastforward.com`
               });
             } catch (emailErr) {
               console.error(`Failed to send email to ${student.email}:`, emailErr);

@@ -88,6 +88,11 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
                 )}
                 {getRoleDisplay()}
               </Badge>
+              {user.is_boosted && user.boost_expires_at && new Date(user.boost_expires_at) > new Date() && (
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold flex items-center gap-1 animate-pulse">
+                  ⭐ Boosted
+                </Badge>
+              )}
               {canProvideReferrals && (
                 <Badge className="bg-green-100 text-green-800 text-xs">
                   Can Refer
