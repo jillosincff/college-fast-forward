@@ -578,6 +578,7 @@ export default function Onboarding() {
         last_name: capitalizedLastName,
         full_name: fullName,
         onboarding_completed: true,
+        expertise_shared: false, // Explicitly set to false to trigger ShareExpertise flow
       };
       await User.updateMyUserData(payload);
 

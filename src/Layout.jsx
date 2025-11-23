@@ -780,8 +780,8 @@ function AppContent() {
             } else {
               finalPage = 'WelcomeRole';
             }
-          } else if ((user.persona === 'parent' || user.roles?.includes('parent')) && !user.expertise_shared) {
-            console.log('📝 Parent needs to share expertise');
+          } else if ((user.persona === 'parent' || user.roles?.includes('parent')) && user.expertise_shared === false) {
+            console.log('📝 Parent needs to share expertise (explicitly required)');
             finalPage = 'ShareExpertise';
           } else {
             console.log('✅ Fully verified and onboarded');
