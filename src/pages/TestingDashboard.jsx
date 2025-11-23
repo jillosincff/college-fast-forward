@@ -18,7 +18,8 @@ import {
   ExternalLink,
   Database,
   Ticket,
-  ListChecks
+  ListChecks,
+  RotateCcw
 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
@@ -33,6 +34,7 @@ export default function TestingDashboard() {
   const [testUserInfo, setTestUserInfo] = useState(null);
   const [creatingSampleParents, setCreatingSampleParents] = useState(false);
   const [sampleParentsResult, setSampleParentsResult] = useState(null);
+  const [resettingOnboarding, setResettingOnboarding] = useState(false);
 
   // New state for custom invite code generation
   const [customCode, setCustomCode] = useState('');
@@ -241,6 +243,30 @@ export default function TestingDashboard() {
     }
   };
 
+  const resetOnboarding = async () => {
+    if (!confirm('Reset your onboarding state? You\'ll go through parent onboarding again when you refresh.')) {
+      return;
+    }
+
+    setResettingOnboarding(true);
+    try {
+      const { data } = await base44.functions.invoke('resetOnboarding');
+      toast({
+        title: "✅ Onboarding Reset!",
+        description: "Refresh the page to start parent onboarding from scratch.",
+      });
+    } catch (error) {
+      console.error('Failed to reset onboarding:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setResettingOnboarding(false);
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -373,6 +399,43 @@ export default function TestingDashboard() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Reset Onboarding Card */}
+          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RotateCcw className="w-5 h-5 text-blue-600" />
+                Reset Onboarding
+              </CardTitle>
+              <CardDescription>
+                Test the parent onboarding flow with your current account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  This will reset all onboarding flags so you can experience the parent onboarding flow again without creating a new account.
+                </p>
+              </div>
+              <Button
+                onClick={resetOnboarding}
+                disabled={resettingOnboarding}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {resettingOnboarding ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset My Onboarding
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Generate Custom Invite Code */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white">
             <CardHeader>
