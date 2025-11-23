@@ -40,7 +40,8 @@ export default function Onboarding() {
     industries: user?.industries || [],
     primary_goal: user?.primary_goal || [],
     dream_companies: user?.dream_companies || '',
-    bio: user?.bio || ''
+    bio: user?.bio || '',
+    student_emails: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -108,6 +109,19 @@ export default function Onboarding() {
         visible_in_directory: true,
         profile_completion_score: 85
       });
+
+      // Link students if provided
+      if (formData.student_emails?.trim()) {
+        try {
+          const emails = formData.student_emails.split(',').map(e => e.trim()).filter(e => e);
+          const response = await base44.functions.invoke('linkStudentsToParent', {
+            studentEmailsOrNames: emails
+          });
+          console.log('Linked students:', response);
+        } catch (linkError) {
+          console.error('Failed to link students:', linkError);
+        }
+      }
 
       await refreshUser();
 
@@ -362,6 +376,25 @@ export default function Onboarding() {
                 maxLength={140}
               />
               <p className="text-xs mt-1" style={{ color: '#757575' }}>{formData.bio?.length || 0}/140 characters</p>
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg border-2 border-orange-200">
+              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#FA4616' }}>
+                🎓 Link Your Gator Student(s)
+              </Label>
+              <p className="text-sm mb-3 text-slate-600">
+                When you post job leads or help students, your Gator's requests will be <strong>boosted to the top</strong> of the feed for 14 days!
+              </p>
+              <Input
+                value={formData.student_emails}
+                onChange={(e) => setFormData({...formData, student_emails: e.target.value})}
+                placeholder="Enter their @ufl.edu email(s), separated by commas"
+                className="h-[44px] border-[#E0E0E0] rounded-[6px] bg-white focus:shadow-[0_0_0_3px_rgba(250,70,22,0.1)] placeholder:text-[#757575]"
+                style={{ borderWidth: '1px' }}
+              />
+              <p className="text-xs mt-2 text-slate-500">
+                Example: john.doe@ufl.edu, jane.smith@ufl.edu
+              </p>
             </div>
           </div>
         </motion.div>
