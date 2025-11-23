@@ -35,12 +35,12 @@ export default function Onboarding() {
 
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
-    current_company: '',
-    current_position: '',
-    industries: [],
-    primary_goal: [],
-    dream_companies: '',
-    bio: ''
+    current_company: user?.current_company || '',
+    current_position: user?.current_position || '',
+    industries: user?.industries || [],
+    primary_goal: user?.primary_goal || [],
+    dream_companies: user?.dream_companies || '',
+    bio: user?.bio || ''
   });
 
   const [errors, setErrors] = useState({});
@@ -133,8 +133,14 @@ export default function Onboarding() {
       });
 
       setTimeout(() => {
-        navigate('ParentDashboard');
-      }, 4000);
+        if (user?.onboarding_completed) {
+          // If editing profile, go back to dashboard faster
+          navigate('ParentDashboard');
+        } else {
+          // If first time, show confetti longer
+          navigate('ParentDashboard');
+        }
+      }, user?.onboarding_completed ? 2000 : 4000);
 
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
@@ -187,11 +193,14 @@ export default function Onboarding() {
           className="text-center mb-10"
         >
           <h1 className="text-[32px] font-bold mb-2 relative inline-block" style={{ color: '#FA4616' }}>
-            Thank You for Empowering Future Gators
-            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FA4616] to-transparent opacity-30"></div>
+          {user?.onboarding_completed ? 'Update Your Profile' : 'Thank You for Empowering Future Gators'}
+          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FA4616] to-transparent opacity-30"></div>
           </h1>
           <p className="text-[18px] leading-[1.5] mt-4" style={{ color: '#0021A5' }}>
-            In less than a minute, students will be able to find YOU when they need advice, internships, or job leads.
+          {user?.onboarding_completed 
+            ? 'Update your information to help students find you more easily'
+            : 'In less than a minute, students will be able to find YOU when they need advice, internships, or job leads.'
+          }
           </p>
         </motion.div>
 
@@ -379,10 +388,10 @@ export default function Onboarding() {
             {isSubmitting ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Joining Gator Nation...
+                {user?.onboarding_completed ? 'Saving...' : 'Joining Gator Nation...'}
               </>
             ) : (
-              'Join Gator Nation →'
+              user?.onboarding_completed ? 'Save Changes →' : 'Join Gator Nation →'
             )}
           </Button>
         </motion.div>

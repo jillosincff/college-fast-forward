@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,11 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/auth/AuthContext';
+import { User } from '@/entities/User';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
+import LinkedInSettings from '@/components/profile/LinkedInSettings';
 import { base44 } from '@/api/base44Client';
 import ResumeUpload from '@/components/profile/ResumeUpload';
 import ShareableProfile from '@/components/profile/ShareableProfile';
@@ -19,10 +23,20 @@ import ExpertiseTagSelector from '@/components/profile/ExpertiseTagSelector';
 import {
   ArrowLeft,
   Save,
+  User as UserIcon,
+  Briefcase,
+  MapPin,
+  FileText,
   Linkedin,
+  Star,
+  CheckCircle,
   Loader2,
+  Globe,
+  CheckCircle2,
   Sparkles,
-  Award
+  Clock,
+  Award,
+  Target
 } from 'lucide-react';
 
 const GRADUATION_YEARS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - 10 + i);

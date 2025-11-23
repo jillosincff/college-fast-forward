@@ -441,7 +441,7 @@ export default function ParentDashboard() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate('ProfileEdit')}
+                      onClick={() => navigate('Onboarding')}
                     >
                       Update Profile
                     </Button>
