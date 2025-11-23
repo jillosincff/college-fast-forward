@@ -157,7 +157,19 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           )}
 
           {/* Parents/Alumni: Company & Title */}
-          {(user.company || user.job_title) && (
+          {(user.current_company || user.current_position) && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Building2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <span className="truncate">
+                {user.current_position && `${user.current_position}`}
+                {user.current_position && user.current_company && ' at '}
+                {user.current_company}
+              </span>
+            </div>
+          )}
+          
+          {/* Legacy company/job_title fields for backwards compatibility */}
+          {!user.current_company && !user.current_position && (user.company || user.job_title) && (
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Building2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
               <span className="truncate">
@@ -211,8 +223,34 @@ export default function UserCard({ user, onMessage, onViewProfile }) {
           </div>
         )}
 
-        {/* Ways to Help - Color Coded - Parents/Alumni Only */}
-        {isParentOrAlumni && hasWaysToHelp && (
+        {/* Primary Goal (from onboarding) - Parents Only */}
+        {isParent && user.primary_goal && user.primary_goal.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-start gap-2 mb-2">
+              <Handshake className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+              <span className="text-xs font-semibold text-green-800">Can help with:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 ml-6">
+              {user.primary_goal.slice(0, 3).map((goal, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs border bg-green-50 text-green-700 border-green-300">
+                  {goal === 'career_advice' && '💼 Career advice & mock interviews'}
+                  {goal === 'job_leads' && '🎯 Job leads at my network'}
+                  {goal === 'resume_reviews' && '📄 Resume & LinkedIn reviews'}
+                  {goal === 'friendly_ear' && '💬 Friendly Gator ear'}
+                  {goal === 'all_in' && '🌟 All of the above'}
+                </Badge>
+              ))}
+              {user.primary_goal.length > 3 && (
+                <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
+                  +{user.primary_goal.length - 3} more
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Ways to Help - Color Coded - Alumni Only (legacy field) */}
+        {!isParent && isParentOrAlumni && hasWaysToHelp && (
           <div className="mb-4">
             <div className="flex items-start gap-2 mb-2">
               <Handshake className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
