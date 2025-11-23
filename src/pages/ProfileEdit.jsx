@@ -153,8 +153,12 @@ export default function ProfileEdit() {
     interests: [],
     ways_to_help: [],
     show_in_directory: true,
+    student_emails: '',
     ...(user || {})
   });
+
+  const [linkedStudents, setLinkedStudents] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
   const [profileCompletion, setProfileCompletion] = useState(0);
 
@@ -185,8 +189,34 @@ export default function ProfileEdit() {
         show_in_directory: user.show_in_directory !== false,
       }));
       setProfileCompletion(calculateProfileCompletion(user));
+      
+      // Load linked students for parents
+      if ((user.persona === 'parent' || user.roles?.includes('parent')) && user.linked_students?.length > 0) {
+        loadLinkedStudents(user.linked_students);
+      }
     }
   }, [user]);
+
+  const loadLinkedStudents = async (studentIds) => {
+    setLoadingStudents(true);
+    try {
+      const students = [];
+      for (const id of studentIds) {
+        try {
+          const allUsers = await base44.entities.User.list();
+          const student = allUsers.find(u => u.id === id);
+          if (student) students.push(student);
+        } catch (err) {
+          console.error('Error loading student:', err);
+        }
+      }
+      setLinkedStudents(students);
+    } catch (error) {
+      console.error('Failed to load linked students:', error);
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -196,6 +226,26 @@ export default function ProfileEdit() {
     setSaving(true);
     try {
       await base44.auth.updateMe(formData);
+      
+      // Link students if provided (for parents)
+      if (isParent && formData.student_emails?.trim()) {
+        try {
+          const emails = formData.student_emails.split(',').map(e => e.trim()).filter(e => e);
+          const { data: linkResult } = await base44.functions.invoke('linkStudentsToParent', {
+            studentEmailsOrNames: emails
+          });
+          
+          if (linkResult.linkedCount > 0) {
+            toast({
+              title: "✅ Students Linked!",
+              description: `Successfully linked ${linkResult.linkedCount} student(s)`,
+            });
+          }
+        } catch (linkError) {
+          console.error('Failed to link students:', linkError);
+        }
+      }
+      
       await refreshUser();
       
       toast({
@@ -496,6 +546,63 @@ export default function ProfileEdit() {
               )}
             </CardContent>
           </Card>
+
+          {/* Linked Students Section - Parents Only */}
+          {isParent && (
+            <Card className="border-2 border-orange-200 bg-gradient-to-br from-white to-orange-50">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Target className="w-6 h-6 text-orange-600" />
+                  <CardTitle>Your Gator Student(s)</CardTitle>
+                </div>
+                <CardDescription>
+                  When you post opportunities or help students, your linked Gator's requests get boosted for 14 days!
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loadingStudents ? (
+                  <div className="text-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-orange-600" />
+                  </div>
+                ) : linkedStudents.length > 0 ? (
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Currently Linked:</Label>
+                    {linkedStudents.map((student) => (
+                      <div key={student.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                        <div>
+                          <p className="font-medium">{student.full_name}</p>
+                          <p className="text-sm text-slate-500">{student.email}</p>
+                        </div>
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="space-y-2">
+                  <Label htmlFor="student_emails">Link Your Gator Student(s)</Label>
+                  <Input
+                    id="student_emails"
+                    value={formData.student_emails || ''}
+                    onChange={(e) => handleChange('student_emails', e.target.value)}
+                    placeholder="Enter @ufl.edu email(s), separated by commas"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Example: john.doe@ufl.edu, jane.smith@ufl.edu
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+                  <p className="text-sm text-orange-900 font-semibold flex items-center gap-2">
+                    ⭐ Parent Power Boost
+                  </p>
+                  <p className="text-xs text-orange-800 mt-1">
+                    Each time you post a job or help a student, your linked Gator's help requests automatically rise to the top of the feed for 2 weeks!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Expertise Profile Section - Parents Only */}
           {isParent && (
