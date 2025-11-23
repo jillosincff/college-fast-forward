@@ -122,25 +122,24 @@ export default function Onboarding() {
       sessionStorage.removeItem('pending_invite_type');
       sessionStorage.removeItem('pending_inviter_name');
 
-      // Show success and trigger confetti
-      setShowSuccess(true);
-      
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#0021A5', '#FA4616', '#FF6B35']
-      });
+      // Only show confetti for first-time completion
+      if (!user?.onboarding_completed) {
+        setShowSuccess(true);
+        
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#0021A5', '#FA4616', '#FF6B35']
+        });
 
-      setTimeout(() => {
-        if (user?.onboarding_completed) {
-          // If editing profile, go back to dashboard faster
+        setTimeout(() => {
           navigate('ParentDashboard');
-        } else {
-          // If first time, show confetti longer
-          navigate('ParentDashboard');
-        }
-      }, user?.onboarding_completed ? 2000 : 4000);
+        }, 4000);
+      } else {
+        // If editing profile, go directly back to dashboard
+        navigate('ParentDashboard');
+      }
 
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
