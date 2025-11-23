@@ -363,7 +363,7 @@ export default function Onboarding() {
                 Joining the Swarm...
               </>
             ) : (
-              'Join the Gator Parent Swarm →'
+              'Join Gator Nation'
             )}
           </Button>
         </motion.div>
