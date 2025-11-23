@@ -27,6 +27,7 @@ import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
+import ParentWelcomeOverlay from '@/components/dashboard/ParentWelcomeOverlay';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -39,6 +40,7 @@ export default function ParentDashboard() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showParentInviteModal, setShowParentInviteModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
 
   const loadDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.email) {
@@ -161,23 +163,30 @@ export default function ParentDashboard() {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  // Update user dashboard state
+  // Show welcome overlay on first dashboard visit
   useEffect(() => {
-    if (user && (user.first_login || !user.has_seen_dashboard)) {
-      (async () => {
-        try {
-          const { User } = await import('@/entities/User');
-          await User.updateMyUserData({ 
-            has_seen_dashboard: true,
-            first_login: false 
-          });
-          await refreshUser();
-        } catch (error) {
-          console.error('Failed to update user state:', error);
-        }
-      })();
+    if (user && !user.welcome_shown) {
+      setShowWelcomeOverlay(true);
     }
-  }, [user, refreshUser]);
+  }, [user]);
+
+  const handleWelcomeDismiss = async () => {
+    setShowWelcomeOverlay(false);
+    
+    try {
+      const { User } = await import('@/entities/User');
+      await User.updateMyUserData({ 
+        welcome_shown: true,
+        has_seen_dashboard: true,
+        first_login: false 
+      });
+      await refreshUser();
+      
+      trackEvent('parent_welcome_overlay_viewed', { userId: user?.id });
+    } catch (error) {
+      console.error('Failed to update welcome state:', error);
+    }
+  };
 
   // Track page view
   useEffect(() => {
@@ -539,6 +548,11 @@ export default function ParentDashboard() {
         inviteType="parent_to_parent"
         userPersona="parent"
       />
+
+      {/* Welcome Overlay */}
+      {showWelcomeOverlay && (
+        <ParentWelcomeOverlay onDismiss={handleWelcomeDismiss} />
+      )}
     </div>
   );
 }
