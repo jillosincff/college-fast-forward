@@ -35,6 +35,7 @@ export default function TestingDashboard() {
   const [creatingSampleParents, setCreatingSampleParents] = useState(false);
   const [sampleParentsResult, setSampleParentsResult] = useState(null);
   const [resettingOnboarding, setResettingOnboarding] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
 
   // New state for custom invite code generation
   const [customCode, setCustomCode] = useState('');
@@ -243,18 +244,20 @@ export default function TestingDashboard() {
     }
   };
 
-  const resetOnboarding = async () => {
-    if (!confirm('Reset your onboarding state? You\'ll go through parent onboarding again when you refresh.')) {
+  const resetOnboarding = async (email = '') => {
+    const targetEmail = email || user.email;
+    if (!confirm(`Reset onboarding for ${targetEmail}?`)) {
       return;
     }
 
     setResettingOnboarding(true);
     try {
-      const { data } = await base44.functions.invoke('resetOnboarding');
+      const { data } = await base44.functions.invoke('resetOnboarding', { email: targetEmail });
       toast({
         title: "✅ Onboarding Reset!",
-        description: "Refresh the page to start parent onboarding from scratch.",
+        description: `${targetEmail} can now start parent onboarding from scratch.`,
       });
+      setResetEmail('');
     } catch (error) {
       console.error('Failed to reset onboarding:', error);
       toast({
@@ -407,17 +410,29 @@ export default function TestingDashboard() {
                 Reset Onboarding
               </CardTitle>
               <CardDescription>
-                Test the parent onboarding flow with your current account
+                Test the parent onboarding flow - reset your account or another user's
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-900">
-                  This will reset all onboarding flags so you can experience the parent onboarding flow again without creating a new account.
+                  This will reset all onboarding flags and clear profile data to test the parent flow from scratch.
                 </p>
               </div>
+
+              <div className="space-y-2">
+                <Label>Reset Specific User (Optional)</Label>
+                <Input
+                  type="email"
+                  placeholder="user@example.com (leave blank for yourself)"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  disabled={resettingOnboarding}
+                />
+              </div>
+
               <Button
-                onClick={resetOnboarding}
+                onClick={() => resetOnboarding(resetEmail)}
                 disabled={resettingOnboarding}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
@@ -429,7 +444,7 @@ export default function TestingDashboard() {
                 ) : (
                   <>
                     <RotateCcw className="w-4 h-4 mr-2" />
-                    Reset My Onboarding
+                    Reset Onboarding
                   </>
                 )}
               </Button>
