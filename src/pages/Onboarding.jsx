@@ -38,7 +38,7 @@ export default function Onboarding() {
     current_company: '',
     current_position: '',
     industries: [],
-    primary_goal: '',
+    primary_goal: [],
     dream_companies: '',
     bio: ''
   });
@@ -75,7 +75,7 @@ export default function Onboarding() {
     
     if (!formData.full_name?.trim()) newErrors.full_name = 'Required';
     if (!formData.industries?.length) newErrors.industries = 'Select at least 1';
-    if (!formData.primary_goal) newErrors.primary_goal = 'Required';
+    if (!formData.primary_goal?.length) newErrors.primary_goal = 'Required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -287,21 +287,26 @@ export default function Onboarding() {
               <Label className="text-[16px] font-bold mb-3 block" style={{ color: '#0021A5' }}>
                 Primary Goal – What are you most excited to help Gator students with? <span className="text-[#FF0000]">*</span>
               </Label>
+              <p className="text-sm mb-3" style={{ color: '#757575' }}>Pick all that apply</p>
               <div className="space-y-2">
                 {primaryGoals.map((goal) => (
                   <label
                     key={goal.id}
                     className={`flex items-center gap-3 px-4 py-3 rounded-[6px] cursor-pointer border transition-all ${
-                      formData.primary_goal === goal.id
+                      formData.primary_goal?.includes(goal.id)
                         ? 'bg-blue-50 border-[#0021A5]'
                         : 'bg-white border-[#E0E0E0] hover:bg-slate-50'
                     }`}
                   >
                     <input
-                      type="radio"
-                      name="primary_goal"
-                      checked={formData.primary_goal === goal.id}
-                      onChange={() => setFormData({...formData, primary_goal: goal.id})}
+                      type="checkbox"
+                      checked={formData.primary_goal?.includes(goal.id)}
+                      onChange={(e) => {
+                        const newGoals = e.target.checked
+                          ? [...(formData.primary_goal || []), goal.id]
+                          : (formData.primary_goal || []).filter(g => g !== goal.id);
+                        setFormData({...formData, primary_goal: newGoals});
+                      }}
                       className="w-5 h-5 accent-[#0021A5]"
                     />
                     <span className="text-[14px] font-medium" style={{ color: '#333333' }}>{goal.label}</span>
