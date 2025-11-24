@@ -690,13 +690,8 @@ function AppContent() {
       return;
     }
 
-    if (currentPage === 'Privacy' || currentPage === 'Terms' || currentPage === 'CookiePolicy' || currentPage === 'InviteRequired' || currentPage === 'RequestInvite' || currentPage === 'Pricing' || currentPage === 'PublicProfile') {
+    if (currentPage === 'Privacy' || currentPage === 'Terms' || currentPage === 'CookiePolicy' || currentPage === 'InviteRequired' || currentPage === 'RequestInvite' || currentPage === 'Pricing' || currentPage === 'PublicProfile' || currentPage === 'AdminSetup') {
       setResolvedPage(currentPage);
-      return;
-    }
-
-    if (currentPage === 'AdminSetup') {
-      setResolvedPage('AdminSetup');
       return;
     }
 
