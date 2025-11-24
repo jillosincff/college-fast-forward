@@ -205,11 +205,21 @@ export default function ParentActivityWidget() {
     if (messages.length === 0) {
       return (
         <div className="text-center py-12">
-          <Mail className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600">No messages yet</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Your conversations will appear here
+          <div className="relative inline-block mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 blur-xl rounded-full"></div>
+            <Mail className="w-16 h-16 text-gradient-to-br from-[#0021A5] to-[#FA4616] mx-auto relative" />
+          </div>
+          <p className="text-lg font-semibold text-slate-800 mb-1">Your Gator network conversations will appear here</p>
+          <p className="text-sm text-slate-600">
+            Start connecting with students to see your messages 🐊
           </p>
+          <Button
+            variant="outline"
+            className="mt-4 border-[#0021A5] text-[#0021A5] hover:bg-[#0021A5] hover:text-white"
+            onClick={() => navigate('Connections')}
+          >
+            Start Helping Students
+          </Button>
         </div>
       );
     }
@@ -263,14 +273,17 @@ export default function ParentActivityWidget() {
     if (helpOffers.length === 0) {
       return (
         <div className="text-center py-12">
-          <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600">No help offers yet</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Start helping students to see your impact here
+          <div className="relative inline-block mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 blur-xl rounded-full"></div>
+            <Users className="w-16 h-16 text-gradient-to-br from-[#0021A5] to-[#FA4616] mx-auto relative" />
+          </div>
+          <p className="text-lg font-semibold text-slate-800 mb-1">Your Gator impact starts here 🐊</p>
+          <p className="text-sm text-slate-600">
+            Browse student requests and offer your expertise
           </p>
           <Button
             variant="outline"
-            className="mt-4"
+            className="mt-4 border-[#0021A5] text-[#0021A5] hover:bg-[#0021A5] hover:text-white"
             onClick={() => navigate('Connections')}
           >
             Browse Requests
@@ -315,14 +328,16 @@ export default function ParentActivityWidget() {
     if (myOpportunities.length === 0) {
       return (
         <div className="text-center py-12">
-          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-600">No job postings yet</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Post opportunities to help students find their next role
+          <div className="relative inline-block mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FA4616]/10 to-[#F2A900]/10 blur-xl rounded-full"></div>
+            <Briefcase className="w-16 h-16 text-gradient-to-br from-[#FA4616] to-[#F2A900] mx-auto relative" />
+          </div>
+          <p className="text-lg font-semibold text-slate-800 mb-1">Share opportunities with Gators 🐊</p>
+          <p className="text-sm text-slate-600">
+            Post job leads and boost your student's visibility
           </p>
           <Button
-            variant="outline"
-            className="mt-4"
+            className="mt-4 bg-gradient-to-r from-[#FA4616] to-[#D32737] hover:from-[#D32737] hover:to-[#FA4616] text-white font-bold shadow-lg"
             onClick={() => navigate('PostOpportunity')}
           >
             Post a Job
