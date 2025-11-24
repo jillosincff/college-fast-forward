@@ -1,11 +1,13 @@
-
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Globe2 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import { getDisplayName } from '@/components/utils/nameUtils';
+import { Message } from '@/entities/Message';
+import { Connection } from '@/entities/Connection';
+import { HelpOffer } from '@/entities/HelpOffer';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -98,9 +100,39 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const isOpenToRelocate = request?.relocation_ok || false;
   const needsVisaSponsorship = request?.visa_needed || false;
 
-  // Mock engagement stats
-  const messagesCount = Math.floor(Math.random() * 8) + 1;
-  const responsesCount = Math.floor(Math.random() * 3) + 1;
+  // Real engagement stats
+  const [messagesCount, setMessagesCount] = useState(0);
+  const [responsesCount, setResponsesCount] = useState(0);
+
+  useEffect(() => {
+    if (!request) return;
+    
+    const loadEngagementStats = async () => {
+      try {
+        const [messages, connections, helpOffers] = await Promise.all([
+          Message.filter({ post_id: request.id }).catch(() => []),
+          Connection.filter({ job_request_id: request.id }).catch(() => []),
+          HelpOffer.filter({ request_id: request.id }).catch(() => [])
+        ]);
+
+        const uniqueHelpers = new Set();
+        messages.forEach(m => {
+          if (m.sender_email !== gator.email) uniqueHelpers.add(m.sender_email);
+        });
+        connections.forEach(c => uniqueHelpers.add(c.connector_user_id || c.created_by));
+        helpOffers.forEach(h => uniqueHelpers.add(h.created_by));
+
+        const totalResponses = messages.filter(m => m.sender_email !== gator.email).length;
+
+        setMessagesCount(uniqueHelpers.size);
+        setResponsesCount(totalResponses);
+      } catch (error) {
+        console.error('Failed to load engagement stats:', error);
+      }
+    };
+
+    loadEngagementStats();
+  }, [request?.id, gator.email]);
 
   const handleMessage = () => {
     if (onHelp) {
