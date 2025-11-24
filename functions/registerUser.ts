@@ -80,9 +80,13 @@ Deno.serve(async (req) => {
 
   try {
     console.log("=== REGISTRATION STARTED ===");
+    console.log("Timestamp:", new Date().toISOString());
+    console.log("Request URL:", req.url);
+    console.log("Request method:", req.method);
+    console.log("Request headers:", Object.fromEntries(req.headers.entries()));
     
     const { email, password, full_name, persona } = await req.json();
-    console.log("Request data:", { email, full_name, persona });
+    console.log("Request data:", { email, full_name, persona, hasPassword: !!password });
 
     if (!email || !password || !full_name) {
       console.error("Missing required fields");
