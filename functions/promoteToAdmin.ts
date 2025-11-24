@@ -1,110 +1,70 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
   try {
-    console.log('Admin promotion request received');
-    
-    const requestBody = await req.json();
-    console.log('Request body:', requestBody);
-    
-    const { email, adminSetupKey } = requestBody;
-    
-    // Check for the admin setup key
-    const ADMIN_SETUP_KEY = Deno.env.get('ADMIN_SETUP_KEY') || 'college-fast-forward-admin-2024';
-    console.log('Checking admin key...');
-    
-    if (adminSetupKey !== ADMIN_SETUP_KEY) {
-      console.log('Invalid admin setup key provided');
-      return new Response(JSON.stringify({ 
-        error: 'Invalid admin setup key' 
-      }), { 
-        status: 403, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
-    }
-
-    if (!email) {
-      console.log('No email provided');
-      return new Response(JSON.stringify({ 
-        error: 'Email is required' 
-      }), { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
-    }
-
-    console.log('Creating base44 client...');
     const base44 = createClientFromRequest(req);
     
-    console.log('Using service role to find user:', email);
+    const { email, adminSetupKey } = await req.json();
     
-    // Find the user by email using service role
-    const users = await base44.asServiceRole.entities.User.filter({ email: email.toLowerCase() });
-    console.log('Found users:', users.length);
+    if (!email || !adminSetupKey) {
+      return Response.json(
+        { error: 'Email and admin setup key are required' },
+        { status: 400 }
+      );
+    }
+
+    if (adminSetupKey !== ADMIN_SETUP_KEY) {
+      return Response.json(
+        { error: 'Invalid admin setup key' },
+        { status: 403 }
+      );
+    }
+
+    // Use service role to find and update the user
+    const users = await base44.asServiceRole.entities.User.filter({ email });
     
     if (!users || users.length === 0) {
-      console.log('User not found');
-      return new Response(JSON.stringify({ 
-        error: 'User not found with that email address' 
-      }), { 
-        status: 404, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
+      return Response.json(
+        { error: 'User not found with that email' },
+        { status: 404 }
+      );
     }
 
     const user = users[0];
-    console.log('Updating user:', user.id);
 
-    // Update user to have admin role
-    const currentRoles = user.roles || [];
-    const updatedRoles = currentRoles.includes('admin') 
-      ? currentRoles 
-      : [...currentRoles, 'admin'];
-
-    console.log('Current roles:', currentRoles);
-    console.log('Updated roles:', updatedRoles);
+    // Update user to add admin role
+    const updatedRoles = user.roles || [];
+    if (!updatedRoles.includes('admin')) {
+      updatedRoles.push('admin');
+    }
 
     await base44.asServiceRole.entities.User.update(user.id, {
-      roles: updatedRoles,
-      role: 'admin' // Also set the legacy role field for compatibility
+      roles: updatedRoles
     });
 
-    console.log(`✅ Admin access granted to: ${email}`);
+    console.log(`Successfully promoted ${email} to admin`);
 
-    return new Response(JSON.stringify({
+    return Response.json({
       success: true,
-      message: `Successfully promoted ${email} to administrator`,
+      message: 'User successfully promoted to admin! Please log out and log back in.',
       user: {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
         roles: updatedRoles
       }
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('❌ Admin promotion error:', error);
-    console.error('Error stack:', error.stack);
-    
-    return new Response(JSON.stringify({ 
-      error: 'Failed to promote user to admin',
-      details: error.message,
-      stack: error.stack
-    }), { 
-      status: 500, 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    });
+    console.error('Admin promotion error:', error);
+    return Response.json(
+      { 
+        error: 'Failed to promote user',
+        details: error.message 
+      },
+      { status: 500 }
+    );
   }
 });
