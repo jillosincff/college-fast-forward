@@ -14,7 +14,7 @@ export default function EmergingGatorsHero({ onBrowse }) {
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-          ✅ 847 students found help today
+          ✅ Gators find help every day through our network!
         </div>
         <h1 className={HERO_HEADING_CLASSES}>Students Seeking Your Help</h1>
         <p className={`${HERO_SUBHEADING_CLASSES} mb-8 mt-4`}>
