@@ -566,9 +566,13 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     <DropdownMenuItem onClick={() => onNavigate('MyRequests')}><FileText className="mr-2 h-4 w-4" />My Requests</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyMessages')}><MessageSquare className="mr-2 h-4 w-4" />My Messages</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('Favorites')}><Bookmark className="mr-2 h-4 w-4" />My Favorites</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onNavigate('AdminSetup')} className="text-orange-600 focus:bg-orange-50 focus:text-orange-700">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Admin Setup
+                    </DropdownMenuItem>
                     {user?.roles?.includes('admin') && (
                       <>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onNavigate('AdminDashboard')} className="text-purple-600 focus:bg-purple-50 focus:text-purple-700">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             Admin Dashboard
