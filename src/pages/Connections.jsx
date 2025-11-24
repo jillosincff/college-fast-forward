@@ -3,8 +3,12 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { JobRequest } from '@/entities/JobRequest';
+import { Message } from '@/entities/Message';
+import { Connection } from '@/entities/Connection';
+import { HelpOffer } from '@/entities/HelpOffer';
 import { base44 } from '@/api/base44Client';
 import { Search, Plus, Filter, Sparkles, MessageSquare, UserPlus, TrendingUp } from 'lucide-react';
+import moment from 'moment';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,9 +65,18 @@ export default function DiscoverEmergingGatorsPage() {
       const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
       const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
       
-      const [jobRequests, directoryResponse] = await Promise.all([
+      const startOfDay = moment().startOf('day').toISOString();
+      
+      const messagesTodayPromise = Message.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
+      const connectionsTodayPromise = Connection.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
+      const helpOffersTodayPromise = HelpOffer.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
+
+      const [jobRequests, directoryResponse, messagesToday, connectionsToday, helpOffersToday] = await Promise.all([
         jobRequestsPromise,
-        directoryUsersPromise
+        directoryUsersPromise,
+        messagesTodayPromise,
+        connectionsTodayPromise,
+        helpOffersTodayPromise
       ]);
       
       // Filter out test/demo requests
@@ -81,10 +94,12 @@ export default function DiscoverEmergingGatorsPage() {
       
       const users = directoryResponse?.data?.data || [];
       setAllUsers(users);
+
+      const totalResponsesToday = messagesToday.length + connectionsToday.length + helpOffersToday.length;
       
       setLiveStats({
         seekingHelp: realRequests?.length || 0,
-        responsesToday: Math.floor(Math.random() * 50) + 80
+        responsesToday: totalResponsesToday
       });
       
     } catch (error) {
