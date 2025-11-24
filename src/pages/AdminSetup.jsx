@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { promoteToAdmin } from '@/functions/promoteToAdmin';
 
 export default function AdminSetup() {
   const [email, setEmail] = useState('');
@@ -20,41 +21,32 @@ export default function AdminSetup() {
     try {
       console.log('Calling admin promotion function...');
       
-      // Make direct HTTP request to the function
-      const response = await fetch('/functions/promoteToAdmin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          adminSetupKey: adminKey.trim()
-        })
+      const response = await promoteToAdmin({
+        email: email.trim(),
+        adminSetupKey: adminKey.trim()
       });
 
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
+      console.log('Response data:', response.data);
 
-      if (response.ok && data.success) {
+      if (response.data.success) {
         setResult({
           type: 'success',
-          message: data.message,
-          user: data.user
+          message: response.data.message,
+          user: response.data.user
         });
         setEmail('');
         setAdminKey('');
       } else {
         setResult({
           type: 'error',
-          message: data.error || data.details || 'Failed to promote user'
+          message: response.data.error || response.data.details || 'Failed to promote user'
         });
       }
     } catch (error) {
       console.error('Admin setup error:', error);
       setResult({
         type: 'error',
-        message: `Network error: ${error.message}`
+        message: error.response?.data?.error || error.message || 'Failed to promote user'
       });
     }
 
