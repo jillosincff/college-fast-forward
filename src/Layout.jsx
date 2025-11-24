@@ -842,7 +842,7 @@ function AppContent() {
   }
 
   const PageComponent = getPageComponent(resolvedPage);
-  const showHeader = resolvedPage !== 'LandingPage' && !onboardingPages.includes(resolvedPage) && !publicPages.includes(resolvedPage);
+  const showHeader = resolvedPage !== 'LandingPage' && resolvedPage !== 'AdminSetup' && !onboardingPages.includes(resolvedPage) && !publicPages.includes(resolvedPage);
 
   return (
     <AppErrorBoundary name="MainApp">
