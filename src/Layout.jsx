@@ -569,6 +569,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     {user?.roles?.includes('admin') && (
                       <>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onNavigate('AdminDashboard')} className="text-purple-600 focus:bg-purple-50 focus:text-purple-700">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Admin Dashboard
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onNavigate('TestingDashboard')} className="text-blue-600 focus:bg-blue-50 focus:text-blue-700">
                             <TestTube className="mr-2 h-4 w-4" />
                             Testing Dashboard
