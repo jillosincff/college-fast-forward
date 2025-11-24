@@ -303,18 +303,18 @@ export default function ParentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-700">
               <Sparkles className="w-6 h-6 text-green-600" />
-              How Your Parent Power Boost Works!
+              Boost Your Gator's Request for Help
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 font-bold text-lg">1</span>
+                  <span className="text-green-600 font-bold text-lg" aria-label="Step 1">1</span>
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1">Link with Your Gator</h4>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-700">
                     {user.linked_students?.length > 0 ? (
                       `You're connected to ${user.linked_students.length} student${user.linked_students.length > 1 ? 's' : ''} – they're all set for a boost!`
                     ) : (
@@ -326,14 +326,14 @@ export default function ParentDashboard() {
 
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 font-bold text-lg">2</span>
+                  <span className="text-green-600 font-bold text-lg" aria-label="Step 2">2</span>
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1">Take Action: Help a Student or Post a Lead</h4>
-                  <p className="text-sm text-slate-600 mb-2">
+                  <p className="text-sm text-slate-700 mb-2">
                     When you take any of these actions, you're making an impact:
                   </p>
-                  <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                  <ul className="text-sm text-slate-700 space-y-1 ml-4">
                     <li>• Message a student</li>
                     <li>• Offer help on a student request</li>
                     <li>• Post or share a job/internship opportunity</li>
@@ -343,14 +343,17 @@ export default function ParentDashboard() {
 
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center flex-shrink-0">
-                  <Star className="w-5 h-5 text-white" />
+                  <Star className="w-5 h-5 text-white" aria-hidden="true" />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    Your Student's Request Gets Boosted! 🚀
+                    Your Student's Request Gets Boosted! <span role="img" aria-label="rocket">🚀</span>
                   </h4>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-700">
                     For <strong>7 days</strong>, your linked student's help requests will be pinned to the top of the feed for everyone to see. Go Gators!
+                  </p>
+                  <p className="text-xs text-green-700 font-semibold mt-2 bg-green-100 rounded-lg px-3 py-2 border border-green-300">
+                    <span role="img" aria-label="chart">📊</span> Parents who link students see 2× more responses to their requests
                   </p>
                 </div>
               </div>
