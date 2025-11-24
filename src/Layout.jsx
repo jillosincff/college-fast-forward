@@ -546,10 +546,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
               {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <ShadButton variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                    <ShadButton variant="ghost" className="relative h-10 w-10 rounded-full p-0 ring-2 ring-slate-200 hover:ring-[#0021A5]">
                       <UserAvatar
                         user={user}
-                        className="h-8 w-8"
+                        className="h-10 w-10"
                         showFallback={true}
                       />
                     </ShadButton>
