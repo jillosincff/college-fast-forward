@@ -381,7 +381,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                 )}
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
               {user && (
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                   <SheetTrigger asChild className="md:hidden">
@@ -546,7 +546,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
               {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <ShadButton variant="ghost" className="relative h-10 w-10 rounded-full p-0 ring-2 ring-slate-200 hover:ring-[#0021A5]">
+                    <ShadButton 
+                      variant="outline" 
+                      className="h-11 w-11 rounded-full p-0 border-2 border-[#0021A5] hover:border-[#FA4616] hover:bg-slate-50 transition-all shadow-md"
+                    >
                       <UserAvatar
                         user={user}
                         className="h-10 w-10"
@@ -572,7 +575,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                       </>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}><LogOut className="mr-2 h-4 w-4" />Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout} className="text-red-600 focus:bg-red-50 focus:text-red-700">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
