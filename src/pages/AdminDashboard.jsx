@@ -461,57 +461,64 @@ const AdminDashboard = () => {
 
         {analytics && (
           <Tabs defaultValue="growth" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-7 gap-2 h-auto p-2 bg-white border border-slate-200">
-              <TabsTrigger 
-                value="growth" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                User Growth
-              </TabsTrigger>
-              <TabsTrigger 
-                value="features" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                Feature Usage
-              </TabsTrigger>
-              <TabsTrigger 
-                value="performance" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                Performance
-              </TabsTrigger>
-              <TabsTrigger 
-                value="database" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                Database
-              </TabsTrigger>
-              <TabsTrigger 
-                value="invites" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                Invite Requests
-                {inviteRequests.length > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {inviteRequests.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="community" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                <Share2 className="w-4 h-4 mr-1" />
-                Community Invites
-              </TabsTrigger>
-              <TabsTrigger 
-                value="manual" 
-                className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                <UserPlus className="w-4 h-4 mr-1" />
-                Manual Invite
-              </TabsTrigger>
-            </TabsList>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-8 gap-2 h-auto p-2 bg-white border border-slate-200">
+            <TabsTrigger 
+              value="growth" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              User Growth
+            </TabsTrigger>
+            <TabsTrigger 
+              value="features" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Feature Usage
+            </TabsTrigger>
+            <TabsTrigger 
+              value="performance" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Performance
+            </TabsTrigger>
+            <TabsTrigger 
+              value="database" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Database
+            </TabsTrigger>
+            <TabsTrigger 
+              value="signup" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <AlertTriangle className="w-4 h-4 mr-1" />
+              Sign-up Issues
+            </TabsTrigger>
+            <TabsTrigger 
+              value="invites" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Invite Requests
+              {inviteRequests.length > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {inviteRequests.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="community" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Share2 className="w-4 h-4 mr-1" />
+              Community Invites
+            </TabsTrigger>
+            <TabsTrigger 
+              value="manual" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              Manual Invite
+            </TabsTrigger>
+          </TabsList>
 
             {/* User Growth Tab */}
             <TabsContent value="growth" className="space-y-6">
@@ -681,6 +688,11 @@ const AdminDashboard = () => {
               <DatabaseBreakdownTable data={analytics.database?.entityBreakdown || []} />
             </TabsContent>
 
+            {/* Sign-up Issues Tab */}
+            <TabsContent value="signup" className="space-y-6">
+              <SignUpDiagnostics />
+            </TabsContent>
+
             {/* New Invite Requests Tab */}
             <TabsContent value="invites" className="space-y-6">
               <Card>
@@ -789,6 +801,241 @@ const AdminDashboard = () => {
           </Tabs>
         )}
       </div>
+    </div>
+  );
+};
+
+// Sign-up Diagnostics Component
+const SignUpDiagnostics = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [pendingAttempts, setPendingAttempts] = useState([]);
+  const [expiredAttempts, setExpiredAttempts] = useState([]);
+  const [usersWithoutPersona, setUsersWithoutPersona] = useState([]);
+
+  useEffect(() => {
+    loadDiagnostics();
+  }, []);
+
+  const loadDiagnostics = async () => {
+    setLoading(true);
+    try {
+      // Load pending registration attempts (not verified yet)
+      const pending = await base44.entities.RegistrationAttempt.filter(
+        { status: 'pending' },
+        '-created_date',
+        50
+      );
+
+      // Load expired registration attempts (older than 24h, still pending)
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const expired = (pending || []).filter(att => 
+        new Date(att.created_date) < new Date(twentyFourHoursAgo)
+      );
+
+      // Load users without persona
+      const allUsers = await base44.entities.User.filter({}, '-created_date', 100);
+      const noPersona = (allUsers || []).filter(u => !u.persona && !u.roles?.includes('admin'));
+
+      setPendingAttempts(pending || []);
+      setExpiredAttempts(expired || []);
+      setUsersWithoutPersona(noPersona || []);
+    } catch (error) {
+      console.error('Failed to load diagnostics:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load sign-up diagnostics",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+        <p className="text-slate-600">Loading diagnostics...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className={pendingAttempts.length > 0 ? 'border-yellow-300 bg-yellow-50' : ''}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Clock className="w-8 h-8 text-yellow-600" />
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{pendingAttempts.length}</p>
+                <p className="text-sm text-slate-600">Pending Email Verification</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={expiredAttempts.length > 0 ? 'border-red-300 bg-red-50' : ''}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{expiredAttempts.length}</p>
+                <p className="text-sm text-slate-600">Expired (24h+)</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={usersWithoutPersona.length > 0 ? 'border-orange-300 bg-orange-50' : ''}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Users className="w-8 h-8 text-orange-600" />
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{usersWithoutPersona.length}</p>
+                <p className="text-sm text-slate-600">Users Without Persona</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Pending Verification Attempts */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">Pending Email Verifications</CardTitle>
+          <Button onClick={loadDiagnostics} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {pendingAttempts.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
+              <p>All recent sign-ups have verified their email</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pendingAttempts.map((attempt) => {
+                const hoursAgo = Math.floor((Date.now() - new Date(attempt.created_date)) / (1000 * 60 * 60));
+                const isExpired = hoursAgo >= 24;
+                
+                return (
+                  <div 
+                    key={attempt.id}
+                    className={`p-4 rounded-lg border ${isExpired ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold text-slate-900">{attempt.full_name}</p>
+                          {isExpired && (
+                            <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+                              Expired
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-600">{attempt.email}</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Signed up {hoursAgo}h ago • Persona: {attempt.persona || 'N/A'}
+                        </p>
+                      </div>
+                      {isExpired && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => {
+                            toast({
+                              title: "Resend Feature Coming Soon",
+                              description: "Auto-resend verification emails will be added soon",
+                            });
+                          }}
+                        >
+                          Resend Email
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Users Without Persona */}
+      {usersWithoutPersona.length > 0 && (
+        <Card className="border-orange-300">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+              Users Without Persona (Onboarding Incomplete)
+            </CardTitle>
+            <p className="text-sm text-slate-600">
+              These users created accounts but didn't complete onboarding
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {usersWithoutPersona.map((user) => (
+                <div key={user.id} className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900">{user.full_name || 'No name'}</p>
+                      <p className="text-sm text-slate-600">{user.email}</p>
+                      <p className="text-xs text-slate-500">
+                        Joined {new Date(user.created_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Common Issues & Solutions */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="text-lg">Common Sign-up Issues & Solutions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-sm text-slate-900 mb-2">🔴 Pending Verifications (24h+)</h4>
+            <p className="text-sm text-slate-700">
+              Users signed up but never verified their email. Possible causes:
+            </p>
+            <ul className="text-sm text-slate-600 ml-4 mt-1 space-y-1">
+              <li>• Email went to spam folder</li>
+              <li>• User entered wrong email</li>
+              <li>• Email delivery failed</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-sm text-slate-900 mb-2">🟠 No Persona Set</h4>
+            <p className="text-sm text-slate-700">
+              Users verified email but didn't complete onboarding. Check:
+            </p>
+            <ul className="text-sm text-slate-600 ml-4 mt-1 space-y-1">
+              <li>• Onboarding flow might be broken</li>
+              <li>• User closed browser mid-onboarding</li>
+              <li>• Error during role selection</li>
+            </ul>
+          </div>
+
+          <div className="pt-4 border-t">
+            <p className="text-xs text-slate-600">
+              💡 <strong>Tip:</strong> Check the Console logs in Code → Functions → registerUser to see detailed error messages for failed sign-ups.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
