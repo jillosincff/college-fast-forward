@@ -548,13 +548,14 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                   <DropdownMenuTrigger asChild>
                     <ShadButton 
                       variant="outline" 
-                      className="h-11 w-11 rounded-full p-0 border-2 border-[#0021A5] hover:border-[#FA4616] hover:bg-slate-50 transition-all shadow-md"
+                      className="h-12 px-3 gap-2 rounded-full border-2 border-[#0021A5] hover:border-[#FA4616] hover:bg-slate-50 transition-all shadow-lg"
                     >
                       <UserAvatar
                         user={user}
-                        className="h-10 w-10"
+                        className="h-9 w-9"
                         showFallback={true}
                       />
+                      <span className="hidden sm:inline-flex text-sm font-semibold">Menu</span>
                     </ShadButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
