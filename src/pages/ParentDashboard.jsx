@@ -261,10 +261,10 @@ export default function ParentDashboard() {
           <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0021A5] to-[#0033CC] flex items-center justify-center shadow-md">
+                  <Heart className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-3xl font-bold text-slate-900">{stats.studentsHelped}</span>
+                <span className="text-3xl font-bold text-[#0021A5]">{stats.studentsHelped}</span>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Students Helped</h3>
               <p className="text-xs text-slate-600">Through intros and connections</p>
@@ -274,10 +274,10 @@ export default function ParentDashboard() {
           <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FA4616] to-[#D32737] flex items-center justify-center shadow-md">
+                  <Briefcase className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-3xl font-bold text-slate-900">{stats.jobsPosted}</span>
+                <span className="text-3xl font-bold text-[#FA4616]">{stats.jobsPosted}</span>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Jobs Posted</h3>
               <p className="text-xs text-slate-600">Opportunities shared</p>
@@ -287,10 +287,10 @@ export default function ParentDashboard() {
           <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-orange-600" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F2A900] to-[#FA4616] flex items-center justify-center shadow-md">
+                  <MessageSquare className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-3xl font-bold text-slate-900">{stats.messagesReceived}</span>
+                <span className="text-3xl font-bold text-[#F2A900]">{stats.messagesReceived}</span>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Messages</h3>
               <p className="text-xs text-slate-600">Active conversations</p>
@@ -376,8 +376,8 @@ export default function ParentDashboard() {
                   </p>
                   <Button
                     onClick={() => setShowInviteModal(true)}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
+                    size="lg"
+                    className="bg-[#0021A5] hover:bg-[#001580] text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                   >
                     Send Invite
                   </Button>
@@ -399,8 +399,8 @@ export default function ParentDashboard() {
                   </p>
                   <Button
                     onClick={() => setShowParentInviteModal(true)}
-                    size="sm"
-                    className="bg-orange-600 hover:bg-orange-700"
+                    size="lg"
+                    className="bg-[#FA4616] hover:bg-[#D32737] text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                   >
                     Send Invite
                   </Button>
