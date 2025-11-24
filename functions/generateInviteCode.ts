@@ -10,15 +10,23 @@ function generateRandomCode() {
 }
 
 Deno.serve(async (req) => {
+  console.log('=== GENERATE INVITE CODE STARTED ===');
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Request URL:', req.url);
+  
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
+    console.log('User authenticated:', user?.email);
+
     if (!user) {
+      console.error('❌ No user authenticated');
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { invite_type } = await req.json();
+    console.log('Invite type requested:', invite_type);
 
     // Simplified validation: gators and parents can invite anyone
     const validInviteTypes = [
@@ -76,6 +84,7 @@ Deno.serve(async (req) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
+    console.log('Creating invite code in database...');
     const inviteCode = await base44.asServiceRole.entities.InviteCode.create({
       code,
       inviter_id: user.id,
@@ -86,6 +95,11 @@ Deno.serve(async (req) => {
       expires_at: expiresAt.toISOString()
     });
 
+    console.log('=== INVITE CODE GENERATION SUCCESS ===');
+    console.log('Code:', inviteCode.code);
+    console.log('Expires:', inviteCode.expires_at);
+    console.log('For user:', user.email);
+
     return Response.json({
       success: true,
       code: inviteCode.code,
@@ -94,7 +108,9 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Generate invite code error:', error);
+    console.error('=== INVITE CODE GENERATION ERROR ===');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
     return Response.json({ 
       error: error.message || 'Failed to generate invite code' 
     }, { status: 500 });
