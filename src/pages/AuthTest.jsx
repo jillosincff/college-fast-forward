@@ -5,23 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, CheckCircle, XCircle, Mail, Lock, User } from 'lucide-react';
-import { registerUser } from '@/functions/registerUser';
-import { sendMagicLink } from '@/functions/sendMagicLink';
+import { Loader2, CheckCircle, XCircle, Mail, Key, Chrome } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { generateInviteCode } from '@/functions/generateInviteCode';
 
 export default function AuthTest() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [logs, setLogs] = useState([]);
 
-  const [registerForm, setRegisterForm] = useState({
+  const [inviteForm, setInviteForm] = useState({
     email: '',
-    password: '',
     fullName: '',
-    persona: 'student'
+    persona: 'gator'
   });
-
-  const [magicLinkEmail, setMagicLinkEmail] = useState('');
 
   const addLog = (message, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
@@ -29,72 +26,62 @@ export default function AuthTest() {
     console.log(`[${timestamp}] ${message}`);
   };
 
-  const testRegistration = async (e) => {
-    e.preventDefault();
+  const testGoogleLogin = async () => {
     setLoading(true);
     setResult(null);
     setLogs([]);
     
-    addLog('🚀 Starting registration test...');
-    addLog(`📧 Email: ${registerForm.email}`);
-    addLog(`👤 Name: ${registerForm.fullName}`);
+    addLog('🚀 Testing Google OAuth login...');
+    addLog('Redirecting to Google login...');
 
     try {
-      addLog('📤 Calling registerUser function...');
-      
-      const response = await registerUser({
-        email: registerForm.email,
-        password: registerForm.password,
-        full_name: registerForm.fullName,
-        persona: registerForm.persona
-      });
-
-      addLog('📥 Response received', 'success');
-      addLog(`Status: ${response.status}`);
-      addLog(`Data: ${JSON.stringify(response.data, null, 2)}`);
-
-      if (response.data?.success) {
-        setResult({ type: 'success', message: 'Registration successful! Check your email for verification link.' });
-        addLog('✅ Registration completed successfully!', 'success');
-      } else {
-        setResult({ type: 'error', message: response.data?.error || 'Registration failed' });
-        addLog(`❌ Registration failed: ${response.data?.error}`, 'error');
-      }
+      base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
+      addLog('✅ Redirect initiated', 'success');
     } catch (error) {
       addLog(`❌ Error: ${error.message}`, 'error');
-      addLog(`Stack: ${error.stack}`, 'error');
-      setResult({ type: 'error', message: error.message || 'Unknown error occurred' });
-    } finally {
+      setResult({ type: 'error', message: error.message });
       setLoading(false);
     }
   };
 
-  const testMagicLink = async (e) => {
+  const testInviteCode = async (e) => {
     e.preventDefault();
     setLoading(true);
     setResult(null);
     setLogs([]);
 
-    addLog('🚀 Starting magic link test...');
-    addLog(`📧 Email: ${magicLinkEmail}`);
+    addLog('🚀 Testing invite code generation...');
+    addLog(`📧 Email: ${inviteForm.email}`);
+    addLog(`👤 Name: ${inviteForm.fullName}`);
+    addLog(`🎭 Persona: ${inviteForm.persona}`);
 
     try {
-      addLog('📤 Calling sendMagicLink function...');
+      addLog('📤 Calling generateInviteCode function...');
       
-      const response = await sendMagicLink({ email: magicLinkEmail });
+      const response = await generateInviteCode({
+        admin_email: inviteForm.email,
+        note: `Test invite for ${inviteForm.fullName}`,
+        max_uses: 1
+      });
 
       addLog('📥 Response received', 'success');
       addLog(`Data: ${JSON.stringify(response.data, null, 2)}`);
 
-      if (response.data?.success) {
-        setResult({ type: 'success', message: 'Magic link sent! Check your email.' });
-        addLog('✅ Magic link sent successfully!', 'success');
+      if (response.data?.code) {
+        setResult({ 
+          type: 'success', 
+          message: `Invite code generated: ${response.data.code}`,
+          data: response.data
+        });
+        addLog(`✅ Invite code generated: ${response.data.code}`, 'success');
+        addLog(`📧 Email sent: ${response.data.email_sent ? 'Yes' : 'No'}`, response.data.email_sent ? 'success' : 'error');
       } else {
-        setResult({ type: 'error', message: response.data?.error || 'Failed to send magic link' });
+        setResult({ type: 'error', message: response.data?.error || 'Failed to generate invite' });
         addLog(`❌ Failed: ${response.data?.error}`, 'error');
       }
     } catch (error) {
       addLog(`❌ Error: ${error.message}`, 'error');
+      addLog(`Stack: ${error.stack}`, 'error');
       setResult({ type: 'error', message: error.message });
     } finally {
       setLoading(false);
@@ -117,27 +104,64 @@ export default function AuthTest() {
                 <CardTitle>Test Authentication</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="register">
+                <Tabs defaultValue="oauth">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="register">Registration</TabsTrigger>
-                    <TabsTrigger value="magic">Magic Link</TabsTrigger>
+                    <TabsTrigger value="oauth">OAuth Login</TabsTrigger>
+                    <TabsTrigger value="invite">Invite Code</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="register">
-                    <form onSubmit={testRegistration} className="space-y-4">
+                  <TabsContent value="oauth">
+                    <div className="space-y-4">
+                      <div className="text-center mb-4">
+                        <Chrome className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                        <p className="text-sm text-slate-600">
+                          Test Google OAuth login flow
+                        </p>
+                      </div>
+
+                      <Alert className="border-blue-200 bg-blue-50">
+                        <AlertDescription className="text-blue-800 text-sm">
+                          <strong>Note:</strong> This will redirect you to Google login. Make sure you have Google SSO configured.
+                        </AlertDescription>
+                      </Alert>
+
+                      <Button 
+                        onClick={testGoogleLogin}
+                        className="w-full bg-blue-600 hover:bg-blue-700" 
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Redirecting...
+                          </>
+                        ) : (
+                          <>
+                            <Chrome className="w-4 h-4 mr-2" />
+                            Test Google Login
+                          </>
+                        )}
+                      </Button>
+
+                      <Alert className="border-yellow-200 bg-yellow-50">
+                        <AlertDescription className="text-yellow-800 text-sm">
+                          <strong>Facebook Login:</strong> Not currently configured. Only Google OAuth is set up.
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="invite">
+                    <form onSubmit={testInviteCode} className="space-y-4">
                       <div>
                         <Label htmlFor="fullName">Full Name</Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                          <Input
-                            id="fullName"
-                            placeholder="John Doe"
-                            value={registerForm.fullName}
-                            onChange={(e) => setRegisterForm({...registerForm, fullName: e.target.value})}
-                            className="pl-10"
-                            required
-                          />
-                        </div>
+                        <Input
+                          id="fullName"
+                          placeholder="John Doe"
+                          value={inviteForm.fullName}
+                          onChange={(e) => setInviteForm({...inviteForm, fullName: e.target.value})}
+                          required
+                        />
                       </div>
 
                       <div>
@@ -148,27 +172,10 @@ export default function AuthTest() {
                             id="email"
                             type="email"
                             placeholder="test@ufl.edu"
-                            value={registerForm.email}
-                            onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+                            value={inviteForm.email}
+                            onChange={(e) => setInviteForm({...inviteForm, email: e.target.value})}
                             className="pl-10"
                             required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="password">Password</Label>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                          <Input
-                            id="password"
-                            type="password"
-                            placeholder="Min 6 characters"
-                            value={registerForm.password}
-                            onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
-                            className="pl-10"
-                            required
-                            minLength={6}
                           />
                         </div>
                       </div>
@@ -177,11 +184,11 @@ export default function AuthTest() {
                         <Label htmlFor="persona">Persona</Label>
                         <select
                           id="persona"
-                          value={registerForm.persona}
-                          onChange={(e) => setRegisterForm({...registerForm, persona: e.target.value})}
+                          value={inviteForm.persona}
+                          onChange={(e) => setInviteForm({...inviteForm, persona: e.target.value})}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                         >
-                          <option value="student">Student</option>
+                          <option value="gator">Student</option>
                           <option value="parent">Parent</option>
                           <option value="alumni">Alumni</option>
                         </select>
@@ -194,38 +201,10 @@ export default function AuthTest() {
                             Testing...
                           </>
                         ) : (
-                          'Test Registration'
-                        )}
-                      </Button>
-                    </form>
-                  </TabsContent>
-
-                  <TabsContent value="magic">
-                    <form onSubmit={testMagicLink} className="space-y-4">
-                      <div>
-                        <Label htmlFor="magicEmail">Email</Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                          <Input
-                            id="magicEmail"
-                            type="email"
-                            placeholder="test@ufl.edu"
-                            value={magicLinkEmail}
-                            onChange={(e) => setMagicLinkEmail(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Sending...
+                            <Key className="w-4 h-4 mr-2" />
+                            Generate Test Invite
                           </>
-                        ) : (
-                          'Send Magic Link'
                         )}
                       </Button>
                     </form>
@@ -282,12 +261,17 @@ export default function AuthTest() {
                 <CardTitle>Quick Instructions</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-slate-600 space-y-2">
-                <p>📝 <strong>Registration Test:</strong> Creates a user and sends verification email</p>
-                <p>🔗 <strong>Magic Link Test:</strong> Sends a passwordless login link</p>
+                <p>🔐 <strong>OAuth Test:</strong> Tests Google login flow (Facebook not configured)</p>
+                <p>📧 <strong>Invite Code Test:</strong> Generates invite code and attempts to send email</p>
                 <p>📊 All function calls are logged in real-time</p>
                 <p>🔍 Check the browser console for additional details</p>
                 <p className="pt-2 border-t">
-                  💡 <strong>Tip:</strong> After testing, check Code → Functions → Logs for backend logs
+                  💡 <strong>Tip:</strong> After testing, check Code → Functions → generateInviteCode → Logs
+                </p>
+                <p className="pt-2 border-t text-yellow-700 bg-yellow-50 p-2 rounded">
+                  ⚠️ <strong>Known Issues:</strong>
+                  <br />• Facebook OAuth not configured (only Google works)
+                  <br />• Some users report not receiving invite codes
                 </p>
               </CardContent>
             </Card>
