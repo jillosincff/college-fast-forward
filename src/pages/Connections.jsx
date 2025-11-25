@@ -169,6 +169,10 @@ export default function DiscoverEmergingGatorsPage() {
           firstName = 'Samantha';
           lastName = 'Pecora';
           formattedName = 'Samantha Pecora';
+        } else if (emailUsername === 'odesai') {
+          firstName = 'Om';
+          lastName = 'Desai';
+          formattedName = 'Om Desai';
         }
         
         profiles.push({
