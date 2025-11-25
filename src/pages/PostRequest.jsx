@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { JobRequest } from '@/entities/JobRequest';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate, useParams } from '@/components/utils/navigation';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Zap, TrendingUp, Heart, Lightbulb } from 'lucide-react';
 
 export default function PostRequestPage() { // Renamed from PostRequest
   const { user } = useAuth();
   const { toast } = useToast();
   const params = useParams();
-  const editId = params.editId;
+  const editId = params.edit || params.editId;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Removed showSuccess state as we're now navigating directly
