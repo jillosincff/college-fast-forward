@@ -1639,8 +1639,107 @@ const BackfillStudentRequests = () => {
             )}
           </div>
         )}
+
+        {/* Cleanup Section */}
+        <CleanupDraftNames />
       </CardContent>
     </Card>
+  );
+};
+
+// Cleanup Draft Names Component
+const CleanupDraftNames = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleCleanup = async () => {
+    if (!confirm('This will fix name formatting issues (Last, First → First Last) and trim trailing spaces. Continue?')) {
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const response = await cleanupDraftNames({});
+      
+      if (response.data?.success) {
+        setResult(response.data);
+        toast({
+          title: "✅ Cleanup Complete!",
+          description: `Fixed ${response.data.summary.fixed} records`,
+        });
+      } else {
+        throw new Error(response.data?.error || 'Cleanup failed');
+      }
+    } catch (error) {
+      console.error('Cleanup error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Cleanup failed",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="border-t pt-6 mt-6">
+      <h4 className="font-semibold text-slate-900 mb-2">🧹 Cleanup Draft Data</h4>
+      <p className="text-sm text-slate-600 mb-4">
+        Fix name formatting issues (e.g., "Last, First" → "First Last") and trim trailing spaces from fields.
+      </p>
+
+      <Button
+        onClick={handleCleanup}
+        disabled={loading}
+        variant="outline"
+        className="w-full"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Running Cleanup...
+          </>
+        ) : (
+          <>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Run Cleanup
+          </>
+        )}
+      </Button>
+
+      {result && (
+        <div className="mt-4 bg-slate-50 border rounded-lg p-4">
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
+            <div>
+              <p className="text-xl font-bold text-slate-900">{result.summary.totalDrafts}</p>
+              <p className="text-xs text-slate-600">Total Drafts</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-green-600">{result.summary.fixed}</p>
+              <p className="text-xs text-slate-600">Fixed</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-red-600">{result.summary.errors}</p>
+              <p className="text-xs text-slate-600">Errors</p>
+            </div>
+          </div>
+
+          {result.fixed.length > 0 && (
+            <div className="max-h-32 overflow-y-auto bg-white rounded border p-2 space-y-1">
+              {result.fixed.map((item, idx) => (
+                <div key={idx} className="text-xs text-slate-600 py-1 border-b last:border-0">
+                  ✅ {item.originalName} → {item.newName}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
