@@ -1460,6 +1460,44 @@ const BackfillStudentRequests = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [progress, setProgress] = useState(null);
+
+  const runBatch = async (offset = 0, accumulated = { created: [], errors: [] }) => {
+    const response = await backfillStudentRequests({ offset, batchSize: 10 });
+    
+    if (!response.data?.success) {
+      throw new Error(response.data?.error || 'Backfill failed');
+    }
+
+    const newAccumulated = {
+      created: [...accumulated.created, ...response.data.created],
+      errors: [...accumulated.errors, ...response.data.errors]
+    };
+
+    setProgress({
+      processed: offset + response.data.summary.processedInBatch,
+      total: response.data.summary.studentsWithoutRequests,
+      created: newAccumulated.created.length,
+      errors: newAccumulated.errors.length
+    });
+
+    if (response.data.pagination.hasMore) {
+      // Continue with next batch
+      return runBatch(response.data.pagination.nextOffset, newAccumulated);
+    }
+
+    // All done
+    return {
+      ...response.data,
+      created: newAccumulated.created,
+      errors: newAccumulated.errors,
+      summary: {
+        ...response.data.summary,
+        created: newAccumulated.created.length,
+        errors: newAccumulated.errors.length
+      }
+    };
+  };
 
   const handleBackfill = async () => {
     if (!confirm('This will create draft JobRequest entries for all students who don\'t have one. Continue?')) {
@@ -1468,19 +1506,15 @@ const BackfillStudentRequests = () => {
 
     setLoading(true);
     setResult(null);
+    setProgress(null);
 
     try {
-      const response = await backfillStudentRequests({});
-      
-      if (response.data?.success) {
-        setResult(response.data);
-        toast({
-          title: "✅ Backfill Complete!",
-          description: `Created ${response.data.summary.created} draft requests`,
-        });
-      } else {
-        throw new Error(response.data?.error || 'Backfill failed');
-      }
+      const finalResult = await runBatch(0);
+      setResult(finalResult);
+      toast({
+        title: "✅ Backfill Complete!",
+        description: `Created ${finalResult.summary.created} draft requests`,
+      });
     } catch (error) {
       console.error('Backfill error:', error);
       toast({
@@ -1490,6 +1524,7 @@ const BackfillStudentRequests = () => {
       });
     } finally {
       setLoading(false);
+      setProgress(null);
     }
   };
 
