@@ -1570,6 +1570,24 @@ const BackfillStudentRequests = () => {
           )}
         </Button>
 
+        {progress && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+              <span className="font-medium text-blue-900">Processing...</span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all"
+                style={{ width: `${progress.total > 0 ? (progress.processed / progress.total) * 100 : 0}%` }}
+              />
+            </div>
+            <p className="text-sm text-blue-700">
+              {progress.processed} / {progress.total} students processed • {progress.created} created • {progress.errors} errors
+            </p>
+          </div>
+        )}
+
         {result && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
             <h4 className="font-semibold text-green-900">✅ Backfill Results</h4>
