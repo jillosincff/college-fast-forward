@@ -76,12 +76,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     
     const timingMap = {
       'immediate': 'Immediate',
+      'asap': 'ASAP',
       'this_semester': 'This Semester',
       'next_semester': 'Next Semester',
-      'summer': 'Summer'
+      'summer': 'Summer',
+      'summer_2025': 'Summer 2025',
+      'summer_2026': 'Summer 2026',
+      'after_grad_2025': 'After Graduation 2025',
+      'after_grad_2026': 'After Graduation 2026'
     };
     
-    return timingMap[request.start_timing] || request.start_timing;
+    return timingMap[request.start_timing] || request.start_timing.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   };
 
   // Extract skills from bio
