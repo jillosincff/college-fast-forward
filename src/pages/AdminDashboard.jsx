@@ -1454,4 +1454,139 @@ const DatabaseBreakdownTable = ({ data }) => (
   </Card>
 );
 
+// Backfill Student Requests Component
+const BackfillStudentRequests = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleBackfill = async () => {
+    if (!confirm('This will create draft JobRequest entries for all students who don\'t have one. Continue?')) {
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const response = await backfillStudentRequests({});
+      
+      if (response.data?.success) {
+        setResult(response.data);
+        toast({
+          title: "✅ Backfill Complete!",
+          description: `Created ${response.data.summary.created} draft requests`,
+        });
+      } else {
+        throw new Error(response.data?.error || 'Backfill failed');
+      }
+    } catch (error) {
+      console.error('Backfill error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Backfill failed",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Database className="w-5 h-5 text-purple-600" />
+          Backfill Student Requests
+        </CardTitle>
+        <p className="text-sm text-slate-600 mt-2">
+          Create draft JobRequest entries for students who are in the directory but don't have a help request yet.
+          Students will see a banner on their dashboard prompting them to activate their request.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <h4 className="font-semibold text-amber-900 mb-2">⚠️ What this does:</h4>
+          <ul className="text-sm text-amber-800 space-y-1 ml-4 list-disc">
+            <li>Finds all students/gators without a JobRequest</li>
+            <li>Creates a <strong>draft</strong> JobRequest using their profile info (bio, major, etc.)</li>
+            <li>Students will see a notification on their dashboard to activate it</li>
+            <li>Draft requests are NOT visible on the Emerging Gators page until activated</li>
+          </ul>
+        </div>
+
+        <Button
+          onClick={handleBackfill}
+          disabled={loading}
+          className="w-full bg-purple-600 hover:bg-purple-700"
+          size="lg"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Running Backfill...
+            </>
+          ) : (
+            <>
+              <Database className="w-4 h-4 mr-2" />
+              Run Backfill Now
+            </>
+          )}
+        </Button>
+
+        {result && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
+            <h4 className="font-semibold text-green-900">✅ Backfill Results</h4>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="bg-white rounded-lg p-3 border">
+                <p className="text-2xl font-bold text-slate-900">{result.summary.totalStudents}</p>
+                <p className="text-xs text-slate-600">Total Students</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border">
+                <p className="text-2xl font-bold text-slate-900">{result.summary.existingRequests}</p>
+                <p className="text-xs text-slate-600">Already Had Request</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border">
+                <p className="text-2xl font-bold text-green-600">{result.summary.created}</p>
+                <p className="text-xs text-slate-600">Drafts Created</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border">
+                <p className="text-2xl font-bold text-red-600">{result.summary.errors}</p>
+                <p className="text-xs text-slate-600">Errors</p>
+              </div>
+            </div>
+
+            {result.created.length > 0 && (
+              <div>
+                <h5 className="font-medium text-sm text-slate-700 mb-2">Created Drafts:</h5>
+                <div className="max-h-48 overflow-y-auto bg-white rounded border p-2 space-y-1">
+                  {result.created.map((item, idx) => (
+                    <div key={idx} className="text-xs text-slate-600 py-1 border-b last:border-0">
+                      ✅ {item.name} ({item.email})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {result.errors.length > 0 && (
+              <div>
+                <h5 className="font-medium text-sm text-red-700 mb-2">Errors:</h5>
+                <div className="max-h-32 overflow-y-auto bg-red-50 rounded border border-red-200 p-2 space-y-1">
+                  {result.errors.map((item, idx) => (
+                    <div key={idx} className="text-xs text-red-600 py-1 border-b last:border-0">
+                      ❌ {item.email}: {item.error}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export default AdminDashboard;
