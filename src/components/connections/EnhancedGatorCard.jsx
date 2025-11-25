@@ -308,6 +308,33 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
             <MessageSquare className="w-4 h-4 mr-2" />
             Message
           </Button>
+
+          {/* Quick-Win Engagement Signals */}
+          {(messagesCount > 0 || request?.offers_count > 0) && (
+            <div className="engagement-signals">
+              {messagesCount > 0 && (
+                <span 
+                  className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
+                  title={`${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}`}
+                >
+                  💬 {messagesCount}
+                </span>
+              )}
+              {(request?.offers_count || 0) > 0 && (
+                <span 
+                  className={`signal-badge ${request.offers_count >= 3 ? 'signal-hot' : ''}`}
+                  title={`${request.offers_count} parent${request.offers_count > 1 ? 's' : ''} said "I can help"`}
+                >
+                  👍 {request.offers_count}
+                </span>
+              )}
+              {isFeatured && (
+                <span className="signal-badge signal-fire" title="Trending this week">
+                  🔥
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -626,6 +653,34 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           background: #FF6F00;
           transform: scale(1.05);
           box-shadow: 0 4px 12px rgba(250, 70, 22, 0.3);
+        }
+
+        /* Engagement Signals */
+        .engagement-signals {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 6px;
+        }
+
+        .signal-badge {
+          font-size: 14px;
+          color: #666;
+          cursor: default;
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          transition: color 0.2s;
+        }
+
+        .signal-badge.signal-hot {
+          color: #FA4616;
+          font-weight: 600;
+        }
+
+        .signal-badge.signal-fire {
+          color: #FA4616;
         }
 
         /* Mobile Responsiveness */
