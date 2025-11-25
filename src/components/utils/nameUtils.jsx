@@ -63,11 +63,29 @@ export function getDisplayName(user) {
     if (emailName.includes('.')) {
       return emailName
         .split('.')
-        .map(part => capitalizeName(part))
+        .map(part => {
+          const cleanPart = part.replace(/[0-9]/g, '');
+          return capitalizeName(cleanPart);
+        })
+        .filter(Boolean)
         .join(' ');
     }
-    // Convert "spencer7stavrevski" to "Spencer Stavrevski" (remove numbers)
+    // Remove numbers first: "spencer7stavrevski" -> "spencerstavrevski"
     const cleanName = emailName.replace(/[0-9]/g, '');
+    
+    // Try to detect common name patterns and split them
+    // e.g., "joshuamarchant" -> "Joshua Marchant"
+    const commonFirstNames = ['joshua', 'spencer', 'olivia', 'michael', 'sarah', 'david', 'james', 'john', 'robert', 'william', 'richard', 'joseph', 'thomas', 'christopher', 'daniel', 'matthew', 'anthony', 'mark', 'donald', 'steven', 'paul', 'andrew', 'kenneth', 'george', 'edward', 'brian', 'ronald', 'timothy', 'jason', 'jeffrey', 'ryan', 'jacob', 'gary', 'nicholas', 'eric', 'jonathan', 'stephen', 'larry', 'justin', 'scott', 'brandon', 'benjamin', 'samuel', 'raymond', 'gregory', 'frank', 'alexander', 'patrick', 'jack', 'dennis', 'jerry', 'tyler', 'aaron', 'jose', 'adam', 'nathan', 'henry', 'douglas', 'zachary', 'peter', 'kyle', 'noah', 'ethan', 'jeremy', 'walter', 'christian', 'keith', 'roger', 'terry', 'austin', 'sean', 'gerald', 'carl', 'harold', 'dylan', 'arthur', 'lawrence', 'jordan', 'jesse', 'bryan', 'billy', 'bruce', 'gabriel', 'joe', 'logan', 'alan', 'juan', 'wayne', 'elijah', 'randy', 'roy', 'vincent', 'ralph', 'eugene', 'russell', 'bobby', 'mason', 'philip', 'louis', 'mary', 'patricia', 'jennifer', 'linda', 'elizabeth', 'barbara', 'susan', 'jessica', 'margaret', 'dorothy', 'lisa', 'nancy', 'karen', 'betty', 'helen', 'sandra', 'donna', 'carol', 'ruth', 'sharon', 'michelle', 'laura', 'kimberly', 'deborah', 'stephanie', 'cynthia', 'amy', 'angela', 'melissa', 'brenda', 'anna', 'rebecca', 'virginia', 'kathleen', 'pamela', 'martha', 'debra', 'amanda', 'stephanie', 'carolyn', 'christine', 'marie', 'janet', 'catherine', 'frances', 'ann', 'joyce', 'diane', 'alice', 'julie', 'heather', 'teresa', 'doris', 'gloria', 'evelyn', 'jean', 'cheryl', 'mildred', 'katherine', 'joan', 'ashley', 'judith', 'rose', 'janice', 'kelly', 'nicole', 'judy', 'christina', 'kathy', 'theresa', 'beverly', 'denise', 'tammy', 'irene', 'jane', 'lori', 'rachel', 'marilyn', 'andrea', 'kathryn', 'louise', 'sara', 'anne', 'jacqueline', 'wanda', 'bonnie', 'julia', 'ruby', 'lois', 'tina', 'phyllis', 'norma', 'paula', 'diana', 'annie', 'lillian', 'emily', 'robin', 'peggy', 'crystal', 'gladys', 'rita', 'dawn', 'connie', 'florence', 'tracy', 'edna', 'tiffany', 'carmen', 'rosa', 'cindy', 'grace', 'wendy', 'victoria', 'edith', 'kim', 'sherry', 'sylvia', 'josephine', 'thelma', 'shannon', 'sheila', 'ethel', 'ellen', 'elaine', 'marjorie', 'carrie', 'charlotte', 'monica', 'esther', 'pauline', 'emma', 'juanita', 'anita', 'rhonda', 'hazel', 'amber', 'eva', 'debbie', 'april', 'leslie', 'clara', 'lucille', 'jamie', 'joanne', 'eleanor', 'valerie', 'danielle', 'megan', 'alicia', 'suzanne', 'michele', 'gail', 'bertha', 'darlene', 'veronica', 'jill', 'erin', 'geraldine', 'lauren', 'cathy', 'joann', 'lorraine', 'lynn', 'sally', 'regina', 'erica', 'beatrice', 'dolores', 'bernice', 'audrey', 'yvonne', 'annette', 'june', 'samantha', 'marion', 'dana', 'stacy', 'ana', 'renee', 'ida', 'vivian', 'roberta', 'holly', 'brittany', 'melanie', 'loretta', 'yolanda', 'jeanette', 'laurie', 'katie', 'kristen', 'vanessa', 'alma', 'sue', 'elsie', 'beth', 'jeanne', 'vicki', 'carla', 'tara', 'rosemary', 'eileen', 'terri', 'gertrude', 'lucy', 'tonya', 'ella', 'stacey', 'wilma', 'gina', 'kristin', 'jessie', 'natalie', 'agnes', 'vera', 'willie', 'charlene', 'bessie', 'delores', 'melinda', 'pearl', 'arlene', 'maureen', 'colleen', 'allison', 'tamara', 'joy', 'georgia', 'constance', 'lillie', 'claudia', 'jackie', 'marcia', 'tanya', 'nellie', 'minnie', 'marlene', 'heidi', 'glenda', 'lydia', 'viola', 'courtney', 'marian', 'stella', 'caroline', 'dora', 'jo', 'vickie', 'mattie', 'maxine', 'irma', 'mabel', 'marsha', 'myrtle', 'lena', 'christy', 'deanna', 'patsy', 'hilda', 'gwendolyn', 'jennie', 'nora', 'margie', 'nina', 'cassandra', 'leah', 'penny', 'kay', 'priscilla', 'naomi', 'carole', 'brandy', 'olga', 'billie', 'dianne', 'tracey', 'leona', 'jenny', 'felicia', 'sonia', 'miriam', 'velma', 'becky', 'bobbie', 'violet', 'kristina', 'toni', 'misty', 'mae', 'shelly', 'daisy', 'ramona', 'sherri', 'erika', 'katrina', 'claire', 'rhiannon', 'odesai', 'omri'];
+    const lowerClean = cleanName.toLowerCase();
+    
+    for (const firstName of commonFirstNames) {
+      if (lowerClean.startsWith(firstName) && lowerClean.length > firstName.length) {
+        const lastName = lowerClean.slice(firstName.length);
+        return `${capitalizeName(firstName)} ${capitalizeName(lastName)}`;
+      }
+    }
+    
+    // If no match found, just capitalize the whole thing as one name
     return capitalizeName(cleanName);
   }
   
