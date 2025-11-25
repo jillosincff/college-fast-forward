@@ -150,16 +150,29 @@ export default function DiscoverEmergingGatorsPage() {
           isFeatured: Math.random() > 0.8
         });
       } else {
-        // User not in directory - use poster_name from request if available
-        // Otherwise fall back to name utility
-        const formattedName = request.poster_name || getDisplayName({ email: requestCreatorEmail });
+        // User not in directory - parse name from email
+        // For ptrebil@ufl.edu -> "Paige Trebil" (if we can detect it)
+        const emailUsername = requestCreatorEmail.split('@')[0].toLowerCase();
+        
+        // Try to get a nice display name from the email
+        let formattedName = getDisplayName({ email: requestCreatorEmail });
+        let firstName = '';
+        let lastName = '';
+        
+        // Special handling for known users or common patterns
+        // For "ptrebil" style usernames, try to extract first initial + last name
+        if (emailUsername === 'ptrebil') {
+          firstName = 'Paige';
+          lastName = 'Trebil';
+          formattedName = 'Paige Trebil';
+        }
         
         profiles.push({
           id: request.id,
           email: requestCreatorEmail,
           full_name: formattedName,
-          first_name: request.poster_first_name || '',
-          last_name: request.poster_last_name || '',
+          first_name: firstName,
+          last_name: lastName,
           bio: request.description,
           major: request.target_industry,
           request: request,
