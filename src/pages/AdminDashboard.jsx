@@ -526,6 +526,13 @@ const AdminDashboard = () => {
               <UserPlus className="w-4 h-4 mr-1" />
               Manual Invite
             </TabsTrigger>
+            <TabsTrigger 
+              value="backfill" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Database className="w-4 h-4 mr-1" />
+              Backfill Requests
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
