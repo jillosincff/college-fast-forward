@@ -24,6 +24,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { approveInviteRequest } from '@/functions/approveInviteRequest';
 import CommunityInviteManager from '@/components/admin/CommunityInviteManager'; // Added CommunityInviteManager import
+import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
