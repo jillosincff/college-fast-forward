@@ -299,24 +299,20 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           </Button>
 
           {/* Quick-Win Engagement Signals */}
-          {(messagesCount > 0 || request?.offers_count > 0) && (
+          {request && (
             <div className="engagement-signals">
-              {messagesCount > 0 && (
-                <span 
-                  className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
-                  title={`${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}`}
-                >
-                  💬 {messagesCount}
-                </span>
-              )}
-              {(request?.offers_count || 0) > 0 && (
-                <span 
-                  className={`signal-badge ${request.offers_count >= 3 ? 'signal-hot' : ''}`}
-                  title={`${request.offers_count} parent${request.offers_count > 1 ? 's' : ''} said "I can help"`}
-                >
-                  👍 {request.offers_count}
-                </span>
-              )}
+              <span 
+                className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
+                title={messagesCount > 0 ? `${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}` : 'Be the first to reach out!'}
+              >
+                💬 {messagesCount}
+              </span>
+              <span 
+                className={`signal-badge ${(request?.offers_count || 0) >= 3 ? 'signal-hot' : ''}`}
+                title={(request?.offers_count || 0) > 0 ? `${request.offers_count} parent${request.offers_count > 1 ? 's' : ''} said "I can help"` : 'No offers yet'}
+              >
+                👍 {request?.offers_count || 0}
+              </span>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
                   🔥
