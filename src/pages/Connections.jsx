@@ -150,17 +150,16 @@ export default function DiscoverEmergingGatorsPage() {
           isFeatured: Math.random() > 0.8
         });
       } else {
-        // Use the centralized name utility for consistent formatting
-        // Pass the full request object which may have poster info
-        const formattedName = getDisplayName({ 
-          email: requestCreatorEmail,
-          full_name: request.poster_name // If we stored poster name on request
-        });
+        // User not in directory - use poster_name from request if available
+        // Otherwise fall back to name utility
+        const formattedName = request.poster_name || getDisplayName({ email: requestCreatorEmail });
         
         profiles.push({
           id: request.id,
           email: requestCreatorEmail,
           full_name: formattedName,
+          first_name: request.poster_first_name || '',
+          last_name: request.poster_last_name || '',
           bio: request.description,
           major: request.target_industry,
           request: request,
