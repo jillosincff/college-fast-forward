@@ -192,7 +192,7 @@ export default function StudentOnboarding() {
         ? formData.location_preferences.join(', ')
         : formData.custom_location;
 
-      // Create job request
+      // Create job request with poster name for display
       await JobRequest.create({
         role: roles.split(',')[0].trim(), // First role as main role
         title: `${formData.primary_goal.replace(/_/g, ' ')} - ${roles.split(',')[0].trim()}`,
@@ -201,7 +201,10 @@ export default function StudentOnboarding() {
         location_preference: locations,
         start_timing: formData.timeline,
         status: 'active',
-        target_helpers: ['alumni', 'parents']
+        target_helpers: ['alumni', 'parents'],
+        poster_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
+        poster_first_name: formData.first_name.trim(),
+        poster_last_name: formData.last_name.trim()
       });
 
       // Mark onboarding complete
