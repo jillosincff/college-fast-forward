@@ -289,17 +289,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
             </button>
           )}
 
-          {/* Engagement Stats */}
-          <div className="engagement-stats">
-            {messagesCount > 0 && (
-              <span className="stat-text">Messaged by {messagesCount} alumni</span>
-            )}
-            {responsesCount > 0 && messagesCount > 0 && <span className="stat-separator">•</span>}
-            {responsesCount > 0 && (
-              <span className="stat-text">{responsesCount} response{responsesCount > 1 ? 's' : ''} received</span>
-            )}
-          </div>
-
           {/* Single Message Button */}
           <Button
             onClick={handleMessage}
@@ -611,24 +600,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .resume-download:hover {
           background: #FA4616;
           color: white;
-        }
-
-        .engagement-stats {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          font-size: 12px;
-          color: #6b7280;
-          flex-wrap: wrap;
-        }
-
-        .stat-text {
-          font-size: 12px;
-        }
-
-        .stat-separator {
-          color: #d1d5db;
         }
 
         .message-btn-primary {
