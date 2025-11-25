@@ -10,7 +10,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized - admin only' }, { status: 401 });
     }
 
-    // Get all users who are students/gators and opted into directory
+    const body = await req.json().catch(() => ({}));
+    const batchSize = body.batchSize || 10; // Process in smaller batches
+    const offset = body.offset || 0;
+
+    // Get all users who are students/gators
     const allUsers = await base44.asServiceRole.entities.User.list();
     const students = allUsers.filter(u => {
       const isStudent = u.persona === 'gator' || 
@@ -29,17 +33,18 @@ Deno.serve(async (req) => {
       !emailsWithRequests.has(s.email?.toLowerCase())
     );
 
+    // Get batch to process
+    const batch = studentsWithoutRequests.slice(offset, offset + batchSize);
+    
     const created = [];
     const errors = [];
 
-    for (const student of studentsWithoutRequests) {
+    for (const student of batch) {
       try {
-        // Build name
         const firstName = student.first_name || student.full_name?.split(' ')[0] || '';
         const lastName = student.last_name || student.full_name?.split(' ').slice(1).join(' ') || '';
         const fullName = (firstName && lastName) ? `${firstName} ${lastName}` : student.full_name || 'Student';
 
-        // Infer role and description from profile
         let role = 'Seeking Opportunities';
         let description = '';
         let targetIndustry = student.major || 'Any';
@@ -52,7 +57,6 @@ Deno.serve(async (req) => {
           description = 'Open to opportunities and career guidance. Please reach out to learn more about my interests and goals.';
         }
 
-        // Try to infer job type from bio
         let jobType = 'full_time';
         const bioLower = (student.bio || '').toLowerCase();
         if (bioLower.includes('internship') || bioLower.includes('intern')) {
@@ -63,7 +67,6 @@ Deno.serve(async (req) => {
           role = 'Seeking Full-time Role';
         }
 
-        // Create draft job request
         const newRequest = await base44.asServiceRole.entities.JobRequest.create({
           role: role,
           title: `${fullName} - ${role}`,
@@ -94,17 +97,27 @@ Deno.serve(async (req) => {
       }
     }
 
+    const hasMore = (offset + batchSize) < studentsWithoutRequests.length;
+
     return Response.json({
       success: true,
       summary: {
         totalStudents: students.length,
         existingRequests: emailsWithRequests.size,
         studentsWithoutRequests: studentsWithoutRequests.length,
+        processedInBatch: batch.length,
         created: created.length,
         errors: errors.length
       },
       created,
-      errors
+      errors,
+      pagination: {
+        offset,
+        batchSize,
+        hasMore,
+        nextOffset: hasMore ? offset + batchSize : null,
+        remaining: Math.max(0, studentsWithoutRequests.length - offset - batchSize)
+      }
     });
 
   } catch (error) {
