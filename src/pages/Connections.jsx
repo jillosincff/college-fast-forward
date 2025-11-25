@@ -151,7 +151,11 @@ export default function DiscoverEmergingGatorsPage() {
         });
       } else {
         // Use the centralized name utility for consistent formatting
-        const formattedName = getDisplayName({ email: requestCreatorEmail });
+        // Pass the full request object which may have poster info
+        const formattedName = getDisplayName({ 
+          email: requestCreatorEmail,
+          full_name: request.poster_name // If we stored poster name on request
+        });
         
         profiles.push({
           id: request.id,
