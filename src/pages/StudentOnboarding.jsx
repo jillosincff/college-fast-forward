@@ -8,9 +8,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Sparkles, Check } from 'lucide-react';
+import { LogOut, Sparkles, Check, User as UserIcon, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PRIMARY_GOALS = [
   { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
@@ -46,15 +47,25 @@ const TIMELINES = [
   { value: 'after_grad_2028', label: 'After graduation 2028' }
 ];
 
+const currentYear = new Date().getFullYear();
+const GRADUATION_YEARS = Array.from({ length: 7 }, (_, i) => currentYear + i);
+
 export default function StudentOnboarding() {
   const { user, refreshUser, logout } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // Start at 0 for profile step
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [liveViewCount, setLiveViewCount] = useState(0);
+  const [profileErrors, setProfileErrors] = useState({});
 
   const [formData, setFormData] = useState({
+    // Profile fields (Step 0)
+    first_name: '',
+    last_name: '',
+    graduation_year: currentYear + 2,
+    major: '',
+    // Career fields (Steps 1-7)
     primary_goal: '',
     target_roles: [],
     custom_role: '',
@@ -65,6 +76,19 @@ export default function StudentOnboarding() {
     timeline: '',
     one_sentence_pitch: ''
   });
+
+  // Initialize profile from user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        graduation_year: user.graduation_year || currentYear + 2,
+        major: user.major || ''
+      }));
+    }
+  }, [user]);
 
   // Auto-save every 3 seconds
   useEffect(() => {
@@ -101,8 +125,21 @@ export default function StudentOnboarding() {
     }));
   };
 
+  const validateProfile = () => {
+    const errors = {};
+    if (!formData.first_name?.trim()) errors.first_name = 'First name is required';
+    if (!formData.last_name?.trim()) errors.last_name = 'Last name is required';
+    if (!formData.graduation_year) errors.graduation_year = 'Graduation year is required';
+    if (!formData.major?.trim()) errors.major = 'Major is required';
+    if (formData.first_name?.includes('@')) errors.first_name = 'Please enter your name, not email';
+    if (formData.last_name?.includes('@')) errors.last_name = 'Please enter your name, not email';
+    setProfileErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const canProceed = () => {
     switch (currentStep) {
+      case 0: return formData.first_name?.trim() && formData.last_name?.trim() && formData.graduation_year && formData.major?.trim();
       case 1: return formData.primary_goal !== '';
       case 2: return formData.target_roles.length > 0 || formData.custom_role !== '';
       case 3: return formData.target_industries.length > 0;
@@ -114,14 +151,29 @@ export default function StudentOnboarding() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      if (!validateProfile()) return;
+      // Save profile data immediately
+      try {
+        await User.updateMyUserData({
+          first_name: formData.first_name.trim(),
+          last_name: formData.last_name.trim(),
+          full_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
+          graduation_year: formData.graduation_year,
+          major: formData.major.trim()
+        });
+      } catch (error) {
+        console.error('Failed to save profile:', error);
+      }
+    }
     if (canProceed()) {
       setCurrentStep(prev => prev + 1);
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(prev => Math.max(1, prev - 1));
+    setCurrentStep(prev => Math.max(0, prev - 1));
   };
 
   const handleSubmit = async () => {
@@ -239,7 +291,7 @@ export default function StudentOnboarding() {
           <motion.div
             className="h-full bg-gradient-to-r from-[#FA4616] to-[#FF8C42]"
             initial={{ width: 0 }}
-            animate={{ width: `${(currentStep / 7) * 100}%` }}
+            animate={{ width: `${(currentStep / 8) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -269,6 +321,91 @@ export default function StudentOnboarding() {
           <Card className="shadow-xl border-2 border-slate-200">
             <CardContent className="p-8">
               <AnimatePresence mode="wait">
+                {/* Step 0: Profile Info */}
+                {currentStep === 0 && (
+                  <motion.div
+                    key="step0"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+                      <UserIcon className="w-6 h-6 text-[#0021A5]" />
+                      Let's start with your name
+                    </h2>
+                    <p className="text-slate-600 mb-6">This helps Gator parents and alumni know who they're helping.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">First Name *</label>
+                        <Input
+                          value={formData.first_name}
+                          onChange={(e) => updateField('first_name', e.target.value)}
+                          placeholder="e.g., John"
+                          className={profileErrors.first_name ? 'border-red-300' : ''}
+                        />
+                        {profileErrors.first_name && (
+                          <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />{profileErrors.first_name}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
+                        <Input
+                          value={formData.last_name}
+                          onChange={(e) => updateField('last_name', e.target.value)}
+                          placeholder="e.g., Smith"
+                          className={profileErrors.last_name ? 'border-red-300' : ''}
+                        />
+                        {profileErrors.last_name && (
+                          <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />{profileErrors.last_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">🎓 Graduation Year *</label>
+                        <Select 
+                          value={formData.graduation_year?.toString()} 
+                          onValueChange={(value) => updateField('graduation_year', parseInt(value))}
+                        >
+                          <SelectTrigger className={profileErrors.graduation_year ? 'border-red-300' : ''}>
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {GRADUATION_YEARS.map(year => (
+                              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {profileErrors.graduation_year && (
+                          <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />{profileErrors.graduation_year}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">📚 Major *</label>
+                        <Input
+                          value={formData.major}
+                          onChange={(e) => updateField('major', e.target.value)}
+                          placeholder="e.g., Computer Science"
+                          className={profileErrors.major ? 'border-red-300' : ''}
+                        />
+                        {profileErrors.major && (
+                          <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />{profileErrors.major}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Step 1: Primary Goal */}
                 {currentStep === 1 && (
                   <motion.div
@@ -468,7 +605,7 @@ export default function StudentOnboarding() {
 
               {/* Navigation */}
               <div className="flex gap-3 mt-8">
-                {currentStep > 1 && (
+                {currentStep > 0 && (
                   <Button
                     variant="outline"
                     onClick={handleBack}
@@ -499,7 +636,7 @@ export default function StudentOnboarding() {
 
               {/* Progress Indicator */}
               <div className="text-center mt-6 text-sm text-slate-500">
-                Step {currentStep} of 7
+                Step {currentStep + 1} of 8
               </div>
             </CardContent>
           </Card>
