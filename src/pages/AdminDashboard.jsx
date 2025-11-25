@@ -16,7 +16,8 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
-  Share2 // Added Share2 import
+  Share2,
+  CheckCircle
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { trackEvent } from '@/components/utils/analytics';
