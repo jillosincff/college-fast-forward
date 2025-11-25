@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
+import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
 export default function Dashboard() {
