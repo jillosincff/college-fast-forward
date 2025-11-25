@@ -813,6 +813,11 @@ const AdminDashboard = () => {
             <TabsContent value="manual" className="space-y-6">
               <ManualUserCreation />
             </TabsContent>
+
+            {/* Backfill Student Requests Tab */}
+            <TabsContent value="backfill" className="space-y-6">
+              <BackfillStudentRequests />
+            </TabsContent>
           </Tabs>
         )}
       </div>
