@@ -25,8 +25,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
 
-  // FIXED: Use the proper name utility function
-  const fullName = getDisplayName(gator);
+  // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
+  const fullName = (gator.first_name && gator.last_name) 
+    ? `${gator.first_name} ${gator.last_name}`
+    : request?.poster_name 
+      || gator.full_name 
+      || getDisplayName(gator);
   const graduationYear = gator.graduation_year ? `Class of ${gator.graduation_year}` : 'UF Student';
   const major = gator.major || 'Undeclared';
   const bio = gator.bio || request?.description || 'Connect with me to learn more!';
