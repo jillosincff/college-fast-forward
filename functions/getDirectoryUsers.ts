@@ -57,15 +57,30 @@ Deno.serve(async (req) => {
         return true;
       })
       .map(u => {
-        // Construct full_name if not present
+        // Construct full_name and extract first/last name if not present
         let fullName = u.full_name;
+        let firstName = u.first_name;
+        let lastName = u.last_name;
+        
+        // If we have full_name but no first/last, extract them
+        if (fullName && !fullName.includes('@') && (!firstName || !lastName)) {
+          const nameParts = fullName.trim().split(' ').filter(Boolean);
+          if (nameParts.length >= 2) {
+            firstName = firstName || nameParts[0];
+            lastName = lastName || nameParts.slice(1).join(' ');
+          } else if (nameParts.length === 1) {
+            firstName = firstName || nameParts[0];
+          }
+        }
+        
+        // Construct full_name if not present
         if (!fullName || fullName.includes('@')) {
-          if (u.first_name && u.last_name) {
-            fullName = `${u.first_name} ${u.last_name}`.trim();
-          } else if (u.first_name) {
-            fullName = u.first_name;
-          } else if (u.last_name) {
-            fullName = u.last_name;
+          if (firstName && lastName) {
+            fullName = `${firstName} ${lastName}`.trim();
+          } else if (firstName) {
+            fullName = firstName;
+          } else if (lastName) {
+            fullName = lastName;
           } else {
             fullName = u.email.split('@')[0];
           }
@@ -91,8 +106,8 @@ Deno.serve(async (req) => {
         return {
           id: u.id,
           email: u.email,
-          first_name: u.first_name || '',
-          last_name: u.last_name || '',
+          first_name: firstName || '',
+          last_name: lastName || '',
           full_name: fullName,
           persona: displayPersona,
           graduation_year: u.graduation_year,
