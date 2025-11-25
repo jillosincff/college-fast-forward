@@ -149,10 +149,16 @@ export default function DiscoverEmergingGatorsPage() {
           isFeatured: Math.random() > 0.8
         });
       } else {
+        // Extract name from email - "rhiannon.thomas@email.com" -> "Rhiannon Thomas"
+        const emailLocal = requestCreatorEmail.split('@')[0];
+        const formattedName = emailLocal.includes('.') 
+          ? emailLocal.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ')
+          : emailLocal.charAt(0).toUpperCase() + emailLocal.slice(1).toLowerCase();
+        
         profiles.push({
           id: request.id,
           email: requestCreatorEmail,
-          full_name: requestCreatorEmail.split('@')[0],
+          full_name: formattedName,
           bio: request.description,
           major: request.target_industry,
           request: request,
