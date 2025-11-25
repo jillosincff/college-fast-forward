@@ -66,8 +66,9 @@ export function getDisplayName(user) {
         .map(part => capitalizeName(part))
         .join(' ');
     }
-    // Convert "jillcamhi" to "Jillcamhi"
-    return capitalizeName(emailName);
+    // Convert "spencer7stavrevski" to "Spencer Stavrevski" (remove numbers)
+    const cleanName = emailName.replace(/[0-9]/g, '');
+    return capitalizeName(cleanName);
   }
   
   return 'Gator User';

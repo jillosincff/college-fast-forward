@@ -9,6 +9,7 @@ import { HelpOffer } from '@/entities/HelpOffer';
 import { base44 } from '@/api/base44Client';
 import { Search, Plus, Filter, Sparkles, MessageSquare, UserPlus, TrendingUp } from 'lucide-react';
 import moment from 'moment';
+import { getDisplayName } from '@/components/utils/nameUtils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -149,11 +150,8 @@ export default function DiscoverEmergingGatorsPage() {
           isFeatured: Math.random() > 0.8
         });
       } else {
-        // Extract name from email - "rhiannon.thomas@email.com" -> "Rhiannon Thomas"
-        const emailLocal = requestCreatorEmail.split('@')[0];
-        const formattedName = emailLocal.includes('.') 
-          ? emailLocal.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ')
-          : emailLocal.charAt(0).toUpperCase() + emailLocal.slice(1).toLowerCase();
+        // Use the centralized name utility for consistent formatting
+        const formattedName = getDisplayName({ email: requestCreatorEmail });
         
         profiles.push({
           id: request.id,
