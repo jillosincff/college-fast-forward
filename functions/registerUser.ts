@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.7.1';
+import { createClient } from 'npm:@base44/sdk@0.8.4';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
 // Centralized function to send the verification email
