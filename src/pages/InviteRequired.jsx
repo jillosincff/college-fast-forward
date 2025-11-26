@@ -96,7 +96,8 @@ export default function InviteRequired() {
       }
     } catch (error) {
       console.error('Failed to verify invite:', error);
-      setErrorMessage('Something went wrong. Please try again.');
+      console.error('Error details:', error?.response?.data || error?.message || error);
+      setErrorMessage(error?.response?.data?.error || error?.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
