@@ -223,23 +223,48 @@ export default function InviteRequired() {
                 </div>
               )}
 
-              <Button
-                onClick={handleVerifyAndSetRole}
-                disabled={isSubmitting || !inviteCode.trim() || !selectedRole}
-                className="w-full bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white py-3 text-lg"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Unlocking Access...
-                  </>
-                ) : (
-                  <>
-                    Unlock Access
+              {!user ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ You need to sign in first before using your invite code
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      // Store invite code and role for after auth
+                      sessionStorage.setItem('pending_invite_code', inviteCode.trim());
+                      if (selectedRole) {
+                        sessionStorage.setItem('pending_role_selection', selectedRole);
+                      }
+                      base44.auth.redirectToLogin(window.location.href);
+                    }}
+                    disabled={!inviteCode.trim()}
+                    className="w-full bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white py-3 text-lg"
+                  >
+                    Sign In to Unlock Access
                     <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
-              </Button>
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleVerifyAndSetRole}
+                  disabled={isSubmitting || !inviteCode.trim() || !selectedRole}
+                  className="w-full bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white py-3 text-lg"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Unlocking Access...
+                    </>
+                  ) : (
+                    <>
+                      Unlock Access
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </Card>
