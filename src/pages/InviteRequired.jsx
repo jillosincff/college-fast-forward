@@ -47,14 +47,25 @@ export default function InviteRequired() {
     setErrorMessage('');
 
     try {
-      console.log('Verifying invite code...');
+      console.log('Verifying invite code...', inviteCode.trim());
+      console.log('Selected role:', selectedRole);
+      console.log('Current user:', user?.email);
       
-      const result = await verifyInviteCode({
-        code: inviteCode.trim()
-      });
+      let result;
+      try {
+        result = await verifyInviteCode({
+          code: inviteCode.trim()
+        });
+        console.log('Verify result:', result);
+      } catch (verifyError) {
+        console.error('verifyInviteCode threw:', verifyError);
+        setErrorMessage(verifyError?.response?.data?.error || verifyError?.message || 'Failed to verify code. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
 
-      if (!result.data.success) {
-        setErrorMessage(result.data.error || 'Invalid invite code');
+      if (!result?.data?.success) {
+        setErrorMessage(result?.data?.error || 'Invalid invite code');
         setIsSubmitting(false);
         return;
       }
