@@ -255,12 +255,18 @@ export default function OpportunityCard({
       )}
 
       {isExternal && externalUrl && (
-        <div className="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center gap-2 text-sm text-blue-800">
+        <a 
+          href={externalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-lg block hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-2 text-sm text-blue-800 font-medium">
             <ExternalLink className="w-4 h-4" />
-            <span>Apply on external site</span>
+            <span>Apply on external site →</span>
           </div>
-        </div>
+        </a>
       )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-5 border-t-2 border-slate-100">
