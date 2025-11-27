@@ -130,6 +130,17 @@ Deno.serve(async (req) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomUUID();
 
+    // Count existing users to determine signup order
+    console.log("Counting existing users for signup order...");
+    let signupOrder = null;
+    try {
+      const allUsers = await base44.entities.User.list();
+      signupOrder = (allUsers?.length || 0) + 1;
+      console.log(`Signup order will be: ${signupOrder}`);
+    } catch (countError) {
+      console.warn("Could not determine signup order:", countError);
+    }
+
     console.log("Creating registration attempt...");
     await base44.entities.RegistrationAttempt.create({
       email: emailLower,
@@ -137,7 +148,8 @@ Deno.serve(async (req) => {
       password_hash: passwordHash,
       token: verificationToken,
       status: 'pending',
-      persona: persona || 'student'
+      persona: persona || 'student',
+      signup_order: signupOrder
     });
 
     console.log("Registration attempt created, sending email...");
