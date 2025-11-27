@@ -57,6 +57,7 @@ const useLocalStorageState = (key, defaultValue) => {
 
 export default function OpportunitiesPage() {
   const { user } = useAuth();
+  const accessInfo = useAccessControl(user);
   const { toast } = useToast();
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
