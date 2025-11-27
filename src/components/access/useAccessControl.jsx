@@ -37,7 +37,7 @@ export function useAccessControl(user, linkedParent = null) {
         canAccessTalentSpotlight: true,
         canApplyToOpportunities: true,
         canSaveOpportunities: true,
-        canMessageInDirectory: true,
+        canMessageFromDirectory: true,
         reason: 'parent'
       };
     }
@@ -53,7 +53,7 @@ export function useAccessControl(user, linkedParent = null) {
         canAccessTalentSpotlight: true,
         canApplyToOpportunities: true,
         canSaveOpportunities: true,
-        canMessageInDirectory: true,
+        canMessageFromDirectory: true,
         reason: 'admin'
       };
     }
@@ -72,7 +72,7 @@ export function useAccessControl(user, linkedParent = null) {
         canAccessTalentSpotlight: true,
         canApplyToOpportunities: true,
         canSaveOpportunities: true,
-        canMessageInDirectory: true,
+        canMessageFromDirectory: true,
         reason: 'founding_gator'
       };
     }
@@ -91,7 +91,7 @@ export function useAccessControl(user, linkedParent = null) {
         canAccessTalentSpotlight: true,
         canApplyToOpportunities: true,
         canSaveOpportunities: true,
-        canMessageInDirectory: true,
+        canMessageFromDirectory: true,
         reason: 'parent_subscription'
       };
     }
@@ -111,9 +111,9 @@ export function useAccessControl(user, linkedParent = null) {
       messagesRemaining,
       messageLimit: LIMITED_MODE_MESSAGE_LIMIT,
       canAccessTalentSpotlight: false,
-      canApplyToOpportunities: false,
-      canSaveOpportunities: false,
-      canMessageInDirectory: false,
+      canApplyToOpportunities: true, // View only - can see but not apply via intro
+      canSaveOpportunities: true, // Allow saving - localStorage based
+      canMessageFromDirectory: false, // Hide "Message" button in directory
       reason: 'limited_mode'
     };
   }, [user, linkedParent]);
