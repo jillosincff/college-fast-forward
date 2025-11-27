@@ -21,7 +21,7 @@ export function useAccessControl(user, linkedParent = null) {
         canAccessTalentSpotlight: false,
         canApplyToOpportunities: false,
         canSaveOpportunities: false,
-        canMessageInDirectory: false,
+        canMessageFromDirectory: false,
         reason: 'not_authenticated'
       };
     }
