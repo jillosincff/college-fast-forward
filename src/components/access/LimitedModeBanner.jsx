@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Lock, Crown, Sparkles, X } from 'lucide-react';
+import { Lock, Crown, Sparkles, X, Star } from 'lucide-react';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
+import { navigate } from '@/components/utils/navigation';
 
 export default function LimitedModeBanner({ user, accessInfo, onDismiss }) {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
+  // Don't show for non-gator users or if not in limited mode
   if (!accessInfo?.isLimitedMode || isDismissed) return null;
+  if (user?.persona !== 'gator') return null;
 
   const handleDismiss = () => {
     setIsDismissed(true);
@@ -65,28 +68,51 @@ export default function LimitedModeBanner({ user, accessInfo, onDismiss }) {
 /**
  * Inline VIP overlay for restricted features
  */
-export function VIPOnlyOverlay({ feature = "this feature", onInviteParent }) {
+export function VIPOnlyOverlay({ featureName = "this feature", onInviteParent }) {
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
   return (
-    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-      <div className="text-center p-6">
-        <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Lock className="w-8 h-8 text-orange-400" />
-        </div>
-        <h3 className="text-white font-bold text-lg mb-2">VIP Only</h3>
-        <p className="text-white/80 text-sm mb-4 max-w-xs">
-          Ask your parent to upgrade for full access to {feature}
-        </p>
-        {onInviteParent && (
+    <>
+      <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-center border border-slate-700 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-purple-500/10 rounded-2xl" />
+        
+        <div className="relative z-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Crown className="w-10 h-10 text-white" />
+          </div>
+          
+          <div className="inline-flex items-center gap-2 bg-orange-500/20 px-4 py-2 rounded-full mb-4">
+            <Star className="w-4 h-4 text-orange-400" />
+            <span className="text-orange-300 font-bold text-sm">VIP ACCESS REQUIRED</span>
+          </div>
+          
+          <h3 className="text-white font-bold text-2xl mb-3">{featureName}</h3>
+          <p className="text-slate-300 text-base mb-6 max-w-md mx-auto">
+            Invite your parent to unlock full access to {featureName} and all premium features.
+          </p>
+          
           <Button
-            onClick={onInviteParent}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold"
+            onClick={() => setShowInviteModal(true)}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-3 text-lg shadow-xl"
           >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Invite Parent
+            <Sparkles className="w-5 h-5 mr-2" />
+            Invite Parent to Unlock
           </Button>
-        )}
+          
+          <p className="text-slate-500 text-sm mt-4">
+            Parent subscription: $9/month • Full access for you
+          </p>
+        </div>
       </div>
-    </div>
+
+      <GenerateInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        inviteType="gator_to_parent"
+        userPersona="gator"
+        isUpgradeFlow={true}
+      />
+    </>
   );
 }
 
