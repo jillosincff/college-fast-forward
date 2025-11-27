@@ -864,6 +864,7 @@ export default function OpportunitiesPage() {
                       setShowManageModal(true);
                     }}
                     isFeatured={true}
+                    isLimitedMode={accessInfo.isLimitedMode}
                   />
                 ))}
               </div>
