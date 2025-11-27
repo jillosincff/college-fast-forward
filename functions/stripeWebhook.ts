@@ -89,6 +89,25 @@ Deno.serve(async (req) => {
             subscription_status: 'canceled'
           });
           console.log('Canceled user subscription:', user.id);
+
+          // If parent subscription canceled, update linked gators (unless they're founding gators)
+          if (user.persona === 'parent' && user.linked_gator_ids?.length > 0) {
+            console.log('Parent subscription canceled, updating linked gators:', user.linked_gator_ids);
+            for (const gatorId of user.linked_gator_ids) {
+              try {
+                const gator = await base44.entities.User.get(gatorId);
+                // Don't downgrade founding gators
+                if (!gator.is_founding_gator && !(gator.signup_order && gator.signup_order <= 1000)) {
+                  await base44.entities.User.update(gatorId, {
+                    linked_parent_subscription_active: false
+                  });
+                  console.log('Removed VIP access from gator:', gatorId);
+                }
+              } catch (gatorError) {
+                console.error('Failed to update gator:', gatorId, gatorError);
+              }
+            }
+          }
         }
         break;
 
