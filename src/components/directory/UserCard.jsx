@@ -7,7 +7,7 @@ import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award,
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import { formatLabel } from '@/components/utils/format';
 
-export default function UserCard({ user, onMessage, onViewProfile }) {
+export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode = false }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
