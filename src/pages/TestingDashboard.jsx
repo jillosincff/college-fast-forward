@@ -41,6 +41,10 @@ export default function TestingDashboard() {
   const [resettingOnboarding, setResettingOnboarding] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
 
+  // Limited Mode simulation state
+  const [limitedModeEnabled, setLimitedModeEnabled] = useState(false);
+  const [savingLimitedMode, setSavingLimitedMode] = useState(false);
+
   // New state for custom invite code generation
   const [customCode, setCustomCode] = useState('');
   const [generatingCustomCode, setGeneratingCustomCode] = useState(false);
