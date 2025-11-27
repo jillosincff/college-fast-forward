@@ -8,6 +8,8 @@ import { getDisplayName } from '@/components/utils/nameUtils';
 import { Message } from '@/entities/Message';
 import { Connection } from '@/entities/Connection';
 import { HelpOffer } from '@/entities/HelpOffer';
+import { JobRequest } from '@/entities/JobRequest';
+import { useToast } from '@/components/ui/use-toast';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
