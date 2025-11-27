@@ -67,6 +67,15 @@ export default function TestingDashboard() {
     }
   }, [user]);
 
+  // Load limited mode status for current user
+  useEffect(() => {
+    if (user) {
+      // Check if user is in simulated limited mode
+      const isSimulatedLimited = user.signup_order > 1000 && !user.is_founding_gator && !user.linked_parent_subscription_active;
+      setLimitedModeEnabled(isSimulatedLimited);
+    }
+  }, [user]);
+
   // New function to load invite codes
   const loadInviteCodes = async () => {
     setLoadingCodes(true);
