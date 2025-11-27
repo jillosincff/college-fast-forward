@@ -30,16 +30,6 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
     e.preventDefault();
     if (!message.trim() || !user || !recipientUser) return;
 
-    // Check if user can send messages (limited mode check)
-    if (accessInfo.isLimitedMode && !accessInfo.canSendMessages) {
-      toast({
-        title: "Message limit reached",
-        description: "You've used all 5 messages this month. Invite your parent to unlock unlimited messaging!",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSending(true);
     trackEvent('send_message_submitted', { recipient_persona: recipientUser?.persona });
 
@@ -68,24 +58,6 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         description: `Your message to ${recipientName} has been delivered.`,
         duration: 3000,
       });
-
-      // Update message count for limited mode users
-      if (accessInfo.isLimitedMode && user.persona === 'gator') {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        const currentCount = user.messages_month_reset === currentMonth 
-          ? (user.messages_sent_this_month || 0) 
-          : 0;
-        
-        try {
-          await base44.auth.updateMe({
-            messages_sent_this_month: currentCount + 1,
-            messages_month_reset: currentMonth
-          });
-          refreshUser?.();
-        } catch (updateError) {
-          console.error('Failed to update message count:', updateError);
-        }
-      }
 
       // Clear form and close modal immediately
       setMessage('');
@@ -164,21 +136,6 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Limited mode warning */}
-          {accessInfo.isLimitedMode && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-orange-800">
-                  {accessInfo.messagesRemaining} message{accessInfo.messagesRemaining !== 1 ? 's' : ''} remaining this month
-                </p>
-                <p className="text-xs text-orange-600 mt-1">
-                  Invite your parent to unlock unlimited messaging
-                </p>
-              </div>
-            </div>
-          )}
-
           <Textarea
             placeholder="Write your message here..."
             value={message}

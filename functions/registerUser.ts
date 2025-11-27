@@ -130,15 +130,15 @@ Deno.serve(async (req) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomUUID();
 
-    // Count existing users to determine signup order
-    console.log("Counting existing users for signup order...");
+    // Get current user count to assign signup_order
+    console.log("Getting current user count for signup_order...");
     let signupOrder = null;
     try {
-      const allUsers = await base44.entities.User.list();
+      const allUsers = await base44.entities.User.filter({});
       signupOrder = (allUsers?.length || 0) + 1;
-      console.log(`Signup order will be: ${signupOrder}`);
-    } catch (countError) {
-      console.warn("Could not determine signup order:", countError);
+      console.log("Assigned signup_order:", signupOrder);
+    } catch (countErr) {
+      console.error("Failed to get user count for signup_order:", countErr);
     }
 
     console.log("Creating registration attempt...");
