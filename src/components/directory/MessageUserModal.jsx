@@ -165,6 +165,21 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Limited mode warning */}
+          {accessInfo.isLimitedMode && user?.persona === 'gator' && (
+            <div className="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-orange-800">
+                  {accessInfo.messagesRemaining} message{accessInfo.messagesRemaining !== 1 ? 's' : ''} remaining this month
+                </p>
+                <p className="text-orange-600 text-xs mt-1">
+                  Invite your parent to unlock unlimited messaging
+                </p>
+              </div>
+            </div>
+          )}
+          
           <Textarea
             placeholder="Write your message here..."
             value={message}
