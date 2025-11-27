@@ -24,7 +24,8 @@ export default function OpportunityCard({
   hasApplied = false,
   isEditable = false,
   onEdit,
-  isFeatured = false
+  isFeatured = false,
+  isLimitedMode = false
 }) {
   const getTypeColor = (type) => {
     switch (type) {
