@@ -19,11 +19,19 @@ Deno.serve(async (req) => {
       u.roles?.includes('parent')
     );
     
+    // Count founding gators (first 1000 or has is_founding_gator flag)
+    const foundingGators = allUsers.filter(u => 
+      u.is_founding_gator === true || 
+      (u.signup_order && u.signup_order <= 1000)
+    );
+    
     const result = {
       totalUsers: allUsers.length,
       gatorCount: gators.length,
       parentCount: parents.length,
-      spotsLeft: Math.max(0, 1000 - allUsers.length)
+      foundingGatorCount: foundingGators.length,
+      spotsLeft: Math.max(0, 1000 - allUsers.length),
+      isFoundingGatorAvailable: allUsers.length < 1000
     };
     
     return Response.json(result);
