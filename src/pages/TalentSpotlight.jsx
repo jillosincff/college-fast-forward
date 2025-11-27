@@ -326,6 +326,14 @@ export default function TalentSpotlight() {
           currentUser={user}
         />
       )}
+
+      <GenerateInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        inviteType="gator_to_parent"
+        userPersona="gator"
+        isUpgradeFlow={true}
+      />
     </div>
   );
 }
