@@ -132,20 +132,29 @@ export default function GatorDirectory() {
   }, [allUsers]);
 
   // Normalize ways_to_help values to display-friendly format
+  // These match the IDs from AlumniStep2Expertise onboarding
   const normalizeWayToHelp = (value) => {
     if (!value) return value;
-    // Map snake_case to display names
+    const lowercaseValue = value.toLowerCase();
+    // Map all variations to consistent display names
     const mappings = {
+      // From onboarding (AlumniStep2Expertise)
+      'introductions': 'Introductions',
+      'resume_feedback': 'Resume Feedback',
       'career_advice': 'Career Advice',
-      'resume_feedback': 'Resume Review',
-      'resume_review': 'Resume Review',
-      'mock_interview': 'Mock Interview',
-      'job_referral': 'Job Referral',
-      'networking': 'Networking',
-      'mentorship': 'Mentorship',
+      'interview_prep': 'Interview Prep',
+      'job_leads': 'Job Leads',
       'industry_insights': 'Industry Insights',
+      // Legacy/alternate values that might exist
+      'introduce': 'Introductions',
+      'share_leads': 'Job Leads',
+      'resume_review': 'Resume Feedback',
+      'mock_interview': 'Interview Prep',
+      'job_referral': 'Job Leads',
+      'networking': 'Introductions',
+      'mentorship': 'Career Advice',
     };
-    return mappings[value.toLowerCase()] || value;
+    return mappings[lowercaseValue] || value;
   };
 
   const waysToHelpOptions = useMemo(() => {
