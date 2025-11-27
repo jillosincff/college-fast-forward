@@ -212,6 +212,8 @@ export default function GatorDirectory() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
       
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{
