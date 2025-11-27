@@ -131,11 +131,29 @@ export default function GatorDirectory() {
     return [...new Set(allExpertise)].sort();
   }, [allUsers]);
 
+  // Normalize ways_to_help values to display-friendly format
+  const normalizeWayToHelp = (value) => {
+    if (!value) return value;
+    // Map snake_case to display names
+    const mappings = {
+      'career_advice': 'Career Advice',
+      'resume_feedback': 'Resume Review',
+      'resume_review': 'Resume Review',
+      'mock_interview': 'Mock Interview',
+      'job_referral': 'Job Referral',
+      'networking': 'Networking',
+      'mentorship': 'Mentorship',
+      'industry_insights': 'Industry Insights',
+    };
+    return mappings[value.toLowerCase()] || value;
+  };
+
   const waysToHelpOptions = useMemo(() => {
     const allWaysToHelp = allUsers
       .filter(u => u.ways_to_help && u.ways_to_help.length > 0)
-      .flatMap(u => u.ways_to_help);
-    return [...new Set(allWaysToHelp)].sort();
+      .flatMap(u => u.ways_to_help)
+      .map(normalizeWayToHelp);
+    return [...new Set(allWaysToHelp)].filter(Boolean).sort();
   }, [allUsers]);
 
   useEffect(() => {
