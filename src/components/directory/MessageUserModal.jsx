@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, AlertTriangle } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { trackEvent } from '@/components/utils/analytics';
 import { getDisplayName, getFirstName } from '@/components/utils/nameUtils';
+import { useAccessControl } from '@/components/access/useAccessControl';
 
 export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const accessInfo = useAccessControl(user);
   const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -27,6 +29,16 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim() || !user || !recipientUser) return;
+
+    // Check if user can send messages (limited mode check)
+    if (accessInfo.isLimitedMode && !accessInfo.canSendMessages) {
+      toast({
+        title: "Message limit reached",
+        description: "You've used all 5 messages this month. Invite your parent to unlock unlimited messaging!",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSending(true);
     trackEvent('send_message_submitted', { recipient_persona: recipientUser?.persona });
@@ -56,6 +68,24 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         description: `Your message to ${recipientName} has been delivered.`,
         duration: 3000,
       });
+
+      // Update message count for limited mode users
+      if (accessInfo.isLimitedMode && user.persona === 'gator') {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const currentCount = user.messages_month_reset === currentMonth 
+          ? (user.messages_sent_this_month || 0) 
+          : 0;
+        
+        try {
+          await base44.auth.updateMe({
+            messages_sent_this_month: currentCount + 1,
+            messages_month_reset: currentMonth
+          });
+          refreshUser?.();
+        } catch (updateError) {
+          console.error('Failed to update message count:', updateError);
+        }
+      }
 
       // Clear form and close modal immediately
       setMessage('');
