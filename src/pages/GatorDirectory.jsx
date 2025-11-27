@@ -11,6 +11,8 @@ import MessageUserModal from '@/components/directory/MessageUserModal';
 import ProfileModal from '@/components/directory/ProfileModal';
 import { navigate } from '@/components/utils/navigation';
 import logger from '@/components/utils/logger';
+import { useAccessControl } from '@/components/access/useAccessControl';
+import LimitedModeBanner from '@/components/access/LimitedModeBanner';
 
 // --- Helper Component: Moved outside the main component ---
 const ErrorState = ({ error, onRetry }) => (
@@ -37,6 +39,7 @@ const ErrorState = ({ error, onRetry }) => (
 
 export default function GatorDirectory() {
   const { user } = useAuth();
+  const accessInfo = useAccessControl(user);
   const [allUsers, setAllUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -209,6 +212,8 @@ export default function GatorDirectory() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
       
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{

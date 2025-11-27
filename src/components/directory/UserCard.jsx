@@ -3,11 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase, Crown, Lock } from 'lucide-react';
+import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase, Crown } from 'lucide-react';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import { formatLabel } from '@/components/utils/format';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode = false }) {
+export default function UserCard({ user, onMessage, onViewProfile, canMessage = true }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
@@ -287,22 +288,7 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
             <Eye className="w-4 h-4" />
             View Profile
           </Button>
-          {isLimitedMode ? (
-            <div className="relative group flex-1">
-              <Button
-                disabled
-                size="sm"
-                className="w-full gap-2 bg-slate-300 text-slate-500 cursor-not-allowed"
-              >
-                <Lock className="w-4 h-4" />
-                Message
-              </Button>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                VIP Only — Invite your parent to upgrade
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
-              </div>
-            </div>
-          ) : (
+          {canMessage ? (
             <Button
               onClick={() => onMessage(user)}
               size="sm"
@@ -311,6 +297,24 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
               <MessageSquare className="w-4 h-4" />
               Message
             </Button>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    disabled
+                    size="sm"
+                    className="flex-1 gap-2 bg-slate-300 text-slate-500 cursor-not-allowed"
+                  >
+                    <Lock className="w-4 h-4" />
+                    VIP Only
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Invite your parent to unlock messaging</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

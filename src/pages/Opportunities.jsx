@@ -6,7 +6,9 @@ import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/components/ui/use-toast";
-import { Search, Plus, Grid3x3, List, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { Search, Plus, Grid3x3, List, SlidersHorizontal, Sparkles, X, Lock } from 'lucide-react';
+import { useAccessControl } from '@/components/access/useAccessControl';
+import LimitedModeBanner from '@/components/access/LimitedModeBanner';
 import OpportunityCard from '@/components/opportunities/OpportunityCard';
 import OpportunityCardSkeleton from '@/components/opportunities/OpportunityCardSkeleton';
 import ApplyModal from '@/components/opportunities/ApplyModal';
@@ -55,6 +57,7 @@ const useLocalStorageState = (key, defaultValue) => {
 
 export default function OpportunitiesPage() {
   const { user } = useAuth();
+  const accessInfo = useAccessControl(user);
   const { toast } = useToast();
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -441,6 +444,8 @@ export default function OpportunitiesPage() {
   
   return (
     <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12">
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      
       {selectedOpportunity && showApplyModal && (
         <ApplyModal 
           isOpen={showApplyModal} 
