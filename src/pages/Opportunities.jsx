@@ -340,8 +340,8 @@ export default function OpportunitiesPage() {
       const externalUrl = opportunity.external_apply_url || opportunity.contact_url;
       
       if (externalUrl) {
-        // Open the URL immediately for mobile compatibility
-        window.location.href = externalUrl;
+        // Open the URL in a new tab
+        window.open(externalUrl, '_blank', 'noopener,noreferrer');
         
         // Track application in background
         try {
