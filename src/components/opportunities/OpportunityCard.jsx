@@ -306,19 +306,36 @@ export default function OpportunityCard({
               >
                 View Details
               </Button>
-              <Button
-                size="sm"
-                onClick={handleApplyClick}
-                disabled={hasApplied}
-                className={cn(
-                  "font-bold text-[15px] uppercase tracking-wide px-7 py-3 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 touch-manipulation flex-1 sm:flex-initial",
-                  hasApplied 
-                    ? "bg-green-600 hover:bg-green-700 text-white" 
-                    : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.5)]"
-                )}
-              >
-                {hasApplied ? 'Applied ✓' : (hasCustomApplicationEmail ? 'Apply via Email' : (isPlatformApply ? 'Apply via Platform' : 'Apply Now'))}
-              </Button>
+              {isLimitedMode ? (
+                <div className="relative group flex-1 sm:flex-initial">
+                  <Button
+                    size="sm"
+                    disabled
+                    className="font-bold text-[15px] uppercase tracking-wide px-7 py-3 rounded-xl bg-slate-300 text-slate-500 cursor-not-allowed w-full"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Apply
+                  </Button>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    VIP Only — Invite your parent to upgrade
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={handleApplyClick}
+                  disabled={hasApplied}
+                  className={cn(
+                    "font-bold text-[15px] uppercase tracking-wide px-7 py-3 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 touch-manipulation flex-1 sm:flex-initial",
+                    hasApplied 
+                      ? "bg-green-600 hover:bg-green-700 text-white" 
+                      : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.5)]"
+                  )}
+                >
+                  {hasApplied ? 'Applied ✓' : (hasCustomApplicationEmail ? 'Apply via Email' : (isPlatformApply ? 'Apply via Platform' : 'Apply Now'))}
+                </Button>
+              )}
             </>
           )}
         </div>
