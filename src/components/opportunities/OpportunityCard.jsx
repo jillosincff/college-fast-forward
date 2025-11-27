@@ -1,15 +1,18 @@
-
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, 
   Briefcase, 
-  DollarSign,
+  DollarSign, 
+  Calendar, 
+  Users,
   ExternalLink,
   Edit,
   BookmarkPlus,
-  Bookmark
+  Bookmark,
+  Lock
 } from 'lucide-react';
 
 export default function OpportunityCard({
