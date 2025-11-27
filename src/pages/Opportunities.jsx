@@ -444,6 +444,9 @@ export default function OpportunitiesPage() {
   
   return (
     <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12">
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      
       {selectedOpportunity && showApplyModal && (
         <ApplyModal 
           isOpen={showApplyModal} 
