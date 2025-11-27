@@ -30,6 +30,16 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
     e.preventDefault();
     if (!message.trim() || !user || !recipientUser) return;
 
+    // Check limited mode message quota
+    if (accessInfo.isLimitedMode && !accessInfo.canSendMessages) {
+      toast({
+        title: "Message limit reached",
+        description: "You've used all 5 messages this month. Invite your parent to unlock unlimited messaging!",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSending(true);
     trackEvent('send_message_submitted', { recipient_persona: recipientUser?.persona });
 
@@ -51,6 +61,25 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
       });
 
       console.log('✅ Message created with ID:', newMessage.id);
+
+      // Track message count for limited mode users
+      if (accessInfo.isLimitedMode && user.persona === 'gator') {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const currentCount = user.messages_month_reset === currentMonth 
+          ? (user.messages_sent_this_month || 0) 
+          : 0;
+        
+        try {
+          await base44.auth.updateMe({
+            messages_sent_this_month: currentCount + 1,
+            messages_month_reset: currentMonth
+          });
+          console.log('✅ Message count updated:', currentCount + 1);
+          refreshUser?.();
+        } catch (countErr) {
+          console.error('Failed to update message count:', countErr);
+        }
+      }
 
       // Show success immediately
       toast({
