@@ -57,7 +57,6 @@ const useLocalStorageState = (key, defaultValue) => {
 
 export default function OpportunitiesPage() {
   const { user } = useAuth();
-  const accessInfo = useAccessControl(user);
   const { toast } = useToast();
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -444,8 +443,6 @@ export default function OpportunitiesPage() {
   
   return (
     <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12">
-      <LimitedModeBanner user={user} accessInfo={accessInfo} />
-      
       {selectedOpportunity && showApplyModal && (
         <ApplyModal 
           isOpen={showApplyModal} 
