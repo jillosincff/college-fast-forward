@@ -667,7 +667,33 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           display: flex;
           align-items: center;
           gap: 3px;
-          transition: color 0.2s;
+          transition: all 0.2s;
+          background: none;
+          border: none;
+          padding: 0;
+        }
+
+        .signal-badge.signal-clickable {
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 6px;
+          background: #f3f4f6;
+        }
+
+        .signal-badge.signal-clickable:hover:not(:disabled) {
+          background: #FFF4ED;
+          color: #FA4616;
+          transform: scale(1.1);
+        }
+
+        .signal-badge.signal-clickable:disabled {
+          cursor: default;
+        }
+
+        .signal-badge.signal-liked {
+          background: #FFF4ED;
+          color: #FA4616;
+          font-weight: 600;
         }
 
         .signal-badge.signal-hot {
