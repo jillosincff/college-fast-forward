@@ -207,11 +207,19 @@ export default function StudentOnboarding() {
         poster_last_name: formData.last_name.trim()
       });
 
-      // Mark onboarding complete
-      await User.updateMyUserData({
+      // Mark onboarding complete and set Founding Gator status if applicable
+      const updateData = {
         onboarding_completed: true,
         profile_completion_score: 90
-      });
+      };
+
+      // Check if user should be a Founding Gator (first 1000 users)
+      // This will be set during registration, but we also check here for safety
+      if (user?.signup_order && user.signup_order <= 1000) {
+        updateData.is_founding_gator = true;
+      }
+
+      await User.updateMyUserData(updateData);
 
       localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
