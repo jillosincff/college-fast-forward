@@ -295,6 +295,38 @@ export default function TestingDashboard() {
     });
   };
 
+  const toggleLimitedMode = async (enabled) => {
+    setSavingLimitedMode(true);
+    try {
+      // Update user to simulate limited mode by setting signup_order > 1000
+      // or restore by setting signup_order = 1 (founding gator)
+      await base44.entities.User.updateMyUserData({
+        signup_order: enabled ? 1500 : 1,
+        is_founding_gator: !enabled,
+        linked_parent_subscription_active: false,
+        // Reset message count when toggling
+        messages_sent_this_month: enabled ? 3 : 0
+      });
+
+      setLimitedModeEnabled(enabled);
+      toast({
+        title: enabled ? "🔒 Limited Mode Enabled" : "🔓 Full Access Restored",
+        description: enabled 
+          ? "You now see the app as a limited mode user (2 messages remaining). Refresh pages to see changes."
+          : "You now have full founding gator access. Refresh pages to see changes.",
+      });
+    } catch (error) {
+      console.error('Failed to toggle limited mode:', error);
+      toast({
+        title: "Error",
+        description: "Failed to toggle limited mode: " + error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setSavingLimitedMode(false);
+    }
+  };
+
   // Helper function to render status badge for invite codes
   const getStatusBadge = (code) => {
     const expiresAt = new Date(code.expires_at);
