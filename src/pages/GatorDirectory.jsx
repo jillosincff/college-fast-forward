@@ -140,7 +140,7 @@ export default function GatorDirectory() {
     const mappings = {
       // From onboarding (AlumniStep2Expertise)
       'introductions': 'Introductions',
-      'resume_feedback': 'Resume Feedback',
+      'resume_feedback': 'Resume Review',
       'career_advice': 'Career Advice',
       'interview_prep': 'Interview Prep',
       'job_leads': 'Job Leads',
@@ -148,7 +148,7 @@ export default function GatorDirectory() {
       // Legacy/alternate values that might exist
       'introduce': 'Introductions',
       'share_leads': 'Job Leads',
-      'resume_review': 'Resume Feedback',
+      'resume_review': 'Resume Review',
       'mock_interview': 'Interview Prep',
       'job_referral': 'Job Leads',
       'networking': 'Introductions',
