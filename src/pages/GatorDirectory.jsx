@@ -187,7 +187,7 @@ export default function GatorDirectory() {
 
     if (filters.waysToHelp && filters.waysToHelp !== 'all') {
       users = users.filter(user =>
-        user.ways_to_help?.includes(filters.waysToHelp)
+        user.ways_to_help?.some(w => normalizeWayToHelp(w) === filters.waysToHelp)
       );
     }
 
