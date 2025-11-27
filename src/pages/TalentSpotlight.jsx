@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Sparkles, TrendingUp, Award, Star, Filter, Lock } from 'lucide-react';
+import { Search, Sparkles, TrendingUp, Award, Star, Filter, Lock, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TalentSpotlightCard from '@/components/talent/TalentSpotlightCard';
 import ReachOutModal from '@/components/talent/ReachOutModal';
@@ -12,11 +12,10 @@ import { trackEvent } from '@/components/utils/analytics';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 import { useAccessControl } from '@/components/access/useAccessControl';
 import LimitedModeBanner from '@/components/access/LimitedModeBanner';
-import { VIPOnlyOverlay } from '@/components/access/LimitedModeBanner';
+import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
 
 export default function TalentSpotlight() {
   const { user } = useAuth();
-  const accessInfo = useAccessControl(user);
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,34 +99,8 @@ export default function TalentSpotlight() {
   const uniqueGradYears = [...new Set(students.map(s => s.graduation_year).filter(Boolean))].sort();
   const uniqueMajors = [...new Set(students.map(s => s.major).filter(Boolean))].sort();
 
-  // For limited mode users, show VIP overlay
-  if (!accessInfo.canAccessTalentSpotlight && user?.persona === 'gator') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-        <LimitedModeBanner user={user} accessInfo={accessInfo} />
-        <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
-          {HERO_TEXTURE_OVERLAY}
-          {HERO_GLOW_EFFECTS}
-          <div className="max-w-7xl mx-auto text-center relative z-10">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Sparkles className="w-8 h-8 text-white" />
-              <h1 className={HERO_HEADING_CLASSES}>Talent Spotlight</h1>
-            </div>
-            <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mb-6 mx-auto`}>
-              Discover exceptional Gator talent ready for opportunities
-            </p>
-          </div>
-        </div>
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <VIPOnlyOverlay featureName="Talent Spotlight" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-      <LimitedModeBanner user={user} accessInfo={accessInfo} />
       {/* Hero Section */}
       <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
         {HERO_TEXTURE_OVERLAY}
