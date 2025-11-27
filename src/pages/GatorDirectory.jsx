@@ -506,8 +506,14 @@ export default function GatorDirectory() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredUsers.length > 0 ? (
-                filteredUsers.map(user => (
-                  <UserCard key={user.id} user={user} onMessage={handleMessageUser} onViewProfile={handleViewProfile} />
+                filteredUsers.map(directoryUser => (
+                  <UserCard 
+                    key={directoryUser.id} 
+                    user={directoryUser} 
+                    onMessage={handleMessageUser} 
+                    onViewProfile={handleViewProfile}
+                    isLimitedMode={accessInfo.isLimitedMode}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-2 border-[#FA4616]/30">
