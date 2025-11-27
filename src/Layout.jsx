@@ -510,48 +510,75 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                       </p>
                     </div>
                     <div className="max-h-[400px] overflow-y-auto">
-                      {loadingMessages ? (
-                        <div className="p-8 text-center text-gray-500">
-                          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                          Loading...
-                        </div>
-                      ) : recentMessages.length > 0 ? (
-                        <div className="divide-y">
-                          {recentMessages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                                !msg.is_read ? 'bg-blue-50' : ''
-                              }`}
-                              onClick={() => {
-                                if (!msg.is_read) markAsRead(msg.id);
-                                handleBellClick();
-                              }}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-medium text-sm truncate">{msg.subject}</p>
-                                    {!msg.is_read && (
-                                      <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-gray-600 truncate">From: {msg.sender_email}</p>
-                                  <p className="text-xs text-gray-400 mt-1">
-                                    {new Date(msg.created_date).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-8 text-center text-gray-500">
-                          <Mail className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                          <p className="text-sm">No messages yet</p>
-                        </div>
-                      )}
-                    </div>
+                                                {loadingMessages ? (
+                                                  <div className="p-8 text-center text-gray-500">
+                                                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                                    Loading...
+                                                  </div>
+                                                ) : (recentMessages.length > 0 || payItForwardNotifications.length > 0) ? (
+                                                  <div className="divide-y">
+                                                    {/* Pay It Forward Notifications */}
+                                                    {payItForwardNotifications.map((notif) => (
+                                                      <div
+                                                        key={`pif-${notif.id}`}
+                                                        className="p-4 hover:bg-orange-50 cursor-pointer transition-colors bg-gradient-to-r from-orange-50 to-pink-50 border-l-4 border-orange-400"
+                                                        onClick={() => {
+                                                          markPIFAsRead(notif.id);
+                                                          onNavigate('Connections');
+                                                        }}
+                                                      >
+                                                        <div className="flex items-start gap-3">
+                                                          <div className="text-2xl">❤️</div>
+                                                          <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-sm text-orange-800">
+                                                              Good news! {notif.student_name || 'Your Gator'} was just helped
+                                                            </p>
+                                                            <p className="text-xs text-gray-600 mt-1">
+                                                              {notif.helper_parent_name || 'A Gator Parent'} reached out to help. Pay it forward?
+                                                            </p>
+                                                            <p className="text-xs text-orange-600 font-medium mt-2">
+                                                              🐊 Help another Gator →
+                                                            </p>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    ))}
+                                                    {/* Regular Messages */}
+                                                    {recentMessages.map((msg) => (
+                                                      <div
+                                                        key={msg.id}
+                                                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                                                          !msg.is_read ? 'bg-blue-50' : ''
+                                                        }`}
+                                                        onClick={() => {
+                                                          if (!msg.is_read) markAsRead(msg.id);
+                                                          handleBellClick();
+                                                        }}
+                                                      >
+                                                        <div className="flex items-start gap-3">
+                                                          <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                              <p className="font-medium text-sm truncate">{msg.subject}</p>
+                                                              {!msg.is_read && (
+                                                                <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
+                                                              )}
+                                                            </div>
+                                                            <p className="text-xs text-gray-600 truncate">From: {msg.sender_email}</p>
+                                                            <p className="text-xs text-gray-400 mt-1">
+                                                              {new Date(msg.created_date).toLocaleDateString()}
+                                                            </p>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                ) : (
+                                                  <div className="p-8 text-center text-gray-500">
+                                                    <Mail className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                                                    <p className="text-sm">No messages yet</p>
+                                                  </div>
+                                                )}
+                                              </div>
                     {recentMessages.length > 0 && (
                       <div className="border-t p-3">
                         <ShadButton
