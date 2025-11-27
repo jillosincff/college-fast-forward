@@ -160,12 +160,7 @@ export default function DiscoverEmergingGatorsPage() {
         let lastName = '';
         
         // Special handling for known users or common patterns
-        // For "ptrebil" style usernames, try to extract first initial + last name
-        if (emailUsername === 'ptrebil') {
-          firstName = 'Paige';
-          lastName = 'Trebil';
-          formattedName = 'Paige Trebil';
-        } else if (emailUsername === 'specora') {
+        if (emailUsername === 'specora') {
           firstName = 'Samantha';
           lastName = 'Pecora';
           formattedName = 'Samantha Pecora';
