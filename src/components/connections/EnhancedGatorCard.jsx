@@ -658,6 +658,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           justify-content: flex-end;
           gap: 10px;
           margin-top: 6px;
+          position: relative;
+          z-index: 5;
         }
 
         .signal-badge {
