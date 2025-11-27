@@ -41,7 +41,14 @@ export default function LimitedModeBanner({ user, accessInfo, onDismiss }) {
               className="bg-white text-orange-600 hover:bg-orange-50 font-bold px-4 py-2 text-sm shadow-lg"
             >
               <Crown className="w-4 h-4 mr-2" />
-              Unlock VIP Access ($9/mo)
+              Invite Parent for VIP ($9/mo)
+            </Button>
+            <Button
+              onClick={() => navigate('Pricing')}
+              variant="ghost"
+              className="text-white/90 hover:bg-white/20 font-medium px-4 py-2 text-sm"
+            >
+              Learn More
             </Button>
             <button
               onClick={handleDismiss}
