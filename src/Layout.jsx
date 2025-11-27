@@ -109,10 +109,10 @@ const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-      const [recentMessages, setRecentMessages] = useState([]);
-      const [payItForwardNotifications, setPayItForwardNotifications] = useState([]);
-      const [loadingMessages, setLoadingMessages] = useState(false);
-      const [hasError, setHasError] = useState(false);
+  const [recentMessages, setRecentMessages] = useState([]);
+  const [payItForwardNotifications, setPayItForwardNotifications] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
