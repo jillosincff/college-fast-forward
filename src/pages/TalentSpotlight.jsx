@@ -16,12 +16,14 @@ import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
 
 export default function TalentSpotlight() {
   const { user } = useAuth();
+  const accessInfo = useAccessControl(user);
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showReachOutModal, setShowReachOutModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [error, setError] = useState(null);
   
   const [filters, setFilters] = useState({
