@@ -914,6 +914,7 @@ export default function OpportunitiesPage() {
                         setShowManageModal(true);
                       }}
                       cardIndex={index}
+                      isLimitedMode={accessInfo.isLimitedMode}
                     />
                   </motion.div>
                 ))}
