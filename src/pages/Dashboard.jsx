@@ -21,6 +21,7 @@ import LimitedModeBanner from '@/components/access/LimitedModeBanner';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
+  const accessInfo = useAccessControl(user);
   const [opportunities, setOpportunities] = useState([]);
   const [requests, setRequests] = useState([]);
   const [messages, setMessages] = useState([]);
