@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +11,13 @@ import {
   Video,
   Star,
   GraduationCap,
-  MapPin
+  MapPin,
+  ThumbsUp
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UserAvatar from '@/components/common/UserAvatar';
+import { User } from '@/entities/User';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function TalentSpotlightCard({ student, onReachOut, currentUser }) {
   const getGradStatus = () => {
