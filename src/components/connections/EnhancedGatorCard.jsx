@@ -678,6 +678,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           padding: 4px 8px;
           border-radius: 6px;
           background: #f3f4f6;
+          pointer-events: auto;
+          position: relative;
+          z-index: 10;
         }
 
         .signal-badge.signal-clickable:hover:not(:disabled) {
@@ -688,6 +691,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
         .signal-badge.signal-clickable:disabled {
           cursor: default;
+        }
+
+        .signal-badge.signal-clickable:active:not(:disabled) {
+          transform: scale(0.95);
         }
 
         .signal-badge.signal-liked {
