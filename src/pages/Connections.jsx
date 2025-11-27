@@ -334,11 +334,6 @@ export default function DiscoverEmergingGatorsPage() {
                 <span className="pulse-dot"></span>
                 {liveStats.seekingHelp} students seeking help
               </span>
-              <span className="stat-divider">•</span>
-              <span className="stat-badge-pulsing">
-                <span className="pulse-dot"></span>
-                {liveStats.responsesToday} responses today
-              </span>
             </div>
           </div>
         </div>
