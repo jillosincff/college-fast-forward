@@ -180,21 +180,38 @@ export default function OpportunityCard({
         </div>
         
         <div className="flex items-start gap-3 flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSave(opportunity.id);
-            }}
-            className={cn(
-              "rounded-full hover:bg-slate-100 transition-colors",
-              isSaved ? "text-red-500" : "text-slate-400"
-            )}
-            aria-label={isSaved ? "Remove from saved" : "Save opportunity"}
-          >
-            {isSaved ? <Bookmark className="w-5 h-5 fill-current" /> : <BookmarkPlus className="w-5 h-5" />}
-          </Button>
+          {isLimitedMode ? (
+            <div className="relative group">
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled
+                className="rounded-full text-slate-300 cursor-not-allowed"
+                aria-label="Save (VIP Only)"
+              >
+                <Lock className="w-4 h-4" />
+              </Button>
+              <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-slate-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                VIP Only
+              </div>
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSave(opportunity.id);
+              }}
+              className={cn(
+                "rounded-full hover:bg-slate-100 transition-colors",
+                isSaved ? "text-red-500" : "text-slate-400"
+              )}
+              aria-label={isSaved ? "Remove from saved" : "Save opportunity"}
+            >
+              {isSaved ? <Bookmark className="w-5 h-5 fill-current" /> : <BookmarkPlus className="w-5 h-5" />}
+            </Button>
+          )}
           
           {opportunity.created_date && (
             <span className="text-xs text-slate-500 mt-1.5">{getTimeAgo()}</span>
