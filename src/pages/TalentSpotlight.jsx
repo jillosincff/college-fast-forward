@@ -180,7 +180,7 @@ export default function TalentSpotlight() {
         </div>
       )}
 
-      {/* Search and Filters */}
+      {/* Search and Filters Section */}
       <div className="max-w-7xl mx-auto px-4 pb-8">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="space-y-4">
