@@ -723,6 +723,13 @@ function AppContent() {
         currentPage
       });
 
+      // If user is on a public page like Privacy, Terms, etc. - let them stay
+      if (publicPages.includes(currentPage) && currentPage !== 'LandingPage') {
+        console.log('✅ Authenticated user viewing public page:', currentPage);
+        setResolvedPage(currentPage);
+        return;
+      }
+
       if (isLandingPage) {
         console.log('🚫 Authenticated user on LandingPage - redirecting');
         
