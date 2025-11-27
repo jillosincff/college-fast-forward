@@ -20,6 +20,31 @@ import { User } from '@/entities/User';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function TalentSpotlightCard({ student, onReachOut, currentUser }) {
+  const [endorsementCount, setEndorsementCount] = useState(student.endorsement_count || 0);
+  const [hasEndorsed, setHasEndorsed] = useState(false);
+  const { toast } = useToast();
+
+  const handleEndorse = async (e) => {
+    e.stopPropagation();
+    if (hasEndorsed) return;
+    
+    setHasEndorsed(true);
+    const newCount = endorsementCount + 1;
+    setEndorsementCount(newCount);
+    
+    try {
+      await User.update(student.id, { endorsement_count: newCount });
+      toast({
+        title: "👍 Endorsed!",
+        description: `You endorsed ${student.full_name?.split(' ')[0] || 'this student'}!`,
+      });
+    } catch (error) {
+      console.error('Failed to update endorsement count:', error);
+      setEndorsementCount(endorsementCount);
+      setHasEndorsed(false);
+    }
+  };
+
   const getGradStatus = () => {
     const year = student.graduation_year;
     const currentYear = new Date().getFullYear();
