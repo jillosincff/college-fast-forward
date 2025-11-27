@@ -19,8 +19,12 @@ import {
   Database,
   Ticket,
   ListChecks,
-  RotateCcw
+  RotateCcw,
+  Lock,
+  Unlock,
+  Crown
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { navigate } from '@/components/utils/navigation';
 
 export default function TestingDashboard() {
