@@ -208,47 +208,60 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   }, [user?.email, hasError, currentPage]);
 
   const loadRecentMessages = async () => {
-    const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
-    const adminPages = ['AdminDashboard', 'TestingDashboard', 'AdminSetup'];
+        const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
+        const adminPages = ['AdminDashboard', 'TestingDashboard', 'AdminSetup'];
 
-    if (!user?.email || loadingMessages || publicPages.includes(currentPage) || adminPages.includes(currentPage)) {
-        console.log('Skipping recent messages fetch (conditions not met).');
-        return;
-    }
-    
-    setLoadingMessages(true);
-    console.log('Loading recent messages for dropdown...');
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        console.warn('Recent messages fetch timed out after 5 seconds.');
-      }, 5000);
+        if (!user?.email || loadingMessages || publicPages.includes(currentPage) || adminPages.includes(currentPage)) {
+            console.log('Skipping recent messages fetch (conditions not met).');
+            return;
+        }
 
-      let messages = [];
-      try {
-        messages = await Message.filter(
-          { recipient_email: user.email },
-          '-created_date',
-          5,
-          { signal: controller.signal }
-        );
-      } catch (fetchError) {
-        console.log('Recent messages temporarily unavailable (network error suppressed).');
-        messages = [];
-      } finally {
-        clearTimeout(timeoutId);
-      }
+        setLoadingMessages(true);
+        console.log('Loading recent messages for dropdown...');
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => {
+            controller.abort();
+            console.warn('Recent messages fetch timed out after 5 seconds.');
+          }, 5000);
 
-      setRecentMessages(messages || []);
-      console.log(`Recent messages loaded: ${messages?.length || 0}`);
-    } catch (error) {
-      console.log('Error during recent message load (suppressed).');
-      setRecentMessages([]);
-    } finally {
-      setLoadingMessages(false);
-    }
-  };
+          let messages = [];
+          let pifNotifications = [];
+          try {
+            messages = await Message.filter(
+              { recipient_email: user.email },
+              '-created_date',
+              5,
+              { signal: controller.signal }
+            );
+
+            // Load Pay It Forward notifications for parents
+            if (user.persona === 'parent' || user.roles?.includes('parent')) {
+              pifNotifications = await PayItForwardNotification.filter(
+                { recipient_parent_email: user.email, is_read: false },
+                '-created_date',
+                3
+              );
+            }
+          } catch (fetchError) {
+            console.log('Recent messages temporarily unavailable (network error suppressed).');
+            messages = [];
+            pifNotifications = [];
+          } finally {
+            clearTimeout(timeoutId);
+          }
+
+          setRecentMessages(messages || []);
+          setPayItForwardNotifications(pifNotifications || []);
+          console.log(`Recent messages loaded: ${messages?.length || 0}, PIF notifications: ${pifNotifications?.length || 0}`);
+        } catch (error) {
+          console.log('Error during recent message load (suppressed).');
+          setRecentMessages([]);
+          setPayItForwardNotifications([]);
+        } finally {
+          setLoadingMessages(false);
+        }
+      };
 
   const handleBellClick = () => {
     if (currentPage === 'MyMessages') {
