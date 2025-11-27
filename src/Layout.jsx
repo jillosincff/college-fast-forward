@@ -694,7 +694,10 @@ function AppContent() {
       return;
     }
 
-    if (currentPage === 'Privacy' || currentPage === 'Terms' || currentPage === 'CookiePolicy' || currentPage === 'InviteRequired' || currentPage === 'RequestInvite' || currentPage === 'Pricing' || currentPage === 'PublicProfile' || currentPage === 'AdminSetup') {
+    // Handle public pages FIRST - before any auth checks
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage'];
+    if (trulyPublicPages.includes(currentPage)) {
+      console.log('✅ Public page accessed directly:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
