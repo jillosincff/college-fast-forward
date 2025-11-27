@@ -59,14 +59,13 @@ export default function ParentDashboard() {
       console.log('Linked students:', user.linked_students);
       console.log('Force refresh:', forceRefresh);
       
-      // Load with explicit cache-busting query params
-      const cacheBuster = `_cb=${Date.now()}`;
+      // Load data using entity SDK
       const [helpOffersResult, introsResult, messagesResult, jobsResult, allJobRequestsResult] = await Promise.allSettled([
-        fetch(`/api/entities/HelpOffer/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(h => h.offerer_email === user.email)),
-        fetch(`/api/entities/Intro/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(i => i.helper_user_id === user.id)),
-        fetch(`/api/entities/Message/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(m => m.recipient_email === user.email)),
-        fetch(`/api/entities/Opportunity/list?${cacheBuster}`).then(r => r.json()).then(all => all.filter(o => o.created_by === user.email)),
-        fetch(`/api/entities/JobRequest/list?${cacheBuster}`).then(r => r.json())
+        HelpOffer.filter({ offerer_email: user.email }),
+        Intro.filter({ helper_user_id: user.id }),
+        Message.filter({ recipient_email: user.email }),
+        Opportunity.filter({ created_by: user.email }),
+        JobRequest.list()
       ]);
       
       const helpOffers = helpOffersResult.status === 'fulfilled' ? (helpOffersResult.value || []) : [];
