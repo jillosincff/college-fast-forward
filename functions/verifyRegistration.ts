@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
+import { createClient } from 'npm:@base44/sdk@0.8.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,7 +35,13 @@ Deno.serve(async (req) => {
 
     // We do NOT create/update the User here to avoid "Entity User not found".
     // Frontend will now send a Magic Link to the verified email for sign-in.
-    return new Response(JSON.stringify({ success: true, message: 'Email verified!', email: attempt.email }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // Include signup_order if available for Founding Gator assignment
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Email verified!', 
+      email: attempt.email,
+      signup_order: attempt.signup_order 
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('verifyRegistration error:', error);
     return new Response(JSON.stringify({ success: false, error: 'Verification failed. Please try again.' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
