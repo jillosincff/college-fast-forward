@@ -358,6 +358,96 @@ export default function TestingDashboard() {
           </p>
         </div>
 
+        {/* Limited Mode Simulator */}
+        <Card className="mb-6 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-orange-600" />
+              Limited Mode Simulator
+            </CardTitle>
+            <CardDescription>
+              Test the Limited Mode experience for non-founding gators without parent subscription
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-white rounded-lg border-2 border-orange-200">
+              <div className="flex items-center gap-3">
+                {limitedModeEnabled ? (
+                  <Lock className="w-6 h-6 text-orange-600" />
+                ) : (
+                  <Unlock className="w-6 h-6 text-green-600" />
+                )}
+                <div>
+                  <p className="font-semibold text-slate-900">
+                    {limitedModeEnabled ? "Limited Mode Active" : "Full Access (Founding Gator)"}
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {limitedModeEnabled 
+                      ? "Viewing as user #1500 with 2 messages remaining"
+                      : "Viewing as founding gator #1 with full access"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={limitedModeEnabled}
+                onCheckedChange={toggleLimitedMode}
+                disabled={savingLimitedMode}
+              />
+            </div>
+
+            {savingLimitedMode && (
+              <div className="flex items-center justify-center gap-2 text-orange-600">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Updating...</span>
+              </div>
+            )}
+
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-sm font-semibold text-orange-900 mb-2">What Limited Mode restricts:</p>
+              <ul className="text-xs text-orange-800 space-y-1">
+                <li>• <strong>Messages:</strong> Limited to 5 per month (simulated at 3 sent = 2 remaining)</li>
+                <li>• <strong>Gator Directory:</strong> Message button hidden (shows lock icon)</li>
+                <li>• <strong>Talent Spotlight:</strong> VIP overlay shown</li>
+                <li>• <strong>Banner:</strong> Orange upgrade banner appears on all pages</li>
+              </ul>
+            </div>
+
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-semibold text-blue-900 mb-2">📋 Test Pages:</p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('GatorDirectory')}
+                >
+                  Gator Directory
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('TalentSpotlight')}
+                >
+                  Talent Spotlight
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('Opportunities')}
+                >
+                  Opportunities
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('Dashboard')}
+                >
+                  Dashboard
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Invite Codes History - NEW */}
         <Card className="mb-6 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
           <CardHeader>
