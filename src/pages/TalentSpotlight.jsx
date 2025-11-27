@@ -101,8 +101,14 @@ export default function TalentSpotlight() {
   const uniqueGradYears = [...new Set(students.map(s => s.graduation_year).filter(Boolean))].sort();
   const uniqueMajors = [...new Set(students.map(s => s.major).filter(Boolean))].sort();
 
+  // If user is in limited mode AND is a gator, show VIP upgrade overlay
+  const isGatorInLimitedMode = accessInfo.isLimitedMode && user?.persona === 'gator';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
         {HERO_TEXTURE_OVERLAY}
@@ -133,7 +139,33 @@ export default function TalentSpotlight() {
         </div>
       </div>
 
-      {/* Coming Soon Banner */}
+      {/* VIP Only Overlay for Limited Mode Gators */}
+      {isGatorInLimitedMode && (
+        <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl p-8 text-center text-white border-2 border-orange-500/50 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Lock className="w-10 h-10 text-orange-400" />
+              </div>
+              <h2 className="text-3xl font-bold mb-3">VIP Feature</h2>
+              <p className="text-xl text-white/80 mb-6 max-w-lg mx-auto">
+                Talent Spotlight is available for VIP members. Invite your parent to unlock full access!
+              </p>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-4 text-lg shadow-lg"
+              >
+                <Crown className="w-5 h-5 mr-2" />
+                Invite Parent to Unlock ($9/mo)
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Coming Soon Banner - only show if NOT in limited mode */}
+      {!isGatorInLimitedMode && (
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
         <div className="bg-gradient-to-r from-orange-500 to-blue-600 rounded-2xl shadow-xl p-8 text-center text-white border-4 border-white/20">
           <div className="flex items-center justify-center gap-3 mb-3">
