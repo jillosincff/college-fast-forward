@@ -170,6 +170,28 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     }
   };
 
+  const handleThumbsUp = async (e) => {
+    e.stopPropagation();
+    if (!request || hasLiked) return;
+    
+    setHasLiked(true);
+    const newCount = localOffersCount + 1;
+    setLocalOffersCount(newCount);
+    
+    try {
+      await JobRequest.update(request.id, { offers_count: newCount });
+      toast({
+        title: "👍 Support sent!",
+        description: `You encouraged ${fullName.split(' ')[0]}!`,
+      });
+    } catch (error) {
+      console.error('Failed to update offers count:', error);
+      // Revert on error
+      setLocalOffersCount(localOffersCount);
+      setHasLiked(false);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -312,12 +334,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               >
                 💬 {messagesCount}
               </span>
-              <span 
-                className={`signal-badge ${(request?.offers_count || 0) >= 3 ? 'signal-hot' : ''}`}
-                title={(request?.offers_count || 0) > 0 ? `${request.offers_count} parent${request.offers_count > 1 ? 's' : ''} said "I can help"` : 'No offers yet'}
+              <button 
+                onClick={handleThumbsUp}
+                disabled={hasLiked}
+                className={`signal-badge signal-clickable ${localOffersCount >= 3 ? 'signal-hot' : ''} ${hasLiked ? 'signal-liked' : ''}`}
+                title={hasLiked ? 'You encouraged this student!' : 'Click to encourage this student'}
               >
-                👍 {request?.offers_count || 0}
-              </span>
+                👍 {localOffersCount}
+              </button>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
                   🔥
