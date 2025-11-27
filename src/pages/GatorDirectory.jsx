@@ -39,6 +39,7 @@ const ErrorState = ({ error, onRetry }) => (
 
 export default function GatorDirectory() {
   const { user } = useAuth();
+  const accessInfo = useAccessControl(user);
   const [allUsers, setAllUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -211,6 +212,8 @@ export default function GatorDirectory() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
       
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{
@@ -503,8 +506,14 @@ export default function GatorDirectory() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredUsers.length > 0 ? (
-                filteredUsers.map(user => (
-                  <UserCard key={user.id} user={user} onMessage={handleMessageUser} onViewProfile={handleViewProfile} />
+                filteredUsers.map(directoryUser => (
+                  <UserCard 
+                    key={directoryUser.id} 
+                    user={directoryUser} 
+                    onMessage={handleMessageUser} 
+                    onViewProfile={handleViewProfile}
+                    canMessage={accessInfo.canMessageFromDirectory}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-2 border-[#FA4616]/30">
