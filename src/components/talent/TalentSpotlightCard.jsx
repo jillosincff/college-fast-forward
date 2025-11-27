@@ -203,6 +203,23 @@ export default function TalentSpotlightCard({ student, onReachOut, currentUser }
             <Mail className="w-4 h-4 mr-2" />
             Reach Out with an Opportunity
           </Button>
+
+          {/* Endorsement Section */}
+          <div className="flex items-center justify-end pt-2">
+            <button
+              onClick={handleEndorse}
+              disabled={hasEndorsed}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                hasEndorsed 
+                  ? 'bg-orange-100 text-[#FA4616] cursor-default' 
+                  : 'bg-slate-100 text-slate-600 hover:bg-orange-100 hover:text-[#FA4616] hover:scale-105 cursor-pointer'
+              }`}
+              title={hasEndorsed ? 'You endorsed this student!' : 'Click to endorse this student'}
+            >
+              <span>👍</span>
+              <span>{endorsementCount}</span>
+            </button>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
