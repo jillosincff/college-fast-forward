@@ -168,6 +168,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Limited Mode Banner */}
+      <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden text-white py-12 px-4" style={HERO_BG_GRADIENT}>
         {HERO_TEXTURE_OVERLAY}
