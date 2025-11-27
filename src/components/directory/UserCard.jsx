@@ -287,14 +287,31 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
             <Eye className="w-4 h-4" />
             View Profile
           </Button>
-          <Button
-            onClick={() => onMessage(user)}
-            size="sm"
-            className="flex-1 gap-2 bg-[#0021A5] hover:bg-[#001580] text-white relative group-hover:animate-pulse"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Message
-          </Button>
+          {isLimitedMode ? (
+            <div className="relative group flex-1">
+              <Button
+                disabled
+                size="sm"
+                className="w-full gap-2 bg-slate-300 text-slate-500 cursor-not-allowed"
+              >
+                <Lock className="w-4 h-4" />
+                Message
+              </Button>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                VIP Only — Invite your parent to upgrade
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+              </div>
+            </div>
+          ) : (
+            <Button
+              onClick={() => onMessage(user)}
+              size="sm"
+              className="flex-1 gap-2 bg-[#0021A5] hover:bg-[#001580] text-white relative group-hover:animate-pulse"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Message
+            </Button>
+          )}
         </div>
       </div>
     </Card>
