@@ -22,7 +22,8 @@ import {
   RotateCcw,
   Lock,
   Unlock,
-  Crown
+  Crown,
+  Heart
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { navigate } from '@/components/utils/navigation';
@@ -40,6 +41,11 @@ export default function TestingDashboard() {
   const [sampleParentsResult, setSampleParentsResult] = useState(null);
   const [resettingOnboarding, setResettingOnboarding] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+
+  // Pay It Forward test state
+  const [pifTestRunning, setPifTestRunning] = useState(false);
+  const [pifTestResult, setPifTestResult] = useState(null);
+  const [pifStudentEmail, setPifStudentEmail] = useState('');
 
   // Limited Mode simulation state
   const [limitedModeEnabled, setLimitedModeEnabled] = useState(false);
@@ -295,6 +301,55 @@ export default function TestingDashboard() {
     });
   };
 
+  const testPayItForward = async () => {
+    if (!pifStudentEmail.trim()) {
+      toast({
+        title: "Enter student email",
+        description: "Provide an email of a student who has a linked parent",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setPifTestRunning(true);
+    setPifTestResult(null);
+
+    try {
+      const response = await base44.functions.invoke('sendPayItForwardNotification', {
+        helper_parent_email: user.email,
+        helper_parent_name: user.full_name || 'Test Helper Parent',
+        student_email: pifStudentEmail.trim(),
+        student_name: 'Test Student',
+        trigger_type: 'message'
+      });
+
+      setPifTestResult(response.data);
+      
+      if (response.data.success) {
+        toast({
+          title: "❤️ Pay It Forward Sent!",
+          description: `Notification sent to ${response.data.recipient_parent}`,
+        });
+      } else {
+        toast({
+          title: "Not Sent",
+          description: response.data.reason || "See details below",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Pay It Forward test failed:', error);
+      setPifTestResult({ success: false, error: error.message });
+      toast({
+        title: "Test Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setPifTestRunning(false);
+    }
+  };
+
   const toggleLimitedMode = async (enabled) => {
     setSavingLimitedMode(true);
     try {
@@ -357,6 +412,116 @@ export default function TestingDashboard() {
             Run automated tests and get instructions for manual testing
           </p>
         </div>
+
+        {/* Pay It Forward Test */}
+        <Card className="mb-6 border-2 border-pink-200 bg-gradient-to-br from-pink-50 to-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-pink-600" />
+              Pay It Forward Notification Test
+            </CardTitle>
+            <CardDescription>
+              Test the Pay It Forward notification system (parent helps student → student's parent gets notified)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-3 bg-pink-50 border border-pink-200 rounded-lg">
+              <p className="text-sm text-pink-900 mb-2">
+                <strong>How it works:</strong>
+              </p>
+              <ol className="text-xs text-pink-800 space-y-1 list-decimal ml-4">
+                <li>Parent A messages a student</li>
+                <li>System looks up the student's linked parent (Parent B)</li>
+                <li>Parent B receives a ❤️ notification encouraging them to help another student</li>
+                <li>Rate limited to 1 notification per parent per day</li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Student Email (who has a linked parent)</Label>
+              <Input
+                type="email"
+                placeholder="student@ufl.edu"
+                value={pifStudentEmail}
+                onChange={(e) => setPifStudentEmail(e.target.value)}
+                disabled={pifTestRunning}
+              />
+              <p className="text-xs text-slate-500">
+                The student must have parent_email set OR a parent with linked_student_emails containing this email
+              </p>
+            </div>
+
+            <Button
+              onClick={testPayItForward}
+              disabled={pifTestRunning || !pifStudentEmail.trim()}
+              className="w-full bg-pink-600 hover:bg-pink-700"
+            >
+              {pifTestRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Heart className="w-4 h-4 mr-2" />
+                  Send Test Notification
+                </>
+              )}
+            </Button>
+
+            {pifTestResult && (
+              <div className={`p-4 rounded-lg border ${
+                pifTestResult.success 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}>
+                <p className={`font-semibold mb-2 flex items-center gap-2 ${
+                  pifTestResult.success ? 'text-green-900' : 'text-yellow-900'
+                }`}>
+                  {pifTestResult.success ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      Notification Sent!
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-5 h-5" />
+                      Not Sent
+                    </>
+                  )}
+                </p>
+                <div className="text-sm space-y-1">
+                  {pifTestResult.success && (
+                    <p className="text-green-800">
+                      Sent to: <strong>{pifTestResult.recipient_parent}</strong>
+                    </p>
+                  )}
+                  {pifTestResult.reason && (
+                    <p className="text-yellow-800">
+                      Reason: {pifTestResult.reason}
+                    </p>
+                  )}
+                  {pifTestResult.error && (
+                    <p className="text-red-600">
+                      Error: {pifTestResult.error}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-semibold text-blue-900 mb-2">
+                📋 To verify:
+              </p>
+              <ul className="text-xs text-blue-800 space-y-1">
+                <li>• Check PayItForwardNotification entity in Admin Dashboard</li>
+                <li>• The recipient parent should see ❤️ notification in bell dropdown</li>
+                <li>• Email should be sent (check SendGrid logs or recipient inbox)</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Limited Mode Simulator */}
         <Card className="mb-6 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white">
