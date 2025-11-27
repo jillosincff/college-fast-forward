@@ -58,6 +58,23 @@ Deno.serve(async (req) => {
             subscription_status: subscription.status
           });
           console.log('Updated user subscription status:', user.id, subscription.status);
+
+          // If parent subscription is now active, update linked gators
+          if (subscription.status === 'active' && user.persona === 'parent' && user.linked_gator_ids?.length > 0) {
+            console.log('Parent subscription active, updating linked gators:', user.linked_gator_ids);
+            for (const gatorId of user.linked_gator_ids) {
+              try {
+                await base44.entities.User.update(gatorId, {
+                  linked_parent_subscription_active: true,
+                  messages_sent_this_month: 0, // Reset message count
+                  messages_month_reset: new Date().toISOString().slice(0, 7)
+                });
+                console.log('Updated gator access:', gatorId);
+              } catch (gatorError) {
+                console.error('Failed to update gator:', gatorId, gatorError);
+              }
+            }
+          }
         }
         break;
 
