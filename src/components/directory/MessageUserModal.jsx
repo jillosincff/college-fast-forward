@@ -130,6 +130,23 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
             // Silent fail - message was already sent
           }
         }, 200);
+
+        // Trigger Pay It Forward notification to the student's parent
+        console.log('❤️ Triggering Pay It Forward notification...');
+        setTimeout(async () => {
+          try {
+            await base44.functions.invoke('sendPayItForwardNotification', {
+              helper_parent_email: user.email,
+              helper_parent_name: user.full_name || user.first_name || 'A Gator Parent',
+              student_email: recipientUser.email,
+              student_name: recipientUser.full_name || recipientUser.first_name,
+              trigger_type: 'message'
+            });
+            console.log('✅ Pay It Forward notification sent');
+          } catch (pifError) {
+            console.error('❌ Pay It Forward notification failed (background):', pifError);
+          }
+        }, 300);
       }
 
     } catch (error) {
