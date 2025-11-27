@@ -20,6 +20,7 @@ import './globals.css';
 import AppErrorBoundary from './components/common/AppErrorBoundary';
 import logger from './components/utils/logger';
 import { Message } from '@/entities/Message';
+import { PayItForwardNotification } from '@/entities/PayItForwardNotification';
 import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
 import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
@@ -108,9 +109,10 @@ const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [recentMessages, setRecentMessages] = useState([]);
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const [hasError, setHasError] = useState(false);
+      const [recentMessages, setRecentMessages] = useState([]);
+      const [payItForwardNotifications, setPayItForwardNotifications] = useState([]);
+      const [loadingMessages, setLoadingMessages] = useState(false);
+      const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
