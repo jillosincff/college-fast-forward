@@ -272,24 +272,24 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   };
 
   const markAsRead = async (messageId) => {
-        try {
-          await Message.update(messageId, { is_read: true });
-          setRecentMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
-          setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (error) {
-          console.error('Failed to mark message as read:', error);
-          logger.error('Failed to mark message as read from notification dropdown', { error: error.message, messageId, userEmail: user?.email });
-        }
-      };
+    try {
+      await Message.update(messageId, { is_read: true });
+      setRecentMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark message as read:', error);
+      logger.error('Failed to mark message as read from notification dropdown', { error: error.message, messageId, userEmail: user?.email });
+    }
+  };
 
-      const markPIFAsRead = async (notifId) => {
-        try {
-          await PayItForwardNotification.update(notifId, { is_read: true });
-          setPayItForwardNotifications(prev => prev.filter(n => n.id !== notifId));
-        } catch (error) {
-          console.error('Failed to mark Pay It Forward notification as read:', error);
-        }
-      };
+  const markPIFAsRead = async (notifId) => {
+    try {
+      await PayItForwardNotification.update(notifId, { is_read: true });
+      setPayItForwardNotifications(prev => prev.filter(n => n.id !== notifId));
+    } catch (error) {
+      console.error('Failed to mark Pay It Forward notification as read:', error);
+    }
+  };
 
   const allNavItems = useMemo(() => [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
