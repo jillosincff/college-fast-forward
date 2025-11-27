@@ -26,6 +26,9 @@ const cardVariants = {
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [localOffersCount, setLocalOffersCount] = useState(request?.offers_count || 0);
+  const [hasLiked, setHasLiked] = useState(false);
+  const { toast } = useToast();
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
