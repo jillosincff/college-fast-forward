@@ -430,6 +430,10 @@ const AnimatedNetworkHero = ({
             Get <span className="highlight">Gators</span> Hired.
           </h1>
 
+          <p className="text-lg text-[#FFD700] mt-4 mb-2 px-4">
+            College Fast Forward is a private network for UF students and parents to get hired through warm intros.
+          </p>
+
           <div className="text-center max-w-2xl mx-auto mb-2 px-4 mt-6">
             <div className="text-xl md:text-2xl mb-3">
               <span className="text-white font-semibold">College Fast Forward: </span>
