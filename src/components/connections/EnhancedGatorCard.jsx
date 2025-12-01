@@ -44,18 +44,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       : (request?.offers_count || 0)
   );
   
-  // Sync with global store on mount and when request changes (but only if we haven't interacted)
-  useEffect(() => {
-    if (!requestId) return;
-    
-    // If we have a stored value in global store, use it (user already interacted)
-    if (localCountsStore.hasOwnProperty(requestId)) {
-      setLocalCount(localCountsStore[requestId]);
-      setLocalLiked(likedRequestsStore.has(requestId));
-    }
-    // Otherwise, don't update - keep the initial value from props
-  }, [requestId]);
-
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
     ? `${gator.first_name} ${gator.last_name}`
