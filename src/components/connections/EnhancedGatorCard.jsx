@@ -361,7 +361,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
                   // 1. Update DB via backend function (bypasses RLS)
                   try {
-                    const response = await incrementOfferCount({ requestId });
+                    const response = await incrementOfferCount({ 
+                      requestId, 
+                      currentCount: request?.offers_count || 0 
+                    });
                     alert(`Success! New count in DB: ${response.data.newCount}`);
                   } catch (err) {
                     alert("API failed: " + err.message);
