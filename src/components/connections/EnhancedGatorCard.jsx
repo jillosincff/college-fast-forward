@@ -194,7 +194,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     likedRequestsStore.add(requestId);
     localCountsStore[requestId] = newCount;
     
-  
+    // Force re-render
+    setRenderKey(k => k + 1);
     
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
@@ -207,6 +208,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       // Revert on error
       likedRequestsStore.delete(requestId);
       delete localCountsStore[requestId];
+      setRenderKey(k => k + 1);
     }
   };
 
