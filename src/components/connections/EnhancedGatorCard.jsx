@@ -42,6 +42,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const displayedCount = requestId && requestId in thumbsUpCounts 
     ? thumbsUpCounts[requestId] 
     : (request?.offers_count || 0);
+
+  // DEBUG LOGGING
+  console.log("CARD RENDER #", requestId, {
+    fromProps: request?.offers_count,
+    fromGlobalStore: thumbsUpCounts[requestId],
+    likedInStore: likedRequests.has(requestId),
+    displayedCount,
+    timestamp: Date.now()
+  });
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
