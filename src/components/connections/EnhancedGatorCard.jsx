@@ -220,6 +220,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (err) {
       // Revert on failure
+      countRef.current = displayCount;
+      likedRef.current = false;
       setDisplayCount(displayCount);
       setIsLiked(false);
       localStorage.removeItem(`thumbs_${requestId}`);
