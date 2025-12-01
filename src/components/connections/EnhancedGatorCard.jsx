@@ -23,31 +23,7 @@ const cardVariants = {
   }
 };
 
-// FINAL – WORKS EVERYWHERE (StrictMode + HMR + production)
-const STORE_KEY = "gator_thumbs_2025";
-
-const getStore = () => {
-  if (typeof window === "undefined") return { likes: new Set(), counts: {} };
-  if (!window[STORE_KEY]) {
-    const raw = localStorage.getItem(STORE_KEY);
-    const data = raw ? JSON.parse(raw) : { likes: [], counts: {} };
-    window[STORE_KEY] = {
-      likes: new Set(data.likes || []),
-      counts: data.counts || {},
-    };
-  }
-  return window[STORE_KEY];
-};
-
-const save = () => {
-  if (typeof window !== "undefined") {
-    const s = getStore();
-    localStorage.setItem(STORE_KEY, JSON.stringify({
-      likes: Array.from(s.likes),
-      counts: s.counts,
-    }));
-  }
-};
+// Thumbs up now uses direct localStorage – no global state needed
 
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
