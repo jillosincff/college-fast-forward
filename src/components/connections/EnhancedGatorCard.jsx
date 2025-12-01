@@ -201,7 +201,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
     const newCount = displayCount + 1;
 
-    // Optimistic update - state + localStorage
+    // Optimistic update - refs + state + localStorage
+    countRef.current = newCount;
+    likedRef.current = true;
     setDisplayCount(newCount);
     setIsLiked(true);
     localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
