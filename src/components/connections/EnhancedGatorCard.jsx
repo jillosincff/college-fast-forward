@@ -9,6 +9,7 @@ import { Message } from '@/entities/Message';
 import { Connection } from '@/entities/Connection';
 import { HelpOffer } from '@/entities/HelpOffer';
 import { JobRequest } from '@/entities/JobRequest';
+import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
 
 const cardVariants = {
