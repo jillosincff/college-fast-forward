@@ -77,11 +77,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   // Dummy state just to force re-render when needed
   const [, forceRender] = useState(0);
   
-  // Completely decoupled from props - read directly from global store
+  // Completely decoupled from props - read directly from persistent store
   const isLiked = likedRequests.has(requestId);
-  const displayedCount = requestId && requestId in thumbsUpCounts 
-    ? thumbsUpCounts[requestId] 
-    : (request?.offers_count || 0);
+  const storedCount = requestId ? getLikedStore().counts[requestId] : undefined;
+  const displayedCount = storedCount !== undefined ? storedCount : (request?.offers_count || 0);
 
   // DEBUG LOGGING
   console.log("CARD RENDER #", requestId, {
