@@ -186,19 +186,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     }
   };
 
-  // Force re-render after localStorage change
-  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
     if (!requestId || isLiked) return;
 
     const newCount = displayCount + 1;
 
-    // Persist to localStorage FIRST
+    // Optimistic update - state + localStorage
+    setDisplayCount(newCount);
+    setIsLiked(true);
     localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
     localStorage.setItem(`liked_${requestId}`, "yes");
-    forceUpdate();
 
     try {
       await incrementOfferCount({ 
@@ -211,9 +209,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (err) {
       // Revert on failure
+      setDisplayCount(displayCount);
+      setIsLiked(false);
       localStorage.removeItem(`thumbs_${requestId}`);
       localStorage.removeItem(`liked_${requestId}`);
-      forceUpdate();
       console.error('Failed to increment offer count:', err);
     }
   };
