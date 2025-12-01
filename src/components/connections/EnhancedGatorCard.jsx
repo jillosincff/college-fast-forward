@@ -400,6 +400,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .gator-card-enhanced:hover {
           border-color: #FA4616;
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+          transform: translateY(-4px);
         }
 
         .gator-card-enhanced.featured {
