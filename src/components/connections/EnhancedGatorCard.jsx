@@ -200,10 +200,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     const currentCount = displayCount;
     const newCount = currentCount + 1;
 
-    // Update state and localStorage together
-    setThumbsState({ count: newCount, liked: true });
+    // Update ref and localStorage together
+    thumbsRef.current = { requestId, count: newCount, liked: true };
     localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
     localStorage.setItem(`liked_${requestId}`, "yes");
+    setThumbsVersion(v => v + 1); // Trigger re-render
 
     try {
       await incrementOfferCount({ 
@@ -216,9 +217,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (err) {
       // Revert on failure
-      setThumbsState({ count: currentCount, liked: false });
+      thumbsRef.current = { requestId, count: currentCount, liked: false };
       localStorage.removeItem(`thumbs_${requestId}`);
       localStorage.removeItem(`liked_${requestId}`);
+      setThumbsVersion(v => v + 1); // Trigger re-render
       console.error('Failed to increment offer count:', err);
     }
   };
