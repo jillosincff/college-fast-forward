@@ -32,13 +32,19 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const { toast } = useToast();
   
   const requestId = request?.id;
-
-  // Check localStorage for user's like status
-  const isLiked = requestId ? localStorage.getItem(`liked_${requestId}`) === "yes" : false;
-
-  // Get the LOCAL override if user liked it, otherwise use DB value
-  const localOverride = requestId ? localStorage.getItem(`thumbs_${requestId}`) : null;
-  const displayCount = localOverride !== null ? parseInt(localOverride) : (request?.offers_count || 0);
+  
+  // Use state to track count - initialize from localStorage or DB
+  const [displayCount, setDisplayCount] = useState(() => {
+    if (!requestId) return 0;
+    const stored = localStorage.getItem(`thumbs_${requestId}`);
+    if (stored !== null) return parseInt(stored);
+    return request?.offers_count || 0;
+  });
+  
+  const [isLiked, setIsLiked] = useState(() => {
+    if (!requestId) return false;
+    return localStorage.getItem(`liked_${requestId}`) === "yes";
+  });
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
