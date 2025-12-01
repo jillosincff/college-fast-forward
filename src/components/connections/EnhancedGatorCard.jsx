@@ -24,8 +24,8 @@ const cardVariants = {
 };
 
 // Global store for liked requests (persists across component re-mounts)
-const likedRequestsStore = new Set();
-const localCountsStore = {};
+const likedRequests = new Set();
+const thumbsUpCounts = {};
 
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
