@@ -186,17 +186,20 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
-    if (!request || hasLiked) return;
+    if (!requestId || hasLiked) return;
     
     const currentCount = displayOffersCount;
     const newCount = currentCount + 1;
     
-    // Optimistically update UI
-    setHasLiked(true);
-    setLocalOffersCount(newCount);
+    // Optimistically update using refs (survives re-renders)
+    likedRequestsRef.current.add(requestId);
+    localCountsRef.current[requestId] = newCount;
+    
+    // Force re-render
+    setShowFullBio(prev => prev);
     
     try {
-      await JobRequest.update(request.id, { offers_count: newCount });
+      await JobRequest.update(requestId, { offers_count: newCount });
       toast({
         title: "👍 Support sent!",
         description: `You encouraged ${fullName.split(' ')[0]}!`,
@@ -204,8 +207,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     } catch (error) {
       console.error('Failed to update offers count:', error);
       // Revert on error
-      setLocalOffersCount(currentCount);
-      setHasLiked(false);
+      likedRequestsRef.current.delete(requestId);
+      delete localCountsRef.current[requestId];
     }
   };
 
