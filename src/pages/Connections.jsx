@@ -200,9 +200,7 @@ export default function DiscoverEmergingGatorsPage() {
     });
 
     return profiles;
-  };
-
-  const allProfiles = buildCombinedProfiles();
+  }, [requests, allUsers]);
 
   const filteredProfiles = allProfiles.filter(profile => {
     if (searchQuery) {
