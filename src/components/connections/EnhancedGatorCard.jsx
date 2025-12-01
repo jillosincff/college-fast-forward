@@ -353,13 +353,26 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               >
                 💬 {messagesCount}
               </span>
-              <button 
-                onClick={handleThumbsUp}
-                disabled={isLiked}
-                className={`signal-badge signal-clickable ${displayCount >= 3 ? 'signal-hot' : ''} ${isLiked ? 'signal-liked' : ''}`}
-                title={isLiked ? 'You encouraged this student!' : 'Click to encourage this student'}
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!requestId) return;
+
+                  // 1. Update DB
+                  try {
+                    const newCount = (request?.offers_count || 0) + 1;
+                    await JobRequest.update(requestId, { offers_count: newCount });
+                    alert(`Success! New count in DB: ${newCount}`);
+                  } catch (err) {
+                    alert("API failed: " + err.message);
+                  }
+
+                  // 2. Force full page refresh so you SEE the truth
+                  window.location.reload();
+                }}
+                style={{ background: "#FA4616", color: "white", padding: "10px 20px", fontSize: "18px" }}
               >
-                👍 {displayCount}
+                TEST THUMBS UP (REAL DB)
               </button>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
