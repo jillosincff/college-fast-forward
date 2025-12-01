@@ -189,19 +189,19 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     e.stopPropagation();
     if (!requestId || isLiked) return;
 
-    // IMMEDIATELY mutate localStorage – survives EVERYTHING
-    const key = `thumbs_${requestId}`;
-    const current = parseInt(localStorage.getItem(key) || request?.offers_count || 0);
-    const newCount = current + 1;
-    localStorage.setItem(key, newCount.toString());
+    // Optimistic update
+    const newCount = displayCount + 1;
+    setDisplayCount(newCount);
+    setIsLiked(true);
+
+    // Persist to localStorage
+    localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
     localStorage.setItem(`liked_${requestId}`, "yes");
-    
-    forceUpdate(); // re-render
 
     try {
       await incrementOfferCount({ 
         requestId, 
-        currentCount: request?.offers_count || 0 
+        currentCount: displayCount 
       });
       toast({
         title: "👍 Support sent!",
@@ -209,9 +209,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (err) {
       // Revert on failure
-      localStorage.removeItem(key);
+      setDisplayCount(displayCount);
+      setIsLiked(false);
+      localStorage.removeItem(`thumbs_${requestId}`);
       localStorage.removeItem(`liked_${requestId}`);
-      forceUpdate();
       console.error('Failed to increment offer count:', err);
     }
   };
