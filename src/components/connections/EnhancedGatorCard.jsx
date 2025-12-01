@@ -30,6 +30,7 @@ const localCountsStore = {};
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [renderKey, setRenderKey] = useState(0);
   const { toast } = useToast();
   
   const requestId = request?.id;
