@@ -355,11 +355,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               </span>
               <button 
                 onClick={handleThumbsUp}
-                disabled={localLiked}
-                className={`signal-badge signal-clickable ${localCount >= 3 ? 'signal-hot' : ''} ${localLiked ? 'signal-liked' : ''}`}
-                title={localLiked ? 'You encouraged this student!' : 'Click to encourage this student'}
+                disabled={isLiked}
+                className={`signal-badge signal-clickable ${displayedCount >= 3 ? 'signal-hot' : ''} ${isLiked ? 'signal-liked' : ''}`}
+                title={isLiked ? 'You encouraged this student!' : 'Click to encourage this student'}
               >
-                👍 {localCount}
+                👍 {displayedCount}
               </button>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
