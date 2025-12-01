@@ -30,40 +30,17 @@ const localCountsStore = {};
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [localCount, setLocalCount] = useState(() => {
-    // Initialize from global store if exists, otherwise from request
-    const requestId = request?.id;
-    if (requestId && localCountsStore[requestId] !== undefined) {
-      return localCountsStore[requestId];
-    }
-    return request?.offers_count || 0;
-  });
-  const [isLiked, setIsLiked] = useState(() => {
-    return request?.id ? likedRequestsStore.has(request.id) : false;
-  });
   const { toast } = useToast();
   
   const requestId = request?.id;
   
-  // Sync with global store on mount/request change, but preserve liked state
-  useEffect(() => {
-    if (requestId) {
-      // If we've already liked this one, use stored count
-      if (likedRequestsStore.has(requestId)) {
-        setIsLiked(true);
-        if (localCountsStore[requestId] !== undefined) {
-          setLocalCount(localCountsStore[requestId]);
-        }
-      } else {
-        // Only update from request if we haven't interacted
-        setLocalCount(request?.offers_count || 0);
-        setIsLiked(false);
-      }
-    }
-  }, [requestId]);
+  // Determine if liked from global store
+  const hasLiked = requestId ? likedRequestsStore.has(requestId) : false;
   
-  const hasLiked = isLiked;
-  const displayOffersCount = localCount;
+  // Get display count: if we've stored a count for this request, use it; otherwise use request data
+  const displayOffersCount = (requestId && localCountsStore[requestId] !== undefined) 
+    ? localCountsStore[requestId] 
+    : (request?.offers_count || 0);
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
@@ -209,13 +186,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     e.stopPropagation();
     if (!requestId || hasLiked) return;
     
-    const newCount = localCount + 1;
+    const newCount = displayOffersCount + 1;
     
-    // Optimistically update local state AND global store
-    setIsLiked(true);
-    setLocalCount(newCount);
+    // Store in global store FIRST (this persists across re-renders)
     likedRequestsStore.add(requestId);
     localCountsStore[requestId] = newCount;
+    
+    // Force component to re-read from store
+    setShowFullBio(s => s);
     
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
@@ -226,8 +204,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     } catch (error) {
       console.error('Failed to update offers count:', error);
       // Revert on error
-      setIsLiked(false);
-      setLocalCount(localCount);
       likedRequestsStore.delete(requestId);
       delete localCountsStore[requestId];
     }
