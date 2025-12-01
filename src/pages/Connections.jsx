@@ -356,10 +356,10 @@ export default function DiscoverEmergingGatorsPage() {
                     }
                   }}
                 >
-                  <AnimatePresence>
+                  <AnimatePresence mode="sync">
                     {displayedProfiles.map((profile) => (
                       <EnhancedGatorCard
-                        key={profile.id || profile.email}
+                        key={profile.request?.id || profile.id || profile.email}
                         gator={profile}
                         request={profile.request}
                         onHelp={profile.request ? () => handleOfferHelp(profile.request) : null}
