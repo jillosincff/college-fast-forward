@@ -224,8 +224,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       <motion.div
         variants={cardVariants}
         className={`gator-card-enhanced ${isFeatured ? 'featured' : ''}`}
-        whileHover={{ scale: 1.02, y: -4 }}
-        transition={{ duration: 0.2 }}
       >
         {isFeatured && (
           <div className="featured-badge">
