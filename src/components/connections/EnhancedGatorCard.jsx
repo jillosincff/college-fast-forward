@@ -32,18 +32,18 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const { toast } = useToast();
   
   const requestId = request?.id;
-  
-  // Tiny state ONLY for forcing re-render
-  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-  
-  // Reads directly from localStorage – survives EVERYTHING
-  const displayCount = requestId 
-    ? parseInt(localStorage.getItem(`thumbs_${requestId}`) || request?.offers_count || 0)
-    : 0;
 
-  const isLiked = requestId 
-    ? localStorage.getItem(`liked_${requestId}`) === "yes"
-    : false;
+  // State for display count and liked status
+  const [displayCount, setDisplayCount] = React.useState(() => {
+    if (!requestId) return 0;
+    const stored = localStorage.getItem(`thumbs_${requestId}`);
+    return stored ? parseInt(stored) : (request?.offers_count || 0);
+  });
+
+  const [isLiked, setIsLiked] = React.useState(() => {
+    if (!requestId) return false;
+    return localStorage.getItem(`liked_${requestId}`) === "yes";
+  });
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
