@@ -125,7 +125,8 @@ export default function DiscoverEmergingGatorsPage() {
     }
   };
 
-  const buildCombinedProfiles = () => {
+  // Memoize profiles to prevent rebuilding on every render (which resets card state)
+  const allProfiles = useMemo(() => {
     const profiles = [];
     const seenEmails = new Set();
 
