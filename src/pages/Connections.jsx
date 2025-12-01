@@ -51,13 +51,7 @@ export default function DiscoverEmergingGatorsPage() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) loadData(true);
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+  // Removed visibility change auto-reload - it was causing thumbs up to reset
 
   const loadData = async (silent = false) => {
     if (!silent) setIsLoading(true);
