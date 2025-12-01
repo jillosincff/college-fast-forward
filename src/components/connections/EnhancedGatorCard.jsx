@@ -23,49 +23,49 @@ const cardVariants = {
   }
 };
 
-// Persistent store for liked requests (survives HMR and page reloads)
-const getLikedStore = () => {
+// ──────────────────────────────────────────────────────────────
+// PERSISTENT GLOBAL STORE – survives StrictMode + HMR + reloads
+// ──────────────────────────────────────────────────────────────
+const GLOBAL_KEY = 'gator_thumbs_up_2025';
+
+const getGlobalStore = () => {
   if (typeof window === 'undefined') return { likes: new Set(), counts: {} };
-  if (!window._gatorThumbsUpStore) {
-    const saved = localStorage.getItem('gator-thumbs-up');
-    const parsed = saved ? JSON.parse(saved) : { likes: [], counts: {} };
-    window._gatorThumbsUpStore = { 
-      likes: new Set(parsed.likes || []), 
-      counts: parsed.counts || {} 
-    };
+  
+  if (!window[GLOBAL_KEY]) {
+    try {
+      const saved = localStorage.getItem(GLOBAL_KEY);
+      const parsed = saved ? JSON.parse(saved) : { likes: [], counts: {} };
+      window[GLOBAL_KEY] = {
+        likes: new Set(parsed.likes),
+        counts: parsed.counts
+      };
+    } catch (e) {
+      window[GLOBAL_KEY] = { likes: new Set(), counts: {} };
+    }
   }
-  return window._gatorThumbsUpStore;
+  return window[GLOBAL_KEY];
 };
 
-const persistStore = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('gator-thumbs-up', JSON.stringify({
-      likes: Array.from(getLikedStore().likes),
-      counts: getLikedStore().counts
-    }));
-  }
+const saveGlobalStore = () => {
+  if (typeof window === 'undefined') return;
+  const store = getGlobalStore();
+  localStorage.setItem(GLOBAL_KEY, JSON.stringify({
+    likes: Array.from(store.likes),
+    counts: store.counts
+  }));
 };
 
-const likedRequests = {
-  has: (id) => getLikedStore().likes.has(id),
-  add: (id) => { getLikedStore().likes.add(id); persistStore(); },
-  delete: (id) => { getLikedStore().likes.delete(id); persistStore(); }
+const likedRequestsStore = {
+  has: (id) => getGlobalStore().likes.has(id),
+  add: (id) => { getGlobalStore().likes.add(id); saveGlobalStore(); },
+  delete: (id) => { getGlobalStore().likes.delete(id); saveGlobalStore(); }
 };
 
-const thumbsUpCounts = new Proxy({}, {
-  get: (_, prop) => getLikedStore().counts[prop],
-  set: (_, prop, value) => {
-    getLikedStore().counts[prop] = value;
-    persistStore();
-    return true;
-  },
-  deleteProperty: (_, prop) => {
-    delete getLikedStore().counts[prop];
-    persistStore();
-    return true;
-  },
-  has: (_, prop) => prop in getLikedStore().counts
-});
+const localCountsStore = {
+  get: (id) => getGlobalStore().counts[id],
+  set: (id, value) => { getGlobalStore().counts[id] = value; saveGlobalStore(); },
+  delete: (id) => { delete getGlobalStore().counts[id]; saveGlobalStore(); }
+};
 
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
