@@ -23,26 +23,25 @@ const cardVariants = {
   }
 };
 
+// Global store for liked requests (persists across component re-mounts)
+const likedRequestsStore = new Set();
+const localCountsStore = {};
+
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [localOffersCount, setLocalOffersCount] = useState(request?.offers_count || 0);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [, forceUpdate] = useState(0);
   const { toast } = useToast();
-  const initializedRef = useRef(false);
-  const requestIdRef = useRef(request?.id);
   
-  // Only reset if this is a completely different request (different ID)
-  useEffect(() => {
-    if (request?.id && request.id !== requestIdRef.current) {
-      requestIdRef.current = request.id;
-      initializedRef.current = false;
-      setLocalOffersCount(request.offers_count || 0);
-      setHasLiked(false);
-    }
-  }, [request?.id]);
+  const requestId = request?.id;
   
-  const displayOffersCount = localOffersCount;
+  // Check if this request was already liked (from global store)
+  const hasLiked = requestId ? likedRequestsStore.has(requestId) : false;
+  
+  // Get the display count - use stored count if we've interacted, otherwise use request count
+  const displayOffersCount = (requestId && localCountsStore[requestId] !== undefined) 
+    ? localCountsStore[requestId] 
+    : (request?.offers_count || 0);
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
@@ -191,12 +190,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     const currentCount = displayOffersCount;
     const newCount = currentCount + 1;
     
-    // Optimistically update using refs (survives re-renders)
-    likedRequestsRef.current.add(requestId);
-    localCountsRef.current[requestId] = newCount;
+    // Optimistically update using global store (survives re-renders and re-mounts)
+    likedRequestsStore.add(requestId);
+    localCountsStore[requestId] = newCount;
     
     // Force re-render
-    setShowFullBio(prev => prev);
+    forceUpdate(n => n + 1);
     
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
@@ -207,8 +206,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     } catch (error) {
       console.error('Failed to update offers count:', error);
       // Revert on error
-      likedRequestsRef.current.delete(requestId);
-      delete localCountsRef.current[requestId];
+      likedRequestsStore.delete(requestId);
+      delete localCountsStore[requestId];
+      forceUpdate(n => n + 1);
     }
   };
 
