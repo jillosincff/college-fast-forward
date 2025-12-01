@@ -57,22 +57,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const requestId = request?.id;
   
   // Dummy state just to force re-render when needed
-  const [, forceUpdate] = useState({});
+  const [, forceRerender] = useState({});
   
-  // Completely decoupled from props - read directly from persistent store
-  const isLiked = likedRequestsStore.has(requestId);
-  const currentCount = requestId && localCountsStore.get(requestId) !== undefined
-    ? localCountsStore.get(requestId)
+  // NO useState for the count/like – immune to double mount
+  const store = getStore();
+  const isLiked = requestId ? store.likes.has(requestId) : false;
+  const displayCount = requestId && store.counts[requestId] !== undefined
+    ? store.counts[requestId]
     : (request?.offers_count || 0);
-
-  // DEBUG LOGGING
-  console.log("CARD RENDER #", requestId, {
-    fromProps: request?.offers_count,
-    fromGlobalStore: localCountsStore.get(requestId),
-    likedInStore: isLiked,
-    currentCount,
-    timestamp: Date.now()
-  });
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
