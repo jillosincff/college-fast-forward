@@ -355,27 +355,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
                 💬 {messagesCount}
               </span>
               <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (!requestId) return;
-
-                  // 1. Update DB via backend function (bypasses RLS)
-                  try {
-                    const response = await incrementOfferCount({ 
-                      requestId, 
-                      currentCount: request?.offers_count || 0 
-                    });
-                    alert(`Success! New count in DB: ${response.data.newCount}`);
-                  } catch (err) {
-                    alert("API failed: " + err.message);
-                  }
-
-                  // 2. Force full page refresh so you SEE the truth
-                  window.location.reload();
-                }}
-                style={{ background: "#FA4616", color: "white", padding: "10px 20px", fontSize: "18px" }}
+                onClick={handleThumbsUp}
+                className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
+                disabled={isLiked}
+                title={isLiked ? 'You supported this student!' : 'Show support'}
               >
-                TEST THUMBS UP (REAL DB)
+                👍 {displayCount}
               </button>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
