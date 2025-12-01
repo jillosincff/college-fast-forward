@@ -194,6 +194,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
+    console.log("CLICKED THUMBS UP", requestId, "old count:", displayedCount);
     if (!requestId || isLiked) return;
 
     const newCount = displayedCount + 1;
@@ -201,6 +202,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     // Optimistic update — this survives ANY remount
     thumbsUpCounts[requestId] = newCount;
     likedRequests.add(requestId);
+    console.log("OPTIMISTIC UPDATE → new count:", newCount, "globalStore:", thumbsUpCounts);
 
     // Force re-render
     forceRender(n => n + 1);
@@ -212,6 +214,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         description: `You encouraged ${fullName.split(' ')[0]}!`,
       });
     } catch (error) {
+      console.log("API FAILED → reverting", requestId);
       console.error('Failed to update offers count:', error);
       // Only revert on real failure
       delete thumbsUpCounts[requestId];
