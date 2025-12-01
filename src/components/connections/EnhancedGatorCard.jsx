@@ -33,25 +33,25 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use refs to persist values across re-renders without triggering state updates
-  const thumbsRef = useRef(null);
+  // DEBUG: Log on every render
+  console.log(`[GatorCard RENDER] requestId=${requestId}, localStorage thumbs=${localStorage.getItem(`thumbs_${requestId}`)}, localStorage liked=${localStorage.getItem(`liked_${requestId}`)}`);
   
-  // Initialize ref only once per requestId
-  if (thumbsRef.current === null || thumbsRef.current.requestId !== requestId) {
-    const storedCount = requestId ? localStorage.getItem(`thumbs_${requestId}`) : null;
-    const storedLiked = requestId ? localStorage.getItem(`liked_${requestId}`) === "yes" : false;
-    thumbsRef.current = {
-      requestId,
-      count: storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0),
-      liked: storedLiked
-    };
-  }
+  // Read directly from localStorage on every render - simplest approach
+  const getThumbsData = () => {
+    if (!requestId) return { count: 0, liked: false };
+    const storedCount = localStorage.getItem(`thumbs_${requestId}`);
+    const storedLiked = localStorage.getItem(`liked_${requestId}`) === "yes";
+    const count = storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0);
+    console.log(`[GatorCard getThumbsData] requestId=${requestId}, storedCount=${storedCount}, offers_count=${request?.offers_count}, final count=${count}, liked=${storedLiked}`);
+    return { count, liked: storedLiked };
+  };
   
-  // Use state only to trigger re-renders when user clicks
-  const [thumbsVersion, setThumbsVersion] = useState(0);
+  const thumbsData = getThumbsData();
+  const displayCount = thumbsData.count;
+  const isLiked = thumbsData.liked;
   
-  const displayCount = thumbsRef.current.count;
-  const isLiked = thumbsRef.current.liked;
+  // State just to force re-render after click
+  const [, forceRender] = useState(0);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
