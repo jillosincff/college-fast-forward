@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Globe2 } from 'lucide-react';
@@ -26,19 +26,23 @@ const cardVariants = {
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [localOffersCount, setLocalOffersCount] = useState(null);
+  const [localOffersCount, setLocalOffersCount] = useState(request?.offers_count || 0);
   const [hasLiked, setHasLiked] = useState(false);
   const { toast } = useToast();
+  const initializedRef = useRef(false);
+  const requestIdRef = useRef(request?.id);
   
-  // Initialize localOffersCount from request only once
+  // Only reset if this is a completely different request (different ID)
   useEffect(() => {
-    if (localOffersCount === null && request?.offers_count !== undefined) {
+    if (request?.id && request.id !== requestIdRef.current) {
+      requestIdRef.current = request.id;
+      initializedRef.current = false;
       setLocalOffersCount(request.offers_count || 0);
+      setHasLiked(false);
     }
-  }, [request?.offers_count, localOffersCount]);
+  }, [request?.id]);
   
-  // Use the local count if set, otherwise fall back to request count
-  const displayOffersCount = localOffersCount !== null ? localOffersCount : (request?.offers_count || 0);
+  const displayOffersCount = localOffersCount;
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
