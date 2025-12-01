@@ -195,34 +195,33 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
-    console.log(`[GatorCard handleThumbsUp] requestId=${requestId}, isLiked=${isLiked}, displayCount=${displayCount}`);
     if (!requestId || isLiked) return;
 
     const currentCount = displayCount;
     const newCount = currentCount + 1;
 
-    // Save to localStorage
-    console.log(`[GatorCard handleThumbsUp] Setting localStorage thumbs_${requestId}=${newCount}, liked=yes`);
+    // Save to localStorage FIRST - this is our source of truth
     localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
     localStorage.setItem(`liked_${requestId}`, "yes");
-    forceRender(n => n + 1); // Trigger re-render to pick up new values
+    forceRender(n => n + 1);
 
+    // Call backend - don't revert on failure, localStorage is source of truth
     try {
-      await incrementOfferCount({ 
-        requestId, 
-        currentCount 
-      });
+      const result = await incrementOfferCount({ requestId });
+      if (result?.data?.success) {
+        toast({
+          title: "👍 Support sent!",
+          description: `You encouraged ${fullName.split(' ')[0]}!`,
+        });
+      }
+    } catch (err) {
+      // Don't revert - localStorage is source of truth
+      // Backend will eventually sync
+      console.warn('Backend sync failed, but like is saved locally:', err);
       toast({
         title: "👍 Support sent!",
         description: `You encouraged ${fullName.split(' ')[0]}!`,
       });
-    } catch (err) {
-      // Revert on failure
-      console.log(`[GatorCard handleThumbsUp] ERROR - reverting localStorage`);
-      localStorage.removeItem(`thumbs_${requestId}`);
-      localStorage.removeItem(`liked_${requestId}`);
-      forceRender(n => n + 1);
-      console.error('Failed to increment offer count:', err);
     }
   };
 
