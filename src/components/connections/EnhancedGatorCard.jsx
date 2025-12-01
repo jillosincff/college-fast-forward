@@ -85,8 +85,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   // DEBUG LOGGING
   console.log("CARD RENDER #", requestId, {
     fromProps: request?.offers_count,
-    fromGlobalStore: thumbsUpCounts[requestId],
-    likedInStore: likedRequests.has(requestId),
+    fromGlobalStore: storedCount,
+    likedInStore: isLiked,
     displayedCount,
     timestamp: Date.now()
   });
