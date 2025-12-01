@@ -75,19 +75,20 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const requestId = request?.id;
   
   // Dummy state just to force re-render when needed
-  const [, forceRender] = useState(0);
+  const [, forceUpdate] = useState({});
   
   // Completely decoupled from props - read directly from persistent store
-  const isLiked = likedRequests.has(requestId);
-  const storedCount = requestId ? getLikedStore().counts[requestId] : undefined;
-  const displayedCount = storedCount !== undefined ? storedCount : (request?.offers_count || 0);
+  const isLiked = likedRequestsStore.has(requestId);
+  const currentCount = requestId && localCountsStore.get(requestId) !== undefined
+    ? localCountsStore.get(requestId)
+    : (request?.offers_count || 0);
 
   // DEBUG LOGGING
   console.log("CARD RENDER #", requestId, {
     fromProps: request?.offers_count,
-    fromGlobalStore: storedCount,
+    fromGlobalStore: localCountsStore.get(requestId),
     likedInStore: isLiked,
-    displayedCount,
+    currentCount,
     timestamp: Date.now()
   });
   
