@@ -33,19 +33,25 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use state initialized from localStorage, ignore props after mount
-  const [thumbsState, setThumbsState] = useState(() => {
-    if (!requestId) return { count: 0, liked: false };
-    const storedCount = localStorage.getItem(`thumbs_${requestId}`);
-    const storedLiked = localStorage.getItem(`liked_${requestId}`) === "yes";
-    return {
+  // Use refs to persist values across re-renders without triggering state updates
+  const thumbsRef = useRef(null);
+  
+  // Initialize ref only once per requestId
+  if (thumbsRef.current === null || thumbsRef.current.requestId !== requestId) {
+    const storedCount = requestId ? localStorage.getItem(`thumbs_${requestId}`) : null;
+    const storedLiked = requestId ? localStorage.getItem(`liked_${requestId}`) === "yes" : false;
+    thumbsRef.current = {
+      requestId,
       count: storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0),
       liked: storedLiked
     };
-  });
+  }
   
-  const displayCount = thumbsState.count;
-  const isLiked = thumbsState.liked;
+  // Use state only to trigger re-renders when user clicks
+  const [thumbsVersion, setThumbsVersion] = useState(0);
+  
+  const displayCount = thumbsRef.current.count;
+  const isLiked = thumbsRef.current.liked;
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
