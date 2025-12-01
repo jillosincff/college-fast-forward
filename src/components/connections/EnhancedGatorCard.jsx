@@ -33,8 +33,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // DEBUG: Log on every render
-  console.log(`[GatorCard RENDER] requestId=${requestId}, localStorage thumbs=${localStorage.getItem(`thumbs_${requestId}`)}, localStorage liked=${localStorage.getItem(`liked_${requestId}`)}`);
+  // State just to force re-render after click
+  const [, forceRender] = useState(0);
   
   // Read directly from localStorage on every render - simplest approach
   const getThumbsData = () => {
@@ -42,16 +42,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     const storedCount = localStorage.getItem(`thumbs_${requestId}`);
     const storedLiked = localStorage.getItem(`liked_${requestId}`) === "yes";
     const count = storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0);
-    console.log(`[GatorCard getThumbsData] requestId=${requestId}, storedCount=${storedCount}, offers_count=${request?.offers_count}, final count=${count}, liked=${storedLiked}`);
     return { count, liked: storedLiked };
   };
   
   const thumbsData = getThumbsData();
   const displayCount = thumbsData.count;
   const isLiked = thumbsData.liked;
-  
-  // State just to force re-render after click
-  const [, forceRender] = useState(0);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
