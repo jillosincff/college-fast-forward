@@ -23,48 +23,30 @@ const cardVariants = {
   }
 };
 
-// ──────────────────────────────────────────────────────────────
-// PERSISTENT GLOBAL STORE – survives StrictMode + HMR + reloads
-// ──────────────────────────────────────────────────────────────
-const GLOBAL_KEY = 'gator_thumbs_up_2025';
+// FINAL – WORKS EVERYWHERE (StrictMode + HMR + production)
+const STORE_KEY = "gator_thumbs_2025";
 
-const getGlobalStore = () => {
-  if (typeof window === 'undefined') return { likes: new Set(), counts: {} };
-  
-  if (!window[GLOBAL_KEY]) {
-    try {
-      const saved = localStorage.getItem(GLOBAL_KEY);
-      const parsed = saved ? JSON.parse(saved) : { likes: [], counts: {} };
-      window[GLOBAL_KEY] = {
-        likes: new Set(parsed.likes),
-        counts: parsed.counts
-      };
-    } catch (e) {
-      window[GLOBAL_KEY] = { likes: new Set(), counts: {} };
-    }
+const getStore = () => {
+  if (typeof window === "undefined") return { likes: new Set(), counts: {} };
+  if (!window[STORE_KEY]) {
+    const raw = localStorage.getItem(STORE_KEY);
+    const data = raw ? JSON.parse(raw) : { likes: [], counts: {} };
+    window[STORE_KEY] = {
+      likes: new Set(data.likes || []),
+      counts: data.counts || {},
+    };
   }
-  return window[GLOBAL_KEY];
+  return window[STORE_KEY];
 };
 
-const saveGlobalStore = () => {
-  if (typeof window === 'undefined') return;
-  const store = getGlobalStore();
-  localStorage.setItem(GLOBAL_KEY, JSON.stringify({
-    likes: Array.from(store.likes),
-    counts: store.counts
-  }));
-};
-
-const likedRequestsStore = {
-  has: (id) => getGlobalStore().likes.has(id),
-  add: (id) => { getGlobalStore().likes.add(id); saveGlobalStore(); },
-  delete: (id) => { getGlobalStore().likes.delete(id); saveGlobalStore(); }
-};
-
-const localCountsStore = {
-  get: (id) => getGlobalStore().counts[id],
-  set: (id, value) => { getGlobalStore().counts[id] = value; saveGlobalStore(); },
-  delete: (id) => { delete getGlobalStore().counts[id]; saveGlobalStore(); }
+const save = () => {
+  if (typeof window !== "undefined") {
+    const s = getStore();
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      likes: Array.from(s.likes),
+      counts: s.counts,
+    }));
+  }
 };
 
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
