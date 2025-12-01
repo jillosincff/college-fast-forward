@@ -187,17 +187,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
     if (!requestId || localLiked) return;
-    
-    const newCount = localCount + 1;
-    
-    // Update local state immediately (optimistic update)
+
+    const newCount = (localCount || 0) + 1;
+
+    // Optimistic UI
     setLocalLiked(true);
     setLocalCount(newCount);
-    
-    // Store in global store (persists across re-renders from parent)
+
+    // Persist globally – survives remounts forever
     likedRequestsStore.add(requestId);
     localCountsStore[requestId] = newCount;
-    
+
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
       toast({
@@ -206,11 +206,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (error) {
       console.error('Failed to update offers count:', error);
-      // Revert on error
-      setLocalLiked(false);
-      setLocalCount(localCount);
+      // Only revert if the API actually failed
       likedRequestsStore.delete(requestId);
       delete localCountsStore[requestId];
+      setLocalLiked(false);
+      setLocalCount(request?.offers_count || 0);
     }
   };
 
