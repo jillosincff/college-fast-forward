@@ -186,7 +186,7 @@ export default function DiscoverEmergingGatorsPage() {
           major: request.target_industry,
           request: request,
           hasRequest: true,
-          isFeatured: false
+          isFeatured
         });
       }
     });
