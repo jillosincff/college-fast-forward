@@ -195,16 +195,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
+    console.log(`[GatorCard handleThumbsUp] requestId=${requestId}, isLiked=${isLiked}, displayCount=${displayCount}`);
     if (!requestId || isLiked) return;
 
     const currentCount = displayCount;
     const newCount = currentCount + 1;
 
-    // Update ref and localStorage together
-    thumbsRef.current = { requestId, count: newCount, liked: true };
+    // Save to localStorage
+    console.log(`[GatorCard handleThumbsUp] Setting localStorage thumbs_${requestId}=${newCount}, liked=yes`);
     localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
     localStorage.setItem(`liked_${requestId}`, "yes");
-    setThumbsVersion(v => v + 1); // Trigger re-render
+    forceRender(n => n + 1); // Trigger re-render to pick up new values
 
     try {
       await incrementOfferCount({ 
@@ -217,10 +218,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
     } catch (err) {
       // Revert on failure
-      thumbsRef.current = { requestId, count: currentCount, liked: false };
+      console.log(`[GatorCard handleThumbsUp] ERROR - reverting localStorage`);
       localStorage.removeItem(`thumbs_${requestId}`);
       localStorage.removeItem(`liked_${requestId}`);
-      setThumbsVersion(v => v + 1); // Trigger re-render
+      forceRender(n => n + 1);
       console.error('Failed to increment offer count:', err);
     }
   };
