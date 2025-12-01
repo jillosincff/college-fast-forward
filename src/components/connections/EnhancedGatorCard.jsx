@@ -34,15 +34,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use local state - ALWAYS prefer global store if user ever liked this request
-  const [localLiked, setLocalLiked] = useState(likedRequestsStore.has(requestId));
-
-  const [localCount, setLocalCount] = useState(() => {
-    if (likedRequestsStore.has(requestId)) {
-      return localCountsStore[requestId] ?? (request?.offers_count || 0);
-    }
-    return request?.offers_count || 0;
-  });
+  // Dummy state just to force re-render when needed
+  const [, forceRender] = useState(0);
+  
+  // Completely decoupled from props - read directly from global store
+  const isLiked = likedRequests.has(requestId);
+  const displayedCount = requestId && requestId in thumbsUpCounts 
+    ? thumbsUpCounts[requestId] 
+    : (request?.offers_count || 0);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
