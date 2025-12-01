@@ -199,7 +199,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     forceUpdate(); // re-render
 
     try {
-      await JobRequest.update(requestId, { offers_count: newCount });
+      await incrementOfferCount({ 
+        requestId, 
+        currentCount: request?.offers_count || 0 
+      });
       toast({
         title: "👍 Support sent!",
         description: `You encouraged ${fullName.split(' ')[0]}!`,
@@ -209,6 +212,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       localStorage.removeItem(key);
       localStorage.removeItem(`liked_${requestId}`);
       forceUpdate();
+      console.error('Failed to increment offer count:', err);
     }
   };
 
