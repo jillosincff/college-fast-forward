@@ -192,8 +192,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     likedRequestsStore.add(requestId);
     localCountsStore[requestId] = newCount;
     
-    // Force component to re-read from store
-    setShowFullBio(s => s);
+    // Force component to re-render by toggling a dummy state
+    setShowMessageModal(prev => { 
+      // Just trigger re-render, don't actually change anything
+      setTimeout(() => {}, 0);
+      return prev; 
+    });
     
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
