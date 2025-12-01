@@ -37,8 +37,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   // Determine if liked from global store
   const hasLiked = requestId ? likedRequestsStore.has(requestId) : false;
   
-  // Get display count: if we've stored a count for this request, use it; otherwise use request data
-  const displayOffersCount = (requestId && localCountsStore[requestId] !== undefined) 
+  // ALWAYS prefer the global store count if it exists (means we interacted with it)
+  // This prevents parent re-renders from resetting our local state
+  const displayOffersCount = (requestId && localCountsStore.hasOwnProperty(requestId)) 
     ? localCountsStore[requestId] 
     : (request?.offers_count || 0);
 
