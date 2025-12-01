@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Globe2 } from 'lucide-react';
@@ -30,19 +30,31 @@ const localCountsStore = {};
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [renderKey, setRenderKey] = useState(0);
   const { toast } = useToast();
   
   const requestId = request?.id;
   
-  // Determine if liked from global store
-  const hasLiked = requestId ? likedRequestsStore.has(requestId) : false;
+  // Use local state for liked status and count - initialize from global store or props
+  const [localLiked, setLocalLiked] = useState(() => 
+    requestId ? likedRequestsStore.has(requestId) : false
+  );
+  const [localCount, setLocalCount] = useState(() => 
+    (requestId && localCountsStore.hasOwnProperty(requestId)) 
+      ? localCountsStore[requestId] 
+      : (request?.offers_count || 0)
+  );
   
-  // ALWAYS prefer the global store count if it exists (means we interacted with it)
-  // This prevents parent re-renders from resetting our local state
-  const displayOffersCount = (requestId && localCountsStore.hasOwnProperty(requestId)) 
-    ? localCountsStore[requestId] 
-    : (request?.offers_count || 0);
+  // Sync with global store on mount and when request changes (but only if we haven't interacted)
+  useEffect(() => {
+    if (!requestId) return;
+    
+    // If we have a stored value in global store, use it (user already interacted)
+    if (localCountsStore.hasOwnProperty(requestId)) {
+      setLocalCount(localCountsStore[requestId]);
+      setLocalLiked(likedRequestsStore.has(requestId));
+    }
+    // Otherwise, don't update - keep the initial value from props
+  }, [requestId]);
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
