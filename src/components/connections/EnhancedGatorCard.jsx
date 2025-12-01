@@ -188,11 +188,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     e.stopPropagation();
     if (!requestId || isLiked) return;
 
-    const newCount = displayCount + 1;
-    store.counts[requestId] = newCount;
-    store.likes.add(requestId);
-    save();
-    forceRerender({});
+    // IMMEDIATELY mutate localStorage – survives EVERYTHING
+    const key = `thumbs_${requestId}`;
+    const current = parseInt(localStorage.getItem(key) || request?.offers_count || 0);
+    const newCount = current + 1;
+    localStorage.setItem(key, newCount.toString());
+    localStorage.setItem(`liked_${requestId}`, "yes");
+    
+    forceUpdate(); // re-render
 
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
@@ -201,10 +204,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         description: `You encouraged ${fullName.split(' ')[0]}!`,
       });
     } catch (err) {
-      delete store.counts[requestId];
-      store.likes.delete(requestId);
-      save();
-      forceRerender({});
+      // Revert on failure
+      localStorage.removeItem(key);
+      localStorage.removeItem(`liked_${requestId}`);
+      forceUpdate();
     }
   };
 
