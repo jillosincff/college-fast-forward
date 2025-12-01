@@ -208,18 +208,13 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
-    console.log("CLICKED THUMBS UP", requestId, "old count:", currentCount);
     if (!requestId || isLiked) return;
 
-    const newCount = currentCount + 1;
-
-    // Optimistic update — survives StrictMode + HMR + reloads
-    localCountsStore.set(requestId, newCount);
-    likedRequestsStore.add(requestId);
-    console.log("OPTIMISTIC UPDATE → new count:", newCount);
-
-    // Force re-render
-    forceUpdate({});
+    const newCount = displayCount + 1;
+    store.counts[requestId] = newCount;
+    store.likes.add(requestId);
+    save();
+    forceRerender({});
 
     try {
       await JobRequest.update(requestId, { offers_count: newCount });
@@ -227,13 +222,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         title: "👍 Support sent!",
         description: `You encouraged ${fullName.split(' ')[0]}!`,
       });
-    } catch (error) {
-      console.log("API FAILED → reverting", requestId);
-      console.error('Failed to update offers count:', error);
-      // Only revert on real failure
-      likedRequestsStore.delete(requestId);
-      localCountsStore.delete(requestId);
-      forceUpdate({});
+    } catch (err) {
+      delete store.counts[requestId];
+      store.likes.delete(requestId);
+      save();
+      forceRerender({});
     }
   };
 
