@@ -34,15 +34,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use local state for liked status and count - ALWAYS prefer global store on remount
-  const [localLiked, setLocalLiked] = useState(() => 
-    requestId ? likedRequestsStore.has(requestId) : false
-  );
+  // Use local state - ALWAYS prefer global store if user ever liked this request
+  const [localLiked, setLocalLiked] = useState(likedRequestsStore.has(requestId));
+
   const [localCount, setLocalCount] = useState(() => {
-    if (requestId && requestId in localCountsStore) {
-      return localCountsStore[requestId];
+    if (likedRequestsStore.has(requestId)) {
+      return localCountsStore[requestId] ?? (request?.offers_count || 0);
     }
-    return request?.offers_count ?? 0;
+    return request?.offers_count || 0;
   });
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
