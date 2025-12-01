@@ -206,17 +206,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       const result = await incrementOfferCount({ requestId });
       if (result?.data?.success) {
         toast({
-          title: "👍 Support sent!",
-          description: `You encouraged ${fullName.split(' ')[0]}!`,
-        });
+                title: "👍 You liked this!",
+              });
       }
     } catch (err) {
       // Don't revert - localStorage is source of truth
       // Backend will eventually sync
       console.warn('Backend sync failed, but like is saved locally:', err);
       toast({
-        title: "👍 Support sent!",
-        description: `You encouraged ${fullName.split(' ')[0]}!`,
+        title: "👍 You liked this!",
       });
     }
   };
