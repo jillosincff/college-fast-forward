@@ -359,11 +359,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
                   e.stopPropagation();
                   if (!requestId) return;
 
-                  // 1. Update DB
+                  // 1. Update DB via backend function (bypasses RLS)
                   try {
-                    const newCount = (request?.offers_count || 0) + 1;
-                    await JobRequest.update(requestId, { offers_count: newCount });
-                    alert(`Success! New count in DB: ${newCount}`);
+                    const response = await incrementOfferCount({ requestId });
+                    alert(`Success! New count in DB: ${response.data.newCount}`);
                   } catch (err) {
                     alert("API failed: " + err.message);
                   }
