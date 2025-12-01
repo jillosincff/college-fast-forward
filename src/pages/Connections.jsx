@@ -130,19 +130,22 @@ export default function DiscoverEmergingGatorsPage() {
     const profiles = [];
     const seenEmails = new Set();
 
-    requests.forEach(request => {
+    requests.forEach((request, index) => {
       const requestCreatorEmail = request.created_by;
       if (seenEmails.has(requestCreatorEmail)) return;
       
       seenEmails.add(requestCreatorEmail);
       const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
       
+      // Deterministic "featured" based on index, not random
+      const isFeatured = index % 5 === 0;
+      
       if (userProfile) {
         profiles.push({
           ...userProfile,
           request: request,
           hasRequest: true,
-          isFeatured: Math.random() > 0.8
+          isFeatured
         });
       } else {
         // User not in directory - parse name from email
