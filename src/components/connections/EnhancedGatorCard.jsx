@@ -33,27 +33,23 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use refs to track values that survive re-renders with new props
-  const countRef = React.useRef(null);
-  const likedRef = React.useRef(null);
+  // Simple approach: read from localStorage on every render, use forceUpdate to trigger re-render after click
+  const [, forceUpdate] = useState(0);
   
-  // Initialize refs only once
-  if (countRef.current === null && requestId) {
+  // Always read fresh from localStorage - this is the source of truth
+  const getStoredCount = () => {
+    if (!requestId) return 0;
     const stored = localStorage.getItem(`thumbs_${requestId}`);
-    countRef.current = stored !== null ? parseInt(stored) : (request?.offers_count || 0);
-  }
-  if (likedRef.current === null && requestId) {
-    likedRef.current = localStorage.getItem(`liked_${requestId}`) === "yes";
-  }
+    return stored !== null ? parseInt(stored) : (request?.offers_count || 0);
+  };
   
-  const [displayCount, setDisplayCount] = useState(countRef.current || 0);
-  const [isLiked, setIsLiked] = useState(likedRef.current || false);
+  const getIsLiked = () => {
+    if (!requestId) return false;
+    return localStorage.getItem(`liked_${requestId}`) === "yes";
+  };
   
-  // Sync state with refs
-  React.useEffect(() => {
-    if (countRef.current !== null) setDisplayCount(countRef.current);
-    if (likedRef.current !== null) setIsLiked(likedRef.current);
-  }, [requestId]);
+  const displayCount = getStoredCount();
+  const isLiked = getIsLiked();
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
