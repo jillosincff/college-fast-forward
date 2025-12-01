@@ -26,9 +26,19 @@ const cardVariants = {
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [localOffersCount, setLocalOffersCount] = useState(request?.offers_count || 0);
+  const [localOffersCount, setLocalOffersCount] = useState(null);
   const [hasLiked, setHasLiked] = useState(false);
   const { toast } = useToast();
+  
+  // Initialize localOffersCount from request only once
+  useEffect(() => {
+    if (localOffersCount === null && request?.offers_count !== undefined) {
+      setLocalOffersCount(request.offers_count || 0);
+    }
+  }, [request?.offers_count, localOffersCount]);
+  
+  // Use the local count if set, otherwise fall back to request count
+  const displayOffersCount = localOffersCount !== null ? localOffersCount : (request?.offers_count || 0);
 
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
@@ -174,8 +184,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     e.stopPropagation();
     if (!request || hasLiked) return;
     
+    const currentCount = displayOffersCount;
+    const newCount = currentCount + 1;
+    
+    // Optimistically update UI
     setHasLiked(true);
-    const newCount = localOffersCount + 1;
     setLocalOffersCount(newCount);
     
     try {
@@ -187,7 +200,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     } catch (error) {
       console.error('Failed to update offers count:', error);
       // Revert on error
-      setLocalOffersCount(localOffersCount);
+      setLocalOffersCount(currentCount);
       setHasLiked(false);
     }
   };
@@ -337,10 +350,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               <button 
                 onClick={handleThumbsUp}
                 disabled={hasLiked}
-                className={`signal-badge signal-clickable ${localOffersCount >= 3 ? 'signal-hot' : ''} ${hasLiked ? 'signal-liked' : ''}`}
+                className={`signal-badge signal-clickable ${displayOffersCount >= 3 ? 'signal-hot' : ''} ${hasLiked ? 'signal-liked' : ''}`}
                 title={hasLiked ? 'You encouraged this student!' : 'Click to encourage this student'}
               >
-                👍 {localOffersCount}
+                👍 {displayOffersCount}
               </button>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
