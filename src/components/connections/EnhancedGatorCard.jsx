@@ -33,23 +33,19 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Simple approach: read from localStorage on every render, use forceUpdate to trigger re-render after click
-  const [, forceUpdate] = useState(0);
+  // Use state initialized from localStorage, ignore props after mount
+  const [thumbsState, setThumbsState] = useState(() => {
+    if (!requestId) return { count: 0, liked: false };
+    const storedCount = localStorage.getItem(`thumbs_${requestId}`);
+    const storedLiked = localStorage.getItem(`liked_${requestId}`) === "yes";
+    return {
+      count: storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0),
+      liked: storedLiked
+    };
+  });
   
-  // Always read fresh from localStorage - this is the source of truth
-  const getStoredCount = () => {
-    if (!requestId) return 0;
-    const stored = localStorage.getItem(`thumbs_${requestId}`);
-    return stored !== null ? parseInt(stored) : (request?.offers_count || 0);
-  };
-  
-  const getIsLiked = () => {
-    if (!requestId) return false;
-    return localStorage.getItem(`liked_${requestId}`) === "yes";
-  };
-  
-  const displayCount = getStoredCount();
-  const isLiked = getIsLiked();
+  const displayCount = thumbsState.count;
+  const isLiked = thumbsState.liked;
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
