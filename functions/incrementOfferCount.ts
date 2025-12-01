@@ -10,21 +10,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { requestId } = await req.json();
+    const body = await req.json();
+    const requestId = body.requestId;
+    const currentCount = body.currentCount || 0;
     
     if (!requestId) {
       return Response.json({ error: 'Missing requestId' }, { status: 400 });
     }
 
-    // Get current request using service role
-    const requests = await base44.asServiceRole.entities.JobRequest.filter({ id: requestId });
-    
-    if (!requests || requests.length === 0) {
-      return Response.json({ error: 'Request not found' }, { status: 404 });
-    }
-
-    const currentRequest = requests[0];
-    const newCount = (currentRequest.offers_count || 0) + 1;
+    const newCount = currentCount + 1;
 
     // Update using service role to bypass RLS
     await base44.asServiceRole.entities.JobRequest.update(requestId, { 
