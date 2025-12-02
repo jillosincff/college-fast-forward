@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Zap, MessageSquare, Star, Eye, Check } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthContext';
-import { useAccessControl, hasLinkedParent } from '@/components/access/useAccessControl';
+import { useAccessControl, hasLinkedParent, getTotalUserCount, isPremiumActive, ACCESS_CONSTANTS } from '@/components/access/useAccessControl';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -21,9 +20,23 @@ export default function FullAccessUpgradeCard({ user }) {
   const [showSelfPayModal, setShowSelfPayModal] = useState(false);
   const [agreedToSelfPay, setAgreedToSelfPay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [premiumActivated, setPremiumActivated] = useState(false);
+  const [checkingUserCount, setCheckingUserCount] = useState(true);
 
-  // Don't show if user has premium or is a parent
-  if (accessInfo.isPremium || user?.persona === 'parent') {
+  // Check if premium features are active (1,000+ users)
+  useEffect(() => {
+    let mounted = true;
+    getTotalUserCount().then(count => {
+      if (mounted) {
+        setPremiumActivated(isPremiumActive(count));
+        setCheckingUserCount(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  // Don't show if still checking, premium not activated, user has premium, or is a parent
+  if (checkingUserCount || !premiumActivated || accessInfo.isPremium || user?.persona === 'parent') {
     return null;
   }
 
