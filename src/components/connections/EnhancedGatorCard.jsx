@@ -11,6 +11,7 @@ import { HelpOffer } from '@/entities/HelpOffer';
 import { JobRequest } from '@/entities/JobRequest';
 import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
+import { checkFullAccess } from '@/components/access/useAccessControl';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -30,6 +31,10 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const { toast } = useToast();
+  
+  // Check if the gator (student) has premium access → show Featured badge
+  const gatorHasPremium = checkFullAccess(gator);
+  const showFeaturedBadge = isFeatured || gatorHasPremium;
   
   const requestId = request?.id;
   
@@ -223,12 +228,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     <>
       <motion.div
         variants={cardVariants}
-        className={`gator-card-enhanced ${isFeatured ? 'featured' : ''}`}
+        className={`gator-card-enhanced ${showFeaturedBadge ? 'featured' : ''}`}
       >
-        {isFeatured && (
+        {showFeaturedBadge && (
           <div className="featured-badge">
-            <Star className="w-3 h-3" fill="currentColor" />
-            Featured
+            🔥 Featured
           </div>
         )}
 
