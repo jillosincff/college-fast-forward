@@ -210,14 +210,8 @@ export function hasLinkedParent(user) {
   return !!user.linked_parent_id || !!user.parent_email;
 }
 
-/**
- * Get current day in ET timezone
- */
-export function getCurrentDayET() {
-  const now = new Date();
-  const etOptions = { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' };
-  return new Intl.DateTimeFormat('en-US', etOptions).format(now);
-}
+// Re-export the private function for external use
+export { getCurrentDayET };
 
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
