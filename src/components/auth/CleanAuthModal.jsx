@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ export default function CleanAuthModal({ isOpen, onClose, defaultTab = 'login' }
   
   // Form states
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '', confirmPassword: '' });
+  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '', confirmPassword: '', referralCode: '' });
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
 
   const { loginWithPassword, registerWithPassword, sendMagicLinkEmail } = useAuth();
@@ -62,9 +62,9 @@ export default function CleanAuthModal({ isOpen, onClose, defaultTab = 'login' }
     setIsLoading(true);
     
     try {
-      const result = await registerWithPassword(signupForm.email, signupForm.password, signupForm.fullName);
+      const result = await registerWithPassword(signupForm.email, signupForm.password, signupForm.fullName, signupForm.referralCode);
       showMessage(result.message, 'success');
-      setSignupForm({ email: '', password: '', fullName: '', confirmPassword: '' });
+      setSignupForm({ email: '', password: '', fullName: '', confirmPassword: '', referralCode: '' });
     } catch (error) {
       showMessage(error.message, 'error');
     }
@@ -246,6 +246,17 @@ export default function CleanAuthModal({ isOpen, onClose, defaultTab = 'login' }
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-referral">Referral Code (optional)</Label>
+                  <Input
+                    id="signup-referral"
+                    placeholder="e.g., GATOR-JOHN"
+                    value={signupForm.referralCode}
+                    onChange={(e) => setSignupForm({...signupForm, referralCode: e.target.value.toUpperCase()})}
+                  />
+                  <p className="text-xs text-slate-500">Got a code from a friend or ambassador? Enter it here!</p>
                 </div>
 
                 <Button 
