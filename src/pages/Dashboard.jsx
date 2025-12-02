@@ -15,6 +15,7 @@ import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
+import FullAccessUpgradeCard from '@/components/dashboard/FullAccessUpgradeCard';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 import { useAccessControl } from '@/components/access/useAccessControl';
 import LimitedModeBanner from '@/components/access/LimitedModeBanner';
@@ -220,6 +221,9 @@ export default function Dashboard() {
         
         {/* Draft Request Banner */}
         <DraftRequestBanner user={user} />
+        
+        {/* Full Access Upgrade Card (for free-tier students without linked parent) */}
+        <FullAccessUpgradeCard user={user} />
         
         {/* Quick Actions */}
         <motion.div
