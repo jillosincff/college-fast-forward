@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 
 const FOUNDING_GATOR_LIMIT = 1000;
 const FREE_DAILY_MESSAGE_LIMIT = 3;
-const PREMIUM_PRICE = 9; // $9/month
+const EARLY_ADOPTER_THRESHOLD = 5000; // After 5,000 users, price goes to $19
+const PREMIUM_PRICE_EARLY = 9; // $9/month for users 1,001-4,999
+const PREMIUM_PRICE_STANDARD = 19; // $19/month for users 5,000+
 const PREMIUM_ACTIVATION_THRESHOLD = 1000; // Premium features activate after 1,000 users
 
 // Cache for user count to avoid repeated API calls
@@ -277,9 +279,56 @@ export function hasLinkedParent(user) {
 // Re-export the private function for external use
 export { getCurrentDayET };
 
+/**
+ * Get current premium price based on total user count
+ */
+export function getCurrentPremiumPrice(userCount) {
+  if (userCount >= EARLY_ADOPTER_THRESHOLD) {
+    return PREMIUM_PRICE_STANDARD; // $19
+  }
+  return PREMIUM_PRICE_EARLY; // $9
+}
+
+/**
+ * Get pricing tier info based on user count
+ */
+export function getPricingTierInfo(userCount) {
+  const foundingSpotsLeft = Math.max(0, FOUNDING_GATOR_LIMIT - userCount);
+  
+  if (userCount < FOUNDING_GATOR_LIMIT) {
+    return {
+      phase: 'founding',
+      currentPrice: 0,
+      spotsLeft: foundingSpotsLeft,
+      nextPhase: 'early_adopter',
+      nextPrice: PREMIUM_PRICE_EARLY
+    };
+  }
+  
+  if (userCount < EARLY_ADOPTER_THRESHOLD) {
+    return {
+      phase: 'early_adopter',
+      currentPrice: PREMIUM_PRICE_EARLY,
+      spotsLeft: EARLY_ADOPTER_THRESHOLD - userCount,
+      nextPhase: 'standard',
+      nextPrice: PREMIUM_PRICE_STANDARD
+    };
+  }
+  
+  return {
+    phase: 'standard',
+    currentPrice: PREMIUM_PRICE_STANDARD,
+    spotsLeft: null,
+    nextPhase: null,
+    nextPrice: null
+  };
+}
+
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
   FREE_DAILY_MESSAGE_LIMIT,
-  PREMIUM_PRICE,
+  PREMIUM_PRICE_EARLY,
+  PREMIUM_PRICE_STANDARD,
+  EARLY_ADOPTER_THRESHOLD,
   PREMIUM_ACTIVATION_THRESHOLD
 };

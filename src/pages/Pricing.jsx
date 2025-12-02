@@ -4,26 +4,34 @@ import { Check, ArrowRight, Crown, Zap, TrendingUp, Users, Sparkles } from 'luci
 import { useAuth } from '@/components/auth/AuthContext';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
-import { getFoundingSpotsLeft } from '@/functions/getFoundingSpotsLeft';
+import { getUserCount } from '@/functions/getUserCount';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { useToast } from '@/components/ui/use-toast';
+import { getPricingTierInfo, ACCESS_CONSTANTS } from '@/components/access/useAccessControl';
 
 export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState(null);
-  const [foundingSpotsLeft, setFoundingSpotsLeft] = useState(965);
   const [loading, setLoading] = useState(true);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [tierInfo, setTierInfo] = useState({
+    phase: 'founding',
+    currentPrice: 0,
+    spotsLeft: 965,
+    nextPhase: 'early_adopter',
+    nextPrice: 9
+  });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const spotsResult = await getFoundingSpotsLeft();
-        if (spotsResult?.data?.success) {
-          setFoundingSpotsLeft(spotsResult.data.spotsLeft);
-        }
+        const result = await getUserCount();
+        const count = result?.data?.count || result?.data?.totalUsers || 0;
+        setTotalUsers(count);
+        setTierInfo(getPricingTierInfo(count));
       } catch (error) {
-        console.warn('Founding spots count unavailable:', error.message);
+        console.warn('User count unavailable:', error.message);
       } finally {
         setLoading(false);
       }
