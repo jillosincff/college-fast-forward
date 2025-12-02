@@ -112,7 +112,17 @@ export default function Pricing() {
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 my-16">
           
           {/* Founding Tier */}
-          <div className="relative bg-gradient-to-br from-[#0021A5] to-[#003087] rounded-2xl p-8 shadow-xl flex flex-col">
+          <div className={`relative bg-gradient-to-br from-[#0021A5] to-[#003087] rounded-2xl p-8 shadow-xl flex flex-col ${tierInfo.phase !== 'founding' ? 'opacity-60' : ''}`}>
+            {tierInfo.phase === 'founding' && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                CURRENT PHASE
+              </div>
+            )}
+            {tierInfo.phase !== 'founding' && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                SOLD OUT
+              </div>
+            )}
             <div className="text-center flex-1 flex flex-col">
               <h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-white">Founding Gator</h3>
               <p className="text-base text-white/90 mb-6">First 1,000 total users</p>
@@ -124,31 +134,49 @@ export default function Pricing() {
                 Full access today + every new connection and feature we add
               </p>
               
-              <div className="bg-[#FF9F1C] text-black py-2 px-4 rounded-full font-bold inline-block mx-auto mb-6">
-                Only {loading ? '...' : foundingSpotsLeft} spots left!
-              </div>
-              
-              {user ? (
-                <Button
-                  onClick={handleFreeClaim}
-                  size="lg"
-                  className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
-                >
-                  Go to Dashboard <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+              {tierInfo.phase === 'founding' ? (
+                <>
+                  <div className="bg-[#FF9F1C] text-black py-2 px-4 rounded-full font-bold inline-block mx-auto mb-6">
+                    Only {loading ? '...' : tierInfo.spotsLeft} spots left!
+                  </div>
+                  
+                  {user ? (
+                    <Button
+                      onClick={handleFreeClaim}
+                      size="lg"
+                      className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
+                    >
+                      Go to Dashboard <ArrowRight className="ml-2 w-5 h-5" />
+                    </Button>
+                  ) : (
+                    <GoogleAuthButton
+                      size="lg"
+                      className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
+                    >
+                      Claim Your Free Forever Spot <ArrowRight className="ml-2 w-5 h-5" />
+                    </GoogleAuthButton>
+                  )}
+                </>
               ) : (
-                <GoogleAuthButton
-                  size="lg"
-                  className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
-                >
-                  Claim Your Free Forever Spot <ArrowRight className="ml-2 w-5 h-5" />
-                </GoogleAuthButton>
+                <div className="bg-slate-600 text-white py-3 px-4 rounded-full font-bold inline-block mx-auto">
+                  All 1,000 spots claimed!
+                </div>
               )}
             </div>
           </div>
 
           {/* Early Adopter */}
-          <div className="relative bg-white border-[3px] border-[#0021A5] rounded-2xl p-8 shadow-lg flex flex-col">
+          <div className={`relative bg-white border-[3px] border-[#0021A5] rounded-2xl p-8 shadow-lg flex flex-col ${tierInfo.phase === 'early_adopter' ? 'ring-4 ring-orange-400' : tierInfo.phase === 'standard' ? 'opacity-60' : ''}`}>
+            {tierInfo.phase === 'early_adopter' && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                CURRENT PHASE
+              </div>
+            )}
+            {tierInfo.phase === 'standard' && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                CLOSED
+              </div>
+            )}
             <div className="text-center flex-1 flex flex-col">
               <h3 className="text-2xl md:text-3xl font-bold text-[#0021A5] mb-2">Early Adopter</h3>
               <p className="text-base text-slate-500 mb-6">Users 1,001 – 4,999</p>
@@ -160,35 +188,56 @@ export default function Pricing() {
                 Same full access, locked in before the network explodes
               </p>
               
-              {user ? (
-                <Button
-                  onClick={() => handleCheckout('price_1SUJ2g873TV7WMcTBYvmzGYU')}
-                  disabled={checkoutLoading !== null}
-                  size="lg"
-                  className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
-                >
-                  {checkoutLoading === 'price_1SUJ2g873TV7WMcTBYvmzGYU' ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" /></>
-                  )}
-                </Button>
+              {tierInfo.phase === 'early_adopter' && (
+                <div className="bg-orange-100 text-orange-800 py-2 px-4 rounded-full font-bold inline-block mx-auto mb-6">
+                  {tierInfo.spotsLeft?.toLocaleString()} spots at $9
+                </div>
+              )}
+              
+              {tierInfo.phase === 'early_adopter' ? (
+                user ? (
+                  <Button
+                    onClick={() => handleCheckout('price_1SUJ2g873TV7WMcTBYvmzGYU')}
+                    disabled={checkoutLoading !== null}
+                    size="lg"
+                    className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
+                  >
+                    {checkoutLoading === 'price_1SUJ2g873TV7WMcTBYvmzGYU' ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" /></>
+                    )}
+                  </Button>
+                ) : (
+                  <GoogleAuthButton
+                    size="lg"
+                    className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
+                  >
+                    Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" />
+                  </GoogleAuthButton>
+                )
+              ) : tierInfo.phase === 'founding' ? (
+                <div className="bg-slate-200 text-slate-600 py-3 px-4 rounded-full font-bold inline-block mx-auto">
+                  Coming after 1,000 users
+                </div>
               ) : (
-                <GoogleAuthButton
-                  size="lg"
-                  className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
-                >
-                  Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" />
-                </GoogleAuthButton>
+                <div className="bg-slate-600 text-white py-3 px-4 rounded-full font-bold inline-block mx-auto">
+                  Early Adopter phase closed
+                </div>
               )}
             </div>
           </div>
 
           {/* Standard */}
-          <div className="relative bg-slate-100 rounded-2xl p-8 shadow-md flex flex-col">
+          <div className={`relative bg-slate-100 rounded-2xl p-8 shadow-md flex flex-col ${tierInfo.phase === 'standard' ? 'ring-4 ring-slate-400' : ''}`}>
+            {tierInfo.phase === 'standard' && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-700 text-white text-xs font-bold px-3 py-1 rounded-full">
+                CURRENT PHASE
+              </div>
+            )}
             <div className="text-center flex-1 flex flex-col">
               <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Standard</h3>
               <p className="text-base text-slate-500 mb-6">5,000+ users</p>
@@ -200,29 +249,35 @@ export default function Pricing() {
                 Full access to the largest Gator job network
               </p>
               
-              {user ? (
-                <Button
-                  onClick={() => handleCheckout('price_1SUJ7I873TV7WMcT1plkAZpz')}
-                  disabled={checkoutLoading !== null}
-                  size="lg"
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
-                >
-                  {checkoutLoading === 'price_1SUJ7I873TV7WMcT1plkAZpz' ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>Join at Current Price <ArrowRight className="ml-2 w-5 h-5" /></>
-                  )}
-                </Button>
+              {tierInfo.phase === 'standard' ? (
+                user ? (
+                  <Button
+                    onClick={() => handleCheckout('price_1SUJ7I873TV7WMcT1plkAZpz')}
+                    disabled={checkoutLoading !== null}
+                    size="lg"
+                    className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
+                  >
+                    {checkoutLoading === 'price_1SUJ7I873TV7WMcT1plkAZpz' ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>Join at Current Price <ArrowRight className="ml-2 w-5 h-5" /></>
+                    )}
+                  </Button>
+                ) : (
+                  <GoogleAuthButton
+                    size="lg"
+                    className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
+                  >
+                    Join at Current Price <ArrowRight className="ml-2 w-5 h-5" />
+                  </GoogleAuthButton>
+                )
               ) : (
-                <GoogleAuthButton
-                  size="lg"
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
-                >
-                  Join at Current Price <ArrowRight className="ml-2 w-5 h-5" />
-                </GoogleAuthButton>
+                <div className="bg-slate-200 text-slate-600 py-3 px-4 rounded-full font-bold inline-block mx-auto">
+                  Coming after 5,000 users
+                </div>
               )}
             </div>
           </div>
