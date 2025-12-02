@@ -104,15 +104,15 @@ export default function Pricing() {
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 my-16">
           
           {/* Founding Tier */}
-          <div className="relative bg-gradient-to-br from-[#0021A5] to-[#003087] text-white rounded-2xl p-8 shadow-xl flex flex-col">
+          <div className="relative bg-gradient-to-br from-[#0021A5] to-[#003087] rounded-2xl p-8 shadow-xl flex flex-col">
             <div className="text-center flex-1 flex flex-col">
-              <h3 className="text-2xl md:text-3xl font-extrabold mb-2">Founding Gator</h3>
-              <p className="text-base opacity-90 mb-6">First 1,000 total users</p>
+              <h3 className="text-2xl md:text-3xl font-extrabold mb-2 text-white">Founding Gator</h3>
+              <p className="text-base text-white/90 mb-6">First 1,000 total users</p>
               
-              <div className="text-5xl md:text-6xl font-black my-4">$0</div>
-              <p className="text-lg mb-2">per month <strong>FOREVER</strong></p>
+              <div className="text-5xl md:text-6xl font-black my-4 text-white">$0</div>
+              <p className="text-lg mb-2 text-white">per month <strong>FOREVER</strong></p>
               
-              <p className="text-base opacity-90 my-6 flex-1">
+              <p className="text-base text-white/90 my-6 flex-1">
                 Full access today + every new connection and feature we add
               </p>
               
