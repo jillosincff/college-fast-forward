@@ -30,11 +30,11 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
     e.preventDefault();
     if (!message.trim() || !user || !recipientUser) return;
 
-    // Check limited mode message quota
+    // Check free tier daily message quota
     if (accessInfo.isLimitedMode && !accessInfo.canSendMessages) {
       toast({
-        title: "Message limit reached",
-        description: "You've used all 5 messages this month. Invite your parent to unlock unlimited messaging!",
+        title: "Daily message limit reached",
+        description: "You've used all 3 messages today. Upgrade to Full Access for unlimited messaging!",
         variant: "destructive",
       });
       return;
@@ -62,19 +62,21 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
 
       console.log('✅ Message created with ID:', newMessage.id);
 
-      // Track message count for limited mode users
+      // Track daily message count for free tier users (resets midnight ET)
       if (accessInfo.isLimitedMode && user.persona === 'gator') {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        const currentCount = user.messages_month_reset === currentMonth 
-          ? (user.messages_sent_this_month || 0) 
+        const now = new Date();
+        const etOptions = { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' };
+        const currentDayET = new Intl.DateTimeFormat('en-US', etOptions).format(now);
+        const currentCount = user.messages_day_reset === currentDayET 
+          ? (user.messages_sent_today || 0) 
           : 0;
         
         try {
           await base44.auth.updateMe({
-            messages_sent_this_month: currentCount + 1,
-            messages_month_reset: currentMonth
+            messages_sent_today: currentCount + 1,
+            messages_day_reset: currentDayET
           });
-          console.log('✅ Message count updated:', currentCount + 1);
+          console.log('✅ Daily message count updated:', currentCount + 1);
           refreshUser?.();
         } catch (countErr) {
           console.error('Failed to update message count:', countErr);
@@ -182,16 +184,16 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Limited mode warning */}
+          {/* Free tier daily limit warning */}
           {accessInfo.isLimitedMode && user?.persona === 'gator' && (
             <div className="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-medium text-orange-800">
-                  {accessInfo.messagesRemaining} message{accessInfo.messagesRemaining !== 1 ? 's' : ''} remaining this month
+                  {accessInfo.messagesRemaining} message{accessInfo.messagesRemaining !== 1 ? 's' : ''} remaining today
                 </p>
                 <p className="text-orange-600 text-xs mt-1">
-                  Invite your parent to unlock unlimited messaging
+                  Upgrade to Full Access ($9/mo) for unlimited messaging
                 </p>
               </div>
             </div>
