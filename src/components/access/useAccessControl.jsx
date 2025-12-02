@@ -3,6 +3,39 @@ import { useMemo } from 'react';
 const FOUNDING_GATOR_LIMIT = 1000;
 const FREE_DAILY_MESSAGE_LIMIT = 3;
 const PREMIUM_PRICE = 9; // $9/month
+const PREMIUM_ACTIVATION_THRESHOLD = 1000; // Premium features activate after 1,000 users
+
+// Cache for user count to avoid repeated API calls
+let cachedUserCount = null;
+let cacheExpiry = 0;
+
+/**
+ * Get total user count (cached for 5 minutes)
+ */
+export async function getTotalUserCount() {
+  const now = Date.now();
+  if (cachedUserCount !== null && now < cacheExpiry) {
+    return cachedUserCount;
+  }
+  
+  try {
+    const { getUserCount } = await import('@/functions/getUserCount');
+    const result = await getUserCount({});
+    cachedUserCount = result?.data?.count || 0;
+    cacheExpiry = now + 5 * 60 * 1000; // Cache for 5 minutes
+    return cachedUserCount;
+  } catch (error) {
+    console.error('Failed to get user count:', error);
+    return cachedUserCount || 0;
+  }
+}
+
+/**
+ * Check if premium features should be active (1,000+ users)
+ */
+export function isPremiumActive(userCount) {
+  return userCount >= PREMIUM_ACTIVATION_THRESHOLD;
+}
 
 /**
  * Get current day key in ET timezone for daily message reset
@@ -216,5 +249,6 @@ export { getCurrentDayET };
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
   FREE_DAILY_MESSAGE_LIMIT,
-  PREMIUM_PRICE
+  PREMIUM_PRICE,
+  PREMIUM_ACTIVATION_THRESHOLD
 };
