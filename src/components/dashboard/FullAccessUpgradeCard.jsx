@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Zap, MessageSquare, Star, Eye, Check } from 'lucide-react';
-import { useAccessControl, hasLinkedParent, getTotalUserCount, isPremiumActive, ACCESS_CONSTANTS } from '@/components/access/useAccessControl';
+import { useAccessControl, hasLinkedParent, getTotalUserCount, isPremiumActive, getCurrentPremiumPrice, ACCESS_CONSTANTS } from '@/components/access/useAccessControl';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -22,13 +22,17 @@ export default function FullAccessUpgradeCard({ user }) {
   const [isLoading, setIsLoading] = useState(false);
   const [premiumActivated, setPremiumActivated] = useState(false);
   const [checkingUserCount, setCheckingUserCount] = useState(true);
+  const [currentPrice, setCurrentPrice] = useState(9);
+  const [userCount, setUserCount] = useState(0);
 
-  // Check if premium features are active (1,000+ users)
+  // Check if premium features are active (1,000+ users) and get current price
   useEffect(() => {
     let mounted = true;
     getTotalUserCount().then(count => {
       if (mounted) {
+        setUserCount(count);
         setPremiumActivated(isPremiumActive(count));
+        setCurrentPrice(getCurrentPremiumPrice(count));
         setCheckingUserCount(false);
       }
     });
@@ -51,6 +55,14 @@ export default function FullAccessUpgradeCard({ user }) {
     });
   };
 
+  // Get correct price ID based on current tier
+  const getPriceId = () => {
+    if (userCount >= ACCESS_CONSTANTS.EARLY_ADOPTER_THRESHOLD) {
+      return 'price_1SUJ7I873TV7WMcT1plkAZpz'; // $19/month
+    }
+    return 'price_1SUJ2g873TV7WMcTBYvmzGYU'; // $9/month
+  };
+
   const handleSelfPayCheckout = async () => {
     if (!agreedToSelfPay) {
       toast({
@@ -64,7 +76,7 @@ export default function FullAccessUpgradeCard({ user }) {
     setIsLoading(true);
     try {
       const response = await createCheckoutSession({
-        priceId: 'price_student_self_pay_9', // $9/month price ID
+        priceId: getPriceId(),
         successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
         cancelUrl: `${window.location.origin}/#Dashboard?upgrade=cancelled`,
         metadata: {
@@ -101,7 +113,7 @@ export default function FullAccessUpgradeCard({ user }) {
             </div>
             <div className="flex-1">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                Unlock Full Access — $9/month
+                Unlock Full Access — ${currentPrice}/month
               </h3>
               
               <ul className="space-y-2 mb-6">
@@ -120,7 +132,7 @@ export default function FullAccessUpgradeCard({ user }) {
                 size="lg"
                 className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-6 text-lg shadow-lg"
               >
-                Ask your parent to upgrade — $9/month
+                Ask your parent to upgrade — ${currentPrice}/month
               </Button>
 
               {/* Only show self-pay link if no linked parent */}
@@ -145,7 +157,7 @@ export default function FullAccessUpgradeCard({ user }) {
               Happy to have you upgrade yourself!
             </DialogTitle>
             <DialogDescription className="text-center text-slate-600 mt-2">
-              Most parents cover the $9/month for their student. You can unlock the exact same full access yourself at the same $9/month rate.
+              Most parents cover the ${currentPrice}/month for their student. You can unlock the exact same full access yourself at the same ${currentPrice}/month rate.
             </DialogDescription>
           </DialogHeader>
 
@@ -185,7 +197,7 @@ export default function FullAccessUpgradeCard({ user }) {
                   Processing...
                 </>
               ) : (
-                'Upgrade Myself Now — $9/month'
+                `Upgrade Myself Now — $${currentPrice}/month`
               )}
             </Button>
 
