@@ -1,55 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Check, Crown, Zap, Users, TrendingUp, ArrowRight, Sparkles, CreditCard, Lock } from 'lucide-react';
+import { Check, ArrowRight, Crown, Zap, TrendingUp, Users, Sparkles } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthContext';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
-import { getPricingTier } from '@/functions/getPricingTier';
 import { getFoundingSpotsLeft } from '@/functions/getFoundingSpotsLeft';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
-import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [pricingData, setPricingData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [foundingSpotsLeft, setFoundingSpotsLeft] = useState(965);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        try {
-          const spotsResult = await getFoundingSpotsLeft();
-          if (spotsResult?.data?.success) {
-            setFoundingSpotsLeft(spotsResult.data.spotsLeft);
-          }
-        } catch (spotsError) {
-          console.warn('Founding spots count unavailable, using default:', spotsError.message);
-        }
-
-        if (user) {
-          try {
-            const { data } = await getPricingTier();
-            if (data) {
-              setPricingData(data);
-            }
-          } catch (tierError) {
-            console.warn('Pricing tier unavailable:', tierError.message);
-          }
+        const spotsResult = await getFoundingSpotsLeft();
+        if (spotsResult?.data?.success) {
+          setFoundingSpotsLeft(spotsResult.data.spotsLeft);
         }
       } catch (error) {
-        console.error('Error loading pricing data:', error);
+        console.warn('Founding spots count unavailable:', error.message);
       } finally {
         setLoading(false);
       }
     };
-
     loadData();
-  }, [user]);
+  }, []);
 
   const handleCheckout = async (priceId) => {
     if (!user) {
@@ -90,357 +70,163 @@ export default function Pricing() {
     }
   };
 
-  const handleCTAClick = (role) => {
+  const handleFreeClaim = () => {
     if (user) {
-      if (role === 'student') {
-        navigate('Dashboard');
-      } else {
-        navigate('ParentDashboard');
-      }
+      navigate('Dashboard');
     }
+    // If not logged in, GoogleAuthButton handles it
   };
 
-  const pricingTiers = [
-    {
-      name: 'Founding Gator Parent',
-      badge: '👑 Limited Spots – 1,000 total',
-      price: 0,
-      priceLabel: '$0 / month FOREVER',
-      description: '',
-      features: [
-        'Full platform access',
-        'Connect with all Gators',
-        'Priority intros',
-        'Founding badge',
-        'Exclusive founder perks'
-      ],
-      cta: user ? 'Go to Dashboard' : 'Lock in Founding Price',
-      ctaRole: 'parent',
-      highlighted: foundingSpotsLeft > 0,
-      gradient: 'from-yellow-400 to-orange-500',
-      icon: Crown,
-      spotsLeft: foundingSpotsLeft,
-      stripePriceId: null
-    },
-    {
-      name: 'Early Adopter',
-      badge: '⚡ Price increase after 1,000 members',
-      price: 9,
-      priceLabel: '$9 / month FOREVER',
-      description: '',
-      features: [
-        'Full platform access',
-        'Connect with all Gators',
-        'Priority intros',
-        'Early badge',
-        '—'
-      ],
-      cta: 'Join at $9/mo',
-      ctaRole: 'parent',
-      highlighted: false,
-      gradient: 'from-purple-400 to-blue-500',
-      icon: Zap,
-      stripePriceId: 'price_1SUJ2g873TV7WMcTBYvmzGYU'
-    },
-    {
-      name: 'Standard',
-      badge: '🐊 Price increase after 5,000 members',
-      price: 19,
-      priceLabel: '$19 / month FOREVER',
-      description: '',
-      features: [
-        'Full platform access',
-        'Connect with all Gators',
-        'Priority intros',
-        'Standard',
-        '—'
-      ],
-      cta: 'Join at $19/mo',
-      ctaRole: 'parent',
-      highlighted: false,
-      gradient: 'from-blue-400 to-indigo-500',
-      icon: TrendingUp,
-      stripePriceId: 'price_1SUJ7I873TV7WMcT1plkAZpz'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden text-white py-20 px-4" style={HERO_BG_GRADIENT}>
-        {HERO_TEXTURE_OVERLAY}
-        {HERO_GLOW_EFFECTS}
+    <div className="min-h-screen bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-6 relative z-10">
-            <h1 className={HERO_HEADING_CLASSES}>
-              Simple, Transparent Pricing
-            </h1>
-            <p className={`${HERO_SUBHEADING_CLASSES} max-w-3xl mx-auto`}>
-              Students FREE forever · Parents lock in the lowest price by joining early
-            </p>
-            
-            <div className="flex flex-wrap justify-center gap-6 pt-6">
-              <div className="flex items-center gap-2 text-white">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>No contracts</span>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#0021A5] mb-4">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto">
+            First 1,000 Gators (students, parents, alumni) → <strong>FREE Forever</strong><br />
+            Full access, no credit card required.
+          </p>
+        </div>
+
+        {/* Explainer Box */}
+        <div className="text-center my-12 p-8 bg-slate-50 rounded-2xl max-w-4xl mx-auto">
+          <p className="text-lg md:text-xl text-slate-700 leading-relaxed">
+            The more Gators we have, the more connections and opportunities for everyone.<br />
+            That's why early supporters who help us grow get the best deal — forever.
+          </p>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 my-16">
+          
+          {/* Founding Tier */}
+          <div className="relative bg-gradient-to-br from-[#0021A5] to-[#003087] text-white rounded-2xl p-8 shadow-xl flex flex-col">
+            <div className="text-center flex-1 flex flex-col">
+              <h3 className="text-2xl md:text-3xl font-extrabold mb-2">Founding Gator</h3>
+              <p className="text-base opacity-90 mb-6">First 1,000 total users</p>
+              
+              <div className="text-5xl md:text-6xl font-black my-4">$0</div>
+              <p className="text-lg mb-2">per month <strong>FOREVER</strong></p>
+              
+              <p className="text-base opacity-90 my-6 flex-1">
+                Full access today + every new connection and feature we add
+              </p>
+              
+              <div className="bg-[#FF9F1C] text-black py-2 px-4 rounded-full font-bold inline-block mx-auto mb-6">
+                Only {loading ? '...' : foundingSpotsLeft} spots left!
               </div>
-              <div className="flex items-center gap-2 text-white">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Cancel anytime</span>
-              </div>
-              <div className="flex items-center gap-2 text-white">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Earn free lifetime membership</span>
-              </div>
+              
+              {user ? (
+                <Button
+                  onClick={handleFreeClaim}
+                  size="lg"
+                  className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
+                >
+                  Go to Dashboard <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              ) : (
+                <GoogleAuthButton
+                  size="lg"
+                  className="w-full bg-[#FF9F1C] hover:bg-[#e8900a] text-black font-bold py-6 text-lg rounded-full"
+                >
+                  Claim Your Free Forever Spot <ArrowRight className="ml-2 w-5 h-5" />
+                </GoogleAuthButton>
+              )}
+            </div>
+          </div>
+
+          {/* Early Adopter */}
+          <div className="relative bg-white border-[3px] border-[#0021A5] rounded-2xl p-8 shadow-lg flex flex-col">
+            <div className="text-center flex-1 flex flex-col">
+              <h3 className="text-2xl md:text-3xl font-bold text-[#0021A5] mb-2">Early Adopter</h3>
+              <p className="text-base text-slate-500 mb-6">Users 1,001 – 4,999</p>
+              
+              <div className="text-5xl md:text-6xl font-black text-[#0021A5] my-4">$9</div>
+              <p className="text-lg text-slate-700 mb-2">per month <strong>FOREVER</strong></p>
+              
+              <p className="text-base text-slate-600 my-6 flex-1">
+                Same full access, locked in before the network explodes
+              </p>
+              
+              {user ? (
+                <Button
+                  onClick={() => handleCheckout('price_1SUJ2g873TV7WMcTBYvmzGYU')}
+                  disabled={checkoutLoading !== null}
+                  size="lg"
+                  className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
+                >
+                  {checkoutLoading === 'price_1SUJ2g873TV7WMcTBYvmzGYU' ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" /></>
+                  )}
+                </Button>
+              ) : (
+                <GoogleAuthButton
+                  size="lg"
+                  className="w-full bg-[#0021A5] hover:bg-[#001a84] text-white font-bold py-6 text-lg rounded-full"
+                >
+                  Lock In $9 Forever <ArrowRight className="ml-2 w-5 h-5" />
+                </GoogleAuthButton>
+              )}
+            </div>
+          </div>
+
+          {/* Standard */}
+          <div className="relative bg-slate-100 rounded-2xl p-8 shadow-md flex flex-col">
+            <div className="text-center flex-1 flex flex-col">
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Standard</h3>
+              <p className="text-base text-slate-500 mb-6">5,000+ users</p>
+              
+              <div className="text-5xl md:text-6xl font-black text-slate-800 my-4">$19</div>
+              <p className="text-lg text-slate-700 mb-2">per month <strong>FOREVER</strong></p>
+              
+              <p className="text-base text-slate-600 my-6 flex-1">
+                Full access to the largest Gator job network
+              </p>
+              
+              {user ? (
+                <Button
+                  onClick={() => handleCheckout('price_1SUJ7I873TV7WMcT1plkAZpz')}
+                  disabled={checkoutLoading !== null}
+                  size="lg"
+                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
+                >
+                  {checkoutLoading === 'price_1SUJ7I873TV7WMcT1plkAZpz' ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>Join at Current Price <ArrowRight className="ml-2 w-5 h-5" /></>
+                  )}
+                </Button>
+              ) : (
+                <GoogleAuthButton
+                  size="lg"
+                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-6 text-lg rounded-full"
+                >
+                  Join at Current Price <ArrowRight className="ml-2 w-5 h-5" />
+                </GoogleAuthButton>
+              )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Student Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="bg-gradient-to-r from-orange-500 to-blue-500 text-white border-0 shadow-2xl">
-          <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex-1 text-center md:text-left">
-                <div className="text-4xl font-bold mb-2">🎓 UF Students</div>
-                <h3 className="text-3xl font-extrabold mb-2">100% FREE Forever</h3>
-                <p className="text-lg text-white/90">
-                  No credit card. No hidden fees. Just focus on landing your dream job.
-                </p>
-              </div>
-              <div className="flex-shrink-0">
-                {user ? (
-                  <Button
-                    onClick={() => handleCTAClick('student')}
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-slate-100 font-bold px-8 py-6 text-lg shadow-lg"
-                  >
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                ) : (
-                  <GoogleAuthButton
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-slate-100 font-bold px-8 py-6 text-lg shadow-lg"
-                  >
-                    Join Free - Students
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </GoogleAuthButton>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Pricing Tiers */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-4xl font-bold text-center text-slate-900 mb-4">
-          Parent Pricing – The earlier you join, the lower your price. Forever.
-        </h2>
-        <p className="text-center text-slate-600 mb-12 text-lg">
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {pricingTiers.map((tier) => {
-            const Icon = tier.icon;
-            const isActive = pricingData?.tierName?.includes(tier.name);
-            const isLoading = checkoutLoading === tier.stripePriceId;
-            const isLocked = foundingSpotsLeft > 0 && tier.stripePriceId !== null;
-            
-            return (
-              <Card
-                key={tier.name}
-                className={`relative overflow-hidden transition-all duration-300 ${
-                  tier.highlighted
-                    ? 'ring-4 ring-yellow-400 shadow-2xl scale-105'
-                    : isActive
-                    ? 'ring-2 ring-blue-400 shadow-xl'
-                    : isLocked
-                    ? 'shadow-lg opacity-50'
-                    : 'shadow-lg hover:shadow-xl'
-                }`}
-              >
-                {tier.highlighted && (
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-center py-2 font-bold">
-                    ⏰ Only {tier.spotsLeft} spots left!
-                  </div>
-                )}
-                {isActive && (
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-center py-2 font-bold">
-                    ✨ Your Current Plan
-                  </div>
-                )}
-
-                <CardHeader className={tier.highlighted || isActive ? 'pt-12' : 'pt-6'}>
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center mb-4 ${isLocked ? 'opacity-50' : ''}`}>
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <CardTitle className={`text-2xl font-bold mb-2 ${isLocked ? 'text-slate-400' : ''}`}>{tier.name}</CardTitle>
-                  <div className={`text-sm mb-4 ${isLocked ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {tier.badge}
-                  </div>
-                  
-                  <div className="mt-4">
-                    <div className={`text-4xl font-extrabold mb-1 ${isLocked ? 'text-slate-400' : 'text-slate-900'}`}>
-                      {tier.priceLabel}
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {tier.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        {feature === '—' ? (
-                          <span className={isLocked ? 'text-slate-300' : 'text-slate-400'}>—</span>
-                        ) : (
-                          <>
-                            <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isLocked ? 'text-slate-300' : 'text-green-600'}`} />
-                            <span className={isLocked ? 'text-slate-400' : 'text-slate-700'}>{feature}</span>
-                          </>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {user ? (
-                    tier.stripePriceId ? (
-                      <Button
-                        onClick={() => !isLocked && handleCheckout(tier.stripePriceId)}
-                        disabled={checkoutLoading !== null || isActive || isLocked}
-                        className={`w-full py-6 text-lg font-bold ${
-                          isLocked
-                            ? 'bg-slate-300 cursor-not-allowed text-slate-500'
-                            : tier.highlighted
-                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                            : isActive
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-500'
-                            : 'bg-slate-900 hover:bg-slate-800'
-                        }`}
-                      >
-                        {isLocked ? (
-                          <>
-                            <Lock className="mr-2 w-5 h-5" />
-                            Coming Soon
-                          </>
-                        ) : isLoading ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                            Processing...
-                          </>
-                        ) : isActive ? (
-                          'Current Plan'
-                        ) : (
-                          <>
-                            {tier.cta}
-                            <ArrowRight className="ml-2 w-5 h-5" />
-                          </>
-                        )}
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => handleCTAClick(tier.ctaRole)}
-                        className="w-full py-6 text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-                      >
-                        {tier.cta}
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </Button>
-                    )
-                  ) : (
-                    isLocked ? (
-                      <Button
-                        disabled
-                        className="w-full py-6 text-lg font-bold bg-slate-300 cursor-not-allowed text-slate-500"
-                      >
-                        <Lock className="mr-2 w-5 h-5" />
-                        Coming Soon
-                      </Button>
-                    ) : (
-                      <GoogleAuthButton
-                        className={`w-full py-6 text-lg font-bold ${
-                          tier.highlighted
-                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                            : 'bg-slate-900 hover:bg-slate-800'
-                        }`}
-                      >
-                        {tier.cta}
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </GoogleAuthButton>
-                    )
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Urgency Message */}
-        <div className="text-center mt-12">
-          <p className="text-xl font-bold text-slate-900">
-            Only {foundingSpotsLeft} Founding spots left — price increases forever when they're gone.
+        {/* Footer Message */}
+        <div className="text-center mt-16">
+          <p className="text-xl font-bold text-[#0021A5]">
+            Lock in your price today — it never goes up for you.
           </p>
+          <p className="mt-4 text-lg text-slate-600">Go Gators! 🐊</p>
         </div>
-      </div>
-
-      {/* Invite System Explainer */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
-          <CardContent className="p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                  🎉 Earn Free Lifetime Membership!
-                </h3>
-                <p className="text-slate-700 text-lg mb-4">
-                  Invite 20 people = 2,000 points = FREE forever (no matter the price later)
-                </p>
-                <ul className="space-y-2 text-slate-700">
-                  <li className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-green-600" />
-                    <span>100 points per successful invite</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Final CTA */}
-      {!user && foundingSpotsLeft > 0 && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white border-0 shadow-2xl">
-            <CardContent className="p-12 text-center">
-              <Crown className="w-16 h-16 mx-auto mb-4 text-white" />
-              <h3 className="text-4xl font-extrabold mb-4">
-                Parents — this is the best deal you'll ever get.
-              </h3>
-              <p className="text-xl mb-8 text-white/90">
-                Join now. Secure your price. Help your Gator.
-              </p>
-              <GoogleAuthButton
-                size="lg"
-                className="bg-white text-orange-600 hover:bg-slate-100 font-bold px-12 py-8 text-2xl shadow-2xl"
-              >
-                Lock in Founding Price
-                <ArrowRight className="ml-3 w-6 h-6" />
-              </GoogleAuthButton>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <div className="text-center pb-12 text-slate-500">
-        <p className="text-sm">
-          Questions? We're here to help. Go Gators! 🐊
-        </p>
       </div>
     </div>
   );
