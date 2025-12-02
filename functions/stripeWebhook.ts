@@ -32,16 +32,33 @@ Deno.serve(async (req) => {
         // Get customer and subscription info
         const customerId = session.customer;
         const subscriptionId = session.subscription;
+        const subscriptionType = session.metadata?.subscription_type || 'parent_paid';
         
         // Find user by customer ID
         const users = await base44.entities.User.filter({ stripe_customer_id: customerId });
         if (users && users.length > 0) {
           const user = users[0];
-          await base44.entities.User.update(user.id, {
-            stripe_subscription_id: subscriptionId,
-            subscription_status: 'active'
-          });
-          console.log('Updated user subscription:', user.id);
+          
+          // Check if this is a student self-pay subscription
+          if (subscriptionType === 'student_self_pay') {
+            // Student is paying for themselves
+            await base44.entities.User.update(user.id, {
+              stripe_subscription_id: subscriptionId,
+              subscription_status: 'active',
+              subscription_type: 'student_self_pay',
+              messages_sent_today: 0,
+              messages_day_reset: null
+            });
+            console.log('Updated student self-pay subscription:', user.id);
+          } else {
+            // Parent is paying (default behavior)
+            await base44.entities.User.update(user.id, {
+              stripe_subscription_id: subscriptionId,
+              subscription_status: 'active',
+              subscription_type: 'parent_paid'
+            });
+            console.log('Updated parent subscription:', user.id);
+          }
         }
         break;
 
@@ -64,10 +81,37 @@ Deno.serve(async (req) => {
             console.log('Parent subscription active, updating linked gators:', user.linked_gator_ids);
             for (const gatorId of user.linked_gator_ids) {
               try {
+                const gator = await base44.entities.User.get(gatorId);
+                
+                // If student was self-paying, refund their last payment
+                if (gator.subscription_status === 'active' && gator.subscription_type === 'student_self_pay' && gator.stripe_subscription_id) {
+                  console.log('Student was self-paying, canceling and refunding:', gatorId);
+                  try {
+                    // Cancel the student's subscription
+                    await stripe.subscriptions.cancel(gator.stripe_subscription_id);
+                    
+                    // Get the latest invoice and refund it
+                    const invoices = await stripe.invoices.list({
+                      subscription: gator.stripe_subscription_id,
+                      limit: 1
+                    });
+                    if (invoices.data.length > 0 && invoices.data[0].payment_intent) {
+                      await stripe.refunds.create({
+                        payment_intent: invoices.data[0].payment_intent
+                      });
+                      console.log('Refunded student last payment:', gatorId);
+                    }
+                  } catch (refundError) {
+                    console.error('Failed to refund student:', gatorId, refundError);
+                  }
+                }
+                
                 await base44.entities.User.update(gatorId, {
+                  has_active_parent_subscription: true,
                   linked_parent_subscription_active: true,
-                  messages_sent_this_month: 0, // Reset message count
-                  messages_month_reset: new Date().toISOString().slice(0, 7)
+                  subscription_type: 'parent_paid',
+                  messages_sent_today: 0,
+                  messages_day_reset: null
                 });
                 console.log('Updated gator access:', gatorId);
               } catch (gatorError) {
