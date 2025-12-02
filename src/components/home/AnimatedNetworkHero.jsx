@@ -338,21 +338,21 @@ const AnimatedNetworkHero = ({
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <p className="font-bold text-blue-900 mb-3 text-sm">
+            <div className="bg-[#0021A5] border-2 border-blue-400 rounded-lg p-4">
+              <p className="font-bold text-white mb-3 text-sm">
                 🎓 UF Students (@ufl.edu):
               </p>
-              <ol className="space-y-2 text-sm text-slate-700">
+              <ol className="space-y-2 text-sm text-white">
                 <li className="flex gap-2">
-                  <span className="font-bold text-blue-600">1.</span>
+                  <span className="font-bold text-blue-200">1.</span>
                   <span>Click <strong>"Continue with Google"</strong></span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold text-blue-600">2.</span>
+                  <span className="font-bold text-blue-200">2.</span>
                   <span>Sign in with your <strong>@ufl.edu</strong> email</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold text-blue-600">3.</span>
+                  <span className="font-bold text-blue-200">3.</span>
                   <span>✅ <strong>Instant access!</strong> No invite code needed</span>
                 </li>
               </ol>
