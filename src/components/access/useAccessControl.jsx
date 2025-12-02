@@ -52,9 +52,10 @@ function getCurrentDayET() {
  * Hook to determine user's access level and restrictions
  * @param {Object} user - The current user object
  * @param {Object} linkedParent - Optional: the user's linked parent (if fetched separately)
+ * @param {number} totalUserCount - Optional: current total user count for premium activation check
  * @returns {Object} Access control info
  */
-export function useAccessControl(user, linkedParent = null) {
+export function useAccessControl(user, linkedParent = null, totalUserCount = 0) {
   return useMemo(() => {
     if (!user) {
       return {
@@ -72,7 +73,31 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: false,
         isFeatured: false,
         hasLinkedParent: false,
+        premiumActivated: false,
         reason: 'not_authenticated'
+      };
+    }
+
+    // If premium features not yet activated (< 1,000 users), everyone gets full access
+    const premiumActivated = isPremiumActive(totalUserCount);
+    if (!premiumActivated && user.persona !== 'parent' && !user.roles?.includes('admin')) {
+      return {
+        hasFullAccess: true,
+        isPremium: false, // Not premium, just pre-activation
+        isFoundingGator: user.is_founding_gator === true || (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT),
+        isLimitedMode: false,
+        canSendMessages: true,
+        messagesRemaining: Infinity,
+        messageLimit: Infinity,
+        canAccessTalentSpotlight: true,
+        canApplyToOpportunities: true,
+        canSaveOpportunities: true,
+        canMessageInDirectory: true,
+        canSeeFullContactInfo: true,
+        isFeatured: false,
+        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
+        premiumActivated: false,
+        reason: 'pre_activation_free'
       };
     }
 
@@ -93,6 +118,7 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: true,
         isFeatured: false,
         hasLinkedParent: false,
+        premiumActivated,
         reason: 'parent'
       };
     }
@@ -114,6 +140,7 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: true,
         isFeatured: false,
         hasLinkedParent: false,
+        premiumActivated,
         reason: 'admin'
       };
     }
@@ -138,6 +165,7 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: true,
         isFeatured: true,
         hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
+        premiumActivated,
         reason: 'founding_gator'
       };
     }
@@ -162,12 +190,13 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: true,
         isFeatured: true,
         hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
+        premiumActivated,
         reason: 'student_self_pay'
       };
     }
 
     // Check if linked parent has active subscription
-    const hasLinkedParent = !!user.linked_parent_id || !!user.parent_email;
+    const hasLinkedParentFlag = !!user.linked_parent_id || !!user.parent_email;
     const parentSubscriptionActive = linkedParent?.subscription_status === 'active' ||
                                     user.linked_parent_subscription_active === true ||
                                     user.has_active_parent_subscription === true;
@@ -188,6 +217,7 @@ export function useAccessControl(user, linkedParent = null) {
         canSeeFullContactInfo: true,
         isFeatured: true,
         hasLinkedParent: true,
+        premiumActivated,
         reason: 'parent_subscription'
       };
     }
@@ -213,10 +243,11 @@ export function useAccessControl(user, linkedParent = null) {
       canMessageInDirectory: messagesRemaining > 0,
       canSeeFullContactInfo: false, // Free users can't see parent email/LinkedIn
       isFeatured: false,
-      hasLinkedParent,
+      hasLinkedParent: hasLinkedParentFlag,
+      premiumActivated,
       reason: 'free_tier'
     };
-  }, [user, linkedParent]);
+  }, [user, linkedParent, totalUserCount]);
 }
 
 /**
