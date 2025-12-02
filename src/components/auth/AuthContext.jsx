@@ -96,14 +96,15 @@ export const AuthProvider = ({ children }) => {
     setUser(newUserData);
   }, []);
 
-  const registerWithPassword = useCallback(async (email, password, fullName) => {
-    console.log('🔵 [AuthContext] registerWithPassword called', { email, fullName });
+  const registerWithPassword = useCallback(async (email, password, fullName, referralCode = '') => {
+    console.log('🔵 [AuthContext] registerWithPassword called', { email, fullName, referralCode });
     try {
       const response = await registerUser({
         email,
         password,
         full_name: fullName,
-        persona: 'student'
+        persona: 'student',
+        referral_code: referralCode
       });
       
       console.log('✅ [AuthContext] Registration response:', response.data);

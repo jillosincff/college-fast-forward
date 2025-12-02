@@ -85,8 +85,8 @@ Deno.serve(async (req) => {
     console.log("Request method:", req.method);
     console.log("Request headers:", Object.fromEntries(req.headers.entries()));
     
-    const { email, password, full_name, persona } = await req.json();
-    console.log("Request data:", { email, full_name, persona, hasPassword: !!password });
+    const { email, password, full_name, persona, referral_code } = await req.json();
+    console.log("Request data:", { email, full_name, persona, referral_code, hasPassword: !!password });
 
     if (!email || !password || !full_name) {
       console.error("Missing required fields");
@@ -141,6 +141,26 @@ Deno.serve(async (req) => {
       console.error("Failed to get user count for signup_order:", countErr);
     }
 
+    // Look up ambassador if referral code provided
+    let ambassadorId = null;
+    let teamLeadId = null;
+    if (referral_code && referral_code.trim()) {
+      console.log("Looking up referral code:", referral_code);
+      try {
+        // Try to find user with matching referral code pattern (stored as ambassador code)
+        const ambassadors = await base44.entities.User.filter({ ambassador_code: referral_code.trim().toUpperCase() });
+        if (ambassadors && ambassadors.length > 0) {
+          ambassadorId = ambassadors[0].id;
+          teamLeadId = ambassadors[0].team_lead_id || null;
+          console.log("Found ambassador:", ambassadorId, "team_lead:", teamLeadId);
+        } else {
+          console.log("No ambassador found for code:", referral_code);
+        }
+      } catch (lookupErr) {
+        console.error("Failed to lookup referral code:", lookupErr);
+      }
+    }
+
     console.log("Creating registration attempt...");
     await base44.entities.RegistrationAttempt.create({
       email: emailLower,
@@ -149,7 +169,10 @@ Deno.serve(async (req) => {
       token: verificationToken,
       status: 'pending',
       persona: persona || 'student',
-      signup_order: signupOrder
+      signup_order: signupOrder,
+      referral_code: referral_code?.trim()?.toUpperCase() || null,
+      ambassador_id: ambassadorId,
+      team_lead_id: teamLeadId
     });
 
     console.log("Registration attempt created, sending email...");
