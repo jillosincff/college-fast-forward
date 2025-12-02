@@ -15,9 +15,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { priceId, successUrl, cancelUrl } = await req.json();
+    const { priceId, successUrl, cancelUrl, metadata } = await req.json();
 
-    console.log('Checkout request:', { priceId, userId: user.id, email: user.email });
+    console.log('Checkout request:', { priceId, userId: user.id, email: user.email, metadata });
 
     if (!priceId || !successUrl || !cancelUrl) {
       return Response.json({ 
@@ -62,6 +62,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Determine subscription type from metadata
+    const subscriptionType = metadata?.subscriptionType || 'parent_paid';
+    
+    // For student self-pay, use the $9/month Full Access price
+    // Map custom price ID to actual Stripe price
+    let actualPriceId = priceId;
+    if (priceId === 'price_student_self_pay_9') {
+      // Use the Early Adopter $9/month price for student self-pay
+      actualPriceId = 'price_1SUJ2g873TV7WMcTBYvmzGYU';
+    }
+
     // Create checkout session
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
@@ -69,7 +80,7 @@ Deno.serve(async (req) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price: actualPriceId,
           quantity: 1
         }
       ],
@@ -78,7 +89,8 @@ Deno.serve(async (req) => {
       cancel_url: cancelUrl,
       metadata: {
         user_id: user.id,
-        user_email: user.email
+        user_email: user.email,
+        subscription_type: subscriptionType
       }
     });
 
