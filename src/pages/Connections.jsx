@@ -17,6 +17,7 @@ import MessageAndHelpModal from '../components/connections/MessageAndHelpModal';
 import EnhancedGatorCard from '../components/connections/EnhancedGatorCard';
 import { useToast } from '@/components/ui/use-toast';
 import EmergingGatorsHero from '@/components/connections/EmergingGatorsHero';
+import { checkFullAccess } from '@/components/access/useAccessControl';
 
 export default function DiscoverEmergingGatorsPage() {
   const { user } = useAuth();
@@ -224,6 +225,13 @@ export default function DiscoverEmergingGatorsPage() {
   const sortedProfiles = [...filteredProfiles].sort((a, b) => {
     if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
     if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
+    
+    // Premium users always appear in top 10
+    const aIsPremium = checkFullAccess(a);
+    const bIsPremium = checkFullAccess(b);
+    if (aIsPremium && !bIsPremium) return -1;
+    if (!aIsPremium && bIsPremium) return 1;
+    
     if (a.isFeatured && !b.isFeatured) return -1;
     if (!a.isFeatured && b.isFeatured) return 1;
     if (a.hasRequest && !b.hasRequest) return -1;
