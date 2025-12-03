@@ -115,8 +115,8 @@ export default function InviteRequired() {
   };
 
   const handleUFStudentSignIn = () => {
-    // Redirect to Google OAuth - UF students will be auto-verified
-    base44.auth.redirectToLogin(window.location.href);
+    // Redirect to login - UF students (@ufl.edu) will be auto-verified
+    base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
   };
 
   return (
