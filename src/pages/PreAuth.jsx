@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { User } from '@/entities/User';
+import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
 export default function PreAuth() {
@@ -11,14 +11,26 @@ export default function PreAuth() {
   React.useEffect(() => {
     // If user is already authenticated, route them into the app
     if (user && !isLoading) {
+      console.log('🔐 PreAuth: User authenticated, routing...', { persona: user.persona, onboarding: user.onboarding_completed });
+      
       if (!user.persona) {
         navigate('WelcomeRole');
       } else if (user.onboarding_completed !== true) {
-        if (user.persona === 'alumni') navigate('AlumniOnboarding');
-        else if (user.persona === 'student') navigate('StudentOnboarding');
-        else navigate('Onboarding');
+        // Route to appropriate onboarding
+        if (user.persona === 'gator' || user.persona === 'student' || user.persona === 'alumni') {
+          navigate('StudentOnboarding');
+        } else if (user.persona === 'parent') {
+          navigate('Onboarding');
+        } else {
+          navigate('WelcomeRole');
+        }
       } else {
-        navigate('Dashboard');
+        // Fully onboarded - go to dashboard
+        if (user.persona === 'parent') {
+          navigate('ParentDashboard');
+        } else {
+          navigate('Dashboard');
+        }
       }
       return;
     }
@@ -26,7 +38,8 @@ export default function PreAuth() {
     // If unauthenticated and not loading, immediately go to the platform login
     if (!isLoading && !user && !redirectingRef.current) {
       redirectingRef.current = true;
-      User.loginWithRedirect(window.location.href);
+      console.log('🔐 PreAuth: Redirecting to login...');
+      base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
     }
   }, [user, isLoading]);
 
