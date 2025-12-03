@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import logger from '@/components/utils/logger';
-import { registerUser } from '@/functions/registerUser';
-import { sendMagicLink } from '@/functions/sendMagicLink';
 
 export const AuthContext = React.createContext(null);
 
