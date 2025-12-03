@@ -103,13 +103,11 @@ export const AuthProvider = ({ children }) => {
     user,
     isLoading,
     loginWithMagicLink,
-    loginWithPassword,
-    registerWithPassword,
-    sendMagicLinkEmail,
+    loginWithGoogle,
     logout,
     refreshUser,
     updateAuthContextUser,
-  }), [user, isLoading, loginWithMagicLink, loginWithPassword, registerWithPassword, sendMagicLinkEmail, logout, refreshUser, updateAuthContextUser]);
+  }), [user, isLoading, loginWithMagicLink, loginWithGoogle, logout, refreshUser, updateAuthContextUser]);
 
   return (
     <AuthContext.Provider value={value}>
