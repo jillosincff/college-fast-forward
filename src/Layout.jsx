@@ -798,43 +798,62 @@ function AppContent() {
         return;
       }
 
-      // Determine if user needs to complete onboarding
+      // Determine user state
       const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
       const needsOnboarding = user.onboarding_completed !== true;
-      
+      const userEmail = user.email?.toLowerCase() || '';
+      const isUFLStudent = userEmail.endsWith('@ufl.edu');
+
       // Helper function to get the right onboarding page
       const getOnboardingPage = () => {
         if (hasNoRole) return 'WelcomeRole';
-        if (user.persona === 'gator' || user.roles?.includes('gator')) return 'StudentOnboarding';
+        if (user.persona === 'gator' || user.roles?.includes('gator') || user.persona === 'student' || user.persona === 'alumni') {
+          return 'StudentOnboarding';
+        }
         if (user.persona === 'parent' || user.roles?.includes('parent')) return 'Onboarding';
         return 'WelcomeRole';
       };
 
-      if (isLandingPage) {
-        console.log('🚫 Authenticated user on LandingPage - redirecting');
-        
+      // Helper function to get the right dashboard
+      const getDashboard = () => {
+        if (user.roles?.includes('admin')) return 'AdminDashboard';
+        if (user.persona === 'parent' || user.roles?.includes('parent')) return 'ParentDashboard';
+        return 'Dashboard';
+      };
+
+      // FLOW FOR AUTHENTICATED USERS:
+      // 1. No role yet → WelcomeRole (unless @ufl.edu, they're auto-verified as gator)
+      // 2. Has role but not verified (non-UFL without invite) → InviteRequired  
+      // 3. Has role, verified, but onboarding incomplete → Onboarding page
+      // 4. Fully onboarded → Dashboard
+
+      if (isLandingPage || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
+        console.log('🚦 User on landing/dashboard, determining correct destination...');
+
+        // Step 1: Check if user has a role
         if (hasNoRole) {
+          // @ufl.edu users can go straight to WelcomeRole (they're auto-verified)
           finalPage = 'WelcomeRole';
           console.log('➡️ No role - redirecting to WelcomeRole');
-        } else {
+        } 
+        // Step 2: User has role - check verification
+        else {
           const verified = isUserVerified(user);
-          if (!verified) {
+
+          if (!verified && !isUFLStudent) {
+            // Non-UFL user without verification needs invite code
             finalPage = 'InviteRequired';
-            console.log('➡️ Not verified - redirecting to InviteRequired');
-          } else if (needsOnboarding) {
+            console.log('➡️ Not verified (non-UFL) - redirecting to InviteRequired');
+          } 
+          // Step 3: Verified - check onboarding
+          else if (needsOnboarding) {
             finalPage = getOnboardingPage();
             console.log('➡️ Needs onboarding - redirecting to:', finalPage);
-          } else {
-            if (user.roles?.includes('admin')) {
-              finalPage = 'AdminDashboard';
-              console.log('➡️ Admin - AdminDashboard');
-            } else if (user.persona === 'parent') {
-              finalPage = 'ParentDashboard';
-              console.log('➡️ Parent - ParentDashboard');
-            } else {
-              finalPage = 'Dashboard';
-              console.log('➡️ Gator - Dashboard');
-            }
+          } 
+          // Step 4: Fully onboarded - go to dashboard
+          else {
+            finalPage = getDashboard();
+            console.log('➡️ Fully onboarded - going to:', finalPage);
           }
         }
       }
@@ -844,56 +863,42 @@ function AppContent() {
         return;
       }
       else {
-        // User trying to access a protected page
+        // User trying to access other protected pages
         if (hasNoRole) {
           console.log('👤 No role - redirecting to WelcomeRole');
           finalPage = 'WelcomeRole';
         } else {
           const verified = isUserVerified(user);
-          console.log('🔐 User has role. Verified:', verified, 'Onboarding complete:', !needsOnboarding);
 
-          if (!verified) {
+          if (!verified && !isUFLStudent) {
             console.log('🚫 Not verified - InviteRequired');
             finalPage = 'InviteRequired';
           } else if (needsOnboarding) {
-            // User has role but hasn't completed onboarding - send them to continue
             finalPage = getOnboardingPage();
             console.log('📝 Onboarding incomplete - redirecting to:', finalPage);
-          } else if ((user.persona === 'parent' || user.roles?.includes('parent')) && user.expertise_shared === false) {
-            console.log('📝 Parent needs to share expertise (explicitly required)');
-            finalPage = 'ShareExpertise';
           } else {
-            console.log('✅ Fully verified and onboarded');
+            // Fully verified and onboarded - allow access
+            console.log('✅ Fully verified and onboarded - allowing access to:', currentPage);
 
-            if (currentPage === 'Dashboard') {
-              if (user.roles?.includes('admin')) {
-                finalPage = 'AdminDashboard';
-              } else if (user.persona === 'parent') {
-                finalPage = 'ParentDashboard';
-              }
-            }
-
+            // Handle admin page access
             if (isAdminPage && !user.roles?.includes('admin')) {
               console.log('🚫 Non-admin trying to access admin page');
-              if (user.persona === 'parent') {
-                finalPage = 'ParentDashboard';
-              } else {
-                finalPage = 'Dashboard';
-              }
+              finalPage = getDashboard();
             }
           }
         }
       }
 
     } else {
+      // UNAUTHENTICATED USER
       console.log('👤 Unauthenticated user accessing:', currentPage);
-      
+
       if (isAuthOnlyPage) {
         console.log('✅ Allowing unauthenticated access to auth-only page');
         setResolvedPage(currentPage);
         return;
       }
-      
+
       const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage;
       if (isProtectedPage) {
         console.log('🚫 Redirecting to LandingPage');
