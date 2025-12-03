@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
@@ -11,26 +11,47 @@ export default function PreAuth() {
   React.useEffect(() => {
     // If user is already authenticated, route them into the app
     if (user && !isLoading) {
-      console.log('🔐 PreAuth: User authenticated, routing...', { persona: user.persona, onboarding: user.onboarding_completed });
+      console.log('🔐 PreAuth: User authenticated, routing...', { 
+        email: user.email,
+        persona: user.persona, 
+        onboarding: user.onboarding_completed 
+      });
       
-      if (!user.persona) {
+      const userEmail = user.email?.toLowerCase() || '';
+      const isUFLStudent = userEmail.endsWith('@ufl.edu');
+      
+      // No persona yet - go to role selection
+      if (!user.persona && (!user.roles || user.roles.length === 0)) {
+        console.log('➡️ PreAuth: No role, going to WelcomeRole');
         navigate('WelcomeRole');
-      } else if (user.onboarding_completed !== true) {
-        // Route to appropriate onboarding
-        if (user.persona === 'gator' || user.persona === 'student' || user.persona === 'alumni') {
+        return;
+      }
+      
+      // Has role but onboarding not complete
+      if (user.onboarding_completed !== true) {
+        if (user.persona === 'gator' || user.persona === 'student' || user.persona === 'alumni' || user.roles?.includes('gator')) {
+          console.log('➡️ PreAuth: Gator needs onboarding');
           navigate('StudentOnboarding');
-        } else if (user.persona === 'parent') {
+        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          console.log('➡️ PreAuth: Parent needs onboarding');
           navigate('Onboarding');
         } else {
+          console.log('➡️ PreAuth: Unknown role, going to WelcomeRole');
           navigate('WelcomeRole');
         }
+        return;
+      }
+      
+      // Fully onboarded - go to appropriate dashboard
+      if (user.roles?.includes('admin')) {
+        console.log('➡️ PreAuth: Admin → AdminDashboard');
+        navigate('AdminDashboard');
+      } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        console.log('➡️ PreAuth: Parent → ParentDashboard');
+        navigate('ParentDashboard');
       } else {
-        // Fully onboarded - go to dashboard
-        if (user.persona === 'parent') {
-          navigate('ParentDashboard');
-        } else {
-          navigate('Dashboard');
-        }
+        console.log('➡️ PreAuth: Gator → Dashboard');
+        navigate('Dashboard');
       }
       return;
     }
@@ -38,7 +59,7 @@ export default function PreAuth() {
     // If unauthenticated and not loading, immediately go to the platform login
     if (!isLoading && !user && !redirectingRef.current) {
       redirectingRef.current = true;
-      console.log('🔐 PreAuth: Redirecting to login...');
+      console.log('🔐 PreAuth: Unauthenticated, redirecting to login...');
       base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
     }
   }, [user, isLoading]);
