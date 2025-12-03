@@ -96,58 +96,9 @@ export const AuthProvider = ({ children }) => {
     setUser(newUserData);
   }, []);
 
-  const registerWithPassword = useCallback(async (email, password, fullName, referralCode = '') => {
-    console.log('🔵 [AuthContext] registerWithPassword called', { email, fullName, referralCode });
-    try {
-      const response = await registerUser({
-        email,
-        password,
-        full_name: fullName,
-        persona: 'student',
-        referral_code: referralCode
-      });
-      
-      console.log('✅ [AuthContext] Registration response:', response.data);
-      
-      if (response.data?.success) {
-        return { success: true, message: response.data.message };
-      } else {
-        throw new Error(response.data?.error || 'Registration failed');
-      }
-    } catch (error) {
-      console.error('❌ [AuthContext] Registration error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Registration failed');
-    }
-  }, []);
-
-  const loginWithPassword = useCallback(async (email, password) => {
-    console.log('🔵 [AuthContext] loginWithPassword called', { email });
-    try {
-      // For now, redirect to magic link flow
-      // TODO: Implement password login
-      await sendMagicLinkEmail(email);
-      return { success: true, message: 'Magic link sent to your email' };
-    } catch (error) {
-      console.error('❌ [AuthContext] Login error:', error);
-      throw error;
-    }
-  }, []);
-
-  const sendMagicLinkEmail = useCallback(async (email) => {
-    console.log('🔵 [AuthContext] sendMagicLinkEmail called', { email });
-    try {
-      const response = await sendMagicLink({ email });
-      console.log('✅ [AuthContext] Magic link response:', response.data);
-      
-      if (response.data?.success) {
-        return { success: true, message: 'Check your email for a sign-in link!' };
-      } else {
-        throw new Error(response.data?.error || 'Failed to send magic link');
-      }
-    } catch (error) {
-      console.error('❌ [AuthContext] Magic link error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to send magic link');
-    }
+  const loginWithGoogle = useCallback(() => {
+    console.log('🔵 [AuthContext] loginWithGoogle called');
+    base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
   }, []);
 
   const value = useMemo(() => ({
