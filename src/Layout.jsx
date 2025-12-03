@@ -781,10 +781,28 @@ function AppContent() {
         return;
       }
 
+      // CRITICAL FIX: Always allow access to onboarding pages for authenticated users
+      // This prevents users from getting stuck if they left mid-onboarding
+      if (isOnboardingPage) {
+        console.log('✅ Allowing access to onboarding page:', currentPage);
+        setResolvedPage(currentPage);
+        return;
+      }
+
+      // Determine if user needs to complete onboarding
+      const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+      const needsOnboarding = user.onboarding_completed !== true;
+      
+      // Helper function to get the right onboarding page
+      const getOnboardingPage = () => {
+        if (hasNoRole) return 'WelcomeRole';
+        if (user.persona === 'gator' || user.roles?.includes('gator')) return 'StudentOnboarding';
+        if (user.persona === 'parent' || user.roles?.includes('parent')) return 'Onboarding';
+        return 'WelcomeRole';
+      };
+
       if (isLandingPage) {
         console.log('🚫 Authenticated user on LandingPage - redirecting');
-        
-        const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
         
         if (hasNoRole) {
           finalPage = 'WelcomeRole';
@@ -794,17 +812,9 @@ function AppContent() {
           if (!verified) {
             finalPage = 'InviteRequired';
             console.log('➡️ Not verified - redirecting to InviteRequired');
-          } else if (user.onboarding_completed === false || user.onboarding_completed === null || user.onboarding_completed === undefined) {
-            if (user.persona === 'gator' || user.roles?.includes('gator')) {
-              finalPage = 'StudentOnboarding';
-              console.log('➡️ Gator needs onboarding');
-            } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
-              finalPage = 'Onboarding';
-              console.log('➡️ Parent needs onboarding');
-            } else {
-              finalPage = 'WelcomeRole';
-              console.log('➡️ Unknown state - WelcomeRole');
-            }
+          } else if (needsOnboarding) {
+            finalPage = getOnboardingPage();
+            console.log('➡️ Needs onboarding - redirecting to:', finalPage);
           } else {
             if (user.roles?.includes('admin')) {
               finalPage = 'AdminDashboard';
@@ -824,33 +834,22 @@ function AppContent() {
         setResolvedPage(currentPage);
         return;
       }
-      else if (isOnboardingPage) {
-        console.log('✅ Allowing access to onboarding page');
-        setResolvedPage(currentPage);
-        return;
-      }
       else {
-        const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+        // User trying to access a protected page
         if (hasNoRole) {
           console.log('👤 No role - redirecting to WelcomeRole');
           finalPage = 'WelcomeRole';
         } else {
           const verified = isUserVerified(user);
-          console.log('🔐 User has role. Verified:', verified);
+          console.log('🔐 User has role. Verified:', verified, 'Onboarding complete:', !needsOnboarding);
 
           if (!verified) {
             console.log('🚫 Not verified - InviteRequired');
             finalPage = 'InviteRequired';
-          } else if (user.onboarding_completed === false || user.onboarding_completed === null || user.onboarding_completed === undefined) {
-            console.log('📝 Verified but onboarding incomplete');
-
-            if (user.persona === 'gator' || user.roles?.includes('gator')) {
-              finalPage = 'StudentOnboarding';
-            } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
-              finalPage = 'Onboarding';
-            } else {
-              finalPage = 'WelcomeRole';
-            }
+          } else if (needsOnboarding) {
+            // User has role but hasn't completed onboarding - send them to continue
+            finalPage = getOnboardingPage();
+            console.log('📝 Onboarding incomplete - redirecting to:', finalPage);
           } else if ((user.persona === 'parent' || user.roles?.includes('parent')) && user.expertise_shared === false) {
             console.log('📝 Parent needs to share expertise (explicitly required)');
             finalPage = 'ShareExpertise';
