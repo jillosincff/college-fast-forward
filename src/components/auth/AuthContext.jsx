@@ -95,20 +95,14 @@ export const AuthProvider = ({ children }) => {
     setUser(newUserData);
   }, []);
 
-  const loginWithGoogle = useCallback(() => {
-    console.log('🔵 [AuthContext] loginWithGoogle called');
-    base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
-  }, []);
-
   const value = useMemo(() => ({
     user,
     isLoading,
-    loginWithMagicLink,
-    loginWithGoogle,
+    login,
     logout,
     refreshUser,
     updateAuthContextUser,
-  }), [user, isLoading, loginWithMagicLink, loginWithGoogle, logout, refreshUser, updateAuthContextUser]);
+  }), [user, isLoading, login, logout, refreshUser, updateAuthContextUser]);
 
   return (
     <AuthContext.Provider value={value}>
