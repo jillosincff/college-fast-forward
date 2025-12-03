@@ -660,10 +660,12 @@ const isUserVerified = (user) => {
   
   const email = user.email?.toLowerCase() || '';
   
+  // @ufl.edu emails are always verified
   if (email.endsWith('@ufl.edu')) {
     return true;
   }
   
+  // If user has a pending invite code in session, they're in the verification flow
   if (typeof window !== 'undefined') {
     const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
     if (pendingInviteCode) {
@@ -671,6 +673,8 @@ const isUserVerified = (user) => {
     }
   }
   
+  // If user already has a persona/role set, they've been verified before
+  // This is the key fix - once a user has selected a role, they're verified
   if (user.persona === 'parent' || user.roles?.includes('parent')) {
     return true;
   }
@@ -679,8 +683,13 @@ const isUserVerified = (user) => {
     return true;
   }
   
+  if (user.persona === 'student' || user.persona === 'alumni') {
+    return true;
+  }
+  
   if (user.roles?.includes('admin')) return true;
   
+  // New users without any role need verification (unless @ufl.edu)
   return false;
 };
 
