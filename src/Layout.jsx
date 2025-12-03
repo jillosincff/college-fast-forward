@@ -660,10 +660,13 @@ const isUserVerified = (user) => {
   
   const email = user.email?.toLowerCase() || '';
   
-  // @ufl.edu emails are always verified
+  // @ufl.edu emails are always verified - instant access
   if (email.endsWith('@ufl.edu')) {
     return true;
   }
+  
+  // Admins are always verified
+  if (user.roles?.includes('admin')) return true;
   
   // If user has a pending invite code in session, they're in the verification flow
   if (typeof window !== 'undefined') {
@@ -674,7 +677,7 @@ const isUserVerified = (user) => {
   }
   
   // If user already has a persona/role set, they've been verified before
-  // This is the key fix - once a user has selected a role, they're verified
+  // Once a user has selected a role, they're verified (they went through invite flow)
   if (user.persona === 'parent' || user.roles?.includes('parent')) {
     return true;
   }
@@ -683,11 +686,10 @@ const isUserVerified = (user) => {
     return true;
   }
   
+  // Legacy persona values
   if (user.persona === 'student' || user.persona === 'alumni') {
     return true;
   }
-  
-  if (user.roles?.includes('admin')) return true;
   
   // New users without any role need verification (unless @ufl.edu)
   return false;
