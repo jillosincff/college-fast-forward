@@ -244,11 +244,14 @@ export default function InviteRequired() {
                   <Button
                     onClick={() => {
                       // Store invite code and role for after auth
-                      sessionStorage.setItem('pending_invite_code', inviteCode.trim());
+                      if (inviteCode.trim()) {
+                        sessionStorage.setItem('pending_invite_code', inviteCode.trim());
+                      }
                       if (selectedRole) {
                         sessionStorage.setItem('pending_role_selection', selectedRole);
                       }
-                      base44.auth.redirectToLogin(window.location.href);
+                      // Redirect to login, then back to this page
+                      base44.auth.redirectToLogin(window.location.origin + '/#InviteRequired');
                     }}
                     disabled={!inviteCode.trim()}
                     className="w-full bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white py-3 text-lg"
