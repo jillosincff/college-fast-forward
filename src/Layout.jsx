@@ -653,7 +653,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
 const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
-const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile'];
+const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
   if (!user) return false;
