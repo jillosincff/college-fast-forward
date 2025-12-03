@@ -50,12 +50,13 @@ export const AuthProvider = ({ children }) => {
     checkAuthState();
   }, [checkAuthState]);
 
-  const loginWithMagicLink = useCallback(async () => {
+  const login = useCallback((redirectUrl = null) => {
     try {
-      const callbackUrl = window.location.href;
+      const callbackUrl = redirectUrl || window.location.origin + '/#Dashboard';
+      console.log('🔐 [AuthContext] Redirecting to login with callback:', callbackUrl);
       base44.auth.redirectToLogin(callbackUrl);
     } catch (e) {
-      logger.error('Magic link login failed', { error: e });
+      logger.error('Login redirect failed', { error: e });
       base44.auth.redirectToLogin(window.location.origin);
     }
   }, []);
