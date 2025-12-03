@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
-import { Chrome, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function GoogleAuthButton({ 
   action = 'sign-in', 
@@ -10,28 +10,25 @@ export default function GoogleAuthButton({
   size = 'default',
   disabled = false,
   children,
-  showHint = false
+  showHint = false,
+  redirectUrl = null
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleGoogleAuth = async () => {
+  const handleAuth = () => {
     setIsLoading(true);
-    try {
-      console.log('🔐 Initiating Google OAuth via Base44...');
-      // Use Base44's built-in redirectToLogin which handles Google SSO
-      await base44.auth.redirectToLogin(window.location.href);
-    } catch (error) {
-      console.error('❌ Google auth error:', error);
-      setIsLoading(false);
-    }
+    console.log('🔐 Initiating OAuth via Base44...');
+    // Redirect to login - base44 handles Google/Facebook OAuth
+    const callback = redirectUrl || window.location.origin + '/#Dashboard';
+    base44.auth.redirectToLogin(callback);
   };
 
-  const buttonText = children || (action === 'sign-up' ? 'Continue with Google' : 'Sign in with Google');
+  const buttonText = children || (action === 'sign-up' ? 'Join Now' : 'Sign In');
 
   return (
     <div className="w-full">
       <Button
-        onClick={handleGoogleAuth}
+        onClick={handleAuth}
         disabled={disabled || isLoading}
         variant={variant}
         size={size}
@@ -40,13 +37,13 @@ export default function GoogleAuthButton({
         {isLoading ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          <Chrome className="w-5 h-5" />
+          <span>🐊</span>
         )}
-        {buttonText}
+        {isLoading ? 'Redirecting...' : buttonText}
       </Button>
       {showHint && (
         <p className="text-xs text-slate-600 text-center mt-2">
-          💡 <strong>UF Students:</strong> For instant access, sign in with your @ufl.edu email address
+          💡 <strong>UF Students:</strong> Sign in with your @ufl.edu email for instant access
         </p>
       )}
     </div>
