@@ -38,7 +38,7 @@ import {
   Award,
   Target
 } from 'lucide-react';
-import { useEffect as useEffectHook } from 'react';
+
 
 const GRADUATION_YEARS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - 10 + i);
 
