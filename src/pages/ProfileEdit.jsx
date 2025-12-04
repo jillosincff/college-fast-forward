@@ -698,8 +698,7 @@ export default function ProfileEdit() {
           </Card>
 
           {/* Talent Spotlight Banner - Students Only */}
-          {isStudent && (
-            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
