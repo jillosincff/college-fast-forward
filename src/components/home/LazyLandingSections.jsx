@@ -555,6 +555,35 @@ export default function LazyLandingSections() {
         </div>
       </section>
 
+      {/* Ambassador CTA Section */}
+      <section className="py-16 bg-slate-100">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <motion.div {...fadeInUp}>
+            <p className="text-xl md:text-2xl text-slate-700 mb-8">
+              Want to earn money while helping more Gators?
+            </p>
+            <Button
+              size="lg"
+              onClick={() => navigate('UFAmbassador')}
+              className="bg-[var(--uf-blue)] hover:bg-blue-700 text-white px-12 py-6 text-xl rounded-full shadow-lg mb-4"
+            >
+              Yes – Make Me a Campus Ambassador
+            </Button>
+            <p className="text-slate-600">
+              Founding Circle tier (25% + override)?{' '}
+              <a 
+                href="https://forms.gle/YOUR_LINK" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[var(--uf-orange)] font-bold hover:underline"
+              >
+                Apply here →
+              </a>
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Every New Member Progress */}
       <section 
         className="py-20 md:py-32 bg-cover bg-center relative"
