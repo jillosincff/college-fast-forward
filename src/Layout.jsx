@@ -104,6 +104,7 @@ const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
+const UFAmbassador = React.lazy(() => import('./pages/UFAmbassador'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -728,6 +729,7 @@ const getPageComponent = (pageName) => {
     case 'PublicProfile': return PublicProfile;
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
+    case 'UFAmbassador': return UFAmbassador;
     default: return LandingPage;
   }
 };
@@ -757,7 +759,7 @@ function AppContent() {
     }
 
     // Handle public pages FIRST - before any auth checks
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ Public page accessed directly:', currentPage);
       setResolvedPage(currentPage);
