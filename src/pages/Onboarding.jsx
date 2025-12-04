@@ -199,6 +199,31 @@ export default function Onboarding() {
     );
   }
 
+  // Step 0: Connect with Gator (only for new users)
+  if (currentStep === 0 && !user?.onboarding_completed) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-lg shadow-lg p-8"
+          >
+            <ConnectGatorStep 
+              onComplete={(student) => {
+                if (student?.email) {
+                  setFormData(prev => ({ ...prev, student_emails: student.email }));
+                }
+                setCurrentStep(1);
+              }}
+              onSkip={() => setCurrentStep(1)}
+            />
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
       <div className="max-w-3xl mx-auto">
