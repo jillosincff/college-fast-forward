@@ -293,10 +293,17 @@ export default function ProfileEdit() {
     );
   }
 
+  // Detect parent persona - check both persona field and roles array
   const isParent = user.persona === 'parent' || user.roles?.includes('parent');
-  const isStudent = user.persona === 'gator' || user.persona === 'student' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
+  const isStudent = user.persona === 'gator' || user.persona === 'student' || user.persona === 'alumni' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
 
-  console.log('ProfileEdit rendering:', { persona: user.persona, roles: user.roles, isParent, isStudent });
+  console.log('ProfileEdit persona detection:', { 
+    email: user.email,
+    persona: user.persona, 
+    roles: user.roles, 
+    isParent, 
+    isStudent 
+  });
 
   // PARENT-SPECIFIC SIMPLIFIED VIEW
   if (isParent) {
