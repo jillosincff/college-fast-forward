@@ -329,20 +329,10 @@ export default function ProfileEdit() {
                   Professional Information
                 </CardTitle>
                 <CardDescription>
-                  Help students understand your background
+                  This info appears on your profile in the Gator Directory
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company">Current Company *</Label>
-                  <Input
-                    id="company"
-                    value={formData.company || ''}
-                    onChange={(e) => handleChange('company', e.target.value)}
-                    placeholder="e.g., Google, Bank of America, UF Health"
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="job_title">Job Title</Label>
                   <Input
@@ -354,7 +344,17 @@ export default function ProfileEdit() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Industry *</Label>
+                  <Label htmlFor="company">Company</Label>
+                  <Input
+                    id="company"
+                    value={formData.company || ''}
+                    onChange={(e) => handleChange('company', e.target.value)}
+                    placeholder="e.g., Google, Bank of America, UF Health"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
                   <Select
                     value={formData.industry || ''}
                     onValueChange={(value) => handleChange('industry', value)}
@@ -394,9 +394,6 @@ export default function ProfileEdit() {
                     onChange={(e) => handleChange('linkedin_url', e.target.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
-                  <p className="text-xs text-slate-500">
-                    Adding LinkedIn helps students learn more about you
-                  </p>
                 </div>
               </CardContent>
             </Card>
