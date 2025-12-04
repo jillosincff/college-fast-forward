@@ -308,13 +308,13 @@ export default function ProfileEdit() {
 
   // PARENT-SPECIFIC: Redirect to Onboarding page which has all the right fields
   // (Primary Goal checkboxes, expertise bio, industries, etc.)
-  if (isParent) {
-    // Redirect parents to the Onboarding page for profile editing
-    // The Onboarding page already handles both new and existing users
-    useEffect(() => {
+  useEffect(() => {
+    if (isParent) {
       navigate('Onboarding');
-    }, []);
-    
+    }
+  }, [isParent]);
+
+  if (isParent) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
