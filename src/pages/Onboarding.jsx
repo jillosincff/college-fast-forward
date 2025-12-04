@@ -11,6 +11,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
+import ConnectGatorStep from '@/components/onboarding/parent/ConnectGatorStep';
 
 const industries = [
   "Finance", "Tech", "Healthcare", "Engineering", "Consulting",
