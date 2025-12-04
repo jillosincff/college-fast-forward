@@ -384,7 +384,7 @@ export default function ParentDashboard() {
             Want to earn money while helping more Gators?
           </p>
           <Button
-            onClick={() => navigate('BrandAmbassador')}
+            onClick={() => navigate('UFAmbassador')}
             size="lg"
             className="h-14 px-10 text-xl font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             style={{ backgroundColor: '#0021A5' }}
