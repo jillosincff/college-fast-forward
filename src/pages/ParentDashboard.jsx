@@ -311,7 +311,7 @@ export default function ParentDashboard() {
               className="rounded-full px-8 font-bold"
               style={{ backgroundColor: '#0021A5' }}
             >
-              Update Profile →
+              Update Your Profile →
             </Button>
           </div>
 
