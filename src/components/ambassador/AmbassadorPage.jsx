@@ -114,7 +114,7 @@ export default function AmbassadorPage({
               </ul>
 
               <p className="text-center text-sm text-gray-500 mb-6">
-                Paid at school limit (450 for UF)
+                Paid at school limit (1000 users for UF)
               </p>
 
               {!showCodeBox ? (
@@ -236,7 +236,7 @@ export default function AmbassadorPage({
               </ul>
 
               <p className="text-center text-sm text-gray-400 mb-6">
-                Paid at school limit (450 for UF)
+                Paid at school limit (1000 users for UF)
               </p>
 
               <a
