@@ -293,9 +293,205 @@ export default function ProfileEdit() {
     );
   }
 
-  const isParent = user.persona === 'parent';
-  const isStudent = user.persona === 'gator';
+  const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+  const isStudent = user.persona === 'gator' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
 
+  // PARENT-SPECIFIC SIMPLIFIED VIEW
+  if (isParent) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('ParentDashboard')}
+              className="mb-4 text-slate-600 hover:text-slate-900"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            
+            <h1 className="text-3xl font-bold mb-2" style={{ color: '#0021A5' }}>
+              Complete Your Parent Profile
+            </h1>
+            <p className="text-slate-600">
+              The more complete your profile, the more your Gator's requests get boosted!
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {/* Professional Info Card */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-blue-600" />
+                  Professional Information
+                </CardTitle>
+                <CardDescription>
+                  Help students understand your background
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="company">Current Company *</Label>
+                  <Input
+                    id="company"
+                    value={formData.company || ''}
+                    onChange={(e) => handleChange('company', e.target.value)}
+                    placeholder="e.g., Google, Bank of America, UF Health"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="job_title">Job Title</Label>
+                  <Input
+                    id="job_title"
+                    value={formData.job_title || ''}
+                    onChange={(e) => handleChange('job_title', e.target.value)}
+                    placeholder="e.g., Senior Manager, Director of Sales"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry *</Label>
+                  <Select
+                    value={formData.industry || ''}
+                    onValueChange={(value) => handleChange('industry', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="Healthcare">Healthcare</SelectItem>
+                      <SelectItem value="Finance">Finance / Banking</SelectItem>
+                      <SelectItem value="Consulting">Consulting</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="Engineering">Engineering</SelectItem>
+                      <SelectItem value="Marketing">Marketing / Advertising</SelectItem>
+                      <SelectItem value="Legal">Legal</SelectItem>
+                      <SelectItem value="Real Estate">Real Estate</SelectItem>
+                      <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="Retail">Retail</SelectItem>
+                      <SelectItem value="Government">Government</SelectItem>
+                      <SelectItem value="Non-Profit">Non-Profit</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin_url">
+                    <div className="flex items-center gap-2">
+                      <Linkedin className="w-4 h-4 text-blue-600" />
+                      LinkedIn URL (Optional)
+                    </div>
+                  </Label>
+                  <Input
+                    id="linkedin_url"
+                    value={formData.linkedin_url || ''}
+                    onChange={(e) => handleChange('linkedin_url', e.target.value)}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Adding LinkedIn helps students learn more about you
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Location Card */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  Location
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location_city">City</Label>
+                    <Input
+                      id="location_city"
+                      value={formData.location_city || ''}
+                      onChange={(e) => handleChange('location_city', e.target.value)}
+                      placeholder="Miami"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="location_state">State</Label>
+                    <Input
+                      id="location_state"
+                      value={formData.location_state || ''}
+                      onChange={(e) => handleChange('location_state', e.target.value)}
+                      placeholder="FL"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Privacy Settings */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Privacy Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="show_in_directory" className="text-base">Show in Gator Directory</Label>
+                    <p className="text-sm text-slate-500">
+                      Allow students to find and message you
+                    </p>
+                  </div>
+                  <Switch
+                    id="show_in_directory"
+                    checked={formData.show_in_directory}
+                    onCheckedChange={(checked) => handleChange('show_in_directory', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Save Button */}
+            <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 border">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('ParentDashboard')}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STUDENT/ALUMNI VIEW (original complex form)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -314,10 +510,7 @@ export default function ProfileEdit() {
             Edit Your Profile
           </h1>
           <p className="text-slate-600">
-            {isParent 
-              ? 'Showcase your expertise to help Gator students succeed'
-              : 'Keep your information up to date to maximize opportunities'
-            }
+            Keep your information up to date to maximize opportunities
           </p>
 
           {/* Profile Completion */}
@@ -329,10 +522,7 @@ export default function ProfileEdit() {
             <Progress value={profileCompletion} className="h-2" />
             {profileCompletion < 100 && (
               <p className="text-xs text-slate-500 mt-2">
-                {isParent 
-                  ? 'Complete your expertise profile to help more students!'
-                  : 'Complete your profile to get discovered by more parents and alumni!'
-                }
+                Complete your profile to get discovered by more parents and alumni!
               </p>
             )}
           </div>
@@ -340,7 +530,7 @@ export default function ProfileEdit() {
 
         <div className="space-y-6">
           {/* Resume Upload Section - Students Only */}
-          {isStudent && <ResumeUpload user={user} onResumeUpdated={handleResumeUpdated} />}
+          <ResumeUpload user={user} onResumeUpdated={handleResumeUpdated} />
 
           {/* Shareable Profile Section */}
           <ShareableProfile user={user} onProfileUpdated={handleProfileUpdated} />
