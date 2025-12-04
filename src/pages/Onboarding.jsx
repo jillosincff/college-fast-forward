@@ -33,6 +33,7 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [startTime] = useState(Date.now());
+  const [currentStep, setCurrentStep] = useState(0); // 0 = connect gator, 1 = profile form
 
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
