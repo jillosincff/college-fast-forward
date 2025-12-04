@@ -9,8 +9,8 @@ export default function AmbassadorPage({
   school, 
   nickname, 
   prefix, 
-  primaryColor, 
-  accentColor,
+  primaryColor = "#0021A5", 
+  accentColor = "#FA4616",
   leadFormUrl = "https://forms.gle/YOUR_LINK"
 }) {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
@@ -87,25 +87,35 @@ export default function AmbassadorPage({
         <div className="grid md:grid-cols-2 gap-8">
           
           {/* Campus Ambassador Card */}
-          <Card className="shadow-xl">
-            <CardContent className="p-8">
-              <h2 
-                className="text-2xl font-bold text-center mb-2"
-                style={{ color: primaryColor }}
-              >
+          <Card className="shadow-xl overflow-hidden">
+            {/* Header Banner */}
+            <div 
+              className="py-6 text-center"
+              style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #003399 100%)` }}
+            >
+              <h2 className="text-3xl font-bold text-white mb-1">
                 Campus Ambassador
               </h2>
-              <p 
-                className="text-center font-semibold mb-6"
-                style={{ color: primaryColor }}
-              >
+              <p className="text-lg font-semibold" style={{ color: accentColor }}>
                 Free & Open to All
               </p>
-              
-              <ul className="text-lg space-y-2 mb-8">
-                <li>• $5 per completed signup (max $100)</li>
-                <li>• 15% lifetime commission on paid users</li>
+            </div>
+            
+            <CardContent className="p-8">
+              <ul className="text-lg space-y-3 mb-6">
+                <li className="flex items-start gap-2">
+                  <span>💰</span>
+                  <span><strong>$5 retro bonus per signup</strong> (up to $100 cap)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>📈</span>
+                  <span><strong>15% lifetime commission</strong> ($1.35–2.85/mo per referral)</span>
+                </li>
               </ul>
+
+              <p className="text-center text-sm text-gray-500 mb-6">
+                Paid at school limit (450 for UF)
+              </p>
 
               {!showCodeBox ? (
                 <form onSubmit={handleFormSubmit} className="space-y-3">
@@ -113,14 +123,14 @@ export default function AmbassadorPage({
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="h-12"
+                    className="h-12 border-gray-300"
                     required
                   />
                   <Input
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="h-12"
+                    className="h-12 border-gray-300"
                     required
                   />
                   <Input
@@ -128,15 +138,15 @@ export default function AmbassadorPage({
                     placeholder="Your Email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="h-12"
+                    className="h-12 border-gray-300"
                     required
                   />
                   <Button
                     type="submit"
-                    className="w-full h-14 text-lg font-bold text-white"
+                    className="w-full h-14 text-lg font-bold text-white rounded-lg"
                     style={{ backgroundColor: primaryColor }}
                   >
-                    Join Free — Create Your Code
+                    Join Free — Get Your Code in 30 Seconds →
                   </Button>
                 </form>
               ) : !finalCode ? (
@@ -192,31 +202,51 @@ export default function AmbassadorPage({
           </Card>
 
           {/* Founding Circle Card */}
-          <Card className="bg-gray-900 text-white shadow-xl">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold text-center mb-2">
+          <Card className="shadow-xl overflow-hidden bg-gray-900">
+            {/* Header Banner */}
+            <div 
+              className="py-6 text-center"
+              style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #333333 100%)' }}
+            >
+              <h2 
+                className="text-3xl font-bold mb-1"
+                style={{ color: accentColor }}
+              >
                 Founding Circle (Lead)
               </h2>
-              <p className="text-center font-semibold mb-6 text-gray-300">
-                Parents Only • Limited Spots
+              <p className="text-lg font-semibold" style={{ color: accentColor }}>
+                Parents Only • Limited Spots • Apply Now
               </p>
-              
-              <ul className="text-lg space-y-2 mb-8">
-                <li>• $5 per signup (max $200)</li>
-                <li>• 25% lifetime + 5% squad override</li>
+            </div>
+            
+            <CardContent className="p-8">
+              <ul className="text-lg space-y-3 mb-6 text-white">
+                <li className="flex items-start gap-2">
+                  <span>💰</span>
+                  <span><strong>$5 retro bonus per signup</strong> (up to $200 cap)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>📈</span>
+                  <span><strong>25% lifetime commission</strong> ($2.25–4.75/mo per referral)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>🔥</span>
+                  <span><strong>5% override</strong> on your squad's earnings</span>
+                </li>
               </ul>
+
+              <p className="text-center text-sm text-gray-400 mb-6">
+                Paid at school limit (450 for UF)
+              </p>
 
               <a
                 href={leadFormUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full py-4 text-center text-xl font-bold rounded-lg"
-                style={{ 
-                  backgroundColor: accentColor,
-                  color: accentColor === '#FFFFFF' ? '#002D62' : '#000'
-                }}
+                className="block w-full py-4 text-center text-xl font-bold rounded-lg text-black"
+                style={{ backgroundColor: accentColor }}
               >
-                Apply to Lead
+                Apply to Lead →
               </a>
             </CardContent>
           </Card>
