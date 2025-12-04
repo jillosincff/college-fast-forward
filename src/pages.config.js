@@ -51,6 +51,10 @@ import RequestInvite from './pages/RequestInvite';
 import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
 import ShareExpertise from './pages/ShareExpertise';
+import UFAmbassador from './pages/UFAmbassador';
+import FSUAmbassador from './pages/FSUAmbassador';
+import UCFAmbassador from './pages/UCFAmbassador';
+import PSUAmbassador from './pages/PSUAmbassador';
 import __Layout from './Layout.jsx';
 
 
@@ -108,6 +112,10 @@ export const PAGES = {
     "Pricing": Pricing,
     "PublicProfile": PublicProfile,
     "ShareExpertise": ShareExpertise,
+    "UFAmbassador": UFAmbassador,
+    "FSUAmbassador": FSUAmbassador,
+    "UCFAmbassador": UCFAmbassador,
+    "PSUAmbassador": PSUAmbassador,
 }
 
 export const pagesConfig = {
