@@ -723,7 +723,6 @@ export default function ProfileEdit() {
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Save Button */}
           <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 border">
