@@ -624,116 +624,51 @@ export default function ProfileEdit() {
             </CardContent>
           </Card>
 
-          {/* Professional/Academic Information */}
+          {/* Academic Information - Students Only */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                {isStudent ? 'Academic Information' : 'Professional Information'}
-              </CardTitle>
-              <CardDescription>
-                {isStudent 
-                  ? 'Your education and career interests' 
-                  : 'Your work experience and expertise'
-                }
-              </CardDescription>
+              <CardTitle>Academic Information</CardTitle>
+              <CardDescription>Your education and career interests</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isStudent ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="major">Major</Label>
-                    <Input
-                      id="major"
-                      value={formData.major || ''}
-                      onChange={(e) => handleChange('major', e.target.value)}
-                      placeholder="Computer Science"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="major">Major</Label>
+                <Input
+                  id="major"
+                  value={formData.major || ''}
+                  onChange={(e) => handleChange('major', e.target.value)}
+                  placeholder="Computer Science"
+                />
+              </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="graduation_year">Graduation Year</Label>
-                      <Select
-                        value={formData.graduation_year ? formData.graduation_year.toString() : ''}
-                        onValueChange={(value) => handleChange('graduation_year', value)}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GRADUATION_YEARS.map(year => (
-                            <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="graduation_year">Graduation Year</Label>
+                  <Select
+                    value={formData.graduation_year ? formData.graduation_year.toString() : ''}
+                    onValueChange={(value) => handleChange('graduation_year', value)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADUATION_YEARS.map(year => (
+                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="gpa">GPA (Optional)</Label>
-                      <Input
-                        id="gpa"
-                        value={formData.gpa || ''}
-                        onChange={(e) => handleChange('gpa', e.target.value)}
-                        placeholder="3.8"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Current Company</Label>
-                    <Input
-                      id="company"
-                      value={formData.company || ''}
-                      onChange={(e) => handleChange('company', e.target.value)}
-                      placeholder="Google"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="job_title">Current Job Title</Label>
-                    <Input
-                      id="job_title"
-                      value={formData.job_title || ''}
-                      onChange={(e) => handleChange('job_title', e.target.value)}
-                      placeholder="Senior Product Manager"
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="industry">Industry</Label>
-                      <Input
-                        id="industry"
-                        value={formData.industry || ''}
-                        onChange={(e) => handleChange('industry', e.target.value)}
-                        placeholder="Technology"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="years_of_experience">Years of Experience</Label>
-                      <Select
-                        value={formData.years_of_experience || ''}
-                        onValueChange={(value) => handleChange('years_of_experience', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0-2">0-2 years</SelectItem>
-                          <SelectItem value="3-5">3-5 years</SelectItem>
-                          <SelectItem value="6-10">6-10 years</SelectItem>
-                          <SelectItem value="11-15">11-15 years</SelectItem>
-                          <SelectItem value="16-20">16-20 years</SelectItem>
-                          <SelectItem value="20+">20+ years</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </>
-              )}
+                <div className="space-y-2">
+                  <Label htmlFor="gpa">GPA (Optional)</Label>
+                  <Input
+                    id="gpa"
+                    value={formData.gpa || ''}
+                    onChange={(e) => handleChange('gpa', e.target.value)}
+                    placeholder="3.8"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
