@@ -294,7 +294,9 @@ export default function ProfileEdit() {
   }
 
   const isParent = user.persona === 'parent' || user.roles?.includes('parent');
-  const isStudent = user.persona === 'gator' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
+  const isStudent = user.persona === 'gator' || user.persona === 'student' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
+
+  console.log('ProfileEdit rendering:', { persona: user.persona, roles: user.roles, isParent, isStudent });
 
   // PARENT-SPECIFIC SIMPLIFIED VIEW
   if (isParent) {
