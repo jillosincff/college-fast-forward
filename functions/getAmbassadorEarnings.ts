@@ -33,13 +33,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Calculate signup bonuses
+    // Only count users with completed profiles for signup bonuses
+    const completedProfileUsers = referredUsers.filter(u => u.onboarding_completed === true);
     const totalSignups = referredUsers.length;
-    const signupBonusEarnings = Math.min(totalSignups * SIGNUP_BONUS, SIGNUP_BONUS_CAP);
-    const signupBonusCapped = totalSignups * SIGNUP_BONUS > SIGNUP_BONUS_CAP;
+    const qualifiedSignups = completedProfileUsers.length;
+    const signupBonusEarnings = Math.min(qualifiedSignups * SIGNUP_BONUS, SIGNUP_BONUS_CAP);
+    const signupBonusCapped = qualifiedSignups * SIGNUP_BONUS > SIGNUP_BONUS_CAP;
 
-    // Calculate monthly commission from paid subscribers
-    const paidUsers = referredUsers.filter(u => 
+    // Calculate monthly commission from paid subscribers (must also have completed profile)
+    const paidUsers = completedProfileUsers.filter(u => 
       u.subscription_status === 'active'
     );
     
@@ -89,7 +91,8 @@ Deno.serve(async (req) => {
         name: u.full_name || `${u.first_name} ${u.last_name}`,
         date: u.created_date,
         isPaid: u.subscription_status === 'active',
-        tier: u.subscription_tier
+        tier: u.subscription_tier,
+        profileComplete: u.onboarding_completed === true
       }));
 
     // Calculate totals
@@ -101,7 +104,9 @@ Deno.serve(async (req) => {
         total: totalEarnings,
         signupBonus: {
           amount: signupBonusEarnings,
-          count: totalSignups,
+          count: qualifiedSignups,
+          totalSignups: totalSignups,
+          pendingProfiles: totalSignups - qualifiedSignups,
           perSignup: SIGNUP_BONUS,
           cap: SIGNUP_BONUS_CAP,
           capped: signupBonusCapped
@@ -120,8 +125,10 @@ Deno.serve(async (req) => {
       },
       stats: {
         totalSignups,
+        qualifiedSignups,
+        pendingProfiles: totalSignups - qualifiedSignups,
         paidConversions: paidUsers.length,
-        conversionRate: totalSignups > 0 ? ((paidUsers.length / totalSignups) * 100).toFixed(1) : 0,
+        conversionRate: qualifiedSignups > 0 ? ((paidUsers.length / qualifiedSignups) * 100).toFixed(1) : 0,
         teamSize: teamAmbassadors.length
       },
       team: teamAmbassadors,
