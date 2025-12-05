@@ -247,40 +247,40 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Founding Circle Leader Widget (if approved) */}
-        {user?.is_founding_circle_lead && (
-          <FoundingCircleLeaderWidget user={user} />
-        )}
+        {/* Two Square Boxes Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Founding Circle Leader Widget (if approved) */}
+          {user?.is_founding_circle_lead && (
+            <FoundingCircleLeaderWidget user={user} />
+          )}
 
-        {/* 2. Connect With Your Gator Box */}
-        <div 
-          className="bg-white rounded-2xl shadow-lg p-8 text-center"
-          style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.1)' }}
-        >
-          <h3 className="text-2xl font-bold mb-4" style={{ color: '#0021A5' }}>
-            Connect With Your Gator
-          </h3>
-          <p className="text-lg text-slate-600 mb-6">
-            Is your student already on College Fast Forward?
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button
-              onClick={() => setShowSearchModal(true)}
-              size="lg"
-              className="min-w-[220px] h-12 text-base font-bold rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-              style={{ backgroundColor: '#0021A5' }}
-            >
-              Yes – Search & Link Them
-            </Button>
-            <Button
-              onClick={() => setShowInviteModal(true)}
-              size="lg"
-              className="min-w-[220px] h-12 text-base font-bold rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-              style={{ backgroundColor: '#FA4616' }}
-            >
-              No – Send Them an Invite
-            </Button>
-          </div>
+          {/* Connect With Your Gator Box */}
+          <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
+            <CardContent className="p-4">
+              <h3 className="text-lg font-bold mb-3 text-center" style={{ color: '#0021A5' }}>
+                Connect With Your Gator
+              </h3>
+              <p className="text-sm text-slate-600 mb-4 text-center">
+                Is your student already on College Fast Forward?
+              </p>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => setShowSearchModal(true)}
+                  className="w-full h-9 text-sm font-bold rounded-full"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  Yes – Search & Link Them
+                </Button>
+                <Button
+                  onClick={() => setShowInviteModal(true)}
+                  className="w-full h-9 text-sm font-bold rounded-full"
+                  style={{ backgroundColor: '#FA4616' }}
+                >
+                  No – Send Them an Invite
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* 3. Main Headline */}
