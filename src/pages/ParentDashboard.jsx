@@ -255,12 +255,12 @@ export default function ParentDashboard() {
           )}
 
           {/* Connect With Your Gator Box */}
-          <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
-            <CardContent className="p-4">
-              <h3 className="text-lg font-bold mb-3 text-center" style={{ color: '#0021A5' }}>
+          <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg h-fit">
+            <CardContent className="p-4 pb-4">
+              <h3 className="text-lg font-bold mb-2 text-center" style={{ color: '#0021A5' }}>
                 Connect With Your Gator
               </h3>
-              <p className="text-sm text-slate-600 mb-4 text-center">
+              <p className="text-sm text-slate-600 mb-3 text-center">
                 Is your student already on College Fast Forward?
               </p>
               <div className="space-y-2">
