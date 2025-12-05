@@ -105,16 +105,16 @@ export default function AmbassadorPage({
               <ul className="text-lg space-y-3 mb-6">
                 <li className="flex items-start gap-2">
                   <span>💰</span>
-                  <span><strong>$5 retro bonus per signup</strong> (up to $100 cap)</span>
+                  <span><strong>$5 one-time bonus per signup</strong> (max $100 lifetime, 20 referrals)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span>📈</span>
-                  <span><strong>15% lifetime commission</strong> ($1.35–2.85/mo per referral)</span>
+                  <span><strong>15% monthly commission</strong> on each paid family</span>
                 </li>
               </ul>
 
               <p className="text-center text-sm text-gray-500 mb-6">
-                Paid at school limit (1000 users for UF)
+                $5 bonus only during Free Phase (first 1,000 UF users)
               </p>
 
               {!showCodeBox ? (
