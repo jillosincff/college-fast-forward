@@ -226,6 +226,34 @@ export default function Dashboard() {
         {/* Full Access Upgrade Card (for free-tier students without linked parent) */}
         <FullAccessUpgradeCard user={user} />
         
+        {/* Brand Ambassador Promotion */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-lg">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-2xl font-bold mb-2">
+                    💰 Want to earn money while spreading the word to Gators?
+                  </h3>
+                  <p className="text-white/90 text-lg">
+                    Become a Brand Ambassador and get paid to help fellow Gators discover opportunities!
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate('UFAmbassador')}
+                  className="bg-white text-orange-600 hover:bg-white/90 font-bold px-8 py-6 shadow-lg"
+                >
+                  Learn More
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
         {/* Campus Ambassador Widget */}
         <CampusAmbassadorWidget />
         
