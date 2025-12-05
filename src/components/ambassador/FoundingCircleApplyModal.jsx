@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle, Loader2, LogIn } from 'lucide-react';
 import { FoundingCircleApplication } from '@/entities/FoundingCircleApplication';
 import { base44 } from '@/api/base44Client';
@@ -17,6 +18,7 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
     phone_number: '',
     linkedin_url: ''
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -44,6 +46,11 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
 
     if (!formData.first_name || !formData.last_name || !formData.email) {
       setError('Please fill in all required fields');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setError('You must agree to the Founding Circle Leader Agreement to proceed');
       return;
     }
 
@@ -97,6 +104,7 @@ Please review this application in your Admin Dashboard.
 
   const handleClose = () => {
     setFormData({ first_name: '', last_name: '', email: '', phone_number: '', linkedin_url: '' });
+    setAgreedToTerms(false);
     setError('');
     setSuccess(false);
     onClose();
@@ -202,14 +210,39 @@ Please review this application in your Admin Dashboard.
               />
             </div>
 
+            {/* Founding Circle Leader Agreement */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto text-xs text-gray-700">
+              <p className="font-bold mb-2 text-sm">FOUNDING CIRCLE LEADER AGREEMENT (revocable license)</p>
+              <p className="mb-2">By clicking "Submit Application" and/or accepting appointment as a Founding Circle Leader, you agree:</p>
+              <ol className="list-decimal list-inside space-y-1 mb-2">
+                <li>This is a revocable, performance-based license — not employment or partnership.</li>
+                <li>College Fast Forward reserves the right to modify compensation rates, caps, or structure at any time with 14 days written notice.</li>
+                <li>We may revoke your Founding Circle status (and revert you to regular Campus Ambassador rates) at our sole discretion for inactivity, low performance, policy violations, or any reason. No notice required for revocation due to fraud or violation.</li>
+                <li>You have no vested right to future commissions beyond what has already been earned and paid.</li>
+                <li>All decisions by College Fast Forward are final.</li>
+              </ol>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="agree-terms"
+                checked={agreedToTerms}
+                onCheckedChange={setAgreedToTerms}
+                className="mt-0.5"
+              />
+              <Label htmlFor="agree-terms" className="text-sm text-gray-700 cursor-pointer leading-tight">
+                I have read and agree to the above terms <span className="text-red-500">*</span>
+              </Label>
+            </div>
+
             {error && (
               <p className="text-red-600 text-sm font-medium">{error}</p>
             )}
 
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-12 text-lg font-bold text-black"
+              disabled={isSubmitting || !agreedToTerms}
+              className="w-full h-12 text-lg font-bold text-black disabled:opacity-50"
               style={{ backgroundColor: accentColor }}
             >
               {isSubmitting ? (
