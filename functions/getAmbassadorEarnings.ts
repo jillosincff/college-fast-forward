@@ -75,8 +75,8 @@ Deno.serve(async (req) => {
     
     for (const referredUser of referredUsers) {
       // Check if this referred user has their own referral codes (became an ambassador)
-      const theirReferrals = await base44.entities.Referral.filter({
-        created_by: referredUser.email,
+      const theirReferrals = await base44.asServiceRole.entities.Referral.filter({
+        email: referredUser.email,
         role: 'ambassador'
       });
       
