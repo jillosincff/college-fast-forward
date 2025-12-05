@@ -4,14 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { Referral } from '@/entities/Referral';
+import FoundingCircleApplyModal from './FoundingCircleApplyModal';
 
 export default function AmbassadorPage({ 
   school, 
   nickname, 
   prefix, 
   primaryColor = "#0021A5", 
-  accentColor = "#FA4616",
-  leadFormUrl = "https://forms.gle/YOUR_LINK"
+  accentColor = "#FA4616"
 }) {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
   const [showCodeBox, setShowCodeBox] = useState(false);
@@ -19,6 +19,7 @@ export default function AmbassadorPage({
   const [finalCode, setFinalCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showLeadModal, setShowLeadModal] = useState(false);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -239,19 +240,24 @@ export default function AmbassadorPage({
                 $5 bonus only during Free Phase (first 1,000 UF users)
               </p>
 
-              <a
-                href={leadFormUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full py-4 text-center text-xl font-bold rounded-lg text-black"
+              <Button
+                onClick={() => setShowLeadModal(true)}
+                className="w-full py-6 text-xl font-bold rounded-lg text-black"
                 style={{ backgroundColor: accentColor }}
               >
                 Apply to Lead →
-              </a>
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <FoundingCircleApplyModal
+        open={showLeadModal}
+        onClose={() => setShowLeadModal(false)}
+        school={school}
+        accentColor={accentColor}
+      />
     </div>
   );
 }
