@@ -34,10 +34,14 @@ Deno.serve(async (req) => {
     if (referralCodes.length > 0) {
       // Get users who used any of this lead's referral codes
       for (const code of referralCodes) {
-        const usersWithCode = await base44.entities.User.filter({ 
-          referral_code: code 
-        });
-        referredUsers = [...referredUsers, ...usersWithCode];
+        try {
+          const usersWithCode = await base44.asServiceRole.entities.User.filter({ 
+            referral_code: code 
+          });
+          referredUsers = [...referredUsers, ...usersWithCode];
+        } catch (err) {
+          console.log(`Could not fetch users for code ${code}:`, err.message);
+        }
       }
     }
 
