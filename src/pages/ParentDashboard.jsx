@@ -24,6 +24,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
+import FoundingCircleLeaderWidget from '@/components/dashboard/FoundingCircleLeaderWidget';
 import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
@@ -246,6 +247,11 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
+        {/* Founding Circle Leader Widget (if approved) */}
+        {user?.is_founding_circle_lead && (
+          <FoundingCircleLeaderWidget user={user} />
+        )}
+
         {/* 2. Connect With Your Gator Box */}
         <div 
           className="bg-white rounded-2xl shadow-lg p-8 text-center"
@@ -391,17 +397,17 @@ export default function ParentDashboard() {
           >
             Yes – Make Me a Campus Ambassador
           </Button>
-          <p className="mt-4 text-slate-500">
-            Founding Circle tier (25% + override)?{' '}
-            <a 
-              href="https://forms.gle/yourformlink" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[#FA4616] hover:underline font-medium"
-            >
-              Apply here →
-            </a>
-          </p>
+          {!user?.is_founding_circle_lead && (
+            <p className="mt-4 text-slate-500">
+              Founding Circle tier (25% + override)?{' '}
+              <span 
+                onClick={() => navigate('UFAmbassador')}
+                className="text-[#FA4616] hover:underline font-medium cursor-pointer"
+              >
+                Apply here →
+              </span>
+            </p>
+          )}
         </div>
 
       </div>
