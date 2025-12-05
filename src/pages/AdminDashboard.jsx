@@ -558,11 +558,11 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="founding-circle" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white relative"
             >
               🔥 Founding Circle
               {foundingCircleCount > 0 && (
-                <span className="ml-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="ml-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full animate-pulse font-bold">
                   {foundingCircleCount}
                 </span>
               )}
