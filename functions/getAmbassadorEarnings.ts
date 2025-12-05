@@ -14,10 +14,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all referral codes for this user
-    const referrals = await base44.entities.Referral.filter({ 
+    // Get all referral codes for this user (check both created_by and email fields)
+    const referralsByCreator = await base44.entities.Referral.filter({ 
       created_by: user.email 
     });
+    const referralsByEmail = await base44.entities.Referral.filter({ 
+      email: user.email 
+    });
+    
+    // Combine and deduplicate referrals
+    const referralMap = new Map();
+    [...referralsByCreator, ...referralsByEmail].forEach(r => referralMap.set(r.id, r));
+    const referrals = Array.from(referralMap.values());
 
     // Get all users who signed up with this user's referral codes
     const referralCodes = referrals.map(r => r.referral_code);
