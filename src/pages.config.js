@@ -52,6 +52,7 @@ import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
 import ShareExpertise from './pages/ShareExpertise';
 import UFAmbassador from './pages/UFAmbassador';
+import AmbassadorLeaderboard from './pages/AmbassadorLeaderboard';
 import __Layout from './Layout.jsx';
 
 
@@ -110,6 +111,7 @@ export const PAGES = {
     "PublicProfile": PublicProfile,
     "ShareExpertise": ShareExpertise,
     "UFAmbassador": UFAmbassador,
+    "AmbassadorLeaderboard": AmbassadorLeaderboard,
 }
 
 export const pagesConfig = {
