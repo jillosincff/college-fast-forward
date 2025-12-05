@@ -400,12 +400,13 @@ export default function ParentDashboard() {
           {!user?.is_founding_circle_lead && (
             <p className="mt-4 text-slate-500">
               Founding Circle tier (25% + override)?{' '}
-              <span 
+              <Button 
+                variant="link"
                 onClick={() => navigate('UFAmbassador')}
-                className="text-[#FA4616] hover:underline font-medium cursor-pointer"
+                className="text-[#FA4616] hover:underline font-medium p-0 h-auto"
               >
                 Apply here →
-              </span>
+              </Button>
             </p>
           )}
         </div>
