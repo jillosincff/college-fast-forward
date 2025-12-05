@@ -102,8 +102,13 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
                     {formatCurrency(data.earnings.signupBonus.amount)}
                   </p>
                   <p className="text-xs text-green-600 mt-1">
-                    {data.earnings.signupBonus.count} signups × ${data.earnings.signupBonus.perSignup}
+                    {data.earnings.signupBonus.count} complete profiles × ${data.earnings.signupBonus.perSignup}
                   </p>
+                  {data.earnings.signupBonus.pendingProfiles > 0 && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      {data.earnings.signupBonus.pendingProfiles} pending profile completion
+                    </p>
+                  )}
                   {data.earnings.signupBonus.capped && (
                     <Badge className="mt-2 bg-green-200 text-green-800 text-xs">
                       Cap reached (${data.earnings.signupBonus.cap})
@@ -149,10 +154,14 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
             <Card>
               <CardContent className="p-4">
                 <h4 className="font-semibold text-slate-900 mb-4">Performance Stats</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-slate-900">{data.stats.totalSignups}</p>
                     <p className="text-xs text-slate-500">Total Signups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{data.stats.qualifiedSignups}</p>
+                    <p className="text-xs text-slate-500">Complete Profiles</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-slate-900">{data.stats.paidConversions}</p>
@@ -217,18 +226,22 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            activity.isPaid ? 'bg-green-100' : 'bg-slate-100'
+                            activity.isPaid ? 'bg-green-100' : activity.profileComplete ? 'bg-blue-100' : 'bg-amber-100'
                           }`}>
                             {activity.isPaid ? (
                               <CreditCard className="w-4 h-4 text-green-600" />
                             ) : (
-                              <UserPlus className="w-4 h-4 text-slate-500" />
+                              <UserPlus className={`w-4 h-4 ${activity.profileComplete ? 'text-blue-500' : 'text-amber-500'}`} />
                             )}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-slate-900">{activity.name}</p>
                             <p className="text-xs text-slate-500">
-                              {activity.isPaid ? `Paid • ${activity.tier || 'Subscriber'}` : 'Free signup'}
+                              {activity.isPaid 
+                                ? `Paid • ${activity.tier || 'Subscriber'}` 
+                                : activity.profileComplete 
+                                  ? 'Profile complete • Eligible for bonus'
+                                  : 'Profile incomplete • Pending'}
                             </p>
                           </div>
                         </div>
