@@ -118,84 +118,85 @@ export default function FoundingCircleLeaderWidget({ user }) {
 
   return (
     <Card className="border-2 border-orange-300 bg-gradient-to-br from-orange-50 to-amber-50 shadow-lg">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <Crown className="w-6 h-6 text-white" />
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+              <Crown className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-slate-900">Founding Circle Leader</h3>
-              <Badge className="bg-orange-100 text-orange-800 mt-1">
-                {user.founding_circle_school || 'UF'}
-              </Badge>
+              <h3 className="font-semibold text-sm text-slate-900">Founding Circle Leader</h3>
             </div>
           </div>
+          <Badge className="bg-orange-100 text-orange-800 text-xs">
+            {user.founding_circle_school || 'UF'}
+          </Badge>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <DollarSign className="w-5 h-5 mx-auto text-green-600 mb-1" />
-            <p className="text-lg font-bold text-slate-900">$5</p>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="text-center p-2 bg-white rounded-lg border">
+            <DollarSign className="w-4 h-4 mx-auto text-green-600 mb-0.5" />
+            <p className="text-sm font-bold text-slate-900">$5</p>
             <p className="text-xs text-slate-600">per signup</p>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <TrendingUp className="w-5 h-5 mx-auto text-blue-600 mb-1" />
-            <p className="text-lg font-bold text-slate-900">25%</p>
+          <div className="text-center p-2 bg-white rounded-lg border">
+            <TrendingUp className="w-4 h-4 mx-auto text-blue-600 mb-0.5" />
+            <p className="text-sm font-bold text-slate-900">25%</p>
             <p className="text-xs text-slate-600">commission</p>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <Users className="w-5 h-5 mx-auto text-purple-600 mb-1" />
-            <p className="text-lg font-bold text-slate-900">5%</p>
+          <div className="text-center p-2 bg-white rounded-lg border">
+            <Users className="w-4 h-4 mx-auto text-purple-600 mb-0.5" />
+            <p className="text-sm font-bold text-slate-900">5%</p>
             <p className="text-xs text-slate-600">override</p>
           </div>
         </div>
 
         {/* Referral Codes Section */}
-        <div className="bg-white rounded-lg border p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold text-slate-900">Your Referral Codes</h4>
+        <div className="bg-white rounded-lg border p-3 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-sm text-slate-900">Your Referral Codes</h4>
             <Button 
               size="sm" 
               variant="outline"
               onClick={() => setShowCreateForm(!showCreateForm)}
+              className="h-7 text-xs"
             >
-              <Plus className="w-4 h-4 mr-1" />
+              <Plus className="w-3 h-3 mr-1" />
               New Code
             </Button>
           </div>
 
           {showCreateForm && (
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-3">
               <Input
                 value={newCodePrefix}
                 onChange={(e) => setNewCodePrefix(e.target.value.toUpperCase())}
                 placeholder="e.g., GATOR-JANE"
-                className="flex-1"
+                className="flex-1 h-8 text-sm"
               />
-              <Button onClick={generateCode} disabled={creating}>
-                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create'}
+              <Button onClick={generateCode} disabled={creating} size="sm" className="h-8">
+                {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Create'}
               </Button>
             </div>
           )}
 
           {loading ? (
-            <div className="text-center py-4">
-              <Loader2 className="w-5 h-5 animate-spin mx-auto text-slate-400" />
+            <div className="text-center py-3">
+              <Loader2 className="w-4 h-4 animate-spin mx-auto text-slate-400" />
             </div>
           ) : referralCodes.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-4">
+            <p className="text-xs text-slate-500 text-center py-3">
               No codes yet. Create your first referral code above!
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {referralCodes.map((ref) => (
                 <div 
                   key={ref.id}
-                  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                  className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
                 >
                   <div>
-                    <p className="font-mono font-bold text-slate-900">{ref.referral_code}</p>
+                    <p className="font-mono font-semibold text-sm text-slate-900">{ref.referral_code}</p>
                     <p className="text-xs text-slate-500">
                       {ref.signups_count || 0} signups • ${ref.earnings_total || 0} earned
                     </p>
@@ -205,19 +206,19 @@ export default function FoundingCircleLeaderWidget({ user }) {
                       size="sm"
                       variant="ghost"
                       onClick={() => copyCode(ref.referral_code)}
-                      className="h-8 w-8 p-0"
+                      className="h-7 w-7 p-0"
                     >
                       {copiedCode === ref.referral_code ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
+                        <CheckCircle className="w-3 h-3 text-green-600" />
                       ) : (
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-3 h-3" />
                       )}
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => copyLink(ref.referral_code)}
-                      className="h-8 text-xs"
+                      className="h-7 text-xs px-2"
                     >
                       Copy Link
                     </Button>
@@ -228,21 +229,19 @@ export default function FoundingCircleLeaderWidget({ user }) {
           )}
         </div>
 
-        <div className="space-y-3">
-          <Button 
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-            onClick={() => setShowPaymentDashboard(true)}
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            View Earnings Dashboard
-          </Button>
-          
-          <p className="text-xs text-center text-slate-500">
-            Member since {user.founding_circle_approved_at 
-              ? new Date(user.founding_circle_approved_at).toLocaleDateString() 
-              : 'N/A'}
-          </p>
-        </div>
+        <Button 
+          className="w-full bg-orange-600 hover:bg-orange-700 text-white h-9"
+          onClick={() => setShowPaymentDashboard(true)}
+        >
+          <BarChart3 className="w-4 h-4 mr-2" />
+          View Earnings Dashboard
+        </Button>
+        
+        <p className="text-xs text-center text-slate-500 mt-2">
+          Member since {user.founding_circle_approved_at 
+            ? new Date(user.founding_circle_approved_at).toLocaleDateString() 
+            : 'N/A'}
+        </p>
 
         <AmbassadorPaymentDashboard
           open={showPaymentDashboard}
