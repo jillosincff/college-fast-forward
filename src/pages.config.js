@@ -53,6 +53,7 @@ import PublicProfile from './pages/PublicProfile';
 import ShareExpertise from './pages/ShareExpertise';
 import UFAmbassador from './pages/UFAmbassador';
 import AmbassadorLeaderboard from './pages/AmbassadorLeaderboard';
+import Notifications from './pages/Notifications';
 import __Layout from './Layout.jsx';
 
 
@@ -112,6 +113,7 @@ export const PAGES = {
     "ShareExpertise": ShareExpertise,
     "UFAmbassador": UFAmbassador,
     "AmbassadorLeaderboard": AmbassadorLeaderboard,
+    "Notifications": Notifications,
 }
 
 export const pagesConfig = {

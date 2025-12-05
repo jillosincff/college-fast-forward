@@ -21,6 +21,7 @@ import AppErrorBoundary from './components/common/AppErrorBoundary';
 import logger from './components/utils/logger';
 import { Message } from '@/entities/Message';
 import { PayItForwardNotification } from '@/entities/PayItForwardNotification';
+import NotificationBell from './components/notifications/NotificationBell';
 import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
 import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
@@ -105,6 +106,7 @@ const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 const UFAmbassador = React.lazy(() => import('./pages/UFAmbassador'));
+const Notifications = React.lazy(() => import('./pages/Notifications'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -595,6 +597,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                 </Popover>
               )}
 
+              {user && currentPage !== 'AdminDashboard' && currentPage !== 'TestingDashboard' && currentPage !== 'AdminSetup' && (
+                <NotificationBell user={user} />
+              )}
+
               {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -730,6 +736,7 @@ const getPageComponent = (pageName) => {
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
     case 'UFAmbassador': return UFAmbassador;
+    case 'Notifications': return Notifications;
     default: return LandingPage;
   }
 };
