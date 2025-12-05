@@ -26,6 +26,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { approveInviteRequest } from '@/functions/approveInviteRequest';
 import CommunityInviteManager from '@/components/admin/CommunityInviteManager'; // Added CommunityInviteManager import
+import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircleApplicationsManager';
 import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
   const [inviteRequests, setInviteRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [processingRequest, setProcessingRequest] = useState(null);
+  const [foundingCircleCount, setFoundingCircleCount] = useState(0);
 
   // Check admin access
   useEffect(() => {
@@ -203,8 +205,18 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (user?.roles?.includes('admin')) {
       loadInviteRequests();
+      loadFoundingCircleCount();
     }
   }, [user]);
+
+  const loadFoundingCircleCount = async () => {
+    try {
+      const pending = await base44.entities.FoundingCircleApplication.filter({ status: 'pending' });
+      setFoundingCircleCount(pending?.length || 0);
+    } catch (error) {
+      console.error('Failed to load founding circle count:', error);
+    }
+  };
 
   const handleInviteAction = async (requestId, action) => {
     setProcessingRequest(requestId);
@@ -544,6 +556,17 @@ const AdminDashboard = () => {
               <Download className="w-4 h-4 mr-1" />
               Export Users
             </TabsTrigger>
+            <TabsTrigger 
+              value="founding-circle" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white"
+            >
+              🔥 Founding Circle
+              {foundingCircleCount > 0 && (
+                <span className="ml-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {foundingCircleCount}
+                </span>
+              )}
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
@@ -833,6 +856,11 @@ const AdminDashboard = () => {
             {/* Export Users Tab */}
             <TabsContent value="export" className="space-y-6">
               <ExportUsersSection />
+            </TabsContent>
+
+            {/* Founding Circle Applications Tab */}
+            <TabsContent value="founding-circle" className="space-y-6">
+              <FoundingCircleApplicationsManager />
             </TabsContent>
           </Tabs>
         )}
