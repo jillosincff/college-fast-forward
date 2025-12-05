@@ -44,7 +44,7 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
     e.preventDefault();
     setError('');
 
-    if (!formData.first_name || !formData.last_name || !formData.email) {
+    if (!formData.first_name || !formData.last_name) {
       setError('Please fill in all required fields');
       return;
     }
@@ -57,17 +57,24 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
     setIsSubmitting(true);
 
     try {
+      // Use user's email from auth
+      const userEmail = user.email;
+
       // Check if already applied
-      const existing = await FoundingCircleApplication.filter({ email: formData.email });
+      const existing = await FoundingCircleApplication.filter({ email: userEmail });
       if (existing && existing.length > 0) {
         setError('You have already applied. We will be in touch soon!');
         setIsSubmitting(false);
         return;
       }
 
-      // Create application
+      // Create application with user's authenticated email
       await FoundingCircleApplication.create({
-        ...formData,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: userEmail,
+        phone_number: formData.phone_number,
+        linkedin_url: formData.linkedin_url,
         school: school,
         status: 'pending'
       });
@@ -81,7 +88,7 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
 New Founding Circle Lead Application
 
 Name: ${formData.first_name} ${formData.last_name}
-Email: ${formData.email}
+Email: ${userEmail}
 Phone: ${formData.phone_number || 'Not provided'}
 LinkedIn: ${formData.linkedin_url || 'Not provided'}
 School: ${school}
@@ -171,19 +178,6 @@ Please review this application in your Admin Dashboard.
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="john@example.com"
-                className="mt-1"
-                required
-              />
             </div>
 
             <div>
