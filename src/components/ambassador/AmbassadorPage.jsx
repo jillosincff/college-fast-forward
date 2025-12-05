@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, LogIn } from 'lucide-react';
 import { Referral } from '@/entities/Referral';
 import FoundingCircleApplyModal from './FoundingCircleApplyModal';
+import { useAuth } from '@/components/auth/AuthContext';
+import { base44 } from '@/api/base44Client';
 
 export default function AmbassadorPage({ 
   school, 
@@ -13,25 +15,45 @@ export default function AmbassadorPage({
   primaryColor = "#0021A5", 
   accentColor = "#FA4616"
 }) {
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
-  const [showCodeBox, setShowCodeBox] = useState(false);
+  const { user, isLoading } = useAuth();
   const [customCode, setCustomCode] = useState('');
   const [finalCode, setFinalCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showLeadModal, setShowLeadModal] = useState(false);
+  const [existingReferral, setExistingReferral] = useState(null);
+  const [checkingExisting, setCheckingExisting] = useState(false);
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      setError('Please fill in all fields');
-      return;
-    }
-    setShowCodeBox(true);
-    setError('');
+  // Check if user already has a referral code
+  useEffect(() => {
+    const checkExistingReferral = async () => {
+      if (!user?.email) return;
+      setCheckingExisting(true);
+      try {
+        const existing = await Referral.filter({ email: user.email });
+        if (existing && existing.length > 0) {
+          setExistingReferral(existing[0]);
+          setFinalCode(existing[0].referral_code);
+        }
+      } catch (err) {
+        console.error('Error checking existing referral:', err);
+      } finally {
+        setCheckingExisting(false);
+      }
+    };
+    checkExistingReferral();
+  }, [user?.email]);
+
+  const handleLogin = () => {
+    base44.auth.redirectToLogin(window.location.href);
   };
 
   const handleSaveCode = async () => {
+    if (!user) {
+      setError('Please sign in first');
+      return;
+    }
+
     const input = customCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (input.length < 3) {
       setError('Code must be at least 3 characters');
@@ -51,16 +73,17 @@ export default function AmbassadorPage({
         return;
       }
 
-      // Create the referral
-      await Referral.create({
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
+      // Create the referral linked to authenticated user
+      const newReferral = await Referral.create({
+        name: user.full_name || user.email,
+        email: user.email,
         referral_code: code,
         school: school,
         role: 'ambassador',
         status: 'active'
       });
 
+      setExistingReferral(newReferral);
       setFinalCode(code);
     } catch (err) {
       console.error('Error creating referral:', err);
@@ -118,38 +141,22 @@ export default function AmbassadorPage({
                 $5 bonus only during Free Phase (first 1,000 UF users)
               </p>
 
-              {!showCodeBox ? (
-                <form onSubmit={handleFormSubmit} className="space-y-3">
-                  <Input
-                    placeholder="First Name"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="h-12 border-gray-300"
-                    required
-                  />
-                  <Input
-                    placeholder="Last Name"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="h-12 border-gray-300"
-                    required
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Your Email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="h-12 border-gray-300"
-                    required
-                  />
+              {isLoading || checkingExisting ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : !user ? (
+                <div className="text-center space-y-4">
+                  <p className="text-gray-600">Sign in to become a Campus Ambassador and get your referral code.</p>
                   <Button
-                    type="submit"
+                    onClick={handleLogin}
                     className="w-full h-14 text-lg font-bold text-white rounded-lg"
                     style={{ backgroundColor: primaryColor }}
                   >
-                    Join Free — Get Your Code in 30 Seconds →
+                    <LogIn className="w-5 h-5 mr-2" />
+                    Sign In to Get Started
                   </Button>
-                </form>
+                </div>
               ) : !finalCode ? (
                 <div className="text-center space-y-4">
                   <p className="text-lg">Choose your code:</p>

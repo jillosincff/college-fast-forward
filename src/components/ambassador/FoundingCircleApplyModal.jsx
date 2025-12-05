@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, LogIn } from 'lucide-react';
 import { FoundingCircleApplication } from '@/entities/FoundingCircleApplication';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/components/auth/AuthContext';
 
 export default function FoundingCircleApplyModal({ open, onClose, school = "UF", accentColor = "#FA4616" }) {
+  const { user, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -18,6 +20,23 @@ export default function FoundingCircleApplyModal({ open, onClose, school = "UF",
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Pre-fill form with user data when authenticated
+  useEffect(() => {
+    if (user) {
+      const nameParts = (user.full_name || '').split(' ');
+      setFormData(prev => ({
+        ...prev,
+        first_name: nameParts[0] || '',
+        last_name: nameParts.slice(1).join(' ') || '',
+        email: user.email || ''
+      }));
+    }
+  }, [user]);
+
+  const handleLogin = () => {
+    base44.auth.redirectToLogin(window.location.href);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +111,23 @@ Please review this application in your Admin Dashboard.
           </DialogTitle>
         </DialogHeader>
 
-        {success ? (
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          </div>
+        ) : !user ? (
+          <div className="text-center py-8 space-y-4">
+            <p className="text-gray-600">Sign in to apply for the Founding Circle Lead program.</p>
+            <Button
+              onClick={handleLogin}
+              className="h-12 text-lg font-bold text-black"
+              style={{ backgroundColor: accentColor }}
+            >
+              <LogIn className="w-5 h-5 mr-2" />
+              Sign In to Apply
+            </Button>
+          </div>
+        ) : success ? (
           <div className="text-center py-8 space-y-4">
             <CheckCircle className="w-16 h-16 mx-auto text-green-500" />
             <h3 className="text-xl font-bold text-gray-900">Application Submitted!</h3>
