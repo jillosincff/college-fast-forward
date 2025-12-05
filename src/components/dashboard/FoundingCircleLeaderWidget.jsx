@@ -3,9 +3,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Crown, ExternalLink, DollarSign, Users, TrendingUp, Copy, Plus, Loader2, CheckCircle } from 'lucide-react';
+import { Crown, ExternalLink, DollarSign, Users, TrendingUp, Copy, Plus, Loader2, CheckCircle, BarChart3 } from 'lucide-react';
 import { Referral } from '@/entities/Referral';
 import { useToast } from '@/components/ui/use-toast';
+import AmbassadorPaymentDashboard from './AmbassadorPaymentDashboard';
 
 export default function FoundingCircleLeaderWidget({ user }) {
   const { toast } = useToast();
@@ -15,6 +16,7 @@ export default function FoundingCircleLeaderWidget({ user }) {
   const [newCodePrefix, setNewCodePrefix] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [copiedCode, setCopiedCode] = useState(null);
+  const [showPaymentDashboard, setShowPaymentDashboard] = useState(false);
 
   useEffect(() => {
     if (user?.is_founding_circle_lead) {
@@ -229,13 +231,10 @@ export default function FoundingCircleLeaderWidget({ user }) {
         <div className="space-y-3">
           <Button 
             className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-            onClick={() => {
-              // TODO: Link to actual payment dashboard when ready
-              window.open('https://dashboard.stripe.com', '_blank');
-            }}
+            onClick={() => setShowPaymentDashboard(true)}
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            View Payment Dashboard
+            <BarChart3 className="w-4 h-4 mr-2" />
+            View Earnings Dashboard
           </Button>
           
           <p className="text-xs text-center text-slate-500">
@@ -244,6 +243,12 @@ export default function FoundingCircleLeaderWidget({ user }) {
               : 'N/A'}
           </p>
         </div>
+
+        <AmbassadorPaymentDashboard
+          open={showPaymentDashboard}
+          onOpenChange={setShowPaymentDashboard}
+          user={user}
+        />
       </CardContent>
     </Card>
   );
