@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Loader2, LogIn } from 'lucide-react';
+import { CheckCircle, Loader2, LogIn, ArrowLeft } from 'lucide-react';
 import { Referral } from '@/entities/Referral';
 import FoundingCircleApplyModal from './FoundingCircleApplyModal';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 export default function AmbassadorPage({ 
   school, 
@@ -96,6 +97,16 @@ export default function AmbassadorPage({
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-5xl mx-auto">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate('Dashboard')}
+          className="mb-6 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Button>
+
         {/* Header */}
         <h1 
           className="text-center text-4xl md:text-5xl font-bold mb-4"
