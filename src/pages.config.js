@@ -54,6 +54,7 @@ import ShareExpertise from './pages/ShareExpertise';
 import UFAmbassador from './pages/UFAmbassador';
 import AmbassadorLeaderboard from './pages/AmbassadorLeaderboard';
 import Notifications from './pages/Notifications';
+import ReferralAnalytics from './pages/ReferralAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -114,6 +115,7 @@ export const PAGES = {
     "UFAmbassador": UFAmbassador,
     "AmbassadorLeaderboard": AmbassadorLeaderboard,
     "Notifications": Notifications,
+    "ReferralAnalytics": ReferralAnalytics,
 }
 
 export const pagesConfig = {

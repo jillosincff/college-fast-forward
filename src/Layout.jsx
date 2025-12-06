@@ -100,6 +100,7 @@ import TestingDashboard from './pages/TestingDashboard';
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
 const Favorites = React.lazy(() => import('./pages/Favorites'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
+const ReferralAnalytics = React.lazy(() => import('./pages/ReferralAnalytics'));
 const Terms = React.lazy(() => import('./pages/Terms'));
 const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
@@ -737,6 +738,7 @@ const getPageComponent = (pageName) => {
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
     case 'UFAmbassador': return UFAmbassador;
     case 'Notifications': return Notifications;
+    case 'ReferralAnalytics': return ReferralAnalytics;
     default: return LandingPage;
   }
 };
