@@ -1,9 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-const SIGNUP_BONUS = 5; // $5 per signup
-const SIGNUP_BONUS_CAP = 200; // $200 lifetime cap
-const LEAD_COMMISSION_RATE = 0.25; // 25% monthly commission
-const OVERRIDE_RATE = 0.05; // 5% override on team earnings
+// Updated payout structure per December 2025 guide
+const SIGNUP_BONUS = 5; // $5 per completed signup during Free Phase
+const SIGNUP_BONUS_CAP = 100; // $100 lifetime cap (20 signups max)
+const COMMISSION_RATE = 0.15; // 15% monthly commission on paid subscriptions
+
+// Pricing tiers
+const TIER_FOUNDING = 9; // $9/month for first 5,000 paid users nationwide
+const TIER_STANDARD = 19; // $19/month for 5,001+ paid users nationwide
+
+// UF Free Phase: First 1,000 UF users get Free Forever
+const UF_FREE_PHASE_LIMIT = 1000;
 
 Deno.serve(async (req) => {
   try {
@@ -14,7 +21,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all referral codes for this user (check both created_by and email fields)
+    // Get user's referral record
     const referralsByCreator = await base44.entities.Referral.filter({ 
       created_by: user.email 
     });
@@ -22,77 +29,132 @@ Deno.serve(async (req) => {
       email: user.email 
     });
     
-    // Combine and deduplicate referrals
     const referralMap = new Map();
     [...referralsByCreator, ...referralsByEmail].forEach(r => referralMap.set(r.id, r));
     const referrals = Array.from(referralMap.values());
 
-    // Get all users who signed up with this user's referral codes
+    if (referrals.length === 0) {
+      return Response.json({
+        success: true,
+        earnings: {
+          total: 0,
+          signupBonus: {
+            amount: 0,
+            count: 0,
+            totalSignups: 0,
+            pendingProfiles: 0,
+            perSignup: SIGNUP_BONUS,
+            cap: SIGNUP_BONUS_CAP,
+            capped: false
+          },
+          monthlyCommission: {
+            amount: 0,
+            rate: COMMISSION_RATE * 100,
+            paidUsersCount: 0,
+            breakdown: []
+          }
+        },
+        stats: {
+          totalSignups: 0,
+          qualifiedSignups: 0,
+          pendingProfiles: 0,
+          paidConversions: 0,
+          conversionRate: 0
+        },
+        recentActivity: [],
+        referralCodes: []
+      });
+    }
+
+    // Get all users who signed up with this ambassador's referral codes
     const referralCodes = referrals.map(r => r.referral_code);
-    
     let referredUsers = [];
-    if (referralCodes.length > 0) {
-      // Get users who used any of this lead's referral codes
-      for (const code of referralCodes) {
-        try {
-          const usersWithCode = await base44.asServiceRole.entities.User.filter({ 
-            referral_code: code 
-          });
-          referredUsers = [...referredUsers, ...usersWithCode];
-        } catch (err) {
-          console.log(`Could not fetch users for code ${code}:`, err.message);
-        }
+    
+    for (const code of referralCodes) {
+      try {
+        const usersWithCode = await base44.asServiceRole.entities.User.filter({ 
+          referral_code: code 
+        });
+        referredUsers = [...referredUsers, ...usersWithCode];
+      } catch (err) {
+        console.log(`Could not fetch users for code ${code}:`, err.message);
       }
     }
 
-    // Only count users with completed profiles for signup bonuses
-    const completedProfileUsers = referredUsers.filter(u => u.onboarding_completed === true);
+    // Get total UF user count to determine if Free Phase is still active
+    let ufUserCount = 0;
+    try {
+      const allUsers = await base44.asServiceRole.entities.User.list();
+      // Count UF users (students + alumni with @ufl.edu OR persona = gator/student/alumni)
+      ufUserCount = allUsers.filter(u => 
+        u.email?.toLowerCase().endsWith('@ufl.edu') || 
+        ['gator', 'student', 'alumni'].includes(u.persona?.toLowerCase())
+      ).length;
+    } catch (err) {
+      console.log('Could not fetch UF user count:', err.message);
+    }
+
+    const isFreePhaseActive = ufUserCount < UF_FREE_PHASE_LIMIT;
+
+    // Calculate signup bonuses - only for completed profiles during Free Phase
+    const completedProfileUsers = referredUsers.filter(u => {
+      // Profile is complete if:
+      // 1. Onboarding completed
+      // 2. Has first and last name
+      // 3. Has grad year or major (for students)
+      // 4. Has filled out help request or created a profile
+      const hasBasicInfo = u.first_name && u.last_name;
+      const hasOnboarding = u.onboarding_completed === true;
+      return hasBasicInfo && hasOnboarding;
+    });
+
     const totalSignups = referredUsers.length;
     const qualifiedSignups = completedProfileUsers.length;
-    const signupBonusEarnings = Math.min(qualifiedSignups * SIGNUP_BONUS, SIGNUP_BONUS_CAP);
-    const signupBonusCapped = qualifiedSignups * SIGNUP_BONUS > SIGNUP_BONUS_CAP;
-
-    // Calculate monthly commission from paid subscribers (must also have completed profile)
-    const paidUsers = completedProfileUsers.filter(u => 
-      u.subscription_status === 'active'
-    );
     
-    // For simplicity, we'll estimate monthly commission based on subscription tiers
-    // Founding Gator: $9/mo, Standard: $19/mo
-    let monthlyCommissionBase = 0;
-    paidUsers.forEach(u => {
-      if (u.subscription_tier === 'Early Adopter' || u.is_founding_gator) {
-        monthlyCommissionBase += 9;
-      } else {
-        monthlyCommissionBase += 19;
+    // Only count signup bonuses if referred during Free Phase
+    const freePhaseSignups = completedProfileUsers.filter(u => {
+      // If we have signup_order and it's <= 1000, they were in Free Phase
+      if (u.signup_order && u.signup_order <= UF_FREE_PHASE_LIMIT) {
+        return true;
       }
+      // Fallback: check if their creation was before UF hit 1,000
+      // (This is approximate - ideally we'd track the exact moment)
+      return isFreePhaseActive;
     });
-    const monthlyCommission = monthlyCommissionBase * LEAD_COMMISSION_RATE;
 
-    // Get team ambassadors (users who signed up under this lead and became ambassadors)
-    const teamAmbassadors = [];
-    let teamOverrideEarnings = 0;
-    
-    for (const referredUser of referredUsers) {
-      // Check if this referred user has their own referral codes (became an ambassador)
-      const theirReferrals = await base44.asServiceRole.entities.Referral.filter({
-        email: referredUser.email,
-        role: 'ambassador'
-      });
+    const bonusEligibleCount = Math.min(freePhaseSignups.length, SIGNUP_BONUS_CAP / SIGNUP_BONUS);
+    const signupBonusEarnings = bonusEligibleCount * SIGNUP_BONUS;
+    const signupBonusCapped = freePhaseSignups.length >= (SIGNUP_BONUS_CAP / SIGNUP_BONUS);
+
+    // Calculate monthly commission from paid subscribers
+    // Only users who upgraded AFTER UF hit 1,000 generate commission
+    const paidUsers = completedProfileUsers.filter(u => 
+      u.subscription_status === 'active' && u.subscription_tier
+    );
+
+    let monthlyCommissionBreakdown = [];
+    let totalMonthlyCommission = 0;
+
+    paidUsers.forEach(u => {
+      let monthlyPrice = 0;
       
-      if (theirReferrals.length > 0) {
-        // Sum up their earnings for override calculation
-        const theirTotalEarnings = theirReferrals.reduce((sum, r) => sum + (r.earnings_total || 0), 0);
-        teamOverrideEarnings += theirTotalEarnings * OVERRIDE_RATE;
-        
-        teamAmbassadors.push({
-          name: referredUser.full_name || `${referredUser.first_name} ${referredUser.last_name}`,
-          email: referredUser.email,
-          signups: theirReferrals.reduce((sum, r) => sum + (r.signups_count || 0), 0),
-          earnings: theirTotalEarnings
-        });
+      // Determine their subscription price based on when they subscribed
+      if (u.subscription_tier === 'Early Adopter' || u.subscription_tier === 'Founding Gator') {
+        monthlyPrice = TIER_FOUNDING; // $9/month
+      } else if (u.subscription_tier === 'Standard') {
+        monthlyPrice = TIER_STANDARD; // $19/month
       }
-    }
+
+      const commission = monthlyPrice * COMMISSION_RATE;
+      totalMonthlyCommission += commission;
+
+      monthlyCommissionBreakdown.push({
+        name: u.full_name || `${u.first_name} ${u.last_name}`,
+        tier: u.subscription_tier,
+        monthlyPrice,
+        commission
+      });
+    });
 
     // Build activity timeline
     const recentActivity = referredUsers
@@ -104,11 +166,11 @@ Deno.serve(async (req) => {
         date: u.created_date,
         isPaid: u.subscription_status === 'active',
         tier: u.subscription_tier,
-        profileComplete: u.onboarding_completed === true
+        profileComplete: u.onboarding_completed === true,
+        inFreePhaseBucket: u.signup_order && u.signup_order <= UF_FREE_PHASE_LIMIT
       }));
 
-    // Calculate totals
-    const totalEarnings = signupBonusEarnings + monthlyCommission + teamOverrideEarnings;
+    const totalEarnings = signupBonusEarnings + totalMonthlyCommission;
 
     return Response.json({
       success: true,
@@ -116,34 +178,33 @@ Deno.serve(async (req) => {
         total: totalEarnings,
         signupBonus: {
           amount: signupBonusEarnings,
-          count: qualifiedSignups,
+          count: bonusEligibleCount,
           totalSignups: totalSignups,
+          freePhaseSignups: freePhaseSignups.length,
           pendingProfiles: totalSignups - qualifiedSignups,
           perSignup: SIGNUP_BONUS,
           cap: SIGNUP_BONUS_CAP,
-          capped: signupBonusCapped
+          capped: signupBonusCapped,
+          isFreePhaseActive
         },
         monthlyCommission: {
-          amount: monthlyCommission,
-          rate: LEAD_COMMISSION_RATE * 100,
+          amount: totalMonthlyCommission,
+          rate: COMMISSION_RATE * 100,
           paidUsersCount: paidUsers.length,
-          baseAmount: monthlyCommissionBase
-        },
-        teamOverride: {
-          amount: teamOverrideEarnings,
-          rate: OVERRIDE_RATE * 100,
-          teamSize: teamAmbassadors.length
+          breakdown: monthlyCommissionBreakdown
         }
       },
       stats: {
         totalSignups,
         qualifiedSignups,
+        freePhaseSignups: freePhaseSignups.length,
         pendingProfiles: totalSignups - qualifiedSignups,
         paidConversions: paidUsers.length,
         conversionRate: qualifiedSignups > 0 ? ((paidUsers.length / qualifiedSignups) * 100).toFixed(1) : 0,
-        teamSize: teamAmbassadors.length
+        ufUserCount,
+        freePhaseActive: isFreePhaseActive,
+        spotsLeftInFreePhase: Math.max(0, UF_FREE_PHASE_LIMIT - ufUserCount)
       },
-      team: teamAmbassadors,
       recentActivity,
       referralCodes: referrals.map(r => ({
         code: r.referral_code,

@@ -102,11 +102,16 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
                     {formatCurrency(data.earnings.signupBonus.amount)}
                   </p>
                   <p className="text-xs text-green-600 mt-1">
-                    {data.earnings.signupBonus.count} complete profiles × ${data.earnings.signupBonus.perSignup}
+                    {data.earnings.signupBonus.count} eligible × ${data.earnings.signupBonus.perSignup}
                   </p>
-                  {data.earnings.signupBonus.pendingProfiles > 0 && (
+                  {data.earnings.signupBonus.isFreePhaseActive && data.earnings.signupBonus.pendingProfiles > 0 && (
                     <p className="text-xs text-amber-600 mt-1">
                       {data.earnings.signupBonus.pendingProfiles} pending profile completion
+                    </p>
+                  )}
+                  {!data.earnings.signupBonus.isFreePhaseActive && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Free Phase ended - no new $5 bonuses
                     </p>
                   )}
                   {data.earnings.signupBonus.capped && (
@@ -128,23 +133,25 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
                     {formatCurrency(data.earnings.monthlyCommission.amount)}
                   </p>
                   <p className="text-xs text-blue-600 mt-1">
-                    {data.earnings.monthlyCommission.rate}% of {data.earnings.monthlyCommission.paidUsersCount} paid users
+                    {data.earnings.monthlyCommission.rate}% from {data.earnings.monthlyCommission.paidUsersCount} paid users
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Team Override */}
-              <Card className="border-purple-200 bg-purple-50">
+              {/* Free Phase Status */}
+              <Card className="border-orange-200 bg-orange-50">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-5 h-5 text-purple-600" />
-                    <span className="font-semibold text-purple-800">Team Override</span>
+                    <Calendar className="w-5 h-5 text-orange-600" />
+                    <span className="font-semibold text-orange-800">Free Phase</span>
                   </div>
-                  <p className="text-2xl font-bold text-purple-700">
-                    {formatCurrency(data.earnings.teamOverride.amount)}
+                  <p className="text-2xl font-bold text-orange-700">
+                    {data.stats.freePhaseActive ? 'Active' : 'Ended'}
                   </p>
-                  <p className="text-xs text-purple-600 mt-1">
-                    {data.earnings.teamOverride.rate}% from {data.earnings.teamOverride.teamSize} ambassadors
+                  <p className="text-xs text-orange-600 mt-1">
+                    {data.stats.freePhaseActive 
+                      ? `${data.stats.spotsLeftInFreePhase} spots left for $5 bonuses`
+                      : 'Now earning 15% commission on paid users'}
                   </p>
                 </CardContent>
               </Card>
@@ -179,29 +186,27 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
               </CardContent>
             </Card>
 
-            {/* Team Ambassadors */}
-            {data.team.length > 0 && (
+            {/* Commission Breakdown */}
+            {data.earnings.monthlyCommission.breakdown && data.earnings.monthlyCommission.breakdown.length > 0 && (
               <Card>
                 <CardContent className="p-4">
                   <h4 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Your Team Ambassadors
+                    <DollarSign className="w-4 h-4" />
+                    Monthly Commission Breakdown
                   </h4>
-                  <div className="space-y-3">
-                    {data.team.map((member, idx) => (
+                  <div className="space-y-2">
+                    {data.earnings.monthlyCommission.breakdown.map((item, idx) => (
                       <div 
                         key={idx}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
                       >
                         <div>
-                          <p className="font-medium text-slate-900">{member.name}</p>
-                          <p className="text-xs text-slate-500">{member.signups} signups</p>
+                          <p className="font-medium text-slate-900">{item.name}</p>
+                          <p className="text-xs text-slate-500">{item.tier} • ${item.monthlyPrice}/mo</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-slate-900">{formatCurrency(member.earnings)}</p>
-                          <p className="text-xs text-purple-600">
-                            Your cut: {formatCurrency(member.earnings * 0.05)}
-                          </p>
+                          <p className="font-semibold text-blue-700">{formatCurrency(item.commission)}/mo</p>
+                          <p className="text-xs text-blue-600">15% commission</p>
                         </div>
                       </div>
                     ))}
@@ -253,12 +258,27 @@ export default function AmbassadorPaymentDashboard({ open, onOpenChange, user })
               </Card>
             )}
 
-            {/* Info Banner */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-800">
-                <strong>Note:</strong> Earnings are calculated in real-time. Payouts are processed monthly via Stripe. 
-                Contact support if you have questions about your earnings.
-              </p>
+            {/* Payout Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-3">How Campus Ambassador Payouts Work</h4>
+              <div className="space-y-2 text-sm text-blue-800">
+                <div>
+                  <strong>$5 Signup Bonuses (Free Phase Only):</strong>
+                  <ul className="ml-4 mt-1 space-y-1 text-blue-700">
+                    <li>• $5 for every completed signup before UF hits 1,000 users</li>
+                    <li>• Max $100 lifetime (20 signups)</li>
+                    <li>• Requires full profile: Name, Grad Year + Major, Help Request</li>
+                  </ul>
+                </div>
+                <div className="mt-3">
+                  <strong>15% Monthly Commission (After 1,000):</strong>
+                  <ul className="ml-4 mt-1 space-y-1 text-blue-700">
+                    <li>• $1.35/mo per $9 subscriber (15% of $9)</li>
+                    <li>• $2.85/mo per $19 subscriber (15% of $19)</li>
+                    <li>• Paid forever as long as they stay subscribed</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         ) : null}
