@@ -431,7 +431,7 @@ const AnimatedNetworkHero = ({
           </h1>
 
           <p className="text-lg text-[#FFD700] mt-4 mb-2 px-4">
-            College Fast Forward is a private network for UF students and parents to get hired through warm intros.
+            College Fast Forward is a private, parent-driven network that accelerates the job search for every Gator.
           </p>
 
           <div className="text-center max-w-2xl mx-auto mb-2 px-4 mt-6">
