@@ -33,7 +33,9 @@ Deno.serve(async (req) => {
       'gator_to_parent',
       'gator_to_gator', 
       'parent_to_parent',
-      'parent_to_gator'
+      'parent_to_gator',
+      'admin_to_parent',
+      'admin_to_gator'
     ];
 
     if (!validInviteTypes.includes(invite_type)) {
@@ -53,6 +55,12 @@ Deno.serve(async (req) => {
       if (!invite_type.startsWith('parent_to_')) {
         return Response.json({ 
           error: 'Invalid invite type for Parents' 
+        }, { status: 400 });
+      }
+    } else if (user.roles?.includes('admin')) {
+      if (!invite_type.startsWith('admin_to_')) {
+        return Response.json({ 
+          error: 'Invalid invite type for Admins' 
         }, { status: 400 });
       }
     }
