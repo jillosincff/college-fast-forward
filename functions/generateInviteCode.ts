@@ -44,8 +44,11 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Validate user can generate this type
-    if (user.persona === 'gator') {
+    // Validate user can generate this type (check admin first)
+    if (user.roles?.includes('admin')) {
+      // Admins can generate any type of invite
+      console.log('Admin user generating invite');
+    } else if (user.persona === 'gator') {
       if (!invite_type.startsWith('gator_to_')) {
         return Response.json({ 
           error: 'Invalid invite type for Gators' 
@@ -55,12 +58,6 @@ Deno.serve(async (req) => {
       if (!invite_type.startsWith('parent_to_')) {
         return Response.json({ 
           error: 'Invalid invite type for Parents' 
-        }, { status: 400 });
-      }
-    } else if (user.roles?.includes('admin')) {
-      if (!invite_type.startsWith('admin_to_')) {
-        return Response.json({ 
-          error: 'Invalid invite type for Admins' 
         }, { status: 400 });
       }
     }
