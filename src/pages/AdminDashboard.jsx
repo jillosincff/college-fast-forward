@@ -1127,10 +1127,11 @@ const ManualUserCreation = () => {
 
     setLoading(true);
     try {
+      // Determine invite_type based on selected persona
+      const invite_type = persona === 'gator' ? 'admin_to_gator' : 'admin_to_parent';
+      
       const response = await base44.functions.invoke('generateInviteCode', {
-        admin_email: email.toLowerCase().trim(),
-        note: `Manual invite for ${fullName}`,
-        max_uses: 1
+        invite_type: invite_type
       });
 
       if (response.data?.code) {
