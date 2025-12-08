@@ -203,7 +203,9 @@ College Fast Forward Team`;
       is_community_invite: invite.is_community_invite || false,
       group_name: invite.group_name || null,
       current_uses: invite.current_uses + 1,
-      max_uses: invite.max_uses || 1
+      max_uses: invite.max_uses || 1,
+      family_group_id: invite.family_group_id || null,
+      parent_slot: invite.parent_slot || null
     });
 
   } catch (error) {
