@@ -24,6 +24,7 @@ export default function LandingPage() {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [showAuthInstructions, setShowAuthInstructions] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [foundingStats, setFoundingStats] = useState({ spots_left: 430, total_users: 570 });
   
   const handleSeeHowItWorks = () => {
     const howItWorksSection = document.getElementById('how-it-works');
@@ -89,6 +90,23 @@ export default function LandingPage() {
     setShowInviteModal(true);
   };
 
+  useEffect(() => {
+    const loadFoundingStats = async () => {
+      try {
+        const response = await base44.functions.invoke('getFoundingStats');
+        if (response.data.success) {
+          setFoundingStats({
+            spots_left: response.data.spots_left,
+            total_users: response.data.total_users
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load founding stats:', error);
+      }
+    };
+    loadFoundingStats();
+  }, []);
+
   return (
     <>
       <SocialMetaTags 
@@ -105,6 +123,29 @@ export default function LandingPage() {
       `}</style>
 
       <div className="min-h-screen bg-white">
+        {/* Founding Gator Bar */}
+        {foundingStats.spots_left > 0 && (
+          <div 
+            className="sticky top-0 z-50 text-white text-center py-3 px-4 font-bold shadow-lg"
+            style={{ backgroundColor: '#FA4616' }}
+          >
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3">
+              <span className="text-sm sm:text-base">
+                ⚡ ONLY <span className="text-2xl mx-1">{foundingStats.spots_left}</span> FOUNDING SPOTS LEFT (out of 1000) ⚡
+              </span>
+              <span className="text-xs sm:text-sm">
+                Lifetime free + permanent Founding Gator Family badge — claim yours now →
+              </span>
+              <Button
+                onClick={() => !user ? handleTopRightJoinClick() : navigate('Dashboard')}
+                className="bg-yellow-400 text-slate-900 hover:bg-yellow-500 font-bold px-6 py-2 shadow-xl"
+              >
+                Claim My Spot Free
+              </Button>
+            </div>
+          </div>
+        )}
+
         {selectedFeature && (
            <FeaturePreviewModal
               isOpen={showPreviewModal}
