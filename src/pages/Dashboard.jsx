@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
-import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
+import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
 import { UserPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -590,11 +590,13 @@ export default function Dashboard() {
         )}
       </div>
 
-      <GenerateInviteModal
+      <InviteParentModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
-        inviteType="student_to_parent"
-        userPersona="gator"
+        onSuccess={async () => {
+          await refreshUser();
+          await loadDashboardData();
+        }}
       />
 
       <TalentSpotlightSetupModal
