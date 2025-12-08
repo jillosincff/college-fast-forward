@@ -28,6 +28,7 @@ import FoundingCircleLeaderWidget from '@/components/dashboard/FoundingCircleLea
 import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
+import AddStudentModal from '@/components/dashboard/AddStudentModal';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -44,6 +45,8 @@ export default function ParentDashboard() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [myStudents, setMyStudents] = useState([]);
 
   const loadDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.email) {
@@ -65,6 +68,23 @@ export default function ParentDashboard() {
         Message.filter({ recipient_email: user.email }),
         Opportunity.filter({ created_by: user.email })
       ]);
+      
+      // Load students in family
+      if (user.family_group_id) {
+        const familyMembers = await base44.entities.User.filter({
+          family_group_id: user.family_group_id
+        });
+        const students = familyMembers.filter(m => m.persona === 'gator' || m.roles?.includes('gator'));
+        setMyStudents(students);
+      } else if (user.student_emails && user.student_emails.length > 0) {
+        // Legacy support
+        const students = await Promise.all(
+          user.student_emails.map(email => 
+            base44.entities.User.filter({ email }).then(r => r[0])
+          )
+        );
+        setMyStudents(students.filter(Boolean));
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
       errorReporter.captureException(error, {
@@ -247,41 +267,67 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Two Square Boxes Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Founding Circle Leader Widget (if approved) */}
-          {user?.is_founding_circle_lead && (
-            <FoundingCircleLeaderWidget user={user} />
-          )}
-
-          {/* Connect With Your Gator Box */}
-          <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg h-fit">
-            <CardContent className="p-4 pb-4">
-              <h3 className="text-lg font-bold mb-2 text-center" style={{ color: '#0021A5' }}>
-                Connect With Your Gator
-              </h3>
-              <p className="text-sm text-slate-600 mb-3 text-center">
-                Is your student already on College Fast Forward?
-              </p>
-              <div className="space-y-2">
+        {/* My Family Section */}
+        <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
+          <CardContent className="p-6">
+            <h3 className="text-xl font-bold mb-4 text-center" style={{ color: '#0021A5' }}>
+              👨‍👩‍👧‍👦 My Family
+            </h3>
+            
+            {myStudents.length > 0 ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {myStudents.map((student) => (
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200"
+                    >
+                      <div>
+                        <p className="font-semibold text-slate-900">{student.full_name || 'Gator'}</p>
+                        <p className="text-sm text-slate-500">{student.email}</p>
+                      </div>
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    </div>
+                  ))}
+                </div>
                 <Button
-                  onClick={() => setShowSearchModal(true)}
-                  className="w-full h-9 text-sm font-bold rounded-full"
-                  style={{ backgroundColor: '#0021A5' }}
+                  onClick={() => setShowAddStudentModal(true)}
+                  variant="outline"
+                  className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
-                  Yes – Search & Link Them
-                </Button>
-                <Button
-                  onClick={() => setShowInviteModal(true)}
-                  className="w-full h-9 text-sm font-bold rounded-full"
-                  style={{ backgroundColor: '#FA4616' }}
-                >
-                  No – Send Them an Invite
+                  + Add Another Child
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-slate-600 text-center mb-3">
+                  Connect with your Gator student to get started
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => setShowSearchModal(true)}
+                    className="w-full h-10 text-sm font-bold rounded-full"
+                    style={{ backgroundColor: '#0021A5' }}
+                  >
+                    Search & Link Existing Student
+                  </Button>
+                  <Button
+                    onClick={() => setShowInviteModal(true)}
+                    className="w-full h-10 text-sm font-bold rounded-full"
+                    style={{ backgroundColor: '#FA4616' }}
+                  >
+                    Send Invite to New Student
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {/* Founding Circle Leader Widget (if approved) */}
+        {user?.is_founding_circle_lead && (
+          <FoundingCircleLeaderWidget user={user} />
+        )}
 
         {/* 3. Main Headline */}
         <div className="text-center">
@@ -533,6 +579,16 @@ export default function ParentDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Add Student Modal */}
+      <AddStudentModal
+        isOpen={showAddStudentModal}
+        onClose={() => setShowAddStudentModal(false)}
+        onSuccess={async () => {
+          await refreshUser();
+          await loadDashboardData(true);
+        }}
+      />
     </div>
   );
 }
