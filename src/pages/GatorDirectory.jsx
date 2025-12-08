@@ -168,6 +168,13 @@ export default function GatorDirectory() {
   useEffect(() => {
     let users = [...allUsers];
 
+    // Sort founding members to top
+    users.sort((a, b) => {
+      if (a.is_founding_member && !b.is_founding_member) return -1;
+      if (!a.is_founding_member && b.is_founding_member) return 1;
+      return 0;
+    });
+
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
       users = users.filter(user =>
