@@ -196,6 +196,78 @@ College Fast Forward Team`;
       }
     }
 
+    // Handle gator_to_parent linking
+    if (invite.invite_type === 'gator_to_parent' && invite.family_group_id && invite.parent_slot) {
+      console.log('🔗 Processing gator_to_parent linking...');
+      
+      let parentUser = null;
+      try {
+        parentUser = await base44.auth.me();
+      } catch (e) {
+        console.log('Parent user not authenticated yet during verification');
+      }
+
+      if (parentUser?.id) {
+        console.log('Parent user authenticated:', parentUser.email);
+        
+        // Get the student who created this invite
+        try {
+          const studentUser = await base44.asServiceRole.entities.User.get(invite.inviter_id);
+          
+          // Check if the parent slot is already filled
+          const slotField = `${invite.parent_slot}_email`;
+          if (studentUser[slotField]) {
+            console.error('❌ Parent slot already filled:', slotField, studentUser[slotField]);
+            return Response.json({
+              success: false,
+              error: `This parent slot (${invite.parent_slot}) is already filled. Please contact ${studentUser.full_name || 'the student'} for a new invite code.`
+            });
+          }
+
+          // Link parent to student's family
+          console.log('Linking parent to family:', invite.family_group_id);
+          await base44.asServiceRole.entities.User.update(parentUser.id, {
+            family_group_id: invite.family_group_id,
+            persona: 'parent',
+            roles: ['parent']
+          });
+
+          // Update student's parent slot
+          console.log('Updating student parent slot:', slotField, '=', parentUser.email);
+          await base44.asServiceRole.entities.User.update(invite.inviter_id, {
+            [slotField]: parentUser.email
+          });
+
+          console.log('✅ Parent-student linking complete!');
+
+          // Send notification to student
+          try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: studentUser.email,
+              subject: `Your parent joined College Fast Forward! 🎉`,
+              body: `Great news!
+
+${parentUser.full_name || parentUser.email} has joined your family network on College Fast Forward using your invite code.
+
+They can now help you connect with opportunities and support your career journey.
+
+Go Gators! 🐊🧡💙
+
+College Fast Forward Team`
+            });
+          } catch (emailErr) {
+            console.log('Email notification failed (non-critical):', emailErr.message);
+          }
+        } catch (linkingError) {
+          console.error('❌ Failed to link parent to student:', linkingError);
+          return Response.json({
+            success: false,
+            error: 'Failed to link parent to student. Please contact support.'
+          }, { status: 500 });
+        }
+      }
+    }
+
     // Increment global user count if user authenticated
     let currentUser = null;
     try {
