@@ -588,10 +588,10 @@ const AdminDashboard = () => {
                   isPercentage={true}
                 />
                 <MetricCard
-                  title="Students"
-                  value={analytics.userGrowth?.byType?.gator || 0}
+                  title="Gators (Students)"
+                  value={(analytics.userGrowth?.byType?.gator || 0) + (analytics.userGrowth?.byType?.student || 0)}
                   percentage={analytics.userGrowth?.total > 0 ? 
-                    Math.round((analytics.userGrowth?.byType?.gator || 0) / analytics.userGrowth.total * 100) : 0}
+                    Math.round(((analytics.userGrowth?.byType?.gator || 0) + (analytics.userGrowth?.byType?.student || 0)) / analytics.userGrowth.total * 100) : 0}
                   icon={Users}
                   color="purple"
                 />
@@ -1394,36 +1394,48 @@ const GrowthChart = ({ data }) => (
 );
 
 // User Breakdown Chart
-const UserBreakdownChart = ({ data }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">User Types</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {Object.entries(data).map(([type, count]) => {
-          const total = Object.values(data).reduce((sum, c) => sum + c, 0);
-          const percentage = total > 0 ? (count / total) * 100 : 0;
-          
-          return (
-            <div key={type} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium capitalize">{type}</span>
-                <span className="text-sm text-slate-600">{count} ({Math.round(percentage)}%)</span>
+const UserBreakdownChart = ({ data }) => {
+  // Combine student and gator counts since they're the same
+  const combinedData = { ...data };
+  if (combinedData.student && combinedData.gator) {
+    combinedData.gator = (combinedData.gator || 0) + (combinedData.student || 0);
+    delete combinedData.student;
+  } else if (combinedData.student && !combinedData.gator) {
+    combinedData.gator = combinedData.student;
+    delete combinedData.student;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">User Types</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {Object.entries(combinedData).map(([type, count]) => {
+            const total = Object.values(combinedData).reduce((sum, c) => sum + c, 0);
+            const percentage = total > 0 ? (count / total) * 100 : 0;
+            
+            return (
+              <div key={type} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium capitalize">{type}</span>
+                  <span className="text-sm text-slate-600">{count} ({Math.round(percentage)}%)</span>
+                </div>
+                <div className="w-full bg-blue-600 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all" 
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-blue-600 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all" 
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-);
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Feature Usage Table
 const FeatureUsageTable = ({ data }) => (
