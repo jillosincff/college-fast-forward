@@ -230,7 +230,7 @@ export default function FoundingCircleLeaderWidget({ user }) {
         </div>
 
         <Button 
-          className="w-full bg-orange-600 hover:bg-orange-700 text-white h-9"
+          className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-slate-900 font-bold h-9 shadow-md"
           onClick={() => setShowPaymentDashboard(true)}
         >
           <BarChart3 className="w-4 h-4 mr-2" />
