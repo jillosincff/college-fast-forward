@@ -70,14 +70,7 @@ export default function LandingPage() {
   };
 
   const handleTopRightJoinClick = () => {
-    setShowAuthInstructions(true);
-  };
-
-  const handleProceedToAuth = () => {
-    setShowAuthInstructions(false);
-    setTimeout(() => {
-      base44.auth.redirectToLogin(window.location.href);
-    }, 200);
+    navigate('GatorAuth');
   };
 
   const handleRequestInvite = () => {
@@ -168,9 +161,6 @@ export default function LandingPage() {
         <AnimatedNetworkHero
           handleCTAClick={handleCTAClick}
           handleSeeHowItWorks={handleSeeHowItWorks}
-          showAuthInstructions={showAuthInstructions}
-          setShowAuthInstructions={setShowAuthInstructions}
-          onProceedToAuth={handleProceedToAuth}
           onRequestInvite={handleRequestInvite}
           onTopRightJoinClick={handleTopRightJoinClick}
           onInviteFriend={handleInviteFriend}

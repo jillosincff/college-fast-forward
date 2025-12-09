@@ -5,15 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Typewriter } from '@/components/ui/typewriter';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
-import { LogOut, Info, UserPlus, Send } from 'lucide-react';
+import { LogOut, UserPlus, Send } from 'lucide-react';
 import { getUserCount } from '@/functions/getUserCount';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const AnimatedNetworkHero = ({ 
   showAuthInstructions, 
@@ -32,11 +25,6 @@ const AnimatedNetworkHero = ({
     spotsLeft: 774
   });
   const [isLoadingCount, setIsLoadingCount] = useState(true);
-  const [internalShowAuthInstructions, setInternalShowAuthInstructions] = useState(false);
-
-  // Use external state if provided, otherwise use internal state
-  const isModalOpen = showAuthInstructions !== undefined ? showAuthInstructions : internalShowAuthInstructions;
-  const setIsModalOpen = setShowAuthInstructions || setInternalShowAuthInstructions;
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -99,27 +87,11 @@ const AnimatedNetworkHero = ({
   };
 
   const handleJoinClick = () => {
-    console.log('🔵 Join button clicked - opening modal');
-    setIsModalOpen(true);
+    console.log('🔵 Join button clicked - going to GatorAuth');
+    navigate('GatorAuth');
   };
 
-  const handleProceedToAuthInternal = () => {
-    console.log('🟢 Proceeding to auth...');
-    setIsModalOpen(false);
-    
-    if (onProceedToAuth) {
-      onProceedToAuth();
-    } else {
-      setTimeout(() => {
-        const base44 = require('@/api/base44Client').base44;
-        base44.auth.redirectToLogin(window.location.href);
-      }, 200);
-    }
-  };
 
-  useEffect(() => {
-    console.log('🔔 Modal state changed:', isModalOpen);
-  }, [isModalOpen]);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -325,89 +297,7 @@ const AnimatedNetworkHero = ({
         </div>
       )}
       
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md z-[9999]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-600" />
-              How to Sign In
-            </DialogTitle>
-            <DialogDescription>
-              Choose your sign-in method on the next page
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="bg-[#0021A5] border-2 border-blue-400 rounded-lg p-4">
-              <p className="font-bold text-white mb-3 text-sm">
-                🎓 UF Students (@ufl.edu):
-              </p>
-              <ol className="space-y-2 text-sm text-white">
-                <li className="flex gap-2">
-                  <span className="font-bold text-blue-200">1.</span>
-                  <span>Click <strong>"Continue with Google"</strong></span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-blue-200">2.</span>
-                  <span>Sign in with your <strong>@ufl.edu</strong> email</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-blue-200">3.</span>
-                  <span>✅ <strong>Instant access!</strong> No invite code needed</span>
-                </li>
-              </ol>
-            </div>
 
-            <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
-              <p className="font-bold text-orange-900 mb-3 text-sm">
-                🧡 Parents and UF Alumni:
-              </p>
-              <ol className="space-y-2 text-sm text-slate-700">
-                <li className="flex gap-2">
-                  <span className="font-bold text-orange-600">1.</span>
-                  <span>Click <strong>"Continue with Google"</strong> or <strong>"Continue with Facebook"</strong></span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-orange-600">2.</span>
-                  <span>You'll be asked for an <strong>invite code</strong></span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-orange-600">3.</span>
-                  <span>Enter your code</span>
-                </li>
-              </ol>
-            </div>
-            
-            <div className="text-center mt-2">
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  if (onRequestInvite) onRequestInvite();
-                }}
-                className="text-sm text-slate-600 hover:text-slate-900 underline"
-              >
-                Don't have a code? Request an invite
-              </button>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleProceedToAuthInternal}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white"
-            >
-              Got It - Continue
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
       
       <section 
         className="animated-hero" 
