@@ -6,7 +6,8 @@ Deno.serve(async (req) => {
   try {
     const { email, adminSetupKey } = await req.json();
     
-    console.log('Received request for email:', email);
+    console.log('=== Admin Promotion Request ===');
+    console.log('Email:', email);
     
     if (!email || !adminSetupKey) {
       return Response.json(
@@ -23,34 +24,57 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create Base44 client with service role
-    const base44 = createClient({
-      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY')
-    });
-
-    console.log('Searching for user...');
-    const users = await base44.entities.User.filter({ email });
-    console.log('Search result:', users?.length || 0, 'users found');
+    const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
+    console.log('Service role key exists:', !!serviceRoleKey);
     
-    if (!users || users.length === 0) {
+    if (!serviceRoleKey) {
+      return Response.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
+    // Create Base44 client with service role
+    const base44 = createClient({ serviceRoleKey });
+
+    console.log('Searching for user with email:', email);
+    
+    // List all users and filter manually as a fallback
+    const allUsers = await base44.entities.User.list();
+    console.log('Total users in database:', allUsers.length);
+    
+    const user = allUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    
+    if (!user) {
+      console.log('No user found with email:', email);
       return Response.json({ error: 'User not found with that email' }, { status: 404 });
     }
 
-    const user = users[0];
-    console.log('Found user:', user.id);
+    console.log('Found user:', user.id, user.email);
 
     // Update user roles
-    const updatedRoles = Array.isArray(user.roles) ? [...user.roles] : [];
-    if (!updatedRoles.includes('admin')) {
-      updatedRoles.push('admin');
+    const currentRoles = Array.isArray(user.roles) ? user.roles : [];
+    console.log('Current roles:', currentRoles);
+    
+    if (currentRoles.includes('admin')) {
+      console.log('User is already an admin');
+      return Response.json({
+        success: true,
+        message: 'User is already an admin',
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          roles: currentRoles
+        }
+      });
     }
-    console.log('Updating roles to:', updatedRoles);
+
+    const updatedRoles = [...currentRoles, 'admin'];
+    console.log('Updating to roles:', updatedRoles);
 
     await base44.entities.User.update(user.id, {
       roles: updatedRoles
     });
 
-    console.log('Successfully promoted user to admin');
+    console.log('✅ Successfully promoted user to admin');
 
     return Response.json({
       success: true,
@@ -64,11 +88,13 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Admin promotion error:', error);
+    console.error('❌ Admin promotion error:', error);
+    console.error('Error stack:', error.stack);
     return Response.json(
       { 
         error: 'Failed to promote user',
-        details: error.message 
+        details: error.message,
+        stack: error.stack
       },
       { status: 500 }
     );
