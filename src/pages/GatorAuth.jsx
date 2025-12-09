@@ -8,13 +8,15 @@ export default function GatorAuth() {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        // User is authenticated, go directly to role selection
-        console.log('✅ User already authenticated, going to role selection');
-        window.location.hash = '#GatorRoleSelection';
+        // User is authenticated, go to role selection
+        console.log('✅ User authenticated, navigating to role selection');
+        setTimeout(() => {
+          window.location.href = window.location.origin + '/#GatorRoleSelection';
+        }, 100);
       } else {
         // Not authenticated, redirect to Base44 login
-        console.log('🔐 Redirecting to Base44 auth...');
-        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
+        console.log('🔐 Not authenticated, redirecting to Base44 login...');
+        const callbackUrl = window.location.origin + '/#GatorAuth';
         base44.auth.redirectToLogin(callbackUrl);
       }
     }

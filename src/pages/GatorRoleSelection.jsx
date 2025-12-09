@@ -13,16 +13,10 @@ export default function GatorRoleSelection() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!authLoading) {
-      if (user) {
-        console.log('✅ User authenticated on role selection:', user.email);
-      } else {
-        console.log('❌ Not authenticated - redirecting to login');
-        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
-        base44.auth.redirectToLogin(callbackUrl);
-      }
+    if (user) {
+      console.log('✅ User authenticated on role selection:', user.email);
     }
-  }, [user, authLoading]);
+  }, [user]);
 
   const handleContinue = async () => {
     if (!selectedRole) return;
