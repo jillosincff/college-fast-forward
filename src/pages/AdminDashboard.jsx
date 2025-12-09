@@ -246,22 +246,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (!user || !user.roles?.includes('admin')) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Access Restricted</h2>
-            <p className="text-slate-600">This dashboard is only available to administrators.</p>
-            <Button onClick={() => navigate('Dashboard')} className="mt-4">
-              Return to Dashboard
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Allow access to Admin Dashboard - admin checks handled per-feature
 
   if (loading && !analytics) {
     return (
