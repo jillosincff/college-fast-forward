@@ -662,9 +662,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
+const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
-const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
+const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
@@ -775,10 +776,17 @@ function AppContent() {
       return;
     }
 
-    // Handle public pages FIRST - before any auth checks
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
+    // Handle truly public pages FIRST - before any auth checks
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ Public page accessed directly:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+
+    // Handle new user flow pages - these manage their own auth logic
+    if (newUserFlowPages.includes(currentPage)) {
+      console.log('✅ New user flow page - letting page handle logic:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
@@ -791,6 +799,7 @@ function AppContent() {
     let finalPage = currentPage;
     const isLandingPage = currentPage === 'LandingPage';
     const isOnboardingPage = onboardingPages.includes(currentPage);
+    const isNewUserFlowPage = newUserFlowPages.includes(currentPage);
     const isAdminPage = adminPages.includes(currentPage);
     const isPublicPage = publicPages.includes(currentPage);
     const isAuthOnlyPage = authOnlyPages.includes(currentPage);
@@ -920,10 +929,10 @@ function AppContent() {
         return;
       }
 
-      const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage;
+      const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage && !isNewUserFlowPage;
       if (isProtectedPage) {
-        console.log('🚫 Redirecting to LandingPage');
-        finalPage = 'LandingPage';
+        console.log('🚫 Redirecting to GatorAuth for new users');
+        finalPage = 'GatorAuth';
       }
     }
 
@@ -941,7 +950,11 @@ function AppContent() {
   }
 
   const PageComponent = getPageComponent(resolvedPage);
-  const showHeader = resolvedPage !== 'LandingPage' && resolvedPage !== 'AdminSetup' && !onboardingPages.includes(resolvedPage) && !publicPages.includes(resolvedPage);
+  const showHeader = resolvedPage !== 'LandingPage' && 
+                     resolvedPage !== 'AdminSetup' && 
+                     !onboardingPages.includes(resolvedPage) && 
+                     !newUserFlowPages.includes(resolvedPage) &&
+                     !publicPages.includes(resolvedPage);
 
   return (
     <AppErrorBoundary name="MainApp">
