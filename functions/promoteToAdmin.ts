@@ -35,13 +35,16 @@ Deno.serve(async (req) => {
     const user = users[0];
 
     // Update user to add admin role
-    const updatedRoles = user.roles || [];
+    const updatedRoles = Array.isArray(user.roles) ? [...user.roles] : [];
     if (!updatedRoles.includes('admin')) {
       updatedRoles.push('admin');
     }
 
-    await base44.asServiceRole.entities.User.update(user.id, {
-      roles: updatedRoles
+    // Use the auth admin API to update the user's role
+    await base44.asServiceRole.auth.admin.updateUser(user.id, {
+      user_metadata: {
+        roles: updatedRoles
+      }
     });
 
     console.log(`Successfully promoted ${email} to admin`);
