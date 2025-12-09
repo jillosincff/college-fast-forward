@@ -16,7 +16,7 @@ export default function GatorAuth() {
         // Not authenticated, redirect to Base44 login
         console.log('🔐 Not authenticated, redirecting to Base44 login...');
         setAuthAttempted(true);
-        const callbackUrl = window.location.origin + '/#GatorAuth';
+        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
         base44.auth.redirectToLogin(callbackUrl);
       }
     }
