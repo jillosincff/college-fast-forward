@@ -5,8 +5,17 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         
         const user = await base44.auth.me();
-        if (!user || !user.roles?.includes('admin')) {
-            return Response.json({ error: 'Unauthorized - Admin only' }, { status: 403 });
+        console.log('User attempting approval:', { email: user?.email, roles: user?.roles, id: user?.id });
+        
+        if (!user) {
+            return Response.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+        
+        if (!user.roles?.includes('admin')) {
+            return Response.json({ 
+                error: 'Unauthorized - Admin access required',
+                debug: { email: user.email, roles: user.roles }
+            }, { status: 403 });
         }
 
         const { request_id, action } = await req.json(); // action: 'approve' or 'reject'
