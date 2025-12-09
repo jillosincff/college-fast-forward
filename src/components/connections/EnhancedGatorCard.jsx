@@ -12,6 +12,7 @@ import { JobRequest } from '@/entities/JobRequest';
 import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
+import { ProfileLike } from '@/entities/ProfileLike';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -38,21 +39,35 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // State just to force re-render after click
-  const [, forceRender] = useState(0);
+  // Track likes from database
+  const [displayCount, setDisplayCount] = useState(request?.offers_count || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesLoading, setLikesLoading] = useState(true);
   
-  // Read directly from localStorage on every render - simplest approach
-  const getThumbsData = () => {
-    if (!requestId) return { count: 0, liked: false };
-    const storedCount = localStorage.getItem(`thumbs_${requestId}`);
-    const storedLiked = localStorage.getItem(`liked_${requestId}`) === "yes";
-    const count = storedCount !== null ? parseInt(storedCount) : (request?.offers_count || 0);
-    return { count, liked: storedLiked };
-  };
-  
-  const thumbsData = getThumbsData();
-  const displayCount = thumbsData.count;
-  const isLiked = thumbsData.liked;
+  // Load like status from database on mount
+  useEffect(() => {
+    if (!requestId || !currentUser?.email) {
+      setLikesLoading(false);
+      return;
+    }
+    
+    const loadLikeStatus = async () => {
+      try {
+        const likes = await ProfileLike.filter({ 
+          request_id: requestId, 
+          liker_email: currentUser.email 
+        });
+        setIsLiked(likes.length > 0);
+        setDisplayCount(request?.offers_count || 0);
+      } catch (error) {
+        console.error('Failed to load like status:', error);
+      } finally {
+        setLikesLoading(false);
+      }
+    };
+    
+    loadLikeStatus();
+  }, [requestId, currentUser?.email, request?.offers_count]);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
@@ -196,30 +211,37 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
-    if (!requestId || isLiked) return;
+    if (!requestId || isLiked || !currentUser?.email || likesLoading) return;
 
-    const currentCount = displayCount;
-    const newCount = currentCount + 1;
+    // Optimistic update
+    const newCount = displayCount + 1;
+    setDisplayCount(newCount);
+    setIsLiked(true);
 
-    // Save to localStorage FIRST - this is our source of truth
-    localStorage.setItem(`thumbs_${requestId}`, newCount.toString());
-    localStorage.setItem(`liked_${requestId}`, "yes");
-    forceRender(n => n + 1);
-
-    // Call backend - don't revert on failure, localStorage is source of truth
     try {
+      // Save like to database
+      await ProfileLike.create({
+        request_id: requestId,
+        liker_email: currentUser.email
+      });
+      
+      // Increment counter in backend
       const result = await incrementOfferCount({ requestId });
+      
       if (result?.data?.success) {
         toast({
-                title: "👍 You liked this!",
-              });
+          title: "👍 You liked this!",
+        });
       }
     } catch (err) {
-      // Don't revert - localStorage is source of truth
-      // Backend will eventually sync
-      console.warn('Backend sync failed, but like is saved locally:', err);
+      // Revert on failure
+      console.error('Failed to save like:', err);
+      setDisplayCount(displayCount);
+      setIsLiked(false);
       toast({
-        title: "👍 You liked this!",
+        title: "Failed to save like",
+        description: "Please try again",
+        variant: "destructive"
       });
     }
   };
