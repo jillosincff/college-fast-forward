@@ -42,45 +42,50 @@ export default function GatorRoleSelection() {
   }
 
   const handleContinue = async () => {
-    if (!selectedRole) return;
+    if (!selectedRole) {
+      console.log('⚠️ No role selected');
+      return;
+    }
     
     setIsLoading(true);
-    console.log('👤 Role selected:', selectedRole);
+    console.log('👤 [GatorRoleSelection] Role selected:', selectedRole);
+    console.log('📧 [GatorRoleSelection] User:', user?.email);
     trackEvent('role_selected', { role: selectedRole });
 
     try {
       const isUFLEmail = user?.email?.toLowerCase().endsWith('@ufl.edu');
-      console.log('📧 User email:', user.email, 'isUFL:', isUFLEmail);
+      console.log('🔍 [GatorRoleSelection] isUFL:', isUFLEmail);
 
       if (selectedRole === 'gator') {
-        console.log('🐊 Updating user to Gator role...');
-        await base44.entities.User.updateMyUserData({
+        console.log('🐊 [GatorRoleSelection] Updating to Gator role...');
+        await base44.auth.updateMe({
           persona: 'gator',
           roles: ['gator']
         });
+        console.log('✅ [GatorRoleSelection] User role updated');
         await refreshUser();
-        console.log('✅ User updated to Gator');
 
         if (isUFLEmail) {
-          console.log('➡️ UFL student - going to welcome');
-          navigate('GatorWelcome', { role: 'gator' });
+          console.log('➡️ [GatorRoleSelection] UFL student -> GatorWelcome');
+          navigate('GatorWelcome');
         } else {
-          console.log('➡️ Non-UFL - need invite code');
-          navigate('GatorInviteCode', { role: 'gator' });
+          console.log('➡️ [GatorRoleSelection] Non-UFL -> GatorInviteCode');
+          navigate('GatorInviteCode');
         }
       } else if (selectedRole === 'parent') {
-        console.log('❤️ Updating user to Parent role...');
-        await base44.entities.User.updateMyUserData({
+        console.log('❤️ [GatorRoleSelection] Updating to Parent role...');
+        await base44.auth.updateMe({
           persona: 'parent',
           roles: ['parent']
         });
+        console.log('✅ [GatorRoleSelection] User role updated');
         await refreshUser();
-        console.log('✅ User updated to Parent');
-        console.log('➡️ Parent - need invite code');
-        navigate('GatorInviteCode', { role: 'parent' });
+        console.log('➡️ [GatorRoleSelection] Parent -> GatorInviteCode');
+        navigate('GatorInviteCode');
       }
     } catch (error) {
-      console.error('❌ Failed to update role:', error);
+      console.error('❌ [GatorRoleSelection] Failed to update role:', error);
+      alert('Error updating your role. Please try again.');
       setIsLoading(false);
     }
   };
