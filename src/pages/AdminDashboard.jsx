@@ -712,6 +712,8 @@ const AdminDashboard = () => {
               </div>
 
               <DatabaseBreakdownTable data={analytics.database?.entityBreakdown || []} />
+              </>
+              )}
             </TabsContent>
 
             {/* Sign-up Issues Tab */}
