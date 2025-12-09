@@ -23,7 +23,9 @@ Deno.serve(async (req) => {
     }
 
     // Use service role to find and update the user
+    console.log('Searching for user with email:', email);
     const users = await base44.asServiceRole.entities.User.filter({ email });
+    console.log('Found users:', users);
     
     if (!users || users.length === 0) {
       return Response.json(
@@ -33,19 +35,20 @@ Deno.serve(async (req) => {
     }
 
     const user = users[0];
+    console.log('User found:', { id: user.id, email: user.email, currentRoles: user.roles });
 
     // Update user to add admin role
     const updatedRoles = Array.isArray(user.roles) ? [...user.roles] : [];
     if (!updatedRoles.includes('admin')) {
       updatedRoles.push('admin');
     }
+    console.log('Updated roles:', updatedRoles);
 
-    // Use the auth admin API to update the user's role
-    await base44.asServiceRole.auth.admin.updateUser(user.id, {
-      user_metadata: {
-        roles: updatedRoles
-      }
+    // Update the user entity with the new roles
+    await base44.asServiceRole.entities.User.update(user.id, {
+      roles: updatedRoles
     });
+    console.log('User updated successfully');
 
     console.log(`Successfully promoted ${email} to admin`);
 
