@@ -233,7 +233,7 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       {/* 1. Welcome Header */}
-      <div className="bg-white border-b border-slate-200 py-6 mb-8">
+      <div className="bg-white border-b border-slate-200 py-5 mb-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
@@ -265,7 +265,7 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
         {/* My Family Section */}
         <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
@@ -293,7 +293,7 @@ export default function ParentDashboard() {
                 <Button
                   onClick={() => setShowAddStudentModal(true)}
                   variant="outline"
-                  className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                  className="w-full sm:w-auto border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   + Add Another Child
                 </Button>
@@ -303,17 +303,17 @@ export default function ParentDashboard() {
                 <p className="text-sm text-slate-600 text-center mb-3">
                   Connect with your Gator student to get started
                 </p>
-                <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     onClick={() => setShowSearchModal(true)}
-                    className="w-full h-10 text-sm font-bold rounded-full"
+                    className="w-full sm:flex-1 h-10 text-sm font-bold rounded-full"
                     style={{ backgroundColor: '#0021A5' }}
                   >
                     Search & Link Existing Student
                   </Button>
                   <Button
                     onClick={() => setShowInviteModal(true)}
-                    className="w-full h-10 text-sm font-bold rounded-full"
+                    className="w-full sm:flex-1 h-10 text-sm font-bold rounded-full"
                     style={{ backgroundColor: '#FA4616' }}
                   >
                     Send Invite to New Student
@@ -332,35 +332,34 @@ export default function ParentDashboard() {
         {/* 3. Main Headline */}
         <div className="text-center">
           <h2 
-            className="text-3xl md:text-4xl font-black leading-tight mb-4"
+            className="text-3xl md:text-4xl font-black leading-tight mb-3"
             style={{ color: '#0021A5' }}
           >
-            The more you help other Gators,<br />
-            the higher your own kid rises
+            Help More Gators, Boost Your Own Kid Higher ⚡
           </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            Every action you take boosts your student's profile so more parents & alumni see them.
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+            Every action you take unlocks more opportunities for your student — parents & alumni see boosted profiles first.
           </p>
         </div>
 
         {/* 4. Three Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Complete Profile */}
           <div 
-            className="bg-white rounded-2xl p-10 text-center hover:shadow-2xl transition-shadow"
-            style={{ boxShadow: '0 15px 40px rgba(0,0,0,0.1)' }}
+            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
+            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >
-            <div className="text-7xl mb-6">👤</div>
-            <h3 className="text-xl font-bold mb-3" style={{ color: '#0021A5' }}>
+            <div className="text-5xl mb-4">🐊</div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
               Complete Your Parent Profile
             </h3>
-            <p className="text-slate-600 mb-6">
-              Add your company, industry, and LinkedIn (optional).<br />
-              <span className="font-medium">The stronger your profile → the more your kid's profile gets boosted</span>
+            <p className="text-sm text-slate-600 mb-4">
+              Add your company, industry, and LinkedIn.<br />
+              <span className="font-semibold">The stronger your profile → the more your kid's profile gets boosted</span>
             </p>
             <Button
               onClick={() => navigate('ProfileEdit')}
-              className="rounded-full px-8 font-bold"
+              className="rounded-full px-6 py-2 font-bold text-sm"
               style={{ backgroundColor: '#0021A5' }}
             >
               Update Your Profile →
@@ -369,20 +368,20 @@ export default function ParentDashboard() {
 
           {/* Card 2: Answer Questions */}
           <div 
-            className="bg-white rounded-2xl p-10 text-center hover:shadow-2xl transition-shadow"
-            style={{ boxShadow: '0 15px 40px rgba(0,0,0,0.1)' }}
+            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
+            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >
-            <div className="text-7xl mb-6">❓</div>
-            <h3 className="text-xl font-bold mb-3" style={{ color: '#0021A5' }}>
+            <div className="text-5xl mb-4">💬</div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
               Answer Questions & Make Intros
             </h3>
-            <p className="text-slate-600 mb-6">
+            <p className="text-sm text-slate-600 mb-4">
               A student asks "How do I break into consulting?"<br />
               You reply → <strong>your kid's profile gets boosted</strong>
             </p>
             <Button
               onClick={() => navigate('Connections')}
-              className="rounded-full px-8 font-bold"
+              className="rounded-full px-6 py-2 font-bold text-sm"
               style={{ backgroundColor: '#0021A5' }}
             >
               See Requests & Help →
@@ -391,20 +390,20 @@ export default function ParentDashboard() {
 
           {/* Card 3: Post Jobs */}
           <div 
-            className="bg-white rounded-2xl p-10 text-center hover:shadow-2xl transition-shadow"
-            style={{ boxShadow: '0 15px 40px rgba(0,0,0,0.1)' }}
+            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
+            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >
-            <div className="text-7xl mb-6">💼</div>
-            <h3 className="text-xl font-bold mb-3" style={{ color: '#0021A5' }}>
+            <div className="text-5xl mb-4">💼</div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
               Post Jobs & Internships
             </h3>
-            <p className="text-slate-600 mb-6">
+            <p className="text-sm text-slate-600 mb-4">
               Have an opening or know someone hiring?<br />
               Post it → <strong>your kid's profile gets boosted</strong>
             </p>
             <Button
               onClick={() => navigate('PostOpportunity')}
-              className="rounded-full px-8 font-bold"
+              className="rounded-full px-6 py-2 font-bold text-sm"
               style={{ backgroundColor: '#0021A5' }}
             >
               Post an Opportunity →
@@ -418,20 +417,27 @@ export default function ParentDashboard() {
         </div>
 
         {/* 6. Recent Activity Feed */}
-        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <h3 className="text-xl font-bold mb-4" style={{ color: '#0021A5' }}>
+        <div className="bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
+          <h3 className="text-lg font-bold mb-3" style={{ color: '#0021A5' }}>
             Your Recent Activity
           </h3>
-          <p className="text-slate-500 mb-4">
-            No activity yet — start helping Gators to see your impact here!
-          </p>
-          <Button variant="link" onClick={() => navigate('MyImpact')} className="p-0 text-[#0021A5]">
-            View full activity →
-          </Button>
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">🌟</div>
+            <p className="text-slate-600 mb-4">
+              Your help offers to students will show here
+            </p>
+            <Button 
+              onClick={() => navigate('Connections')} 
+              className="rounded-full px-6"
+              style={{ backgroundColor: '#FA4616' }}
+            >
+              Start by answering a student's help request →
+            </Button>
+          </div>
         </div>
 
         {/* 7. Ambassador CTA */}
-        <div className="text-center py-8">
+        <div className="text-center py-6">
           <p className="text-lg text-slate-600 mb-4">
             Want to earn money while helping more Gators?
           </p>
