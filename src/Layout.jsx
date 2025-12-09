@@ -931,8 +931,8 @@ function AppContent() {
 
       const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage && !isNewUserFlowPage;
       if (isProtectedPage) {
-        console.log('🚫 Redirecting to GatorAuth for new users');
-        finalPage = 'GatorAuth';
+        console.log('🚫 Unauthenticated - redirecting to LandingPage');
+        finalPage = 'LandingPage';
       }
     }
 
