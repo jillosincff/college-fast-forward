@@ -248,44 +248,7 @@ const AdminDashboard = () => {
 
   // Allow access to Admin Dashboard - admin checks handled per-feature
 
-  if (loading && !analytics) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading analytics...</p>
-          <p className="text-xs text-slate-500 mt-2">This may take a moment...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && !analytics) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">
-              {error === 'Analytics temporarily unavailable' ? 'Analytics Temporarily Unavailable' : 'Error Loading Analytics'}
-            </h2>
-            <p className="text-slate-600 mb-4">
-              {error === 'Analytics temporarily unavailable' 
-                ? 'We are unable to fetch the latest analytics data at this time. Please try again later.'
-                : 'Analytics are taking longer than usual to load, or an error occurred. This might be due to a slow network connection.'}
-            </p>
-            <Button onClick={() => {
-              setError(null);
-              loadAnalytics(true); // Attempt a manual refresh
-            }} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Skip loading/error blocking states - show dashboard immediately
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
