@@ -18,9 +18,9 @@ export default function GatorRoleSelection() {
       console.log('✅ User authenticated on role selection:', user.email);
     } else if (!authLoading) {
       const timer = setTimeout(() => {
-        console.log('⏱️ Auth timeout - no user after 8s');
+        console.log('⏱️ Auth timeout - no user after 15s');
         setAuthTimeout(true);
-      }, 8000);
+      }, 15000);
       return () => clearTimeout(timer);
     }
   }, [user, authLoading]);

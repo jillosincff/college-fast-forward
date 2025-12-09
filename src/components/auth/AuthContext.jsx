@@ -21,12 +21,13 @@ export const AuthProvider = ({ children }) => {
     
     // Check if we're in OAuth callback flow
     const urlParams = new URLSearchParams(window.location.search);
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || window.location.hash.includes('GatorRoleSelection');
+    const hash = window.location.hash;
+    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || hash.includes('GatorRoleSelection') || hash.includes('GatorAuth');
     
-    // If OAuth callback, wait for SDK to process it
+    // If OAuth callback, wait longer for SDK to process it
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 OAuth callback detected, waiting for SDK to process...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('🔄 OAuth callback detected, waiting 2s for SDK to process...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     try {
@@ -46,11 +47,11 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       if (error.status === 401 || error.message?.includes('401')) {
-        // Retry once if this is OAuth callback
-        if (hasOAuthParams && retryCount === 0) {
-          console.log('🔄 Auth failed, retrying in 1s...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return checkAuthState(1);
+        // Retry up to 3 times if this is OAuth callback
+        if (hasOAuthParams && retryCount < 3) {
+          console.log(`🔄 Auth failed (attempt ${retryCount + 1}/3), retrying in 2s...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return checkAuthState(retryCount + 1);
         }
         logger.info('User not authenticated - staying on current page');
       } else {
