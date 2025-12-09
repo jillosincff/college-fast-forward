@@ -786,16 +786,9 @@ function AppContent() {
 
     // Handle new user flow pages - these manage their own auth logic
     // These pages handle their own redirects and should not be intercepted by Layout
+    // CRITICAL: These pages ALWAYS bypass routing logic below
     if (newUserFlowPages.includes(currentPage)) {
-      console.log('✅ New user flow page - letting page handle logic:', currentPage);
-      setResolvedPage(currentPage);
-      return;
-    }
-    
-    // CRITICAL: If user is authenticated but no role yet, always allow GatorRoleSelection
-    // This prevents redirect loops during the signup flow
-    if (user && !user.persona && (!user.roles || user.roles.length === 0) && currentPage === 'GatorRoleSelection') {
-      console.log('✅ Authenticated user on role selection - allowing');
+      console.log('✅ New user flow page - bypassing all routing logic:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
