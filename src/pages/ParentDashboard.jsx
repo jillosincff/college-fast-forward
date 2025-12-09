@@ -267,6 +267,28 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
+        {/* Quick Win Banner for New Parents */}
+        {myStudents.length === 0 && (
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-center text-white shadow-lg">
+            <h3 className="text-2xl font-black mb-2">Link Your Gator Student Now – Unlock Boosts for Them ⚡</h3>
+            <p className="text-orange-100 mb-4">Connect your student's account to start boosting their profile instantly</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={() => setShowSearchModal(true)}
+                className="bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full px-8"
+              >
+                Search & Link Existing Student
+              </Button>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-full px-8"
+              >
+                Invite My Child to Join
+              </Button>
+            </div>
+          </div>
+        )}
+        
         {/* My Family Section */}
         <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
           <CardContent className="p-6">
@@ -276,6 +298,20 @@ export default function ParentDashboard() {
             
             {myStudents.length > 0 ? (
               <div className="space-y-3">
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="font-medium text-slate-700">Family Linked: {myStudents.length}/2</span>
+                    {myStudents.length < 2 && (
+                      <span className="text-xs text-blue-700 font-semibold">Link more to unlock boosts!</span>
+                    )}
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-blue-700 h-2 rounded-full transition-all"
+                      style={{ width: `${(myStudents.length / 2) * 100}%` }}
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   {myStudents.map((student) => (
                     <div
@@ -300,8 +336,11 @@ export default function ParentDashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm text-slate-600 text-center mb-3">
+                <p className="text-sm text-slate-600 text-center mb-4">
                   Connect with your Gator student to get started
+                </p>
+                <p className="text-xs text-blue-700 text-center mb-3 font-medium">
+                  💡 Send a secure invite code — links your profiles instantly
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button
@@ -316,7 +355,7 @@ export default function ParentDashboard() {
                     className="w-full sm:flex-1 h-10 text-sm font-bold rounded-full"
                     style={{ backgroundColor: '#FA4616' }}
                   >
-                    Send Invite to New Student
+                    Invite My Child to Join
                   </Button>
                 </div>
               </div>
@@ -324,10 +363,7 @@ export default function ParentDashboard() {
           </CardContent>
         </Card>
         
-        {/* Founding Circle Leader Widget (if approved) */}
-        {user?.is_founding_circle_lead && (
-          <FoundingCircleLeaderWidget user={user} />
-        )}
+        {/* Action Cards First - Before Founding Circle */}
 
         {/* 3. Main Headline */}
         <div className="text-center">
@@ -335,7 +371,7 @@ export default function ParentDashboard() {
             className="text-3xl md:text-4xl font-black leading-tight mb-3"
             style={{ color: '#0021A5' }}
           >
-            Help More Gators, Boost Your Own Kid Higher ⚡
+            Help More Gators, Boost Your Own Higher ⚡
           </h2>
           <p className="text-lg text-slate-600 max-w-3xl mx-auto">
             Every action you take unlocks more opportunities for your student — parents & alumni see boosted profiles first.
@@ -410,6 +446,11 @@ export default function ParentDashboard() {
             </Button>
           </div>
         </div>
+
+        {/* Founding Circle Leader Widget (if approved) - Moved Below Actions */}
+        {user?.is_founding_circle_lead && (
+          <FoundingCircleLeaderWidget user={user} />
+        )}
 
         {/* 5. Messages & Activity - Full Width */}
         <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
@@ -532,7 +573,7 @@ export default function ParentDashboard() {
       <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle style={{ color: '#FA4616' }}>Invite Your Gator Student</DialogTitle>
+            <DialogTitle style={{ color: '#FA4616' }}>Invite My Child to Join</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -559,8 +600,8 @@ export default function ParentDashboard() {
 
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <p className="text-sm text-orange-800">
-                🐊 We'll send them an email invitation to join the Gator Network. 
-                Once they sign up, you'll be automatically linked!
+                🐊 We'll send them a secure invite to join the Gator Network. 
+                Once they sign up, your profiles link automatically and their profile gets boosted!
               </p>
             </div>
 
