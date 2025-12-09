@@ -815,6 +815,15 @@ function AppContent() {
         currentPage
       });
 
+      // CRITICAL: Check for new user from OAuth
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('is_new_user')) {
+        console.log('🆕 New user from OAuth - redirecting to role selection');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        navigate('GatorRoleSelection');
+        return;
+      }
+
       // If user is on a public page like Privacy, Terms, etc. - let them stay
       if (publicPages.includes(currentPage) && currentPage !== 'LandingPage') {
         console.log('✅ Authenticated user viewing public page:', currentPage);
