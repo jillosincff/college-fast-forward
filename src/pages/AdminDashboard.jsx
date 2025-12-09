@@ -575,7 +575,7 @@ const AdminDashboard = () => {
 
               <GrowthChart data={analytics.userGrowth?.dailySignups || []} />
               <UserBreakdownChart data={analytics.userGrowth?.byType || {}} />
-              </>
+                </>
               )}
             </TabsContent>
 
@@ -621,7 +621,7 @@ const AdminDashboard = () => {
               </div>
 
               <FeatureUsageTable data={analytics.featureUsage?.topFeatures || []} />
-              </>
+                </>
               )}
             </TabsContent>
 
@@ -666,7 +666,7 @@ const AdminDashboard = () => {
               </div>
 
               <PerformanceChart data={analytics.performance?.timeline || []} />
-              </>
+                </>
               )}
             </TabsContent>
 
@@ -712,7 +712,7 @@ const AdminDashboard = () => {
               </div>
 
               <DatabaseBreakdownTable data={analytics.database?.entityBreakdown || []} />
-              </>
+                </>
               )}
             </TabsContent>
 
