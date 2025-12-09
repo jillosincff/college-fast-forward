@@ -267,29 +267,54 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Quick Win Banner for New Parents */}
-        {myStudents.length === 0 && (
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-center text-white shadow-lg">
-            <h3 className="text-2xl font-black mb-2">Link Your Gator Student Now – Unlock Boosts for Them ⚡</h3>
-            <p className="text-orange-100 mb-4">Connect your student's account to start boosting their profile instantly</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        {/* Founding Circle Leader Banner */}
+        {user?.is_founding_circle_lead && (
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-center md:text-left">
+                <h3 className="text-2xl font-black mb-2">🎉 You're a Founding Circle Leader!</h3>
+                <p className="text-orange-100">
+                  Earn 25% commission + team overrides. Track your earnings and team growth.
+                </p>
+              </div>
               <Button
-                onClick={() => setShowSearchModal(true)}
-                className="bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full px-8"
+                onClick={() => navigate('ReferralAnalytics')}
+                className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold rounded-full px-8 py-3 shadow-lg"
               >
-                Search & Link Existing Student
-              </Button>
-              <Button
-                onClick={() => setShowInviteModal(true)}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-full px-8"
-              >
-                Invite My Child to Join
+                View Earnings Dashboard
               </Button>
             </div>
           </div>
         )}
+
+        {/* Connect With Your Gator Card */}
+        <Card className="border-2 border-slate-200 shadow-lg">
+          <CardContent className="p-8">
+            <h3 className="text-2xl font-bold text-center mb-2" style={{ color: '#0021A5' }}>
+              Connect With Your Gator
+            </h3>
+            <p className="text-center text-slate-600 mb-6">
+              Is your student already on College Fast Forward?
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => setShowSearchModal(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-full px-8 py-3 shadow-lg"
+              >
+                Yes — Search & Link Them
+              </Button>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="font-bold rounded-full px-8 py-3 shadow-lg"
+                style={{ backgroundColor: '#0021A5' }}
+              >
+                No — Send Them an Invite
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         
-        {/* Action Cards First - Before Founding Circle */}
+        {/* Action Cards */}
 
         {/* 3. Main Headline */}
         <div className="text-center">
@@ -373,10 +398,7 @@ export default function ParentDashboard() {
           </div>
         </div>
 
-        {/* Founding Circle Leader Widget (if approved) - Moved Below Actions */}
-        {user?.is_founding_circle_lead && (
-          <FoundingCircleLeaderWidget user={user} />
-        )}
+
 
         {/* 5. Messages & Activity - Full Width */}
         <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
