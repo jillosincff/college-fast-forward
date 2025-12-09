@@ -800,13 +800,9 @@ function AppContent() {
       return;
     }
 
-    if (currentPage === 'TestingDashboard' && user?.roles?.includes('admin')) {
-      setResolvedPage('TestingDashboard');
-      return;
-    }
-
-    if (currentPage === 'AdminDashboard') {
-      setResolvedPage('AdminDashboard');
+    // Allow direct access to admin pages without any routing logic
+    if (currentPage === 'TestingDashboard' || currentPage === 'AdminDashboard') {
+      setResolvedPage(currentPage);
       return;
     }
 
