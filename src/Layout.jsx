@@ -772,6 +772,15 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    // CRITICAL: Check for new user from OAuth FIRST - before any other logic
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('is_new_user') && user) {
+      console.log('🆕 NEW USER FROM OAUTH - Force redirect to role selection');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      navigate('GatorRoleSelection');
+      return;
+    }
+
     if (isLoading || !currentPage) {
       return;
     }
@@ -814,15 +823,6 @@ function AppContent() {
         onboarding_completed: user.onboarding_completed,
         currentPage
       });
-
-      // CRITICAL: Check for new user from OAuth
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('is_new_user')) {
-        console.log('🆕 New user from OAuth - redirecting to role selection');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        navigate('GatorRoleSelection');
-        return;
-      }
 
       // If user is on a public page like Privacy, Terms, etc. - let them stay
       if (publicPages.includes(currentPage) && currentPage !== 'LandingPage') {
