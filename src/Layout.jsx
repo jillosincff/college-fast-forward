@@ -783,6 +783,13 @@ function AppContent() {
       return;
     }
 
+    // CRITICAL: Admin pages bypass ALL routing logic
+    if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') {
+      console.log('✅ Admin page - direct access:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+
     // Handle truly public pages FIRST - before any auth checks
     const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
     if (trulyPublicPages.includes(currentPage)) {
@@ -796,12 +803,6 @@ function AppContent() {
     // CRITICAL: These pages ALWAYS bypass routing logic below
     if (newUserFlowPages.includes(currentPage)) {
       console.log('✅ New user flow page - bypassing all routing logic:', currentPage);
-      setResolvedPage(currentPage);
-      return;
-    }
-
-    // Allow direct access to admin pages without any routing logic
-    if (currentPage === 'TestingDashboard' || currentPage === 'AdminDashboard') {
       setResolvedPage(currentPage);
       return;
     }
