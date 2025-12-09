@@ -13,10 +13,13 @@ export default function GatorRoleSelection() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading && !user) {
+      console.log('❌ Not authenticated - redirecting to auth');
+      navigate('GatorAuth');
+    } else if (user) {
       console.log('✅ User authenticated on role selection:', user.email);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleContinue = async () => {
     if (!selectedRole) return;
@@ -62,12 +65,16 @@ export default function GatorRoleSelection() {
     }
   };
 
-  if (authLoading || !user) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
   }
 
   return (
