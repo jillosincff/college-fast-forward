@@ -1,11 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClient } from 'npm:@base44/sdk@0.8.4';
 
 const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    
     const { email, adminSetupKey } = await req.json();
     
     if (!email || !adminSetupKey) {
@@ -22,9 +20,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to find and update the user
+    // Create service role client directly (no user auth needed)
+    const base44 = createClient({
+      appId: Deno.env.get('BASE44_APP_ID'),
+      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY')
+    });
+
+    // Find the user
     console.log('Searching for user with email:', email);
-    const users = await base44.asServiceRole.entities.User.filter({ email });
+    const users = await base44.entities.User.filter({ email });
     console.log('Found users:', users);
     
     if (!users || users.length === 0) {
@@ -45,12 +49,10 @@ Deno.serve(async (req) => {
     console.log('Updated roles:', updatedRoles);
 
     // Update the user entity with the new roles
-    await base44.asServiceRole.entities.User.update(user.id, {
+    await base44.entities.User.update(user.id, {
       roles: updatedRoles
     });
     console.log('User updated successfully');
-
-    console.log(`Successfully promoted ${email} to admin`);
 
     return Response.json({
       success: true,
