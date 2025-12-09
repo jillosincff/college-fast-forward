@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, ArrowRight, Crown, Zap, TrendingUp, Users, Sparkles } from 'lucide-react';
+import { Check, ArrowRight, Crown, Zap, TrendingUp, Users, Sparkles, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthContext';
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { navigate } from '@/components/utils/navigation';
@@ -88,6 +88,18 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        
+        {/* Back Button */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+            className="text-slate-600 hover:text-slate-900"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+        </div>
         
         {/* Header */}
         <div className="text-center mb-12">
