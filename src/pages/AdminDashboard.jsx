@@ -575,6 +575,8 @@ const AdminDashboard = () => {
 
               <GrowthChart data={analytics.userGrowth?.dailySignups || []} />
               <UserBreakdownChart data={analytics.userGrowth?.byType || {}} />
+              </>
+              )}
             </TabsContent>
 
             {/* Feature Usage Tab */}
