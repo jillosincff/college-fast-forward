@@ -93,10 +93,10 @@ export default function GatorRoleSelection() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-xl text-slate-900 mb-1">
-                    I'm a current UF student
+                    I'm a Gator student
                   </h3>
                   <p className="text-sm text-slate-600">
-                    Find internships and jobs (requires @ufl.edu email)
+                    Forever free — find jobs & get hired
                   </p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
@@ -127,10 +127,10 @@ export default function GatorRoleSelection() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-xl text-slate-900 mb-1">
-                    I'm a Gator Parent or Alumni
+                    I'm a Gator parent or alumni
                   </h3>
                   <p className="text-sm text-slate-600">
-                    Help current students get hired — open your network
+                    Help Gators get hired — open your network
                   </p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
