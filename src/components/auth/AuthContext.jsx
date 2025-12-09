@@ -16,8 +16,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAuthState = useCallback(async () => {
+  const checkAuthState = useCallback(async (retryCount = 0) => {
     setIsLoading(true);
+    
+    // Check if we're in OAuth callback flow
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || window.location.hash.includes('GatorRoleSelection');
+    
+    // If OAuth callback, wait for SDK to process it
+    if (hasOAuthParams && retryCount === 0) {
+      console.log('🔄 OAuth callback detected, waiting for SDK to process...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
     try {
       const userData = await base44.auth.me();
       
@@ -30,12 +41,17 @@ export const AuthProvider = ({ children }) => {
       
       setUser(userData);
 
-      const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('token')) {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
       }
     } catch (error) {
       if (error.status === 401 || error.message?.includes('401')) {
+        // Retry once if this is OAuth callback
+        if (hasOAuthParams && retryCount === 0) {
+          console.log('🔄 Auth failed, retrying in 1s...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return checkAuthState(1);
+        }
         logger.info('User not authenticated - staying on current page');
       } else {
         logger.error('Authentication check failed', { error, status: error.status });
