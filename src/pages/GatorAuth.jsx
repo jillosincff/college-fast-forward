@@ -6,10 +6,17 @@ export default function GatorAuth() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    // If user is not authenticated, redirect to Base44's built-in auth
-    if (!isLoading && !user) {
-      console.log('🔐 Redirecting to Base44 auth...');
-      base44.auth.redirectToLogin(window.location.origin + '/#GatorRoleSelection');
+    if (!isLoading) {
+      if (user) {
+        // User is authenticated, go directly to role selection
+        console.log('✅ User already authenticated, going to role selection');
+        window.location.hash = '#GatorRoleSelection';
+      } else {
+        // Not authenticated, redirect to Base44 login
+        console.log('🔐 Redirecting to Base44 auth...');
+        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
+        base44.auth.redirectToLogin(callbackUrl);
+      }
     }
   }, [user, isLoading]);
 
