@@ -50,13 +50,8 @@ const AdminDashboard = () => {
   const [processingRequest, setProcessingRequest] = useState(null);
   const [foundingCircleCount, setFoundingCircleCount] = useState(0);
 
-  // Check admin access
-  useEffect(() => {
-    if (user && !user.roles?.includes('admin')) {
-      navigate('Dashboard');
-      return;
-    }
-  }, [user]);
+  // Access control is handled by Layout.js
+  // No need to redirect here
 
   const loadAnalytics = async (isManualRefresh = false) => {
     setLoading(true);
