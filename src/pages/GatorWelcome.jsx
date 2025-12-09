@@ -12,7 +12,10 @@ export default function GatorWelcome() {
 
   useEffect(() => {
     if (!user) {
+      console.log('❌ No user on welcome, redirecting to auth');
       navigate('GatorAuth');
+    } else {
+      console.log('✅ User on welcome page:', user.email, 'role:', role);
     }
   }, [user]);
 
@@ -53,13 +56,17 @@ export default function GatorWelcome() {
   }, []);
 
   const handleGetStarted = () => {
+    console.log('🚀 Starting onboarding for role:', role);
     trackEvent('onboarding_started', { role });
     
     if (role === 'gator') {
+      console.log('➡️ Going to StudentOnboarding');
       navigate('StudentOnboarding');
     } else if (role === 'parent') {
+      console.log('➡️ Going to Onboarding');
       navigate('Onboarding');
     } else {
+      console.log('➡️ Going to Dashboard (fallback)');
       navigate('Dashboard');
     }
   };

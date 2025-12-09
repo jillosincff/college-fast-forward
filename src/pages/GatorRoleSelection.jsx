@@ -14,7 +14,10 @@ export default function GatorRoleSelection() {
 
   useEffect(() => {
     if (!user) {
+      console.log('❌ No user on role selection, redirecting to auth');
       navigate('GatorAuth');
+    } else {
+      console.log('✅ User authenticated on role selection:', user.email);
     }
   }, [user]);
 
@@ -22,39 +25,42 @@ export default function GatorRoleSelection() {
     if (!selectedRole) return;
     
     setIsLoading(true);
+    console.log('👤 Role selected:', selectedRole);
     trackEvent('role_selected', { role: selectedRole });
 
     try {
-      // Check if user has @ufl.edu email
       const isUFLEmail = user?.email?.toLowerCase().endsWith('@ufl.edu');
+      console.log('📧 User email:', user.email, 'isUFL:', isUFLEmail);
 
       if (selectedRole === 'gator') {
-        // Update user persona
+        console.log('🐊 Updating user to Gator role...');
         await base44.entities.User.updateMyUserData({
           persona: 'gator',
           roles: ['gator']
         });
         await refreshUser();
+        console.log('✅ User updated to Gator');
 
-        // UFL students skip invite code
         if (isUFLEmail) {
+          console.log('➡️ UFL student - going to welcome');
           navigate('GatorWelcome', { role: 'gator' });
         } else {
+          console.log('➡️ Non-UFL - need invite code');
           navigate('GatorInviteCode', { role: 'gator' });
         }
       } else if (selectedRole === 'parent') {
-        // Update user persona
+        console.log('❤️ Updating user to Parent role...');
         await base44.entities.User.updateMyUserData({
           persona: 'parent',
           roles: ['parent']
         });
         await refreshUser();
-
-        // Parents always need invite code
+        console.log('✅ User updated to Parent');
+        console.log('➡️ Parent - need invite code');
         navigate('GatorInviteCode', { role: 'parent' });
       }
     } catch (error) {
-      console.error('Failed to update role:', error);
+      console.error('❌ Failed to update role:', error);
       setIsLoading(false);
     }
   };
