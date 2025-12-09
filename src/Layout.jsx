@@ -805,6 +805,11 @@ function AppContent() {
       return;
     }
 
+    if (currentPage === 'AdminDashboard') {
+      setResolvedPage('AdminDashboard');
+      return;
+    }
+
     let finalPage = currentPage;
     const isLandingPage = currentPage === 'LandingPage';
     const isOnboardingPage = onboardingPages.includes(currentPage);
