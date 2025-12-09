@@ -8,10 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Sparkles, Check, User as UserIcon, AlertCircle } from 'lucide-react';
+import { LogOut, Sparkles, Check, User as UserIcon, AlertCircle, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import InviteParentModal from '@/components/dashboard/InviteParentModal';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const PRIMARY_GOALS = [
   { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
@@ -56,8 +58,10 @@ export default function StudentOnboarding() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showParentInviteModal, setShowParentInviteModal] = useState(false);
   const [liveViewCount, setLiveViewCount] = useState(0);
   const [profileErrors, setProfileErrors] = useState({});
+  const [emailError, setEmailError] = useState('');
 
   const [formData, setFormData] = useState({
     // Profile fields (Step 0)
@@ -65,7 +69,11 @@ export default function StudentOnboarding() {
     last_name: '',
     graduation_year: currentYear + 2,
     major: '',
-    // Career fields (Steps 1-7)
+    // Help Request (Step 1)
+    help_request: '',
+    post_to_emerging: false,
+    show_on_directory: false,
+    // Career fields (Steps 2-8)
     primary_goal: '',
     target_roles: [],
     custom_role: '',
@@ -77,9 +85,16 @@ export default function StudentOnboarding() {
     one_sentence_pitch: ''
   });
 
-  // Initialize profile from user data
+  // Initialize profile from user data + validate @ufl.edu
   useEffect(() => {
     if (user) {
+      // Validate @ufl.edu email
+      const email = user.email?.toLowerCase() || '';
+      if (!email.endsWith('@ufl.edu')) {
+        setEmailError('Please use your @ufl.edu email to sign up as a student.');
+        return;
+      }
+      
       setFormData(prev => ({
         ...prev,
         first_name: user.first_name || '',
@@ -140,13 +155,14 @@ export default function StudentOnboarding() {
   const canProceed = () => {
     switch (currentStep) {
       case 0: return formData.first_name?.trim() && formData.last_name?.trim() && formData.graduation_year && formData.major?.trim();
-      case 1: return formData.primary_goal !== '';
-      case 2: return formData.target_roles.length > 0 || formData.custom_role !== '';
-      case 3: return formData.target_industries.length > 0;
-      case 4: return true; // Dream companies optional
-      case 5: return formData.location_preferences.length > 0 || formData.custom_location !== '';
-      case 6: return formData.timeline !== '';
-      case 7: return formData.one_sentence_pitch.trim().length >= 20;
+      case 1: return formData.help_request?.trim().length >= 10; // Mandatory help request
+      case 2: return formData.primary_goal !== '';
+      case 3: return formData.target_roles.length > 0 || formData.custom_role !== '';
+      case 4: return formData.target_industries.length > 0;
+      case 5: return true; // Dream companies optional
+      case 6: return formData.location_preferences.length > 0 || formData.custom_location !== '';
+      case 7: return formData.timeline !== '';
+      case 8: return formData.one_sentence_pitch.trim().length >= 20;
       default: return false;
     }
   };
@@ -192,6 +208,9 @@ export default function StudentOnboarding() {
         ? formData.location_preferences.join(', ')
         : formData.custom_location;
 
+      // Determine if request should be public
+      const isPublicRequest = formData.post_to_emerging || formData.show_on_directory;
+
       // Create job request with poster name for display
       await JobRequest.create({
         role: roles.split(',')[0].trim(), // First role as main role
@@ -200,52 +219,30 @@ export default function StudentOnboarding() {
         target_industry: formData.target_industries[0] || 'Various',
         location_preference: locations,
         start_timing: formData.timeline,
-        status: 'active',
+        status: isPublicRequest ? 'active' : 'draft', // Draft if both unchecked
         target_helpers: ['alumni', 'parents'],
         poster_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
         poster_first_name: formData.first_name.trim(),
         poster_last_name: formData.last_name.trim()
       });
 
-      // Mark onboarding complete and set Founding Gator status if applicable
-      const updateData = {
+      // Update user profile with help request if showing on directory
+      const userUpdate = {
         onboarding_completed: true,
         profile_completion_score: 90
       };
-
-      // Check if user should be a Founding Gator (first 1000 users)
-      // This will be set during registration, but we also check here for safety
-      if (user?.signup_order && user.signup_order <= 1000) {
-        updateData.is_founding_gator = true;
+      
+      if (formData.show_on_directory) {
+        userUpdate.currently_seeking = formData.help_request;
       }
 
-      await User.updateMyUserData(updateData);
+      await User.updateMyUserData(userUpdate);
 
       localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
 
-      // Success animation
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#FA4616', '#0021A5', '#FF6B35']
-      });
-
-      setShowSuccess(true);
-      
-      // Simulate live counter
-      let count = Math.floor(Math.random() * 20) + 30;
-      setLiveViewCount(count);
-      const interval = setInterval(() => {
-        count += Math.floor(Math.random() * 3);
-        setLiveViewCount(count);
-      }, 2000);
-
-      setTimeout(() => {
-        clearInterval(interval);
-        refreshUser().then(() => navigate('Dashboard'));
-      }, 5000);
+      // Show parent invite modal
+      setShowParentInviteModal(true);
 
     } catch (error) {
       console.error('Failed to submit onboarding:', error);
@@ -253,6 +250,64 @@ export default function StudentOnboarding() {
       setIsSubmitting(false);
     }
   };
+
+  const handleParentInviteComplete = () => {
+    setShowParentInviteModal(false);
+    
+    // Success animation
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#FA4616', '#0021A5', '#FF6B35']
+    });
+
+    setShowSuccess(true);
+    
+    // Simulate live counter
+    let count = Math.floor(Math.random() * 20) + 30;
+    setLiveViewCount(count);
+    const interval = setInterval(() => {
+      count += Math.floor(Math.random() * 3);
+      setLiveViewCount(count);
+    }, 2000);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      refreshUser().then(() => navigate('Dashboard'));
+    }, 5000);
+  };
+
+  // Show error if not @ufl.edu email
+  if (emailError) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-red-300 shadow-xl">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+              Invalid Email
+            </h2>
+            <p className="text-slate-600 mb-6">
+              {emailError}
+            </p>
+            <p className="text-sm text-slate-500 mb-6">
+              You're currently logged in as: <strong>{user?.email}</strong>
+            </p>
+            <Button
+              onClick={() => logout()}
+              className="bg-[#0021A5] hover:bg-[#001580] text-white"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out & Use UF Email
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (showSuccess) {
     return (
@@ -302,7 +357,7 @@ export default function StudentOnboarding() {
           <motion.div
             className="h-full bg-gradient-to-r from-[#FA4616] to-[#FF8C42]"
             initial={{ width: 0 }}
-            animate={{ width: `${(currentStep / 8) * 100}%` }}
+            animate={{ width: `${(currentStep / 9) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -417,8 +472,82 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 1: Primary Goal */}
+                {/* Step 1: Help Request */}
                 {currentStep === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+                      <HelpCircle className="w-6 h-6 text-[#0021A5]" />
+                      What kind of help are you looking for?
+                    </h2>
+                    <p className="text-slate-600 mb-4">This helps Gator parents and alumni know how to help you best.</p>
+                    
+                    <Textarea
+                      value={formData.help_request}
+                      onChange={(e) => updateField('help_request', e.target.value)}
+                      placeholder="e.g., Finance internship in NYC, software engineering job at a startup, informational interview with a consultant, resume review from someone in healthcare..."
+                      rows={5}
+                      className="mb-4 text-base"
+                    />
+                    <p className="text-sm text-slate-500 mb-6">
+                      {formData.help_request.length} characters
+                      {formData.help_request.length < 10 && ' (minimum 10)'}
+                    </p>
+
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 space-y-3">
+                      <p className="text-sm font-semibold text-blue-900 mb-3">Where should this appear?</p>
+                      
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={formData.post_to_emerging}
+                          onChange={(e) => updateField('post_to_emerging', e.target.checked)}
+                          className="mt-1 w-5 h-5 text-blue-600 rounded"
+                        />
+                        <div>
+                          <p className="font-medium text-slate-900 group-hover:text-blue-700">
+                            Post this to Emerging Gators (recommended)
+                          </p>
+                          <p className="text-sm text-slate-600">
+                            Parents and alumni will see your request and can offer help
+                          </p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={formData.show_on_directory}
+                          onChange={(e) => updateField('show_on_directory', e.target.checked)}
+                          className="mt-1 w-5 h-5 text-blue-600 rounded"
+                        />
+                        <div>
+                          <p className="font-medium text-slate-900 group-hover:text-blue-700">
+                            Show this on my Directory profile (recommended)
+                          </p>
+                          <p className="text-sm text-slate-600">
+                            Appears as "Currently seeking: [your text]" on your profile card
+                          </p>
+                        </div>
+                      </label>
+
+                      {!formData.post_to_emerging && !formData.show_on_directory && (
+                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            ℹ️ Your request will be private. You can still browse opportunities and connect with Gators.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 2: Primary Goal */}
+                {currentStep === 2 && (
                   <motion.div
                     key="step1"
                     initial={{ opacity: 0, x: 20 }}
@@ -447,8 +576,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 2: Target Roles */}
-                {currentStep === 2 && (
+                {/* Step 3: Target Roles */}
+                {currentStep === 3 && (
                   <motion.div
                     key="step2"
                     initial={{ opacity: 0, x: 20 }}
@@ -480,8 +609,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 3: Target Industries */}
-                {currentStep === 3 && (
+                {/* Step 4: Target Industries */}
+                {currentStep === 4 && (
                   <motion.div
                     key="step3"
                     initial={{ opacity: 0, x: 20 }}
@@ -507,8 +636,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 4: Dream Companies */}
-                {currentStep === 4 && (
+                {/* Step 5: Dream Companies */}
+                {currentStep === 5 && (
                   <motion.div
                     key="step4"
                     initial={{ opacity: 0, x: 20 }}
@@ -530,8 +659,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 5: Location Preferences */}
-                {currentStep === 5 && (
+                {/* Step 6: Location Preferences */}
+                {currentStep === 6 && (
                   <motion.div
                     key="step5"
                     initial={{ opacity: 0, x: 20 }}
@@ -562,8 +691,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 6: Timeline */}
-                {currentStep === 6 && (
+                {/* Step 7: Timeline */}
+                {currentStep === 7 && (
                   <motion.div
                     key="step6"
                     initial={{ opacity: 0, x: 20 }}
@@ -589,8 +718,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 7: One-Sentence Pitch */}
-                {currentStep === 7 && (
+                {/* Step 8: One-Sentence Pitch */}
+                {currentStep === 8 && (
                   <motion.div
                     key="step7"
                     initial={{ opacity: 0, x: 20 }}
@@ -626,7 +755,7 @@ export default function StudentOnboarding() {
                     Back
                   </Button>
                 )}
-                {currentStep < 7 ? (
+                {currentStep < 8 ? (
                   <Button
                     onClick={handleNext}
                     disabled={!canProceed()}
@@ -640,19 +769,30 @@ export default function StudentOnboarding() {
                     disabled={!canProceed() || isSubmitting}
                     className="flex-1 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg py-6"
                   >
-                    {isSubmitting ? 'Posting...' : 'Post My Request & Unlock Gator Nation →'}
+                    {isSubmitting ? 'Saving...' : 'Complete Setup →'}
                   </Button>
                 )}
               </div>
 
               {/* Progress Indicator */}
               <div className="text-center mt-6 text-sm text-slate-500">
-                Step {currentStep + 1} of 8
+                Step {currentStep + 1} of 9
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Parent Invite Modal */}
+      <Dialog open={showParentInviteModal} onOpenChange={setShowParentInviteModal}>
+        <DialogContent className="max-w-2xl">
+          <InviteParentModal
+            isOpen={showParentInviteModal}
+            onClose={handleParentInviteComplete}
+            onSuccess={handleParentInviteComplete}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
