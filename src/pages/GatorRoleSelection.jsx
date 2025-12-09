@@ -13,13 +13,13 @@ export default function GatorRoleSelection() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!user && !isLoading) {
+    if (!user && !authLoading) {
       console.log('❌ No user on role selection, redirecting to auth');
       navigate('GatorAuth');
     } else if (user) {
       console.log('✅ User authenticated on role selection:', user.email);
     }
-  }, [user, isLoading]);
+  }, [user, authLoading]);
 
   const handleContinue = async () => {
     if (!selectedRole) return;
