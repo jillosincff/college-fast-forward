@@ -8,16 +8,6 @@ export default function GatorAuth() {
   const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
-    // Check if we're returning from OAuth
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('code');
-
-    if (hasOAuthParams) {
-      console.log('🔄 OAuth callback detected in GatorAuth, waiting for session...');
-      // Just wait - AuthContext will handle the retry logic
-      return;
-    }
-
     if (!isLoading) {
       if (user) {
         console.log('✅ User authenticated, navigating to role selection');
@@ -25,8 +15,8 @@ export default function GatorAuth() {
       } else if (!authAttempted) {
         console.log('🔐 Not authenticated, redirecting to Base44 login...');
         setAuthAttempted(true);
-        const callbackUrl = window.location.origin + '/#GatorAuth';
-        base44.auth.redirectToLogin(callbackUrl);
+        // Use root URL as callback - Base44 SDK will handle the redirect
+        base44.auth.redirectToLogin(`${window.location.origin}/`);
       }
     }
   }, [user, isLoading, authAttempted]);

@@ -21,13 +21,12 @@ export const AuthProvider = ({ children }) => {
     
     // Check if we're in OAuth callback flow
     const urlParams = new URLSearchParams(window.location.search);
-    const hash = window.location.hash;
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || hash.includes('GatorRoleSelection') || hash.includes('GatorAuth');
+    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || urlParams.has('access_token');
     
-    // If OAuth callback, wait longer for SDK to process it
+    // If OAuth callback, wait for SDK to process it
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 OAuth callback detected, waiting 2s for SDK to process...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🔄 OAuth callback detected with params, waiting 3s for SDK...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
     try {
