@@ -1,3 +1,5 @@
+import { createClient } from 'npm:@base44/sdk@0.8.4';
+
 const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
 Deno.serve(async (req) => {
@@ -21,65 +23,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use Supabase admin client directly
-    const supabaseUrl = `https://qtrypzzcjebvfcihiynt.supabase.co`;
-    const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
-    
-    if (!serviceRoleKey) {
-      console.error('Service role key not found');
-      return Response.json({ error: 'Configuration error' }, { status: 500 });
-    }
+    // Create Base44 client with service role
+    const base44 = createClient({
+      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY')
+    });
 
-    // Find user by email
-    const getUserResponse = await fetch(
-      `${supabaseUrl}/rest/v1/users?email=eq.${encodeURIComponent(email)}`,
-      {
-        headers: {
-          'apikey': serviceRoleKey,
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    if (!getUserResponse.ok) {
-      console.error('Failed to fetch user:', await getUserResponse.text());
-      return Response.json({ error: 'Failed to fetch user' }, { status: 500 });
-    }
-
-    const users = await getUserResponse.json();
+    console.log('Searching for user...');
+    const users = await base44.entities.User.filter({ email });
+    console.log('Search result:', users?.length || 0, 'users found');
     
     if (!users || users.length === 0) {
       return Response.json({ error: 'User not found with that email' }, { status: 404 });
     }
 
     const user = users[0];
-    console.log('Found user:', user.id, user.email);
+    console.log('Found user:', user.id);
 
     // Update user roles
     const updatedRoles = Array.isArray(user.roles) ? [...user.roles] : [];
     if (!updatedRoles.includes('admin')) {
       updatedRoles.push('admin');
     }
+    console.log('Updating roles to:', updatedRoles);
 
-    const updateResponse = await fetch(
-      `${supabaseUrl}/rest/v1/users?id=eq.${user.id}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'apikey': serviceRoleKey,
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify({ roles: updatedRoles })
-      }
-    );
-
-    if (!updateResponse.ok) {
-      console.error('Failed to update user:', await updateResponse.text());
-      return Response.json({ error: 'Failed to update user' }, { status: 500 });
-    }
+    await base44.entities.User.update(user.id, {
+      roles: updatedRoles
+    });
 
     console.log('Successfully promoted user to admin');
 
