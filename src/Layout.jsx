@@ -108,6 +108,10 @@ const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 const UFAmbassador = React.lazy(() => import('./pages/UFAmbassador'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
+const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
+const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection'));
+const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
+const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -658,9 +662,9 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise'];
+const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
 const adminPages = ['AdminDashboard', 'TestingDashboard'];
-const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
+const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
@@ -739,6 +743,10 @@ const getPageComponent = (pageName) => {
     case 'UFAmbassador': return UFAmbassador;
     case 'Notifications': return Notifications;
     case 'ReferralAnalytics': return ReferralAnalytics;
+    case 'GatorAuth': return GatorAuth;
+    case 'GatorRoleSelection': return GatorRoleSelection;
+    case 'GatorInviteCode': return GatorInviteCode;
+    case 'GatorWelcome': return GatorWelcome;
     default: return LandingPage;
   }
 };
@@ -768,7 +776,7 @@ function AppContent() {
     }
 
     // Handle public pages FIRST - before any auth checks
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador', 'GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ Public page accessed directly:', currentPage);
       setResolvedPage(currentPage);
