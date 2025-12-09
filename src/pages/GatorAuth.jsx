@@ -9,14 +9,6 @@ import { trackEvent } from '@/components/utils/analytics';
 export default function GatorAuth() {
   const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    // If user is already authenticated, redirect to role selection
-    if (user && !isLoading) {
-      console.log('✅ User already authenticated, redirecting to role selection');
-      navigate('GatorRoleSelection');
-    }
-  }, [user, isLoading]);
-
   const handleGoogleAuth = () => {
     console.log('🔐 Initiating Google auth...');
     trackEvent('auth_google_clicked');
@@ -31,9 +23,13 @@ export default function GatorAuth() {
     );
   }
 
-  // If already authenticated, don't render the auth page
+  // If already authenticated, let layout handle routing
   if (user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (

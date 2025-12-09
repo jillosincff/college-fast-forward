@@ -8,18 +8,18 @@ import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
 export default function GatorRoleSelection() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isLoading: authLoading } = useAuth();
   const [selectedRole, setSelectedRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !isLoading) {
       console.log('❌ No user on role selection, redirecting to auth');
       navigate('GatorAuth');
-    } else {
+    } else if (user) {
       console.log('✅ User authenticated on role selection:', user.email);
     }
-  }, [user]);
+  }, [user, isLoading]);
 
   const handleContinue = async () => {
     if (!selectedRole) return;
@@ -65,9 +65,9 @@ export default function GatorRoleSelection() {
     }
   };
 
-  if (!user) {
+  if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
