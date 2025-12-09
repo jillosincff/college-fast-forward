@@ -8,6 +8,18 @@ export default function GatorAuth() {
   const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
+    // Check if returning from OAuth with tokens
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('token') || urlParams.has('access_token')) {
+      console.log('🔄 [GatorAuth] OAuth callback detected, tokens present');
+      // Wait for auth check to complete
+      if (!isLoading && user) {
+        console.log('✅ [GatorAuth] Auth successful, navigating to role selection');
+        navigate('GatorRoleSelection');
+      }
+      return;
+    }
+
     if (!isLoading) {
       if (user) {
         console.log('✅ [GatorAuth] User authenticated, navigating to role selection');
@@ -15,8 +27,13 @@ export default function GatorAuth() {
       } else if (!authAttempted) {
         console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
         setAuthAttempted(true);
-        const callbackUrl = `${window.location.origin}/#GatorRoleSelection`;
+        // Use clean callback URL without hash - Base44 needs this
+        const callbackUrl = `${window.location.origin}/`;
         console.log('📍 [GatorAuth] Callback URL:', callbackUrl);
+        
+        // Store intent to go to role selection after auth
+        sessionStorage.setItem('post_auth_redirect', 'GatorRoleSelection');
+        
         base44.auth.redirectToLogin(callbackUrl);
       }
     }

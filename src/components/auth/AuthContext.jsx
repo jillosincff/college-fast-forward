@@ -19,45 +19,40 @@ export const AuthProvider = ({ children }) => {
   const checkAuthState = useCallback(async (retryCount = 0) => {
     setIsLoading(true);
     
-    // Check if we're in OAuth callback flow
     const urlParams = new URLSearchParams(window.location.search);
-    const hash = window.location.hash;
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || urlParams.has('access_token');
-    const isRoleSelectionPage = hash.includes('GatorRoleSelection');
+    const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token');
     
-    // If OAuth callback on role selection page, wait for SDK to process
-    if (hasOAuthParams && isRoleSelectionPage && retryCount === 0) {
-      console.log('🔄 [AuthContext] OAuth callback on role selection, waiting 2s...');
+    // Wait longer on first attempt if OAuth callback
+    if (hasOAuthParams && retryCount === 0) {
+      console.log('🔄 [AuthContext] OAuth callback detected, waiting 2s for SDK...');
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     try {
       const userData = await base44.auth.me();
       
-      console.log('✅ [AuthContext] User authenticated:', {
-        email: userData.email,
-        persona: userData.persona,
-        roles: userData.roles
-      });
-      
+      console.log('✅ [AuthContext] Authenticated:', userData.email);
       setUser(userData);
 
-      // Clean up URL after successful auth
+      // Handle post-auth redirect and clean URL
       if (hasOAuthParams) {
-        const cleanUrl = window.location.pathname + window.location.hash.split('?')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
+        const redirect = sessionStorage.getItem('post_auth_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('post_auth_redirect');
+          window.location.hash = redirect;
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     } catch (error) {
-      if (error.status === 401 || error.message?.includes('401')) {
-        // Retry up to 2 times if OAuth callback
+      if (error.status === 401) {
         if (hasOAuthParams && retryCount < 2) {
-          console.log(`🔄 [AuthContext] Auth failed (${retryCount + 1}/2), retrying in 1.5s...`);
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          console.log(`🔄 [AuthContext] Retry ${retryCount + 1}/2 in 1s...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
           return checkAuthState(retryCount + 1);
         }
-        logger.info('User not authenticated');
+        logger.info('Not authenticated');
       } else {
-        logger.error('Auth check failed', { error });
+        logger.error('Auth failed', { error });
       }
       setUser(null);
     } finally {
