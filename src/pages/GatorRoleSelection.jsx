@@ -72,81 +72,78 @@ export default function GatorRoleSelection() {
       <Card className="w-full max-w-lg shadow-2xl border-0">
         <CardContent className="pt-12 pb-10 px-8">
           <div className="text-center mb-10">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-lg">
-              <span className="text-4xl">🐊</span>
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-4xl font-bold text-slate-900 mb-3">
               Welcome to the Gator Network!
             </h1>
-            <p className="text-slate-600">Select your role to get started</p>
+            <p className="text-slate-600 text-lg">Select your role to get started</p>
           </div>
 
           <div className="space-y-4 mb-8">
             <button
               onClick={() => setSelectedRole('gator')}
-              className={`w-full p-6 rounded-2xl border-2 transition-all text-left ${
+              className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
                 selectedRole === 'gator'
-                  ? 'border-blue-500 bg-blue-50 shadow-md'
+                  ? 'border-slate-300 bg-slate-50'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  selectedRole === 'gator' ? 'bg-blue-500' : 'bg-slate-100'
-                }`}>
-                  <GraduationCap className={`w-6 h-6 ${
-                    selectedRole === 'gator' ? 'text-white' : 'text-slate-600'
-                  }`} />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-7 h-7 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-900 mb-1">
+                  <h3 className="font-bold text-xl text-slate-900 mb-1">
                     I'm a current UF student
                   </h3>
                   <p className="text-sm text-slate-600">
-                    Find internships and job opportunities (@ufl.edu email)
+                    Find internships and jobs (requires @ufl.edu email)
                   </p>
                 </div>
-                {selectedRole === 'gator' && (
-                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
+                <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
+                  selectedRole === 'gator'
+                    ? 'border-blue-600 bg-blue-600'
+                    : 'border-slate-300 bg-white'
+                }`}>
+                  {selectedRole === 'gator' && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white" />
+                    </div>
+                  )}
+                </div>
               </div>
             </button>
 
             <button
               onClick={() => setSelectedRole('parent')}
-              className={`w-full p-6 rounded-2xl border-2 transition-all text-left ${
+              className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
                 selectedRole === 'parent'
-                  ? 'border-orange-500 bg-orange-50 shadow-md'
+                  ? 'border-slate-300 bg-slate-50'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  selectedRole === 'parent' ? 'bg-orange-500' : 'bg-slate-100'
-                }`}>
-                  <Heart className={`w-6 h-6 ${
-                    selectedRole === 'parent' ? 'text-white' : 'text-slate-600'
-                  }`} />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-6 h-6 text-red-500 fill-red-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-900 mb-1">
+                  <h3 className="font-bold text-xl text-slate-900 mb-1">
                     I'm a Gator Parent or Alumni
                   </h3>
                   <p className="text-sm text-slate-600">
                     Help current students get hired — open your network
                   </p>
                 </div>
-                {selectedRole === 'parent' && (
-                  <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
+                <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
+                  selectedRole === 'parent'
+                    ? 'border-blue-600 bg-blue-600'
+                    : 'border-slate-300 bg-white'
+                }`}>
+                  {selectedRole === 'parent' && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white" />
+                    </div>
+                  )}
+                </div>
               </div>
             </button>
           </div>
@@ -154,7 +151,9 @@ export default function GatorRoleSelection() {
           <Button
             onClick={handleContinue}
             disabled={!selectedRole || isLoading}
-            className="w-full h-12 text-base font-semibold"
+            className={`w-full h-14 text-base font-semibold ${
+              !selectedRole ? 'bg-slate-300 hover:bg-slate-300 cursor-not-allowed' : ''
+            }`}
             style={{ 
               backgroundColor: selectedRole ? (selectedRole === 'gator' ? '#0021A5' : '#FA4616') : undefined 
             }}
@@ -172,11 +171,9 @@ export default function GatorRoleSelection() {
             )}
           </Button>
 
-          {!selectedRole && (
-            <p className="text-center text-sm text-slate-500 mt-4">
-              Select your role to continue
-            </p>
-          )}
+          <p className="text-center text-sm text-slate-500 mt-4">
+            Select your role to continue
+          </p>
         </CardContent>
       </Card>
     </div>
