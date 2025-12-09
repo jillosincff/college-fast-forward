@@ -426,7 +426,7 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {analytics && (
+        {(analytics || loading) && (
           <Tabs defaultValue="growth" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-8 gap-2 h-auto p-2 bg-white border border-slate-200">
             <TabsTrigger 
