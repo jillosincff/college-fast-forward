@@ -47,6 +47,10 @@ export default function TestingDashboard() {
   const [pifTestResult, setPifTestResult] = useState(null);
   const [pifStudentEmail, setPifStudentEmail] = useState('');
 
+  // Parent invite system test state
+  const [parentInviteTestRunning, setParentInviteTestRunning] = useState(false);
+  const [parentInviteTestResult, setParentInviteTestResult] = useState(null);
+
   // Limited Mode simulation state
   const [limitedModeEnabled, setLimitedModeEnabled] = useState(false);
   const [savingLimitedMode, setSavingLimitedMode] = useState(false);
@@ -350,6 +354,43 @@ export default function TestingDashboard() {
     }
   };
 
+  const runParentInviteTest = async () => {
+    setParentInviteTestRunning(true);
+    setParentInviteTestResult(null);
+
+    try {
+      const response = await base44.functions.invoke('testParentInviteSystem', {});
+
+      setParentInviteTestResult(response.data);
+
+      if (response.data.success) {
+        const passed = response.data.summary.passed;
+        const total = response.data.summary.total;
+        
+        toast({
+          title: passed === total ? "✅ All Tests Passed!" : "⚠️ Some Tests Failed",
+          description: `${passed}/${total} tests successful (${response.data.summary.success_rate}%)`,
+          variant: passed === total ? "default" : "destructive"
+        });
+      } else {
+        toast({
+          title: "Test Error",
+          description: "Failed to run parent invite tests",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Parent invite test failed:', error);
+      toast({
+        title: "Test Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setParentInviteTestRunning(false);
+    }
+  };
+
   const toggleLimitedMode = async (enabled) => {
     setSavingLimitedMode(true);
     try {
@@ -412,6 +453,137 @@ export default function TestingDashboard() {
             Run automated tests and get instructions for manual testing
           </p>
         </div>
+
+        {/* Parent Invite System Test - NEW */}
+        <Card className="mb-6 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" />
+              Parent Invite System Test
+            </CardTitle>
+            <CardDescription>
+              Test the complete parent invite flow: generation, validation, and linking
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900 mb-2">
+                <strong>Tests performed:</strong>
+              </p>
+              <ul className="text-xs text-blue-800 space-y-1 list-decimal ml-4">
+                <li>Generate parent_1 invite code</li>
+                <li>Generate parent_2 invite code</li>
+                <li>Validate codes exist in database with correct structure</li>
+                <li>Verify family_group_id assignment</li>
+                <li>Test duplicate generation (should return same code)</li>
+                <li>Test invalid slot rejection</li>
+                <li>Verify code structure (type, slot, expiry, family group)</li>
+                <li>Test verification endpoint availability</li>
+              </ul>
+            </div>
+
+            <Button
+              onClick={runParentInviteTest}
+              disabled={parentInviteTestRunning}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {parentInviteTestRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Running Tests...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Run Parent Invite Tests
+                </>
+              )}
+            </Button>
+
+            {parentInviteTestResult && (
+              <div className="space-y-3 mt-4">
+                <div className={`p-4 rounded-lg ${
+                  parentInviteTestResult.summary.failed === 0
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-red-50 border border-red-200'
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-slate-900">
+                      Test Summary
+                    </span>
+                    <span className={`text-lg font-bold ${
+                      parentInviteTestResult.summary.failed === 0
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}>
+                      {parentInviteTestResult.summary.success_rate}%
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <span className="text-slate-600">Total:</span>
+                      <span className="ml-2 font-bold">{parentInviteTestResult.summary.total}</span>
+                    </div>
+                    <div>
+                      <span className="text-green-600">Passed:</span>
+                      <span className="ml-2 font-bold">{parentInviteTestResult.summary.passed}</span>
+                    </div>
+                    <div>
+                      <span className="text-red-600">Failed:</span>
+                      <span className="ml-2 font-bold">{parentInviteTestResult.summary.failed}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-slate-700">Test Results:</p>
+                  {parentInviteTestResult.results.tests.map((test, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border ${
+                        test.passed
+                          ? 'bg-green-50 border-green-200'
+                          : 'bg-red-50 border-red-200'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {test.passed ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-red-600" />
+                            )}
+                            <span className="font-medium text-sm">
+                              {test.name}
+                            </span>
+                          </div>
+                          {test.details && (
+                            <details className="ml-6 mt-2">
+                              <summary className="text-xs text-slate-600 cursor-pointer hover:text-slate-900">
+                                View Details
+                              </summary>
+                              <pre className="text-xs bg-white p-2 rounded mt-1 overflow-auto">
+                                {JSON.stringify(test.details, null, 2)}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded ${
+                          test.passed
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {test.passed ? 'PASS' : 'FAIL'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Pay It Forward Test */}
         <Card className="mb-6 border-2 border-pink-200 bg-gradient-to-br from-pink-50 to-white">
