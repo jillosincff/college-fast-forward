@@ -10,13 +10,14 @@ export default function GatorAuth() {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        console.log('✅ User authenticated, navigating to role selection');
+        console.log('✅ [GatorAuth] User authenticated, navigating to role selection');
         navigate('GatorRoleSelection');
       } else if (!authAttempted) {
-        console.log('🔐 Not authenticated, redirecting to Base44 login...');
+        console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
         setAuthAttempted(true);
-        // Use root URL as callback - Base44 SDK will handle the redirect
-        base44.auth.redirectToLogin(`${window.location.origin}/`);
+        const callbackUrl = `${window.location.origin}/#GatorRoleSelection`;
+        console.log('📍 [GatorAuth] Callback URL:', callbackUrl);
+        base44.auth.redirectToLogin(callbackUrl);
       }
     }
   }, [user, isLoading, authAttempted]);

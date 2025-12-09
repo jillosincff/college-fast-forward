@@ -21,40 +21,43 @@ export const AuthProvider = ({ children }) => {
     
     // Check if we're in OAuth callback flow
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
     const hasOAuthParams = urlParams.has('token') || urlParams.has('code') || urlParams.has('access_token');
+    const isRoleSelectionPage = hash.includes('GatorRoleSelection');
     
-    // If OAuth callback, wait for SDK to process it
-    if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 OAuth callback detected with params, waiting 3s for SDK...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
+    // If OAuth callback on role selection page, wait for SDK to process
+    if (hasOAuthParams && isRoleSelectionPage && retryCount === 0) {
+      console.log('🔄 [AuthContext] OAuth callback on role selection, waiting 2s...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     try {
       const userData = await base44.auth.me();
       
-      console.log('🔐 Auth check - User data:', {
+      console.log('✅ [AuthContext] User authenticated:', {
         email: userData.email,
         persona: userData.persona,
-        roles: userData.roles,
-        onboarding_completed: userData.onboarding_completed
+        roles: userData.roles
       });
       
       setUser(userData);
 
-      if (urlParams.has('token')) {
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      // Clean up URL after successful auth
+      if (hasOAuthParams) {
+        const cleanUrl = window.location.pathname + window.location.hash.split('?')[0];
+        window.history.replaceState({}, document.title, cleanUrl);
       }
     } catch (error) {
       if (error.status === 401 || error.message?.includes('401')) {
-        // Retry up to 3 times if this is OAuth callback
-        if (hasOAuthParams && retryCount < 3) {
-          console.log(`🔄 Auth failed (attempt ${retryCount + 1}/3), retrying in 2s...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+        // Retry up to 2 times if OAuth callback
+        if (hasOAuthParams && retryCount < 2) {
+          console.log(`🔄 [AuthContext] Auth failed (${retryCount + 1}/2), retrying in 1.5s...`);
+          await new Promise(resolve => setTimeout(resolve, 1500));
           return checkAuthState(retryCount + 1);
         }
-        logger.info('User not authenticated - staying on current page');
+        logger.info('User not authenticated');
       } else {
-        logger.error('Authentication check failed', { error, status: error.status });
+        logger.error('Auth check failed', { error });
       }
       setUser(null);
     } finally {

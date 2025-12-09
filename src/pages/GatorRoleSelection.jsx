@@ -15,12 +15,12 @@ export default function GatorRoleSelection() {
 
   useEffect(() => {
     if (user) {
-      console.log('✅ User authenticated on role selection:', user.email);
+      console.log('✅ [GatorRoleSelection] User authenticated:', user.email);
     } else if (!authLoading) {
       const timer = setTimeout(() => {
-        console.log('⏱️ Auth timeout - no user after 15s');
+        console.log('⏱️ [GatorRoleSelection] Auth timeout - no user after 10s');
         setAuthTimeout(true);
-      }, 15000);
+      }, 10000);
       return () => clearTimeout(timer);
     }
   }, [user, authLoading]);
