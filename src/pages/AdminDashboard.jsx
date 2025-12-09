@@ -621,10 +621,19 @@ const AdminDashboard = () => {
               </div>
 
               <FeatureUsageTable data={analytics.featureUsage?.topFeatures || []} />
+              </>
+              )}
             </TabsContent>
 
             {/* Performance Tab */}
             <TabsContent value="performance" className="space-y-6">
+              {!analytics ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-slate-600">Loading analytics...</p>
+                </div>
+              ) : (
+                <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MetricCard
                   title="Avg Load Time"
