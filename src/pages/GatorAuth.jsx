@@ -10,13 +10,11 @@ export default function GatorAuth() {
       if (user) {
         // User is authenticated, go to role selection
         console.log('✅ User authenticated, navigating to role selection');
-        setTimeout(() => {
-          window.location.href = window.location.origin + '/#GatorRoleSelection';
-        }, 100);
+        navigate('GatorRoleSelection');
       } else {
         // Not authenticated, redirect to Base44 login
         console.log('🔐 Not authenticated, redirecting to Base44 login...');
-        const callbackUrl = window.location.origin + '/#GatorAuth';
+        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
         base44.auth.redirectToLogin(callbackUrl);
       }
     }
