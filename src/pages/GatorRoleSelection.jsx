@@ -130,7 +130,7 @@ export default function GatorRoleSelection() {
                     I'm a Gator student
                   </h3>
                   <p className="text-sm text-slate-600">
-                    Forever free — find jobs & get hired
+                    Find Jobs, Internships & Post Grad roommates
                   </p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
