@@ -55,6 +55,10 @@ import UFAmbassador from './pages/UFAmbassador';
 import AmbassadorLeaderboard from './pages/AmbassadorLeaderboard';
 import Notifications from './pages/Notifications';
 import ReferralAnalytics from './pages/ReferralAnalytics';
+import GatorAuth from './pages/GatorAuth';
+import GatorRoleSelection from './pages/GatorRoleSelection';
+import GatorInviteCode from './pages/GatorInviteCode';
+import GatorWelcome from './pages/GatorWelcome';
 import __Layout from './Layout.jsx';
 
 
@@ -116,6 +120,10 @@ export const PAGES = {
     "AmbassadorLeaderboard": AmbassadorLeaderboard,
     "Notifications": Notifications,
     "ReferralAnalytics": ReferralAnalytics,
+    "GatorAuth": GatorAuth,
+    "GatorRoleSelection": GatorRoleSelection,
+    "GatorInviteCode": GatorInviteCode,
+    "GatorWelcome": GatorWelcome,
 }
 
 export const pagesConfig = {
