@@ -317,11 +317,52 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
+        {/* Superpower Parent Invite Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <Card className="border-4 border-orange-500 shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50 relative overflow-hidden">
+            {/* Lightning bolt decorations */}
+            <div className="absolute top-4 right-4 text-6xl animate-pulse">⚡</div>
+            <div className="absolute bottom-4 left-4 text-4xl animate-pulse" style={{ animationDelay: '0.5s' }}>⚡</div>
+            <CardContent className="pt-8 pb-8 relative z-10">
+              <div className="text-center mb-6">
+                <h3 className="text-3xl font-extrabold text-slate-900 mb-3">
+                  Invite Your Parent(s) – This Is Your Superpower ⚡
+                </h3>
+                <p className="text-lg text-slate-700 max-w-3xl mx-auto font-medium">
+                  Parents get you warm intros, post jobs for you, and unlock your elite badges. 87% of students who invite a parent get help within 2 weeks.
+                </p>
+              </div>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                <Button
+                  onClick={() => setShowInviteModal(true)}
+                  size="lg"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-7 text-lg shadow-xl border-2 border-orange-300"
+                >
+                  <UserPlus className="w-6 h-6 mr-2" />
+                  Invite Parent 1
+                </Button>
+                <Button
+                  onClick={() => setShowInviteModal(true)}
+                  size="lg"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-7 text-lg shadow-xl border-2 border-orange-300"
+                >
+                  <UserPlus className="w-6 h-6 mr-2" />
+                  Invite Parent 2
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {!isSpotlightActive && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            transition={{ delay: 0.2 }}
           >
             <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 border-0 shadow-2xl overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
@@ -368,7 +409,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: isSpotlightActive ? 0.15 : 0.2 }}
+          transition={{ delay: isSpotlightActive ? 0.2 : 0.25 }}
         >
           <MembershipStatusCard />
         </motion.div>
@@ -376,7 +417,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: isSpotlightActive ? 0.2 : 0.25 }}
+          transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
           className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6"
         >
           <h2 className="text-lg font-bold text-slate-900 mb-4 text-center">
@@ -415,39 +456,13 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
-        >
-          <Card className="bg-gradient-to-r from-purple-600 to-pink-600 border-0 shadow-xl">
-            <CardContent className="pt-6 pb-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <UserPlus className="w-6 h-6" />
-                    <h3 className="text-xl font-bold text-white">👨‍👩‍👧‍👦 Invite Your Parent</h3>
-                  </div>
-                  <p className="text-white/90">
-                    Give them access to help you + unlock their professional network. Earn +100 points!
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setShowInviteModal(true)}
-                  className="bg-white/20 border-2 border-white/40 text-white hover:bg-white/30 font-bold px-8 py-6 shadow-lg backdrop-blur-sm"
-                >
-                  Generate Invite
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
 
         {!loadingData && messages.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.3 : 0.35 }}
+            transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
           >
             <Card className="border-2 border-blue-200 shadow-lg">
               <CardContent className="pt-6">
@@ -514,7 +529,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.35 : 0.4 }}
+            transition={{ delay: isSpotlightActive ? 0.3 : 0.35 }}
           >
             <Card>
               <CardContent className="pt-6">
@@ -562,7 +577,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.4 : 0.45 }}
+            transition={{ delay: isSpotlightActive ? 0.35 : 0.4 }}
           >
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50">
               <CardContent className="pt-6">
