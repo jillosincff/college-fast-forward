@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 
 export default function GatorAuth() {
   const { user, isLoading } = useAuth();
+  const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -11,14 +12,15 @@ export default function GatorAuth() {
         // User is authenticated, go to role selection
         console.log('✅ User authenticated, navigating to role selection');
         navigate('GatorRoleSelection');
-      } else {
+      } else if (!authAttempted) {
         // Not authenticated, redirect to Base44 login
         console.log('🔐 Not authenticated, redirecting to Base44 login...');
-        const callbackUrl = window.location.origin + '/#GatorRoleSelection';
+        setAuthAttempted(true);
+        const callbackUrl = window.location.origin + '/#GatorAuth';
         base44.auth.redirectToLogin(callbackUrl);
       }
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, authAttempted]);
 
   // Show loading spinner while checking auth or redirecting
   return (
