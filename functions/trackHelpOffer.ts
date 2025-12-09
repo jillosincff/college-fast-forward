@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 console.log('🚀 trackHelpOffer function loaded');
 
@@ -53,7 +53,9 @@ Deno.serve(async (req) => {
                 sender_email: helperEmail,
                 subject: `🙋 ${helperName} wants to help with: ${requestTitle}`,
                 body: `${helperName} (${helperPersona || 'Gator'}) offered to help!\n\n${message}\n\nView this in your Activity tab to respond.`,
-                is_read: false
+                is_read: false,
+                post_id: requestId,
+                post_title: requestTitle
             });
             messageCreated = true;
             messageId = newMessage.id;
