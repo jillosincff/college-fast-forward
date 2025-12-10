@@ -62,17 +62,17 @@ export default function GatorParentInvite() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-white py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#faf8f3] py-8 px-4">
+      <div className="max-w-xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-yellow-600 to-yellow-700 mx-auto mb-6 flex items-center justify-center shadow-2xl">
-            <Lock className="w-10 h-10 text-white" strokeWidth={2.5} />
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4A017] to-[#B8860B] mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <Lock className="w-8 h-8 text-white" strokeWidth={2.5} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 mb-1">
             UF Gator Network
           </h1>
-          <p className="text-lg text-slate-600">
+          <p className="text-sm text-slate-600">
             Where Gators connect for careers
           </p>
         </div>
