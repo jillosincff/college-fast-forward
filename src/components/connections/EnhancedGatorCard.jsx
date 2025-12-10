@@ -210,9 +210,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       console.log('📞 Calling incrementOfferCount with:', { requestId, actionType: 'like' });
       const result = await base44.functions.invoke('incrementOfferCount', { requestId, actionType: 'like' });
       console.log('✅ Backend result:', result);
-      
+      console.log('📦 result.data:', result?.data);
+      console.log('🔢 result.data.newCount:', result?.data?.newCount);
+      console.log('✅ result.data.success:', result?.data?.success);
+
       if (result?.data?.success) {
-        setDisplayCount(result.data.newCount || newCount);
+        const finalCount = result.data.newCount;
+        console.log('📈 Setting display count to:', finalCount);
+        setDisplayCount(finalCount);
         if (onLikeChange) onLikeChange();
         toast({
           title: "👍 You liked this!",
