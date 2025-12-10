@@ -36,8 +36,8 @@ export default function WelcomeRole() {
     {
       id: 'gator',
       icon: GraduationCap,
-      title: "I'm a Gator (student or alum)",
-      description: 'Forever free — find jobs & get hired',
+      title: "I'm a Gator (current student)",
+      description: 'Find an internship, job, and post-college roommate',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       emoji: '🐊'
@@ -45,8 +45,8 @@ export default function WelcomeRole() {
     {
       id: 'parent',
       icon: Users,
-      title: "I'm a Gator parent",
-      description: 'Help Gators get hired — open your network',
+      title: "I'm a Gator parent or alumni",
+      description: 'Help Gators get hired - Start Networking',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       emoji: '🧡'
