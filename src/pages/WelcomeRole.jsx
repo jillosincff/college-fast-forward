@@ -173,7 +173,7 @@ export default function WelcomeRole() {
         <div className="sticky bottom-0 bg-white/80 backdrop-blur-sm pt-4 pb-safe border-t">
           <Button
             onClick={handleContinue}
-            disabled={isSubmitting}
+            disabled={!selectedRole}
             size="lg"
             className={`
               w-full h-12 sm:h-14 text-base sm:text-lg font-semibold shadow-lg
@@ -182,19 +182,10 @@ export default function WelcomeRole() {
                 : 'bg-blue-600 hover:bg-blue-700'}
             `}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Setting up...
-              </>
-            ) : (
-              <>
-                Continue
-                <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </>
-            )}
+            Continue
+            <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </Button>
           {!selectedRole && (
             <p className="text-xs text-center text-slate-500 mt-2">
