@@ -87,8 +87,8 @@ const AnimatedNetworkHero = ({
   };
 
   const handleJoinClick = () => {
-    console.log('🔵 Join button clicked - going to GatorAuth');
-    navigate('GatorAuth');
+    console.log('🔵 Join button clicked - going to WelcomeRole');
+    navigate('WelcomeRole');
   };
 
 
