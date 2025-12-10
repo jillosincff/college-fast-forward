@@ -59,6 +59,7 @@ import GatorAuth from './pages/GatorAuth';
 import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorInviteCode from './pages/GatorInviteCode';
 import GatorWelcome from './pages/GatorWelcome';
+import GatorParentInvite from './pages/GatorParentInvite';
 import __Layout from './Layout.jsx';
 
 
@@ -124,6 +125,7 @@ export const PAGES = {
     "GatorRoleSelection": GatorRoleSelection,
     "GatorInviteCode": GatorInviteCode,
     "GatorWelcome": GatorWelcome,
+    "GatorParentInvite": GatorParentInvite,
 }
 
 export const pagesConfig = {
