@@ -78,24 +78,24 @@ export default function GatorParentInvite() {
         </div>
 
         {/* Main Value Prop Card */}
-        <div className="bg-[#F2A900] rounded-2xl p-8 text-center mb-5 shadow-md">
-          <Shield className="w-14 h-14 text-slate-900 mx-auto mb-4" strokeWidth={2} />
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">
+        <div className="rounded-2xl p-8 text-center mb-5 shadow-md" style={{ backgroundColor: '#0021A5' }}>
+          <Shield className="w-14 h-14 text-white mx-auto mb-4" strokeWidth={2} />
+          <h2 className="text-2xl font-bold text-white mb-3">
             Join the UF Gator Family Network
           </h2>
-          <p className="text-sm text-slate-800 mb-5 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-white mb-5 max-w-md mx-auto leading-relaxed">
             Connect with 4,000+ UF Gators, Alumni & Families to help students launch careers through warm introductions
           </p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-            <div className="flex items-center gap-2 text-slate-900">
+            <div className="flex items-center gap-2 text-white">
               <CheckCircle className="w-4 h-4" />
               <span>Invite Only</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-900">
+            <div className="flex items-center gap-2 text-white">
               <CheckCircle className="w-4 h-4" />
               <span>Exclusive Network</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-900">
+            <div className="flex items-center gap-2 text-white">
               <CheckCircle className="w-4 h-4" />
               <span>Help Gators</span>
             </div>
