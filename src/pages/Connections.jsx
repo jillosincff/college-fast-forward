@@ -57,6 +57,26 @@ export default function DiscoverEmergingGatorsPage() {
 
   // Removed visibility change auto-reload - it was causing thumbs up to reset
 
+  const loadUserLikes = async () => {
+    if (!user?.email) return;
+    
+    try {
+      // Single API call to get all likes for current user
+      const likes = await ProfileLike.filter({ liker_email: user.email });
+      
+      // Convert to Map for O(1) lookup
+      const likesMap = new Map();
+      likes.forEach(like => {
+        likesMap.set(like.request_id, true);
+      });
+      
+      setUserLikes(likesMap);
+    } catch (error) {
+      console.log('Could not load user likes:', error);
+      setUserLikes(new Map());
+    }
+  };
+
   const loadData = async (silent = false) => {
     if (!silent) setIsLoading(true);
     
