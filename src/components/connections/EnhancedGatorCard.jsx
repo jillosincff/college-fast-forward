@@ -44,12 +44,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const [isLiked, setIsLiked] = useState(false);
   const [likesLoading, setLikesLoading] = useState(true);
   
-  // Load like status from database on mount
+  // Load like status from database on mount with staggered timing
   useEffect(() => {
     if (!requestId || !currentUser?.email) {
       setLikesLoading(false);
       return;
     }
+    
+    // Stagger requests to avoid rate limits (0-2 second random delay)
+    const delay = Math.random() * 2000;
     
     const loadLikeStatus = async () => {
       try {
@@ -60,13 +63,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         setIsLiked(likes.length > 0);
         setDisplayCount(request?.offers_count || 0);
       } catch (error) {
-        console.error('Failed to load like status:', error);
+        // Silently fail on rate limits, just show the count from request
+        setDisplayCount(request?.offers_count || 0);
       } finally {
         setLikesLoading(false);
       }
     };
     
-    loadLikeStatus();
+    const timer = setTimeout(loadLikeStatus, delay);
+    return () => clearTimeout(timer);
   }, [requestId, currentUser?.email, request?.offers_count]);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
