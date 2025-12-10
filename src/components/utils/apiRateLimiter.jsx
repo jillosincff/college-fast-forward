@@ -4,11 +4,12 @@
  */
 
 class ApiRateLimiter {
-  constructor(maxCallsPerSecond = 5) {
+  constructor(maxCallsPerSecond = 3) {
     this.maxCallsPerSecond = maxCallsPerSecond;
     this.queue = [];
     this.processing = false;
     this.callTimestamps = [];
+    this.retryDelays = [1000, 2000, 4000]; // Exponential backoff
   }
 
   async execute(apiCall) {
