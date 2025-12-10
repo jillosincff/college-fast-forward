@@ -161,7 +161,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!requestId || isLiked || !currentUser?.email) return;
+    
+    console.log('👍 CLICK DEBUG:', { requestId, isLiked, currentUser: currentUser?.email });
+    
+    if (!requestId || isLiked || !currentUser?.email) {
+      console.log('❌ Blocked - requestId:', requestId, 'isLiked:', isLiked, 'user:', currentUser?.email);
+      return;
+    }
+
+    console.log('✅ Processing like...');
 
     // Optimistic update
     const prevCount = displayCount;
@@ -170,12 +178,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     setIsLiked(true);
 
     try {
-      // Save like via backend
+      console.log('Calling incrementOfferCount...');
       const result = await incrementOfferCount({ requestId, actionType: 'like' });
+      console.log('Backend result:', result);
       
       if (result?.data?.success) {
         setDisplayCount(result.data.newCount);
-        // Notify parent to refresh like map
         if (onLikeChange) onLikeChange();
         toast({
           title: "👍 You liked this!",
@@ -184,8 +192,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         throw new Error(result?.data?.error || 'Failed to like');
       }
     } catch (err) {
-      // Revert on failure
-      console.error('Failed to save like:', err);
+      console.error('❌ Failed to save like:', err);
       setDisplayCount(prevCount);
       setIsLiked(false);
       toast({
