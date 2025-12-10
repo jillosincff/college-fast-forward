@@ -57,10 +57,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     
     const loadLikeStatus = async () => {
       try {
-        const likes = await ProfileLike.filter({ 
-          request_id: requestId, 
-          liker_email: currentUser.email 
-        });
+        const likes = await rateLimiter.execute(() => 
+          ProfileLike.filter({ 
+            request_id: requestId, 
+            liker_email: currentUser.email 
+          })
+        );
         setIsLiked(likes.length > 0);
         setDisplayCount(request?.offers_count || 0);
       } catch (error) {
