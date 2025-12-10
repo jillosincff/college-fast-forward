@@ -52,8 +52,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       return;
     }
     
-    // Stagger requests to avoid rate limits (0-2 second random delay)
-    const delay = Math.random() * 2000;
+    // Stagger requests to avoid rate limits (2-6 second random delay)
+    const delay = 2000 + Math.random() * 4000;
     
     const loadLikeStatus = async () => {
       try {
