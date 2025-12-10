@@ -229,15 +229,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       <motion.div
         variants={cardVariants}
         className={`gator-card-enhanced ${showFeaturedBadge ? 'featured' : ''}`}
-        onClickCapture={(e) => {
-          // Only allow clicks on interactive elements
-          const target = e.target;
-          if (target.closest('button') || target.closest('a')) {
-            return; // Let button/link handle it
-          }
-          // Block all other clicks on card
-          e.stopPropagation();
-        }}
       >
         {showFeaturedBadge && (
           <div className="featured-badge">
@@ -378,13 +369,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               </span>
               <button
                 type="button"
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  e.preventDefault();
                   console.log('🎯 BUTTON CLICK FIRED!');
                   handleThumbsUp(e);
                 }}
