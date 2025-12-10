@@ -229,6 +229,15 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       <motion.div
         variants={cardVariants}
         className={`gator-card-enhanced ${showFeaturedBadge ? 'featured' : ''}`}
+        onClickCapture={(e) => {
+          // Only allow clicks on interactive elements
+          const target = e.target;
+          if (target.closest('button') || target.closest('a')) {
+            return; // Let button/link handle it
+          }
+          // Block all other clicks on card
+          e.stopPropagation();
+        }}
       >
         {showFeaturedBadge && (
           <div className="featured-badge">
@@ -721,19 +730,27 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
         .signal-badge.signal-clickable {
           cursor: pointer !important;
-          padding: 4px 8px;
-          border-radius: 6px;
+          padding: 6px 10px;
+          border-radius: 8px;
           background: #f3f4f6;
           pointer-events: auto !important;
           position: relative;
-          z-index: 999;
+          z-index: 9999;
           user-select: none;
-          border: none;
+          border: 2px solid transparent;
           outline: none;
+          font-weight: 600;
+          transition: all 0.15s ease;
+        }
+        
+        .signal-badge.signal-clickable:not(:disabled):hover {
+          border-color: #FA4616;
+          box-shadow: 0 2px 8px rgba(250, 70, 22, 0.2);
         }
         
         .signal-badge.signal-clickable:not(:disabled):active {
-          transform: scale(0.95);
+          transform: scale(0.92);
+          background: #e5e7eb;
         }
 
         .signal-badge.signal-clickable:hover:not(:disabled) {
