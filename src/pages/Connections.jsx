@@ -26,6 +26,7 @@ export default function DiscoverEmergingGatorsPage() {
   const [requests, setRequests] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userLikes, setUserLikes] = useState(new Map()); // Map of request_id -> boolean
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     major: 'all',
