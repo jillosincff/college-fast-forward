@@ -151,13 +151,42 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   };
 
   const handleThumbsUp = async (e) => {
-    e.stopPropagation();
-    e.preventDefault();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     
-    console.log('👍 CLICK DEBUG:', { requestId, isLiked, currentUser: currentUser?.email });
+    console.log('🔥 THUMBS UP CLICKED!');
+    console.log('👍 CLICK DEBUG:', { 
+      requestId, 
+      request: !!request,
+      isLiked, 
+      currentUser: currentUser?.email,
+      hasRequest: !!request 
+    });
     
-    if (!requestId || isLiked || !currentUser?.email) {
-      console.log('❌ Blocked - requestId:', requestId, 'isLiked:', isLiked, 'user:', currentUser?.email);
+    if (!requestId) {
+      console.error('❌ No requestId:', requestId);
+      toast({
+        title: "Error",
+        description: "No request ID found",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (isLiked) {
+      console.log('❌ Already liked');
+      return;
+    }
+    
+    if (!currentUser?.email) {
+      console.error('❌ No user email:', currentUser);
+      toast({
+        title: "Please log in",
+        description: "You must be logged in to like",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -170,12 +199,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     setIsLiked(true);
 
     try {
-      console.log('Calling incrementOfferCount...');
+      console.log('📞 Calling incrementOfferCount with:', { requestId, actionType: 'like' });
       const result = await base44.functions.invoke('incrementOfferCount', { requestId, actionType: 'like' });
-      console.log('Backend result:', result);
+      console.log('✅ Backend result:', result);
       
       if (result?.data?.success) {
-        setDisplayCount(result.data.newCount);
+        setDisplayCount(result.data.newCount || newCount);
         if (onLikeChange) onLikeChange();
         toast({
           title: "👍 You liked this!",
@@ -327,7 +356,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
           {/* Quick-Win Engagement Signals */}
           {request && (
-            <div className="engagement-signals">
+            <div className="engagement-signals" onClick={(e) => e.stopPropagation()}>
               <span 
                 className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
                 title={messagesCount > 0 ? `${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}` : 'Be the first to reach out!'}
@@ -335,11 +364,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
                 💬 {messagesCount}
               </span>
               <button
-                onClick={handleThumbsUp}
+                type="button"
+                onClick={(e) => {
+                  console.log('🎯 Button clicked directly!');
+                  handleThumbsUp(e);
+                }}
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
                 disabled={isLiked}
                 title={isLiked ? 'You supported this student!' : 'Show support'}
-                style={{ pointerEvents: 'auto', cursor: isLiked ? 'default' : 'pointer' }}
               >
                 👍 {displayCount}
               </button>
@@ -686,6 +718,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           position: relative;
           z-index: 999;
           user-select: none;
+          border: none;
+          outline: none;
+        }
+        
+        .signal-badge.signal-clickable:not(:disabled):active {
+          transform: scale(0.95);
         }
 
         .signal-badge.signal-clickable:hover:not(:disabled) {
