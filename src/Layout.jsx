@@ -660,10 +660,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ShareExpertise'];
+const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
 const adminPages = ['TestingDashboard'];
-const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
+const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
