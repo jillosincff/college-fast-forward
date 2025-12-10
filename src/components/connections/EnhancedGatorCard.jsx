@@ -21,7 +21,7 @@ const cardVariants = {
   }
 };
 
-export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, onLikeChange }) {
+export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, likeCount = 0, onLikeChange }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const { toast } = useToast();
@@ -32,8 +32,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Use passed-in like status from parent (single batch API call)
-  const [displayCount, setDisplayCount] = useState(request?.offers_count || 0);
+  // Use passed-in like count and status from parent (single batch API call)
+  const [displayCount, setDisplayCount] = useState(likeCount);
   const [isLiked, setIsLiked] = useState(isLikedByUser);
   
   // Debug logging
@@ -46,15 +46,16 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     );
   }, [requestId, isLikedByUser, isLiked, request?.poster_name]);
   
-  // Sync like status when prop changes
+  // Sync like status and count when props change
   useEffect(() => {
-    console.log('🔄 Syncing isLiked:', 
-      '\n  from:', isLiked, 
-      '\n  to:', isLikedByUser, 
+    console.log('🔄 Syncing:', 
+      '\n  isLiked from:', isLiked, 'to:', isLikedByUser,
+      '\n  count from:', displayCount, 'to:', likeCount,
       '\n  requestId:', requestId
     );
     setIsLiked(isLikedByUser);
-  }, [isLikedByUser]);
+    setDisplayCount(likeCount);
+  }, [isLikedByUser, likeCount]);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 

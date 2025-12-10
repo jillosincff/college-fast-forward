@@ -27,6 +27,7 @@ export default function DiscoverEmergingGatorsPage() {
   const [allUsers, setAllUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userLikes, setUserLikes] = useState(new Map()); // Map of request_id -> boolean
+  const [likeCounts, setLikeCounts] = useState(new Map()); // Map of request_id -> count
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     major: 'all',
@@ -67,6 +68,25 @@ export default function DiscoverEmergingGatorsPage() {
     } catch (error) {
       console.log('Could not load user likes:', error);
       setUserLikes(new Map());
+    }
+  };
+
+  const loadLikeCounts = async () => {
+    try {
+      // Get ALL ProfileLikes to count them by request_id
+      const allLikes = await ProfileLike.list();
+      
+      // Count likes per request
+      const countsMap = new Map();
+      allLikes.forEach(like => {
+        const currentCount = countsMap.get(like.request_id) || 0;
+        countsMap.set(like.request_id, currentCount + 1);
+      });
+      
+      setLikeCounts(countsMap);
+    } catch (error) {
+      console.log('Could not load like counts:', error);
+      setLikeCounts(new Map());
     }
   };
 
@@ -132,6 +152,7 @@ export default function DiscoverEmergingGatorsPage() {
   useEffect(() => {
     loadData();
     loadUserLikes();
+    loadLikeCounts();
   }, [user?.email]);
 
   const handleOfferHelp = (request) => {
@@ -395,7 +416,8 @@ export default function DiscoverEmergingGatorsPage() {
                         isFeatured={profile.isFeatured}
                         currentUser={user}
                         isLikedByUser={profile.request ? userLikes.get(profile.request.id) : false}
-                        onLikeChange={loadUserLikes}
+                        likeCount={profile.request ? (likeCounts.get(profile.request.id) || 0) : 0}
+                        onLikeChange={() => { loadUserLikes(); loadLikeCounts(); }}
                       />
                     ))}
                   </AnimatePresence>
