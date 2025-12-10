@@ -66,7 +66,7 @@ class ApiRateLimiter {
   }
 }
 
-// Global instance
-const rateLimiter = new ApiRateLimiter(5); // 5 calls per second
+// Global instance - reduced to 3 calls/second to be more conservative
+const rateLimiter = new ApiRateLimiter(3);
 
 export default rateLimiter;
