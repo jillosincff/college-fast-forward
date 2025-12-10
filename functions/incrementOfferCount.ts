@@ -52,10 +52,17 @@ Deno.serve(async (req) => {
         }
 
         // Create the like record
-        await base44.asServiceRole.entities.ProfileLike.create({
-          request_id: requestId,
-          liker_email: user.email
-        });
+        console.log('Creating ProfileLike:', { request_id: requestId, liker_email: user.email });
+        try {
+          await base44.asServiceRole.entities.ProfileLike.create({
+            request_id: requestId,
+            liker_email: user.email
+          });
+          console.log('ProfileLike created successfully');
+        } catch (createError) {
+          console.error('Failed to create ProfileLike:', createError);
+          throw createError;
+        }
 
         // Also increment the offers_count on JobRequest
         const currentRecord = await base44.asServiceRole.entities.JobRequest.get(requestId);
