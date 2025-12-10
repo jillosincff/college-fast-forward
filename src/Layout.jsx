@@ -662,7 +662,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite'];
 const adminPages = ['TestingDashboard'];
 const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
