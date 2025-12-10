@@ -420,6 +420,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           border: 2px solid transparent;
           display: flex;
           flex-direction: column;
+          cursor: auto;
         }
 
         .gator-card-enhanced:hover {
