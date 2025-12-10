@@ -33,10 +33,13 @@ Deno.serve(async (req) => {
         });
 
         if (existingLikes && existingLikes.length > 0) {
+          // Already liked - return success with current count (idempotent)
+          const currentRecord = await base44.asServiceRole.entities.JobRequest.get(requestId);
           return Response.json({ 
-            success: false, 
-            error: 'Already liked' 
-          }, { status: 400 });
+            success: true, 
+            newCount: currentRecord?.offers_count || 0,
+            alreadyLiked: true
+          });
         }
 
         // Create the like record
