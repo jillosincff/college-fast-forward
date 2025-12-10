@@ -66,7 +66,7 @@ export default function GatorParentInvite() {
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4A017] to-[#B8860B] mx-auto mb-4 flex items-center justify-center shadow-lg">
+          <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg" style={{ backgroundColor: '#0021A5' }}>
             <Lock className="w-8 h-8 text-white" strokeWidth={2.5} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-1">
