@@ -4,24 +4,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate, useParams } from '@/components/utils/navigation';
-import { Lock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Lock, ArrowRight, Info } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 
 export default function GatorInviteCode() {
-  const { user, refreshUser } = useAuth();
-  const { role } = useParams();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [inviteCode, setInviteCode] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!user) {
-      navigate('GatorAuth');
-    }
-  }, [user]);
+  const [referralCode, setReferralCode] = useState('');
+  const [showReferralInput, setShowReferralInput] = useState(false);
 
   const handleVerifyCode = async () => {
     if (!inviteCode.trim()) {
