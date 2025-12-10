@@ -112,6 +112,7 @@ const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection'));
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
 const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
+const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
