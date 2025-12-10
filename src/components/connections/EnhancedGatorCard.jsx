@@ -38,17 +38,21 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   // Debug logging
   useEffect(() => {
-    console.log('💡 Card mounted/updated:', {
-      requestId,
-      isLikedByUser,
-      isLiked,
-      posterName: request?.poster_name
-    });
+    console.log('💡 Card mounted/updated:', 
+      '\n  requestId:', requestId,
+      '\n  isLikedByUser:', isLikedByUser,
+      '\n  isLiked:', isLiked,
+      '\n  posterName:', request?.poster_name
+    );
   }, [requestId, isLikedByUser, isLiked, request?.poster_name]);
   
   // Sync like status when prop changes
   useEffect(() => {
-    console.log('🔄 Syncing isLiked:', { from: isLiked, to: isLikedByUser, requestId });
+    console.log('🔄 Syncing isLiked:', 
+      '\n  from:', isLiked, 
+      '\n  to:', isLikedByUser, 
+      '\n  requestId:', requestId
+    );
     setIsLiked(isLikedByUser);
   }, [isLikedByUser]);
   
@@ -370,13 +374,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               <div
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
                 onClick={(e) => {
-                  console.log('🎯 DIV CLICKED!', { isLiked, requestId });
+                  console.log('🎯 DIV CLICKED!', 
+                    '\n  isLiked:', isLiked, 
+                    '\n  requestId:', requestId,
+                    '\n  isLikedByUser prop:', isLikedByUser
+                  );
                   e.stopPropagation();
                   if (!isLiked) {
                     console.log('🎯 Calling handleThumbsUp...');
                     handleThumbsUp();
                   } else {
-                    console.log('⏭️ Already liked, skipping');
+                    console.log('⏭️ Already liked, skipping - isLiked is:', isLiked);
                   }
                 }}
                 style={{ cursor: isLiked ? 'default' : 'pointer' }}
