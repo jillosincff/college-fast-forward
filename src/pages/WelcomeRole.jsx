@@ -53,7 +53,7 @@ export default function WelcomeRole() {
     }
   ];
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     if (!selectedRole) {
       setShowError(true);
       toast({
@@ -64,138 +64,25 @@ export default function WelcomeRole() {
       return;
     }
 
-    setIsSubmitting(true);
+    // Store role selection in sessionStorage
+    sessionStorage.setItem('pending_role_selection', selectedRole);
+    
+    console.log('🎯 Role selected:', selectedRole);
 
-    try {
-      const userEmail = user.email?.toLowerCase() || '';
-      const hasUFLEmail = userEmail.endsWith('@ufl.edu');
-      
-      // GATOR ROLE: @ufl.edu gets instant access, others need invite code
-      if (selectedRole === 'gator') {
-        if (hasUFLEmail) {
-          console.log('✅ @ufl.edu Gator - instant access!');
-          
-          toast({
-            title: "Welcome Gator! 🎉",
-            description: "You earned 50 points for joining with @ufl.edu!",
-          });
-        } else {
-          // Alumni without @ufl.edu need invite code
-          if (!inviteInfo || !inviteInfo.code) {
-            console.log('Alumni without @ufl.edu - needs invite code');
-            
-            sessionStorage.setItem('pending_role_selection', 'gator');
-            navigate('InviteRequired');
-            return;
-          }
-
-          console.log('Verifying alumni invite code...');
-          
-          const result = await verifyInviteCode({
-            code: inviteInfo.code,
-            invite_type: inviteInfo.type
-          });
-
-          if (!result.data.success) {
-            toast({
-              title: "Invite Verification Failed",
-              description: result.data.error || "Invalid invite code",
-              variant: "destructive"
-            });
-            
-            sessionStorage.removeItem('pending_invite_code');
-            sessionStorage.removeItem('pending_invite_type');
-            sessionStorage.removeItem('pending_inviter_name');
-            setInviteInfo(null);
-            setIsSubmitting(false);
-            return;
-          }
-
-          console.log('✅ Alumni invite verified successfully!');
-          toast({
-            title: "Welcome Gator! 🎉",
-            description: `Invited by ${result.data.inviter_name}. You earned 50 points!`,
-          });
-
-          sessionStorage.removeItem('pending_invite_code');
-          sessionStorage.removeItem('pending_invite_type');
-          sessionStorage.removeItem('pending_inviter_name');
-        }
-      } 
-      // PARENT ROLE: Must have invite code
-      else if (selectedRole === 'parent') {
-        if (!inviteInfo || !inviteInfo.code) {
-          console.log('No invite code found - redirecting to InviteRequired page');
-          
-          // Save the selected role so they don't have to select it again
-          sessionStorage.setItem('pending_role_selection', 'parent');
-          
-          // Redirect to InviteRequired page where they can enter their code
-          navigate('InviteRequired');
-          return;
-        }
-
-        console.log('Verifying parent invite code...');
-        
-        const result = await verifyInviteCode({
-          code: inviteInfo.code,
-          invite_type: inviteInfo.type
-        });
-
-        if (!result.data.success) {
-          toast({
-            title: "Invite Verification Failed",
-            description: result.data.error || "Invalid invite code",
-            variant: "destructive"
-          });
-          
-          sessionStorage.removeItem('pending_invite_code');
-          sessionStorage.removeItem('pending_invite_type');
-          sessionStorage.removeItem('pending_inviter_name');
-          setInviteInfo(null);
-          setIsSubmitting(false);
-          return;
-        }
-
-        console.log('✅ Parent invite verified successfully!');
-        toast({
-          title: "Welcome! 🎉",
-          description: `Invited by ${result.data.inviter_name}. You earned 50 points!`,
-        });
-
-        sessionStorage.removeItem('pending_invite_code');
-        sessionStorage.removeItem('pending_invite_type');
-        sessionStorage.removeItem('pending_inviter_name');
+    // For students: go to referral code entry (GatorInviteCode)
+    if (selectedRole === 'gator') {
+      navigate('GatorInviteCode');
+    } 
+    // For parents: go to auth with invite code required
+    else if (selectedRole === 'parent') {
+      // Check if they have an invite code already
+      const hasInvite = sessionStorage.getItem('pending_invite_code');
+      if (hasInvite) {
+        navigate('GatorAuth');
+      } else {
+        // Parents must have invite code
+        navigate('InviteRequired');
       }
-
-      const updateData = {
-        roles: [selectedRole],
-        persona: selectedRole,
-        onboarding_completed: false,
-        profile_completion_score: 10,
-        gator_points: 50
-      };
-      
-      console.log('🔄 WelcomeRole: Updating user with:', updateData);
-
-      await base44.auth.updateMe(updateData);
-      await refreshUser();
-
-      const nextPage = selectedRole === 'gator' ? 'StudentOnboarding' : 'Onboarding';
-      
-      console.log('➡️ WelcomeRole: Navigating to:', nextPage);
-
-      navigate(nextPage);
-
-    } catch (error) {
-      console.error('Failed to update user role:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save your selection. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
