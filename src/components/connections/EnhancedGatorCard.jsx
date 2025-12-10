@@ -179,9 +179,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     const loadEngagementStats = async () => {
       try {
         const [messages, connections, helpOffers] = await Promise.all([
-          Message.filter({ post_id: request.id }).catch(() => []),
-          Connection.filter({ job_request_id: request.id }).catch(() => []),
-          HelpOffer.filter({ request_id: request.id }).catch(() => [])
+          rateLimiter.execute(() => Message.filter({ post_id: request.id })).catch(() => []),
+          rateLimiter.execute(() => Connection.filter({ job_request_id: request.id })).catch(() => []),
+          rateLimiter.execute(() => HelpOffer.filter({ request_id: request.id })).catch(() => [])
         ]);
 
         const uniqueHelpers = new Set();
