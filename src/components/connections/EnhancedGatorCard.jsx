@@ -728,13 +728,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         }
 
         .signal-badge.signal-clickable {
-          cursor: pointer;
+          cursor: pointer !important;
           padding: 4px 8px;
           border-radius: 6px;
           background: #f3f4f6;
           pointer-events: auto !important;
           position: relative;
-          z-index: 10;
+          z-index: 999;
+          user-select: none;
         }
 
         .signal-badge.signal-clickable:hover:not(:disabled) {
