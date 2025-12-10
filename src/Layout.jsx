@@ -747,6 +747,7 @@ const getPageComponent = (pageName) => {
     case 'GatorRoleSelection': return GatorRoleSelection;
     case 'GatorInviteCode': return GatorInviteCode;
     case 'GatorWelcome': return GatorWelcome;
+    case 'GatorParentInvite': return GatorParentInvite;
     default: return LandingPage;
   }
 };
