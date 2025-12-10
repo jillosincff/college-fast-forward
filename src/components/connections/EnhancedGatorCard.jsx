@@ -5,9 +5,9 @@ import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Glob
 import UserAvatar from '@/components/common/UserAvatar';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import { getDisplayName } from '@/components/utils/nameUtils';
-import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
+import { base44 } from '@/api/base44Client';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -171,7 +171,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
     try {
       console.log('Calling incrementOfferCount...');
-      const result = await incrementOfferCount({ requestId, actionType: 'like' });
+      const result = await base44.functions.invoke('incrementOfferCount', { requestId, actionType: 'like' });
       console.log('Backend result:', result);
       
       if (result?.data?.success) {
