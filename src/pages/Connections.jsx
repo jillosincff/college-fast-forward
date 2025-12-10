@@ -396,6 +396,8 @@ export default function DiscoverEmergingGatorsPage() {
                         onHelp={profile.request ? () => handleOfferHelp(profile.request) : null}
                         isFeatured={profile.isFeatured}
                         currentUser={user}
+                        isLikedByUser={profile.request ? userLikes.get(profile.request.id) : false}
+                        onLikeChange={loadUserLikes}
                       />
                     ))}
                   </AnimatePresence>
