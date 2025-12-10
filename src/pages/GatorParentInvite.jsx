@@ -124,45 +124,45 @@ export default function GatorParentInvite() {
             </h3>
 
             {/* User Type Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-2.5">
                 I am a...
               </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setUserType('uf_alumni')}
-                  className={`p-4 rounded-xl border-2 transition-all text-left ${
+                  className={`p-3.5 rounded-lg border transition-all text-left ${
                     userType === 'uf_alumni'
-                      ? 'border-[#0021A5] bg-blue-50'
+                      ? 'border-[#0021A5] bg-blue-50 shadow-sm'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                       <Users className="w-5 h-5 text-[#0021A5]" />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 mb-1">UF Graduate</div>
-                      <div className="text-sm text-slate-600">University of Florida Alumni</div>
+                      <div className="font-semibold text-sm text-slate-900">UF Graduate</div>
+                      <div className="text-xs text-slate-600 mt-0.5">University of Central Florida alum</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setUserType('uf_parent')}
-                  className={`p-4 rounded-xl border-2 transition-all text-left ${
+                  className={`p-3.5 rounded-lg border transition-all text-left ${
                     userType === 'uf_parent'
-                      ? 'border-[#FA4616] bg-orange-50'
+                      ? 'border-[#0021A5] bg-blue-50 shadow-sm'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                      <Heart className="w-5 h-5 text-[#FA4616]" />
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 mb-1">UF Family Member</div>
-                      <div className="text-sm text-slate-600">Parent/Guardian of UF student or alum</div>
+                      <div className="font-semibold text-sm text-slate-900">UF Family Member</div>
+                      <div className="text-xs text-slate-600 mt-0.5">Parent/Guardian of UF student or alum</div>
                     </div>
                   </div>
                 </button>
