@@ -78,31 +78,29 @@ export default function GatorParentInvite() {
         </div>
 
         {/* Main Value Prop Card */}
-        <Card className="mb-6 shadow-xl border-0 overflow-hidden">
-          <div className="bg-gradient-to-br from-[#F2A900] to-[#FA4616] p-8 text-center">
-            <Shield className="w-16 h-16 text-white mx-auto mb-4" strokeWidth={2} />
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">
-              Join the UF Gator Family Network
-            </h2>
-            <p className="text-base text-slate-800 mb-6 max-w-lg mx-auto">
-              Connect with 4,000+ UF Gators, Alumni & Families to help students launch careers through warm introductions
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2 text-slate-900">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Invite Only</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-900">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Exclusive Network</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-900">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Help Gators</span>
-              </div>
+        <div className="bg-[#F2A900] rounded-2xl p-8 text-center mb-5 shadow-md">
+          <Shield className="w-14 h-14 text-slate-900 mx-auto mb-4" strokeWidth={2} />
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">
+            Join the UF Gator Family Network
+          </h2>
+          <p className="text-sm text-slate-800 mb-5 max-w-md mx-auto leading-relaxed">
+            Connect with 4,000+ UF Gators, Alumni & Families to help students launch careers through warm introductions
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+            <div className="flex items-center gap-2 text-slate-900">
+              <CheckCircle className="w-4 h-4" />
+              <span>Invite Only</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-900">
+              <CheckCircle className="w-4 h-4" />
+              <span>Exclusive Network</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-900">
+              <CheckCircle className="w-4 h-4" />
+              <span>Help Gators</span>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Already Have Code */}
         <button
