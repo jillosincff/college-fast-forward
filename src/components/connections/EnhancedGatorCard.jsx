@@ -40,42 +40,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   
   const requestId = request?.id;
   
-  // Track likes from database
+  // Use passed-in like status from parent (single batch API call)
   const [displayCount, setDisplayCount] = useState(request?.offers_count || 0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesLoading, setLikesLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(isLikedByUser);
   
-  // Load like status from database on mount with staggered timing
+  // Sync like status when prop changes
   useEffect(() => {
-    if (!requestId || !currentUser?.email) {
-      setLikesLoading(false);
-      return;
-    }
-    
-    // Stagger requests to avoid rate limits (2-6 second random delay)
-    const delay = 2000 + Math.random() * 4000;
-    
-    const loadLikeStatus = async () => {
-      try {
-        const likes = await rateLimiter.execute(() => 
-          ProfileLike.filter({ 
-            request_id: requestId, 
-            liker_email: currentUser.email 
-          })
-        );
-        setIsLiked(likes.length > 0);
-        setDisplayCount(request?.offers_count || 0);
-      } catch (error) {
-        // Silently fail on rate limits, just show the count from request
-        setDisplayCount(request?.offers_count || 0);
-      } finally {
-        setLikesLoading(false);
-      }
-    };
-    
-    const timer = setTimeout(loadLikeStatus, delay);
-    return () => clearTimeout(timer);
-  }, [requestId, currentUser?.email, request?.offers_count]);
+    setIsLiked(isLikedByUser);
+  }, [isLikedByUser]);
   
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
   const fullName = (gator.first_name && gator.last_name) 
