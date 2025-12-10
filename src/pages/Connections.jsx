@@ -52,7 +52,8 @@ export default function DiscoverEmergingGatorsPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+    loadUserLikes();
+  }, [user?.email]);
 
   // Removed visibility change auto-reload - it was causing thumbs up to reset
 
