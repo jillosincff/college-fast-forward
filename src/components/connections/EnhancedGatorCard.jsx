@@ -226,7 +226,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       });
       
       // Increment counter in backend
-      const result = await incrementOfferCount({ requestId });
+      const result = await incrementOfferCount({ requestId, actionType: 'like' });
       
       if (result?.data?.success) {
         toast({
