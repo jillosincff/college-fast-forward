@@ -129,6 +129,11 @@ export default function DiscoverEmergingGatorsPage() {
     }
   };
 
+  useEffect(() => {
+    loadData();
+    loadUserLikes();
+  }, [user?.email]);
+
   const handleOfferHelp = (request) => {
     setSelectedRequest(request);
     setShowHelpModal(true);
