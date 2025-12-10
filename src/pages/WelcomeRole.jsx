@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/components/auth/AuthContext';
-import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { GraduationCap, Users, Loader2, AlertCircle } from 'lucide-react';
+import { GraduationCap, Users, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate } from '@/components/utils/navigation';
-import { verifyInviteCode } from '@/functions/verifyInviteCode';
 
 export default function WelcomeRole() {
-  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [selectedRole, setSelectedRole] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
   const [inviteInfo, setInviteInfo] = useState(null);
 
@@ -35,13 +30,7 @@ export default function WelcomeRole() {
         setSelectedRole('parent');
       }
     }
-    
-    // Auto-detect role based on email
-    const email = user?.email?.toLowerCase() || '';
-    if (email.endsWith('@ufl.edu')) {
-      setSelectedRole('gator');
-    }
-  }, [user]);
+  }, []);
 
   const roles = [
     {
