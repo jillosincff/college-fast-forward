@@ -150,18 +150,13 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     }
   };
 
-  const handleThumbsUp = async (e) => {
+  const handleThumbsUp = async () => {
     console.log('🔥 handleThumbsUp CALLED!', {
-      event: e?.type,
       requestId,
       isLiked,
       currentUser: currentUser?.email,
       displayCount
     });
-    
-    if (e) {
-      e.stopPropagation();
-    }
     
     if (!requestId) {
       console.error('❌ No requestId:', requestId);
@@ -364,9 +359,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               <div
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
                 onClick={(e) => {
-                  console.log('🎯 DIV CLICKED!');
+                  console.log('🎯 DIV CLICKED!', { isLiked, requestId });
                   e.stopPropagation();
-                  if (!isLiked) handleThumbsUp(e);
+                  if (!isLiked) {
+                    console.log('🎯 Calling handleThumbsUp...');
+                    handleThumbsUp();
+                  } else {
+                    console.log('⏭️ Already liked, skipping');
+                  }
                 }}
                 style={{ cursor: isLiked ? 'default' : 'pointer' }}
                 title={isLiked ? 'You supported this student!' : 'Show support'}
