@@ -356,7 +356,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
           {/* Quick-Win Engagement Signals */}
           {request && (
-            <div className="engagement-signals" onClick={(e) => e.stopPropagation()}>
+            <div 
+              className="engagement-signals"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               <span 
                 className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
                 title={messagesCount > 0 ? `${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}` : 'Be the first to reach out!'}
@@ -365,8 +369,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               </span>
               <button
                 type="button"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 onClick={(e) => {
-                  console.log('🎯 Button clicked directly!');
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('🎯 BUTTON CLICK FIRED!');
                   handleThumbsUp(e);
                 }}
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
@@ -402,7 +412,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           border: 2px solid transparent;
           display: flex;
           flex-direction: column;
-          cursor: auto;
         }
 
         .gator-card-enhanced:hover {
@@ -693,7 +702,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           gap: 10px;
           margin-top: 6px;
           position: relative;
-          z-index: 5;
+          z-index: 999;
+          pointer-events: auto;
         }
 
         .signal-badge {
