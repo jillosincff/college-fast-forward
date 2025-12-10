@@ -71,8 +71,8 @@ export default function StudentOnboarding() {
     major: '',
     // Help Request (Step 1)
     help_request: '',
-    post_to_emerging: false,
-    show_on_directory: false,
+    post_to_emerging: true,
+    show_on_directory: true,
     // Career fields (Steps 2-8)
     primary_goal: '',
     target_roles: [],
