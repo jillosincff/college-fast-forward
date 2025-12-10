@@ -16,56 +16,18 @@ export default function GatorInviteCode() {
   const [referralCode, setReferralCode] = useState('');
   const [showReferralInput, setShowReferralInput] = useState(false);
 
-  const handleVerifyCode = async () => {
-    if (!inviteCode.trim()) {
-      setError('Please enter an invite code');
-      return;
+  const handleContinue = () => {
+    // Store referral code if provided
+    if (referralCode.trim()) {
+      sessionStorage.setItem('pending_referral_code', referralCode.trim());
     }
-
-    setIsVerifying(true);
-    setError('');
-    trackEvent('invite_code_submitted', { role });
-
-    try {
-      const response = await base44.functions.invoke('verifyInviteCode', {
-        code: inviteCode.toUpperCase().trim()
-      });
-
-      if (response.data.success) {
-        toast({
-          title: "Welcome to the Gator Network! 🐊",
-          description: "Your invite code has been verified."
-        });
-        
-        await refreshUser();
-        navigate('GatorWelcome', { role });
-      } else {
-        setError(response.data.message || 'Invalid invite code');
-      }
-    } catch (err) {
-      console.error('Invite verification failed:', err);
-      setError('Invalid or expired invite code. Please try again.');
-    } finally {
-      setIsVerifying(false);
-    }
+    
+    // Store that user selected student role
+    sessionStorage.setItem('pending_role_selection', 'gator');
+    
+    trackEvent('gator_continue_to_auth');
+    navigate('GatorAuth');
   };
-
-  const handleRequestInvite = () => {
-    trackEvent('request_invite_from_code_page');
-    navigate('RequestInvite');
-  };
-
-  const handleBack = () => {
-    navigate('GatorRoleSelection');
-  };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
