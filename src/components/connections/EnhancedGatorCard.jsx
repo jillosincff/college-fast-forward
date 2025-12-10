@@ -165,6 +165,14 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   useEffect(() => {
     if (!request) return;
     
+    // Use cached counts from request object if available
+    if (request.messages_count !== undefined) {
+      setMessagesCount(request.messages_count || 0);
+    }
+    
+    // Stagger engagement stats loading (2-5 second random delay)
+    const delay = 2000 + Math.random() * 3000;
+    
     const loadEngagementStats = async () => {
       try {
         const [messages, connections, helpOffers] = await Promise.all([
@@ -185,11 +193,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         setMessagesCount(uniqueHelpers.size);
         setResponsesCount(totalResponses);
       } catch (error) {
-        console.error('Failed to load engagement stats:', error);
+        // Silently fail on rate limits
       }
     };
 
-    loadEngagementStats();
+    const timer = setTimeout(loadEngagementStats, delay);
+    return () => clearTimeout(timer);
   }, [request?.id, gator.email]);
 
   const handleMessage = () => {
