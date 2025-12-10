@@ -171,10 +171,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     // Use cached counts from request object if available
     if (request.messages_count !== undefined) {
       setMessagesCount(request.messages_count || 0);
+      // Don't load engagement stats if we have cached data - save API calls
+      return;
     }
     
-    // Stagger engagement stats loading (2-5 second random delay)
-    const delay = 2000 + Math.random() * 3000;
+    // Stagger engagement stats loading (5-10 second random delay to avoid rate limits)
+    const delay = 5000 + Math.random() * 5000;
     
     const loadEngagementStats = async () => {
       try {
