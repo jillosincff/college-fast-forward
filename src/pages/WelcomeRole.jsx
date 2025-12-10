@@ -73,16 +73,9 @@ export default function WelcomeRole() {
     if (selectedRole === 'gator') {
       navigate('GatorInviteCode');
     } 
-    // For parents: go to auth with invite code required
+    // For parents: go to parent invite request page
     else if (selectedRole === 'parent') {
-      // Check if they have an invite code already
-      const hasInvite = sessionStorage.getItem('pending_invite_code');
-      if (hasInvite) {
-        navigate('GatorAuth');
-      } else {
-        // Parents must have invite code
-        navigate('InviteRequired');
-      }
+      navigate('GatorParentInvite');
     }
   };
 
