@@ -211,9 +211,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
+    e.preventDefault();
     if (!requestId || isLiked || !currentUser?.email || likesLoading) return;
 
     // Optimistic update
+    const prevCount = displayCount;
     const newCount = displayCount + 1;
     setDisplayCount(newCount);
     setIsLiked(true);
@@ -233,11 +235,11 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     } catch (err) {
       // Revert on failure
       console.error('Failed to save like:', err);
-      setDisplayCount(displayCount);
+      setDisplayCount(prevCount);
       setIsLiked(false);
       toast({
         title: "Failed to save like",
-        description: "Please try again",
+        description: err?.message || "Please try again",
         variant: "destructive"
       });
     }
