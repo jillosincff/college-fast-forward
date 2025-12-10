@@ -13,6 +13,7 @@ import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
 import { ProfileLike } from '@/entities/ProfileLike';
+import rateLimiter from '@/components/utils/apiRateLimiter';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
