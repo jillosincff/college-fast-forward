@@ -249,18 +249,18 @@ export default function GatorParentInvite() {
         </Card>
 
         {/* Stats */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-slate-600 mb-4">
+        <div className="mt-6 text-center">
+          <p className="text-sm text-slate-600 mb-3">
             Join thousands of UF families helping Gators succeed
           </p>
-          <div className="flex justify-center gap-8">
+          <div className="flex justify-center gap-12">
             <div>
               <div className="text-3xl font-bold text-[#FA4616]">4,000+</div>
-              <div className="text-sm text-slate-600">Network Members</div>
+              <div className="text-xs text-slate-600 mt-0.5">Network Members</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-[#0021A5]">500+</div>
-              <div className="text-sm text-slate-600">Job Placements</div>
+              <div className="text-xs text-slate-600 mt-0.5">Job Placements</div>
             </div>
           </div>
         </div>
