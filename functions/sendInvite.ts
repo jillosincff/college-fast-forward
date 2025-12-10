@@ -87,10 +87,18 @@ College Fast Forward Team`;
 
         // Get all admin users to notify them
         console.log('👥 Fetching admin users...');
-        const adminUsers = await base44.asServiceRole.entities.User.filter({
-            role: 'admin'
-        });
-        console.log(`Found ${adminUsers.length} admin users`);
+        let adminUsers = [];
+        try {
+            // Fetch all users and filter for admins (User entity uses 'roles' array or 'role' string)
+            const allUsers = await base44.asServiceRole.entities.User.list();
+            adminUsers = allUsers.filter(u => 
+                u.roles?.includes('admin') || u.role === 'admin'
+            );
+            console.log(`Found ${adminUsers.length} admin users`);
+        } catch (adminError) {
+            console.error('Failed to fetch admin users:', adminError);
+            // Continue without admin notifications
+        }
 
         // Send notification to all admins
         let adminNotificationsSent = 0;
