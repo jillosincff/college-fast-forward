@@ -171,7 +171,7 @@ export default function GatorParentInvite() {
 
             {/* Full Name */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Full Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -179,13 +179,13 @@ export default function GatorParentInvite() {
                 placeholder="John Smith"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="h-12"
+                className="h-11 border-slate-300"
               />
             </div>
 
             {/* Email */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Email Address <span className="text-red-500">*</span>
               </label>
               <Input
@@ -193,26 +193,26 @@ export default function GatorParentInvite() {
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12"
+                className="h-11 border-slate-300"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1.5">
                 We'll send your invite to this email
               </p>
             </div>
 
             {/* Why Join */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Why do you want to join? <span className="text-red-500">*</span>
               </label>
               <Textarea
                 placeholder="Tell us about your UF connection and how you'd like to help students find opportunities..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] border-slate-300"
                 maxLength={500}
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1.5">
                 Minimum 20 characters
               </p>
             </div>
