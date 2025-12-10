@@ -412,7 +412,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           border-radius: 12px;
           padding: 16px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-          cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
           border: 2px solid transparent;
