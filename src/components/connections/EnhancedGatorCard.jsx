@@ -219,19 +219,16 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     setIsLiked(true);
 
     try {
-      // Save like to database
-      await ProfileLike.create({
-        request_id: requestId,
-        liker_email: currentUser.email
-      });
-      
-      // Increment counter in backend
+      // Save like via backend
       const result = await incrementOfferCount({ requestId, actionType: 'like' });
       
       if (result?.data?.success) {
+        setDisplayCount(result.data.newCount);
         toast({
           title: "👍 You liked this!",
         });
+      } else {
+        throw new Error(result?.data?.error || 'Failed to like');
       }
     } catch (err) {
       // Revert on failure
