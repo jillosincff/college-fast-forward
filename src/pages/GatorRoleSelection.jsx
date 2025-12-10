@@ -80,8 +80,8 @@ export default function GatorRoleSelection() {
         });
         console.log('✅ [GatorRoleSelection] User role updated');
         await refreshUser();
-        console.log('➡️ [GatorRoleSelection] Parent -> GatorInviteCode');
-        navigate('GatorInviteCode');
+        console.log('➡️ [GatorRoleSelection] Parent -> GatorParentInvite');
+        navigate('GatorParentInvite');
       }
     } catch (error) {
       console.error('❌ [GatorRoleSelection] Failed to update role:', error);
