@@ -36,8 +36,19 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const [displayCount, setDisplayCount] = useState(request?.offers_count || 0);
   const [isLiked, setIsLiked] = useState(isLikedByUser);
   
+  // Debug logging
+  useEffect(() => {
+    console.log('💡 Card mounted/updated:', {
+      requestId,
+      isLikedByUser,
+      isLiked,
+      posterName: request?.poster_name
+    });
+  }, [requestId, isLikedByUser, isLiked, request?.poster_name]);
+  
   // Sync like status when prop changes
   useEffect(() => {
+    console.log('🔄 Syncing isLiked:', { from: isLiked, to: isLikedByUser, requestId });
     setIsLiked(isLikedByUser);
   }, [isLikedByUser]);
   
