@@ -34,12 +34,21 @@ Deno.serve(async (req) => {
 
         if (existingLikes && existingLikes.length > 0) {
           // Already liked - return success with current count (idempotent)
-          const currentRecord = await base44.asServiceRole.entities.JobRequest.get(requestId);
-          return Response.json({ 
-            success: true, 
-            newCount: currentRecord?.offers_count || 0,
-            alreadyLiked: true
-          });
+          try {
+            const currentRecord = await base44.asServiceRole.entities.JobRequest.get(requestId);
+            return Response.json({ 
+              success: true, 
+              newCount: currentRecord?.offers_count || 0,
+              alreadyLiked: true
+            });
+          } catch (fetchError) {
+            console.error('Error fetching record for already-liked:', fetchError);
+            return Response.json({ 
+              success: true, 
+              newCount: 0,
+              alreadyLiked: true
+            });
+          }
         }
 
         // Create the like record
@@ -63,6 +72,7 @@ Deno.serve(async (req) => {
         });
 
       } catch (likeError) {
+        console.error('Like error:', likeError);
         return Response.json({ 
           success: false, 
           error: 'Failed to save like',
