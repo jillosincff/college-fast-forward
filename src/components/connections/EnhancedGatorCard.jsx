@@ -729,7 +729,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           padding: 4px 8px;
           border-radius: 6px;
           background: #f3f4f6;
-          pointer-events: auto;
+          pointer-events: auto !important;
           position: relative;
           z-index: 10;
         }
