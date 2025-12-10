@@ -105,15 +105,15 @@ export default function GatorParentInvite() {
         {/* Already Have Code */}
         <button
           onClick={() => navigate('GatorAuth')}
-          className="w-full mb-6 p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-slate-200 hover:border-blue-400 flex items-center justify-between group"
+          className="w-full mb-5 p-3.5 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-slate-300 flex items-center justify-between group"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full border-2 border-slate-400 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
             </div>
-            <span className="text-slate-700 font-medium">Already have an invite code?</span>
+            <span className="text-slate-700 text-sm">Already have an invite code?</span>
           </div>
-          <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
         </button>
 
         {/* Request Invite Form */}
