@@ -221,28 +221,28 @@ export default function GatorParentInvite() {
             <Button
               onClick={handleRequestInvite}
               disabled={!userType || !fullName.trim() || !email.trim() || reason.trim().length < 20 || isSubmitting}
-              className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
+              className="w-full h-12 text-base font-semibold shadow-sm transition-all rounded-lg"
               style={{ 
-                backgroundColor: isSubmitting ? '#94a3b8' : '#6b7280',
+                backgroundColor: (!userType || !fullName.trim() || !email.trim() || reason.trim().length < 20 || isSubmitting) ? '#9ca3af' : '#6b7280',
                 color: '#fff'
               }}
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                   Submitting...
                 </>
               ) : (
                 <>
                   Request Invite
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}
             </Button>
 
             {/* Privacy Note */}
-            <p className="text-xs text-slate-500 text-center mt-4 flex items-start justify-center gap-2">
-              <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-500 text-center mt-4 flex items-center justify-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 flex-shrink-0" />
               <span>Your information is secure and will only be used to process your invite request</span>
             </p>
           </CardContent>
