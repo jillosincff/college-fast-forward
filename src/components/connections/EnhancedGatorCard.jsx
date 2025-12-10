@@ -151,19 +151,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   };
 
   const handleThumbsUp = async (e) => {
+    console.log('🔥 handleThumbsUp CALLED!', {
+      event: e?.type,
+      requestId,
+      isLiked,
+      currentUser: currentUser?.email,
+      displayCount
+    });
+    
     if (e) {
       e.stopPropagation();
-      e.preventDefault();
     }
-    
-    console.log('🔥 THUMBS UP CLICKED!');
-    console.log('👍 CLICK DEBUG:', { 
-      requestId, 
-      request: !!request,
-      isLiked, 
-      currentUser: currentUser?.email,
-      hasRequest: !!request 
-    });
     
     if (!requestId) {
       console.error('❌ No requestId:', requestId);
@@ -356,30 +354,25 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
           {/* Quick-Win Engagement Signals */}
           {request && (
-            <div 
-              className="engagement-signals"
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="engagement-signals">
               <span 
                 className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
                 title={messagesCount > 0 ? `${messagesCount} parent${messagesCount > 1 ? 's have' : ' has'} already messaged ${fullName.split(' ')[0]}` : 'Be the first to reach out!'}
               >
                 💬 {messagesCount}
               </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log('🎯 BUTTON CLICK FIRED!');
-                  handleThumbsUp(e);
-                }}
+              <div
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
-                disabled={isLiked}
+                onClick={(e) => {
+                  console.log('🎯 DIV CLICKED!');
+                  e.stopPropagation();
+                  if (!isLiked) handleThumbsUp(e);
+                }}
+                style={{ cursor: isLiked ? 'default' : 'pointer' }}
                 title={isLiked ? 'You supported this student!' : 'Show support'}
               >
                 👍 {displayCount}
-              </button>
+              </div>
               {isFeatured && (
                 <span className="signal-badge signal-fire" title="Trending this week">
                   🔥
