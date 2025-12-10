@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
           request_id: requestId
         });
         const newCount = allLikes?.length || 0;
+        console.log('Returning newCount:', newCount, 'from', allLikes?.length, 'likes');
 
         return Response.json({ 
           success: true, 
