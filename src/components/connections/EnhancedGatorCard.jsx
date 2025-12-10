@@ -5,15 +5,9 @@ import { MessageSquare, Star, Paperclip, Linkedin, MapPin, Calendar, Plane, Glob
 import UserAvatar from '@/components/common/UserAvatar';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import { getDisplayName } from '@/components/utils/nameUtils';
-import { Message } from '@/entities/Message';
-import { Connection } from '@/entities/Connection';
-import { HelpOffer } from '@/entities/HelpOffer';
-import { JobRequest } from '@/entities/JobRequest';
 import { incrementOfferCount } from '@/functions/incrementOfferCount';
 import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
-import { ProfileLike } from '@/entities/ProfileLike';
-import rateLimiter from '@/components/utils/apiRateLimiter';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
