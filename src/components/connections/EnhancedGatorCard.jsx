@@ -21,8 +21,6 @@ const cardVariants = {
   }
 };
 
-// Thumbs up now uses direct localStorage – no global state needed
-
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, onLikeChange }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
