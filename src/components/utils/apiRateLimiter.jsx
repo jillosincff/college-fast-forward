@@ -40,24 +40,26 @@ class ApiRateLimiter {
       }
 
       // Execute next call
-      const { apiCall, resolve, reject } = this.queue.shift();
+      const { apiCall, resolve, reject, retryCount = 0 } = this.queue.shift();
       this.callTimestamps.push(Date.now());
 
       try {
         const result = await apiCall();
         resolve(result);
       } catch (error) {
-        // If 429, put it back in queue with delay
-        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          this.queue.unshift({ apiCall, resolve, reject });
+        // If 429, retry with exponential backoff
+        if ((error.message?.includes('429') || error.message?.includes('Rate limit')) && retryCount < 3) {
+          const delay = this.retryDelays[retryCount] || 4000;
+          console.log(`Rate limit hit, retrying after ${delay}ms (attempt ${retryCount + 1}/3)`);
+          await new Promise(r => setTimeout(r, delay));
+          this.queue.push({ apiCall, resolve, reject, retryCount: retryCount + 1 });
         } else {
           reject(error);
         }
       }
 
-      // Small delay between calls
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Longer delay between calls to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 400));
     }
 
     this.processing = false;
