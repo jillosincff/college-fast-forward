@@ -388,7 +388,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               <button
                 onClick={handleThumbsUp}
                 className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
-                disabled={isLiked}
+                disabled={isLiked || likesLoading}
                 title={isLiked ? 'You supported this student!' : 'Show support'}
               >
                 👍 {displayCount}
