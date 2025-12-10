@@ -30,87 +30,79 @@ export default function GatorInviteCode() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardContent className="pt-12 pb-10 px-8">
-          <div className="text-center mb-10">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-400 to-red-600 mx-auto mb-6 flex items-center justify-center shadow-lg">
-              <Lock className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
-              🔒 Enter Your Invite Code
-            </h1>
-            <p className="text-slate-600">
-              Join the exclusive Gator career network
-            </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-orange-50 to-white p-4">
+      <div className="w-full max-w-lg">
+        {/* Lock Icon */}
+        <div className="flex justify-center mb-8">
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-yellow-600 to-yellow-700 flex items-center justify-center shadow-2xl">
+            <Lock className="w-12 h-12 text-white" strokeWidth={2.5} />
           </div>
+        </div>
 
-          <div className="space-y-5 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Invite Code
-              </label>
-              <Input
-                type="text"
-                placeholder="ENTER CODE"
-                value={inviteCode}
-                onChange={(e) => {
-                  setInviteCode(e.target.value.toUpperCase());
-                  setError('');
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleVerifyCode()}
-                className="h-12 text-center text-lg font-semibold tracking-wider uppercase"
-                maxLength={20}
-              />
-            </div>
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-3">
+            UF Gator Network
+          </h1>
+          <p className="text-lg text-slate-600">
+            Where Gators connect for careers
+          </p>
+        </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-800 text-center">{error}</p>
-              </div>
-            )}
-
-            <div className="text-center">
-              <p className="text-sm text-slate-600 mb-2">
-                Don't have an invite code?{' '}
-                <button
-                  onClick={handleRequestInvite}
-                  className="text-orange-600 hover:text-orange-700 font-semibold hover:underline"
-                >
-                  Request one here
-                </button>
+        {/* Main Card */}
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
+          <CardContent className="p-8 md:p-10">
+            {/* Sign in section */}
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                Sign in with your <span className="font-bold">@ufl.edu</span> email
+              </h2>
+              <p className="text-sm text-slate-600">
+                Your data is secure. We only use this to verify you're a UF student.
               </p>
             </div>
 
-            <Button
-              onClick={handleVerifyCode}
-              disabled={!inviteCode.trim() || isVerifying}
-              className="w-full h-12 text-base font-semibold"
-              style={{ backgroundColor: role === 'gator' ? '#0021A5' : '#FA4616' }}
-            >
-              {isVerifying ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Verifying...
-                </>
-              ) : (
-                <>
-                  Continue
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
-          </div>
+            {/* Google Auth Button */}
+            <div className="mb-6">
+              <GoogleAuthButton />
+            </div>
 
-          <button
-            onClick={handleBack}
-            className="w-full flex items-center justify-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Role Selection
-          </button>
-        </CardContent>
-      </Card>
+            {/* Referral code section */}
+            <div className="text-center mb-6">
+              <button
+                onClick={() => setShowReferralInput(!showReferralInput)}
+                className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <span className="text-base">Have a referral code?</span>
+                <Info className="w-4 h-4" />
+              </button>
+            </div>
+
+            {showReferralInput && (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Input
+                  type="text"
+                  placeholder="Enter referral code (optional)"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  className="h-12 text-center text-base"
+                  maxLength={20}
+                />
+              </div>
+            )}
+
+            {/* Continue Button */}
+            <Button
+              onClick={handleContinue}
+              className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
+              style={{ backgroundColor: '#F2A900', color: '#000' }}
+            >
+              Continue
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
