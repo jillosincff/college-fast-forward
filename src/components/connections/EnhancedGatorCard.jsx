@@ -133,50 +133,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const isOpenToRelocate = request?.relocation_ok || false;
   const needsVisaSponsorship = request?.visa_needed || false;
 
-  // Real engagement stats
-  const [messagesCount, setMessagesCount] = useState(0);
-  const [responsesCount, setResponsesCount] = useState(0);
-
-  useEffect(() => {
-    if (!request) return;
-    
-    // Use cached counts from request object if available
-    if (request.messages_count !== undefined) {
-      setMessagesCount(request.messages_count || 0);
-      // Don't load engagement stats if we have cached data - save API calls
-      return;
-    }
-    
-    // Stagger engagement stats loading (5-10 second random delay to avoid rate limits)
-    const delay = 5000 + Math.random() * 5000;
-    
-    const loadEngagementStats = async () => {
-      try {
-        const [messages, connections, helpOffers] = await Promise.all([
-          rateLimiter.execute(() => Message.filter({ post_id: request.id })).catch(() => []),
-          rateLimiter.execute(() => Connection.filter({ job_request_id: request.id })).catch(() => []),
-          rateLimiter.execute(() => HelpOffer.filter({ request_id: request.id })).catch(() => [])
-        ]);
-
-        const uniqueHelpers = new Set();
-        messages.forEach(m => {
-          if (m.sender_email !== gator.email) uniqueHelpers.add(m.sender_email);
-        });
-        connections.forEach(c => uniqueHelpers.add(c.connector_user_id || c.created_by));
-        helpOffers.forEach(h => uniqueHelpers.add(h.created_by));
-
-        const totalResponses = messages.filter(m => m.sender_email !== gator.email).length;
-
-        setMessagesCount(uniqueHelpers.size);
-        setResponsesCount(totalResponses);
-      } catch (error) {
-        // Silently fail on rate limits
-      }
-    };
-
-    const timer = setTimeout(loadEngagementStats, delay);
-    return () => clearTimeout(timer);
-  }, [request?.id, gator.email]);
+  // Real engagement stats - use cached count from request object
+  const messagesCount = request?.messages_count || 0;
 
   const handleMessage = () => {
     if (onHelp) {
