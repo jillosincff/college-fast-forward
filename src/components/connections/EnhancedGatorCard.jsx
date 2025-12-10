@@ -203,7 +203,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const handleThumbsUp = async (e) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!requestId || isLiked || !currentUser?.email || likesLoading) return;
+    if (!requestId || isLiked || !currentUser?.email) return;
 
     // Optimistic update
     const prevCount = displayCount;
@@ -217,6 +217,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
       
       if (result?.data?.success) {
         setDisplayCount(result.data.newCount);
+        // Notify parent to refresh like map
+        if (onLikeChange) onLikeChange();
         toast({
           title: "👍 You liked this!",
         });
