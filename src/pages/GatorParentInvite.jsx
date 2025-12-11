@@ -18,10 +18,10 @@ export default function GatorParentInvite() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRequestInvite = async () => {
-    if (!userType || !fullName.trim() || !email.trim() || !reason.trim()) {
+    if (!userType || !fullName.trim() || !email.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all fields to request an invite.",
+        description: "Please fill in all required fields to request an invite.",
         variant: "destructive"
       });
       return;
@@ -203,7 +203,7 @@ export default function GatorParentInvite() {
             {/* Why Join */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Why do you want to join? <span className="text-red-500">*</span>
+                Why do you want to join? <span className="text-slate-400">(optional)</span>
               </label>
               <Textarea
                 placeholder="Tell us about your UF connection and how you'd like to help students find opportunities..."
@@ -212,18 +212,15 @@ export default function GatorParentInvite() {
                 className="min-h-[100px] border-slate-300"
                 maxLength={500}
               />
-              <p className="text-xs text-slate-500 mt-1.5">
-                Minimum 20 characters
-              </p>
             </div>
 
             {/* Submit Button */}
             <Button
               onClick={handleRequestInvite}
-              disabled={!userType || !fullName.trim() || !email.trim() || reason.trim().length < 20 || isSubmitting}
+              disabled={!userType || !fullName.trim() || !email.trim() || isSubmitting}
               className="w-full h-12 text-base font-semibold shadow-sm transition-all rounded-lg"
               style={{ 
-                backgroundColor: (!userType || !fullName.trim() || !email.trim() || reason.trim().length < 20 || isSubmitting) ? '#9ca3af' : '#6b7280',
+                backgroundColor: (!userType || !fullName.trim() || !email.trim() || isSubmitting) ? '#9ca3af' : '#6b7280',
                 color: '#fff'
               }}
             >
