@@ -6,24 +6,19 @@ export default function GatorAuth() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    // Don't do anything while still loading
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
-    // Not authenticated - redirect to Google
     if (!user) {
       const callbackUrl = `${window.location.origin}/#GatorAuth`;
       base44.auth.redirectToLogin(callbackUrl);
       return;
     }
 
-    // Authenticated - clear URL params and navigate
+    // Authenticated - clear params and go to Dashboard
     if (user) {
-      console.log('✅ [GatorAuth] User authenticated, clearing URL and navigating');
-      // CRITICAL: Clear URL params to prevent loop
-      window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
-      window.location.reload();
+      console.log('✅ [GatorAuth] Authenticated, navigating to Dashboard');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.location.hash = 'Dashboard';
     }
   }, [user, isLoading]);
 

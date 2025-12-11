@@ -886,35 +886,25 @@ function AppContent() {
       if (isLandingPage || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
         console.log('🚦 User on landing/dashboard, determining correct destination...');
 
-        // CRITICAL: Check for pending parent invite FIRST
+        // Check for pending parent invite
         const pendingRole = sessionStorage.getItem('pending_invite_role');
         const pendingCode = sessionStorage.getItem('pending_invite_code');
 
-        if (pendingRole === 'parent' && !user.persona && !user.roles?.includes('parent')) {
-          console.log('🔄 Parent invite detected - setting up role...');
-
-          // Set parent role synchronously
+        if (pendingRole === 'parent' && !user.roles?.includes('parent')) {
+          console.log('🔄 Setting parent role...');
+          
           base44.auth.updateMe({ 
             persona: 'parent',
             roles: ['parent'],
-            onboarding_completed: true,
-            invite_code_used: pendingCode || 'direct'
+            onboarding_completed: true
           }).then(() => {
-            console.log('✅ Parent role set, cleaning up and navigating...');
+            console.log('✅ Parent role set');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
-            // Use hash navigation without full reload
-            window.location.hash = 'ParentDashboard';
-            window.location.reload();
-          }).catch(error => {
-            console.error('❌ Failed to set parent role:', error);
-            sessionStorage.removeItem('pending_invite_code');
-            sessionStorage.removeItem('pending_invite_role');
-            window.location.hash = 'ParentDashboard';
-            window.location.reload();
+            finalPage = 'ParentDashboard';
+            setResolvedPage(finalPage);
           });
-
-          // Show loading while setting up
+          
           setResolvedPage(null);
           return;
         }
