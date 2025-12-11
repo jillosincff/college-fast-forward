@@ -25,10 +25,17 @@ export const AuthProvider = ({ children }) => {
     const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : new URLSearchParams();
     const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token') || hashParams.has('token') || hashParams.has('access_token');
     
-    // Wait for SDK to process OAuth callback - longer initial wait
+    // If OAuth callback and first attempt, reload to let SDK process
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 [AuthContext] OAuth callback detected, waiting 6s for SDK to process token...');
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      const processed = sessionStorage.getItem('oauth_processed');
+      if (!processed) {
+        console.log('🔄 [AuthContext] OAuth callback - marking as processed and reloading...');
+        sessionStorage.setItem('oauth_processed', 'true');
+        window.location.reload();
+        return;
+      }
+      console.log('🔄 [AuthContext] OAuth processed, checking auth...');
+      sessionStorage.removeItem('oauth_processed');
     }
     
     try {
@@ -37,24 +44,20 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ [AuthContext] Authenticated:', userData.email);
       setUser(userData);
 
-      // Handle post-auth redirect and clean URL
+      // Clean URL after successful auth
       if (hasOAuthParams) {
-        const redirect = sessionStorage.getItem('post_auth_redirect');
-        if (redirect) {
-          sessionStorage.removeItem('post_auth_redirect');
-          window.location.hash = redirect;
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash.split('?')[0]);
       }
     } catch (error) {
       if (error.status === 401) {
-        // If OAuth callback, retry up to 4 times with 2s intervals
-        if (hasOAuthParams && retryCount < 4) {
-          console.log(`🔄 [AuthContext] Auth failed, retry ${retryCount + 1}/4 in 2s...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          return checkAuthState(retryCount + 1);
+        // If OAuth callback failed, try one more reload
+        if (hasOAuthParams && retryCount === 0) {
+          console.log('🔄 [AuthContext] Auth failed with OAuth params, reloading once more...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          window.location.reload();
+          return;
         }
-        console.log('❌ [AuthContext] Authentication failed after retries');
+        console.log('❌ [AuthContext] Authentication failed');
         logger.info('Not authenticated');
       } else {
         logger.error('Auth failed', { error });
