@@ -222,12 +222,20 @@ const AdminDashboard = () => {
       });
 
       if (result.data.success) {
-        toast({
-          title: action === 'approve' ? "✅ Approved!" : "Request Rejected",
-          description: action === 'approve' 
-            ? `Invite code sent: ${result.data.code}` 
-            : "Request has been rejected",
-        });
+        if (result.data.warning) {
+          toast({
+            title: "⚠️ Warning",
+            description: result.data.warning,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: action === 'approve' ? "✅ Approved!" : "Request Rejected",
+            description: action === 'approve' 
+              ? `Invite code sent: ${result.data.code}` 
+              : "Request has been rejected",
+          });
+        }
         
         // Reload requests
         loadInviteRequests();
@@ -243,6 +251,37 @@ const AdminDashboard = () => {
       });
     } finally {
       setProcessingRequest(null);
+    }
+  };
+
+  const [testingEmail, setTestingEmail] = useState(false);
+  
+  const sendTestEmail = async () => {
+    if (!user?.email) return;
+    
+    setTestingEmail(true);
+    try {
+      const result = await base44.functions.invoke('sendTestEmail', {
+        recipient: user.email
+      });
+      
+      if (result.data?.success) {
+        toast({
+          title: "✅ Test Email Sent!",
+          description: `Check your inbox at ${user.email}`,
+        });
+      } else {
+        throw new Error(result.data?.error || 'Failed to send test email');
+      }
+    } catch (error) {
+      console.error('Test email failed:', error);
+      toast({
+        title: "Test Email Failed",
+        description: error.message || "Could not send test email",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingEmail(false);
     }
   };
 
@@ -726,15 +765,31 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Pending Invite Requests</CardTitle>
-                  <Button 
-                    onClick={loadInviteRequests} 
-                    disabled={loadingRequests}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${loadingRequests ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={sendTestEmail}
+                      disabled={testingEmail}
+                      variant="outline"
+                      size="sm"
+                      className="bg-purple-50 hover:bg-purple-100 border-purple-300"
+                    >
+                      {testingEmail ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                      )}
+                      Test Email
+                    </Button>
+                    <Button 
+                      onClick={loadInviteRequests} 
+                      disabled={loadingRequests}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${loadingRequests ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {loadingRequests ? (
