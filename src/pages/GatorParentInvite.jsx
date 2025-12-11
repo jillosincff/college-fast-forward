@@ -316,15 +316,16 @@ export default function GatorParentInvite() {
                 />
               </div>
               <Button
-                onClick={async () => {
+                onClick={() => {
                   if (inviteCode.trim()) {
                     setIsVerifyingCode(true);
                     sessionStorage.setItem('pending_invite_code', inviteCode.trim());
                     sessionStorage.setItem('pending_invite_role', 'parent');
                     
-                    // Small delay for UX
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    navigate('GatorAuth');
+                    // Redirect directly to Google OAuth
+                    const callbackUrl = `${window.location.origin}/#GatorAuth`;
+                    console.log('🔐 [GatorParentInvite] Redirecting to Google OAuth with callback:', callbackUrl);
+                    base44.auth.redirectToLogin(callbackUrl);
                   } else {
                     toast({
                       title: "Code Required",
@@ -345,7 +346,7 @@ export default function GatorParentInvite() {
                 {isVerifyingCode ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Verifying...
+                    Redirecting to Google...
                   </>
                 ) : (
                   <>
