@@ -764,7 +764,13 @@ function AppContent() {
       if (hash.startsWith('/')) {
         hash = hash.slice(1);
       }
-      setCurrentPage(hash);
+      
+      // If landing page and OAuth callback detected, clear params after auth
+      if (!hash && window.location.search.includes('access_token')) {
+        hash = 'Dashboard';
+      }
+      
+      setCurrentPage(hash || 'LandingPage');
       setResolvedPage(null);
     };
     handleHashChange();
