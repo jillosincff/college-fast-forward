@@ -104,7 +104,7 @@ export default function GatorParentInvite() {
 
         {/* Already Have Code */}
         <button
-          onClick={() => navigate('GatorAuth')}
+          onClick={() => navigate('GatorInviteCode')}
           className="w-full mb-5 p-3.5 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-slate-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-2">
