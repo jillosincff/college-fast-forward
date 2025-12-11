@@ -105,15 +105,24 @@ Deno.serve(async (req) => {
             `;
 
             try {
-                await base44.asServiceRole.integrations.Core.SendEmail({
+                console.log('Sending approval email to:', inviteRequest.email);
+                const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
                     from_name: 'College Fast Forward',
                     to: inviteRequest.email,
                     subject: emailSubject,
                     body: emailBody
                 });
+                console.log('Email sent successfully:', emailResult);
             } catch (emailError) {
                 console.error('Failed to send email:', emailError);
-                // Don't fail the whole request if email fails
+                console.error('Email error details:', emailError.message, emailError.stack);
+                // Return error in response so user knows email failed
+                return Response.json({
+                    success: true,
+                    warning: 'Invite approved but email failed to send',
+                    code: code,
+                    emailError: emailError.message
+                });
             }
 
             return Response.json({
