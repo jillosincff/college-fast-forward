@@ -781,6 +781,17 @@ function AppContent() {
       return;
     }
 
+    // Check for pending parent invite flow
+    if (user && !isLoading) {
+      const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
+      if (pendingInviteRole === 'parent' && currentPage === 'LandingPage') {
+        console.log('👨‍👩‍👧 Parent invite flow detected after OAuth, navigating to GatorWelcome');
+        sessionStorage.setItem('selected_role', 'parent');
+        navigate('GatorWelcome');
+        return;
+      }
+    }
+
     if (isLoading || !currentPage) {
       return;
     }
