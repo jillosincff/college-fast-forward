@@ -50,8 +50,8 @@ export default function GatorAuth() {
       } else if (!authAttempted) {
         console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
         setAuthAttempted(true);
-        // Use clean callback URL without hash - Base44 needs this
-        const callbackUrl = `${window.location.origin}/`;
+        // Callback to GatorAuth so we can handle the flow after OAuth
+        const callbackUrl = `${window.location.origin}/#GatorAuth`;
         console.log('📍 [GatorAuth] Callback URL:', callbackUrl);
         
         base44.auth.redirectToLogin(callbackUrl);
