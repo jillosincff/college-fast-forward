@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Shield, CheckCircle, Users, Heart, ArrowRight } from 'lucide-react';
+import { Lock, Shield, CheckCircle, Users, Heart, ArrowRight, ChevronDown, Info } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
@@ -16,6 +16,8 @@ export default function GatorParentInvite() {
   const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleRequestInvite = async () => {
     if (!userType || !fullName.trim() || !email.trim()) {
@@ -102,19 +104,55 @@ export default function GatorParentInvite() {
           </div>
         </div>
 
-        {/* Already Have Code */}
-        <button
-          onClick={() => navigate('GatorInviteCode')}
-          className="w-full mb-5 p-3.5 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-slate-300 flex items-center justify-between group"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full border-2 border-slate-400 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+        {/* Already Have Code - Collapsible */}
+        <div className="mb-5 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <button
+            onClick={() => setShowCodeInput(!showCodeInput)}
+            className="w-full p-3.5 flex items-center justify-between group hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-[#F2A900]" />
+              <span className="text-slate-700 text-sm font-medium">Already have an invite code?</span>
             </div>
-            <span className="text-slate-700 text-sm">Already have an invite code?</span>
-          </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-        </button>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showCodeInput ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showCodeInput && (
+            <div className="p-4 border-t border-slate-200 bg-slate-50">
+              <Input
+                type="text"
+                placeholder="ENTER CODE"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                className="h-12 text-center text-lg font-medium border-2 border-[#F2A900] focus:border-[#F2A900] mb-3"
+                maxLength={20}
+              />
+              <Button
+                onClick={() => {
+                  if (inviteCode.trim()) {
+                    sessionStorage.setItem('pending_invite_code', inviteCode.trim());
+                    navigate('GatorAuth');
+                  } else {
+                    toast({
+                      title: "Code Required",
+                      description: "Please enter your invite code",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                disabled={!inviteCode.trim()}
+                className="w-full h-12 text-base font-semibold rounded-lg"
+                style={{ 
+                  backgroundColor: !inviteCode.trim() ? '#9ca3af' : '#F2A900',
+                  color: '#1e293b'
+                }}
+              >
+                Continue with Code
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
+        </div>
 
         {/* Request Invite Form */}
         <Card className="shadow-md border-0 bg-white rounded-2xl">
