@@ -35,8 +35,17 @@ Deno.serve(async (req) => {
     const invalid = emails.filter(e => !isEmail(e));
     
     // Check for existing users
-    const existingUsers = await base44.asServiceRole.entities.User.list();
-    const alreadyUsers = existingUsers.filter(u => validEmails.includes(u.email)).map(u => u.email);
+    const alreadyUsers = [];
+    for (const email of validEmails) {
+        try {
+            const existing = await base44.asServiceRole.entities.User.filter({ email });
+            if (existing && existing.length > 0) {
+                alreadyUsers.push(email);
+            }
+        } catch (err) {
+            console.log(`Could not check user ${email}:`, err.message);
+        }
+    }
 
     const emailsToSend = validEmails.filter(e => !alreadyUsers.includes(e));
 
