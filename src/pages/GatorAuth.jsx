@@ -18,10 +18,12 @@ export default function GatorAuth() {
       return;
     }
 
-    // Authenticated - just go to Dashboard and let Layout handle routing
+    // Authenticated - clear URL params and navigate
     if (user) {
-      console.log('✅ [GatorAuth] User authenticated, navigating to Dashboard');
-      window.location.href = '/#Dashboard';
+      console.log('✅ [GatorAuth] User authenticated, clearing URL and navigating');
+      // CRITICAL: Clear URL params to prevent loop
+      window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
+      window.location.reload();
     }
   }, [user, isLoading]);
 

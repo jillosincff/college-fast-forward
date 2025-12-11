@@ -900,15 +900,18 @@ function AppContent() {
             onboarding_completed: true,
             invite_code_used: pendingCode || 'direct'
           }).then(() => {
-            console.log('✅ Parent role set, reloading...');
+            console.log('✅ Parent role set, cleaning up and navigating...');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
-            window.location.href = '/#ParentDashboard';
+            // Use hash navigation without full reload
+            window.location.hash = 'ParentDashboard';
+            window.location.reload();
           }).catch(error => {
             console.error('❌ Failed to set parent role:', error);
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
-            window.location.href = '/#ParentDashboard';
+            window.location.hash = 'ParentDashboard';
+            window.location.reload();
           });
 
           // Show loading while setting up
