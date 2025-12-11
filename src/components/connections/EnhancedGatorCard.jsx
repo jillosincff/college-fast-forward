@@ -418,8 +418,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .gator-card-enhanced {
           background: white;
           border-radius: 12px;
-          padding: 16px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          padding: 14px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
           transition: all 0.3s ease;
           position: relative;
           border: 2px solid transparent;
@@ -458,12 +458,12 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .card-header {
           display: flex;
           justify-content: center;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .profile-photo-enhanced {
-          width: 80px;
-          height: 80px;
+          width: 70px;
+          height: 70px;
           border-radius: 50%;
           border: 3px solid #0021A5;
         }
@@ -471,7 +471,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .card-content {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 8px;
           flex-grow: 1;
         }
 
@@ -629,8 +629,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
         .student-bio-enhanced {
           font-size: 14px;
-          color: #374151;
-          line-height: 1.5;
+          color: #1f2937;
+          line-height: 1.6;
           text-align: center;
           margin: 0;
         }
@@ -648,8 +648,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         .skills-section {
           display: flex;
           flex-wrap: wrap;
-          gap: 6px;
+          gap: 5px;
           justify-content: center;
+          margin-top: -2px;
         }
 
         .skill-tag-enhanced {
@@ -657,7 +658,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           color: white;
           font-size: 11px;
           font-weight: 600;
-          padding: 5px 10px;
+          padding: 4px 9px;
           border-radius: 12px;
         }
 
@@ -688,7 +689,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           color: white;
           font-size: 14px;
           font-weight: 700;
-          padding: 12px 24px;
+          padding: 10px 20px;
           border-radius: 8px;
           border: none;
           cursor: pointer;
@@ -697,7 +698,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 44px;
+          height: 40px;
           margin-top: auto;
         }
 
@@ -712,8 +713,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          gap: 10px;
-          margin-top: 6px;
+          gap: 8px;
+          margin-top: 4px;
           position: relative;
           z-index: 999;
           pointer-events: auto;
