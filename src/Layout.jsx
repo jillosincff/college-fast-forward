@@ -759,54 +759,8 @@ function AppContent() {
   const [resolvedPage, setResolvedPage] = useState(null);
 
   useEffect(() => {
-    const handleHashChange = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const hashParts = window.location.hash.split('?');
-      const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
-      const hasAccessToken = urlParams.has('access_token') || hashParams?.has('access_token');
-      
-      // CRITICAL: Check for parent invite flow FIRST
-      const pendingRole = sessionStorage.getItem('pending_invite_role');
-      const pendingCode = sessionStorage.getItem('pending_invite_code');
-      
-      if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
-        console.log('🎯 [Parent OAuth] Detected parent invite flow with OAuth callback');
-        const processed = sessionStorage.getItem('oauth_processed');
-        
-        if (!processed) {
-          console.log('⏳ [Parent OAuth] Processing - waiting 3s for SDK...');
-          sessionStorage.setItem('oauth_processed', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          
-          console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
-          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed');
-        }
-      }
-      
-      // Standard OAuth callback
-      if (hasAccessToken) {
-        console.log('🔐 [OAuth] Access token detected');
-        const processed = sessionStorage.getItem('oauth_processed');
-        
-        if (!processed) {
-          console.log('⏳ [OAuth] Processing standard flow...');
-          sessionStorage.setItem('oauth_processed', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          
-          console.log('✅ [OAuth] Redirecting to Dashboard');
-          window.location.href = window.location.origin + '/#Dashboard';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed');
-        }
-      }
-      
-      // Normal hash change
+    const handleHashChange = () => {
+      // Simple hash detection
       let hash = window.location.hash.slice(1).split('?')[0] || 'LandingPage';
       if (hash.startsWith('/')) {
         hash = hash.slice(1);
@@ -829,6 +783,32 @@ function AppContent() {
     }
 
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
+    
+    // CRITICAL: Parent invite flow check - happens BEFORE all other routing
+    const pendingRole = sessionStorage.getItem('pending_invite_role');
+    const pendingCode = sessionStorage.getItem('pending_invite_code');
+    
+    if (user && pendingRole === 'parent' && pendingCode) {
+      console.log('🎯 [Parent Flow] Detected! Code:', pendingCode);
+      
+      // If user doesn't have parent role yet, redirect to GatorWelcome
+      if (user.persona !== 'parent' && !user.roles?.includes('parent')) {
+        console.log('🔄 [Parent Flow] User needs parent setup -> GatorWelcome');
+        if (currentPage !== 'GatorWelcome') {
+          navigate('GatorWelcome?role=parent');
+          return;
+        }
+      }
+      
+      // If user has parent role but hasn't completed onboarding
+      if ((user.persona === 'parent' || user.roles?.includes('parent')) && !user.onboarding_completed) {
+        console.log('🔄 [Parent Flow] Parent needs onboarding -> Onboarding');
+        if (currentPage !== 'Onboarding' && currentPage !== 'GatorWelcome') {
+          navigate('Onboarding');
+          return;
+        }
+      }
+    }
 
     // STEP 1: Admin pages ALWAYS bypass routing
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') {
