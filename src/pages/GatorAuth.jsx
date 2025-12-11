@@ -1,38 +1,41 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { navigate } from '@/components/utils/navigation';
 
 export default function GatorAuth() {
-  const { user, isLoading, refreshUser } = useAuth();
-  const [setupComplete, setSetupComplete] = React.useState(false);
+  const { user, isLoading } = useAuth();
+  const [processing, setProcessing] = React.useState(false);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasOAuthTokens = urlParams.has('token') || urlParams.has('access_token');
-
     console.log('🔄 [GatorAuth] State:', { 
       hasUser: !!user, 
-      isLoading, 
-      hasOAuthTokens,
-      setupComplete,
+      isLoading,
+      processing,
       pendingRole: sessionStorage.getItem('pending_invite_role')
     });
 
-    // If OAuth callback, wait for auth to complete
-    if (hasOAuthTokens && isLoading) {
-      console.log('⏳ [GatorAuth] OAuth callback - waiting for auth...');
+    // Wait for auth to complete
+    if (isLoading) {
+      console.log('⏳ [GatorAuth] Waiting for auth...');
       return;
     }
 
-    // Once authenticated, check for parent invite flow
-    if (user && !isLoading && !setupComplete) {
+    // Not authenticated - redirect to Google OAuth
+    if (!user) {
+      console.log('🔐 [GatorAuth] Redirecting to Google OAuth...');
+      const callbackUrl = `${window.location.origin}/#GatorAuth`;
+      base44.auth.redirectToLogin(callbackUrl);
+      return;
+    }
+
+    // Authenticated - handle parent setup or navigate
+    if (user && !processing) {
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
       
       if (pendingRole === 'parent') {
-        console.log('👨‍👩‍👧 [GatorAuth] Parent invite flow detected, setting up account...');
-        setSetupComplete(true);
+        console.log('👨‍👩‍👧 [GatorAuth] Setting up parent account...');
+        setProcessing(true);
         
         base44.auth.updateMe({ 
           persona: 'parent',
@@ -41,45 +44,23 @@ export default function GatorAuth() {
           invite_code_used: pendingCode || 'direct'
         })
         .then(() => {
-          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
-          return refreshUser();
-        })
-        .then(() => {
-          console.log('✅ [GatorAuth] User refreshed, cleaning up...');
+          console.log('✅ [GatorAuth] Parent role set successfully');
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
-          
-          // Clear URL params
-          window.history.replaceState({}, document.title, window.location.pathname);
-          
-          // Small delay then navigate
-          setTimeout(() => {
-            console.log('✅ [GatorAuth] Navigating to ParentDashboard');
-            navigate('ParentDashboard');
-          }, 500);
+          window.location.href = '/#ParentDashboard';
         })
         .catch(error => {
           console.error('❌ Failed to set parent role:', error);
-          // Navigate anyway
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
-          navigate('ParentDashboard');
+          window.location.href = '/#ParentDashboard';
         });
       } else {
-        // No pending role, go to role selection
-        console.log('✅ [GatorAuth] No pending invite, navigating to role selection');
-        navigate('GatorRoleSelection');
+        console.log('✅ [GatorAuth] No pending role, going to role selection');
+        window.location.href = '/#GatorRoleSelection';
       }
-      return;
     }
-
-    // No user and not loading - redirect to login
-    if (!isLoading && !user && !hasOAuthTokens) {
-      console.log('🔐 [GatorAuth] Redirecting to Google OAuth...');
-      const callbackUrl = `${window.location.origin}/#GatorAuth`;
-      base44.auth.redirectToLogin(callbackUrl);
-    }
-  }, [user, isLoading, setupComplete, refreshUser]);
+  }, [user, isLoading, processing]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
