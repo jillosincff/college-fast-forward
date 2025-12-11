@@ -322,9 +322,9 @@ export default function GatorParentInvite() {
                     sessionStorage.setItem('pending_invite_code', inviteCode.trim());
                     sessionStorage.setItem('pending_invite_role', 'parent');
                     
-                    // Redirect directly to Google OAuth
-                    const callbackUrl = `${window.location.origin}/#GatorAuth`;
-                    console.log('🔐 [GatorParentInvite] Redirecting to Google OAuth with callback:', callbackUrl);
+                    // Redirect to Google OAuth with root callback
+                    const callbackUrl = `${window.location.origin}/`;
+                    console.log('🔐 [GatorParentInvite] Redirecting to Google OAuth');
                     base44.auth.redirectToLogin(callbackUrl);
                   } else {
                     toast({
