@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import { v4 as uuidv4 } from 'npm:uuid';
 
 const isEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
 
     // Rate Limiting
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data: recentInvites } = await base44.asServiceRole.entities.CommunityInvite.filter({
+    const recentInvites = await base44.asServiceRole.entities.CommunityInvite.filter({
         inviter_user_id: user.id,
         created_date: { $gte: twentyFourHoursAgo }
     });
@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     const invalid = emails.filter(e => !isEmail(e));
     
     // Check for existing users
-    const { data: existingUsers } = await base44.asServiceRole.entities.User.filter({ email: { $in: validEmails } });
-    const alreadyUsers = existingUsers.map(u => u.email);
+    const existingUsers = await base44.asServiceRole.entities.User.list();
+    const alreadyUsers = existingUsers.filter(u => validEmails.includes(u.email)).map(u => u.email);
 
     const emailsToSend = validEmails.filter(e => !alreadyUsers.includes(e));
 
