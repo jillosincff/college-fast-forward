@@ -43,6 +43,7 @@ export default function Onboarding() {
     primary_goal: user?.primary_goal || [],
     dream_companies: user?.dream_companies || '',
     bio: user?.bio || '',
+    visible_in_directory: user?.visible_in_directory !== false,
     student_emails: ''
   });
 
@@ -108,7 +109,7 @@ export default function Onboarding() {
         bio: formData.bio,
         onboarding_completed: true,
         expertise_shared: true,
-        visible_in_directory: true,
+        visible_in_directory: formData.visible_in_directory,
         profile_completion_score: 85
       });
 
@@ -405,22 +406,26 @@ export default function Onboarding() {
               <p className="text-xs mt-1" style={{ color: '#757575' }}>{formData.bio?.length || 0}/140 characters</p>
             </div>
 
-            <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg border-2 border-orange-200">
-              <Label className="text-[16px] font-bold mb-2 block" style={{ color: '#FA4616' }}>
-                🎓 Link Your Gator Student(s)
+            <div className="bg-gradient-to-r from-blue-50 to-orange-50 p-6 rounded-lg border-2 border-blue-200">
+              <Label className="text-[16px] font-bold mb-2 flex items-center gap-2" style={{ color: '#0021A5' }}>
+                📖 Gator Directory Visibility
               </Label>
-              <p className="text-sm mb-3 text-slate-600">
-                When you post job leads or help students, your Gator's requests will be <strong>boosted to the top</strong> of the feed for 14 days!
-              </p>
-              <Input
-                value={formData.student_emails}
-                onChange={(e) => setFormData({...formData, student_emails: e.target.value})}
-                placeholder="Enter their @ufl.edu email(s), separated by commas"
-                className="h-[44px] border-[#E0E0E0] rounded-[6px] bg-white focus:shadow-[0_0_0_3px_rgba(250,70,22,0.1)] placeholder:text-[#757575]"
-                style={{ borderWidth: '1px' }}
-              />
-              <p className="text-xs mt-2 text-slate-500">
-                Example: john.doe@ufl.edu, jane.smith@ufl.edu
+              <div className="flex items-center gap-3 mt-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.visible_in_directory !== false}
+                    onChange={(e) => setFormData({...formData, visible_in_directory: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0021A5]"></div>
+                </label>
+                <span className="text-sm text-slate-700 font-medium">
+                  Show my profile in the Gator Directory
+                </span>
+              </div>
+              <p className="text-xs mt-2 text-slate-600">
+                When enabled, students can discover and connect with you through the directory.
               </p>
             </div>
           </div>
