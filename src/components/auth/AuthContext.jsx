@@ -16,48 +16,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAuthState = useCallback(async (retryCount = 0) => {
+  const checkAuthState = useCallback(async () => {
     setIsLoading(true);
-    
-    // Check both regular query params AND hash query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashParts = window.location.hash.split('?');
-    const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : new URLSearchParams();
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token') || hashParams.has('token') || hashParams.has('access_token');
-    
-    // If OAuth callback and first attempt, reload to let SDK process
-    if (hasOAuthParams && retryCount === 0) {
-      const processed = sessionStorage.getItem('oauth_processed');
-      if (!processed) {
-        console.log('🔄 [AuthContext] OAuth callback - marking as processed and reloading...');
-        sessionStorage.setItem('oauth_processed', 'true');
-        window.location.reload();
-        return;
-      }
-      console.log('🔄 [AuthContext] OAuth processed, checking auth...');
-      sessionStorage.removeItem('oauth_processed');
-    }
     
     try {
       const userData = await base44.auth.me();
-      
       console.log('✅ [AuthContext] Authenticated:', userData.email);
       setUser(userData);
-
-      // Clean URL after successful auth
-      if (hasOAuthParams) {
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash.split('?')[0]);
-      }
     } catch (error) {
       if (error.status === 401) {
-        // If OAuth callback failed, try one more reload
-        if (hasOAuthParams && retryCount === 0) {
-          console.log('🔄 [AuthContext] Auth failed with OAuth params, reloading once more...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          window.location.reload();
-          return;
-        }
-        console.log('❌ [AuthContext] Authentication failed');
         logger.info('Not authenticated');
       } else {
         logger.error('Auth failed', { error });

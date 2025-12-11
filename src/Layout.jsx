@@ -839,6 +839,39 @@ function AppContent() {
         currentPage
       });
 
+      // Check for pending parent invite setup FIRST
+      const pendingRole = sessionStorage.getItem('pending_invite_role');
+      const pendingCode = sessionStorage.getItem('pending_invite_code');
+
+      if (pendingRole === 'parent' && (!user.persona || user.persona !== 'parent')) {
+        console.log('🔄 Layout detected pending parent setup - setting role...');
+
+        const setupParent = async () => {
+          try {
+            await base44.auth.updateMe({ 
+              persona: 'parent',
+              roles: ['parent'],
+              onboarding_completed: true,
+              invite_code_used: pendingCode || 'direct'
+            });
+
+            sessionStorage.removeItem('pending_invite_code');
+            sessionStorage.removeItem('pending_invite_role');
+
+            console.log('✅ Parent role set, reloading...');
+            window.location.hash = 'ParentDashboard';
+            window.location.reload();
+          } catch (error) {
+            console.error('❌ Failed to set parent role:', error);
+            sessionStorage.removeItem('pending_invite_code');
+            sessionStorage.removeItem('pending_invite_role');
+          }
+        };
+
+        setupParent();
+        return;
+      }
+
       // If user is on a public page like Privacy, Terms, etc. - let them stay
       if (publicPages.includes(currentPage) && currentPage !== 'LandingPage') {
         console.log('✅ Authenticated user viewing public page:', currentPage);
