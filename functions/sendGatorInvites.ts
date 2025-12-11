@@ -4,14 +4,16 @@ import { v4 as uuidv4 } from 'npm:uuid';
 const isEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
 Deno.serve(async (req) => {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    try {
+        const base44 = createClientFromRequest(req);
+        const user = await base44.auth.me();
 
-    if (!user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-    }
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        }
 
-    const { emails, role, campus, note, refSource } = await req.json();
+        const { emails, role, campus, note, refSource } = await req.json();
+        console.log('sendGatorInvites called:', { emails, role, campus, userId: user.id });
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
         return new Response(JSON.stringify({ error: 'Emails must be a non-empty array.' }), { status: 400 });
@@ -121,8 +123,19 @@ Deno.serve(async (req) => {
         }
     }
 
-    return new Response(JSON.stringify(results), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-    });
+        return new Response(JSON.stringify(results), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    } catch (error) {
+        console.error('sendGatorInvites error:', error);
+        return new Response(JSON.stringify({ 
+            error: 'Failed to send invites', 
+            details: error.message,
+            stack: error.stack 
+        }), { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 });
