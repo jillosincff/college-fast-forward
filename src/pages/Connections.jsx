@@ -549,7 +549,7 @@ export default function DiscoverEmergingGatorsPage() {
         .filters-section-sticky {
           position: sticky;
           top: 96px;
-          z-index: 40;
+          z-index: 45;
           background: white;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           padding: 20px 0;
