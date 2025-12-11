@@ -76,7 +76,7 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
     try {
       const result = await base44.functions.invoke('sendGatorInvites', {
         emails: [inviteEmail],
-        role: 'gator',
+        role: 'student',
         campus: 'UF',
         note: inviteName ? `${inviteName}, join College Fast Forward to connect with the Gator community!` : null
       });
