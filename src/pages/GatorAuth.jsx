@@ -8,59 +8,60 @@ export default function GatorAuth() {
   const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
-    const handleParentInviteFlow = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasOAuthTokens = urlParams.has('token') || urlParams.has('access_token');
+
+    // If OAuth callback, wait for auth to complete
+    if (hasOAuthTokens) {
+      console.log('🔄 [GatorAuth] OAuth callback detected, waiting for auth...');
+      if (isLoading) {
+        console.log('⏳ [GatorAuth] Still loading auth state...');
+        return;
+      }
+      if (!user) {
+        console.log('⚠️ [GatorAuth] Auth complete but no user - retrying...');
+        return;
+      }
+    }
+
+    // Handle authenticated user
+    if (user && !isLoading) {
       const pendingRole = sessionStorage.getItem('pending_invite_role');
-      if (pendingRole === 'parent' && user) {
-        console.log('👨‍👩‍👧 [GatorAuth] Setting parent role in user record');
-        try {
-          await base44.auth.updateMe({ 
-            persona: 'parent',
-            roles: ['parent'],
-            onboarding_completed: false
-          });
-          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
-          await refreshUser();
-          console.log('✅ [GatorAuth] User refreshed, navigating to parent onboarding');
+      
+      if (pendingRole === 'parent') {
+        console.log('👨‍👩‍👧 [GatorAuth] Parent invite flow - setting role');
+        
+        base44.auth.updateMe({ 
+          persona: 'parent',
+          roles: ['parent'],
+          onboarding_completed: false
+        }).then(() => {
+          console.log('✅ [GatorAuth] Parent role set');
+          return refreshUser();
+        }).then(() => {
+          console.log('✅ [GatorAuth] Navigating to parent onboarding');
           sessionStorage.setItem('selected_role', 'parent');
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
           navigate('Onboarding');
-        } catch (error) {
+        }).catch(error => {
           console.error('❌ Failed to set parent role:', error);
           sessionStorage.setItem('selected_role', 'parent');
           navigate('Onboarding');
-        }
+        });
       } else {
-        console.log('🎓 [GatorAuth] Navigating to role selection');
+        console.log('🎓 [GatorAuth] No pending role - going to role selection');
         navigate('GatorRoleSelection');
-      }
-    };
-
-    // Check if returning from OAuth with tokens
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('token') || urlParams.has('access_token')) {
-      console.log('🔄 [GatorAuth] OAuth callback detected, tokens present');
-      // Wait for auth check to complete
-      if (!isLoading && user) {
-        console.log('✅ [GatorAuth] Auth successful');
-        handleParentInviteFlow();
       }
       return;
     }
 
-    if (!isLoading) {
-      if (user) {
-        console.log('✅ [GatorAuth] User authenticated');
-        handleParentInviteFlow();
-      } else if (!authAttempted) {
-        console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
-        setAuthAttempted(true);
-        // Callback to GatorAuth so we can handle the flow after OAuth
-        const callbackUrl = `${window.location.origin}/#GatorAuth`;
-        console.log('📍 [GatorAuth] Callback URL:', callbackUrl);
-        
-        base44.auth.redirectToLogin(callbackUrl);
-      }
+    // No user and not loading - need to authenticate
+    if (!isLoading && !user && !authAttempted && !hasOAuthTokens) {
+      console.log('🔐 [GatorAuth] No user - redirecting to login');
+      setAuthAttempted(true);
+      const callbackUrl = `${window.location.origin}/#GatorAuth`;
+      base44.auth.redirectToLogin(callbackUrl);
     }
   }, [user, isLoading, authAttempted, refreshUser]);
 
