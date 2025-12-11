@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
 export default function GatorAuth() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
@@ -15,15 +15,20 @@ export default function GatorAuth() {
         try {
           await base44.auth.updateMe({ 
             persona: 'parent',
-            roles: ['parent']
+            roles: ['parent'],
+            onboarding_completed: false
           });
-          console.log('✅ [GatorAuth] Parent role set, navigating to welcome');
+          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
+          await refreshUser();
+          console.log('✅ [GatorAuth] User refreshed, navigating to parent onboarding');
           sessionStorage.setItem('selected_role', 'parent');
-          navigate('GatorWelcome');
+          sessionStorage.removeItem('pending_invite_code');
+          sessionStorage.removeItem('pending_invite_role');
+          navigate('Onboarding');
         } catch (error) {
           console.error('❌ Failed to set parent role:', error);
           sessionStorage.setItem('selected_role', 'parent');
-          navigate('GatorWelcome');
+          navigate('Onboarding');
         }
       } else {
         console.log('🎓 [GatorAuth] Navigating to role selection');
@@ -57,7 +62,7 @@ export default function GatorAuth() {
         base44.auth.redirectToLogin(callbackUrl);
       }
     }
-  }, [user, isLoading, authAttempted]);
+  }, [user, isLoading, authAttempted, refreshUser]);
 
   // Show loading spinner while checking auth or redirecting
   return (
