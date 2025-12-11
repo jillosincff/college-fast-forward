@@ -302,6 +302,7 @@ export default function GatorParentInvite() {
                 onClick={() => {
                   if (inviteCode.trim()) {
                     sessionStorage.setItem('pending_invite_code', inviteCode.trim());
+                    sessionStorage.setItem('pending_invite_role', 'parent');
                     navigate('GatorAuth');
                   } else {
                     toast({
