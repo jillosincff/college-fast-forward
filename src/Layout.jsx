@@ -759,20 +759,37 @@ function AppContent() {
   const [resolvedPage, setResolvedPage] = useState(null);
 
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleHashChange = async () => {
+      // Check for OAuth callback params in URL (hash or query)
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParts = window.location.hash.split('?');
+      const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
+      const hasAccessToken = urlParams.has('access_token') || hashParams?.has('access_token');
+      
+      // If OAuth callback, wait for SDK to process token
+      if (hasAccessToken && !sessionStorage.getItem('oauth_processed')) {
+        console.log('🔄 [Layout] OAuth callback detected - waiting for SDK...');
+        sessionStorage.setItem('oauth_processed', 'true');
+        
+        // Give SDK time to process the token
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Clean URL and go to Dashboard
+        window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
+        window.location.reload();
+        return;
+      }
+      
+      // Normal hash change handling
       let hash = window.location.hash.slice(1).split('?')[0] || 'LandingPage';
       if (hash.startsWith('/')) {
         hash = hash.slice(1);
       }
       
-      // If landing page and OAuth callback detected, clear params after auth
-      if (!hash && window.location.search.includes('access_token')) {
-        hash = 'Dashboard';
-      }
-      
       setCurrentPage(hash || 'LandingPage');
       setResolvedPage(null);
     };
+    
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
