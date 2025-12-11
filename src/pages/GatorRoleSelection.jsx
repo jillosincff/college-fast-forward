@@ -73,13 +73,8 @@ export default function GatorRoleSelection() {
           navigate('GatorInviteCode');
         }
       } else if (selectedRole === 'parent') {
-        console.log('❤️ [GatorRoleSelection] Updating to Parent role...');
-        await base44.auth.updateMe({
-          persona: 'parent',
-          roles: ['parent']
-        });
-        console.log('✅ [GatorRoleSelection] User role updated');
-        await refreshUser();
+        console.log('❤️ [GatorRoleSelection] Parent selected, storing in session...');
+        sessionStorage.setItem('pending_invite_role', 'parent');
         console.log('➡️ [GatorRoleSelection] Parent -> GatorParentInvite');
         navigate('GatorParentInvite');
       }

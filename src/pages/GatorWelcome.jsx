@@ -62,6 +62,11 @@ export default function GatorWelcome() {
     console.log('🚀 Starting onboarding for role:', role);
     trackEvent('onboarding_started', { role });
     
+    // Clear the pending flags since we're completing onboarding
+    sessionStorage.removeItem('pending_invite_role');
+    sessionStorage.removeItem('pending_invite_code');
+    sessionStorage.removeItem('selected_role');
+    
     if (role === 'gator') {
       console.log('➡️ Going to StudentOnboarding');
       navigate('StudentOnboarding');
