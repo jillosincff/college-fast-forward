@@ -25,10 +25,10 @@ export const AuthProvider = ({ children }) => {
     const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : new URLSearchParams();
     const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token') || hashParams.has('token') || hashParams.has('access_token');
     
-    // Wait longer on first attempt if OAuth callback
+    // Wait for SDK to process OAuth callback
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 [AuthContext] OAuth callback detected, waiting 3s for SDK...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log('🔄 [AuthContext] OAuth callback detected, waiting 4s for SDK...');
+      await new Promise(resolve => setTimeout(resolve, 4000));
     }
     
     try {

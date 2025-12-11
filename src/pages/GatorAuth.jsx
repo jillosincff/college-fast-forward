@@ -8,36 +8,46 @@ export default function GatorAuth() {
 
   useEffect(() => {
     if (processed) return;
-    
-    // Wait for auth to finish loading
+
+    // Don't do anything while loading
     if (isLoading) {
-      console.log('⏳ [GatorAuth] Waiting for auth...');
+      console.log('⏳ [GatorAuth] Loading auth state...');
       return;
     }
 
-    // Still no user after loading - redirect to login
+    // No user yet - wait for OAuth or redirect to login
     if (!user) {
-      console.log('🔐 [GatorAuth] No user, redirecting to login');
+      // Check if we have OAuth params in URL
+      const hashParts = window.location.hash.split('?');
+      const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
+      const hasAccessToken = hashParams && (hashParams.has('access_token') || hashParams.has('token'));
+      
+      if (hasAccessToken) {
+        // OAuth callback with token - SDK is processing, wait longer
+        console.log('🔄 [GatorAuth] OAuth token detected, SDK still processing...');
+        return;
+      }
+      
+      // No token and no user - redirect to login
+      console.log('🔐 [GatorAuth] No auth, redirecting to login');
       const callbackUrl = `${window.location.origin}/#GatorAuth`;
       base44.auth.redirectToLogin(callbackUrl);
       return;
     }
 
-    // User authenticated - process once
-    const handleAuthSuccess = async () => {
-      console.log('✅ [GatorAuth] User authenticated:', user.email);
+    // User authenticated successfully!
+    const handleSuccess = async () => {
+      console.log('✅ [GatorAuth] Auth successful:', user.email);
       setProcessed(true);
       
-      // Clear OAuth params from URL
-      const cleanHash = window.location.hash.split('?')[0];
-      window.history.replaceState({}, document.title, window.location.pathname + cleanHash);
+      // Clear OAuth params
+      window.history.replaceState({}, document.title, window.location.pathname + '#GatorAuth');
       
-      // Check for pending parent invite
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
       
       if (pendingRole === 'parent') {
-        console.log('🔄 [GatorAuth] Setting up parent role...');
+        console.log('🔄 [GatorAuth] Setting parent role...');
         
         try {
           await base44.auth.updateMe({ 
@@ -52,19 +62,19 @@ export default function GatorAuth() {
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
           
-          console.log('✅ [GatorAuth] Navigating to ParentDashboard');
-          window.location.hash = 'ParentDashboard';
+          console.log('✅ [GatorAuth] Going to ParentDashboard');
+          setTimeout(() => window.location.hash = 'ParentDashboard', 100);
         } catch (error) {
           console.error('❌ [GatorAuth] Error:', error);
-          window.location.hash = 'Dashboard';
+          setTimeout(() => window.location.hash = 'Dashboard', 100);
         }
       } else {
         console.log('✅ [GatorAuth] Going to Dashboard');
-        window.location.hash = 'Dashboard';
+        setTimeout(() => window.location.hash = 'Dashboard', 100);
       }
     };
 
-    handleAuthSuccess();
+    handleSuccess();
   }, [user, isLoading, refreshUser, processed]);
 
   return (
