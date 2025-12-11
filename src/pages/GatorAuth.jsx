@@ -8,6 +8,29 @@ export default function GatorAuth() {
   const [authAttempted, setAuthAttempted] = React.useState(false);
 
   useEffect(() => {
+    const handleParentInviteFlow = async () => {
+      const pendingRole = sessionStorage.getItem('pending_invite_role');
+      if (pendingRole === 'parent' && user) {
+        console.log('👨‍👩‍👧 [GatorAuth] Setting parent role in user record');
+        try {
+          await base44.auth.updateMe({ 
+            persona: 'parent',
+            roles: ['parent']
+          });
+          console.log('✅ [GatorAuth] Parent role set, navigating to welcome');
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        } catch (error) {
+          console.error('❌ Failed to set parent role:', error);
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        }
+      } else {
+        console.log('🎓 [GatorAuth] Navigating to role selection');
+        navigate('GatorRoleSelection');
+      }
+    };
+
     // Check if returning from OAuth with tokens
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('token') || urlParams.has('access_token')) {
@@ -15,17 +38,7 @@ export default function GatorAuth() {
       // Wait for auth check to complete
       if (!isLoading && user) {
         console.log('✅ [GatorAuth] Auth successful');
-        
-        // Check if user has a pending invite role (parent)
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        if (pendingRole === 'parent') {
-          console.log('👨‍👩‍👧 [GatorAuth] Parent invite detected, skipping role selection');
-          sessionStorage.setItem('selected_role', 'parent');
-          navigate('GatorWelcome');
-        } else {
-          console.log('🎓 [GatorAuth] Navigating to role selection');
-          navigate('GatorRoleSelection');
-        }
+        handleParentInviteFlow();
       }
       return;
     }
@@ -33,17 +46,7 @@ export default function GatorAuth() {
     if (!isLoading) {
       if (user) {
         console.log('✅ [GatorAuth] User authenticated');
-        
-        // Check if user has a pending invite role (parent)
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        if (pendingRole === 'parent') {
-          console.log('👨‍👩‍👧 [GatorAuth] Parent invite detected, skipping role selection');
-          sessionStorage.setItem('selected_role', 'parent');
-          navigate('GatorWelcome');
-        } else {
-          console.log('🎓 [GatorAuth] Navigating to role selection');
-          navigate('GatorRoleSelection');
-        }
+        handleParentInviteFlow();
       } else if (!authAttempted) {
         console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
         setAuthAttempted(true);
