@@ -59,9 +59,9 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.entities.CommunityInvite.create({
                 inviter_user_id: user.id,
                 email,
-                role,
-                campus: 'UF', // Force UF campus
-                note,
+                role: role || 'student',
+                campus: 'UF',
+                note: note || '',
                 invite_token: token,
                 status: 'pending',
                 expires_at,
