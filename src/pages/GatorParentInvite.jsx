@@ -65,13 +65,33 @@ export default function GatorParentInvite() {
     trackEvent('parent_invite_request_submitted', { userType });
 
     try {
-      await base44.entities.InviteRequest.create({
+      const inviteRequest = await base44.entities.InviteRequest.create({
         email: email.trim(),
         full_name: fullName.trim(),
         user_type: userType,
         reason: reason.trim(),
         status: 'pending'
       });
+
+      // Notify admin(s)
+      try {
+        const allUsers = await base44.entities.User.list();
+        const admins = allUsers.filter(u => u.roles?.includes('admin') || u.role === 'admin');
+        
+        for (const admin of admins) {
+          await base44.entities.Notification.create({
+            recipient_email: admin.email,
+            type: 'application_received',
+            title: '🆕 New Invite Request',
+            message: `${fullName.trim()} (${email.trim()}) requested to join as ${userType === 'uf_alumni' ? 'UF Graduate' : 'UF Family Member'}`,
+            action_url: 'AdminDashboard',
+            action_label: 'Review Request',
+            priority: 'high'
+          });
+        }
+      } catch (notifError) {
+        console.error('Failed to notify admin:', notifError);
+      }
 
       toast({
         title: "Request Submitted! 🐊",
