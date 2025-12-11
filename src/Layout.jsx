@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { navigate } from '@/components/utils/navigation';
 import './globals.css';
 import AppErrorBoundary from './components/common/AppErrorBoundary';
+import { base44 } from '@/api/base44Client';
 import logger from './components/utils/logger';
 import { Message } from '@/entities/Message';
 import { PayItForwardNotification } from '@/entities/PayItForwardNotification';
