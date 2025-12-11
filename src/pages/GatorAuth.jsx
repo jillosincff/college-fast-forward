@@ -14,25 +14,42 @@ export default function GatorAuth() {
       console.log('🔄 [GatorAuth] OAuth callback detected, tokens present');
       // Wait for auth check to complete
       if (!isLoading && user) {
-        console.log('✅ [GatorAuth] Auth successful, navigating to role selection');
-        navigate('GatorRoleSelection');
+        console.log('✅ [GatorAuth] Auth successful');
+        
+        // Check if user has a pending invite role (parent)
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        if (pendingRole === 'parent') {
+          console.log('👨‍👩‍👧 [GatorAuth] Parent invite detected, skipping role selection');
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        } else {
+          console.log('🎓 [GatorAuth] Navigating to role selection');
+          navigate('GatorRoleSelection');
+        }
       }
       return;
     }
 
     if (!isLoading) {
       if (user) {
-        console.log('✅ [GatorAuth] User authenticated, navigating to role selection');
-        navigate('GatorRoleSelection');
+        console.log('✅ [GatorAuth] User authenticated');
+        
+        // Check if user has a pending invite role (parent)
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        if (pendingRole === 'parent') {
+          console.log('👨‍👩‍👧 [GatorAuth] Parent invite detected, skipping role selection');
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        } else {
+          console.log('🎓 [GatorAuth] Navigating to role selection');
+          navigate('GatorRoleSelection');
+        }
       } else if (!authAttempted) {
         console.log('🔐 [GatorAuth] Redirecting to Base44 login...');
         setAuthAttempted(true);
         // Use clean callback URL without hash - Base44 needs this
         const callbackUrl = `${window.location.origin}/`;
         console.log('📍 [GatorAuth] Callback URL:', callbackUrl);
-        
-        // Store intent to go to role selection after auth
-        sessionStorage.setItem('post_auth_redirect', 'GatorRoleSelection');
         
         base44.auth.redirectToLogin(callbackUrl);
       }
