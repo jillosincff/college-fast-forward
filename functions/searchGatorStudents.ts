@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     }
     
     const searchTerm = query.trim().toLowerCase();
+    const searchWords = searchTerm.split(/\s+/).filter(w => w.length > 0);
     
     // Get all users with service role
     const allUsers = await base44.asServiceRole.entities.User.list();
@@ -31,11 +32,26 @@ Deno.serve(async (req) => {
       const isGator = u.persona === 'gator' || u.roles?.includes('gator') || u.email?.toLowerCase().endsWith('@ufl.edu');
       if (!isGator) return false;
       
-      // Match by email or name
-      if (u.email?.toLowerCase().includes(searchTerm)) return true;
-      if (u.full_name?.toLowerCase().includes(searchTerm)) return true;
-      if (u.first_name?.toLowerCase().includes(searchTerm)) return true;
-      if (u.last_name?.toLowerCase().includes(searchTerm)) return true;
+      const email = u.email?.toLowerCase() || '';
+      const fullName = u.full_name?.toLowerCase() || '';
+      const firstName = u.first_name?.toLowerCase() || '';
+      const lastName = u.last_name?.toLowerCase() || '';
+      
+      // Match exact phrase
+      if (email.includes(searchTerm)) return true;
+      if (fullName.includes(searchTerm)) return true;
+      if (firstName.includes(searchTerm)) return true;
+      if (lastName.includes(searchTerm)) return true;
+      
+      // Match all words (for "Lindsey Osinoff" to match "lindseyosinoff")
+      const allWordsMatch = searchWords.every(word => 
+        email.includes(word) || 
+        fullName.includes(word) || 
+        firstName.includes(word) || 
+        lastName.includes(word)
+      );
+      
+      if (allWordsMatch) return true;
       
       return false;
     });
