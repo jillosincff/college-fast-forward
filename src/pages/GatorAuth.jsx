@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
 export default function GatorAuth() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
+  const [processing, setProcessing] = React.useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -14,7 +15,9 @@ export default function GatorAuth() {
       hasUser: !!user, 
       isLoading, 
       hasOAuthTokens,
-      pendingRole: sessionStorage.getItem('pending_invite_role')
+      processing,
+      pendingRole: sessionStorage.getItem('pending_invite_role'),
+      pendingCode: sessionStorage.getItem('pending_invite_code')
     });
 
     // If OAuth callback, wait for auth to complete
@@ -23,26 +26,40 @@ export default function GatorAuth() {
       return;
     }
 
-    // Handle authenticated user
-    if (user && !isLoading) {
+    // Handle authenticated user - set parent role and go to dashboard
+    if (user && !isLoading && !processing) {
       const pendingRole = sessionStorage.getItem('pending_invite_role');
+      const pendingCode = sessionStorage.getItem('pending_invite_code');
       
-      if (pendingRole === 'parent') {
-        console.log('👨‍👩‍👧 [GatorAuth] Setting parent role and navigating to onboarding');
+      if (pendingRole === 'parent' && pendingCode) {
+        console.log('👨‍👩‍👧 [GatorAuth] Setting parent role with invite code:', pendingCode);
+        setProcessing(true);
         
         base44.auth.updateMe({ 
           persona: 'parent',
           roles: ['parent'],
-          onboarding_completed: false
+          onboarding_completed: true, // Mark as complete to go straight to dashboard
+          invite_code_used: pendingCode
         }).then(() => {
+          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
+          return refreshUser();
+        }).then(() => {
+          console.log('✅ [GatorAuth] User refreshed, cleaning up and navigating to ParentDashboard');
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
           window.history.replaceState({}, document.title, window.location.pathname);
-          navigate('Onboarding');
+          
+          // Navigate to parent dashboard
+          navigate('ParentDashboard');
         }).catch(error => {
           console.error('❌ Failed to set parent role:', error);
-          navigate('Onboarding');
+          setProcessing(false);
+          // Try to navigate anyway
+          navigate('ParentDashboard');
         });
+      } else if (pendingRole === 'parent') {
+        console.log('👨‍👩‍👧 [GatorAuth] Parent role but no code - going to dashboard anyway');
+        navigate('ParentDashboard');
       } else {
         console.log('🎓 [GatorAuth] No pending role - going to role selection');
         navigate('GatorRoleSelection');
@@ -56,7 +73,7 @@ export default function GatorAuth() {
       const callbackUrl = `${window.location.origin}/#GatorAuth`;
       base44.auth.redirectToLogin(callbackUrl);
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, processing, refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
