@@ -8,7 +8,10 @@ import { trackEvent } from '@/components/utils/analytics';
 
 export default function GatorWelcome() {
   const { user } = useAuth();
-  const { role } = useParams();
+  const params = useParams();
+  
+  // Get role from params or sessionStorage
+  const role = params.role || sessionStorage.getItem('selected_role');
 
   useEffect(() => {
     if (!user) {
