@@ -774,8 +774,14 @@ function AppContent() {
         // Give SDK time to process the token
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Clean URL and go to Dashboard
-        window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
+        // Check if this is a parent invite flow
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        const targetHash = pendingRole === 'parent' ? '#GatorWelcome?role=parent' : '#Dashboard';
+        
+        console.log('🎯 [Layout] OAuth complete, redirecting to:', targetHash);
+        
+        // Clean URL and redirect
+        window.history.replaceState({}, document.title, window.location.pathname + targetHash);
         window.location.reload();
         return;
       }
@@ -862,16 +868,15 @@ function AppContent() {
         currentPage
       });
 
-      // Check for pending parent invite setup FIRST - before any routing
+      // Check for pending parent invite setup on GatorWelcome page
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
 
-      if (pendingRole === 'parent' && user.persona !== 'parent') {
-        console.log('🔄 Layout detected pending parent setup - setting role...');
+      if (pendingRole === 'parent' && currentPage === 'GatorWelcome' && user.persona !== 'parent') {
+        console.log('🔄 [Layout] On GatorWelcome - setting parent role now...');
 
         const setupParent = async () => {
           try {
-            console.log('📝 Updating user to parent role (onboarding NOT completed)...');
             await base44.auth.updateMe({ 
               persona: 'parent',
               roles: ['parent'],
@@ -879,12 +884,12 @@ function AppContent() {
               invite_code_used: pendingCode || 'direct'
             });
 
-            console.log('✅ Parent role set, redirecting to welcome...');
+            console.log('✅ [Layout] Parent role set successfully');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
 
-            // Redirect to GatorWelcome with role param
-            window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
+            // Let GatorWelcome page handle the redirect to Onboarding
+            setResolvedPage(currentPage);
           } catch (error) {
             console.error('❌ Failed to set parent role:', error);
             sessionStorage.removeItem('pending_invite_code');
