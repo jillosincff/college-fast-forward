@@ -4,24 +4,33 @@ import { base44 } from '@/api/base44Client';
 
 export default function GatorAuth() {
   const { user, isLoading, refreshUser } = useAuth();
-  const [isSettingUpRole, setIsSettingUpRole] = useState(false);
+  const [processed, setProcessed] = useState(false);
 
   useEffect(() => {
-    if (isLoading || isSettingUpRole) return;
+    if (processed) return;
+    
+    // Wait for auth to finish loading
+    if (isLoading) {
+      console.log('⏳ [GatorAuth] Waiting for auth...');
+      return;
+    }
 
-    // Not authenticated - redirect to Google
+    // Still no user after loading - redirect to login
     if (!user) {
+      console.log('🔐 [GatorAuth] No user, redirecting to login');
       const callbackUrl = `${window.location.origin}/#GatorAuth`;
       base44.auth.redirectToLogin(callbackUrl);
       return;
     }
 
-    // User is authenticated - handle role setup
+    // User authenticated - process once
     const handleAuthSuccess = async () => {
-      console.log('✅ [GatorAuth] User authenticated');
+      console.log('✅ [GatorAuth] User authenticated:', user.email);
+      setProcessed(true);
       
       // Clear OAuth params from URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      const cleanHash = window.location.hash.split('?')[0];
+      window.history.replaceState({}, document.title, window.location.pathname + cleanHash);
       
       // Check for pending parent invite
       const pendingRole = sessionStorage.getItem('pending_invite_role');
@@ -29,7 +38,6 @@ export default function GatorAuth() {
       
       if (pendingRole === 'parent') {
         console.log('🔄 [GatorAuth] Setting up parent role...');
-        setIsSettingUpRole(true);
         
         try {
           await base44.auth.updateMe({ 
@@ -39,7 +47,6 @@ export default function GatorAuth() {
             invite_code_used: pendingCode || 'direct'
           });
           
-          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
           await refreshUser();
           
           sessionStorage.removeItem('pending_invite_code');
@@ -48,19 +55,17 @@ export default function GatorAuth() {
           console.log('✅ [GatorAuth] Navigating to ParentDashboard');
           window.location.hash = 'ParentDashboard';
         } catch (error) {
-          console.error('❌ [GatorAuth] Failed to set parent role:', error);
-          sessionStorage.removeItem('pending_invite_code');
-          sessionStorage.removeItem('pending_invite_role');
+          console.error('❌ [GatorAuth] Error:', error);
           window.location.hash = 'Dashboard';
         }
       } else {
-        console.log('✅ [GatorAuth] Regular user, going to Dashboard');
+        console.log('✅ [GatorAuth] Going to Dashboard');
         window.location.hash = 'Dashboard';
       }
     };
 
     handleAuthSuccess();
-  }, [user, isLoading, isSettingUpRole, refreshUser]);
+  }, [user, isLoading, refreshUser, processed]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">

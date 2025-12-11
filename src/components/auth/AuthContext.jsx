@@ -19,13 +19,16 @@ export const AuthProvider = ({ children }) => {
   const checkAuthState = useCallback(async (retryCount = 0) => {
     setIsLoading(true);
     
+    // Check both regular query params AND hash query params
     const urlParams = new URLSearchParams(window.location.search);
-    const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token');
+    const hashParts = window.location.hash.split('?');
+    const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : new URLSearchParams();
+    const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token') || hashParams.has('token') || hashParams.has('access_token');
     
     // Wait longer on first attempt if OAuth callback
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 [AuthContext] OAuth callback detected, waiting 2s for SDK...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🔄 [AuthContext] OAuth callback detected, waiting 3s for SDK...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
     try {
