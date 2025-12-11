@@ -775,6 +775,11 @@ function AppContent() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     
+    // Don't interfere if we're on GatorAuth - let it handle the flow
+    if (currentPage === 'GatorAuth') {
+      return;
+    }
+    
     // If new user from OAuth and NO pending invite flow - redirect to role selection
     if (urlParams.has('is_new_user') && user && !isLoading) {
       const pendingInviteRole = sessionStorage.getItem('pending_invite_role');

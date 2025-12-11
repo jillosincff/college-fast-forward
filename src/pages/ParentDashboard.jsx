@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Message } from '@/entities/Message';
@@ -31,6 +31,10 @@ import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -47,6 +51,8 @@ export default function ParentDashboard() {
   const [isSending, setIsSending] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [myStudents, setMyStudents] = useState([]);
+  const actionCardsRef = useRef([]);
+  const headlineRef = useRef(null);
 
   const loadDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.email) {
@@ -128,6 +134,55 @@ export default function ParentDashboard() {
       trackEvent('parent_dashboard_viewed', { userId: user.id });
     }
   }, [user?.id]);
+
+  // GSAP scroll animations
+  useEffect(() => {
+    if (!loading && headlineRef.current) {
+      // Animate headline
+      gsap.fromTo(
+        headlineRef.current,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: headlineRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      // Animate action cards with stagger
+      actionCardsRef.current.forEach((card, index) => {
+        if (card) {
+          gsap.fromTo(
+            card,
+            { opacity: 0, y: 80, scale: 0.9 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              delay: index * 0.15,
+              ease: 'back.out(1.4)',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse'
+              }
+            }
+          );
+        }
+      });
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [loading]);
 
   const getCapitalizedFirstName = (fullName) => {
     if (!fullName?.trim()) return 'Gator Parent';
@@ -317,7 +372,7 @@ export default function ParentDashboard() {
         {/* Action Cards */}
 
         {/* 3. Main Headline */}
-        <div className="text-center">
+        <div ref={headlineRef} className="text-center">
           <h2 
             className="text-3xl md:text-4xl font-black leading-tight mb-3"
             style={{ color: '#0021A5' }}
@@ -333,6 +388,7 @@ export default function ParentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Complete Profile */}
           <div 
+            ref={el => actionCardsRef.current[0] = el}
             className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
             style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >
@@ -355,6 +411,7 @@ export default function ParentDashboard() {
 
           {/* Card 2: Answer Questions */}
           <div 
+            ref={el => actionCardsRef.current[1] = el}
             className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
             style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >
@@ -377,6 +434,7 @@ export default function ParentDashboard() {
 
           {/* Card 3: Post Jobs */}
           <div 
+            ref={el => actionCardsRef.current[2] = el}
             className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
             style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
           >

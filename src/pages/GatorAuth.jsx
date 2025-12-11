@@ -6,6 +6,7 @@ import { navigate } from '@/components/utils/navigation';
 export default function GatorAuth() {
   const { user, isLoading, refreshUser } = useAuth();
   const [authAttempted, setAuthAttempted] = React.useState(false);
+  const [processingAuth, setProcessingAuth] = React.useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,28 +26,35 @@ export default function GatorAuth() {
     }
 
     // Handle authenticated user
-    if (user && !isLoading) {
+    if (user && !isLoading && !processingAuth) {
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       
       if (pendingRole === 'parent') {
         console.log('👨‍👩‍👧 [GatorAuth] Parent invite flow - setting role');
+        setProcessingAuth(true);
         
         base44.auth.updateMe({ 
           persona: 'parent',
           roles: ['parent'],
           onboarding_completed: false
         }).then(() => {
-          console.log('✅ [GatorAuth] Parent role set');
+          console.log('✅ [GatorAuth] Parent role set, refreshing user');
           return refreshUser();
         }).then(() => {
-          console.log('✅ [GatorAuth] Navigating to parent onboarding');
-          sessionStorage.setItem('selected_role', 'parent');
+          console.log('✅ [GatorAuth] User refreshed, cleaning session');
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
-          navigate('Onboarding');
+          
+          // Clear URL params
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+          
+          // Navigate to onboarding
+          console.log('✅ [GatorAuth] Navigating to parent onboarding');
+          setTimeout(() => navigate('Onboarding'), 100);
         }).catch(error => {
           console.error('❌ Failed to set parent role:', error);
-          sessionStorage.setItem('selected_role', 'parent');
+          sessionStorage.removeItem('pending_invite_code');
+          sessionStorage.removeItem('pending_invite_role');
           navigate('Onboarding');
         });
       } else {
@@ -63,14 +71,16 @@ export default function GatorAuth() {
       const callbackUrl = `${window.location.origin}/#GatorAuth`;
       base44.auth.redirectToLogin(callbackUrl);
     }
-  }, [user, isLoading, authAttempted, refreshUser]);
+  }, [user, isLoading, authAttempted, refreshUser, processingAuth]);
 
   // Show loading spinner while checking auth or redirecting
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-white text-lg font-semibold">Redirecting to login...</p>
+        <p className="text-white text-lg font-semibold">
+          {processingAuth ? 'Setting up your account...' : 'Authenticating...'}
+        </p>
       </div>
     </div>
   );

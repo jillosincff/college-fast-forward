@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Shield, CheckCircle, Users, Heart, ArrowRight, ChevronDown, Info, Network, GraduationCap, Handshake, TrendingUp, Briefcase, Star } from 'lucide-react';
+import { Lock, Shield, CheckCircle, Users, Heart, ArrowRight, ChevronDown, Info, Network, GraduationCap, Handshake, TrendingUp, Briefcase, Star, Loader2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import baffle from 'baffle';
 
 export default function GatorParentInvite() {
   const { toast } = useToast();
@@ -21,6 +22,8 @@ export default function GatorParentInvite() {
   const [inviteCode, setInviteCode] = useState('');
   const [networkCount, setNetworkCount] = useState(0);
   const [jobCount, setJobCount] = useState(0);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const codeInputRef = useRef(null);
 
   // Counting animation for stats
   useEffect(() => {
@@ -50,6 +53,17 @@ export default function GatorParentInvite() {
       cleanup2();
     };
   }, []);
+
+  // Baffle animation for invite code input
+  useEffect(() => {
+    if (showCodeInput && codeInputRef.current) {
+      const b = baffle(codeInputRef.current, {
+        characters: '█▓▒░ <░▒▓█>',
+        speed: 100
+      });
+      b.start().reveal(200);
+    }
+  }, [showCodeInput]);
 
   const handleRequestInvite = async () => {
     if (!userType || !fullName.trim() || !email.trim()) {
@@ -290,19 +304,26 @@ export default function GatorParentInvite() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
             >
-              <Input
-                type="text"
-                placeholder="ENTER CODE"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                className="h-14 text-center text-xl font-bold border-3 border-[#FF6900] focus:border-[#0021A5] focus:ring-4 focus:ring-blue-100 mb-4 shadow-lg"
-                maxLength={20}
-              />
+              <div className="relative">
+                <Input
+                  ref={codeInputRef}
+                  type="text"
+                  placeholder="ENTER CODE"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  className="h-14 text-center text-xl font-bold border-3 border-[#FF6900] focus:border-[#0021A5] focus:ring-4 focus:ring-blue-100 mb-4 shadow-lg tracking-widest"
+                  maxLength={20}
+                />
+              </div>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   if (inviteCode.trim()) {
+                    setIsVerifyingCode(true);
                     sessionStorage.setItem('pending_invite_code', inviteCode.trim());
                     sessionStorage.setItem('pending_invite_role', 'parent');
+                    
+                    // Small delay for UX
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     navigate('GatorAuth');
                   } else {
                     toast({
@@ -312,17 +333,26 @@ export default function GatorParentInvite() {
                     });
                   }
                 }}
-                disabled={!inviteCode.trim()}
+                disabled={!inviteCode.trim() || isVerifyingCode}
                 className="w-full h-14 text-lg font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
                 style={{ 
-                  background: !inviteCode.trim() 
+                  background: (!inviteCode.trim() || isVerifyingCode)
                     ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
                     : 'linear-gradient(135deg, #FF6900 0%, #ff8c3a 100%)',
                   color: 'white'
                 }}
               >
-                Continue with Code
-                <ArrowRight className="w-5 h-5 ml-2" />
+                {isVerifyingCode ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Continue with Code
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
               </Button>
             </motion.div>
           )}
