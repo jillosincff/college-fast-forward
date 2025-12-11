@@ -881,6 +881,8 @@ function AppContent() {
     const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
     const needsOnboarding = user.onboarding_completed !== true;
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+
+    // CRITICAL: Even @ufl.edu students need to go through role selection if they don't have a role
     const verified = isUserVerified(user);
 
     console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified });
@@ -889,9 +891,10 @@ function AppContent() {
     if (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
       let destination = currentPage;
 
+      // CRITICAL: Check role first - even @ufl.edu students need to select a role
       if (hasNoRole) {
-        destination = 'WelcomeRole';
-        console.log('➡️ [NoRole] → WelcomeRole');
+        destination = 'GatorRoleSelection';
+        console.log('➡️ [NoRole] → GatorRoleSelection');
       } else if (!verified && !isUFLStudent) {
         destination = 'InviteRequired';
         console.log('➡️ [NotVerified] → InviteRequired');
@@ -930,8 +933,8 @@ function AppContent() {
 
     // Redirect incomplete users
     if (hasNoRole) {
-      console.log('🔄 [Incomplete] No role → WelcomeRole');
-      navigate('WelcomeRole');
+      console.log('🔄 [Incomplete] No role → GatorRoleSelection');
+      navigate('GatorRoleSelection');
     } else if (!verified && !isUFLStudent) {
       console.log('🔄 [Incomplete] Not verified → InviteRequired');
       navigate('InviteRequired');
