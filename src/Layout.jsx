@@ -772,10 +772,22 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // CRITICAL: Check for pending parent invite BEFORE handling new user from OAuth
+    // CRITICAL: Check for new user from OAuth FIRST
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('is_new_user') && user) {
+      console.log('🆕 NEW USER FROM OAUTH - Clear any stale session and redirect to role selection');
+      // Clear any stale session storage from previous sessions
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
+      sessionStorage.removeItem('selected_role');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      navigate('GatorRoleSelection');
+      return;
+    }
+
+    // Check for pending parent invite flow
     if (user && !isLoading) {
       const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
-      const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
 
       if (pendingInviteRole === 'parent' && (currentPage === 'LandingPage' || currentPage === 'Dashboard')) {
         console.log('👨‍👩‍👧 Parent invite flow detected after OAuth');
@@ -795,15 +807,6 @@ function AppContent() {
         });
         return;
       }
-    }
-
-    // Check for new user from OAuth
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('is_new_user') && user) {
-      console.log('🆕 NEW USER FROM OAUTH - Force redirect to role selection');
-      window.history.replaceState({}, document.title, window.location.pathname);
-      navigate('GatorRoleSelection');
-      return;
     }
 
     if (isLoading || !currentPage) {
