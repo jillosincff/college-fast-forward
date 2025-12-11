@@ -81,6 +81,12 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
         note: inviteName ? `${inviteName}, join College Fast Forward to connect with the Gator community!` : null
       });
       
+      console.log('sendGatorInvites result:', result);
+      
+      if (result.data?.error) {
+        throw new Error(result.data.details || result.data.error);
+      }
+      
       if (result.data?.sent?.length > 0) {
         toast({
           title: "Invite Sent! 🐊",
@@ -89,8 +95,20 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
         
         setShowInviteModal(false);
         onComplete(null);
+      } else if (result.data?.alreadyUsers?.length > 0) {
+        toast({
+          title: "Already Registered",
+          description: "This email is already registered. Try searching for them instead!",
+          variant: "destructive"
+        });
+      } else if (result.data?.invalid?.length > 0) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address",
+          variant: "destructive"
+        });
       } else {
-        throw new Error(result.data?.error || 'Failed to send invite');
+        throw new Error('Failed to send invite');
       }
     } catch (error) {
       console.error('Failed to send invite:', error);
