@@ -114,8 +114,12 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
         Connect With Your Gator
       </h2>
       
-      <p className="text-lg text-slate-600 mb-8">
+      <p className="text-lg text-slate-600 mb-2">
         Is your student already on College Fast Forward?
+      </p>
+      
+      <p className="text-sm text-slate-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+        Your action boosts your student's visibility by making their profile more prominent in the Gator network—helping them connect with potential mentors, internships, and opportunities—while respecting privacy and keeping their activity private.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
