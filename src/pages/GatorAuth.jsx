@@ -70,23 +70,17 @@ export default function GatorAuth() {
       console.log('🔐 [GatorAuth] No user - initiating login redirect');
       setAuthAttempted(true);
       
-      try {
-        const callbackUrl = `${window.location.origin}/#GatorAuth`;
-        console.log('🔗 [GatorAuth] Callback URL:', callbackUrl);
-        
-        // Force redirect using window.location as fallback
-        setTimeout(() => {
-          if (!redirectError) {
-            console.log('⚠️ [GatorAuth] Redirect timeout - using fallback');
-            window.location.href = `https://base44.app/auth/login?redirect=${encodeURIComponent(callbackUrl)}`;
-          }
-        }, 2000);
-        
-        base44.auth.redirectToLogin(callbackUrl);
-      } catch (error) {
-        console.error('❌ [GatorAuth] Redirect failed:', error);
-        setRedirectError(true);
-      }
+      // Small delay to ensure state is set
+      setTimeout(() => {
+        try {
+          const callbackUrl = `${window.location.origin}/#GatorAuth`;
+          console.log('🔗 [GatorAuth] Redirecting to login with callback:', callbackUrl);
+          base44.auth.redirectToLogin(callbackUrl);
+        } catch (error) {
+          console.error('❌ [GatorAuth] Redirect failed:', error);
+          setRedirectError(true);
+        }
+      }, 100);
     }
   }, [user, isLoading, authAttempted, refreshUser, processingAuth, redirectError]);
 
