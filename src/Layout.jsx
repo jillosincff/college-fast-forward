@@ -772,24 +772,38 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // CRITICAL: Check for new user from OAuth FIRST - before any other logic
+    // CRITICAL: Check for pending parent invite BEFORE handling new user from OAuth
+    if (user && !isLoading) {
+      const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
+      const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
+
+      if (pendingInviteRole === 'parent' && (currentPage === 'LandingPage' || currentPage === 'Dashboard')) {
+        console.log('👨‍👩‍👧 Parent invite flow detected after OAuth');
+
+        // Update user role immediately
+        base44.auth.updateMe({
+          persona: 'parent',
+          roles: ['parent']
+        }).then(() => {
+          console.log('✅ Parent role set, navigating to GatorWelcome');
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        }).catch(err => {
+          console.error('Failed to set parent role:', err);
+          sessionStorage.setItem('selected_role', 'parent');
+          navigate('GatorWelcome');
+        });
+        return;
+      }
+    }
+
+    // Check for new user from OAuth
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('is_new_user') && user) {
       console.log('🆕 NEW USER FROM OAUTH - Force redirect to role selection');
       window.history.replaceState({}, document.title, window.location.pathname);
       navigate('GatorRoleSelection');
       return;
-    }
-
-    // Check for pending parent invite flow
-    if (user && !isLoading) {
-      const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
-      if (pendingInviteRole === 'parent' && currentPage === 'LandingPage') {
-        console.log('👨‍👩‍👧 Parent invite flow detected after OAuth, navigating to GatorWelcome');
-        sessionStorage.setItem('selected_role', 'parent');
-        navigate('GatorWelcome');
-        return;
-      }
     }
 
     if (isLoading || !currentPage) {
