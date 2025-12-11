@@ -768,7 +768,7 @@ function AppContent() {
       
       // If OAuth callback, wait for SDK to process token
       if (hasAccessToken && !sessionStorage.getItem('oauth_processed')) {
-        console.log('🔄 [Layout] OAuth callback detected - waiting for SDK...');
+        console.log('🔄 [OAuth] Callback detected, processing...');
         sessionStorage.setItem('oauth_processed', 'true');
         
         // Give SDK time to process the token
@@ -776,12 +776,15 @@ function AppContent() {
         
         // Check if this is a parent invite flow
         const pendingRole = sessionStorage.getItem('pending_invite_role');
-        const targetHash = pendingRole === 'parent' ? '#GatorWelcome?role=parent' : '#Dashboard';
         
-        console.log('🎯 [Layout] OAuth complete, redirecting to:', targetHash);
+        if (pendingRole === 'parent') {
+          console.log('🎯 [OAuth] Parent flow - redirecting to GatorWelcome');
+          window.history.replaceState({}, document.title, window.location.pathname + '#GatorWelcome?role=parent');
+        } else {
+          console.log('🎯 [OAuth] Standard flow - redirecting to Dashboard');
+          window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
+        }
         
-        // Clean URL and redirect
-        window.history.replaceState({}, document.title, window.location.pathname + targetHash);
         window.location.reload();
         return;
       }
@@ -792,6 +795,7 @@ function AppContent() {
         hash = hash.slice(1);
       }
       
+      console.log('📍 [HashChange] New page:', hash);
       setCurrentPage(hash || 'LandingPage');
       setResolvedPage(null);
     };
@@ -824,29 +828,32 @@ function AppContent() {
     }
 
     // STEP 3: New user flow pages ALWAYS bypass routing (GatorAuth, GatorWelcome, etc.)
-    // These pages handle their own auth and redirects
     if (newUserFlowPages.includes(currentPage)) {
-      console.log('✅ [NewUserFlow] Bypassing routing for:', currentPage);
+      console.log('✅ [NewUserFlow] Page:', currentPage);
       
-      // Special handling: Set parent role when on GatorWelcome
-      const pendingRole = sessionStorage.getItem('pending_invite_role');
-      const pendingCode = sessionStorage.getItem('pending_invite_code');
-      
-      if (currentPage === 'GatorWelcome' && pendingRole === 'parent' && user && user.persona !== 'parent') {
-        console.log('🔄 [GatorWelcome] Setting parent role...');
+      // CRITICAL: Set parent role when landing on GatorWelcome after OAuth
+      if (currentPage === 'GatorWelcome' && user) {
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        const pendingCode = sessionStorage.getItem('pending_invite_code');
         
-        base44.auth.updateMe({ 
-          persona: 'parent',
-          roles: ['parent'],
-          onboarding_completed: false,
-          invite_code_used: pendingCode || 'direct'
-        }).then(() => {
-          console.log('✅ [GatorWelcome] Parent role set');
-          sessionStorage.removeItem('pending_invite_code');
-          sessionStorage.removeItem('pending_invite_role');
-        }).catch(err => {
-          console.error('❌ [GatorWelcome] Failed to set parent role:', err);
-        });
+        if (pendingRole === 'parent' && user.persona !== 'parent') {
+          console.log('🔄 [GatorWelcome] Setting parent role for:', user.email);
+          
+          base44.auth.updateMe({ 
+            persona: 'parent',
+            roles: ['parent'],
+            onboarding_completed: false,
+            invite_code_used: pendingCode || 'direct'
+          }).then(() => {
+            console.log('✅ [GatorWelcome] Parent role set successfully');
+            // Don't remove session items yet - GatorWelcome will handle that
+          }).catch(err => {
+            console.error('❌ [GatorWelcome] Failed to set parent role:', err);
+            // Clear on error
+            sessionStorage.removeItem('pending_invite_code');
+            sessionStorage.removeItem('pending_invite_role');
+          });
+        }
       }
       
       setResolvedPage(currentPage);
