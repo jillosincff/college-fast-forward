@@ -25,10 +25,10 @@ export const AuthProvider = ({ children }) => {
     const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : new URLSearchParams();
     const hasOAuthParams = urlParams.has('token') || urlParams.has('access_token') || hashParams.has('token') || hashParams.has('access_token');
     
-    // Wait for SDK to process OAuth callback
+    // Wait for SDK to process OAuth callback - longer initial wait
     if (hasOAuthParams && retryCount === 0) {
-      console.log('🔄 [AuthContext] OAuth callback detected, waiting 4s for SDK...');
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      console.log('🔄 [AuthContext] OAuth callback detected, waiting 6s for SDK to process token...');
+      await new Promise(resolve => setTimeout(resolve, 6000));
     }
     
     try {
@@ -48,11 +48,13 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       if (error.status === 401) {
-        if (hasOAuthParams && retryCount < 2) {
-          console.log(`🔄 [AuthContext] Retry ${retryCount + 1}/2 in 1s...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        // If OAuth callback, retry up to 4 times with 2s intervals
+        if (hasOAuthParams && retryCount < 4) {
+          console.log(`🔄 [AuthContext] Auth failed, retry ${retryCount + 1}/4 in 2s...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
           return checkAuthState(retryCount + 1);
         }
+        console.log('❌ [AuthContext] Authentication failed after retries');
         logger.info('Not authenticated');
       } else {
         logger.error('Auth failed', { error });
