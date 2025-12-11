@@ -862,15 +862,16 @@ function AppContent() {
         currentPage
       });
 
-      // Check for pending parent invite setup FIRST
+      // Check for pending parent invite setup FIRST - before any routing
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
 
-      if (pendingRole === 'parent' && (!user.persona || user.persona !== 'parent')) {
-        console.log('🔄 Layout detected pending parent setup - setting role...');
+      if (pendingRole === 'parent' && user.persona !== 'parent') {
+        console.log('🔄 Layout detected pending parent setup - setting role immediately...');
 
         const setupParent = async () => {
           try {
+            console.log('📝 Updating user to parent role...');
             await base44.auth.updateMe({ 
               persona: 'parent',
               roles: ['parent'],
@@ -878,20 +879,28 @@ function AppContent() {
               invite_code_used: pendingCode || 'direct'
             });
 
+            console.log('✅ Parent role set successfully');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
 
-            console.log('✅ Parent role set, reloading...');
-            window.location.hash = 'ParentDashboard';
-            window.location.reload();
+            // Force immediate redirect to ParentDashboard
+            window.location.href = window.location.origin + '/#ParentDashboard';
           } catch (error) {
             console.error('❌ Failed to set parent role:', error);
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
+            navigate('Dashboard');
           }
         };
 
         setupParent();
+        return;
+      }
+
+      // If already a parent, go directly to ParentDashboard
+      if (user.persona === 'parent' && (currentPage === 'LandingPage' || currentPage === 'Dashboard')) {
+        console.log('✅ Parent user - redirecting to ParentDashboard');
+        navigate('ParentDashboard');
         return;
       }
 
