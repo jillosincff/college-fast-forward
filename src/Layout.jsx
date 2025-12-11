@@ -886,29 +886,6 @@ function AppContent() {
       if (isLandingPage || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
         console.log('🚦 User on landing/dashboard, determining correct destination...');
 
-        // Check for pending parent invite
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        const pendingCode = sessionStorage.getItem('pending_invite_code');
-
-        if (pendingRole === 'parent' && !user.roles?.includes('parent')) {
-          console.log('🔄 Setting parent role...');
-          
-          base44.auth.updateMe({ 
-            persona: 'parent',
-            roles: ['parent'],
-            onboarding_completed: true
-          }).then(() => {
-            console.log('✅ Parent role set');
-            sessionStorage.removeItem('pending_invite_code');
-            sessionStorage.removeItem('pending_invite_role');
-            finalPage = 'ParentDashboard';
-            setResolvedPage(finalPage);
-          });
-          
-          setResolvedPage(null);
-          return;
-        }
-
         // Step 1: Check if user has a role
         if (hasNoRole) {
           // @ufl.edu users can go straight to WelcomeRole (they're auto-verified)
