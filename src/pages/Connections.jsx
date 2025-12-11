@@ -39,6 +39,7 @@ export default function DiscoverEmergingGatorsPage() {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [visibleCount, setVisibleCount] = useState(20);
+  const [showFilters, setShowFilters] = useState(false);
   
   const [liveStats, setLiveStats] = useState({
     seekingHelp: 0,
@@ -312,74 +313,100 @@ export default function DiscoverEmergingGatorsPage() {
 
         {/* Search and Filters - Sticky */}
         <div className="filters-section-sticky" id="listings-section">
-          <div className="filters-container">
-            {/* Search Bar */}
-            <div className="search-wrapper">
-              <Search className="search-icon" />
-              <Input
-                type="text"
-                placeholder="Search by name, skills, interests, or career goals..."
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="filters-container-compact">
+            <div className="search-and-actions">
+              {/* Search Bar */}
+              <div className="search-wrapper-compact">
+                <Search className="search-icon" />
+                <Input
+                  type="text"
+                  placeholder="Search by name, skills, interests, or career goals..."
+                  className="search-input-compact"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {/* Filters Button & Student Count */}
+              <div className="filter-actions">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="filters-toggle-btn"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                  {(filters.major !== 'all' || filters.graduationYear !== 'all' || filters.location !== 'all' || sortBy !== 'relevance') && (
+                    <span className="filter-count-badge">
+                      {[filters.major !== 'all', filters.graduationYear !== 'all', filters.location !== 'all', sortBy !== 'relevance'].filter(Boolean).length}
+                    </span>
+                  )}
+                </Button>
+                
+                <span className="stat-badge-inline">
+                  <span className="pulse-dot"></span>
+                  {liveStats.seekingHelp} seeking help
+                </span>
+              </div>
             </div>
 
-            {/* Filter Controls */}
-            <div className="filter-controls">
-              <select
-                className="filter-select"
-                value={filters.major}
-                onChange={(e) => setFilters({...filters, major: e.target.value})}
+            {/* Collapsible Filter Panel */}
+            {showFilters && (
+              <motion.div 
+                className="filter-panel"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <option value="all">All Majors</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Business">Business</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Marketing">Marketing</option>
-              </select>
+                <div className="filter-grid">
+                  <select
+                    className="filter-select-compact"
+                    value={filters.major}
+                    onChange={(e) => setFilters({...filters, major: e.target.value})}
+                  >
+                    <option value="all">All Majors</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Business">Business</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Marketing">Marketing</option>
+                  </select>
 
-              <select
-                className="filter-select"
-                value={filters.graduationYear}
-                onChange={(e) => setFilters({...filters, graduationYear: e.target.value})}
-              >
-                <option value="all">All Graduation Years</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-              </select>
+                  <select
+                    className="filter-select-compact"
+                    value={filters.graduationYear}
+                    onChange={(e) => setFilters({...filters, graduationYear: e.target.value})}
+                  >
+                    <option value="all">All Graduation Years</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                  </select>
 
-              <select
-                className="filter-select"
-                value={filters.location}
-                onChange={(e) => setFilters({...filters, location: e.target.value})}
-              >
-                <option value="all">All Locations</option>
-                <option value="Florida">Florida</option>
-                <option value="Remote">Remote</option>
-                <option value="New York">New York</option>
-              </select>
+                  <select
+                    className="filter-select-compact"
+                    value={filters.location}
+                    onChange={(e) => setFilters({...filters, location: e.target.value})}
+                  >
+                    <option value="all">All Locations</option>
+                    <option value="Florida">Florida</option>
+                    <option value="Remote">Remote</option>
+                    <option value="New York">New York</option>
+                  </select>
 
-              <select
-                className="filter-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="relevance">Sort: Relevance</option>
-                <option value="newest">Sort: Newest Requests</option>
-                <option value="most_connected">Sort: Most Connected</option>
-              </select>
-            </div>
-
-            {/* Live Stats */}
-            <div className="live-stats-enhanced">
-              <span className="stat-badge-pulsing">
-                <span className="pulse-dot"></span>
-                {liveStats.seekingHelp} students seeking help
-              </span>
-            </div>
+                  <select
+                    className="filter-select-compact"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="relevance">Sort: Relevance</option>
+                    <option value="newest">Sort: Newest</option>
+                    <option value="most_connected">Sort: Most Connected</option>
+                  </select>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
 
@@ -551,87 +578,123 @@ export default function DiscoverEmergingGatorsPage() {
           top: 96px;
           z-index: 45;
           background: white;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          padding: 20px 0;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+          padding: 12px 0;
         }
 
-        .filters-container {
+        .filters-container-compact {
           max-width: 1400px;
           margin: 0 auto;
           padding: 0 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
         }
 
-        .search-wrapper {
+        .search-and-actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+
+        .search-wrapper-compact {
           position: relative;
-          width: 100%;
+          flex: 1;
         }
 
         .search-icon {
           position: absolute;
-          left: 16px;
+          left: 14px;
           top: 50%;
           transform: translateY(-50%);
           color: #6b7280;
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
         }
 
-        .search-input {
+        .search-input-compact {
           width: 100%;
-          padding: 14px 14px 14px 48px;
-          border: 2px solid #e5e7eb;
-          border-radius: 10px;
-          font-size: 16px;
+          height: 40px;
+          padding: 0 14px 0 44px;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 8px;
+          font-size: 14px;
           transition: border-color 0.2s;
         }
 
-        .search-input:focus {
+        .search-input-compact:focus {
           outline: none;
           border-color: #0021A5;
         }
 
-        .filter-controls {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 12px;
+        .filter-actions {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          flex-shrink: 0;
         }
 
-        .filter-select {
-          padding: 10px 14px;
-          border: 1px solid #d1d5db;
-          border-radius: 8px;
+        .filters-toggle-btn {
+          height: 40px;
+          padding: 0 16px;
           font-size: 14px;
+          font-weight: 600;
+          white-space: nowrap;
+          position: relative;
+        }
+
+        .filter-count-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #0021A5;
+          color: white;
+          font-size: 11px;
+          font-weight: 700;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          margin-left: 6px;
+        }
+
+        .stat-badge-inline {
+          background: #FFF4ED;
+          color: #FA4616;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+        }
+
+        .filter-panel {
+          margin-top: 12px;
+          padding: 16px;
+          background: #F9FAFB;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .filter-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+        }
+
+        .filter-select-compact {
+          padding: 8px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 13px;
           background: white;
           color: #333;
           cursor: pointer;
           transition: border-color 0.2s;
         }
 
-        .filter-select:focus {
+        .filter-select-compact:focus {
           outline: none;
           border-color: #0021A5;
-        }
-
-        .live-stats-enhanced {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          justify-content: center;
-        }
-
-        .stat-badge-pulsing {
-          background: #FFF4ED;
-          color: #FA4616;
-          padding: 8px 14px;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 8px;
         }
 
         .pulse-dot {
@@ -659,11 +722,11 @@ export default function DiscoverEmergingGatorsPage() {
 
         .main-content-area {
           max-width: 1400px;
-          margin: 32px auto;
+          margin: 20px auto;
           padding: 0 20px;
           display: grid;
           grid-template-columns: 1fr 300px;
-          gap: 32px;
+          gap: 24px;
         }
 
         .profile-grid-section {
@@ -673,7 +736,7 @@ export default function DiscoverEmergingGatorsPage() {
         .profile-grid-4col {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
+          gap: 16px;
         }
 
         .loading-state {
@@ -1017,41 +1080,52 @@ export default function DiscoverEmergingGatorsPage() {
 
           .filters-section-sticky {
             top: 96px;
-            padding: 12px 0;
+            padding: 10px 0;
           }
 
-          .filters-container {
-            padding: 0 16px;
-            gap: 12px;
+          .filters-container-compact {
+            padding: 0 12px;
           }
 
-          .search-input {
-            padding: 12px 12px 12px 44px;
-            font-size: 14px;
+          .search-and-actions {
+            flex-direction: column;
+            gap: 8px;
           }
 
-          .filter-controls {
+          .search-wrapper-compact {
+            width: 100%;
+          }
+
+          .search-input-compact {
+            height: 38px;
+            padding: 0 12px 0 40px;
+            font-size: 13px;
+          }
+
+          .filter-actions {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .filters-toggle-btn {
+            height: 38px;
+            padding: 0 14px;
+            font-size: 13px;
+          }
+
+          .stat-badge-inline {
+            font-size: 11px;
+            padding: 6px 10px;
+          }
+
+          .filter-grid {
             grid-template-columns: 1fr;
             gap: 8px;
           }
 
-          .filter-select {
-            padding: 10px 12px;
-            font-size: 13px;
-          }
-
-          .live-stats-enhanced {
-            flex-direction: column;
-            gap: 6px;
-          }
-
-          .stat-badge-pulsing {
+          .filter-select-compact {
+            padding: 8px 10px;
             font-size: 12px;
-            padding: 6px 12px;
-          }
-
-          .stat-divider {
-            display: none;
           }
 
           .main-content-area {
