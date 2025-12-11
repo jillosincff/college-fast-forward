@@ -765,42 +765,41 @@ function AppContent() {
       const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
       const hasAccessToken = urlParams.has('access_token') || hashParams?.has('access_token');
       
-      // CRITICAL: OAuth callback handling MUST happen first
+      // CRITICAL: OAuth callback handling
       if (hasAccessToken) {
-        console.log('🔐 [OAuth] Callback detected with access_token');
+        console.log('🔐 [OAuth] Access token detected in URL');
         const processed = sessionStorage.getItem('oauth_processed');
         
         if (!processed) {
-          console.log('⏳ [OAuth] Processing token, waiting 2s for SDK...');
+          console.log('⏳ [OAuth] First time seeing token - processing...');
           sessionStorage.setItem('oauth_processed', 'true');
           
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Wait for SDK to process the token
+          console.log('⏳ [OAuth] Waiting 3 seconds for SDK to authenticate...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
           
           const pendingRole = sessionStorage.getItem('pending_invite_role');
-          console.log('🔍 [OAuth] Pending role:', pendingRole);
+          console.log('🔍 [OAuth] After wait - pending role:', pendingRole);
           
-          if (pendingRole === 'parent') {
-            console.log('✅ [OAuth] Parent flow confirmed - going to GatorWelcome');
-            window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
-          } else {
-            console.log('✅ [OAuth] Standard flow - going to Dashboard');
-            window.location.href = window.location.origin + '/#Dashboard';
-          }
-          return; // Don't continue - we're redirecting
+          // Clean URL and redirect
+          const targetPage = pendingRole === 'parent' ? 'GatorWelcome?role=parent' : 'Dashboard';
+          console.log('✅ [OAuth] Redirecting to:', targetPage);
+          
+          window.location.href = window.location.origin + '/#' + targetPage;
+          return;
+        } else {
+          console.log('♻️ [OAuth] Already processed - clearing flag');
+          sessionStorage.removeItem('oauth_processed');
         }
-        
-        // OAuth already processed, clear the flag for next time
-        console.log('♻️ [OAuth] Already processed, clearing flag');
-        sessionStorage.removeItem('oauth_processed');
       }
       
-      // Normal hash change handling
+      // Normal hash change
       let hash = window.location.hash.slice(1).split('?')[0] || 'LandingPage';
       if (hash.startsWith('/')) {
         hash = hash.slice(1);
       }
       
-      console.log('📍 [Navigation] Current page:', hash);
+      console.log('📍 [Hash] Setting page:', hash);
       setCurrentPage(hash || 'LandingPage');
       setResolvedPage(null);
     };
@@ -812,6 +811,7 @@ function AppContent() {
 
   useEffect(() => {
     if (isLoading || !currentPage) {
+      console.log('⏳ [Layout Routing] Waiting... isLoading:', isLoading, 'currentPage:', currentPage);
       return;
     }
 
