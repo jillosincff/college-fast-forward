@@ -25,26 +25,11 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
     
     setIsSearching(true);
     try {
-      const query = searchQuery.trim().toLowerCase();
-      
-      // Direct search - get all users and filter for gators
-      const allUsers = await User.list();
-      
-      const gatorUsers = allUsers.filter(u => {
-        // Must be a gator
-        const isGator = u.persona === 'gator' || u.roles?.includes('gator') || u.email?.toLowerCase().endsWith('@ufl.edu');
-        if (!isGator) return false;
-        
-        // Match by email or name
-        if (u.email?.toLowerCase().includes(query)) return true;
-        if (u.full_name?.toLowerCase().includes(query)) return true;
-        if (u.first_name?.toLowerCase().includes(query)) return true;
-        if (u.last_name?.toLowerCase().includes(query)) return true;
-        
-        return false;
+      const result = await base44.functions.invoke('searchGatorStudents', {
+        query: searchQuery
       });
       
-      setSearchResults(gatorUsers);
+      setSearchResults(result.data?.students || []);
     } catch (error) {
       console.error('Search failed:', error);
       setSearchResults([]);
