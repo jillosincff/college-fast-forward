@@ -25,15 +25,24 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
     
     setIsSearching(true);
     try {
-      // Search for students by email or name
-      const results = await base44.functions.invoke('searchUserForDirectory', {
-        query: searchQuery,
-        persona: 'gator'
+      const results = await base44.functions.invoke('getDirectoryUsers', {
+        searchQuery: searchQuery
       });
-      setSearchResults(results.data?.users || []);
+      
+      // Filter for gators only
+      const gatorUsers = (results.data?.users || []).filter(u => 
+        u.persona === 'gator' || u.roles?.includes('gator') || u.email?.toLowerCase().endsWith('@ufl.edu')
+      );
+      
+      setSearchResults(gatorUsers);
     } catch (error) {
       console.error('Search failed:', error);
       setSearchResults([]);
+      toast({
+        title: "Search Failed",
+        description: error.message || "Could not search for students",
+        variant: "destructive"
+      });
     } finally {
       setIsSearching(false);
     }
@@ -70,24 +79,29 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
     
     setIsSending(true);
     try {
-      await base44.functions.invoke('sendGatorInvites', {
+      const result = await base44.functions.invoke('sendGatorInvites', {
         emails: [inviteEmail],
-        inviterName: inviteName || 'A Gator Parent',
-        message: `Join the Gator Network to connect with UF parents and alumni who can help with your career!`
+        role: 'gator',
+        campus: 'UF',
+        note: inviteName ? `${inviteName}, join College Fast Forward to connect with the Gator community!` : null
       });
       
-      toast({
-        title: "Invite Sent! 🐊",
-        description: `We sent an invitation to ${inviteEmail}`
-      });
-      
-      setShowInviteModal(false);
-      onComplete(null); // Continue without linked student
+      if (result.data?.sent?.length > 0) {
+        toast({
+          title: "Invite Sent! 🐊",
+          description: `We sent an invitation to ${inviteEmail}`
+        });
+        
+        setShowInviteModal(false);
+        onComplete(null);
+      } else {
+        throw new Error(result.data?.error || 'Failed to send invite');
+      }
     } catch (error) {
       console.error('Failed to send invite:', error);
       toast({
         title: "Invite Failed",
-        description: "Could not send invite. Please try again.",
+        description: error.message || "Could not send invite. Please try again.",
         variant: "destructive"
       });
     } finally {
