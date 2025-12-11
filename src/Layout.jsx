@@ -772,25 +772,18 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // CRITICAL: Check for new user from OAuth FIRST
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('is_new_user') && user) {
-      console.log('🆕 NEW USER FROM OAUTH - Clear any stale session and redirect to role selection');
-      // Clear any stale session storage from previous sessions
-      sessionStorage.removeItem('pending_invite_role');
-      sessionStorage.removeItem('pending_invite_code');
-      sessionStorage.removeItem('selected_role');
-      window.history.replaceState({}, document.title, window.location.pathname);
-      navigate('GatorRoleSelection');
-      return;
-    }
-
-    // Check for pending parent invite flow
+    
+    // CRITICAL: Check for pending parent invite flow FIRST before clearing anything
     if (user && !isLoading) {
       const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
+      const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
 
-      if (pendingInviteRole === 'parent' && (currentPage === 'LandingPage' || currentPage === 'Dashboard')) {
-        console.log('👨‍👩‍👧 Parent invite flow detected after OAuth');
+      if (pendingInviteRole === 'parent' && urlParams.has('is_new_user')) {
+        console.log('👨‍👩‍👧 Parent invite flow detected after OAuth (new user)');
+        
+        // Clear the is_new_user param but keep the session storage
+        window.history.replaceState({}, document.title, window.location.pathname);
 
         // Update user role immediately
         base44.auth.updateMe({
@@ -805,6 +798,21 @@ function AppContent() {
           sessionStorage.setItem('selected_role', 'parent');
           navigate('GatorWelcome');
         });
+        return;
+      }
+    }
+    
+    // If new user from OAuth and NO pending invite flow
+    if (urlParams.has('is_new_user') && user) {
+      const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
+      
+      if (!pendingInviteRole) {
+        console.log('🆕 NEW USER FROM OAUTH - No pending invite, going to role selection');
+        // Only clear session if there's no pending invite flow
+        sessionStorage.removeItem('pending_invite_code');
+        sessionStorage.removeItem('selected_role');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        navigate('GatorRoleSelection');
         return;
       }
     }
