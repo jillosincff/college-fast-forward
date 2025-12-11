@@ -765,30 +765,43 @@ function AppContent() {
       const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
       const hasAccessToken = urlParams.has('access_token') || hashParams?.has('access_token');
       
-      // CRITICAL: OAuth callback handling
-      if (hasAccessToken) {
-        console.log('🔐 [OAuth] Access token detected in URL');
+      // CRITICAL: Check for parent invite flow FIRST
+      const pendingRole = sessionStorage.getItem('pending_invite_role');
+      const pendingCode = sessionStorage.getItem('pending_invite_code');
+      
+      if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
+        console.log('🎯 [Parent OAuth] Detected parent invite flow with OAuth callback');
         const processed = sessionStorage.getItem('oauth_processed');
         
         if (!processed) {
-          console.log('⏳ [OAuth] First time seeing token - processing...');
+          console.log('⏳ [Parent OAuth] Processing - waiting 3s for SDK...');
           sessionStorage.setItem('oauth_processed', 'true');
           
-          // Wait for SDK to process the token
-          console.log('⏳ [OAuth] Waiting 3 seconds for SDK to authenticate...');
           await new Promise(resolve => setTimeout(resolve, 3000));
           
-          const pendingRole = sessionStorage.getItem('pending_invite_role');
-          console.log('🔍 [OAuth] After wait - pending role:', pendingRole);
-          
-          // Clean URL and redirect
-          const targetPage = pendingRole === 'parent' ? 'GatorWelcome?role=parent' : 'Dashboard';
-          console.log('✅ [OAuth] Redirecting to:', targetPage);
-          
-          window.location.href = window.location.origin + '/#' + targetPage;
+          console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
+          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
           return;
         } else {
-          console.log('♻️ [OAuth] Already processed - clearing flag');
+          sessionStorage.removeItem('oauth_processed');
+        }
+      }
+      
+      // Standard OAuth callback
+      if (hasAccessToken) {
+        console.log('🔐 [OAuth] Access token detected');
+        const processed = sessionStorage.getItem('oauth_processed');
+        
+        if (!processed) {
+          console.log('⏳ [OAuth] Processing standard flow...');
+          sessionStorage.setItem('oauth_processed', 'true');
+          
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
+          console.log('✅ [OAuth] Redirecting to Dashboard');
+          window.location.href = window.location.origin + '/#Dashboard';
+          return;
+        } else {
           sessionStorage.removeItem('oauth_processed');
         }
       }
