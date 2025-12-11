@@ -1016,7 +1016,7 @@ export default function DiscoverEmergingGatorsPage() {
           }
 
           .filters-section-sticky {
-            top: 0;
+            top: 96px;
             padding: 12px 0;
           }
 
