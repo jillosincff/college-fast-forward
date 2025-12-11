@@ -31,35 +31,31 @@ export default function GatorAuth() {
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
       
-      if (pendingRole === 'parent' && pendingCode) {
+      if (pendingRole === 'parent') {
         console.log('👨‍👩‍👧 [GatorAuth] Setting parent role with invite code:', pendingCode);
         setProcessing(true);
         
         base44.auth.updateMe({ 
           persona: 'parent',
           roles: ['parent'],
-          onboarding_completed: true, // Mark as complete to go straight to dashboard
-          invite_code_used: pendingCode
+          onboarding_completed: true,
+          invite_code_used: pendingCode || 'direct'
         }).then(() => {
-          console.log('✅ [GatorAuth] Parent role set, refreshing user...');
-          return refreshUser();
-        }).then(() => {
-          console.log('✅ [GatorAuth] User refreshed, cleaning up and navigating to ParentDashboard');
+          console.log('✅ [GatorAuth] Parent role set, cleaning up...');
           sessionStorage.removeItem('pending_invite_code');
           sessionStorage.removeItem('pending_invite_role');
           window.history.replaceState({}, document.title, window.location.pathname);
           
-          // Navigate to parent dashboard
-          navigate('ParentDashboard');
+          // Force navigation with page reload to ensure Layout picks up new user state
+          console.log('✅ [GatorAuth] Forcing navigation to ParentDashboard');
+          window.location.hash = '#ParentDashboard';
+          window.location.reload();
         }).catch(error => {
           console.error('❌ Failed to set parent role:', error);
-          setProcessing(false);
-          // Try to navigate anyway
-          navigate('ParentDashboard');
+          // Force navigation anyway
+          window.location.hash = '#ParentDashboard';
+          window.location.reload();
         });
-      } else if (pendingRole === 'parent') {
-        console.log('👨‍👩‍👧 [GatorAuth] Parent role but no code - going to dashboard anyway');
-        navigate('ParentDashboard');
       } else {
         console.log('🎓 [GatorAuth] No pending role - going to role selection');
         navigate('GatorRoleSelection');
