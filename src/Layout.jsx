@@ -760,33 +760,38 @@ function AppContent() {
 
   useEffect(() => {
     const handleHashChange = async () => {
-      // Check for OAuth callback params in URL (hash or query)
       const urlParams = new URLSearchParams(window.location.search);
       const hashParts = window.location.hash.split('?');
       const hashParams = hashParts.length > 1 ? new URLSearchParams(hashParts[1]) : null;
       const hasAccessToken = urlParams.has('access_token') || hashParams?.has('access_token');
       
-      // If OAuth callback, wait for SDK to process token
-      if (hasAccessToken && !sessionStorage.getItem('oauth_processed')) {
-        console.log('🔄 [OAuth] Callback detected, processing...');
-        sessionStorage.setItem('oauth_processed', 'true');
+      // CRITICAL: OAuth callback handling MUST happen first
+      if (hasAccessToken) {
+        console.log('🔐 [OAuth] Callback detected with access_token');
+        const processed = sessionStorage.getItem('oauth_processed');
         
-        // Give SDK time to process the token
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Check if this is a parent invite flow
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        
-        if (pendingRole === 'parent') {
-          console.log('🎯 [OAuth] Parent flow - redirecting to GatorWelcome');
-          window.history.replaceState({}, document.title, window.location.pathname + '#GatorWelcome?role=parent');
-        } else {
-          console.log('🎯 [OAuth] Standard flow - redirecting to Dashboard');
-          window.history.replaceState({}, document.title, window.location.pathname + '#Dashboard');
+        if (!processed) {
+          console.log('⏳ [OAuth] Processing token, waiting 2s for SDK...');
+          sessionStorage.setItem('oauth_processed', 'true');
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          const pendingRole = sessionStorage.getItem('pending_invite_role');
+          console.log('🔍 [OAuth] Pending role:', pendingRole);
+          
+          if (pendingRole === 'parent') {
+            console.log('✅ [OAuth] Parent flow confirmed - going to GatorWelcome');
+            window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
+          } else {
+            console.log('✅ [OAuth] Standard flow - going to Dashboard');
+            window.location.href = window.location.origin + '/#Dashboard';
+          }
+          return; // Don't continue - we're redirecting
         }
         
-        window.location.reload();
-        return;
+        // OAuth already processed, clear the flag for next time
+        console.log('♻️ [OAuth] Already processed, clearing flag');
+        sessionStorage.removeItem('oauth_processed');
       }
       
       // Normal hash change handling
@@ -795,7 +800,7 @@ function AppContent() {
         hash = hash.slice(1);
       }
       
-      console.log('📍 [HashChange] New page:', hash);
+      console.log('📍 [Navigation] Current page:', hash);
       setCurrentPage(hash || 'LandingPage');
       setResolvedPage(null);
     };
