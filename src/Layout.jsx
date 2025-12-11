@@ -802,234 +802,141 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    // Don't interfere if we're on GatorAuth - let it handle the flow
-    if (currentPage === 'GatorAuth') {
-      return;
-    }
-    
-    // If new user from OAuth and NO pending invite flow - redirect to role selection
-    if (urlParams.has('is_new_user') && user && !isLoading) {
-      const pendingInviteRole = sessionStorage.getItem('pending_invite_role');
-      
-      if (!pendingInviteRole) {
-        console.log('🆕 NEW USER FROM OAUTH - No pending invite, going to role selection');
-        sessionStorage.removeItem('pending_invite_code');
-        sessionStorage.removeItem('selected_role');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        navigate('GatorRoleSelection');
-        return;
-      }
-    }
-
     if (isLoading || !currentPage) {
       return;
     }
 
-    // CRITICAL: Admin pages bypass ALL routing logic
+    console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
+
+    // STEP 1: Admin pages ALWAYS bypass routing
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') {
-      console.log('✅ Admin page - direct access:', currentPage);
+      console.log('✅ [Admin] Direct access:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
 
-    // Handle truly public pages FIRST - before any auth checks
+    // STEP 2: Public pages ALWAYS accessible
     const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
     if (trulyPublicPages.includes(currentPage)) {
-      console.log('✅ Public page accessed directly:', currentPage);
+      console.log('✅ [Public] Page accessible:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
 
-    // Handle new user flow pages - these manage their own auth logic
-    // These pages handle their own redirects and should not be intercepted by Layout
-    // CRITICAL: These pages ALWAYS bypass routing logic below
+    // STEP 3: New user flow pages ALWAYS bypass routing (GatorAuth, GatorWelcome, etc.)
+    // These pages handle their own auth and redirects
     if (newUserFlowPages.includes(currentPage)) {
-      console.log('✅ New user flow page - bypassing all routing logic:', currentPage);
-      setResolvedPage(currentPage);
-      return;
-    }
-
-    let finalPage = currentPage;
-    const isLandingPage = currentPage === 'LandingPage';
-    const isOnboardingPage = onboardingPages.includes(currentPage);
-    const isNewUserFlowPage = newUserFlowPages.includes(currentPage);
-    const isAdminPage = adminPages.includes(currentPage);
-    const isPublicPage = publicPages.includes(currentPage);
-    const isAuthOnlyPage = authOnlyPages.includes(currentPage);
-
-    if (user) {
-      console.log('🔍 Routing check for user:', {
-        email: user.email,
-        persona: user.persona,
-        roles: user.roles,
-        onboarding_completed: user.onboarding_completed,
-        currentPage
-      });
-
-      // Check for pending parent invite setup on GatorWelcome page
+      console.log('✅ [NewUserFlow] Bypassing routing for:', currentPage);
+      
+      // Special handling: Set parent role when on GatorWelcome
       const pendingRole = sessionStorage.getItem('pending_invite_role');
       const pendingCode = sessionStorage.getItem('pending_invite_code');
-
-      if (pendingRole === 'parent' && currentPage === 'GatorWelcome' && user.persona !== 'parent') {
-        console.log('🔄 [Layout] On GatorWelcome - setting parent role now...');
-
-        const setupParent = async () => {
-          try {
-            await base44.auth.updateMe({ 
-              persona: 'parent',
-              roles: ['parent'],
-              onboarding_completed: false,
-              invite_code_used: pendingCode || 'direct'
-            });
-
-            console.log('✅ [Layout] Parent role set successfully');
-            sessionStorage.removeItem('pending_invite_code');
-            sessionStorage.removeItem('pending_invite_role');
-
-            // Let GatorWelcome page handle the redirect to Onboarding
-            setResolvedPage(currentPage);
-          } catch (error) {
-            console.error('❌ Failed to set parent role:', error);
-            sessionStorage.removeItem('pending_invite_code');
-            sessionStorage.removeItem('pending_invite_role');
-          }
-        };
-
-        setupParent();
-        return;
+      
+      if (currentPage === 'GatorWelcome' && pendingRole === 'parent' && user && user.persona !== 'parent') {
+        console.log('🔄 [GatorWelcome] Setting parent role...');
+        
+        base44.auth.updateMe({ 
+          persona: 'parent',
+          roles: ['parent'],
+          onboarding_completed: false,
+          invite_code_used: pendingCode || 'direct'
+        }).then(() => {
+          console.log('✅ [GatorWelcome] Parent role set');
+          sessionStorage.removeItem('pending_invite_code');
+          sessionStorage.removeItem('pending_invite_role');
+        }).catch(err => {
+          console.error('❌ [GatorWelcome] Failed to set parent role:', err);
+        });
       }
+      
+      setResolvedPage(currentPage);
+      return;
+    }
 
-      // If user is on a public page like Privacy, Terms, etc. - let them stay
-      if (publicPages.includes(currentPage) && currentPage !== 'LandingPage') {
-        console.log('✅ Authenticated user viewing public page:', currentPage);
+    // STEP 4: Onboarding pages ALWAYS accessible (users might refresh mid-flow)
+    if (onboardingPages.includes(currentPage)) {
+      console.log('✅ [Onboarding] Allowing access to:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+
+    // STEP 5: No user = send to landing (except auth-only pages)
+    if (!user) {
+      if (authOnlyPages.includes(currentPage)) {
+        console.log('✅ [NoAuth] Allowing auth-only page:', currentPage);
         setResolvedPage(currentPage);
         return;
       }
+      console.log('🔄 [NoAuth] Redirecting to LandingPage');
+      navigate('LandingPage');
+      return;
+    }
 
-      // CRITICAL FIX: Always allow access to onboarding pages for authenticated users
-      // This prevents users from getting stuck if they left mid-onboarding
-      if (isOnboardingPage) {
-        console.log('✅ Allowing access to onboarding page:', currentPage);
-        setResolvedPage(currentPage);
-        return;
-      }
+    // STEP 6: User is authenticated - determine correct destination
+    const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+    const needsOnboarding = user.onboarding_completed !== true;
+    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+    const verified = isUserVerified(user);
 
-      // Determine user state
-      const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
-      const needsOnboarding = user.onboarding_completed !== true;
-      const userEmail = user.email?.toLowerCase() || '';
-      const isUFLStudent = userEmail.endsWith('@ufl.edu');
+    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified });
 
-      // Helper function to get the right onboarding page
-      const getOnboardingPage = () => {
-        if (hasNoRole) return 'WelcomeRole';
-        if (user.persona === 'gator' || user.roles?.includes('gator') || user.persona === 'student' || user.persona === 'alumni') {
-          return 'StudentOnboarding';
-        }
-        if (user.persona === 'parent' || user.roles?.includes('parent')) return 'Onboarding';
-        return 'WelcomeRole';
-      };
+    // Landing/Dashboard navigation logic
+    if (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
+      let destination = currentPage;
 
-      // Helper function to get the right dashboard
-      const getDashboard = () => {
-        if (user.roles?.includes('admin')) return 'AdminDashboard';
-        if (user.persona === 'parent' || user.roles?.includes('parent')) return 'ParentDashboard';
-        return 'Dashboard';
-      };
-
-      // FLOW FOR AUTHENTICATED USERS:
-      // 1. No role yet → WelcomeRole (unless @ufl.edu, they're auto-verified as gator)
-      // 2. Has role but not verified (non-UFL without invite) → InviteRequired  
-      // 3. Has role, verified, but onboarding incomplete → Onboarding page
-      // 4. Fully onboarded → Dashboard
-
-      if (isLandingPage || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
-        console.log('🚦 User on landing/dashboard, determining correct destination...');
-
-        // Step 1: Check if user has a role
-        if (hasNoRole) {
-          // @ufl.edu users can go straight to WelcomeRole (they're auto-verified)
-          finalPage = 'WelcomeRole';
-          console.log('➡️ No role - redirecting to WelcomeRole');
-        } 
-        // Step 2: User has role - check verification
-        else {
-          const verified = isUserVerified(user);
-
-          if (!verified && !isUFLStudent) {
-            // Non-UFL user without verification needs invite code
-            finalPage = 'InviteRequired';
-            console.log('➡️ Not verified (non-UFL) - redirecting to InviteRequired');
-          } 
-          // Step 3: Verified - check onboarding
-          else if (needsOnboarding) {
-            finalPage = getOnboardingPage();
-            console.log('➡️ Needs onboarding - redirecting to:', finalPage);
-          } 
-          // Step 4: Fully onboarded - go to dashboard
-          else {
-            finalPage = getDashboard();
-            console.log('➡️ Fully onboarded - going to:', finalPage);
-          }
-        }
-      }
-      else if (isAuthOnlyPage) {
-        console.log('✅ User browsing auth-only page');
-        setResolvedPage(currentPage);
-        return;
-      }
-      else {
-        // User trying to access other protected pages
-        if (hasNoRole) {
-          console.log('👤 No role - redirecting to WelcomeRole');
-          finalPage = 'WelcomeRole';
+      if (hasNoRole) {
+        destination = 'WelcomeRole';
+        console.log('➡️ [NoRole] → WelcomeRole');
+      } else if (!verified && !isUFLStudent) {
+        destination = 'InviteRequired';
+        console.log('➡️ [NotVerified] → InviteRequired');
+      } else if (needsOnboarding) {
+        if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          destination = 'Onboarding';
+          console.log('➡️ [NeedsOnboarding] Parent → Onboarding');
         } else {
-          const verified = isUserVerified(user);
-
-          if (!verified && !isUFLStudent) {
-            console.log('🚫 Not verified - InviteRequired');
-            finalPage = 'InviteRequired';
-          } else if (needsOnboarding) {
-            finalPage = getOnboardingPage();
-            console.log('📝 Onboarding incomplete - redirecting to:', finalPage);
-          } else {
-            // Fully verified and onboarded - allow access
-            console.log('✅ Fully verified and onboarded - allowing access to:', currentPage);
-
-            // Handle admin page access
-            if (isAdminPage && !user.roles?.includes('admin')) {
-              console.log('🚫 Non-admin trying to access admin page');
-              finalPage = getDashboard();
-            }
-          }
+          destination = 'StudentOnboarding';
+          console.log('➡️ [NeedsOnboarding] Student → StudentOnboarding');
         }
+      } else {
+        // Fully onboarded - go to correct dashboard
+        if (user.roles?.includes('admin')) {
+          destination = 'AdminDashboard';
+        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          destination = 'ParentDashboard';
+        } else {
+          destination = 'Dashboard';
+        }
+        console.log('➡️ [Onboarded] → Dashboard:', destination);
       }
 
-    } else {
-      // UNAUTHENTICATED USER
-      console.log('👤 Unauthenticated user accessing:', currentPage);
-
-      if (isAuthOnlyPage) {
-        console.log('✅ Allowing unauthenticated access to auth-only page');
-        setResolvedPage(currentPage);
+      if (destination !== currentPage) {
+        navigate(destination);
         return;
-      }
-
-      const isProtectedPage = !isLandingPage && !isOnboardingPage && !isPublicPage && !isNewUserFlowPage;
-      if (isProtectedPage) {
-        console.log('🚫 Unauthenticated - redirecting to LandingPage');
-        finalPage = 'LandingPage';
       }
     }
 
-    if (finalPage !== currentPage) {
-      console.log('🔄 Navigating:', currentPage, '→', finalPage);
-      navigate(finalPage);
+    // Allow access to current page if fully set up
+    if (!hasNoRole && (verified || isUFLStudent) && !needsOnboarding) {
+      console.log('✅ [FullySetup] Allowing access to:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+
+    // Redirect incomplete users
+    if (hasNoRole) {
+      console.log('🔄 [Incomplete] No role → WelcomeRole');
+      navigate('WelcomeRole');
+    } else if (!verified && !isUFLStudent) {
+      console.log('🔄 [Incomplete] Not verified → InviteRequired');
+      navigate('InviteRequired');
+    } else if (needsOnboarding) {
+      const onboardingPage = (user.persona === 'parent' || user.roles?.includes('parent')) ? 'Onboarding' : 'StudentOnboarding';
+      console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage);
+      navigate(onboardingPage);
     } else {
-      console.log('✅ Staying on:', finalPage);
-      setResolvedPage(finalPage);
+      console.log('✅ [FallThrough] Allowing access to:', currentPage);
+      setResolvedPage(currentPage);
     }
   }, [user, isLoading, currentPage]);
 
