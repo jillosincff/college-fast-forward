@@ -867,40 +867,32 @@ function AppContent() {
       const pendingCode = sessionStorage.getItem('pending_invite_code');
 
       if (pendingRole === 'parent' && user.persona !== 'parent') {
-        console.log('🔄 Layout detected pending parent setup - setting role immediately...');
+        console.log('🔄 Layout detected pending parent setup - setting role...');
 
         const setupParent = async () => {
           try {
-            console.log('📝 Updating user to parent role...');
+            console.log('📝 Updating user to parent role (onboarding NOT completed)...');
             await base44.auth.updateMe({ 
               persona: 'parent',
               roles: ['parent'],
-              onboarding_completed: true,
+              onboarding_completed: false,
               invite_code_used: pendingCode || 'direct'
             });
 
-            console.log('✅ Parent role set successfully');
+            console.log('✅ Parent role set, redirecting to welcome...');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
 
-            // Force immediate redirect to ParentDashboard
-            window.location.href = window.location.origin + '/#ParentDashboard';
+            // Redirect to GatorWelcome with role param
+            window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
           } catch (error) {
             console.error('❌ Failed to set parent role:', error);
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
-            navigate('Dashboard');
           }
         };
 
         setupParent();
-        return;
-      }
-
-      // If already a parent, go directly to ParentDashboard
-      if (user.persona === 'parent' && (currentPage === 'LandingPage' || currentPage === 'Dashboard')) {
-        console.log('✅ Parent user - redirecting to ParentDashboard');
-        navigate('ParentDashboard');
         return;
       }
 
