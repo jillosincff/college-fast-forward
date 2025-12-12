@@ -203,7 +203,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-5 px-4 shadow-xl border-b-4 border-yellow-400"
+          className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-5 px-4 shadow-xl border-b-4 border-yellow-400"
         >
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -211,11 +211,11 @@ export default function Dashboard() {
                 <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
                   <span className="text-4xl animate-bounce">🎉</span>
                   <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                    First 1,000 Users FREE — Lifetime Access!
+                    Congrats! You are part of our first 1000 users.
                   </h3>
                 </div>
                 <p className="text-lg text-white/95 font-semibold">
-                  Only <span className="text-yellow-300 font-extrabold text-2xl px-2">{networkStats.spotsLeft}</span> spots left • Join now and never pay
+                  You've earned a <span className="text-yellow-300 font-extrabold">free, lifetime membership!</span>
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -268,7 +268,7 @@ export default function Dashboard() {
             <p className="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto font-semibold" style={{
               textShadow: '0 2px 8px rgba(0,0,0,0.2)'
             }}>
-              Tap into the <span className="text-3xl font-extrabold text-yellow-300">500,000+</span> Strong Gator Nation — Alumni and Parents Ready to Connect You
+              Tap into the First-Ever Gator Nation Network That Includes Parents — Connecting You to Real Opportunities
             </p>
 
             {!loadingData && (
