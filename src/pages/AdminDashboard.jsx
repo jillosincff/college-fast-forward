@@ -328,6 +328,44 @@ const AdminDashboard = () => {
     }
   };
 
+  const [diagnosingEmail, setDiagnosingEmail] = useState(false);
+  
+  const diagnoseSendGrid = async () => {
+    if (!user?.email) return;
+    
+    setDiagnosingEmail(true);
+    try {
+      const result = await base44.functions.invoke('diagnoseSendGrid', {
+        test_email: user.email
+      });
+      
+      if (result.data?.success) {
+        toast({
+          title: "✅ SendGrid Working!",
+          description: result.data.diagnosis,
+          duration: 10000,
+        });
+      } else {
+        toast({
+          title: "❌ SendGrid Issue Found",
+          description: result.data.diagnosis + ": " + result.data.details,
+          variant: "destructive",
+          duration: 15000,
+        });
+      }
+    } catch (error) {
+      console.error('SendGrid diagnosis failed:', error);
+      toast({
+        title: "Diagnosis Failed",
+        description: error.message || "Could not diagnose SendGrid",
+        variant: "destructive",
+        duration: 15000,
+      });
+    } finally {
+      setDiagnosingEmail(false);
+    }
+  };
+
   // Allow access to Admin Dashboard - admin checks handled per-feature
 
   // Skip loading/error blocking states - show dashboard immediately
@@ -843,6 +881,20 @@ const AdminDashboard = () => {
                         <Mail className="w-4 h-4 mr-2" />
                       )}
                       Test Invite Email
+                    </Button>
+                    <Button 
+                      onClick={diagnoseSendGrid}
+                      disabled={diagnosingEmail}
+                      variant="outline"
+                      size="sm"
+                      className="bg-red-50 hover:bg-red-100 border-red-300"
+                    >
+                      {diagnosingEmail ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                      )}
+                      Diagnose SendGrid
                     </Button>
                     <Button 
                       onClick={loadInviteRequests} 
