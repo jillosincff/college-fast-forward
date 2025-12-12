@@ -22,8 +22,38 @@ export default function GatorWelcome() {
     } else {
       console.log('✅ User on welcome page:', user.email, 'role:', role);
       
-      // Set role if user doesn't have one yet
-      if (pendingRole && !user.persona) {
+      const pendingCode = sessionStorage.getItem('pending_invite_code');
+      
+      // If parent with invite code, process it
+      if (pendingRole === 'parent' && pendingCode && !user.persona) {
+        console.log('🔄 [GatorWelcome] Processing parent invite code:', pendingCode);
+        
+        const processInvite = async () => {
+          try {
+            const { processParentInviteCode } = await import('@/functions/processParentInviteCode');
+            const result = await processParentInviteCode({ invite_code: pendingCode });
+            
+            if (result.data.success) {
+              console.log('✅ [GatorWelcome] Parent linked:', result.data);
+              await refreshUser();
+              trackEvent('parent_linked_via_code', { 
+                student_email: result.data.student_email,
+                parent_slot: result.data.parent_slot 
+              });
+            } else {
+              console.error('❌ [GatorWelcome] Failed:', result.data.error);
+              alert(`Failed to process invite code: ${result.data.error}`);
+            }
+          } catch (error) {
+            console.error('❌ [GatorWelcome] Error:', error);
+            alert('Failed to process invite. Please contact support.');
+          }
+        };
+        
+        processInvite();
+      }
+      // Otherwise just set role
+      else if (pendingRole && !user.persona) {
         console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
         base44.auth.updateMe({
           persona: pendingRole,
