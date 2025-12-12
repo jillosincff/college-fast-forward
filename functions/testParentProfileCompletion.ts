@@ -5,7 +5,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     
-    if (!user || !user.roles?.includes('admin')) {
+    const isAdmin = user && (user.role === 'admin' || user.roles?.includes('admin'));
+    if (!isAdmin) {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
