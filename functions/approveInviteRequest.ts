@@ -40,14 +40,14 @@ Deno.serve(async (req) => {
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + 30); // 30 days for admin-approved codes
 
-            // Determine invite type based on requested role
+            // Determine invite type based on user_type field
             const inviteTypeMap = {
-                'student': 'parent_to_student',
-                'parent': 'student_to_parent', 
-                'alumni': 'alum_to_student'
+                'uf_student': 'parent_to_student',
+                'uf_parent': 'student_to_parent', 
+                'uf_alumni': 'alum_to_student'
             };
-            const requestedRole = inviteRequest.requested_role || 'parent';
-            const inviteType = inviteTypeMap[requestedRole.toLowerCase()] || 'parent_to_student';
+            const userType = inviteRequest.user_type || 'uf_parent';
+            const inviteType = inviteTypeMap[userType] || 'parent_to_student';
 
             // Create invite code
             await base44.asServiceRole.entities.InviteCode.create({
