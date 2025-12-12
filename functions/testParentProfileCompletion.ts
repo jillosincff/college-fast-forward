@@ -36,7 +36,8 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({ 
         badge_type: 'parent_verified',
-        parent_email: testParent.email
+        parent_email: testParent.email,
+        family_group_id: testParent.family_group_id
       })
     });
 

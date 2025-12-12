@@ -9,16 +9,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { badge_type, parent_email } = await req.json();
+    const { badge_type, parent_email, family_group_id } = await req.json();
 
-    // Verify caller is a parent
-    if (user.persona !== 'parent' && !user.roles?.includes('parent')) {
-      return Response.json({ error: 'Only parents can grant family badges' }, { status: 403 });
+    // Verify caller is a parent or admin
+    const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+    const isAdmin = user.role === 'admin' || user.roles?.includes('admin');
+    
+    if (!isParent && !isAdmin) {
+      return Response.json({ error: 'Only parents or admins can grant family badges' }, { status: 403 });
     }
 
-    // Get all students in this parent's family
+    // Get family_group_id (from user or passed in by admin)
+    const targetFamilyId = family_group_id || user.family_group_id;
+    
+    if (!targetFamilyId) {
+      return Response.json({ error: 'No family_group_id available' }, { status: 400 });
+    }
+
+    // Get all students in this family
     const familyStudents = await base44.asServiceRole.entities.User.filter({
-      family_group_id: user.family_group_id
+      family_group_id: targetFamilyId
     });
 
     const students = familyStudents.filter(u => 
@@ -26,7 +36,7 @@ Deno.serve(async (req) => {
       u.id !== user.id
     );
 
-    console.log(`Found ${students.length} students in family ${user.family_group_id}`);
+    console.log(`Found ${students.length} students in family ${targetFamilyId}`);
 
     if (students.length === 0) {
       return Response.json({ 
