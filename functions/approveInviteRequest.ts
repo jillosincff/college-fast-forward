@@ -104,19 +104,46 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
+            // Send email directly via SendGrid (Base44 Core.SendEmail only works for registered users)
             try {
                 console.log('Sending approval email to:', inviteRequest.email);
-                const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
-                    from_name: 'College Fast Forward',
-                    to: inviteRequest.email,
-                    subject: emailSubject,
-                    body: emailBody
+                
+                const apiKey = Deno.env.get('SENDGRID_API_KEY');
+                if (!apiKey) {
+                    throw new Error('SENDGRID_API_KEY not configured');
+                }
+
+                const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        personalizations: [{
+                            to: [{ email: inviteRequest.email }]
+                        }],
+                        from: { 
+                            email: 'noreply@collegefastforward.com',
+                            name: 'College Fast Forward'
+                        },
+                        subject: emailSubject,
+                        content: [{
+                            type: 'text/html',
+                            value: emailBody
+                        }]
+                    })
                 });
-                console.log('Email sent successfully:', emailResult);
+
+                if (!sendGridResponse.ok) {
+                    const errorText = await sendGridResponse.text();
+                    throw new Error(`SendGrid error: ${errorText}`);
+                }
+
+                console.log('Email sent successfully via SendGrid');
             } catch (emailError) {
                 console.error('Failed to send email:', emailError);
                 console.error('Email error details:', emailError.message, emailError.stack);
-                // Return error in response so user knows email failed
                 return Response.json({
                     success: true,
                     warning: 'Invite approved but email failed to send',
