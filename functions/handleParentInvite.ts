@@ -15,17 +15,36 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'invite_id is required' }, { status: 400 });
     }
 
-    // Get the invite details
-    const invites = await base44.asServiceRole.entities.Invite.filter({ id: invite_id });
-    const invite = invites[0];
+    // Try to get from Invite entity first, then ReferralLink as fallback
+    let invite = null;
+    let parent = null;
 
-    if (!invite) {
-      return Response.json({ error: 'Invite not found' }, { status: 404 });
+    const invites = await base44.asServiceRole.entities.Invite.filter({ id: invite_id });
+    if (invites.length > 0) {
+      invite = invites[0];
+      const parents = await base44.asServiceRole.entities.User.filter({ id: invite.helper_user_id });
+      parent = parents[0];
+    } else {
+      // Try ReferralLink
+      const referralLinks = await base44.asServiceRole.entities.ReferralLink.filter({ id: invite_id });
+      if (referralLinks.length > 0) {
+        const link = referralLinks[0];
+        const parents = await base44.asServiceRole.entities.User.filter({ id: link.helper_user_id });
+        parent = parents[0];
+        
+        // Convert ReferralLink to invite-like object
+        invite = {
+          id: link.id,
+          helper_user_id: link.helper_user_id,
+          friend_name: 'a connection',
+          friend_email: link.student_email
+        };
+      }
     }
 
-    // Get the parent who sent the invite
-    const parents = await base44.asServiceRole.entities.User.filter({ id: invite.helper_user_id });
-    const parent = parents[0];
+    if (!invite || !parent) {
+      return Response.json({ error: 'Invite or parent not found' }, { status: 404 });
+    }
 
     if (!parent || !parent.family_group_id) {
       return Response.json({ 
