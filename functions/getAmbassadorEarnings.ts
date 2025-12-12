@@ -7,10 +7,13 @@ const COMMISSION_RATE = 0.15; // 15% monthly commission on paid subscriptions
 
 // Founding Circle Leader payouts
 const FCL_PHASE1_BONUS = 5; // $5 per referral in Phase 1
-const FCL_PHASE1_CAP = 200; // $200 cap in Phase 1
-const FCL_PHASE2_BONUS = 10; // $10 per referral in Phase 2
+const FCL_PHASE1_CAP = 200; // $200 cap in Phase 1 (40 signups max)
+const FCL_PHASE2_BONUS = 0; // No signup bonus in Phase 2
 const FCL_PHASE2_COMMISSION = 0.25; // 25% 1st-level commission in Phase 2
 const FCL_PHASE2_SECOND_LEVEL = 0.05; // 5% 2nd-level commission in Phase 2
+
+// Profile completion threshold for payouts
+const MIN_PROFILE_COMPLETION = 80; // 80% profile completion required
 
 // Pricing tiers
 const TIER_FOUNDING = 9; // $9/month for first 5,000 paid users nationwide
@@ -113,11 +116,11 @@ Deno.serve(async (req) => {
       // Profile is complete if:
       // 1. Onboarding completed
       // 2. Has first and last name
-      // 3. Has grad year or major (for students)
-      // 4. Has filled out help request or created a profile
+      // 3. Profile completion score >= 80%
       const hasBasicInfo = u.first_name && u.last_name;
       const hasOnboarding = u.onboarding_completed === true;
-      return hasBasicInfo && hasOnboarding;
+      const profileComplete = (u.profile_completion_score || 0) >= MIN_PROFILE_COMPLETION;
+      return hasBasicInfo && hasOnboarding && profileComplete;
     });
 
     const totalSignups = referredUsers.length;
@@ -142,14 +145,14 @@ Deno.serve(async (req) => {
     if (isFoundingCircleLeader) {
       // Founding Circle Leader logic
       if (isPhase1) {
-        // Phase 1: $5 per referral with $200 cap
+        // Phase 1: $5 per referral with $200 cap (40 signups max)
         bonusEligibleCount = Math.min(freePhaseSignups.length, FCL_PHASE1_CAP / FCL_PHASE1_BONUS);
         signupBonusEarnings = bonusEligibleCount * FCL_PHASE1_BONUS;
         signupBonusCapped = freePhaseSignups.length >= (FCL_PHASE1_CAP / FCL_PHASE1_BONUS);
       } else {
-        // Phase 2: $10 per referral, no cap
-        bonusEligibleCount = completedProfileUsers.length;
-        signupBonusEarnings = bonusEligibleCount * FCL_PHASE2_BONUS;
+        // Phase 2: NO signup bonus (focuses on long-term commission growth)
+        bonusEligibleCount = 0;
+        signupBonusEarnings = 0;
         signupBonusCapped = false;
       }
     } else {

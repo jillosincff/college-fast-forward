@@ -171,10 +171,10 @@ export default function AmbassadorDashboard() {
               <div className="flex items-center gap-2">
                 <Crown className="w-5 h-5" />
                 <p className="font-semibold">
-                  Phase {data.currentPhase} Active 
+                  Founding Circle Leader • Phase {data.currentPhase}
                   {data.currentPhase === 1 
-                    ? ` - $${data.earnings.signupBonus.perSignup} per referral ($${data.earnings.signupBonus.cap} cap)`
-                    : ` - $${data.earnings.signupBonus.perSignup} per referral + ${data.earnings.monthlyCommission.rate}% + 5% 2nd-level (no cap)`
+                    ? ` - $5/signup ($200 cap) + 15% commission`
+                    : ` - ${data.earnings.monthlyCommission.rate}% + 5% 2nd-level (no cap, no signup bonus)`
                   }
                 </p>
               </div>
