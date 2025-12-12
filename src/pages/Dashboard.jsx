@@ -247,7 +247,7 @@ export default function Dashboard() {
             {user?.full_name && (
               <div className="mb-4">
                 <p className="text-white/90 text-lg font-medium">Welcome back,</p>
-                <p className="text-2xl font-bold text-white">{user.full_name.split(' ')[0]}! 🎓</p>
+                <p className="text-2xl font-bold text-white">{user.full_name.split(' ')[0] || 'Gator'}! 🎓</p>
               </div>
             )}
 
@@ -268,7 +268,7 @@ export default function Dashboard() {
             <p className="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto font-semibold" style={{
               textShadow: '0 2px 8px rgba(0,0,0,0.2)'
             }}>
-              <span className="text-3xl font-extrabold text-yellow-300">70,000+</span> Gator alumni and parents connect you directly to hiring managers
+              Tap into the <span className="text-3xl font-extrabold text-yellow-300">500,000+</span> Strong Gator Nation — Alumni and Parents Ready to Connect You
             </p>
 
             {!loadingData && (
@@ -372,7 +372,7 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
         >
           <Card
-            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-green-500 via-emerald-500 to-emerald-600 border-0 shadow-2xl"
+            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-[#0021A5] via-blue-600 to-teal-500 border-0 shadow-2xl"
             onClick={() => {
               navigate('Opportunities');
               trackEvent('quick_action_clicked', { action: 'opportunities' });
@@ -386,7 +386,7 @@ export default function Dashboard() {
                 fontFamily: "'Inter', sans-serif"
               }}>Find Your Next Opportunity</h2>
               <p className="text-white/95 text-lg md:text-xl mb-8 max-w-2xl mx-auto font-medium leading-relaxed">Browse jobs, internships, and student gigs posted by Gator parents and employers</p>
-              <div className="inline-flex items-center gap-3 bg-white text-green-700 px-10 py-5 rounded-2xl font-extrabold text-xl hover:bg-slate-50 hover:shadow-2xl transition-all">
+              <div className="inline-flex items-center gap-3 bg-white text-[#0021A5] px-10 py-5 rounded-2xl font-extrabold text-xl hover:bg-slate-50 hover:shadow-2xl transition-all">
                 View Opportunities
                 <ArrowRight className="w-6 h-6" />
               </div>
@@ -488,67 +488,13 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {!isSpotlightActive && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 border-0 shadow-2xl overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-              <CardContent className="pt-6 pb-6 relative z-10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-7 h-7 text-slate-900 drop-shadow-md" />
-                      <h3 className="text-2xl font-bold text-slate-900" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                        ⭐ Get Featured in Talent Spotlight
-                      </h3>
-                    </div>
-                    <p className="text-slate-900 font-medium text-lg mb-2" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                      70,000+ alumni & parents are looking to hire. Get discovered for 30 days!
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-sm">
-                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 font-medium">
-                        <Sparkles className="w-4 h-4" />
-                        Profile + Skills
-                      </span>
-                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full font-medium">
-                        💼 Projects
-                      </span>
-                      <span className="bg-slate-900/80 text-white backdrop-blur-sm px-3 py-1 rounded-full font-medium">
-                        🎥 Video Intro
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => setShowSpotlightModal(true)}
-                    size="lg"
-                    className="bg-slate-900 text-white hover:bg-slate-800 font-bold px-8 py-6 text-lg shadow-xl"
-                  >
-                    <Star className="w-5 h-5 mr-2" />
-                    Set Up Spotlight
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: isSpotlightActive ? 0.2 : 0.25 }}
-        >
-          <MembershipStatusCard />
-        </motion.div>
 
         {/* More Tools Section - Collapsed */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
+          transition={{ delay: 0.25 }}
         >
           <details className="group bg-white rounded-2xl shadow-lg border-2 border-slate-100 overflow-hidden">
             <summary className="cursor-pointer p-6 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
@@ -596,7 +542,7 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.3 : 0.35 }}
+            transition={{ delay: 0.3 }}
           >
             <Card className="border-2 border-blue-100 shadow-lg">
               <CardContent className="pt-6">
