@@ -6,6 +6,9 @@ const EARLY_ADOPTER_THRESHOLD = 5000; // After 5,000 users, price goes to $19
 const PREMIUM_PRICE_EARLY = 9; // $9/month for users 1,001-4,999
 const PREMIUM_PRICE_STANDARD = 19; // $19/month for users 5,000+
 const PREMIUM_ACTIVATION_THRESHOLD = 1000; // Premium features activate after 1,000 users
+const LIFETIME_DEAL_START = 451; // Lifetime deal available from user 451
+const LIFETIME_DEAL_END = 2000; // Lifetime deal ends at user 2,000
+const LIFETIME_DEAL_PRICE = 149; // $149 one-time payment
 
 // Cache for user count to avoid repeated API calls
 let cachedUserCount = null;
@@ -172,6 +175,31 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
       };
     }
 
+    // Check for lifetime family membership
+    const hasLifetimeMembership = user.subscription_tier === 'lifetime_family' || 
+                                  user.subscription_status === 'lifetime';
+
+    if (hasLifetimeMembership) {
+      return {
+        hasFullAccess: true,
+        isPremium: true,
+        isFoundingGator: false,
+        isLimitedMode: false,
+        canSendMessages: true,
+        messagesRemaining: Infinity,
+        messageLimit: Infinity,
+        canAccessTalentSpotlight: true,
+        canApplyToOpportunities: true,
+        canSaveOpportunities: true,
+        canMessageInDirectory: true,
+        canSeeFullContactInfo: true,
+        isFeatured: true,
+        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
+        premiumActivated,
+        reason: 'lifetime_family'
+      };
+    }
+
     // Check if student has their own premium subscription (self-pay)
     const hasSelfPaidPremium = user.subscription_status === 'active' && 
                                user.subscription_type === 'student_self_pay';
@@ -324,11 +352,21 @@ export function getPricingTierInfo(userCount) {
   };
 }
 
+/**
+ * Check if lifetime deal is available for a given user count
+ */
+export function isLifetimeDealAvailable(userCount) {
+  return userCount >= LIFETIME_DEAL_START && userCount < LIFETIME_DEAL_END;
+}
+
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
   FREE_DAILY_MESSAGE_LIMIT,
   PREMIUM_PRICE_EARLY,
   PREMIUM_PRICE_STANDARD,
   EARLY_ADOPTER_THRESHOLD,
-  PREMIUM_ACTIVATION_THRESHOLD
+  PREMIUM_ACTIVATION_THRESHOLD,
+  LIFETIME_DEAL_START,
+  LIFETIME_DEAL_END,
+  LIFETIME_DEAL_PRICE
 };
