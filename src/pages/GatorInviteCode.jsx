@@ -22,8 +22,8 @@ export default function GatorInviteCode() {
       sessionStorage.setItem('pending_referral_code', referralCode.trim());
     }
     
-    // Store that user selected student role
-    sessionStorage.setItem('pending_role_selection', 'gator');
+    // Store that user selected gator role (matches parent flow naming)
+    sessionStorage.setItem('pending_invite_role', 'gator');
     
     trackEvent('gator_continue_to_auth');
     navigate('GatorAuth');
@@ -70,9 +70,8 @@ export default function GatorInviteCode() {
                   if (referralCode.trim()) {
                     sessionStorage.setItem('pending_referral_code', referralCode.trim());
                   }
-                  sessionStorage.setItem('pending_role_selection', 'gator');
-                  base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
-                }}
+                  sessionStorage.setItem('pending_invite_role', 'gator');
+                  base44.auth.redirectToLogin(window.location.origin + '/');
                 className="w-full h-14 bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-300 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 text-base font-medium"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
