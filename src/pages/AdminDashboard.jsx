@@ -223,27 +223,26 @@ const AdminDashboard = () => {
       });
 
       if (result.data.success) {
-        if (result.data.warning || result.data.emailError) {
-          // Email failed to send - show detailed persistent error
+        if (action === 'approve') {
+          // Show code to admin for manual sharing
           toast({
-            title: "⚠️ Invite Approved BUT Email Failed",
+            title: "✅ Invite Code Generated!",
             description: (
               <div className="space-y-2 text-left">
-                <p className="font-mono font-bold text-lg text-white">Code: {result.data.code}</p>
-                <p className="text-sm text-white font-semibold">Email Error:</p>
-                <p className="text-xs bg-red-700 p-2 rounded text-white">{result.data.emailError || result.data.warning}</p>
-                <p className="text-xs text-white mt-2">⚠️ You must manually share this code with the user!</p>
+                <p className="font-mono font-bold text-lg">Code: {result.data.code}</p>
+                <p className="text-sm">Send to: {result.data.user_email}</p>
+                <p className="text-xs mt-2">📧 Email this code to the user manually</p>
               </div>
             ),
-            duration: 20000,
-            variant: "destructive"
+            duration: 15000,
           });
+          
+          // Also show in browser alert for easy copying
+          alert(`Invite Code Generated!\n\nCode: ${result.data.code}\nEmail: ${result.data.user_email}\n\nPlease email this code to the user manually.`);
         } else {
           toast({
-            title: action === 'approve' ? "✅ Approved!" : "Request Rejected",
-            description: action === 'approve' 
-              ? `Invite code sent: ${result.data.code}` 
-              : "Request has been rejected",
+            title: "Request Rejected",
+            description: "Request has been rejected",
             duration: 5000,
           });
         }
