@@ -20,9 +20,9 @@ export default function GatorAuth() {
       return;
     }
 
-    // User is authenticated - go to Dashboard
-    console.log('✅ [GatorAuth] Authenticated, going to Dashboard');
-    window.location.hash = 'Dashboard';
+    // User is authenticated - Layout will handle routing
+    console.log('✅ [GatorAuth] Authenticated, Layout will handle routing');
+    window.location.hash = 'LandingPage';
   }, [user, isLoading, redirecting]);
 
   return (
