@@ -34,20 +34,6 @@ export default function IndirectHelpModal({ isOpen, onClose, request, posterUser
       });
 
       if (data?.success && data.shortUrl) {
-        // Track this as a parent invite if user is a parent
-        if (user && (user.persona === 'parent' || user.roles?.includes('parent'))) {
-          try {
-            const { default: handleParentInvite } = await import('@/functions/handleParentInvite');
-            await handleParentInvite({
-              invite_id: data.referral_link_id,
-              parent_email: user.email
-            });
-          } catch (err) {
-            console.error('Failed to track parent invite:', err);
-            // Don't block the main flow
-          }
-        }
-        
         setReferralUrl(data.shortUrl);
         const messageTemplate = `Hi [Contact Name],
 
