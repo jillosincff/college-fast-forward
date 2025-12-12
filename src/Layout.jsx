@@ -829,8 +829,8 @@ function AppContent() {
     }
     
     // CRITICAL CHECK #3: Student flow with pending role
-    const pendingRole = sessionStorage.getItem('pending_invite_role');
-    if (user && pendingRole === 'gator') {
+    const pendingGatorRole = sessionStorage.getItem('pending_invite_role');
+    if (user && pendingGatorRole === 'gator') {
       console.log('🎯 [Student Flow] Detected pending gator role');
       
       // If user doesn't have role yet, force to GatorWelcome
