@@ -223,10 +223,19 @@ const AdminDashboard = () => {
       });
 
       if (result.data.success) {
-        if (result.data.warning) {
+        if (result.data.warning || result.data.emailError) {
+          // Email failed to send - show detailed persistent error
           toast({
-            title: "⚠️ Warning",
-            description: result.data.warning,
+            title: "⚠️ Invite Approved BUT Email Failed",
+            description: (
+              <div className="space-y-2 text-left">
+                <p className="font-mono font-bold text-lg text-white">Code: {result.data.code}</p>
+                <p className="text-sm text-white font-semibold">Email Error:</p>
+                <p className="text-xs bg-red-700 p-2 rounded text-white">{result.data.emailError || result.data.warning}</p>
+                <p className="text-xs text-white mt-2">⚠️ You must manually share this code with the user!</p>
+              </div>
+            ),
+            duration: 20000,
             variant: "destructive"
           });
         } else {
@@ -235,6 +244,7 @@ const AdminDashboard = () => {
             description: action === 'approve' 
               ? `Invite code sent: ${result.data.code}` 
               : "Request has been rejected",
+            duration: 5000,
           });
         }
         
@@ -246,9 +256,10 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Failed to process invite request:', error);
       toast({
-        title: "Error",
+        title: "Error Processing Request",
         description: error.message || "Failed to process request",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 10000
       });
     } finally {
       setProcessingRequest(null);
