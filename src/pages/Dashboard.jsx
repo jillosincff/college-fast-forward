@@ -249,13 +249,13 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {user?.full_name && (
+            {user && (
               <div className="mb-4">
                 <p className="text-white/90 text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {localStorage.getItem('cff:seenDashboard') ? 'Welcome back,' : 'Welcome,'}
                 </p>
                 <p className="text-2xl font-bold text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  {user.full_name.split(' ')[0] || 'Gator'}! 🎓
+                  {user.first_name || user.full_name?.split(' ')[0] || 'Gator'}! 🎓
                 </p>
               </div>
             )}
