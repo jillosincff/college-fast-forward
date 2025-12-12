@@ -11,9 +11,9 @@ export default function GatorWelcome() {
   const { user, refreshUser } = useAuth();
   const params = useParams();
   
-  // Get role from params, user persona, or sessionStorage
+  // Get role from params or sessionStorage (prioritize pendingRole over existing persona)
   const pendingRole = sessionStorage.getItem('pending_invite_role');
-  const role = user?.persona || params.role || pendingRole;
+  const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
     if (!user) {
