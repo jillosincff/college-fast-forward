@@ -980,7 +980,6 @@ function AppContent() {
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
     // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
-    const pendingRole = typeof window !== 'undefined' ? sessionStorage.getItem('pending_invite_role') : null;
     const inNewUserFlow = pendingRole && hasNoRole;
 
     const verified = isUserVerified(user);
