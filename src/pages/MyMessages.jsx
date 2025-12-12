@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail, ArrowLeft, Calendar, User, Building, Send, Inbox, Reply } from 'lucide-react';
+import { Mail, ArrowLeft, Calendar, User, Building, Send, Inbox, Reply, Trash2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { formatDistanceToNow } from 'date-fns';
@@ -64,6 +64,21 @@ export default function MyMessagesPage() {
       setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
     } catch (error) {
       console.error('Failed to mark as read:', error);
+    }
+  }
+
+  async function handleDeleteMessage(messageId) {
+    if (!confirm('Are you sure you want to delete this message? This cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await base44.entities.Message.delete(messageId);
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+      trackEvent('message_deleted');
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      alert('Failed to delete message. Please try again.');
     }
   }
 
@@ -281,6 +296,14 @@ export default function MyMessagesPage() {
                                   Reply
                                 </Button>
                               )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteMessage(msg.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
                             </div>
                           </div>
                         </div>
