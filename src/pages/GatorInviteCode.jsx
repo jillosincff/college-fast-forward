@@ -16,18 +16,7 @@ export default function GatorInviteCode() {
   const [referralCode, setReferralCode] = useState('');
   const [showReferralInput, setShowReferralInput] = useState(false);
 
-  const handleContinue = () => {
-    // Store referral code if provided
-    if (referralCode.trim()) {
-      sessionStorage.setItem('pending_referral_code', referralCode.trim());
-    }
-    
-    // Store that user selected gator role (matches parent flow naming)
-    sessionStorage.setItem('pending_invite_role', 'gator');
-    
-    trackEvent('gator_continue_to_auth');
-    navigate('GatorAuth');
-  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-orange-50 to-white p-4">
@@ -86,13 +75,20 @@ export default function GatorInviteCode() {
               </div>
             )}
 
-            {/* Continue Button */}
+            {/* Continue with Google Button */}
             <Button
-              onClick={handleContinue}
+              onClick={() => {
+                if (referralCode.trim()) {
+                  sessionStorage.setItem('pending_referral_code', referralCode.trim());
+                }
+                sessionStorage.setItem('pending_invite_role', 'gator');
+                sessionStorage.setItem('oauth_flow_active', 'true');
+                base44.auth.redirectToLogin(window.location.origin);
+              }}
               className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
               style={{ backgroundColor: '#F2A900', color: '#000' }}
             >
-              Continue
+              Continue with Google
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </CardContent>
