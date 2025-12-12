@@ -147,9 +147,9 @@ Deno.serve(async (req) => {
                     throw new Error(`SendGrid error (${sendGridResponse.status}): ${errorText}`);
                 }
 
-                console.log('Email sent successfully via SendGrid');
+                console.log('✅ Email sent successfully via SendGrid');
             } catch (emailError) {
-                console.error('Failed to send email:', emailError);
+                console.error('❌ Failed to send email:', emailError);
                 console.error('Email error details:', emailError.message, emailError.stack);
                 return Response.json({
                     success: true,
@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
                 });
             }
 
+            console.log('📤 Returning success response');
             return Response.json({
                 success: true,
                 message: 'Request approved and invite sent!',
@@ -180,10 +181,12 @@ Deno.serve(async (req) => {
         }
 
     } catch (error) {
-        console.error('Error processing invite request:', error);
+        console.error('🚨 OUTER CATCH - Error processing invite request:', error);
+        console.error('Error stack:', error.stack);
         return Response.json({ 
             error: 'Failed to process request',
-            details: error.message
+            details: error.message,
+            stack: error.stack
         }, { status: 500 });
     }
 });
