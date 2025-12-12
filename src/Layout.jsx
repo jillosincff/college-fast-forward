@@ -785,10 +785,10 @@ function AppContent() {
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
     // CRITICAL: Parent invite flow check - happens BEFORE all other routing
-    const pendingRole = sessionStorage.getItem('pending_invite_role');
+    const pendingRoleInitial = sessionStorage.getItem('pending_invite_role');
     const pendingCode = sessionStorage.getItem('pending_invite_code');
     
-    if (user && pendingRole === 'parent' && pendingCode) {
+    if (user && pendingRoleInitial === 'parent' && pendingCode) {
       console.log('🎯 [Parent Flow] Detected! Code:', pendingCode);
       
       // If user doesn't have parent role yet, redirect to GatorWelcome
