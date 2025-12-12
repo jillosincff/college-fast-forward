@@ -11,9 +11,9 @@ export default function GatorWelcome() {
   const { user, refreshUser } = useAuth();
   const params = useParams();
   
-  // Get role from params or sessionStorage
+  // Get role from params, user persona, or sessionStorage
   const pendingRole = sessionStorage.getItem('pending_invite_role');
-  const role = params.role || pendingRole;
+  const role = user?.persona || params.role || pendingRole;
 
   useEffect(() => {
     if (!user) {
@@ -86,7 +86,7 @@ export default function GatorWelcome() {
     if (role === 'gator') {
       console.log('➡️ Going to StudentOnboarding');
       navigate('StudentOnboarding');
-    } else if (role === 'parent') {
+    } else if (role === 'parent' || role === 'alumni') {
       console.log('➡️ Going to Onboarding');
       navigate('Onboarding');
     } else {
@@ -142,14 +142,25 @@ export default function GatorWelcome() {
           </h1>
 
           <p className="text-lg text-slate-600 mb-3 max-w-xl mx-auto">
-            {role === 'gator' 
-              ? "You're joining a powerful network of parents helping Gators succeed."
-              : "You're joining a powerful network of parents helping Gators get hired."
+            {role === 'gator'
+              ? "You're joining a vibrant network of Gators, parents, and alumni accelerating your college success."
+              : role === 'parent'
+                ? "You're joining a powerful network of parents, students, and alumni empowering Gators to succeed."
+                : role === 'alumni'
+                  ? "Welcome! As a Gator alum, you're joining a network of students, parents, and fellow alumni."
+                  : "You're joining a powerful network of parents helping Gators get hired."
             }
           </p>
           
           <p className="text-base text-slate-600 mb-8 max-w-lg mx-auto">
-            Let's set up your profile so you can start making an impact.
+            {role === 'gator'
+              ? "Let's set up your profile to unlock opportunities."
+              : role === 'parent'
+                ? "Let's set up your profile so you can start supporting your student."
+                : role === 'alumni'
+                  ? "Let's set up your profile to start networking."
+                  : "Let's set up your profile so you can start making an impact."
+            }
           </p>
 
           <div className="inline-flex items-center gap-2 bg-orange-50 border-2 border-orange-200 rounded-full px-6 py-3 mb-10">
