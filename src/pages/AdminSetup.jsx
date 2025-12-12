@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import { promoteToAdmin } from '@/functions/promoteToAdmin';
+import { base44 } from '@/api/base44Client';
 
 export default function AdminSetup() {
   const [email, setEmail] = useState('');
@@ -53,8 +54,18 @@ export default function AdminSetup() {
     setIsLoading(false);
   };
 
+  const handleLogout = async () => {
+    await base44.auth.logout();
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <Button variant="ghost" onClick={handleLogout}>
+          <LogOut className="w-4 h-4 mr-2" />
+          Logout
+        </Button>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
