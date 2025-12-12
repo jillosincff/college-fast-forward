@@ -84,7 +84,7 @@ export default function GatorInviteCode() {
                 }
                 sessionStorage.setItem('pending_invite_role', 'gator');
                 console.log('🔐 [GatorInviteCode] Starting OAuth with role=gator');
-                base44.auth.redirectToLogin(`${window.location.origin}/#GatorWelcome?role=gator`);
+                base44.auth.redirectToLogin(window.location.origin);
               }}
               className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
               style={{ backgroundColor: '#F2A900', color: '#000' }}
