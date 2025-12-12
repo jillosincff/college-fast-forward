@@ -15,14 +15,16 @@ export default function GatorAuth() {
       if (!redirecting) {
         console.log('🔐 [GatorAuth] Redirecting to Google login...');
         setRedirecting(true);
-        base44.auth.redirectToLogin(`${window.location.origin}/#Dashboard`);
+        // Mark that we're going through OAuth flow
+        sessionStorage.setItem('oauth_flow_active', 'true');
+        base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
       }
       return;
     }
 
-    // User is authenticated - Layout will handle routing
-    console.log('✅ [GatorAuth] Authenticated, Layout will handle routing');
-    window.location.hash = 'LandingPage';
+    // User is authenticated - send to role selection
+    console.log('✅ [GatorAuth] Authenticated, going to GatorRoleSelection');
+    window.location.hash = 'GatorRoleSelection';
   }, [user, isLoading, redirecting]);
 
   return (

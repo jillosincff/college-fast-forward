@@ -784,7 +784,25 @@ function AppContent() {
 
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
-    // CRITICAL: Parent invite flow check - happens BEFORE all other routing
+    // CRITICAL CHECK #1: Just completed OAuth - force role selection
+    const justCompletedOAuth = sessionStorage.getItem('oauth_flow_active');
+    if (user && justCompletedOAuth) {
+      const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+      
+      if (hasNoRole && currentPage !== 'GatorRoleSelection') {
+        console.log('🔄 [OAuth Complete] New user needs role selection -> GatorRoleSelection');
+        sessionStorage.removeItem('oauth_flow_active');
+        navigate('GatorRoleSelection');
+        return;
+      }
+      
+      // Clear flag once user has a role
+      if (!hasNoRole) {
+        sessionStorage.removeItem('oauth_flow_active');
+      }
+    }
+    
+    // CRITICAL CHECK #2: Parent invite flow
     const pendingRoleInitial = sessionStorage.getItem('pending_invite_role');
     const pendingCode = sessionStorage.getItem('pending_invite_code');
     
@@ -805,6 +823,28 @@ function AppContent() {
         console.log('🔄 [Parent Flow] Parent needs onboarding -> Onboarding');
         if (currentPage !== 'Onboarding' && currentPage !== 'GatorWelcome') {
           navigate('Onboarding');
+          return;
+        }
+      }
+    }
+    
+    // CRITICAL CHECK #3: Student flow with pending role
+    const pendingRole = sessionStorage.getItem('pending_invite_role');
+    if (user && pendingRole === 'gator') {
+      console.log('🎯 [Student Flow] Detected pending gator role');
+      
+      // If user doesn't have role yet, force to GatorWelcome
+      if (!user.persona && currentPage !== 'GatorWelcome' && currentPage !== 'GatorRoleSelection') {
+        console.log('🔄 [Student Flow] Forcing to GatorWelcome');
+        navigate('GatorWelcome');
+        return;
+      }
+      
+      // If user has gator role but needs onboarding
+      if ((user.persona === 'gator' || user.roles?.includes('gator')) && !user.onboarding_completed) {
+        console.log('🔄 [Student Flow] Gator needs onboarding -> StudentOnboarding');
+        if (currentPage !== 'StudentOnboarding' && currentPage !== 'GatorWelcome') {
+          navigate('StudentOnboarding');
           return;
         }
       }
