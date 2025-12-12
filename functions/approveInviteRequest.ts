@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
                     </div>
                     
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="${req.headers.get('origin') || 'https://www.collegefastforward.com'}/#InviteRequired?code=${code}" 
+                        <a href="https://www.collegefastforward.com/#InviteRequired?code=${code}" 
                            style="background: #FA4616; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                             Join the Network →
                         </a>
