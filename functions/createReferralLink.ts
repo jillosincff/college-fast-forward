@@ -44,6 +44,32 @@ Deno.serve(async (req) => {
             success_count: 0
         });
 
+        // If user is a parent, trigger badge & notification flow
+        const isParent = currentUser.persona === 'parent' || currentUser.roles?.includes('parent');
+        if (isParent && currentUser.family_group_id) {
+            try {
+                // Call handleParentInvite to grant badges and send notifications
+                const inviteResponse = await fetch(`${new URL(req.url).origin}/handleParentInvite`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        invite_id: referralLink.id,
+                        parent_email: currentUser.email
+                    })
+                });
+
+                if (!inviteResponse.ok) {
+                    console.error('Failed to handle parent invite:', await inviteResponse.text());
+                }
+            } catch (err) {
+                console.error('Error calling handleParentInvite:', err);
+                // Don't block the main flow
+            }
+        }
+
         return new Response(JSON.stringify({
             success: true,
             link: referralLink,
