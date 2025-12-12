@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.entities.InviteCode.create({
                 code: code,
                 inviter_id: user.id,
-                inviter_email: 'support@collegefastforward.com',
+                inviter_email: 'jill@uffastforward.com',
                 inviter_name: 'CFF Admin Team',
                 invite_type: inviteType,
                 status: 'active',
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
                             to: [{ email: inviteRequest.email }]
                         }],
                         from: { 
-                            email: 'support@collegefastforward.com',
+                            email: 'jill@uffastforward.com',
                             name: 'College Fast Forward'
                         },
                         subject: emailSubject,
