@@ -69,12 +69,13 @@ export default function StudentOnboarding() {
     last_name: '',
     graduation_year: currentYear + 2,
     major: '',
+    resume_url: '',
+    linkedin_url: '',
     // Help Request (Step 1)
     help_request: '',
     post_to_emerging: true,
     show_on_directory: true,
-    // Career fields (Steps 2-8)
-    primary_goal: '',
+    // Career fields (Steps 2-7)
     target_roles: [],
     custom_role: '',
     target_industries: [],
@@ -156,13 +157,12 @@ export default function StudentOnboarding() {
     switch (currentStep) {
       case 0: return formData.first_name?.trim() && formData.last_name?.trim() && formData.graduation_year && formData.major?.trim();
       case 1: return formData.help_request?.trim().length >= 10; // Mandatory help request
-      case 2: return formData.primary_goal !== '';
-      case 3: return formData.target_roles.length > 0 || formData.custom_role !== '';
-      case 4: return formData.target_industries.length > 0;
-      case 5: return true; // Dream companies optional
-      case 6: return formData.location_preferences.length > 0 || formData.custom_location !== '';
-      case 7: return formData.timeline !== '';
-      case 8: return formData.one_sentence_pitch.trim().length >= 20;
+      case 2: return formData.target_roles.length > 0 || formData.custom_role !== '';
+      case 3: return formData.target_industries.length > 0;
+      case 4: return true; // Dream companies optional
+      case 5: return formData.location_preferences.length > 0 || formData.custom_location !== '';
+      case 6: return formData.timeline !== '';
+      case 7: return formData.one_sentence_pitch.trim().length >= 20;
       default: return false;
     }
   };
@@ -177,7 +177,9 @@ export default function StudentOnboarding() {
           last_name: formData.last_name.trim(),
           full_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
           graduation_year: formData.graduation_year,
-          major: formData.major.trim()
+          major: formData.major.trim(),
+          resume_url: formData.resume_url?.trim() || '',
+          linkedin_url: formData.linkedin_url?.trim() || ''
         });
       } catch (error) {
         console.error('Failed to save profile:', error);
@@ -214,7 +216,7 @@ export default function StudentOnboarding() {
       // Create job request with poster name for display
       await JobRequest.create({
         role: roles.split(',')[0].trim(), // First role as main role
-        title: `${formData.primary_goal.replace(/_/g, ' ')} - ${roles.split(',')[0].trim()}`,
+        title: `${roles.split(',')[0].trim()} - ${formData.target_industries[0] || 'Various'}`,
         description: description,
         target_industry: formData.target_industries[0] || 'Various',
         location_preference: locations,
@@ -223,7 +225,9 @@ export default function StudentOnboarding() {
         target_helpers: ['alumni', 'parents'],
         poster_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
         poster_first_name: formData.first_name.trim(),
-        poster_last_name: formData.last_name.trim()
+        poster_last_name: formData.last_name.trim(),
+        resume_url: formData.resume_url?.trim() || '',
+        linkedin_url: formData.linkedin_url?.trim() || ''
       });
 
       // Update user profile with help request if showing on directory
@@ -357,7 +361,7 @@ export default function StudentOnboarding() {
           <motion.div
             className="h-full bg-gradient-to-r from-[#FA4616] to-[#FF8C42]"
             initial={{ width: 0 }}
-            animate={{ width: `${(currentStep / 9) * 100}%` }}
+            animate={{ width: `${(currentStep / 8) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -432,7 +436,7 @@ export default function StudentOnboarding() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">🎓 Graduation Year *</label>
                         <Select 
@@ -467,6 +471,28 @@ export default function StudentOnboarding() {
                             <AlertCircle className="w-4 h-4" />{profileErrors.major}
                           </p>
                         )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">📄 Resume URL (optional)</label>
+                        <Input
+                          value={formData.resume_url}
+                          onChange={(e) => updateField('resume_url', e.target.value)}
+                          placeholder="e.g., https://drive.google.com/file/d/..."
+                          type="url"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">Upload to Google Drive or Dropbox and paste the shareable link</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">💼 LinkedIn Profile (optional)</label>
+                        <Input
+                          value={formData.linkedin_url}
+                          onChange={(e) => updateField('linkedin_url', e.target.value)}
+                          placeholder="e.g., https://linkedin.com/in/yourname"
+                          type="url"
+                        />
                       </div>
                     </div>
                   </motion.div>
@@ -546,38 +572,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 2: Primary Goal */}
+                {/* Step 2: Target Roles */}
                 {currentStep === 2 && (
-                  <motion.div
-                    key="step1"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                  >
-                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Primary Goal</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {PRIMARY_GOALS.map(goal => (
-                        <button
-                          key={goal.value}
-                          onClick={() => updateField('primary_goal', goal.value)}
-                          className={`p-4 rounded-xl border-2 transition-all text-left ${
-                            formData.primary_goal === goal.value
-                              ? 'border-[#0021A5] bg-blue-50 shadow-md'
-                              : 'border-slate-200 hover:border-slate-300 hover:shadow'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl">{goal.icon}</span>
-                            <span className="font-semibold text-slate-800">{goal.label}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 3: Target Roles */}
-                {currentStep === 3 && (
                   <motion.div
                     key="step2"
                     initial={{ opacity: 0, x: 20 }}
@@ -609,8 +605,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 4: Target Industries */}
-                {currentStep === 4 && (
+                {/* Step 3: Target Industries */}
+                {currentStep === 3 && (
                   <motion.div
                     key="step3"
                     initial={{ opacity: 0, x: 20 }}
@@ -636,8 +632,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 5: Dream Companies */}
-                {currentStep === 5 && (
+                {/* Step 4: Dream Companies */}
+                {currentStep === 4 && (
                   <motion.div
                     key="step4"
                     initial={{ opacity: 0, x: 20 }}
@@ -659,8 +655,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 6: Location Preferences */}
-                {currentStep === 6 && (
+                {/* Step 5: Location Preferences */}
+                {currentStep === 5 && (
                   <motion.div
                     key="step5"
                     initial={{ opacity: 0, x: 20 }}
@@ -691,8 +687,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 7: Timeline */}
-                {currentStep === 7 && (
+                {/* Step 6: Timeline */}
+                {currentStep === 6 && (
                   <motion.div
                     key="step6"
                     initial={{ opacity: 0, x: 20 }}
@@ -718,8 +714,8 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 8: One-Sentence Pitch */}
-                {currentStep === 8 && (
+                {/* Step 7: One-Sentence Pitch */}
+                {currentStep === 7 && (
                   <motion.div
                     key="step7"
                     initial={{ opacity: 0, x: 20 }}
@@ -755,7 +751,7 @@ export default function StudentOnboarding() {
                     Back
                   </Button>
                 )}
-                {currentStep < 8 ? (
+                {currentStep < 7 ? (
                   <Button
                     onClick={handleNext}
                     disabled={!canProceed()}
@@ -776,7 +772,7 @@ export default function StudentOnboarding() {
 
               {/* Progress Indicator */}
               <div className="text-center mt-6 text-sm text-slate-500">
-                Step {currentStep + 1} of 9
+                Step {currentStep + 1} of 8
               </div>
             </CardContent>
           </Card>
