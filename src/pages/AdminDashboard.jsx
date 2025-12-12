@@ -313,6 +313,13 @@ const AdminDashboard = () => {
           </div>
           <div className="flex gap-2">
             <Button 
+              onClick={() => navigate('TestingDashboard')} 
+              variant="outline"
+              className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 border-blue-300"
+            >
+              🧪 Testing Dashboard
+            </Button>
+            <Button 
               onClick={() => navigate('AuthTest')} 
               variant="outline"
               className="w-full sm:w-auto bg-purple-50 hover:bg-purple-100 border-purple-300"
