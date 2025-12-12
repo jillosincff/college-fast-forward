@@ -72,6 +72,7 @@ export default function GatorInviteCode() {
                   }
                   sessionStorage.setItem('pending_invite_role', 'gator');
                   base44.auth.redirectToLogin(window.location.origin + '/');
+                }}
                 className="w-full h-14 bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-300 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 text-base font-medium"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
