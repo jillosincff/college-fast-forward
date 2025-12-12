@@ -350,7 +350,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                 <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
                   alt="College Fast Forward"
-                  className="h-20 md:h-24"
+                  className="h-16 w-auto md:h-20 object-contain"
                 />
               </div>
               <div className="hidden md:flex space-x-1">
@@ -383,7 +383,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     <img
                       src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
                       alt="College Fast Forward"
-                      className="h-20 md:h-24"
+                      className="h-16 w-auto md:h-20 object-contain"
                     />
                 </div>
                 {user && (
@@ -430,7 +430,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                         <img
                           src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
                           alt="College Fast Forward"
-                          className="h-32"
+                          className="h-20 w-auto object-contain"
                         />
                       </div>
                       <nav className="flex-grow flex flex-col p-4 space-y-1">
