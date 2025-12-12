@@ -36,29 +36,31 @@ Deno.serve(async (req) => {
     const isFoundingMember = newCount <= 1000;
 
     if (isFoundingMember) {
-      console.log('🎉 User is Founding Member #', newCount);
+      console.log('🎉 User is Founding Gator #', newCount);
       
-      // Mark user as founding member
+      // Mark user as founding gator (correct field names)
       await base44.asServiceRole.entities.User.update(user_id, {
-        is_founding_member: true,
-        founding_number: newCount
+        is_founding_gator: true,
+        founding_gator_number: newCount,
+        signup_order: newCount
       });
 
-      // Mark entire family as founding members if family exists
+      // Mark entire family as founding gators if family exists
       if (family_group_id) {
         const familyMembers = await base44.asServiceRole.entities.User.filter({
           family_group_id: family_group_id
         });
 
         for (const member of familyMembers) {
-          if (member.id !== user_id && !member.is_founding_member) {
+          if (member.id !== user_id && !member.is_founding_gator) {
             await base44.asServiceRole.entities.User.update(member.id, {
-              is_founding_member: true,
-              founding_number: newCount
+              is_founding_gator: true,
+              founding_gator_number: newCount,
+              signup_order: newCount
             });
           }
         }
-        console.log('👨‍👩‍👧‍👦 Marked entire family as founding members');
+        console.log('👨‍👩‍👧‍👦 Marked entire family as founding gators');
       }
     }
 

@@ -17,9 +17,18 @@ Deno.serve(async (req) => {
 
     console.log('👨‍👩‍👧‍👦 Parent adding student:', student_email, 'action:', action);
 
-    // Validate parent has a family_group_id (cannot be changed)
+    // CRITICAL: Validate parent has a family_group_id (cannot be changed once set)
     if (!user.family_group_id) {
       return Response.json({ error: 'Parent must have a family group first' }, { status: 400 });
+    }
+
+    // CRITICAL: Parents are locked to ONE family forever - verify this is their original family
+    // This prevents parents from abandoning one family and joining another
+    const parentCreationData = await base44.asServiceRole.entities.User.filter({ id: user.id });
+    if (parentCreationData[0]?.family_group_id && parentCreationData[0].family_group_id !== user.family_group_id) {
+      return Response.json({ 
+        error: 'Security violation: Parent cannot switch families. You are permanently assigned to your original family.' 
+      }, { status: 403 });
     }
 
     // Find student
