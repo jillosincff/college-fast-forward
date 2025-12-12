@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.4';
+import { Base44 } from 'npm:@base44/sdk@0.8.4';
 
 const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
@@ -24,12 +24,15 @@ Deno.serve(async (req) => {
       );
     }
 
+    const appId = Deno.env.get('BASE44_APP_ID');
     const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
-    if (!serviceRoleKey) {
+    
+    if (!appId || !serviceRoleKey) {
+      console.error('Missing app ID or service role key');
       return Response.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const base44 = createClient({ serviceRoleKey });
+    const base44 = new Base44({ appId, serviceRoleKey });
 
     console.log('Searching for user with email:', email);
     
