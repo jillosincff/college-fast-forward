@@ -25,7 +25,8 @@ export default function GatorWelcome() {
       const pendingCode = sessionStorage.getItem('pending_invite_code');
       
       // If parent with invite code, set persona first then process invite
-      if (pendingRole === 'parent' && pendingCode && !user.persona) {
+      // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
+      if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
         console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
         
         const processParentFlow = async () => {
@@ -63,8 +64,8 @@ export default function GatorWelcome() {
         
         processParentFlow();
       }
-      // Otherwise just set role
-      else if (pendingRole && !user.persona) {
+      // Otherwise just set role (or correct wrong persona)
+      else if (pendingRole && user.persona !== pendingRole) {
         console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
         base44.auth.updateMe({
           persona: pendingRole,
