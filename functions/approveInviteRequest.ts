@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
                             to: [{ email: inviteRequest.email }]
                         }],
                         from: { 
-                            email: 'noreply@collegefastforward.com',
+                            email: 'support@collegefastforward.com',
                             name: 'College Fast Forward'
                         },
                         subject: emailSubject,
