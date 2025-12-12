@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -180,14 +180,16 @@ export default function JobRequestForm({
     }
   };
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = async (data) => {
     const submitData = {
       ...data,
       resume_url: resumeUrl,
       title: data.role,
       target_helpers: ['alumni', 'parents']
     };
-    onSubmit(submitData);
+    
+    // Submit the request first
+    await onSubmit(submitData);
   };
 
   const FormField = ({ label, error, children }) => (
