@@ -57,19 +57,21 @@ export default function GatorRoleSelection() {
       console.log('🔍 [GatorRoleSelection] isUFL:', isUFLEmail);
 
       if (selectedRole === 'gator') {
-        console.log('🐊 [GatorRoleSelection] Updating to Gator role...');
-        await base44.auth.updateMe({
-          persona: 'gator',
-          roles: ['gator']
-        });
-        console.log('✅ [GatorRoleSelection] User role updated');
-        await refreshUser();
-
+        console.log('🐊 [GatorRoleSelection] Gator selected');
+        
         if (isUFLEmail) {
-          console.log('➡️ [GatorRoleSelection] UFL student -> GatorWelcome');
+          console.log('✅ [GatorRoleSelection] UFL student - setting role immediately');
+          await base44.auth.updateMe({
+            persona: 'gator',
+            roles: ['gator']
+          });
+          await refreshUser();
+          console.log('➡️ [GatorRoleSelection] -> GatorWelcome');
           navigate('GatorWelcome');
         } else {
-          console.log('➡️ [GatorRoleSelection] Non-UFL -> GatorInviteCode');
+          console.log('⏳ [GatorRoleSelection] Non-UFL student - storing pending role');
+          sessionStorage.setItem('pending_invite_role', 'gator');
+          console.log('➡️ [GatorRoleSelection] -> GatorInviteCode');
           navigate('GatorInviteCode');
         }
       } else if (selectedRole === 'parent') {
