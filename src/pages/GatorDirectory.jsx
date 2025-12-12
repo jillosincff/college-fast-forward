@@ -333,13 +333,21 @@ export default function GatorDirectory() {
               }`} />
               <Input
                 id="search-directory"
-                placeholder="Search by name, company, expertise..."
+                placeholder="Search parents & alumni by name, company, industry, expertise..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 transition-all duration-300 ${
-                  isScrolled ? 'h-10 text-sm' : 'h-11'
+                className={`pl-10 transition-all duration-300 border-2 border-slate-300 focus:border-[#0021A5] ${
+                  isScrolled ? 'h-10 text-sm' : 'h-12 text-base'
                 }`}
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -350,6 +358,12 @@ export default function GatorDirectory() {
           
           {/* Filters Bar - Scrolls Normally */}
           <div className="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-8">
+            <div className="mb-4 text-center">
+              <p className="text-sm text-slate-600 font-medium">
+                💡 <strong>Tip:</strong> Use search to find Gators by name, company, or skills. Filter by role to find parents/alumni. Click a profile to request an intro!
+              </p>
+            </div>
+            
             {/* Basic Filters */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>

@@ -7,7 +7,9 @@ import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRigh
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
-import { UserPlus } from 'lucide-react';
+import JobRequestForm from '@/components/jobs/JobRequestForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { UserPlus, Edit } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
@@ -30,6 +32,8 @@ export default function Dashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSpotlightModal, setShowSpotlightModal] = useState(false);
+  const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+  const [existingRequest, setExistingRequest] = useState(null);
   const [networkStats, setNetworkStats] = useState({
     totalUsers: 226,
     totalStudents: 66,
@@ -106,6 +110,11 @@ export default function Dashboard() {
         { created_by: user.email },
         '-created_date'
       );
+      
+      // Set most recent request for editing
+      if (myRequests && myRequests.length > 0) {
+        setExistingRequest(myRequests[0]);
+      }
 
       let helpOffersCount = 0;
       if (myRequests && myRequests.length > 0) {
@@ -151,6 +160,22 @@ export default function Dashboard() {
     await refreshUser();
     await loadDashboardData();
   };
+  
+  const handleEditRequestSubmit = async (data) => {
+    try {
+      if (existingRequest) {
+        await base44.entities.JobRequest.update(existingRequest.id, data);
+        trackEvent('job_request_updated');
+      } else {
+        await base44.entities.JobRequest.create(data);
+        trackEvent('job_request_created');
+      }
+      setShowEditRequestModal(false);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Failed to save job request:', error);
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -172,6 +197,37 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
       {/* Limited Mode Banner */}
       <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      
+      {/* Lifetime Access Banner */}
+      {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-5 px-4 shadow-xl border-b-4 border-yellow-400"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-center md:text-left flex-1">
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                  <span className="text-4xl animate-bounce">🎉</span>
+                  <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    First 1,000 Users FREE — Lifetime Access!
+                  </h3>
+                </div>
+                <p className="text-lg text-white/95 font-semibold">
+                  Only <span className="text-yellow-300 font-extrabold text-2xl px-2">{networkStats.spotsLeft}</span> spots left • Join now and never pay
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-5xl font-extrabold text-yellow-300 drop-shadow-lg">{networkStats.spotsLeft}</div>
+                  <div className="text-sm text-white/90 font-bold uppercase tracking-wide">Spots Left</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
       
       {/* Hero Section */}
       <section className="relative overflow-hidden text-white py-16 px-4 mb-12" style={{
@@ -239,6 +295,38 @@ export default function Dashboard() {
         
         {/* Draft Request Banner */}
         <DraftRequestBanner user={user} />
+        
+        {/* Edit Help Request Button */}
+        {existingRequest && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md hover:shadow-lg transition-all">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2 flex items-center justify-center md:justify-start gap-2">
+                      <span className="text-2xl">📝</span>
+                      Update Your Help Request
+                    </h3>
+                    <p className="text-slate-700 font-medium">
+                      Keep your profile fresh! Edit your job search details, target companies, or resume
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setShowEditRequestModal(true)}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-6 text-base shadow-lg whitespace-nowrap"
+                  >
+                    <Edit className="w-5 h-5 mr-2" />
+                    Edit My Request
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
         
         {/* Full Access Upgrade Card (for free-tier students without linked parent) */}
         <FullAccessUpgradeCard user={user} />
@@ -598,7 +686,23 @@ export default function Dashboard() {
         onClose={() => setShowSpotlightModal(false)}
         user={user}
         onSuccess={handleSpotlightSuccess}
-        />
+      />
+      
+      <Dialog open={showEditRequestModal} onOpenChange={setShowEditRequestModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-[#0021A5]">
+              {existingRequest ? 'Edit Your Help Request' : 'Create Help Request'}
+            </DialogTitle>
+          </DialogHeader>
+          <JobRequestForm
+            onSubmit={handleEditRequestSubmit}
+            initialData={existingRequest}
+            user={user}
+            isSubmitting={false}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
