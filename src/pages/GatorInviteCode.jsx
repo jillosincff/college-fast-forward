@@ -2,16 +2,21 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Lock } from 'lucide-react';
+import { Lock, AlertCircle } from 'lucide-react';
 
 export default function GatorInviteCode() {
   const [inviteCode, setInviteCode] = useState('');
+  const [error, setError] = useState('');
 
   const handleContinue = () => {
+    setError('');
+    
     if (!inviteCode?.trim()) {
-      alert('Please enter your invite code');
+      setError('Please enter your invite code');
       return;
     }
+    
+    console.log('📝 Storing invite code:', inviteCode.trim());
     
     // Store invite code
     sessionStorage.setItem('pending_invite_code', inviteCode.trim());
@@ -51,12 +56,26 @@ export default function GatorInviteCode() {
           <div className="space-y-4">
             <Input
               value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                setInviteCode(e.target.value.toUpperCase());
+                setError('');
+              }}
               placeholder="ENTER YOUR CODE"
               className="text-center text-xl font-mono tracking-wider border-2 border-gray-200 focus:border-[#0021A5] rounded-xl py-6 uppercase"
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
             />
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+              >
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                <p className="text-sm text-red-700 font-medium">{error}</p>
+              </motion.div>
+            )}
 
             <button
               onClick={handleContinue}

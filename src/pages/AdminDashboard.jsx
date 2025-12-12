@@ -18,7 +18,8 @@ import {
   Loader2,
   Share2,
   CheckCircle,
-  Download
+  Download,
+  Mail
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { trackEvent } from '@/components/utils/analytics';
@@ -255,6 +256,7 @@ const AdminDashboard = () => {
   };
 
   const [testingEmail, setTestingEmail] = useState(false);
+  const [testingInviteEmail, setTestingInviteEmail] = useState(false);
   
   const sendTestEmail = async () => {
     if (!user?.email) return;
@@ -282,6 +284,36 @@ const AdminDashboard = () => {
       });
     } finally {
       setTestingEmail(false);
+    }
+  };
+
+  const testInviteEmail = async () => {
+    if (!user?.email) return;
+    
+    setTestingInviteEmail(true);
+    try {
+      const result = await base44.functions.invoke('testInviteEmail', {
+        test_email: user.email
+      });
+      
+      if (result.data?.success) {
+        toast({
+          title: "✅ Invite Email Sent!",
+          description: `Check ${user.email} for the invite email. Code: ${result.data.code}`,
+          duration: 10000,
+        });
+      } else {
+        throw new Error(result.data?.error || 'Failed to send invite email');
+      }
+    } catch (error) {
+      console.error('Invite email test failed:', error);
+      toast({
+        title: "Test Failed",
+        description: error.message || "Could not send invite email",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingInviteEmail(false);
     }
   };
 
@@ -786,6 +818,20 @@ const AdminDashboard = () => {
                         <MessageCircle className="w-4 h-4 mr-2" />
                       )}
                       Test Email
+                    </Button>
+                    <Button 
+                      onClick={testInviteEmail}
+                      disabled={testingInviteEmail}
+                      variant="outline"
+                      size="sm"
+                      className="bg-orange-50 hover:bg-orange-100 border-orange-300"
+                    >
+                      {testingInviteEmail ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Mail className="w-4 h-4 mr-2" />
+                      )}
+                      Test Invite Email
                     </Button>
                     <Button 
                       onClick={loadInviteRequests} 
