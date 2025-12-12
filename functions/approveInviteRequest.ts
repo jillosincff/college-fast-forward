@@ -42,12 +42,12 @@ Deno.serve(async (req) => {
 
             // Determine invite type based on user_type field
             const inviteTypeMap = {
-                'uf_student': 'parent_to_student',
-                'uf_parent': 'student_to_parent', 
-                'uf_alumni': 'alum_to_student'
+                'uf_student': 'admin_to_gator',
+                'uf_parent': 'admin_to_parent', 
+                'uf_alumni': 'admin_to_gator'
             };
             const userType = inviteRequest.user_type || 'uf_parent';
-            const inviteType = inviteTypeMap[userType] || 'parent_to_student';
+            const inviteType = inviteTypeMap[userType] || 'admin_to_parent';
 
             // Create invite code
             await base44.asServiceRole.entities.InviteCode.create({
