@@ -7,7 +7,7 @@ import { navigate } from '@/components/utils/navigation';
 import { getUserCount } from '@/functions/getUserCount';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { useToast } from '@/components/ui/use-toast';
-import { getPricingTierInfo, ACCESS_CONSTANTS } from '@/components/access/useAccessControl';
+import { getPricingTierInfo, ACCESS_CONSTANTS, isLifetimeDealAvailable } from '@/components/access/useAccessControl';
 
 export default function Pricing() {
   const { user } = useAuth();
@@ -22,6 +22,7 @@ export default function Pricing() {
     nextPhase: 'early_adopter',
     nextPrice: 9
   });
+  const [showLifetimeDeal, setShowLifetimeDeal] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,6 +31,7 @@ export default function Pricing() {
         const count = result?.data?.count || result?.data?.totalUsers || 0;
         setTotalUsers(count);
         setTierInfo(getPricingTierInfo(count));
+        setShowLifetimeDeal(isLifetimeDealAvailable(count));
       } catch (error) {
         console.warn('User count unavailable:', error.message);
       } finally {
@@ -119,6 +121,59 @@ export default function Pricing() {
             That's why early supporters who help us grow get the best deal — forever.
           </p>
         </div>
+
+        {/* Lifetime Deal Banner - Only shown for users 451-2000 */}
+        {showLifetimeDeal && (
+          <div className="my-12 max-w-4xl mx-auto">
+            <div className="relative bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 rounded-2xl p-8 shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-black/5"></div>
+              <div className="relative z-10 text-center">
+                <div className="inline-block bg-black/20 text-white text-xs font-bold px-4 py-1 rounded-full mb-4">
+                  ⚡ LIMITED TIME OFFER
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3">
+                  Lifetime Family Access – $149 One-Time
+                </h2>
+                <p className="text-lg md:text-xl text-slate-800 mb-6 max-w-2xl mx-auto">
+                  Pay once, unlock <strong>unlimited access forever</strong> for your entire family. Available only to users 451-2,000.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  {user ? (
+                    <Button
+                      onClick={() => handleCheckout('price_lifetime_family_149')}
+                      disabled={checkoutLoading !== null}
+                      size="lg"
+                      className="bg-slate-900 hover:bg-slate-800 text-yellow-400 font-bold py-6 px-8 text-lg rounded-full shadow-xl"
+                    >
+                      {checkoutLoading === 'price_lifetime_family_149' ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin mr-2" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Crown className="w-5 h-5 mr-2" />
+                          Claim Lifetime Access Now
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <GoogleAuthButton
+                      size="lg"
+                      className="bg-slate-900 hover:bg-slate-800 text-yellow-400 font-bold py-6 px-8 text-lg rounded-full shadow-xl"
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Claim Lifetime Access Now
+                    </GoogleAuthButton>
+                  )}
+                </div>
+                <p className="mt-4 text-sm text-slate-700">
+                  🔥 This deal disappears at 2,000 users — lock it in before it's gone forever!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 my-16">

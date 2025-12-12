@@ -13,6 +13,7 @@ import { navigate } from '@/components/utils/navigation';
 import logger from '@/components/utils/logger';
 import { useAccessControl } from '@/components/access/useAccessControl';
 import LimitedModeBanner from '@/components/access/LimitedModeBanner';
+import UpgradeBanner from '@/components/access/UpgradeBanner';
 
 // --- Helper Component: Moved outside the main component ---
 const ErrorState = ({ error, onRetry }) => (
@@ -168,10 +169,25 @@ export default function GatorDirectory() {
   useEffect(() => {
     let users = [...allUsers];
 
-    // Sort founding members to top
+    // Sort by access level: Premium/Founding first, then free users at bottom
     users.sort((a, b) => {
+      // Premium users (founding, subscribed, or parents) go first
+      const aIsPremium = a.is_founding_member || 
+                        a.subscription_status === 'active' || 
+                        a.subscription_tier === 'lifetime_family' ||
+                        a.persona === 'parent';
+      const bIsPremium = b.is_founding_member || 
+                        b.subscription_status === 'active' || 
+                        b.subscription_tier === 'lifetime_family' ||
+                        b.persona === 'parent';
+      
+      if (aIsPremium && !bIsPremium) return -1;
+      if (!aIsPremium && bIsPremium) return 1;
+      
+      // Within premium tier, founding members go first
       if (a.is_founding_member && !b.is_founding_member) return -1;
       if (!a.is_founding_member && b.is_founding_member) return 1;
+      
       return 0;
     });
 
@@ -246,8 +262,22 @@ export default function GatorDirectory() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
-      {/* Limited Mode Banner */}
-      <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      {/* Upgrade Banner - shown when user hits message limit */}
+      {accessInfo.isLimitedMode && accessInfo.messagesRemaining === 0 && (
+        <div className="bg-slate-900 px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <UpgradeBanner 
+              user={user} 
+              messagesRemaining={accessInfo.messagesRemaining}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Limited Mode Banner - shown when user has messages remaining */}
+      {accessInfo.isLimitedMode && accessInfo.messagesRemaining > 0 && (
+        <LimitedModeBanner user={user} accessInfo={accessInfo} />
+      )}
       
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{
