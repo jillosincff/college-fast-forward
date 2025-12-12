@@ -837,21 +837,25 @@ function AppContent() {
 
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
-    // CRITICAL CHECK #1: Just completed OAuth - force role selection
-    const justCompletedOAuth = sessionStorage.getItem('oauth_flow_active');
-    if (user && justCompletedOAuth) {
-      const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+    // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing
+    const pendingRole = sessionStorage.getItem('pending_invite_role');
+    
+    // If we have a pending role (from OAuth flow), let it complete first
+    if (user && pendingRole && !user.persona) {
+      console.log('🎯 [OAuth Flow Active] pendingRole:', pendingRole, 'currentPage:', currentPage);
       
-      if (hasNoRole && currentPage !== 'GatorRoleSelection') {
-        console.log('🔄 [OAuth Complete] New user needs role selection -> GatorRoleSelection');
-        sessionStorage.removeItem('oauth_flow_active');
-        navigate('GatorRoleSelection');
+      // If not on GatorWelcome yet, redirect there
+      if (currentPage !== 'GatorWelcome' && currentPage !== 'GatorAuth') {
+        console.log('🔄 [OAuth Flow] Redirecting to GatorWelcome');
+        navigate(`GatorWelcome?role=${pendingRole}`);
         return;
       }
       
-      // Clear flag once user has a role
-      if (!hasNoRole) {
-        sessionStorage.removeItem('oauth_flow_active');
+      // If on GatorWelcome, allow it to process
+      if (currentPage === 'GatorWelcome') {
+        console.log('✅ [OAuth Flow] On GatorWelcome, allowing page to load');
+        setResolvedPage(currentPage);
+        return;
       }
     }
     
