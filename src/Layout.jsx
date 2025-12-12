@@ -775,10 +775,10 @@ function AppContent() {
         const processed = sessionStorage.getItem('oauth_processed');
         
         if (!processed) {
-          console.log('⏳ [Parent OAuth] Processing - waiting 3s for SDK...');
+          console.log('⏳ [Parent OAuth] Processing - waiting 6s for SDK...');
           sessionStorage.setItem('oauth_processed', 'true');
           
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise(resolve => setTimeout(resolve, 6000));
           
           console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
           window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
@@ -794,10 +794,10 @@ function AppContent() {
         const processed = sessionStorage.getItem('oauth_processed');
         
         if (!processed) {
-          console.log('⏳ [OAuth] Processing - waiting 3s for SDK...');
+          console.log('⏳ [OAuth] Processing - waiting 6s for SDK...');
           sessionStorage.setItem('oauth_processed', 'true');
           
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise(resolve => setTimeout(resolve, 6000));
           
           console.log('✅ [OAuth] Redirecting to GatorRoleSelection');
           window.location.href = window.location.origin + '/#GatorRoleSelection';
