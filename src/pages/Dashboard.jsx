@@ -236,7 +236,7 @@ export default function Dashboard() {
       
       {/* Hero Section */}
       <section className="relative overflow-hidden text-white py-16 px-4 mb-16" style={{
-      background: 'linear-gradient(135deg, #0021A5 0%, #003d82 50%, #005a9e 100%)',
+      background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
       boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
       }}>
         {HERO_TEXTURE_OVERLAY}
