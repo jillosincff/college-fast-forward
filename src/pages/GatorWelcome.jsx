@@ -5,13 +5,15 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate, useParams } from '@/components/utils/navigation';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
+import { base44 } from '@/api/base44Client';
 
 export default function GatorWelcome() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const params = useParams();
   
   // Get role from params or sessionStorage
-  const role = params.role || sessionStorage.getItem('selected_role');
+  const pendingRole = sessionStorage.getItem('pending_invite_role');
+  const role = params.role || pendingRole;
 
   useEffect(() => {
     if (!user) {
@@ -19,6 +21,20 @@ export default function GatorWelcome() {
       navigate('GatorAuth');
     } else {
       console.log('✅ User on welcome page:', user.email, 'role:', role);
+      
+      // Set role if user doesn't have one yet
+      if (pendingRole && !user.persona) {
+        console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
+        base44.auth.updateMe({
+          persona: pendingRole,
+          roles: [pendingRole]
+        }).then(() => {
+          console.log('✅ [GatorWelcome] Role set successfully');
+          refreshUser();
+        }).catch(err => {
+          console.error('❌ [GatorWelcome] Failed to set role:', err);
+        });
+      }
     }
   }, [user]);
 
