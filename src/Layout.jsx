@@ -759,10 +759,55 @@ function AppContent() {
   const [resolvedPage, setResolvedPage] = useState(null);
 
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleHashChange = async () => {
       const hashFragment = window.location.hash.substring(1);
+      const hashParams = new URLSearchParams(hashFragment);
       
-      // Extract page name - ignore OAuth params
+      const hasAccessToken = hashParams.has('access_token');
+
+      // CRITICAL: Check for parent/student invite flow FIRST
+      const pendingRole = sessionStorage.getItem('pending_invite_role');
+      const pendingCode = sessionStorage.getItem('pending_invite_code');
+
+      // Parent flow with invite code
+      if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
+        console.log('🎯 [Parent OAuth] Detected parent invite flow with OAuth callback');
+        const processed = sessionStorage.getItem('oauth_processed_parent');
+        
+        if (!processed) {
+          console.log('⏳ [Parent OAuth] Processing - waiting 6s for SDK...');
+          sessionStorage.setItem('oauth_processed_parent', 'true');
+          
+          await new Promise(resolve => setTimeout(resolve, 6000));
+          
+          console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
+          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
+          return;
+        } else {
+          sessionStorage.removeItem('oauth_processed_parent');
+        }
+      }
+
+      // Student flow (no invite code required for @ufl.edu)
+      if (pendingRole === 'gator' && hasAccessToken) {
+        console.log('🎯 [Student OAuth] Detected student invite flow with OAuth callback');
+        const processed = sessionStorage.getItem('oauth_processed_student');
+        
+        if (!processed) {
+          console.log('⏳ [Student OAuth] Processing - waiting 6s for SDK...');
+          sessionStorage.setItem('oauth_processed_student', 'true');
+          
+          await new Promise(resolve => setTimeout(resolve, 6000));
+          
+          console.log('✅ [Student OAuth] Redirecting to GatorRoleSelection');
+          window.location.href = window.location.origin + '/#GatorRoleSelection';
+          return;
+        } else {
+          sessionStorage.removeItem('oauth_processed_student');
+        }
+      }
+
+      // Normal hash change - extract page name
       let pageHash = hashFragment.split('?')[0] || 'LandingPage';
       
       // Safeguard: if hash looks like OAuth params, extract the page before params
