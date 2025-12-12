@@ -78,10 +78,15 @@ export default function GatorWelcome() {
     console.log('🚀 Starting onboarding for role:', role);
     trackEvent('onboarding_started', { role });
     
-    // Clear the pending flags since we're completing onboarding
+    // Preserve referral code for onboarding to process
+    const referralCode = sessionStorage.getItem('pending_referral_code');
+    console.log('🎟️ [GatorWelcome] Preserving referral code for onboarding:', referralCode);
+    
+    // Clear other pending flags since we're completing onboarding
     sessionStorage.removeItem('pending_invite_role');
     sessionStorage.removeItem('pending_invite_code');
     sessionStorage.removeItem('selected_role');
+    // Don't remove pending_referral_code yet - StudentOnboarding needs it
     
     if (role === 'gator') {
       console.log('➡️ Going to StudentOnboarding');
