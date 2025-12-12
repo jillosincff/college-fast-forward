@@ -67,6 +67,75 @@ Deno.serve(async (req) => {
             body: emailBody
         });
 
+        // If helper is a parent, notify the student's parents to "pay it forward"
+        const isHelperParent = helper.persona === 'parent' || helper.roles?.includes('parent');
+        
+        if (isHelperParent && student.family_group_id) {
+            try {
+                // Find the student's parents
+                const parents = await base44.asServiceRole.entities.User.filter({
+                    family_group_id: student.family_group_id,
+                    persona: 'parent'
+                });
+
+                // Send "pay it forward" notification to each parent
+                for (const parent of parents) {
+                    // Don't notify the helper parent themselves
+                    if (parent.id === helper.id) continue;
+
+                    const pifSubject = `🐊 Great news! ${student.full_name || 'Your Gator'} is being helped`;
+                    const pifBody = `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                            <h2 style="color: #FA4616;">❤️ Your Gator is being helped!</h2>
+                            
+                            <p>Hi ${parent.full_name || 'there'},</p>
+                            
+                            <p><strong>${student.full_name || 'Your student'}</strong> just received help from <strong>${helper.full_name || 'a Gator Parent'}</strong>!</p>
+                            
+                            <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FA4616;">
+                                <p style="margin: 0; color: #92400e; font-size: 16px;">
+                                    <strong>💡 Pay it forward?</strong><br/>
+                                    When another parent helps your Gator, it's the perfect moment to help another family's student.
+                                </p>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="https://collegefastforward.com/#Connections" 
+                                   style="background-color: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                                    Help Another Gator Today 🐊
+                                </a>
+                            </div>
+                            
+                            <p style="color: #64748b; font-size: 14px;">
+                                The Gator network works because we all lift each other up. When you help another student, their parents will get the same joy you're feeling right now! 🧡💙
+                            </p>
+                        </div>
+                    `;
+
+                    await base44.asServiceRole.integrations.Core.SendEmail({
+                        to: parent.email,
+                        subject: pifSubject,
+                        body: pifBody
+                    });
+
+                    // Create PayItForwardNotification record
+                    await base44.asServiceRole.entities.PayItForwardNotification.create({
+                        recipient_parent_email: parent.email,
+                        student_name: student.full_name,
+                        student_email: student.email,
+                        helper_parent_name: helper.full_name,
+                        helper_parent_email: helper.email,
+                        is_read: false
+                    });
+
+                    console.log('Sent pay-it-forward notification to:', parent.email);
+                }
+            } catch (pifError) {
+                console.error('Failed to send pay-it-forward notifications:', pifError);
+                // Don't block the main flow
+            }
+        }
+
         return new Response(JSON.stringify({ success: true }), { status: 200 });
 
     } catch (error) {

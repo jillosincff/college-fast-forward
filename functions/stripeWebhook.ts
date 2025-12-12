@@ -114,6 +114,26 @@ Deno.serve(async (req) => {
                   messages_day_reset: null
                 });
                 console.log('Updated gator access:', gatorId);
+
+                // Grant "Supported Family" badge
+                const existingBadges = await base44.entities.UserBadge.filter({
+                  user_id: gatorId,
+                  badge_type: 'supported_family'
+                });
+
+                if (existingBadges.length === 0) {
+                  await base44.entities.UserBadge.create({
+                    user_id: gatorId,
+                    badge_type: 'supported_family',
+                    badge_name: 'Supported Family',
+                    badge_description: 'Your family invested in your success',
+                    badge_icon: '💝',
+                    earned_at: new Date().toISOString(),
+                    granted_by_parent_email: user.email,
+                    metadata: { parent_id: user.id, subscription_id: subscription.id }
+                  });
+                  console.log('Granted "Supported Family" badge to:', gatorId);
+                }
               } catch (gatorError) {
                 console.error('Failed to update gator:', gatorId, gatorError);
               }
