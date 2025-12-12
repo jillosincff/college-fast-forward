@@ -61,7 +61,14 @@ export default function GatorRoleSelection() {
         sessionStorage.setItem('pending_invite_role', 'gator');
         
         if (isUFLEmail) {
-          console.log('✅ [GatorRoleSelection] UFL student -> GatorWelcome');
+          console.log('✅ [GatorRoleSelection] UFL student - updating role and going to GatorWelcome');
+          // UFL students get instant role assignment
+          await base44.auth.updateMe({ 
+            persona: 'gator',
+            roles: ['gator'],
+            onboarding_completed: false
+          });
+          await refreshUser();
           navigate('GatorWelcome');
         } else {
           console.log('⏳ [GatorRoleSelection] Non-UFL student -> GatorInviteCode');
