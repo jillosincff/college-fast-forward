@@ -5,27 +5,45 @@ import { base44 } from '@/api/base44Client';
 export default function GatorAuth() {
   const { user, isLoading } = useAuth();
   const [redirecting, setRedirecting] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     // Wait for auth state to load
     if (isLoading) return;
 
-    // No user - trigger login
-    if (!user) {
+    // Check if we're returning from OAuth (has access_token in hash)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hasAccessToken = hashParams.has('access_token');
+
+    // No user and no token - trigger login
+    if (!user && !hasAccessToken) {
       if (!redirecting) {
         console.log('🔐 [GatorAuth] Redirecting to Google login...');
         setRedirecting(true);
-        // Mark that we're going through OAuth flow
         sessionStorage.setItem('oauth_flow_active', 'true');
         base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
       }
       return;
     }
 
-    // User is authenticated - send to role selection
-    console.log('✅ [GatorAuth] Authenticated, going to GatorRoleSelection');
-    window.location.hash = 'GatorRoleSelection';
-  }, [user, isLoading, redirecting]);
+    // Returning from OAuth - wait for SDK to process token
+    if (hasAccessToken && !processing) {
+      console.log('🔐 [GatorAuth] OAuth callback detected, waiting for SDK...');
+      setProcessing(true);
+      
+      setTimeout(() => {
+        console.log('✅ [GatorAuth] SDK ready, redirecting to role selection');
+        window.location.href = window.location.origin + '/#GatorRoleSelection';
+      }, 6000);
+      return;
+    }
+
+    // User is authenticated and no token in URL - send to role selection
+    if (user && !hasAccessToken) {
+      console.log('✅ [GatorAuth] User authenticated, going to GatorRoleSelection');
+      window.location.hash = 'GatorRoleSelection';
+    }
+  }, [user, isLoading, redirecting, processing]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">

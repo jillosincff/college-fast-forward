@@ -759,60 +759,15 @@ function AppContent() {
   const [resolvedPage, setResolvedPage] = useState(null);
 
   useEffect(() => {
-    const handleHashChange = async () => {
+    const handleHashChange = () => {
       const hashFragment = window.location.hash.substring(1);
-      const hashParams = new URLSearchParams(hashFragment);
-      const urlParams = new URLSearchParams(window.location.search);
       
-      const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token');
-
-      // CRITICAL: Check for parent invite flow FIRST
-      const pendingRole = sessionStorage.getItem('pending_invite_role');
-      const pendingCode = sessionStorage.getItem('pending_invite_code');
-
-      if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
-        console.log('🎯 [Parent OAuth] Detected parent invite flow with OAuth callback');
-        const processed = sessionStorage.getItem('oauth_processed');
-        
-        if (!processed) {
-          console.log('⏳ [Parent OAuth] Processing - waiting 6s for SDK...');
-          sessionStorage.setItem('oauth_processed', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 6000));
-          
-          console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
-          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed');
-        }
-      }
-
-      // Standard OAuth callback for new students
-      if (hasAccessToken) {
-        console.log('🔐 [OAuth] Access token detected in callback');
-        const processed = sessionStorage.getItem('oauth_processed');
-        
-        if (!processed) {
-          console.log('⏳ [OAuth] Processing - waiting 6s for SDK...');
-          sessionStorage.setItem('oauth_processed', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 6000));
-          
-          console.log('✅ [OAuth] Redirecting to GatorRoleSelection');
-          window.location.href = window.location.origin + '/#GatorRoleSelection';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed');
-        }
-      }
-
-      // Normal hash change - extract page name
+      // Extract page name - ignore OAuth params
       let pageHash = hashFragment.split('?')[0] || 'LandingPage';
       
-      // Safeguard: if hash looks like OAuth params, default to LandingPage
-      if (pageHash.includes('access_token') || pageHash.includes('=')) {
-        pageHash = 'LandingPage';
+      // Safeguard: if hash looks like OAuth params, extract the page before params
+      if (pageHash.includes('access_token') || pageHash.includes('&')) {
+        pageHash = hashFragment.split('&')[0].split('?')[0] || 'LandingPage';
       }
       
       if (pageHash.startsWith('/')) {
