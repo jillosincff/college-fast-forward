@@ -3,13 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle, XCircle, AlertTriangle, Users, TrendingUp, Lock } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Users, TrendingUp, Lock, Shield } from 'lucide-react';
 
 export default function TestingDashboard() {
   const [results, setResults] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentCount, setCurrentCount] = useState(null);
   const [testUserId, setTestUserId] = useState('');
+  const [parentTestResults, setParentTestResults] = useState(null);
+  const [isTestingParent, setIsTestingParent] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -103,6 +105,23 @@ export default function TestingDashboard() {
     setIsRunning(false);
   };
 
+  const testParentProfileCompletion = async () => {
+    setIsTestingParent(true);
+    setParentTestResults(null);
+
+    try {
+      const response = await base44.functions.invoke('testParentProfileCompletion', {});
+      setParentTestResults(response.data);
+    } catch (error) {
+      setParentTestResults({
+        success: false,
+        error: error.message
+      });
+    }
+
+    setIsTestingParent(false);
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'success': return <CheckCircle className="w-5 h-5 text-green-600" />;
@@ -175,16 +194,55 @@ export default function TestingDashboard() {
               />
             </div>
 
-            <Button
-              onClick={runTests}
-              disabled={isRunning}
-              size="lg"
-              className="w-full md:w-auto"
-            >
-              {isRunning ? 'Running Tests...' : 'Run All Tests'}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={runTests}
+                disabled={isRunning}
+                size="lg"
+              >
+                {isRunning ? 'Running Tests...' : 'Run All Tests'}
+              </Button>
+
+              <Button
+                onClick={testParentProfileCompletion}
+                disabled={isTestingParent}
+                size="lg"
+                variant="secondary"
+                className="bg-orange-100 hover:bg-orange-200 text-orange-900"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                {isTestingParent ? 'Testing Parent Feature...' : 'Test Parent Badges'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Parent Test Results */}
+        {parentTestResults && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Parent Profile Completion Test Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 rounded-lg border bg-white">
+                  <div className="mt-0.5">
+                    {parentTestResults.success ? 
+                      <CheckCircle className="w-5 h-5 text-green-600" /> : 
+                      <XCircle className="w-5 h-5 text-red-600" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 mb-2">{parentTestResults.message}</h3>
+                    <pre className="p-4 bg-slate-50 rounded text-xs overflow-auto">
+                      {JSON.stringify(parentTestResults, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Test Results */}
         {results.length > 0 && (
