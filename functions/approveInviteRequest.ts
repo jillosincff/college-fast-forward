@@ -46,7 +46,8 @@ Deno.serve(async (req) => {
                 'parent': 'student_to_parent', 
                 'alumni': 'alum_to_student'
             };
-            const inviteType = inviteTypeMap[inviteRequest.email.toLowerCase().trim()] || 'parent_to_student';
+            const requestedRole = inviteRequest.requested_role || 'parent';
+            const inviteType = inviteTypeMap[requestedRole.toLowerCase()] || 'parent_to_student';
 
             // Create invite code
             await base44.asServiceRole.entities.InviteCode.create({
