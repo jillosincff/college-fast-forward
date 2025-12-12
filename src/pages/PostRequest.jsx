@@ -57,6 +57,8 @@ export default function PostRequestPage() { // Renamed from PostRequest
         poster_profile_image: user?.profile_image_url || null, // Ensure this is included for new requests
       };
 
+      let createdRequest;
+      
       if (editId) {
         await JobRequest.update(editId, requestData);
         toast({
@@ -64,11 +66,23 @@ export default function PostRequestPage() { // Renamed from PostRequest
           description: "Your request has been renewed for another 30 days and is now live.",
         });
       } else {
-        await JobRequest.create(requestData);
+        createdRequest = await JobRequest.create(requestData);
         toast({
           title: "✅ Request Posted!",
           description: "This request will be live for 30 days. Your help request is now visible to the community.",
         });
+
+        // Notify matching parents (async, don't block UI)
+        if (createdRequest?.id) {
+          try {
+            const { notifyMatchingParents } = await import('@/functions/notifyMatchingParents');
+            notifyMatchingParents({ request_id: createdRequest.id }).catch(err => {
+              console.error('Failed to notify matching parents:', err);
+            });
+          } catch (err) {
+            console.error('Failed to import notifyMatchingParents:', err);
+          }
+        }
       }
       
       // Navigate with refresh parameter to trigger reload
