@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
@@ -24,20 +24,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
-    console.log('Service role key exists:', !!serviceRoleKey);
-    
-    if (!serviceRoleKey) {
-      return Response.json({ error: 'Server configuration error' }, { status: 500 });
-    }
-
-    // Create Base44 client with service role
-    const base44 = createClient({ serviceRoleKey });
+    const base44 = createClientFromRequest(req);
 
     console.log('Searching for user with email:', email);
     
     // List all users and filter manually as a fallback
-    const allUsers = await base44.entities.User.list();
+    const allUsers = await base44.asServiceRole.entities.User.list();
     console.log('Total users in database:', allUsers.length);
     
     const user = allUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
@@ -70,7 +62,7 @@ Deno.serve(async (req) => {
     const updatedRoles = [...currentRoles, 'admin'];
     console.log('Updating to roles:', updatedRoles);
 
-    await base44.entities.User.update(user.id, {
+    await base44.asServiceRole.entities.User.update(user.id, {
       roles: updatedRoles
     });
 
