@@ -1,9 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-// Updated payout structure per December 2025 guide
+// Regular Ambassador payouts
 const SIGNUP_BONUS = 5; // $5 per completed signup during Free Phase
 const SIGNUP_BONUS_CAP = 100; // $100 lifetime cap (20 signups max)
 const COMMISSION_RATE = 0.15; // 15% monthly commission on paid subscriptions
+
+// Founding Circle Leader payouts
+const FCL_PHASE1_BONUS = 5; // $5 per referral in Phase 1
+const FCL_PHASE1_CAP = 200; // $200 cap in Phase 1
+const FCL_PHASE2_BONUS = 10; // $10 per referral in Phase 2
+const FCL_PHASE2_COMMISSION = 0.25; // 25% 1st-level commission in Phase 2
+const FCL_PHASE2_SECOND_LEVEL = 0.05; // 5% 2nd-level commission in Phase 2
 
 // Pricing tiers
 const TIER_FOUNDING = 9; // $9/month for first 5,000 paid users nationwide
@@ -20,6 +27,9 @@ Deno.serve(async (req) => {
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check if user is a Founding Circle Leader
+    const isFoundingCircleLeader = user.is_founding_circle_lead === true;
 
     // Get user's referral record
     const referralsByCreator = await base44.entities.Referral.filter({ 
@@ -95,6 +105,8 @@ Deno.serve(async (req) => {
     }
 
     const isFreePhaseActive = ufUserCount < UF_FREE_PHASE_LIMIT;
+    const isPhase1 = ufUserCount <= UF_FREE_PHASE_LIMIT; // Phase 1 = ≤1000 users
+    const isPhase2 = ufUserCount > UF_FREE_PHASE_LIMIT; // Phase 2 = >1000 users
 
     // Calculate signup bonuses - only for completed profiles during Free Phase
     const completedProfileUsers = referredUsers.filter(u => {
@@ -122,9 +134,30 @@ Deno.serve(async (req) => {
       return isFreePhaseActive;
     });
 
-    const bonusEligibleCount = Math.min(freePhaseSignups.length, SIGNUP_BONUS_CAP / SIGNUP_BONUS);
-    const signupBonusEarnings = bonusEligibleCount * SIGNUP_BONUS;
-    const signupBonusCapped = freePhaseSignups.length >= (SIGNUP_BONUS_CAP / SIGNUP_BONUS);
+    // Calculate signup bonuses based on user type
+    let signupBonusEarnings = 0;
+    let bonusEligibleCount = 0;
+    let signupBonusCapped = false;
+
+    if (isFoundingCircleLeader) {
+      // Founding Circle Leader logic
+      if (isPhase1) {
+        // Phase 1: $5 per referral with $200 cap
+        bonusEligibleCount = Math.min(freePhaseSignups.length, FCL_PHASE1_CAP / FCL_PHASE1_BONUS);
+        signupBonusEarnings = bonusEligibleCount * FCL_PHASE1_BONUS;
+        signupBonusCapped = freePhaseSignups.length >= (FCL_PHASE1_CAP / FCL_PHASE1_BONUS);
+      } else {
+        // Phase 2: $10 per referral, no cap
+        bonusEligibleCount = completedProfileUsers.length;
+        signupBonusEarnings = bonusEligibleCount * FCL_PHASE2_BONUS;
+        signupBonusCapped = false;
+      }
+    } else {
+      // Regular Ambassador
+      bonusEligibleCount = Math.min(freePhaseSignups.length, SIGNUP_BONUS_CAP / SIGNUP_BONUS);
+      signupBonusEarnings = bonusEligibleCount * SIGNUP_BONUS;
+      signupBonusCapped = freePhaseSignups.length >= (SIGNUP_BONUS_CAP / SIGNUP_BONUS);
+    }
 
     // Calculate monthly commission from paid subscribers
     // Only users who upgraded AFTER UF hit 1,000 generate commission
@@ -134,6 +167,13 @@ Deno.serve(async (req) => {
 
     let monthlyCommissionBreakdown = [];
     let totalMonthlyCommission = 0;
+    let secondLevelCommission = 0;
+
+    // Determine commission rate based on user type and phase
+    let commissionRate = COMMISSION_RATE; // Default 15%
+    if (isFoundingCircleLeader && isPhase2) {
+      commissionRate = FCL_PHASE2_COMMISSION; // 25% for FCL in Phase 2
+    }
 
     paidUsers.forEach(u => {
       let monthlyPrice = 0;
@@ -145,16 +185,57 @@ Deno.serve(async (req) => {
         monthlyPrice = TIER_STANDARD; // $19/month
       }
 
-      const commission = monthlyPrice * COMMISSION_RATE;
+      const commission = monthlyPrice * commissionRate;
       totalMonthlyCommission += commission;
 
       monthlyCommissionBreakdown.push({
         name: u.full_name || `${u.first_name} ${u.last_name}`,
         tier: u.subscription_tier,
         monthlyPrice,
-        commission
+        commission,
+        level: 1
       });
     });
+
+    // Calculate 2nd-level commission for Founding Circle Leaders in Phase 2
+    if (isFoundingCircleLeader && isPhase2) {
+      // Get 2nd-level referrals (users referred by users this FCL referred)
+      for (const referredUser of referredUsers) {
+        if (referredUser.ambassador_code) {
+          try {
+            const secondLevelUsers = await base44.asServiceRole.entities.User.filter({
+              referral_code: referredUser.ambassador_code,
+              subscription_status: 'active'
+            });
+
+            secondLevelUsers.forEach(u => {
+              let monthlyPrice = 0;
+              if (u.subscription_tier === 'Early Adopter' || u.subscription_tier === 'Founding Gator') {
+                monthlyPrice = TIER_FOUNDING;
+              } else if (u.subscription_tier === 'Standard') {
+                monthlyPrice = TIER_STANDARD;
+              }
+
+              const commission = monthlyPrice * FCL_PHASE2_SECOND_LEVEL;
+              secondLevelCommission += commission;
+
+              monthlyCommissionBreakdown.push({
+                name: u.full_name || `${u.first_name} ${u.last_name}`,
+                tier: u.subscription_tier,
+                monthlyPrice,
+                commission,
+                level: 2,
+                referredBy: referredUser.full_name
+              });
+            });
+          } catch (err) {
+            console.log('Error fetching 2nd-level users:', err.message);
+          }
+        }
+      }
+    }
+
+    totalMonthlyCommission += secondLevelCommission;
 
     // Build activity timeline
     const recentActivity = referredUsers
@@ -174,6 +255,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
+      isFoundingCircleLeader,
+      currentPhase: isPhase1 ? 1 : 2,
       earnings: {
         total: totalEarnings,
         signupBonus: {
@@ -182,15 +265,16 @@ Deno.serve(async (req) => {
           totalSignups: totalSignups,
           freePhaseSignups: freePhaseSignups.length,
           pendingProfiles: totalSignups - qualifiedSignups,
-          perSignup: SIGNUP_BONUS,
-          cap: SIGNUP_BONUS_CAP,
+          perSignup: isFoundingCircleLeader ? (isPhase1 ? FCL_PHASE1_BONUS : FCL_PHASE2_BONUS) : SIGNUP_BONUS,
+          cap: isFoundingCircleLeader ? (isPhase1 ? FCL_PHASE1_CAP : null) : SIGNUP_BONUS_CAP,
           capped: signupBonusCapped,
           isFreePhaseActive
         },
         monthlyCommission: {
           amount: totalMonthlyCommission,
-          rate: COMMISSION_RATE * 100,
+          rate: commissionRate * 100,
           paidUsersCount: paidUsers.length,
+          secondLevelAmount: secondLevelCommission,
           breakdown: monthlyCommissionBreakdown
         }
       },

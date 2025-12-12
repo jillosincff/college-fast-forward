@@ -140,12 +140,12 @@ export default function Pricing() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   {user ? (
                     <Button
-                      onClick={() => handleCheckout('price_lifetime_family_149')}
+                      onClick={() => handleCheckout('price_1SaYXX873TV7WMcTLifetime149')}
                       disabled={checkoutLoading !== null}
                       size="lg"
                       className="bg-slate-900 hover:bg-slate-800 text-yellow-400 font-bold py-6 px-8 text-lg rounded-full shadow-xl"
                     >
-                      {checkoutLoading === 'price_lifetime_family_149' ? (
+                      {checkoutLoading === 'price_1SaYXX873TV7WMcTLifetime149' ? (
                         <>
                           <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin mr-2" />
                           Processing...

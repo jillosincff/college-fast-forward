@@ -60,6 +60,7 @@ import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorInviteCode from './pages/GatorInviteCode';
 import GatorWelcome from './pages/GatorWelcome';
 import GatorParentInvite from './pages/GatorParentInvite';
+import AmbassadorDashboard from './pages/AmbassadorDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -126,6 +127,7 @@ export const PAGES = {
     "GatorInviteCode": GatorInviteCode,
     "GatorWelcome": GatorWelcome,
     "GatorParentInvite": GatorParentInvite,
+    "AmbassadorDashboard": AmbassadorDashboard,
 }
 
 export const pagesConfig = {
