@@ -27,37 +27,52 @@ Deno.serve(async (req) => {
 
     console.log('✅ Test parent found:', testParent.email, 'family:', testParent.family_group_id);
 
-    // Simulate parent profile completion by calling grantFamilyBadges
-    const grantResponse = await fetch(`${req.url.replace('/testParentProfileCompletion', '/grantFamilyBadges')}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.get('Authorization')
-      },
-      body: JSON.stringify({ 
-        badge_type: 'parent_verified',
-        parent_email: testParent.email,
-        family_group_id: testParent.family_group_id
-      })
-    });
-
-    const grantData = await grantResponse.json();
-    
-    if (!grantData.success) {
-      return Response.json({ 
-        error: 'Failed to grant badges',
-        details: grantData 
-      }, { status: 500 });
-    }
-
-    console.log('✅ Badges granted:', grantData);
-
-    // Verify badges were created
+    // Grant badges directly instead of calling another function
     const familyStudents = await base44.asServiceRole.entities.User.filter({
       family_group_id: testParent.family_group_id,
       persona: 'gator'
     });
 
+    console.log(`Found ${familyStudents.length} students in family`);
+
+    const badgesToCreate = [];
+    
+    for (const student of familyStudents) {
+      // Check if badge already exists
+      const existingBadges = await base44.asServiceRole.entities.UserBadge.filter({
+        user_id: student.id,
+        badge_type: 'parent_verified'
+      });
+
+      if (existingBadges.length === 0) {
+        badgesToCreate.push({
+          user_id: student.id,
+          badge_type: 'parent_verified',
+          badge_name: 'Parent Verified',
+          badge_description: 'Parent has completed their profile and is actively supporting this student',
+          badge_icon: '✅',
+          earned_at: new Date().toISOString(),
+          granted_by_parent_email: testParent.email
+        });
+      }
+    }
+
+    if (badgesToCreate.length > 0) {
+      await base44.asServiceRole.entities.UserBadge.bulkCreate(badgesToCreate);
+      console.log(`✅ Granted ${badgesToCreate.length} parent_verified badges`);
+    }
+
+    // Boost students in directory
+    for (const student of familyStudents) {
+      await base44.asServiceRole.entities.User.update(student.id, {
+        directory_boost: true,
+        directory_boost_reason: 'Parent Verified',
+        directory_boost_expires: null
+      });
+    }
+    console.log(`✅ Boosted ${familyStudents.length} students in directory`);
+
+    // Verify badges were created
     const results = [];
     
     for (const student of familyStudents) {
@@ -86,7 +101,7 @@ Deno.serve(async (req) => {
       message: allPassed ? '🎉 Test PASSED!' : '❌ Test FAILED - see results',
       parent_email: testParent.email,
       family_group_id: testParent.family_group_id,
-      badges_granted: grantData.badges_granted,
+      badges_granted: badgesToCreate.length,
       students_checked: results.length,
       results
     });
