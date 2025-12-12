@@ -24,40 +24,52 @@ export default function GatorWelcome() {
       
       const pendingCode = sessionStorage.getItem('pending_invite_code');
       
-      // If parent with invite code, process it
+      // If parent with invite code, set persona first then process invite
       if (pendingRole === 'parent' && pendingCode && !user.persona) {
-        console.log('🔄 [GatorWelcome] Processing parent invite code:', pendingCode);
+        console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
         
-        const processInvite = async () => {
+        const processParentFlow = async () => {
           try {
+            // CRITICAL: Set persona to parent FIRST
+            await base44.auth.updateMe({
+              persona: 'parent',
+              roles: ['parent'],
+              onboarding_completed: false
+            });
+            console.log('✅ [GatorWelcome] Parent persona set');
+            
+            // Then process the invite code to link to student
             const { processParentInviteCode } = await import('@/functions/processParentInviteCode');
             const result = await processParentInviteCode({ invite_code: pendingCode });
             
             if (result.data.success) {
-              console.log('✅ [GatorWelcome] Parent linked:', result.data);
+              console.log('✅ [GatorWelcome] Parent linked to student:', result.data);
               await refreshUser();
               trackEvent('parent_linked_via_code', { 
                 student_email: result.data.student_email,
                 parent_slot: result.data.parent_slot 
               });
             } else {
-              console.error('❌ [GatorWelcome] Failed:', result.data.error);
-              alert(`Failed to process invite code: ${result.data.error}`);
+              console.error('❌ [GatorWelcome] Failed to link:', result.data.error);
+              await refreshUser(); // Still refresh to get the parent persona
+              alert(`Note: ${result.data.error}. You can connect to your student later from your dashboard.`);
             }
           } catch (error) {
             console.error('❌ [GatorWelcome] Error:', error);
-            alert('Failed to process invite. Please contact support.');
+            await refreshUser(); // Refresh to get parent persona
+            alert('Invite code processing had an issue, but you can connect to your student from the dashboard.');
           }
         };
         
-        processInvite();
+        processParentFlow();
       }
       // Otherwise just set role
       else if (pendingRole && !user.persona) {
         console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
         base44.auth.updateMe({
           persona: pendingRole,
-          roles: [pendingRole]
+          roles: [pendingRole],
+          onboarding_completed: false
         }).then(() => {
           console.log('✅ [GatorWelcome] Role set successfully');
           refreshUser();
