@@ -63,6 +63,11 @@ export default function Dashboard() {
       return;
     }
 
+    // Mark that user has seen dashboard
+    if (!localStorage.getItem('cff:seenDashboard')) {
+      localStorage.setItem('cff:seenDashboard', 'true');
+    }
+
     loadDashboardData();
   }, [user, isLoading]);
 
@@ -231,7 +236,7 @@ export default function Dashboard() {
       
       {/* Hero Section */}
       <section className="relative overflow-hidden text-white py-16 px-4 mb-16" style={{
-      background: 'linear-gradient(135deg, #0021A5 0%, #1565C0 50%, #42A5F5 100%)',
+      background: 'linear-gradient(135deg, #0021A5 0%, #003d82 50%, #005a9e 100%)',
       boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
       }}>
         {HERO_TEXTURE_OVERLAY}
@@ -246,8 +251,12 @@ export default function Dashboard() {
           >
             {user?.full_name && (
               <div className="mb-4">
-                <p className="text-white/90 text-lg font-medium">Welcome back,</p>
-                <p className="text-2xl font-bold text-white">{user.full_name.split(' ')[0] || 'Gator'}! 🎓</p>
+                <p className="text-white/90 text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {localStorage.getItem('cff:seenDashboard') ? 'Welcome back,' : 'Welcome,'}
+                </p>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {user.full_name.split(' ')[0] || 'Gator'}! 🎓
+                </p>
               </div>
             )}
 
