@@ -66,14 +66,69 @@ Deno.serve(async (req) => {
                 invite_code_generated: code
             });
 
-            // Note: Cannot send email to users not yet in the app (Base44 restriction)
-            // Admin must manually share the code
+            // Send approval email
+            const emailSubject = '🐊 Welcome to College Fast Forward!';
+            const emailBody = `
+                <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="color: #0021A5; font-size: 28px; margin-bottom: 10px;">🧡💙 You're In! 🐊</h1>
+                        <p style="color: #64748b; font-size: 16px;">Your invite to College Fast Forward has been approved</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+                        <p style="color: white; font-size: 14px; margin: 0 0 10px 0;">Your Invite Code</p>
+                        <p style="color: white; font-size: 32px; font-weight: bold; letter-spacing: 3px; margin: 0; font-family: monospace;">${code}</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${req.headers.get('origin') || 'https://www.collegefastforward.com'}/#InviteRequired?code=${code}" 
+                           style="background: #FA4616; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                            Join the Network →
+                        </a>
+                    </div>
+                    
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                        <h3 style="color: #0f172a; font-size: 16px; margin: 0 0 10px 0;">What's Next?</h3>
+                        <ol style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                            <li>Click the button above or visit collegefastforward.com</li>
+                            <li>Enter your invite code: <strong>${code}</strong></li>
+                            <li>Sign in with Google (use @ufl.edu for students)</li>
+                            <li>Complete your profile and start connecting!</li>
+                        </ol>
+                    </div>
+                    
+                    <p style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 40px;">
+                        This code expires in 30 days. Questions? Reply to this email.<br/>
+                        Go Gators! 🐊🧡💙
+                    </p>
+                </div>
+            `;
+
+            try {
+                console.log('Sending approval email to:', inviteRequest.email);
+                const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
+                    from_name: 'College Fast Forward',
+                    to: inviteRequest.email,
+                    subject: emailSubject,
+                    body: emailBody
+                });
+                console.log('Email sent successfully:', emailResult);
+            } catch (emailError) {
+                console.error('Failed to send email:', emailError);
+                console.error('Email error details:', emailError.message, emailError.stack);
+                // Return error in response so user knows email failed
+                return Response.json({
+                    success: true,
+                    warning: 'Invite approved but email failed to send',
+                    code: code,
+                    emailError: emailError.message
+                });
+            }
+
             return Response.json({
                 success: true,
-                message: 'Invite code generated - share it with the user manually',
-                code: code,
-                user_email: inviteRequest.email,
-                manual_share: true
+                message: 'Request approved and invite sent!',
+                code: code
             });
 
         } else if (action === 'reject') {
