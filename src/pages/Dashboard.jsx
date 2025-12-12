@@ -8,6 +8,7 @@ import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
+import ParentSlotsCard from '@/components/dashboard/ParentSlotsCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UserPlus, Edit } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -456,45 +457,20 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Parent Invite - Contextual Power Move */}
+        {/* Parent Superpower - Shows Slots with Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-3 border-[#FA4616] shadow-2xl bg-gradient-to-r from-orange-50 via-orange-50 to-amber-50 hover:shadow-3xl transition-all">
-            <CardContent className="pt-10 pb-10">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-4xl">🚀</span>
-                    <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900" style={{
-                      fontFamily: "'Inter', sans-serif"
-                    }}>
-                      Supercharge Your Job Search
-                    </h3>
-                  </div>
-                  <p className="text-slate-800 text-lg mb-4 leading-relaxed font-medium">
-                    <strong className="text-[#FA4616]">Parents provide warm introductions to hiring managers.</strong> When your parent joins, they can see your profile and post opportunities specifically for you. <span className="font-bold text-green-700">87% of students get help within 2 weeks.</span>
-                  </p>
-                  <div className="flex flex-wrap gap-3 text-sm">
-                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">✨ Warm Intros</span>
-                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">💼 Job Posts</span>
-                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">🏆 Elite Badges</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <Button
-                    onClick={() => setShowInviteModal(true)}
-                    className="bg-gradient-to-r from-[#FA4616] to-orange-600 hover:from-orange-600 hover:to-red-600 text-white font-extrabold px-10 py-7 text-lg shadow-2xl whitespace-nowrap rounded-2xl hover:scale-105 transition-all"
-                  >
-                    <UserPlus className="w-6 h-6 mr-2" />
-                    Invite a Parent
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ParentSlotsCard
+            user={user}
+            onInviteClick={() => setShowInviteModal(true)}
+            onUpdate={async () => {
+              await refreshUser();
+              await loadDashboardData();
+            }}
+          />
         </motion.div>
 
 
