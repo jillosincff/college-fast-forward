@@ -882,17 +882,25 @@ function AppContent() {
     const needsOnboarding = user.onboarding_completed !== true;
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
-    // CRITICAL: Even @ufl.edu students need to go through role selection if they don't have a role
+    // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
+    const pendingRole = typeof window !== 'undefined' ? sessionStorage.getItem('pending_invite_role') : null;
+    const inNewUserFlow = pendingRole && hasNoRole;
+
     const verified = isUserVerified(user);
 
-    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified });
+    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified, pendingRole, inNewUserFlow });
 
     // Landing/Dashboard navigation logic
     if (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard') {
       let destination = currentPage;
 
-      // CRITICAL: Check role first - even @ufl.edu students need to select a role
-      if (hasNoRole) {
+      // CRITICAL: If user is in new user flow (just came back from OAuth), send to GatorWelcome
+      if (inNewUserFlow) {
+        destination = 'GatorWelcome';
+        console.log('➡️ [NewUserFlow] User just authenticated → GatorWelcome');
+      }
+      // Check role - even @ufl.edu students need to select a role
+      else if (hasNoRole) {
         destination = 'GatorRoleSelection';
         console.log('➡️ [NoRole] → GatorRoleSelection');
       } else if (!verified && !isUFLStudent) {
@@ -932,7 +940,10 @@ function AppContent() {
     }
 
     // Redirect incomplete users
-    if (hasNoRole) {
+    if (inNewUserFlow) {
+      console.log('🔄 [Incomplete] In new user flow → GatorWelcome');
+      navigate('GatorWelcome');
+    } else if (hasNoRole) {
       console.log('🔄 [Incomplete] No role → GatorRoleSelection');
       navigate('GatorRoleSelection');
     } else if (!verified && !isUFLStudent) {
