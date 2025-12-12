@@ -84,6 +84,12 @@ export default function AmbassadorPage({
         status: 'active'
       });
 
+      // Mark user as campus ambassador to enable dashboard access
+      await base44.auth.updateMe({
+        is_campus_ambassador: true,
+        ambassador_code: code
+      });
+
       setExistingReferral(newReferral);
       setFinalCode(code);
     } catch (err) {
@@ -211,6 +217,13 @@ export default function AmbassadorPage({
                   <p className="text-lg text-gray-600">
                     🎉 Start sharing your code and earn!
                   </p>
+                  <Button
+                    onClick={() => navigate('AmbassadorDashboard')}
+                    className="mt-4 w-full h-12 text-white font-bold"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    View Earnings Dashboard →
+                  </Button>
                 </div>
               )}
 

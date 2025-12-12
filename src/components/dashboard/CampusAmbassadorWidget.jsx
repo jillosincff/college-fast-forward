@@ -136,6 +136,13 @@ export default function CampusAmbassadorWidget() {
         {/* Actions */}
         <div className="flex gap-2">
           <Button 
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => navigate('AmbassadorDashboard')}
+          >
+            <DollarSign className="w-4 h-4 mr-2" />
+            Earnings Dashboard
+          </Button>
+          <Button 
             variant="outline" 
             className="flex-1"
             onClick={() => navigate('AmbassadorLeaderboard')}
