@@ -169,33 +169,50 @@ export default function Dashboard() {
   console.log('📊 Dashboard displaying:', networkStats);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
       {/* Limited Mode Banner */}
       <LimitedModeBanner user={user} accessInfo={accessInfo} />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden text-white py-12 px-4" style={HERO_BG_GRADIENT}>
+      <section className="relative overflow-hidden text-white py-16 px-4 mb-12" style={{
+        background: 'linear-gradient(135deg, #0021A5 0%, #0033A0 35%, #FA4616 100%)',
+        boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
+      }}>
         {HERO_TEXTURE_OVERLAY}
-        {HERO_GLOW_EFFECTS}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 right-10 text-9xl">🐊</div>
+        </div>
         
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {networkStats.spotsLeft > 0 && (
+            {user?.full_name && (
               <div className="mb-4">
-                <div className="inline-block bg-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg">
+                <p className="text-white/90 text-lg font-medium">Welcome back,</p>
+                <p className="text-2xl font-bold text-white">{user.full_name.split(' ')[0]}! 🎓</p>
+              </div>
+            )}
+
+            {networkStats.spotsLeft > 0 && (
+              <div className="mb-6">
+                <div className="inline-block bg-[#FA4616] text-white px-8 py-3 rounded-full font-extrabold text-base shadow-2xl animate-pulse">
                   🔥 {networkStats.spotsLeft} founding member spots left out of 1,000
                 </div>
               </div>
             )}
 
-            <h1 className={HERO_HEADING_CLASSES}>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight" style={{ 
+              textShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            }}>
               Get Hired Through Warm Introductions
             </h1>
-            <p className={`${HERO_SUBHEADING_CLASSES} mb-6 max-w-2xl mx-auto mt-4`}>
-              70,000+ Gator alumni and parents connect you directly to hiring managers
+            <p className="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto font-semibold" style={{
+              textShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}>
+              <span className="text-3xl font-extrabold text-yellow-300">70,000+</span> Gator alumni and parents connect you directly to hiring managers
             </p>
 
             {!loadingData && (
@@ -218,7 +235,7 @@ export default function Dashboard() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         
         {/* Draft Request Banner */}
         <DraftRequestBanner user={user} />
@@ -232,22 +249,25 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-lg">
-            <CardContent className="pt-6 pb-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
+          <Card className="bg-gradient-to-r from-[#FA4616] to-red-600 border-0 shadow-2xl hover:shadow-3xl transition-all">
+            <CardContent className="pt-8 pb-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-white">
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-2xl font-bold mb-2">
-                    💰 Want to earn money while spreading the word to Gators?
-                  </h3>
-                  <p className="text-white/90 text-lg">
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                    <span className="text-4xl">💰</span>
+                    <h3 className="text-2xl md:text-3xl font-extrabold">
+                      Earn While You Share
+                    </h3>
+                  </div>
+                  <p className="text-white/95 text-lg font-medium leading-relaxed">
                     Become a Brand Ambassador and get paid to help fellow Gators discover opportunities!
                   </p>
                 </div>
                 <Button
                   onClick={() => navigate('UFAmbassador')}
-                  className="bg-white text-orange-600 hover:bg-white/90 font-bold px-8 py-6 shadow-lg"
+                  className="bg-white text-[#FA4616] hover:bg-slate-50 font-bold px-10 py-7 text-lg shadow-2xl rounded-xl transition-all hover:scale-105"
                 >
-                  Learn More
+                  Learn More →
                 </Button>
               </div>
             </CardContent>
@@ -264,21 +284,23 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
         >
           <Card
-            className="hover:shadow-2xl transition-all cursor-pointer bg-gradient-to-br from-green-500 to-emerald-600 border-0 shadow-xl"
+            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-green-500 via-emerald-500 to-emerald-600 border-0 shadow-2xl"
             onClick={() => {
               navigate('Opportunities');
               trackEvent('quick_action_clicked', { action: 'opportunities' });
             }}
           >
-            <CardContent className="pt-8 pb-8 text-center">
-              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-10 h-10 text-white" />
+            <CardContent className="pt-10 pb-10 text-center">
+              <div className="w-24 h-24 bg-white/25 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-xl">
+                <Briefcase className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-white mb-3">Find Your Next Opportunity</h2>
-              <p className="text-white/90 text-lg mb-6 max-w-2xl mx-auto">Browse jobs, internships, and student gigs posted by Gator parents and employers</p>
-              <div className="inline-flex items-center gap-2 bg-white text-green-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/90 transition-all">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight" style={{
+                fontFamily: "'Inter', sans-serif"
+              }}>Find Your Next Opportunity</h2>
+              <p className="text-white/95 text-lg md:text-xl mb-8 max-w-2xl mx-auto font-medium leading-relaxed">Browse jobs, internships, and student gigs posted by Gator parents and employers</p>
+              <div className="inline-flex items-center gap-3 bg-white text-green-700 px-10 py-5 rounded-2xl font-extrabold text-xl hover:bg-slate-50 hover:shadow-2xl transition-all">
                 View Opportunities
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
@@ -290,42 +312,46 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card
-              className="hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200"
+              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 via-purple-50 to-pink-50 border-2 border-purple-100"
               onClick={() => {
                 navigate('Connections');
                 trackEvent('quick_action_clicked', { action: 'connections' });
               }}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-white" />
+              <CardContent className="pt-8 pb-8">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Users className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">Get Help from Gators</h3>
-                    <p className="text-sm text-slate-600">Connect with parents and alumni for intros</p>
+                    <h3 className="text-xl font-extrabold text-slate-900 mb-2" style={{
+                      fontFamily: "'Inter', sans-serif"
+                    }}>Get Help from Gators</h3>
+                    <p className="text-base text-slate-700 font-medium">Connect with parents and alumni for warm intros</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card
-              className="hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-orange-50 to-red-50 border-orange-200"
+              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-orange-50 via-orange-50 to-red-50 border-2 border-orange-100"
               onClick={() => {
                 navigate('Roommates');
                 trackEvent('quick_action_clicked', { action: 'roommates' });
               }}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Home className="w-6 h-6 text-white" />
+              <CardContent className="pt-8 pb-8">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#FA4616] to-red-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Home className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">Find a Roommate</h3>
-                    <p className="text-sm text-slate-600">Connect with Gators for housing</p>
+                    <h3 className="text-xl font-extrabold text-slate-900 mb-2" style={{
+                      fontFamily: "'Inter', sans-serif"
+                    }}>Find a Roommate</h3>
+                    <p className="text-base text-slate-700 font-medium">Connect with Gators for housing</p>
                   </div>
                 </div>
               </CardContent>
@@ -339,31 +365,33 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-2 border-orange-400 shadow-lg bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50">
-            <CardContent className="pt-6 pb-6">
-              <div className="flex flex-col md:flex-row items-center gap-6">
+          <Card className="border-3 border-[#FA4616] shadow-2xl bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50 hover:shadow-3xl transition-all">
+            <CardContent className="pt-8 pb-8">
+              <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-3xl">🚀</span>
-                    <h3 className="text-2xl font-bold text-slate-900">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-4xl">🚀</span>
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900" style={{
+                      fontFamily: "'Inter', sans-serif"
+                    }}>
                       Supercharge Your Job Search
                     </h3>
                   </div>
-                  <p className="text-slate-700 mb-3 leading-relaxed">
-                    <strong>Parents provide warm introductions to hiring managers.</strong> When your parent joins, they can see your profile and post opportunities specifically for you. 87% of students get help within 2 weeks.
+                  <p className="text-slate-800 text-lg mb-4 leading-relaxed font-medium">
+                    <strong className="text-[#FA4616]">Parents provide warm introductions to hiring managers.</strong> When your parent joins, they can see your profile and post opportunities specifically for you. <span className="font-bold text-green-700">87% of students get help within 2 weeks.</span>
                   </p>
-                  <div className="flex flex-wrap gap-2 text-sm">
-                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">✨ Warm Intros</span>
-                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">💼 Job Posts</span>
-                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">🏆 Elite Badges</span>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">✨ Warm Intros</span>
+                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">💼 Job Posts</span>
+                    <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-900 px-4 py-2 rounded-full font-bold shadow-sm">🏆 Elite Badges</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-3">
                   <Button
                     onClick={() => setShowInviteModal(true)}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-6 text-base shadow-lg whitespace-nowrap"
+                    className="bg-gradient-to-r from-[#FA4616] to-orange-600 hover:from-orange-600 hover:to-red-600 text-white font-extrabold px-10 py-7 text-lg shadow-2xl whitespace-nowrap rounded-2xl hover:scale-105 transition-all"
                   >
-                    <UserPlus className="w-5 h-5 mr-2" />
+                    <UserPlus className="w-6 h-6 mr-2" />
                     Invite a Parent
                   </Button>
                 </div>
@@ -491,18 +519,18 @@ export default function Dashboard() {
 
                 {/* Stats */}
                 {(stats.warmIntros > 0 || stats.parentsViewed > 0) && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{stats.parentsViewed}</div>
-                      <p className="text-xs text-slate-600">Network reach</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    <div className="text-center p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-2 border-blue-200 shadow-md">
+                      <div className="text-3xl font-extrabold text-blue-600 mb-1">{stats.parentsViewed}</div>
+                      <p className="text-sm text-slate-700 font-semibold">Network reach</p>
                     </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">{stats.warmIntros}</div>
-                      <p className="text-xs text-slate-600">Warm intros</p>
+                    <div className="text-center p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border-2 border-purple-200 shadow-md">
+                      <div className="text-3xl font-extrabold text-purple-600 mb-1">{stats.warmIntros}</div>
+                      <p className="text-sm text-slate-700 font-semibold">Warm intros</p>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{opportunities.length}</div>
-                      <p className="text-xs text-slate-600">Available jobs</p>
+                    <div className="text-center p-5 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border-2 border-green-200 shadow-md">
+                      <div className="text-3xl font-extrabold text-green-600 mb-1">{opportunities.length}</div>
+                      <p className="text-sm text-slate-700 font-semibold">Available jobs</p>
                     </div>
                   </div>
                 )}
