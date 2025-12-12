@@ -404,8 +404,8 @@ export default function Dashboard() {
             <Card
               className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 via-purple-50 to-pink-50 border-2 border-purple-100"
               onClick={() => {
-                navigate('Connections');
-                trackEvent('quick_action_clicked', { action: 'connections' });
+                navigate('GatorDirectory');
+                trackEvent('quick_action_clicked', { action: 'directory' });
               }}
             >
               <CardContent className="pt-8 pb-8">
@@ -416,7 +416,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <h3 className="text-xl font-extrabold text-slate-900 mb-2" style={{
                       fontFamily: "'Inter', sans-serif"
-                    }}>Get Help from Gators</h3>
+                    }}>Reach Out to Gators for Help</h3>
                     <p className="text-base text-slate-700 font-medium">Connect with parents and alumni for warm intros</p>
                   </div>
                 </div>
