@@ -50,17 +50,21 @@ Deno.serve(async (req) => {
             const inviteType = inviteTypeMap[userType] || 'admin_to_parent';
 
             // Create invite code
+            console.log('Creating invite code with:', { code, inviteType, userType });
             await base44.asServiceRole.entities.InviteCode.create({
                 code: code,
                 inviter_id: user.id,
-                inviter_email: 'admin@collegefastforward.com',
+                inviter_email: 'support@collegefastforward.com',
                 inviter_name: 'CFF Admin Team',
                 invite_type: inviteType,
                 status: 'active',
                 expires_at: expiresAt.toISOString()
             });
 
+            console.log('Invite code created successfully:', code);
+            
             // Update request status
+            console.log('Updating invite request status to approved');
             await base44.asServiceRole.entities.InviteRequest.update(request_id, {
                 status: 'approved',
                 approved_by: user.email,
@@ -138,7 +142,9 @@ Deno.serve(async (req) => {
 
                 if (!sendGridResponse.ok) {
                     const errorText = await sendGridResponse.text();
-                    throw new Error(`SendGrid error: ${errorText}`);
+                    console.error('SendGrid error response:', errorText);
+                    console.error('SendGrid status:', sendGridResponse.status);
+                    throw new Error(`SendGrid error (${sendGridResponse.status}): ${errorText}`);
                 }
 
                 console.log('Email sent successfully via SendGrid');
