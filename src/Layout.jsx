@@ -799,8 +799,8 @@ function AppContent() {
           
           await new Promise(resolve => setTimeout(resolve, 6000));
           
-          console.log('✅ [Student OAuth] Redirecting to GatorRoleSelection');
-          window.location.href = window.location.origin + '/#GatorRoleSelection';
+          console.log('✅ [Student OAuth] Redirecting to GatorWelcome');
+          window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
           return;
         } else {
           sessionStorage.removeItem('oauth_processed_student');
