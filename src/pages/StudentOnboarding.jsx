@@ -240,10 +240,18 @@ export default function StudentOnboarding() {
         userUpdate.currently_seeking = formData.help_request;
       }
 
+      // Handle referral code from session
+      const referralCode = sessionStorage.getItem('pending_referral_code');
+      if (referralCode) {
+        userUpdate.referral_code = referralCode;
+        console.log('🎟️ [StudentOnboarding] Saving referral code:', referralCode);
+      }
+
       await User.updateMyUserData(userUpdate);
 
       localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
+      sessionStorage.removeItem('pending_referral_code');
 
       // Show parent invite modal
       setShowParentInviteModal(true);

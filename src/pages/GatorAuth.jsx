@@ -20,6 +20,12 @@ export default function GatorAuth() {
       if (!redirecting) {
         console.log('🔐 [GatorAuth] Redirecting to Google login...');
         setRedirecting(true);
+        
+        // Preserve pending data in session
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        const pendingReferral = sessionStorage.getItem('pending_referral_code');
+        console.log('📦 [GatorAuth] Preserving session:', { pendingRole, pendingReferral });
+        
         sessionStorage.setItem('oauth_flow_active', 'true');
         base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
       }
