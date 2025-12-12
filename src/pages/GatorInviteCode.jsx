@@ -80,10 +80,11 @@ export default function GatorInviteCode() {
               onClick={() => {
                 if (referralCode.trim()) {
                   sessionStorage.setItem('pending_referral_code', referralCode.trim());
+                  console.log('🎟️ [GatorInviteCode] Storing referral code:', referralCode.trim());
                 }
                 sessionStorage.setItem('pending_invite_role', 'gator');
-                sessionStorage.setItem('oauth_flow_active', 'true');
-                base44.auth.redirectToLogin(window.location.origin);
+                console.log('🔐 [GatorInviteCode] Starting OAuth with role=gator');
+                base44.auth.redirectToLogin(`${window.location.origin}/#GatorWelcome?role=gator`);
               }}
               className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
               style={{ backgroundColor: '#F2A900', color: '#000' }}
