@@ -192,10 +192,10 @@ export default function Dashboard() {
             )}
 
             <h1 className={HERO_HEADING_CLASSES}>
-              Leverage Your Gator Network to Get Hired
+              Get Hired Through Warm Introductions
             </h1>
             <p className={`${HERO_SUBHEADING_CLASSES} mb-6 max-w-2xl mx-auto mt-4`}>
-              Connect with parents and Gators ready to help you succeed
+              70,000+ Gator alumni and parents connect you directly to hiring managers
             </p>
 
             {!loadingData && (
@@ -257,32 +257,40 @@ export default function Dashboard() {
         {/* Campus Ambassador Widget */}
         <CampusAmbassadorWidget />
         
-        {/* Quick Actions */}
+        {/* Primary CTA - Find Opportunities */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
-            Start Here - Your Career Toolkit
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card
-              className="hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
-              onClick={() => {
-                navigate('Opportunities');
-                trackEvent('quick_action_clicked', { action: 'opportunities' });
-              }}
-            >
-              <CardContent className="pt-6 pb-6 text-center">
-                <div className="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">🟢 Find Opportunities</h3>
-                <p className="text-slate-600">Jobs, internships, & student gigs</p>
-              </CardContent>
-            </Card>
+          <Card
+            className="hover:shadow-2xl transition-all cursor-pointer bg-gradient-to-br from-green-500 to-emerald-600 border-0 shadow-xl"
+            onClick={() => {
+              navigate('Opportunities');
+              trackEvent('quick_action_clicked', { action: 'opportunities' });
+            }}
+          >
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <Briefcase className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-3">Find Your Next Opportunity</h2>
+              <p className="text-white/90 text-lg mb-6 max-w-2xl mx-auto">Browse jobs, internships, and student gigs posted by Gator parents and employers</p>
+              <div className="inline-flex items-center gap-2 bg-white text-green-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/90 transition-all">
+                View Opportunities
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
+        {/* Secondary Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card
               className="hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200"
               onClick={() => {
@@ -290,12 +298,16 @@ export default function Dashboard() {
                 trackEvent('quick_action_clicked', { action: 'connections' });
               }}
             >
-              <CardContent className="pt-6 pb-6 text-center">
-                <div className="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-7 h-7 text-white" />
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Get Help from Gators</h3>
+                    <p className="text-sm text-slate-600">Connect with parents and alumni for intros</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">🟣 Get Help from Gators</h3>
-                <p className="text-slate-600">Parents + Gator intros</p>
               </CardContent>
             </Card>
 
@@ -306,53 +318,55 @@ export default function Dashboard() {
                 trackEvent('quick_action_clicked', { action: 'roommates' });
               }}
             >
-              <CardContent className="pt-6 pb-6 text-center">
-                <div className="w-14 h-14 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Home className="w-7 h-7 text-white" />
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Home className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Find a Roommate</h3>
+                    <p className="text-sm text-slate-600">Connect with Gators for housing</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">🟠 Find a Roommate</h3>
-                <p className="text-slate-600">Connect with Gators looking for housing</p>
               </CardContent>
             </Card>
           </div>
         </motion.div>
 
-        {/* Superpower Parent Invite Section */}
+        {/* Parent Invite - Contextual Power Move */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.2 }}
         >
-          <Card className="border-4 border-orange-500 shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50 relative overflow-hidden">
-            {/* Lightning bolt decorations */}
-            <div className="absolute top-4 right-4 text-6xl animate-pulse">⚡</div>
-            <div className="absolute bottom-4 left-4 text-4xl animate-pulse" style={{ animationDelay: '0.5s' }}>⚡</div>
-            <CardContent className="pt-8 pb-8 relative z-10">
-              <div className="text-center mb-6">
-                <h3 className="text-3xl font-extrabold text-slate-900 mb-3">
-                  Invite Your Parent(s) – This Is Your Superpower ⚡
-                </h3>
-                <p className="text-lg text-slate-700 max-w-3xl mx-auto font-medium">
-                  Parents get you warm intros, post jobs for you, and unlock your elite badges. 87% of students who invite a parent get help within 2 weeks.
-                </p>
-              </div>
-              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <Button
-                  onClick={() => setShowInviteModal(true)}
-                  size="lg"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-7 text-lg shadow-xl border-2 border-orange-300"
-                >
-                  <UserPlus className="w-6 h-6 mr-2" />
-                  Invite Parent 1
-                </Button>
-                <Button
-                  onClick={() => setShowInviteModal(true)}
-                  size="lg"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-7 text-lg shadow-xl border-2 border-orange-300"
-                >
-                  <UserPlus className="w-6 h-6 mr-2" />
-                  Invite Parent 2
-                </Button>
+          <Card className="border-2 border-orange-400 shadow-lg bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-3xl">🚀</span>
+                    <h3 className="text-2xl font-bold text-slate-900">
+                      Supercharge Your Job Search
+                    </h3>
+                  </div>
+                  <p className="text-slate-700 mb-3 leading-relaxed">
+                    <strong>Parents provide warm introductions to hiring managers.</strong> When your parent joins, they can see your profile and post opportunities specifically for you. 87% of students get help within 2 weeks.
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-sm">
+                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">✨ Warm Intros</span>
+                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">💼 Job Posts</span>
+                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">🏆 Elite Badges</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={() => setShowInviteModal(true)}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-6 text-base shadow-lg whitespace-nowrap"
+                  >
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    Invite a Parent
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -414,191 +428,128 @@ export default function Dashboard() {
           <MembershipStatusCard />
         </motion.div>
 
+        {/* More Tools Section - Collapsed */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
-          className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6"
         >
-          <h2 className="text-lg font-bold text-slate-900 mb-4 text-center">
-            Quick Access to Your Career Tools
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => navigate('MyMessages')}
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative"
-            >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              📬 My Messages
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              onClick={() => navigate('MyApplications')}
-              size="lg"
-              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            >
-              <Briefcase className="w-5 h-5 mr-2" />
-              📋 My Applications
-            </Button>
-            <Button
-              onClick={() => navigate('Opportunities')}
-              size="lg"
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            >
-              <Target className="w-5 h-5 mr-2" />
-              💼 Job Postings
-            </Button>
-          </div>
+          <details className="group bg-white rounded-2xl shadow-lg border-2 border-slate-100 overflow-hidden">
+            <summary className="cursor-pointer p-6 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
+              <ArrowRight className="w-5 h-5 text-slate-400 transform group-open:rotate-90 transition-transform" />
+            </summary>
+            <div className="p-6 pt-0 border-t border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Button
+                  onClick={() => navigate('MyMessages')}
+                  variant="outline"
+                  className="justify-start relative h-auto py-4"
+                >
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  My Messages
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => navigate('MyApplications')}
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                >
+                  <Briefcase className="w-5 h-5 mr-2" />
+                  My Applications
+                </Button>
+                <Button
+                  onClick={() => navigate('Profile')}
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                >
+                  <Target className="w-5 h-5 mr-2" />
+                  My Profile
+                </Button>
+              </div>
+            </div>
+          </details>
         </motion.div>
 
-
-
-        {!loadingData && messages.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.25 : 0.3 }}
-          >
-            <Card className="border-2 border-blue-200 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <Mail className="w-6 h-6 text-blue-600" />
-                    Recent Messages
-                    {unreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1">
-                        {unreadCount} new
-                      </span>
-                    )}
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate('MyMessages')}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    View All
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  {messages.slice(0, 3).map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
-                        !msg.is_read ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
-                      }`}
-                      onClick={() => navigate('MyMessages')}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-slate-900">{msg.subject}</p>
-                            {!msg.is_read && (
-                              <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
-                            )}
-                          </div>
-                          <p className="text-sm text-slate-600 line-clamp-2">{msg.body}</p>
-                          <p className="text-xs text-slate-500 mt-2">
-                            {formatDistanceToNow(new Date(msg.created_date), { addSuffix: true })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {messages.length > 3 && (
-                  <Button
-                    variant="link"
-                    onClick={() => navigate('MyMessages')}
-                    className="mt-4 text-blue-600 font-semibold w-full"
-                  >
-                    View All {messages.length} Messages →
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {opportunities.length > 0 && (
+        {/* Network Activity - Consolidated */}
+        {(!loadingData && (messages.length > 0 || stats.warmIntros > 0 || stats.parentsViewed > 0)) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: isSpotlightActive ? 0.3 : 0.35 }}
           >
-            <Card>
+            <Card className="border-2 border-blue-100 shadow-lg">
               <CardContent className="pt-6">
-                <h3 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Target className="w-6 h-6 text-blue-600" />
-                  Recommended For You
+                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <MessageSquare className="w-6 h-6 text-blue-600" />
+                  Your Network Activity
                 </h3>
-                <div className="space-y-3">
-                  {opportunities.slice(0, 3).map((opp) => (
-                    <div
-                      key={opp.id}
-                      className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer"
-                      onClick={() => navigate('Opportunities', { id: opp.id })}
-                    >
-                      <h4 className="font-bold text-slate-900 mb-1">{opp.title}</h4>
-                      <p className="text-sm text-slate-600 mb-2">
-                        {opp.org_name} {opp.salary_display && `• ${opp.salary_display}`}
-                      </p>
-                      <div className="flex gap-2">
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          {opp.opportunity_type}
-                        </span>
-                        {opp.location_type && (
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                            {opp.location_type}
+
+                {/* Stats */}
+                {(stats.warmIntros > 0 || stats.parentsViewed > 0) && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{stats.parentsViewed}</div>
+                      <p className="text-xs text-slate-600">Network reach</p>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">{stats.warmIntros}</div>
+                      <p className="text-xs text-slate-600">Warm intros</p>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{opportunities.length}</div>
+                      <p className="text-xs text-slate-600">Available jobs</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Messages */}
+                {messages.length > 0 && (
+                  <>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <Mail className="w-5 h-5 text-blue-600" />
+                        Recent Messages
+                        {unreadCount > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                            {unreadCount}
                           </span>
                         )}
-                      </div>
+                      </h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('MyMessages')}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        View All
+                      </Button>
                     </div>
-                  ))}
-                </div>
-                <Button
-                  variant="link"
-                  onClick={() => navigate('Opportunities')}
-                  className="mt-4 text-blue-600 font-semibold"
-                >
-                  View All Opportunities →
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {!loadingData && (stats.warmIntros > 0 || stats.opportunitiesMatched > 0 || stats.peerConnections > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: isSpotlightActive ? 0.35 : 0.4 }}
-          >
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50">
-              <CardContent className="pt-6">
-                <h3 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <MessageSquare className="w-6 h-6 text-blue-600" />
-                  Your Network in Action
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-white rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600 mb-1">{stats.parentsViewed}</div>
-                    <p className="text-sm text-slate-600">👥 Network engagement{stats.parentsViewed !== 1 ? 's' : ''}</p>
-                  </div>
-                  <div className="text-center p-4 bg-white rounded-lg">
-                    <div className="text-3xl font-bold text-purple-600 mb-1">{stats.warmIntros}</div>
-                    <p className="text-sm text-slate-600">💬 Warm intro{stats.warmIntros !== 1 ? 's' : ''} received</p>
-                  </div>
-                  <div className="text-center p-4 bg-white rounded-lg">
-                    <div className="text-3xl font-bold text-green-600 mb-1">{stats.opportunitiesMatched}</div>
-                    <p className="text-sm text-slate-600">🎯 Opportunit{stats.opportunitiesMatched !== 1 ? 'ies' : 'y'} available</p>
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      {messages.slice(0, 2).map((msg) => (
+                        <div
+                          key={msg.id}
+                          className={`p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
+                            !msg.is_read ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+                          }`}
+                          onClick={() => navigate('MyMessages')}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold text-sm text-slate-900 line-clamp-1">{msg.subject}</p>
+                            {!msg.is_read && (
+                              <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0">New</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-600 line-clamp-1">{msg.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </motion.div>
