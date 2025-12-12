@@ -230,9 +230,9 @@ export default function Dashboard() {
       )}
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden text-white py-16 px-4 mb-12" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #0033A0 35%, #FA4616 100%)',
-        boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
+      <section className="relative overflow-hidden text-white py-16 px-4 mb-16" style={{
+      background: 'linear-gradient(135deg, #0021A5 0%, #1565C0 50%, #42A5F5 100%)',
+      boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
       }}>
         {HERO_TEXTURE_OVERLAY}
         <div className="absolute inset-0 opacity-10">
@@ -291,7 +291,7 @@ export default function Dashboard() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
         
         {/* Draft Request Banner */}
         <DraftRequestBanner user={user} />
@@ -337,8 +337,8 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <Card className="bg-gradient-to-r from-[#FA4616] to-red-600 border-0 shadow-2xl hover:shadow-3xl transition-all">
-            <CardContent className="pt-8 pb-8">
+          <Card className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-[#FF6B3D] border-0 shadow-2xl hover:shadow-3xl transition-all">
+            <CardContent className="pt-10 pb-10">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-white">
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
@@ -372,7 +372,7 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
         >
           <Card
-            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-[#0021A5] via-blue-600 to-teal-500 border-0 shadow-2xl"
+            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-[#0021A5] via-[#0039C7] to-blue-500 border-0 shadow-2xl"
             onClick={() => {
               navigate('Opportunities');
               trackEvent('quick_action_clicked', { action: 'opportunities' });
@@ -400,9 +400,9 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card
-              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 via-purple-50 to-pink-50 border-2 border-purple-100"
+              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-teal-50 via-green-50 to-emerald-50 border-2 border-teal-100"
               onClick={() => {
                 navigate('GatorDirectory');
                 trackEvent('quick_action_clicked', { action: 'directory' });
@@ -410,7 +410,7 @@ export default function Dashboard() {
             >
               <CardContent className="pt-8 pb-8">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#00A550] to-teal-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <Users className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
@@ -424,7 +424,7 @@ export default function Dashboard() {
             </Card>
 
             <Card
-              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-orange-50 via-orange-50 to-red-50 border-2 border-orange-100"
+              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 border-2 border-slate-200"
               onClick={() => {
                 navigate('Roommates');
                 trackEvent('quick_action_clicked', { action: 'roommates' });
@@ -432,7 +432,7 @@ export default function Dashboard() {
             >
               <CardContent className="pt-8 pb-8">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FA4616] to-red-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <Home className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
@@ -453,8 +453,8 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-3 border-[#FA4616] shadow-2xl bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50 hover:shadow-3xl transition-all">
-            <CardContent className="pt-8 pb-8">
+          <Card className="border-3 border-[#FA4616] shadow-2xl bg-gradient-to-r from-orange-50 via-orange-50 to-amber-50 hover:shadow-3xl transition-all">
+            <CardContent className="pt-10 pb-10">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
