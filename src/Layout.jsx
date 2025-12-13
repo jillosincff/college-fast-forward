@@ -922,9 +922,9 @@ function AppContent() {
       return;
     }
 
-    // STEP 3: New user flow pages ALWAYS bypass routing (GatorAuth, GatorWelcome, etc.)
+    // STEP 3: New user flow pages ALWAYS accessible (even without auth) - GatorAuth, GatorRoleSelection, GatorStudentEmail, etc.
     if (newUserFlowPages.includes(currentPage)) {
-      console.log('✅ [NewUserFlow] Page:', currentPage);
+      console.log('✅ [NewUserFlow] Page accessible:', currentPage);
       
       // CRITICAL: Set parent role when landing on GatorWelcome after OAuth
       if (currentPage === 'GatorWelcome' && user) {
