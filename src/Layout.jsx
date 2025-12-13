@@ -846,19 +846,17 @@ function AppContent() {
     if (user && pendingRole && !user.persona) {
       console.log('🎯 [OAuth Flow Active] pendingRole:', pendingRole, 'currentPage:', currentPage);
       
-      // If not on GatorWelcome yet, redirect there
-      if (currentPage !== 'GatorWelcome' && currentPage !== 'GatorAuth') {
-        console.log('🔄 [OAuth Flow] Redirecting to GatorWelcome');
-        navigate(`GatorWelcome?role=${pendingRole}`);
-        return;
-      }
-      
-      // If on GatorWelcome, allow it to process
-      if (currentPage === 'GatorWelcome') {
-        console.log('✅ [OAuth Flow] On GatorWelcome, allowing page to load');
+      // Allow all new user flow pages (role selection, email entry, etc.)
+      if (newUserFlowPages.includes(currentPage)) {
+        console.log('✅ [OAuth Flow] Allowing new user flow page:', currentPage);
         setResolvedPage(currentPage);
         return;
       }
+      
+      // Otherwise redirect to GatorWelcome
+      console.log('🔄 [OAuth Flow] Redirecting to GatorWelcome');
+      navigate(`GatorWelcome?role=${pendingRole}`);
+      return;
     }
     
     // CRITICAL CHECK #2: Parent invite flow
