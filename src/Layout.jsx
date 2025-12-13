@@ -984,7 +984,8 @@ function AppContent() {
     // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    const verified = isUserVerified(user);
+    // UFL students are ALWAYS verified and should never see invite code pages
+    const verified = isUFLStudent ? true : isUserVerified(user);
 
     console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified, pendingRole, inNewUserFlow });
 
@@ -1048,10 +1049,11 @@ function AppContent() {
     if (inNewUserFlow) {
       console.log('🔄 [Incomplete] In new user flow → GatorWelcome');
       navigate('GatorWelcome');
-    } else if (hasNoRole) {
+    } else if (hasNoRole && !pendingRole) {
       console.log('🔄 [Incomplete] No role → GatorRoleSelection');
       navigate('GatorRoleSelection');
-    } else if (!verified && !isUFLStudent) {
+    } else if (!verified) {
+      // CRITICAL: UFL students are always verified and should NEVER see invite pages
       console.log('🔄 [Incomplete] Not verified → InviteRequired');
       navigate('InviteRequired');
     } else if (needsOnboarding) {
