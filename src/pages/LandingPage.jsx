@@ -70,7 +70,7 @@ export default function LandingPage() {
   };
 
   const handleTopRightJoinClick = () => {
-    navigate('WelcomeRole');
+    navigate('GatorRoleSelection');
   };
 
   const handleRequestInvite = () => {

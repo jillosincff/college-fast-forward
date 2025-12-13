@@ -999,11 +999,16 @@ function AppContent() {
         destination = 'GatorWelcome';
         console.log('➡️ [NewUserFlow] User just authenticated → GatorWelcome');
       }
+      // UFL students with pending role should skip to welcome
+      else if (pendingRole === 'gator' && isUFLStudent && hasNoRole) {
+        destination = 'GatorWelcome';
+        console.log('➡️ [UFL Student] → GatorWelcome');
+      }
       // Check role - even @ufl.edu students need to select a role
-      else if (hasNoRole) {
+      else if (hasNoRole && !pendingRole) {
         destination = 'GatorRoleSelection';
         console.log('➡️ [NoRole] → GatorRoleSelection');
-      } else if (!verified && !isUFLStudent) {
+      } else if (!verified && !isUFLStudent && !pendingRole) {
         destination = 'InviteRequired';
         console.log('➡️ [NotVerified] → InviteRequired');
       } else if (needsOnboarding) {
