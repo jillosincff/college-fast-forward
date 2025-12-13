@@ -53,21 +53,8 @@ export default function GatorRoleSelection() {
 
     try {
       if (selectedRole === 'gator') {
-        // Check if already authenticated with UFL email
-        if (user?.email?.toLowerCase().endsWith('@ufl.edu')) {
-          console.log('✅ [GatorRoleSelection] Authenticated UFL student - going to welcome');
-          sessionStorage.setItem('pending_invite_role', 'gator');
-          await base44.auth.updateMe({ 
-            persona: 'gator',
-            roles: ['gator'],
-            onboarding_completed: false
-          });
-          await refreshUser();
-          navigate('GatorWelcome?role=gator');
-        } else {
-          console.log('🐊 [GatorRoleSelection] Not authenticated yet -> GatorStudentEmail');
-          navigate('GatorStudentEmail');
-        }
+        console.log('🐊 [GatorRoleSelection] Student selected -> GatorStudentEmail');
+        navigate('GatorStudentEmail');
       } else if (selectedRole === 'parent') {
         console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
         sessionStorage.setItem('pending_invite_role', 'parent');
