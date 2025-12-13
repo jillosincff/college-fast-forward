@@ -23,10 +23,23 @@ export default function GatorWelcome() {
       console.log('✅ User on welcome page:', user.email, 'role:', role);
       
       const pendingCode = sessionStorage.getItem('pending_invite_code');
+      const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
       
+      // If student without code and UFL email, auto-verify
+      if (pendingRole === 'gator' && !pendingCode && isUFL) {
+        console.log('✅ [GatorWelcome] UFL student - auto-verifying');
+        base44.auth.updateMe({
+          persona: 'gator',
+          roles: ['gator'],
+          onboarding_completed: false
+        }).then(() => {
+          console.log('✅ [GatorWelcome] UFL student role set');
+          refreshUser();
+        });
+      }
       // If parent with invite code, set persona first then process invite
       // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
-      if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
+      else if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
         console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
         
         const processParentFlow = async () => {

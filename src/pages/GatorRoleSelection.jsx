@@ -49,40 +49,20 @@ export default function GatorRoleSelection() {
     
     setIsLoading(true);
     console.log('👤 [GatorRoleSelection] Role selected:', selectedRole);
-    console.log('📧 [GatorRoleSelection] User:', user?.email);
     trackEvent('role_selected', { role: selectedRole });
 
     try {
-      const isUFLEmail = user?.email?.toLowerCase().endsWith('@ufl.edu');
-      console.log('🔍 [GatorRoleSelection] isUFL:', isUFLEmail);
-
       if (selectedRole === 'gator') {
-        console.log('🐊 [GatorRoleSelection] Gator selected - storing pending role');
-        sessionStorage.setItem('pending_invite_role', 'gator');
-        
-        if (isUFLEmail) {
-          console.log('✅ [GatorRoleSelection] UFL student - updating role and going to GatorWelcome');
-          // UFL students get instant role assignment
-          await base44.auth.updateMe({ 
-            persona: 'gator',
-            roles: ['gator'],
-            onboarding_completed: false
-          });
-          await refreshUser();
-          navigate('GatorWelcome');
-        } else {
-          console.log('⏳ [GatorRoleSelection] Non-UFL student -> GatorInviteCode');
-          navigate('GatorInviteCode');
-        }
+        console.log('🐊 [GatorRoleSelection] Student selected -> GatorStudentEmail');
+        navigate('GatorStudentEmail');
       } else if (selectedRole === 'parent') {
-        console.log('❤️ [GatorRoleSelection] Parent selected, storing in session...');
+        console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
         sessionStorage.setItem('pending_invite_role', 'parent');
-        console.log('➡️ [GatorRoleSelection] Parent -> GatorParentInvite');
         navigate('GatorParentInvite');
       }
     } catch (error) {
-      console.error('❌ [GatorRoleSelection] Failed to update role:', error);
-      alert('Error updating your role. Please try again.');
+      console.error('❌ [GatorRoleSelection] Error:', error);
+      alert('Error. Please try again.');
       setIsLoading(false);
     }
   };
