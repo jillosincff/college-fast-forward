@@ -65,13 +65,14 @@ export default function WelcomeRole() {
     }
 
     // Store role selection in sessionStorage
-    sessionStorage.setItem('pending_role_selection', selectedRole);
+    sessionStorage.setItem('pending_invite_role', selectedRole);
     
     console.log('🎯 Role selected:', selectedRole);
 
-    // For students: go to referral code entry (GatorInviteCode)
+    // For students: go to email entry first
     if (selectedRole === 'gator') {
-      navigate('GatorInviteCode');
+      console.log('🐊 [WelcomeRole] Student selected -> GatorStudentEmail');
+      navigate('GatorStudentEmail');
     } 
     // For parents: go to parent invite request page
     else if (selectedRole === 'parent') {
