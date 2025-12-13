@@ -984,10 +984,7 @@ function AppContent() {
     // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    // UFL students are ALWAYS verified and should never see invite code pages
-    const verified = isUFLStudent ? true : isUserVerified(user);
-
-    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, verified, pendingRole, inNewUserFlow });
+    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, pendingRole, inNewUserFlow });
 
     // Landing/Dashboard navigation logic - ALWAYS check routing for authenticated users
     if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard')) {
@@ -1009,9 +1006,10 @@ function AppContent() {
       else if (hasNoRole && !pendingRole) {
         destination = 'GatorRoleSelection';
         console.log('➡️ [NoRole] → GatorRoleSelection');
-      } else if (!verified && !isUFLStudent && !pendingRole) {
-        destination = 'InviteRequired';
-        console.log('➡️ [NotVerified] → InviteRequired');
+      } else if (hasNoRole && !isUFLStudent && !pendingRole) {
+        // Non-UFL students without role need invite
+        destination = 'GatorInviteCode';
+        console.log('➡️ [NotVerified] → GatorInviteCode');
       } else if (needsOnboarding) {
         if (user.persona === 'parent' || user.roles?.includes('parent')) {
           destination = 'Onboarding';
@@ -1039,23 +1037,20 @@ function AppContent() {
     }
 
     // Allow access to current page if fully set up
-    if (!hasNoRole && (verified || isUFLStudent) && !needsOnboarding) {
+    if (!hasNoRole && !needsOnboarding) {
       console.log('✅ [FullySetup] Allowing access to:', currentPage);
       setResolvedPage(currentPage);
       return;
     }
 
     // Redirect incomplete users
-    if (inNewUserFlow) {
-      console.log('🔄 [Incomplete] In new user flow → GatorWelcome');
+    // CRITICAL: UFL students OR users with pending roles should ALWAYS go to GatorWelcome
+    if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) {
+      console.log('🔄 [Incomplete] New user flow or UFL student → GatorWelcome');
       navigate('GatorWelcome');
-    } else if (hasNoRole && !pendingRole && currentPage !== 'GatorStudentEmail' && currentPage !== 'GatorParentInvite') {
+    } else if (hasNoRole && !pendingRole) {
       console.log('🔄 [Incomplete] No role → GatorRoleSelection');
       navigate('GatorRoleSelection');
-    } else if (!verified && currentPage !== 'GatorStudentEmail' && currentPage !== 'GatorParentInvite') {
-      // CRITICAL: Don't redirect from email collection pages
-      console.log('🔄 [Incomplete] Not verified → InviteRequired');
-      navigate('InviteRequired');
     } else if (needsOnboarding) {
       const onboardingPage = (user.persona === 'parent' || user.roles?.includes('parent')) ? 'Onboarding' : 'StudentOnboarding';
       console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage);
