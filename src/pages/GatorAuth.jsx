@@ -38,8 +38,15 @@ export default function GatorAuth() {
       setProcessing(true);
       
       setTimeout(() => {
-        console.log('✅ [GatorAuth] SDK ready, redirecting to role selection');
-        window.location.href = window.location.origin + '/#GatorRoleSelection';
+        const pendingRole = sessionStorage.getItem('pending_invite_role');
+        console.log('✅ [GatorAuth] SDK ready, pendingRole:', pendingRole);
+        
+        // If student with pending role, go straight to welcome
+        if (pendingRole === 'gator') {
+          window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
+        } else {
+          window.location.href = window.location.origin + '/#GatorRoleSelection';
+        }
       }, 6000);
       return;
     }
