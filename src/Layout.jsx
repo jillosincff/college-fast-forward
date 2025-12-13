@@ -1042,6 +1042,13 @@ function AppContent() {
     }
 
     // Redirect incomplete users
+    // CRITICAL: Don't redirect if already on a new user flow page (let them complete the flow)
+    if (newUserFlowPages.includes(currentPage)) {
+      console.log('✅ [NewUserFlow] Already on flow page, allowing:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+    
     // CRITICAL: UFL students OR users with pending roles should ALWAYS go to GatorWelcome
     if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) {
       console.log('🔄 [Incomplete] New user flow or UFL student → GatorWelcome');
