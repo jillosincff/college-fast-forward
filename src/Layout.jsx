@@ -842,18 +842,8 @@ function AppContent() {
     // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing
     const pendingRole = sessionStorage.getItem('pending_invite_role');
     
-    // If we have a pending role (from OAuth flow), let it complete first
-    if (user && pendingRole && !user.persona) {
-      console.log('🎯 [OAuth Flow Active] pendingRole:', pendingRole, 'currentPage:', currentPage);
-      
-      // Allow all new user flow pages (role selection, email entry, etc.)
-      if (newUserFlowPages.includes(currentPage)) {
-        console.log('✅ [OAuth Flow] Allowing new user flow page:', currentPage);
-        setResolvedPage(currentPage);
-        return;
-      }
-      
-      // Otherwise redirect to GatorWelcome
+    // If we have a pending role (from OAuth flow), redirect to welcome UNLESS on a new user flow page
+    if (user && pendingRole && !user.persona && !newUserFlowPages.includes(currentPage)) {
       console.log('🔄 [OAuth Flow] Redirecting to GatorWelcome');
       navigate(`GatorWelcome?role=${pendingRole}`);
       return;
