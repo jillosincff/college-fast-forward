@@ -1049,11 +1049,11 @@ function AppContent() {
     if (inNewUserFlow) {
       console.log('🔄 [Incomplete] In new user flow → GatorWelcome');
       navigate('GatorWelcome');
-    } else if (hasNoRole && !pendingRole) {
+    } else if (hasNoRole && !pendingRole && currentPage !== 'GatorStudentEmail' && currentPage !== 'GatorParentInvite') {
       console.log('🔄 [Incomplete] No role → GatorRoleSelection');
       navigate('GatorRoleSelection');
-    } else if (!verified) {
-      // CRITICAL: UFL students are always verified and should NEVER see invite pages
+    } else if (!verified && currentPage !== 'GatorStudentEmail' && currentPage !== 'GatorParentInvite') {
+      // CRITICAL: Don't redirect from email collection pages
       console.log('🔄 [Incomplete] Not verified → InviteRequired');
       navigate('InviteRequired');
     } else if (needsOnboarding) {
