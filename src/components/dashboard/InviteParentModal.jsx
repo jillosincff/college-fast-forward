@@ -262,6 +262,23 @@ College Fast Forward Team`
         <div className="text-xs text-slate-500 text-center border-t pt-3">
           💡 Your parents will use these codes to create their accounts and join your family network
         </div>
+
+        <div className="flex gap-3 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => onSuccess && onSuccess()}
+            className="flex-1"
+          >
+            Skip for now
+          </Button>
+          <Button
+            onClick={() => onSuccess && onSuccess()}
+            disabled={!bothSlotsFilled && !pendingInvites.parent_1 && !pendingInvites.parent_2}
+            className="flex-1"
+          >
+            {bothSlotsFilled ? 'Continue' : 'Done'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
