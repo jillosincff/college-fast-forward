@@ -53,8 +53,9 @@ export default function GatorWelcome() {
             console.log('✅ [GatorWelcome] Parent persona set');
             
             // Then process the invite code to link to student
-            const { processParentInviteCode } = await import('@/functions/processParentInviteCode');
-            const result = await processParentInviteCode({ invite_code: pendingCode });
+            const result = await base44.functions.invoke('processParentInviteCode', { 
+              invite_code: pendingCode 
+            });
             
             if (result.data.success) {
               console.log('✅ [GatorWelcome] Parent linked to student:', result.data);
