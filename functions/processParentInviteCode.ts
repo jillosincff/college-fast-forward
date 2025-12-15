@@ -1,28 +1,43 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
+  console.log('=== PROCESS PARENT INVITE CODE ===');
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     
     if (!user) {
+      console.error('❌ No user authenticated');
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('✅ User:', user.email);
+
     const { invite_code } = await req.json();
+    console.log('📝 Received invite code:', invite_code);
     
     if (!invite_code) {
+      console.error('❌ No invite code provided');
       return Response.json({ error: 'Invite code is required' }, { status: 400 });
     }
 
+    const normalizedCode = invite_code.trim().toUpperCase();
+    console.log('🔍 Looking for code:', normalizedCode);
+
     // Find the invite code
     const inviteCodes = await base44.asServiceRole.entities.InviteCode.filter({
-      code: invite_code.trim().toUpperCase(),
+      code: normalizedCode,
       invite_type: 'gator_to_parent',
       status: 'active'
     });
 
+    console.log('📊 Found codes:', inviteCodes.length);
+    if (inviteCodes.length > 0) {
+      console.log('📋 First code:', JSON.stringify(inviteCodes[0], null, 2));
+    }
+
     if (inviteCodes.length === 0) {
+      console.error('❌ No matching invite code found');
       return Response.json({ 
         success: false, 
         error: 'Invalid or expired invite code' 
