@@ -24,10 +24,9 @@ Deno.serve(async (req) => {
     const normalizedCode = invite_code.trim().toUpperCase();
     console.log('🔍 Looking for code:', normalizedCode);
 
-    // Find the invite code
+    // Find the invite code - support both gator_to_parent and admin_to_parent types
     const inviteCodes = await base44.asServiceRole.entities.InviteCode.filter({
       code: normalizedCode,
-      invite_type: 'gator_to_parent',
       status: 'active'
     });
 
