@@ -47,11 +47,52 @@ Deno.serve(async (req) => {
 
     // Check if code is expired
     if (inviteRecord.expires_at && new Date(inviteRecord.expires_at) < new Date()) {
+      console.error('❌ Invite code expired');
       return Response.json({ 
         success: false, 
         error: 'This invite code has expired' 
       }, { status: 400 });
     }
+
+    // Handle community/admin invites (admin_to_parent) differently
+    if (inviteRecord.invite_type === 'admin_to_parent') {
+      console.log('✅ Processing admin/community invite for parent');
+      
+      // Update parent user with role and mark code as used
+      const parentUpdate = {
+        persona: 'parent',
+        roles: ['parent'],
+        invite_code_used: normalizedCode,
+        onboarding_completed: false
+      };
+
+      await base44.asServiceRole.entities.User.update(user.id, parentUpdate);
+
+      // Increment current_uses for community invites
+      if (inviteRecord.is_community_invite) {
+        const currentUses = inviteRecord.current_uses || 0;
+        await base44.asServiceRole.entities.InviteCode.update(inviteRecord.id, {
+          current_uses: currentUses + 1
+        });
+        console.log(`✅ Community invite usage: ${currentUses + 1}`);
+      } else {
+        // For single-use admin codes, mark as used
+        await base44.asServiceRole.entities.InviteCode.update(inviteRecord.id, {
+          status: 'used',
+          used_by_email: user.email,
+          used_at: new Date().toISOString()
+        });
+      }
+
+      console.log('✅ Parent setup complete via admin invite');
+      return Response.json({
+        success: true,
+        message: 'Parent account created successfully'
+      });
+    }
+
+    // Handle gator_to_parent invites (student inviting their parent)
+    console.log('✅ Processing student-to-parent invite');
 
     // Get the student who created the invite
     const students = await base44.asServiceRole.entities.User.filter({
@@ -59,6 +100,7 @@ Deno.serve(async (req) => {
     });
 
     if (students.length === 0) {
+      console.error('❌ Student not found');
       return Response.json({ 
         success: false, 
         error: 'Student not found' 
@@ -71,6 +113,7 @@ Deno.serve(async (req) => {
     // Check if slot is already filled
     const slotEmail = targetSlot === 'parent_1' ? student.parent_1_email : student.parent_2_email;
     if (slotEmail) {
+      console.error('❌ Parent slot already filled');
       return Response.json({ 
         success: false, 
         error: 'This parent slot is already filled' 
@@ -97,7 +140,7 @@ Deno.serve(async (req) => {
       roles: ['parent'],
       family_group_id: familyGroupId,
       student_emails: student.email,
-      invite_code_used: invite_code.trim().toUpperCase()
+      invite_code_used: normalizedCode
     };
 
     await base44.asServiceRole.entities.User.update(user.id, parentUpdate);
@@ -109,6 +152,7 @@ Deno.serve(async (req) => {
       used_at: new Date().toISOString()
     });
 
+    console.log('✅ Student-parent link complete');
     return Response.json({
       success: true,
       family_group_id: familyGroupId,
