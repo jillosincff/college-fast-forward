@@ -84,7 +84,7 @@ export default function GatorWelcome() {
           } catch (error) {
             console.error('❌ [GatorWelcome] Error:', error);
             await refreshUser(); // Refresh to get parent persona
-            alert('Invite code processing had an issue, but you can connect to your student from the dashboard.');
+            alert('❌ Invite code processing had an issue, but you can connect to your student from the dashboard.');
           }
         };
         
