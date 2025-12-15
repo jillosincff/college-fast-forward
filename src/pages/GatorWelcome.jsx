@@ -57,17 +57,19 @@ export default function GatorWelcome() {
               invite_code: pendingCode 
             });
             
-            if (result.data.success) {
-              console.log('✅ [GatorWelcome] Parent linked to student:', result.data);
+            console.log('✅ [GatorWelcome] Invite code result:', result);
+            
+            if (result.success) {
+              console.log('✅ [GatorWelcome] Parent linked to student:', result);
               await refreshUser();
               trackEvent('parent_linked_via_code', { 
-                student_email: result.data.student_email,
-                parent_slot: result.data.parent_slot 
+                student_email: result.student_email,
+                parent_slot: result.parent_slot 
               });
             } else {
-              console.error('❌ [GatorWelcome] Failed to link:', result.data.error);
+              console.error('❌ [GatorWelcome] Failed to link:', result.error);
               await refreshUser(); // Still refresh to get the parent persona
-              alert(`Note: ${result.data.error}. You can connect to your student later from your dashboard.`);
+              alert(`Note: ${result.error || 'Unable to process invite code'}. You can connect to your student later from your dashboard.`);
             }
           } catch (error) {
             console.error('❌ [GatorWelcome] Error:', error);
