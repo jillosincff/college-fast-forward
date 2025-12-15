@@ -53,14 +53,16 @@ export default function GatorWelcome() {
             console.log('✅ [GatorWelcome] Parent persona set');
             
             // Then process the invite code to link to student
-            const result = await base44.functions.invoke('processParentInviteCode', { 
+            const response = await base44.functions.invoke('processParentInviteCode', { 
               invite_code: pendingCode 
             });
             
+            console.log('✅ [GatorWelcome] Full response:', response);
+            const result = response.data || response;
             console.log('✅ [GatorWelcome] Invite code result:', result);
             
             if (result.success) {
-              console.log('✅ [GatorWelcome] Parent linked to student:', result);
+              console.log('✅ [GatorWelcome] Parent linked successfully:', result);
               await refreshUser();
               trackEvent('parent_linked_via_code', { 
                 student_email: result.student_email,
