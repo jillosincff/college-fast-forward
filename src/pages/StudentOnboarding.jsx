@@ -32,8 +32,38 @@ const POPULAR_ROLES = [
 ];
 
 const INDUSTRIES = [
-  'Tech', 'Finance', 'Consulting', 'Healthcare', 'Consumer / Retail',
-  'Government / Non-profit', 'Media / Entertainment', 'Real Estate', 'Other'
+  'Marketing',
+  'Finance & Banking',
+  'Technology & Software',
+  'Healthcare',
+  'Engineering',
+  'Education',
+  'Law & Legal',
+  'Consulting',
+  'Real Estate',
+  'Media & Entertainment',
+  'Non-Profit',
+  'Government',
+  'Retail',
+  'Manufacturing',
+  'Hospitality',
+  'Other'
+];
+
+const HELP_TYPES = [
+  { value: 'career_advice', label: 'Career advice and guidance', icon: '💼' },
+  { value: 'internship_leads', label: 'Internship or job leads', icon: '🎯' },
+  { value: 'resume_review', label: 'Resume review', icon: '📄' },
+  { value: 'interview_prep', label: 'Interview preparation', icon: '🎤' },
+  { value: 'industry_insights', label: 'Industry insights', icon: '🔍' },
+  { value: 'networking_intros', label: 'Networking introductions', icon: '🤝' },
+  { value: 'informational_interview', label: 'Informational interview', icon: '☕' }
+];
+
+const HELP_TIMELINES = [
+  { value: 'this_week', label: 'This week - urgent!' },
+  { value: 'this_month', label: 'Within this month' },
+  { value: 'no_rush', label: 'No rush, just exploring' }
 ];
 
 const LOCATIONS = [
@@ -73,8 +103,11 @@ export default function StudentOnboarding() {
     major: '',
     resume_url: '',
     linkedin_url: '',
-    // Help Request (Step 1)
-    help_request: '',
+    // Help Request (Step 1) - NEW structured fields for matching
+    help_types: [],
+    help_industry: '',
+    help_description: '',
+    help_timeline: '',
     post_to_emerging: true,
     show_on_directory: true,
     // Career fields (Steps 2-7)
@@ -158,7 +191,7 @@ export default function StudentOnboarding() {
   const canProceed = () => {
     switch (currentStep) {
       case 0: return formData.first_name?.trim() && formData.last_name?.trim() && formData.graduation_year && formData.major?.trim();
-      case 1: return formData.help_request?.trim().length >= 10; // Mandatory help request
+      case 1: return formData.help_types.length > 0 && formData.help_industry && formData.help_description?.trim().length >= 10;
       case 2: return formData.target_roles.length > 0 || formData.custom_role !== '';
       case 3: return formData.target_industries.length > 0;
       case 4: return true; // Dream companies optional
@@ -232,8 +265,8 @@ export default function StudentOnboarding() {
         linkedin_url: formData.linkedin_url?.trim() || ''
       });
 
-      // Create HelpRequest if posting to Emerging Gators (enables matching)
-      if (formData.post_to_emerging && formData.helpTypes?.length > 0) {
+      // Create HelpRequest for matching (if they provided help request info)
+      if (formData.help_types?.length > 0 && formData.help_industry) {
         const studentYear = formData.graduation_year 
           ? `Class of ${formData.graduation_year}` 
           : 'Current Student';
@@ -244,34 +277,34 @@ export default function StudentOnboarding() {
           student_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
           student_major: formData.major?.trim(),
           student_year: studentYear,
-          help_types: formData.helpTypes,
-          industry: formData.industry,
-          description: formData.helpDescription || formData.help_request,
-          timeline: formData.timeline || 'no_rush',
+          help_types: formData.help_types,
+          industry: formData.help_industry,
+          description: formData.help_description,
+          timeline: formData.help_timeline || 'no_rush',
           status: 'active'
         });
 
         // Trigger matching algorithm
         try {
-          await base44.functions.invoke('generateMatches', {
+          const matchResult = await base44.functions.invoke('generateMatches', {
             help_request_id: helpRequest.id,
             mode: 'for_request'
           });
-          console.log('✅ Matches generated for help request:', helpRequest.id);
+          console.log('✅ Matches generated for help request:', helpRequest.id, 'Count:', matchResult?.matches?.length || 0);
         } catch (matchError) {
           console.error('Failed to generate matches:', matchError);
           // Don't fail the whole onboarding if matching fails
         }
       }
 
-      // Update user profile with help request if showing on directory
+      // Update user profile
       const userUpdate = {
         onboarding_completed: true,
         profile_completion_score: 90
       };
       
-      if (formData.show_on_directory) {
-        userUpdate.currently_seeking = formData.helpDescription || formData.help_request;
+      if (formData.show_on_directory && formData.help_description) {
+        userUpdate.currently_seeking = formData.help_description;
       }
 
       // Handle referral code from session
@@ -540,32 +573,112 @@ export default function StudentOnboarding() {
                   </motion.div>
                 )}
 
-                {/* Step 1: Help Request */}
+                {/* Step 1: Help Request - NEW structured format for matching */}
                 {currentStep === 1 && (
                   <motion.div
                     key="step1"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
                   >
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2">
-                      <HelpCircle className="w-6 h-6 text-[#0021A5]" />
-                      What kind of help are you looking for?
-                    </h2>
-                    <p className="text-slate-600 mb-4">This helps Gator parents and alumni know how to help you best.</p>
-                    
-                    <Textarea
-                      value={formData.help_request}
-                      onChange={(e) => updateField('help_request', e.target.value)}
-                      placeholder="e.g., Finance internship in NYC, software engineering job at a startup, informational interview with a consultant, resume review from someone in healthcare..."
-                      rows={5}
-                      className="mb-4 text-base"
-                    />
-                    <p className="text-sm text-slate-500 mb-6">
-                      {formData.help_request.length} characters
-                      {formData.help_request.length < 10 && ' (minimum 10)'}
-                    </p>
+                    <div>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <HelpCircle className="w-6 h-6 text-[#0021A5]" />
+                        What kind of help do you need?
+                      </h2>
+                      <p className="text-slate-600">Select all that apply - this helps us match you with the right Gator parents and alumni.</p>
+                    </div>
 
+                    {/* Help Types */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-3">
+                        Types of help needed *
+                      </label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {HELP_TYPES.map(type => (
+                          <label
+                            key={type.value}
+                            className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                              formData.help_types.includes(type.value)
+                                ? 'border-[#0021A5] bg-blue-50'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.help_types.includes(type.value)}
+                              onChange={() => toggleMultiSelect('help_types', type.value)}
+                              className="w-5 h-5 text-[#0021A5] rounded"
+                            />
+                            <span className="text-xl">{type.icon}</span>
+                            <span className="text-sm font-medium text-slate-700">{type.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Industry */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Which industry? *
+                      </label>
+                      <Select 
+                        value={formData.help_industry} 
+                        onValueChange={(value) => updateField('help_industry', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INDUSTRIES.map(industry => (
+                            <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Tell us more about what you're looking for *
+                      </label>
+                      <Textarea
+                        value={formData.help_description}
+                        onChange={(e) => updateField('help_description', e.target.value)}
+                        placeholder="e.g., Looking for advice on breaking into tech consulting. Interested in learning about the interview process and what skills are most valued..."
+                        rows={4}
+                        className="text-base"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        {formData.help_description?.length || 0} characters (minimum 10)
+                      </p>
+                    </div>
+
+                    {/* Timeline */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        When do you need this help? *
+                      </label>
+                      <div className="space-y-2">
+                        {HELP_TIMELINES.map(timeline => (
+                          <button
+                            key={timeline.value}
+                            type="button"
+                            onClick={() => updateField('help_timeline', timeline.value)}
+                            className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                              formData.help_timeline === timeline.value
+                                ? 'border-[#0021A5] bg-blue-50'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="font-medium text-slate-800">{timeline.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Visibility Options */}
                     <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 space-y-3">
                       <p className="text-sm font-semibold text-blue-900 mb-3">Where should this appear?</p>
                       
@@ -602,14 +715,6 @@ export default function StudentOnboarding() {
                           </p>
                         </div>
                       </label>
-
-                      {!formData.post_to_emerging && !formData.show_on_directory && (
-                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <p className="text-sm text-yellow-800">
-                            ℹ️ Your request will be private. You can still browse opportunities and connect with Gators.
-                          </p>
-                        </div>
-                      )}
                     </div>
                   </motion.div>
                 )}
