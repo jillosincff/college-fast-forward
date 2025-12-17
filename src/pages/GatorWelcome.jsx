@@ -58,6 +58,14 @@ export default function GatorWelcome() {
             // Increment user counter
             await base44.functions.invoke('incrementUserCount', { user_id: user.id });
             
+            // Notify admin of new user
+            await base44.functions.invoke('notifyNewUserJoined', {
+              user_email: user.email,
+              user_name: user.full_name,
+              user_persona: 'parent',
+              user_id: user.id
+            });
+            
             // Then process the invite code to link to student
             const response = await base44.functions.invoke('processParentInviteCode', { 
               invite_code: pendingCode 
@@ -109,6 +117,14 @@ export default function GatorWelcome() {
           
           // Increment user counter
           base44.functions.invoke('incrementUserCount', { user_id: user.id });
+          
+          // Notify admin of new user
+          base44.functions.invoke('notifyNewUserJoined', {
+            user_email: user.email,
+            user_name: user.full_name,
+            user_persona: pendingRole,
+            user_id: user.id
+          });
         }).catch(err => {
           console.error('❌ [GatorWelcome] Failed to set role:', err);
         });
