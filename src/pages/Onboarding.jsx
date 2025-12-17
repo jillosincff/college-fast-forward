@@ -12,18 +12,36 @@ import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
 import ConnectGatorStep from '@/components/onboarding/parent/ConnectGatorStep';
+import { ParentExpertise } from '@/entities/ParentExpertise';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const industries = [
-  "Finance", "Tech", "Healthcare", "Engineering", "Consulting",
-  "Real Estate", "Law", "Marketing", "Government", "Entrepreneurship", "Other"
+const INDUSTRIES = [
+  'Marketing',
+  'Finance & Banking',
+  'Technology & Software',
+  'Healthcare',
+  'Engineering',
+  'Education',
+  'Law & Legal',
+  'Consulting',
+  'Real Estate',
+  'Media & Entertainment',
+  'Non-Profit',
+  'Government',
+  'Retail',
+  'Manufacturing',
+  'Hospitality',
+  'Other'
 ];
 
-const primaryGoals = [
-  { id: 'career_advice', label: 'Career advice & mock interviews' },
-  { id: 'job_leads', label: 'Internship or job leads at my company / network' },
-  { id: 'resume_reviews', label: 'Resume & LinkedIn reviews' },
-  { id: 'friendly_ear', label: 'Just be a friendly Gator ear when they\'re stressed' },
-  { id: 'all_in', label: 'All of the above (I\'m all in!)' }
+const HELP_TYPES = [
+  { value: 'career_advice', label: 'Career advice and guidance' },
+  { value: 'internship_leads', label: 'Internship or job leads' },
+  { value: 'resume_review', label: 'Resume review' },
+  { value: 'interview_prep', label: 'Interview preparation' },
+  { value: 'industry_insights', label: 'Industry insights' },
+  { value: 'networking_intros', label: 'Networking introductions' },
+  { value: 'informational_interview', label: 'Informational interview' }
 ];
 
 
@@ -41,9 +59,10 @@ export default function Onboarding() {
     full_name: user?.full_name || '',
     current_company: user?.current_company || '',
     current_position: user?.current_position || '',
-    industries: user?.industries || [],
-    primary_goal: user?.primary_goal || [],
-    dream_companies: user?.dream_companies || '',
+    industry: user?.industry || '',
+    years_experience: user?.years_experience || '',
+    help_types: user?.help_types || [],
+    company_connections: user?.company_connections || '',
     bio: user?.bio || '',
     visible_in_directory: user?.visible_in_directory !== false,
     student_emails: ''
@@ -58,21 +77,13 @@ export default function Onboarding() {
     });
   }, [user?.id]);
 
-  const handleIndustryToggle = (industry) => {
+  const handleHelpTypeToggle = (helpType) => {
     setFormData(prev => {
-      const current = prev.industries || [];
-      if (current.includes(industry)) {
-        return { ...prev, industries: current.filter(i => i !== industry) };
+      const current = prev.help_types || [];
+      if (current.includes(helpType)) {
+        return { ...prev, help_types: current.filter(h => h !== helpType) };
       }
-      if (current.length >= 3) {
-        toast({
-          title: "Maximum 3 industries",
-          description: "Please select up to 3 industries only.",
-          variant: "destructive"
-        });
-        return prev;
-      }
-      return { ...prev, industries: [...current, industry] };
+      return { ...prev, help_types: [...current, helpType] };
     });
   };
 
@@ -80,8 +91,10 @@ export default function Onboarding() {
     const newErrors = {};
     
     if (!formData.full_name?.trim()) newErrors.full_name = 'Required';
-    if (!formData.industries?.length) newErrors.industries = 'Select at least 1';
-    if (!formData.primary_goal?.length) newErrors.primary_goal = 'Required';
+    if (!formData.current_position?.trim()) newErrors.current_position = 'Required';
+    if (!formData.industry) newErrors.industry = 'Required';
+    if (!formData.years_experience) newErrors.years_experience = 'Required';
+    if (!formData.help_types?.length) newErrors.help_types = 'Select at least 1';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -105,9 +118,9 @@ export default function Onboarding() {
         full_name: formData.full_name,
         current_company: formData.current_company,
         current_position: formData.current_position,
-        industries: formData.industries,
-        primary_goal: formData.primary_goal,
-        dream_companies: formData.dream_companies,
+        industry: formData.industry,
+        years_experience: formData.years_experience,
+        company_connections: formData.company_connections,
         bio: formData.bio,
         onboarding_completed: true,
         expertise_shared: true,
@@ -122,6 +135,34 @@ export default function Onboarding() {
       }
 
       await base44.auth.updateMe(updateData);
+
+      // Create ParentExpertise profile for matching
+      await ParentExpertise.create({
+        parent_id: user.id,
+        parent_email: user.email,
+        parent_name: formData.full_name,
+        industry: formData.industry,
+        current_role: formData.current_position,
+        current_company: formData.current_company || '',
+        years_experience: formData.years_experience,
+        help_types: formData.help_types,
+        company_connections: formData.company_connections || '',
+        available: true
+      });
+
+      // Trigger matching for existing student requests
+      try {
+        const parentExpertise = await ParentExpertise.filter({ parent_id: user.id });
+        if (parentExpertise && parentExpertise.length > 0) {
+          await base44.functions.invoke('generateMatches', {
+            parent_expertise_id: parentExpertise[0].id,
+            mode: 'for_parent'
+          });
+          console.log('✅ Generated matches for parent expertise');
+        }
+      } catch (matchError) {
+        console.error('Failed to generate matches:', matchError);
+      }
 
       // Link students if provided
       if (formData.student_emails?.trim()) {
@@ -236,113 +277,180 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #FDF8F3 0%, #FEFCFA 100%)' }}>
-      {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-1/2 h-1/2 opacity-10 pointer-events-none" 
-        style={{ 
-          background: 'radial-gradient(circle, rgba(250, 70, 22, 0.08) 0%, transparent 70%)',
-          borderRadius: '50%',
-          animation: 'float 20s ease-in-out infinite'
-        }} 
-      />
-      <div className="absolute bottom-0 left-0 w-3/4 h-3/4 opacity-10 pointer-events-none" 
-        style={{ 
-          background: 'radial-gradient(circle, rgba(0, 33, 165, 0.05) 0%, transparent 70%)',
-          borderRadius: '50%',
-          animation: 'float 25s ease-in-out infinite reverse'
-        }} 
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-12 shadow-2xl border border-white/80">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-xl p-8"
+        >
           {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-5xl font-bold mb-3" style={{ fontFamily: "'Playfair Display', serif", color: '#003865', letterSpacing: '-0.02em' }}>
-              UF Gator Network
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-[#0021A5] mb-2">
+              Share Your Expertise
             </h1>
-            <p className="text-xl text-gray-600 font-medium">
-              Where Gators connect for careers
+            <p className="text-slate-600">
+              Help us match you with students who need your guidance
             </p>
           </div>
 
-          {/* Auth Section */}
+          {/* Form */}
           <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold mb-2" style={{ color: '#003865' }}>
-                Sign in with your @ufl.edu email
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Your data is secure. We only use this to verify you're a UF student.
+            {/* Full Name */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Full Name *</Label>
+              <Input
+                value={formData.full_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="John Smith"
+                className={errors.full_name ? 'border-red-300' : ''}
+              />
+              {errors.full_name && <p className="text-red-600 text-xs mt-1">{errors.full_name}</p>}
+            </div>
+
+            {/* Current Position */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Current Role/Title *</Label>
+              <Input
+                value={formData.current_position}
+                onChange={(e) => setFormData(prev => ({ ...prev, current_position: e.target.value }))}
+                placeholder="e.g., Senior Marketing Manager"
+                className={errors.current_position ? 'border-red-300' : ''}
+              />
+              {errors.current_position && <p className="text-red-600 text-xs mt-1">{errors.current_position}</p>}
+            </div>
+
+            {/* Current Company */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Current Company (optional)</Label>
+              <Input
+                value={formData.current_company}
+                onChange={(e) => setFormData(prev => ({ ...prev, current_company: e.target.value }))}
+                placeholder="e.g., Google"
+              />
+            </div>
+
+            {/* Industry */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Industry *</Label>
+              <Select 
+                value={formData.industry} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}
+              >
+                <SelectTrigger className={errors.industry ? 'border-red-300' : ''}>
+                  <SelectValue placeholder="Select your industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INDUSTRIES.map(industry => (
+                    <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.industry && <p className="text-red-600 text-xs mt-1">{errors.industry}</p>}
+            </div>
+
+            {/* Years of Experience */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Years of Experience *</Label>
+              <Select 
+                value={formData.years_experience} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, years_experience: value }))}
+              >
+                <SelectTrigger className={errors.years_experience ? 'border-red-300' : ''}>
+                  <SelectValue placeholder="Select experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5-10">5-10 years</SelectItem>
+                  <SelectItem value="10-15">10-15 years</SelectItem>
+                  <SelectItem value="15-20">15-20 years</SelectItem>
+                  <SelectItem value="20+">20+ years</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.years_experience && <p className="text-red-600 text-xs mt-1">{errors.years_experience}</p>}
+            </div>
+
+            {/* Help Types */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700 mb-3 block">
+                What types of help can you provide? * <span className="text-xs font-normal text-slate-500">(Select all that apply)</span>
+              </Label>
+              <div className="grid grid-cols-1 gap-2">
+                {HELP_TYPES.map(type => (
+                  <label
+                    key={type.value}
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      formData.help_types.includes(type.value)
+                        ? 'border-[#0021A5] bg-blue-50'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.help_types.includes(type.value)}
+                      onChange={() => handleHelpTypeToggle(type.value)}
+                      className="w-5 h-5 text-[#0021A5] rounded"
+                    />
+                    <span className="text-sm font-medium text-slate-700">{type.label}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.help_types && <p className="text-red-600 text-xs mt-1">{errors.help_types}</p>}
+            </div>
+
+            {/* Company Connections */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">
+                Companies/organizations you have connections at (optional)
+              </Label>
+              <Input
+                value={formData.company_connections}
+                onChange={(e) => setFormData(prev => ({ ...prev, company_connections: e.target.value }))}
+                placeholder="e.g., Google, Microsoft, Meta (comma-separated)"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                List companies where you have hiring connections or insider knowledge
               </p>
             </div>
 
-            {/* Referral Code Section */}
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setShowReferralInput(!showReferralInput)}
-                className="inline-flex items-center gap-2 text-[#FA4616] font-medium hover:bg-orange-50 rounded-lg px-4 py-2 transition-all"
-              >
-                Have a referral code? Drop it here so we give your friend credit
-                <div 
-                  className={`w-5 h-5 border-2 border-current rounded-full flex items-center justify-center text-xs font-bold transition-all ${showReferralInput ? 'rotate-45 bg-[#FA4616] text-white' : 'bg-orange-50'}`}
-                >
-                  +
-                </div>
-              </button>
-              
-              {showReferralInput && (
-                <motion.div
-                  initial={{ opacity: 0, maxHeight: 0 }}
-                  animate={{ opacity: 1, maxHeight: 100 }}
-                  transition={{ duration: 0.3 }}
-                  className="mt-4"
-                >
-                  <Input
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value)}
-                    placeholder="Enter your friend's referral code"
-                    className="text-center text-lg border-2 border-gray-200 focus:border-[#FA4616] rounded-xl py-6 bg-[#FEFCFA]"
-                    autoFocus
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    We'll make sure your friend gets credit for referring you!
-                  </p>
-                </motion.div>
-              )}
+            {/* Bio */}
+            <div>
+              <Label className="text-sm font-semibold text-slate-700">Bio (optional)</Label>
+              <Textarea
+                value={formData.bio}
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Tell students a bit about yourself and your career journey..."
+                rows={4}
+              />
             </div>
 
-            {/* Google Button */}
-            <button
-              onClick={() => {
-                if (referralCode?.trim()) {
-                  sessionStorage.setItem('pending_referral_code', referralCode.trim());
-                  console.log('🎟️ Stored referral code:', referralCode.trim());
-                }
-                base44.auth.redirectToLogin(window.location.origin + '/#GatorRoleSelection');
-              }}
-              className="w-full bg-gradient-to-r from-[#0021A5] to-[#003865] text-white rounded-2xl py-4 text-lg font-semibold hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
-            >
-              <span>Continue with Google</span>
-              <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            </button>
-          </div>
-        </div>
-      </motion.div>
+            {/* Visibility Toggle */}
+            <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.visible_in_directory}
+                onChange={(e) => setFormData(prev => ({ ...prev, visible_in_directory: e.target.checked }))}
+                className="w-5 h-5 text-[#0021A5] rounded"
+              />
+              <div>
+                <p className="font-medium text-slate-900">Show in Gator Directory</p>
+                <p className="text-sm text-slate-600">Students can discover and message you</p>
+              </div>
+            </label>
 
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          33% { transform: translate(-20px, -30px) rotate(2deg); }
-          66% { transform: translate(20px, -20px) rotate(-1deg); }
-        }
-      `}</style>
+            {/* Submit Button */}
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-[#0021A5] to-[#003865] hover:from-[#001580] hover:to-[#002050] text-white py-6 text-lg font-semibold rounded-xl"
+            >
+              {isSubmitting ? 'Saving...' : 'Complete Setup & Start Helping'}
+            </Button>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
