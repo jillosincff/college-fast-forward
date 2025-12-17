@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Mail, Star, Sparkles, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Loader2, Mail, Sparkles, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -16,9 +16,9 @@ export default function StudentMatchesWidget({ user }) {
   const [helpRequests, setHelpRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRequestId, setExpandedRequestId] = useState(null);
-  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [connectMessage, setConnectMessage] = useState('');
+  const [messageText, setMessageText] = useState('');
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
@@ -35,8 +35,7 @@ export default function StudentMatchesWidget({ user }) {
       const requestsWithMatches = await Promise.all(
         requests.map(async (request) => {
           const matches = await Match.filter({ 
-            help_request_id: request.id,
-            status: { $ne: 'passed' }
+            help_request_id: request.id
           }, '-match_score');
           
           return {
@@ -86,7 +85,7 @@ export default function StudentMatchesWidget({ user }) {
     return '⭐'.repeat(count);
   };
 
-  const handleConnect = (match, request) => {
+  const handleMessage = (match, request) => {
     setSelectedMatch({ ...match, request });
     
     const helpTypesList = request.help_types.map(getHelpTypeLabel).join(', ');
@@ -94,45 +93,37 @@ export default function StudentMatchesWidget({ user }) {
 
 I saw you're a great match for my request for ${helpTypesList}. I'm a ${request.student_year || 'student'} studying ${request.student_major || 'at UF'}.
 
-${request.description.substring(0, 150)}${request.description.length > 150 ? '...' : ''}
+${request.description}
 
 Would you have time for a quick conversation?
 
 Thanks so much!
 ${user?.first_name || user?.full_name || ''}`;
     
-    setConnectMessage(message);
-    setShowConnectModal(true);
+    setMessageText(message);
+    setShowMessageModal(true);
   };
 
-  const sendConnectionRequest = async () => {
-    if (!selectedMatch || !connectMessage.trim()) return;
+  const sendMessage = async () => {
+    if (!selectedMatch || !messageText.trim()) return;
     
     setIsSending(true);
     try {
-      await base44.integrations.Core.SendEmail({
-        to: selectedMatch.parent_email || selectedMatch.request.student_email,
-        subject: `Connection Request: ${user?.full_name || 'A UF Student'} wants to connect`,
-        body: connectMessage
+      await base44.functions.invoke('sendStudentMessageToParent', {
+        match_id: selectedMatch.id,
+        message: messageText,
+        parent_email: selectedMatch.parent_email,
+        parent_name: selectedMatch.parent_name
       });
-
-      await Match.update(selectedMatch.id, { status: 'student_connected' });
       
-      setHelpRequests(prev => prev.map(request => ({
-        ...request,
-        matches: request.matches.map(match =>
-          match.id === selectedMatch.id
-            ? { ...match, status: 'student_connected' }
-            : match
-        )
-      })));
-      
-      setShowConnectModal(false);
+      setShowMessageModal(false);
       setSelectedMatch(null);
-      setConnectMessage('');
+      setMessageText('');
+      
+      alert('Message sent! The parent will receive your email and can respond directly to you.');
     } catch (error) {
-      console.error('Failed to send connection:', error);
-      alert('Failed to send connection request. Please try again.');
+      console.error('Failed to send message:', error);
+      alert('Failed to send message. Please try again.');
     } finally {
       setIsSending(false);
     }
@@ -276,30 +267,14 @@ ${user?.first_name || user?.full_name || ''}`;
                             </div>
 
                             <div className="flex-shrink-0">
-                              {match.status === 'pending' && (
-                                <Button
-                                  onClick={() => handleConnect(match, request)}
-                                  className="bg-[#FA4616] hover:bg-[#E03D0F] whitespace-nowrap"
-                                  size="sm"
-                                >
-                                  Connect
-                                </Button>
-                              )}
-                              {match.status === 'student_connected' && (
-                                <Badge className="bg-yellow-100 text-yellow-800">
-                                  Pending...
-                                </Badge>
-                              )}
-                              {match.status === 'parent_reached_out' && (
-                                <Badge className="bg-blue-100 text-blue-800">
-                                  Parent Reached Out!
-                                </Badge>
-                              )}
-                              {match.status === 'connected' && (
-                                <Badge className="bg-green-100 text-green-800">
-                                  Connected ✓
-                                </Badge>
-                              )}
+                              <Button
+                                onClick={() => handleMessage(match, request)}
+                                className="bg-[#FA4616] hover:bg-[#E03D0F] whitespace-nowrap"
+                                size="sm"
+                              >
+                                <Mail className="w-4 h-4 mr-2" />
+                                Message
+                              </Button>
                             </div>
                           </div>
                         </motion.div>
@@ -341,11 +316,11 @@ ${user?.first_name || user?.full_name || ''}`;
         </CardContent>
       </Card>
 
-      {/* Connect Modal */}
-      <Dialog open={showConnectModal} onOpenChange={setShowConnectModal}>
+      {/* Message Modal */}
+      <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-[#0021A5]">Send Connection Request</DialogTitle>
+            <DialogTitle className="text-[#0021A5]">Message Parent</DialogTitle>
           </DialogHeader>
           
           {selectedMatch && (
@@ -366,26 +341,32 @@ ${user?.first_name || user?.full_name || ''}`;
                   Your message:
                 </label>
                 <Textarea
-                  value={connectMessage}
-                  onChange={(e) => setConnectMessage(e.target.value)}
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
                   rows={8}
                   placeholder="Introduce yourself and explain what help you're looking for..."
                   className="text-sm"
                 />
               </div>
 
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  💡 Your message will be sent to the parent's email. They can respond directly to you.
+                </p>
+              </div>
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => setShowConnectModal(false)}
+                  onClick={() => setShowMessageModal(false)}
                   className="flex-1"
                   disabled={isSending}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={sendConnectionRequest}
-                  disabled={!connectMessage.trim() || isSending}
+                  onClick={sendMessage}
+                  disabled={!messageText.trim() || isSending}
                   className="flex-1 bg-[#FA4616] hover:bg-[#E03D0F]"
                 >
                   {isSending ? (
@@ -396,7 +377,7 @@ ${user?.first_name || user?.full_name || ''}`;
                   ) : (
                     <>
                       <Mail className="w-4 h-4 mr-2" />
-                      Send Request
+                      Send Message
                     </>
                   )}
                 </Button>
