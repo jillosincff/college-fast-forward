@@ -12,6 +12,8 @@ export default function TestingDashboard() {
   const [testUserId, setTestUserId] = useState('');
   const [parentTestResults, setParentTestResults] = useState(null);
   const [isTestingParent, setIsTestingParent] = useState(false);
+  const [accuracyCheck, setAccuracyCheck] = useState(null);
+  const [isCheckingAccuracy, setIsCheckingAccuracy] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -28,6 +30,17 @@ export default function TestingDashboard() {
     } catch (error) {
       console.error('Failed to load count:', error);
     }
+  };
+
+  const checkCountAccuracy = async () => {
+    setIsCheckingAccuracy(true);
+    try {
+      const result = await base44.functions.invoke('checkUserCountAccuracy', {});
+      setAccuracyCheck(result.data);
+    } catch (error) {
+      setAccuracyCheck({ error: error.message });
+    }
+    setIsCheckingAccuracy(false);
   };
 
   const addResult = (test, status, message, details = null) => {
@@ -177,6 +190,55 @@ export default function TestingDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Counter Accuracy Check */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Counter Accuracy Check</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={checkCountAccuracy}
+              disabled={isCheckingAccuracy}
+              variant="outline"
+            >
+              {isCheckingAccuracy ? 'Checking...' : 'Check Counter vs Actual Users'}
+            </Button>
+
+            {accuracyCheck && (
+              <div className={`p-4 rounded-lg border ${
+                accuracyCheck.is_accurate 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Counter Value:</span>
+                    <span className="font-mono">{accuracyCheck.counter_value}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Actual Users:</span>
+                    <span className="font-mono">{accuracyCheck.actual_user_count}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Difference:</span>
+                    <span className={`font-mono ${accuracyCheck.difference !== 0 ? 'text-red-600 font-bold' : 'text-green-600'}`}>
+                      {accuracyCheck.difference > 0 ? '+' : ''}{accuracyCheck.difference}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="font-medium">Spots Left (Actual):</span>
+                    <span className="font-mono font-bold text-lg">{accuracyCheck.spots_left_actual}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Spots Left (Counter):</span>
+                    <span className="font-mono">{accuracyCheck.spots_left_by_counter}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Test Controls */}
         <Card className="mb-8">
