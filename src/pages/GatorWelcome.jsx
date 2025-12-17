@@ -35,6 +35,9 @@ export default function GatorWelcome() {
         }).then(() => {
           console.log('✅ [GatorWelcome] UFL student role set');
           refreshUser();
+          
+          // Increment user counter
+          base44.functions.invoke('incrementUserCount', { user_id: user.id });
         });
       }
       // If parent with invite code, set persona first then process invite
@@ -51,6 +54,9 @@ export default function GatorWelcome() {
               onboarding_completed: false
             });
             console.log('✅ [GatorWelcome] Parent persona set');
+            
+            // Increment user counter
+            await base44.functions.invoke('incrementUserCount', { user_id: user.id });
             
             // Then process the invite code to link to student
             const response = await base44.functions.invoke('processParentInviteCode', { 
@@ -100,6 +106,9 @@ export default function GatorWelcome() {
         }).then(() => {
           console.log('✅ [GatorWelcome] Role set successfully');
           refreshUser();
+          
+          // Increment user counter
+          base44.functions.invoke('incrementUserCount', { user_id: user.id });
         }).catch(err => {
           console.error('❌ [GatorWelcome] Failed to set role:', err);
         });
