@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { User } from '@/entities/User';
 import { JobRequest } from '@/entities/JobRequest';
+import { HelpRequest } from '@/entities/HelpRequest';
 import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -230,6 +232,38 @@ export default function StudentOnboarding() {
         linkedin_url: formData.linkedin_url?.trim() || ''
       });
 
+      // Create HelpRequest if posting to Emerging Gators (enables matching)
+      if (formData.post_to_emerging && formData.helpTypes?.length > 0) {
+        const studentYear = formData.graduation_year 
+          ? `Class of ${formData.graduation_year}` 
+          : 'Current Student';
+        
+        const helpRequest = await HelpRequest.create({
+          student_id: user.id,
+          student_email: user.email,
+          student_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
+          student_major: formData.major?.trim(),
+          student_year: studentYear,
+          help_types: formData.helpTypes,
+          industry: formData.industry,
+          description: formData.helpDescription || formData.help_request,
+          timeline: formData.timeline || 'no_rush',
+          status: 'active'
+        });
+
+        // Trigger matching algorithm
+        try {
+          await base44.functions.invoke('generateMatches', {
+            help_request_id: helpRequest.id,
+            mode: 'for_request'
+          });
+          console.log('✅ Matches generated for help request:', helpRequest.id);
+        } catch (matchError) {
+          console.error('Failed to generate matches:', matchError);
+          // Don't fail the whole onboarding if matching fails
+        }
+      }
+
       // Update user profile with help request if showing on directory
       const userUpdate = {
         onboarding_completed: true,
@@ -237,7 +271,7 @@ export default function StudentOnboarding() {
       };
       
       if (formData.show_on_directory) {
-        userUpdate.currently_seeking = formData.help_request;
+        userUpdate.currently_seeking = formData.helpDescription || formData.help_request;
       }
 
       // Handle referral code from session
