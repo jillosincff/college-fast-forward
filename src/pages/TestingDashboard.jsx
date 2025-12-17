@@ -14,6 +14,7 @@ export default function TestingDashboard() {
   const [isTestingParent, setIsTestingParent] = useState(false);
   const [accuracyCheck, setAccuracyCheck] = useState(null);
   const [isCheckingAccuracy, setIsCheckingAccuracy] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -41,6 +42,19 @@ export default function TestingDashboard() {
       setAccuracyCheck({ error: error.message });
     }
     setIsCheckingAccuracy(false);
+  };
+
+  const syncCounter = async () => {
+    setIsSyncing(true);
+    try {
+      const result = await base44.functions.invoke('syncUserCounter', {});
+      alert(result.data.message);
+      await loadCurrentCount();
+      await checkCountAccuracy();
+    } catch (error) {
+      alert('Sync failed: ' + error.message);
+    }
+    setIsSyncing(false);
   };
 
   const addResult = (test, status, message, details = null) => {
@@ -197,13 +211,25 @@ export default function TestingDashboard() {
             <CardTitle>Counter Accuracy Check</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button
-              onClick={checkCountAccuracy}
-              disabled={isCheckingAccuracy}
-              variant="outline"
-            >
-              {isCheckingAccuracy ? 'Checking...' : 'Check Counter vs Actual Users'}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={checkCountAccuracy}
+                disabled={isCheckingAccuracy}
+                variant="outline"
+              >
+                {isCheckingAccuracy ? 'Checking...' : 'Check Counter vs Actual Users'}
+              </Button>
+              
+              {accuracyCheck && !accuracyCheck.is_accurate && (
+                <Button
+                  onClick={syncCounter}
+                  disabled={isSyncing}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  {isSyncing ? 'Syncing...' : 'Sync Counter to Actual'}
+                </Button>
+              )}
+            </div>
 
             {accuracyCheck && (
               <div className={`p-4 rounded-lg border ${
