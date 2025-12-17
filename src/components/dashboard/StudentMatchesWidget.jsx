@@ -109,18 +109,18 @@ ${user?.first_name || user?.full_name || ''}`;
     
     setIsSending(true);
     try {
-      await base44.functions.invoke('sendStudentMessageToParent', {
+      const result = await base44.functions.invoke('sendStudentMessageToParent', {
         match_id: selectedMatch.id,
-        message: messageText,
-        parent_email: selectedMatch.parent_email,
-        parent_name: selectedMatch.parent_name
+        message: messageText
       });
       
-      setShowMessageModal(false);
-      setSelectedMatch(null);
-      setMessageText('');
-      
-      alert('Message sent! The parent will receive your email and can respond directly to you.');
+      if (result.data?.success) {
+        setShowMessageModal(false);
+        setSelectedMatch(null);
+        setMessageText('');
+        
+        alert(`Message sent to ${selectedMatch.parent_name}! They'll receive your email and can respond directly to ${user.email}.`);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       alert('Failed to send message. Please try again.');
