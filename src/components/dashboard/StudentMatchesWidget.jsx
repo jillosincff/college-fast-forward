@@ -133,10 +133,16 @@ ${user?.first_name || user?.full_name || ''}`;
     if (!confirm('Close this request and remove all matches?')) return;
     
     try {
-      await HelpRequest.update(requestId, { status: 'closed' });
-      setHelpRequests(prev => prev.filter(req => req.id !== requestId));
+      const result = await base44.functions.invoke('closeHelpRequest', { 
+        help_request_id: requestId 
+      });
+      
+      if (result.data?.success) {
+        setHelpRequests(prev => prev.filter(req => req.id !== requestId));
+      }
     } catch (error) {
       console.error('Failed to close request:', error);
+      alert('Failed to close request. Please try again.');
     }
   };
 
