@@ -290,9 +290,23 @@ export default function StudentOnboarding() {
             help_request_id: helpRequest.id,
             mode: 'for_request'
           });
-          console.log('✅ Matches generated for help request:', helpRequest.id, 'Count:', matchResult?.matches?.length || 0);
+          console.log('✅ Matches generated for help request:', helpRequest.id);
+          
+          // Notify parents about the new request
+          if (matchResult?.data?.matches?.length > 0) {
+            await base44.functions.invoke('notifyParentsOfNewRequest', {
+              help_request_id: helpRequest.id
+            });
+            console.log('✅ Notified parents of new request');
+          }
+          
+          // Notify student about their matches
+          await base44.functions.invoke('notifyStudentOfMatches', {
+            help_request_id: helpRequest.id
+          });
+          console.log('✅ Notified student of matches');
         } catch (matchError) {
-          console.error('Failed to generate matches:', matchError);
+          console.error('Failed to generate matches or send notifications:', matchError);
           // Don't fail the whole onboarding if matching fails
         }
       }

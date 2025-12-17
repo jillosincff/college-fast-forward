@@ -152,13 +152,46 @@ export default function Onboarding() {
 
       // Trigger matching for existing student requests
       try {
-        const parentExpertise = await ParentExpertise.filter({ parent_id: user.id });
-        if (parentExpertise && parentExpertise.length > 0) {
-          await base44.functions.invoke('generateMatches', {
-            parent_expertise_id: parentExpertise[0].id,
+        const parentExpertiseRecords = await ParentExpertise.filter({ parent_id: user.id });
+        if (parentExpertiseRecords && parentExpertiseRecords.length > 0) {
+          const matchResult = await base44.functions.invoke('generateMatches', {
+            parent_expertise_id: parentExpertiseRecords[0].id,
             mode: 'for_parent'
           });
           console.log('✅ Generated matches for parent expertise');
+          
+          // Notify students about the new parent who can help
+          if (matchResult?.data?.matches?.length > 0) {
+            const uniqueStudentEmails = [...new Set(matchResult.data.matches.map(m => m.student_email))];
+            
+            for (const studentEmail of uniqueStudentEmails) {
+              try {
+                await base44.integrations.Core.SendEmail({
+                  to: studentEmail,
+                  subject: `🎉 A new Gator parent just joined who can help you!`,
+                  body: `Hi there,
+
+Good news! A Gator parent just joined the network who matches your help request.
+
+**They can help with:**
+${formData.help_types.map(t => `• ${t.replace('_', ' ')}`).join('\n')}
+
+**Their background:**
+• ${formData.current_position} ${formData.current_company ? `at ${formData.current_company}` : ''}
+• ${formData.industry}
+• ${formData.years_experience} of experience
+
+🚀 **Connect with them:**
+Log in to your dashboard to see your new match and reach out!
+${Deno.env.get('APP_URL') || 'https://your-app.com'}/#Dashboard
+
+The Gator Network Team`
+                });
+              } catch (emailError) {
+                console.error('Failed to notify student:', studentEmail, emailError);
+              }
+            }
+          }
         }
       } catch (matchError) {
         console.error('Failed to generate matches:', matchError);

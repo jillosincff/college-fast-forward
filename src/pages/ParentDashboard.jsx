@@ -33,6 +33,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ParentMatchesWidget from '@/components/dashboard/ParentMatchesWidget';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -342,6 +343,9 @@ export default function ParentDashboard() {
           </div>
         )}
 
+        {/* Parent Matches Widget - Students You Can Help */}
+        <ParentMatchesWidget user={user} />
+        
         {/* Connect With Your Gator Card */}
         <Card className="border-2 border-slate-200 shadow-lg">
           <CardContent className="p-8">
