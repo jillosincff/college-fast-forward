@@ -38,6 +38,14 @@ export default function GatorWelcome() {
           
           // Increment user counter
           base44.functions.invoke('incrementUserCount', { user_id: user.id });
+          
+          // Notify admin of new user
+          base44.functions.invoke('notifyNewUserJoined', {
+            user_email: user.email,
+            user_name: user.full_name,
+            user_persona: 'gator',
+            user_id: user.id
+          });
         });
       }
       // If parent with invite code, set persona first then process invite
