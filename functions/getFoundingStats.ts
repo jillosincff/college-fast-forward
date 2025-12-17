@@ -4,20 +4,17 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Get current counter
-    const settings = await base44.asServiceRole.entities.GlobalSettings.filter({
-      setting_key: 'total_users_count'
-    });
-
-    const currentCount = settings.length > 0 ? settings[0].value : 570;
-    const spotsLeft = Math.max(0, 1000 - currentCount);
+    // Get actual user count from database
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const actualCount = allUsers.length;
+    const spotsLeft = Math.max(0, 1000 - actualCount);
 
     return Response.json({
       success: true,
-      total_users: currentCount,
+      total_users: actualCount,
       spots_left: spotsLeft,
       founding_limit: 1000,
-      founding_active: currentCount <= 1000
+      founding_active: actualCount <= 1000
     });
 
   } catch (error) {
