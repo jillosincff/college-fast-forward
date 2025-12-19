@@ -880,25 +880,31 @@ function AppContent() {
       return;
     }
 
-    // Parent invite flow - check user record
-    if (user && user.persona === 'parent' && user.invite_code_used && !user.onboarding_completed) {
-      console.log('🎯 [Parent Flow] Parent needs onboarding');
+    // CRITICAL: Check if user is in active new signup flow (onboarding not completed)
+    // This ensures users going through signup aren't redirected to dashboard prematurely
+    if (user && !user.onboarding_completed) {
+      console.log('🎯 [Onboarding Flow] User needs to complete onboarding, persona:', user.persona);
 
-      if (currentPage !== 'Onboarding' && currentPage !== 'GatorWelcome') {
-        console.log('🔄 [Parent Flow] -> Onboarding');
-        navigate('Onboarding');
+      // Allow new user flow pages during signup
+      if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) {
+        console.log('✅ [Onboarding Flow] Allowing flow page:', currentPage);
+        setResolvedPage(currentPage);
         return;
       }
-    }
 
-    // Student flow - check user record
-    if (user && user.persona === 'gator' && !user.onboarding_completed) {
-      console.log('🎯 [Student Flow] Gator needs onboarding');
-
-      if (currentPage !== 'StudentOnboarding' && currentPage !== 'GatorWelcome') {
-        console.log('🔄 [Student Flow] -> StudentOnboarding');
-        navigate('StudentOnboarding');
-        return;
+      // Route to correct onboarding based on persona
+      if (user.persona === 'parent') {
+        if (currentPage !== 'Onboarding') {
+          console.log('🔄 [Parent Flow] -> Onboarding');
+          navigate('Onboarding');
+          return;
+        }
+      } else if (user.persona === 'gator') {
+        if (currentPage !== 'StudentOnboarding') {
+          console.log('🔄 [Student Flow] -> StudentOnboarding');
+          navigate('StudentOnboarding');
+          return;
+        }
       }
     }
 
@@ -986,7 +992,7 @@ function AppContent() {
     if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard')) {
       let destination = currentPage;
 
-      console.log('🔄 [Routing Check] User on:', currentPage, '| hasNoRole:', hasNoRole, '| needsOnboarding:', needsOnboarding);
+      console.log('🔄 [Routing Check] User on:', currentPage, '| hasNoRole:', hasNoRole, '| needsOnboarding:', needsOnboarding, '| persona:', user.persona);
 
       // CRITICAL: If user is in new user flow (just came back from OAuth), send to GatorWelcome
       if (inNewUserFlow) {
@@ -1007,17 +1013,25 @@ function AppContent() {
         destination = 'GatorInviteCode';
         console.log('➡️ [NotVerified] → GatorInviteCode');
       } else if (needsOnboarding) {
-        if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        // CRITICAL: Route based on ACTUAL persona, not assumptions
+        // This ensures students aren't sent to parent onboarding
+        if (user.persona === 'gator') {
+          destination = 'StudentOnboarding';
+          console.log('➡️ [NeedsOnboarding] Gator → StudentOnboarding');
+        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
           destination = 'Onboarding';
           console.log('➡️ [NeedsOnboarding] Parent → Onboarding');
         } else {
-          destination = 'StudentOnboarding';
-          console.log('➡️ [NeedsOnboarding] Student → StudentOnboarding');
+          // Fallback for unknown persona - go to role selection
+          destination = 'GatorRoleSelection';
+          console.log('➡️ [NeedsOnboarding] Unknown persona → GatorRoleSelection');
         }
       } else {
-        // Fully onboarded - go to correct dashboard
+        // Fully onboarded - go to correct dashboard based on ACTUAL persona
         if (user.roles?.includes('admin')) {
           destination = 'AdminDashboard';
+        } else if (user.persona === 'gator') {
+          destination = 'Dashboard';
         } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else {

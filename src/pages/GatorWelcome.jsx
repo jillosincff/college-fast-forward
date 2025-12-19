@@ -21,10 +21,13 @@ export default function GatorWelcome() {
     sessionStorage.removeItem('oauth_redirect_in_progress');
     console.log('✅ [OAuth] Success - cleared attempt tracking');
     
-    // Redirect if user is already fully onboarded
-    if (user?.persona && user?.onboarding_completed) {
+    // Only redirect if user is FULLY onboarded (not in active signup flow)
+    // The is_new_signup flag indicates they're going through fresh signup
+    if (user?.persona && user?.onboarding_completed && !user?.is_new_signup) {
       console.log('✅ [GatorWelcome] User already onboarded, redirecting to dashboard');
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+      if (user.persona === 'gator') {
+        navigate('Dashboard');
+      } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('ParentDashboard');
       } else if (user.roles?.includes('admin')) {
         navigate('AdminDashboard');

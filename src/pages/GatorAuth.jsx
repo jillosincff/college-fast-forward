@@ -164,15 +164,17 @@ export default function GatorAuth() {
           addLog(`✅ Retrieved state for role: ${result.role}`);
           
           // CRITICAL: Set ALL user data from OAuthState immediately
+          // This MUST override any existing persona to handle re-signups correctly
           let stateId = null;
           try {
             stateId = result.id || result.state_id;
-            addLog(`📝 Setting user data for role: ${result.role}`);
+            addLog(`📝 Setting user data for role: ${result.role} (will override any existing persona)`);
             
             const updateData = {
               persona: result.role,
               roles: [result.role],
-              onboarding_completed: false
+              onboarding_completed: false, // CRITICAL: Reset onboarding for new signup flow
+              is_new_signup: true // Flag to indicate this is a fresh signup
             };
             
             // Store all available data from OAuthState
