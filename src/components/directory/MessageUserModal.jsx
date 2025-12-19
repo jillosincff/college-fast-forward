@@ -108,6 +108,11 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
       setMessage('');
       setIsSending(false);
       onClose();
+      
+      // Notify the page to refresh data (for message count updates)
+      document.dispatchEvent(new CustomEvent('cff:message-sent', { 
+        detail: { recipientEmail: recipientUser.email } 
+      }));
 
       // Send email notification asynchronously with all data (no DB queries)
       console.log('📧 Triggering email notification (with full data)...');
