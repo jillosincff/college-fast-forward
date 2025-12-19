@@ -123,6 +123,11 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Audit and fix users error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error stack:', error.stack);
+    return Response.json({ 
+      error: error.message,
+      stack: error.stack,
+      type: error.constructor.name
+    }, { status: 500 });
   }
 });
