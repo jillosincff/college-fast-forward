@@ -28,9 +28,23 @@ export default function GatorWelcome() {
       return;
     }
     
+    console.log('🔍 [GatorWelcome] Debug state:', {
+      userEmail: user.email,
+      userPersona: user.persona,
+      pendingRole,
+      roleSetupComplete
+    });
+    
     // If role already set and matches, we're done
     if (user.persona === pendingRole) {
       console.log('✅ [GatorWelcome] Role already set:', user.persona);
+      setRoleSetupComplete(true);
+      return;
+    }
+    
+    // Safety: if user already has a persona and we don't have a pending role, enable button
+    if (user.persona && !pendingRole) {
+      console.log('⚠️ [GatorWelcome] User has persona but no pendingRole, enabling button');
       setRoleSetupComplete(true);
       return;
     }
