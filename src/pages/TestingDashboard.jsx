@@ -301,6 +301,18 @@ export default function TestingDashboard() {
                 <Shield className="w-4 h-4 mr-2" />
                 {isTestingParent ? 'Testing Parent Feature...' : 'Test Parent Badges'}
               </Button>
+
+              <Button
+                onClick={async () => {
+                  const result = await base44.functions.invoke('fixMissingPersonas', {});
+                  alert(JSON.stringify(result.data, null, 2));
+                }}
+                size="lg"
+                variant="secondary"
+                className="bg-purple-100 hover:bg-purple-200 text-purple-900"
+              >
+                Fix Missing Personas
+              </Button>
             </div>
           </CardContent>
         </Card>
