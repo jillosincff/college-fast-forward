@@ -102,6 +102,28 @@ export default function GatorAuth() {
           
           console.log('✅ [GatorAuth] Retrieved state:', result);
           
+          // CRITICAL: Set user role IMMEDIATELY after auth (before redirect)
+          try {
+            console.log('📝 [GatorAuth] Setting role:', result.role);
+            const currentUser = await base44.auth.me();
+            
+            const updateData = {
+              persona: result.role,
+              roles: [result.role]
+            };
+            
+            // Store invite code if present
+            if (result.invite_code) {
+              updateData.invite_code_used = result.invite_code;
+            }
+            
+            await base44.auth.updateMe(updateData);
+            console.log('✅ [GatorAuth] Role set successfully:', result.role);
+          } catch (roleError) {
+            console.error('⚠️ [GatorAuth] Failed to set role:', roleError);
+            // Continue anyway - GatorWelcome will handle it
+          }
+          
           // Build redirect URL with retrieved parameters
           let redirectUrl = `${window.location.origin}/#GatorWelcome`;
           const params = new URLSearchParams();
