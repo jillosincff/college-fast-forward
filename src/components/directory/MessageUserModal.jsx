@@ -83,6 +83,20 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
         }
       }
 
+      // Increment message count on the recipient's JobRequest
+      console.log('📊 Incrementing message count for recipient...');
+      setTimeout(async () => {
+        try {
+          await base44.functions.invoke('incrementMessageCount', {
+            recipientEmail: recipientUser.email
+          });
+          console.log('✅ Message count incremented');
+        } catch (countError) {
+          console.error('❌ Failed to increment message count:', countError);
+          // Silent fail - message was already sent
+        }
+      }, 50);
+
       // Show success immediately
       toast({
         title: "✅ Message Sent!",
