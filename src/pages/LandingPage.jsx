@@ -71,7 +71,8 @@ export default function LandingPage() {
   };
 
   const handleTopRightJoinClick = () => {
-    navigate('GatorRoleSelection');
+    // Use same flow as "Join the Gator Network" for consistency
+    navigate('WelcomeRole');
   };
 
   const handleRequestInvite = () => {
