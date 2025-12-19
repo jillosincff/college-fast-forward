@@ -118,52 +118,25 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
-            // First try SendGrid, fallback to Base44 Core.SendEmail for existing users
+            // Use Base44 Core.SendEmail - better deliverability for university emails
             let emailSent = false;
             
-            // Try SendGrid first (works for external emails)
-            console.log('🔑 SENDGRID_API_KEY exists:', !!SENDGRID_API_KEY);
-            console.log('🔑 SENDGRID_API_KEY length:', SENDGRID_API_KEY?.length || 0);
-            if (SENDGRID_API_KEY) {
-                try {
-                    const msg = {
-                        to: email,
-                        from: {
-                            email: 'jill@uffastforward.com',
-                            name: 'College Fast Forward'
-                        },
-                        subject: subject,
-                        html: emailBody
-                    };
-                    
-                    console.log('📤 Attempting SendGrid send with:', JSON.stringify({
-                        to: msg.to,
-                        from: msg.from,
-                        subject: msg.subject
-                    }));
-                    
-                    const [response] = await sgMail.send(msg);
-                    console.log('✅ SendGrid response status:', response.statusCode);
-                    console.log('✅ SendGrid response headers:', JSON.stringify(response.headers));
-                    console.log('✅ Email sent successfully via SendGrid to:', email);
-                    emailSent = true;
-                } catch (sgError) {
-                    console.error('❌ SendGrid error:', sgError.message);
-                    console.error('❌ SendGrid error code:', sgError.code);
-                    if (sgError.response) {
-                        console.error('❌ SendGrid response body:', JSON.stringify(sgError.response.body));
-                    }
-                    console.log('Attempting fallback to Base44 Core.SendEmail...');
-                }
-            } else {
-                console.error('❌ SENDGRID_API_KEY not set!');
+            try {
+                console.log('📤 Sending via Base44 Core.SendEmail to:', email);
+                await base44.integrations.Core.SendEmail({
+                    to: email,
+                    subject: subject,
+                    body: emailBody,
+                    from_name: 'College Fast Forward'
+                });
+                console.log('✅ Email sent successfully via Base44 to:', email);
+                emailSent = true;
+            } catch (emailError) {
+                console.error('❌ Base44 email error:', emailError.message);
             }
             
-            // Fallback: Use the inviting user to forward the invite
             if (!emailSent) {
-                console.log('Using alternative method: creating invite record only');
-                // The invite was already created, just mark this as needing manual follow-up
-                // or use a different notification approach
+                console.log('⚠️ Email could not be sent, invite record created for manual follow-up');
             }
             
             console.log('✅ Invite processed for:', email);
