@@ -331,12 +331,8 @@ export default function TestingDashboard() {
                   setIsLoadingSignups(true);
                   setRecentSignups(null);
                   try {
-                    const allUsers = await base44.asServiceRole.entities.User.list();
-                    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-                    const recent = allUsers
-                      .filter(u => new Date(u.created_date) > yesterday)
-                      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-                    setRecentSignups(recent);
+                    const result = await base44.functions.invoke('getRecentSignups', {});
+                    setRecentSignups(result.data.users || []);
                   } catch (error) {
                     setRecentSignups({ error: error.message });
                   }
