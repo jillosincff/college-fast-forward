@@ -316,20 +316,36 @@ export default function GatorParentInvite() {
                 />
               </div>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   if (inviteCode.trim()) {
                     setIsVerifyingCode(true);
                     const code = inviteCode.trim().toUpperCase();
                     
-                    // Triple redundancy: URL params + both storage types (Base44 SSO strips URL params)
-                    const authData = JSON.stringify({ role: 'parent', code, timestamp: Date.now() });
-                    localStorage.setItem('pending_auth_data', authData);
-                    sessionStorage.setItem('pending_auth_data', authData);
-                    
-                    const callbackUrl = `${window.location.origin}/#GatorAuth?role=parent&code=${encodeURIComponent(code)}`;
-                    console.log('🔐 [GatorParentInvite] Storing auth data + redirecting:', { code, callbackUrl });
-                    
-                    base44.auth.redirectToLogin(callbackUrl);
+                    try {
+                      // Generate unique token and store in database
+                      const token = `oauth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                      const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min
+                      
+                      await base44.entities.OAuthState.create({
+                        token,
+                        role: 'parent',
+                        invite_code: code,
+                        expires_at: expiresAt
+                      });
+                      
+                      const callbackUrl = `${window.location.origin}/#GatorAuth?state=${token}`;
+                      console.log('🔐 [GatorParentInvite] Stored state in DB, redirecting:', { token, code });
+                      
+                      base44.auth.redirectToLogin(callbackUrl);
+                    } catch (error) {
+                      console.error('Failed to create OAuth state:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to initiate login. Please try again.",
+                        variant: "destructive"
+                      });
+                      setIsVerifyingCode(false);
+                    }
                   } else {
                     toast({
                       title: "Code Required",

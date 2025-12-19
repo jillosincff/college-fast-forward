@@ -10,31 +10,33 @@ export default function GatorStudentEmail() {
   const [referralCode, setReferralCode] = useState('');
   const [showReferral, setShowReferral] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!email.trim()) {
       alert('Please enter your email');
       return;
     }
 
-    const isUFL = email.toLowerCase().endsWith('@ufl.edu');
-    
-    // Triple redundancy: URL params + both storage types (Base44 SSO strips URL params)
-    const authData = JSON.stringify({ 
-      role: 'gator', 
-      email: email.trim(), 
-      ref: referralCode.trim().toUpperCase() || null,
-      timestamp: Date.now() 
-    });
-    localStorage.setItem('pending_auth_data', authData);
-    sessionStorage.setItem('pending_auth_data', authData);
-    
-    let callbackUrl = `${window.location.origin}/#GatorAuth?role=gator&email=${encodeURIComponent(email.trim())}`;
-    if (referralCode.trim()) {
-      callbackUrl += `&ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
+    try {
+      // Generate unique token and store in database
+      const token = `oauth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min
+      
+      await base44.entities.OAuthState.create({
+        token,
+        role: 'gator',
+        email: email.trim(),
+        referral_code: referralCode.trim().toUpperCase() || null,
+        expires_at: expiresAt
+      });
+      
+      const callbackUrl = `${window.location.origin}/#GatorAuth?state=${token}`;
+      console.log('🎓 [GatorStudentEmail] Stored state in DB, redirecting:', { token, email });
+      
+      base44.auth.redirectToLogin(callbackUrl);
+    } catch (error) {
+      console.error('Failed to create OAuth state:', error);
+      alert('Failed to initiate login. Please try again.');
     }
-    
-    console.log('🎓 [GatorStudentEmail] Storing auth data + redirecting:', { email, ref: referralCode || 'none', callbackUrl });
-    base44.auth.redirectToLogin(callbackUrl);
   };
 
   return (

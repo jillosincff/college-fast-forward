@@ -11,42 +11,16 @@ export default function GatorAuth() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Extract parameters from URL (role, code, email, ref)
+    // Extract state token from URL
     const urlParams = new URLSearchParams(window.location.search);
     const hashFragment = window.location.hash.substring(1);
     const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
     
-    // Try URL params first, then fall back to storage (Base44 SSO strips URL params)
-    let role = urlParams.get('role') || hashParams.get('role');
-    let code = urlParams.get('code') || hashParams.get('code');
-    let email = urlParams.get('email') || hashParams.get('email');
-    let ref = urlParams.get('ref') || hashParams.get('ref');
-    
-    // If no URL params, check storage (sessionStorage first, then localStorage)
-    if (!role && !code && !email) {
-      console.log('🔍 [GatorAuth] No URL params, checking storage...');
-      const sessionData = sessionStorage.getItem('pending_auth_data');
-      const localData = localStorage.getItem('pending_auth_data');
-      const authDataStr = sessionData || localData;
-      
-      if (authDataStr) {
-        try {
-          const authData = JSON.parse(authDataStr);
-          console.log('✅ [GatorAuth] Retrieved from storage:', authData);
-          role = authData.role;
-          code = authData.code;
-          email = authData.email;
-          ref = authData.ref;
-        } catch (e) {
-          console.error('❌ [GatorAuth] Failed to parse auth data:', e);
-        }
-      }
-    }
-    
+    const stateToken = urlParams.get('state') || hashParams.get('state');
     const hasAccessToken = hashParams.has('access_token');
     const hasError = hashParams.has('error');
     
-    console.log('🔍 [GatorAuth] Final params:', { role, code, email, ref, hasAccessToken, hasError });
+    console.log('🔍 [GatorAuth] Detected:', { stateToken, hasAccessToken, hasError });
 
     // Handle OAuth errors
     if (hasError) {
@@ -63,15 +37,10 @@ export default function GatorAuth() {
       return;
     }
 
-    // Returning from OAuth - wait for SDK
-    if (hasAccessToken && !processing) {
-      console.log('🔐 [GatorAuth] OAuth callback detected');
-      console.log('📦 [GatorAuth] Params:', { role, code, email, ref });
+    // Returning from OAuth - wait for SDK then retrieve state from DB
+    if (hasAccessToken && stateToken && !processing) {
+      console.log('🔐 [GatorAuth] OAuth callback detected with state token:', stateToken);
       setProcessing(true);
-      
-      // Clear auth data from storage after retrieval
-      sessionStorage.removeItem('pending_auth_data');
-      localStorage.removeItem('pending_auth_data');
       
       // Mobile needs more time for SDK initialization
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -79,23 +48,45 @@ export default function GatorAuth() {
       
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms (mobile: ${isMobile})`);
       
-      setTimeout(() => {
-        console.log('✅ [GatorAuth] SDK ready, redirecting...');
+      setTimeout(async () => {
+        console.log('✅ [GatorAuth] SDK ready, retrieving state from database...');
         
-        // Build redirect URL with parameters
-        let redirectUrl = `${window.location.origin}/#GatorWelcome`;
-        const params = new URLSearchParams();
-        if (role) params.set('role', role);
-        if (code) params.set('code', code);
-        if (email) params.set('email', email);
-        if (ref) params.set('ref', ref);
-        
-        if (params.toString()) {
-          redirectUrl += '?' + params.toString();
+        try {
+          // Retrieve OAuth state from database
+          const states = await base44.entities.OAuthState.filter({ token: stateToken });
+          
+          if (states.length === 0) {
+            console.error('❌ [GatorAuth] State token not found or expired');
+            alert('Login session expired. Please try again.');
+            window.location.href = window.location.origin + '/#LandingPage';
+            return;
+          }
+          
+          const state = states[0];
+          console.log('✅ [GatorAuth] Retrieved state:', state);
+          
+          // Mark as used and delete
+          await base44.entities.OAuthState.delete(state.id);
+          
+          // Build redirect URL with retrieved parameters
+          let redirectUrl = `${window.location.origin}/#GatorWelcome`;
+          const params = new URLSearchParams();
+          if (state.role) params.set('role', state.role);
+          if (state.invite_code) params.set('code', state.invite_code);
+          if (state.email) params.set('email', state.email);
+          if (state.referral_code) params.set('ref', state.referral_code);
+          
+          if (params.toString()) {
+            redirectUrl += '?' + params.toString();
+          }
+          
+          console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
+        } catch (error) {
+          console.error('❌ [GatorAuth] Failed to retrieve state:', error);
+          alert('Login failed. Please try again.');
+          window.location.href = window.location.origin + '/#LandingPage';
         }
-        
-        console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
-        window.location.href = redirectUrl;
       }, waitTime);
       return;
     }
