@@ -11,6 +11,7 @@ export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
   const params = useParams();
   const [roleSetupComplete, setRoleSetupComplete] = React.useState(false);
+  const [displayRole, setDisplayRole] = React.useState(null);
   
   // Clear OAuth tracking state on successful arrival
   useEffect(() => {
@@ -41,9 +42,12 @@ export default function GatorWelcome() {
   // prioritize the pending role from current flow over stale database persona
   // This fixes the bug where a returning user with old persona gets wrong welcome screen
   const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-  const role = (!user?.onboarding_completed && pendingRole) 
+  const calculatedRole = (!user?.onboarding_completed && pendingRole) 
     ? pendingRole 
     : (user?.persona || pendingRole || params.role);
+  
+  // Use displayRole for UI (set after we confirm the correct role), fallback to calculated
+  const role = displayRole || calculatedRole;
 
   useEffect(() => {
     // Extract parameters from hash fragment (hash-based routing)
@@ -152,6 +156,7 @@ export default function GatorWelcome() {
     
     if (user.persona && user.persona.trim() && personaMatchesIntendedRole) {
       console.log('✅ [GatorWelcome] Role already correctly set:', user.persona);
+      setDisplayRole(user.persona); // Set display role for UI
       setRoleSetupComplete(true);
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
@@ -172,10 +177,12 @@ export default function GatorWelcome() {
     // If student without code and UFL email, auto-verify
     if (pendingRoleResolved === 'gator' && !pendingCode && isUFL && !roleSetupComplete) {
       console.log('✅ [GatorWelcome] UFL student - auto-verifying');
+      setDisplayRole('gator'); // Set display role IMMEDIATELY for UI
       base44.auth.updateMe({
         persona: 'gator',
         roles: ['gator'],
-        onboarding_completed: false
+        onboarding_completed: false,
+        is_new_signup: true
       }).then(async () => {
         console.log('✅ [GatorWelcome] UFL student role set');
         await refreshUser();
@@ -201,6 +208,7 @@ export default function GatorWelcome() {
     // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
     else if (pendingRoleResolved === 'parent' && pendingCode && user.persona !== 'parent') {
         console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
+        setDisplayRole('parent'); // Set display role IMMEDIATELY for UI
         
         const processParentFlow = async () => {
           try {
@@ -208,7 +216,8 @@ export default function GatorWelcome() {
             await base44.auth.updateMe({
               persona: 'parent',
               roles: ['parent'],
-              onboarding_completed: false
+              onboarding_completed: false,
+              is_new_signup: true
             });
             console.log('✅ [GatorWelcome] Parent persona set');
             
@@ -276,6 +285,7 @@ export default function GatorWelcome() {
     // CRITICAL: This handles both new users AND users with mismatched personas
     else if (pendingRoleResolved && user.persona !== pendingRoleResolved && !roleSetupComplete) {
         console.log('🔄 [GatorWelcome] Setting/correcting role to:', pendingRoleResolved, '(was:', user.persona || 'none', ')');
+        setDisplayRole(pendingRoleResolved); // Set display role IMMEDIATELY for UI
         base44.auth.updateMe({
           persona: pendingRoleResolved,
           roles: [pendingRoleResolved],
