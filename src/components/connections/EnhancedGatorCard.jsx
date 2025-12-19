@@ -717,6 +717,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           justify-content: flex-end;
           gap: 8px;
           margin-top: 4px;
+          position: relative;
+          z-index: 1;
         }
 
         .signal-badge {
@@ -730,6 +732,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           background: none;
           border: none;
           padding: 0;
+          position: relative;
+          z-index: 1;
         }
 
         .signal-badge.signal-clickable {
@@ -742,6 +746,8 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           outline: none;
           font-weight: 600;
           transition: all 0.15s ease;
+          position: relative;
+          z-index: 1;
         }
         
         .signal-badge.signal-clickable:not(:disabled):hover {
