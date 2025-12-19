@@ -249,19 +249,33 @@ export default function ParentDashboard() {
       });
       console.log('📧 Invite result:', result);
       
-      toast({
-        title: "Invite Sent! 🐊",
-        description: `We sent an invitation to ${inviteEmail}`
-      });
+      // Check for errors in response
+      if (result.data?.error) {
+        throw new Error(result.data.details || result.data.error);
+      }
       
-      setShowInviteModal(false);
-      setInviteEmail('');
-      setInviteName('');
+      if (result.data?.sent?.length > 0) {
+        toast({
+          title: "Invite Sent! 🐊",
+          description: `We sent an invitation to ${inviteEmail}`
+        });
+        setShowInviteModal(false);
+        setInviteEmail('');
+        setInviteName('');
+      } else if (result.data?.alreadyUsers?.length > 0) {
+        toast({
+          title: "Already Registered",
+          description: "This email is already registered. Try searching for them instead!",
+          variant: "destructive"
+        });
+      } else {
+        throw new Error('Failed to send invite');
+      }
     } catch (error) {
       console.error('Failed to send invite:', error);
       toast({
         title: "Invite Failed",
-        description: "Could not send invite. Please try again.",
+        description: error.message || "Could not send invite. Please try again.",
         variant: "destructive"
       });
     } finally {
