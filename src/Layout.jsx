@@ -766,47 +766,20 @@ function AppContent() {
       const hashParams = new URLSearchParams(hashFragment);
       
       const hasAccessToken = hashParams.has('access_token');
+      const hasStateToken = hashParams.has('state') || new URLSearchParams(window.location.search).has('state');
 
-      // CRITICAL: Check for parent/student invite flow FIRST - use localStorage
-      const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      const pendingCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
-
-      // Parent flow with invite code
-      if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
-        console.log('🎯 [Parent OAuth] Detected parent invite flow with OAuth callback');
-        const processed = sessionStorage.getItem('oauth_processed_parent');
-        
-        if (!processed) {
-          console.log('⏳ [Parent OAuth] Processing - waiting 6s for SDK...');
-          sessionStorage.setItem('oauth_processed_parent', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 6000));
-          
-          console.log('✅ [Parent OAuth] Redirecting to GatorWelcome');
-          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed_parent');
+      // CRITICAL: If this is an OAuth callback with state token, let GatorAuth handle it
+      if (hasAccessToken && hasStateToken) {
+        console.log('🔐 [Layout] OAuth callback detected with state - letting GatorAuth handle it');
+        // Extract page from hash (should be GatorAuth)
+        let pageHash = hashFragment.split('?')[0].split('&')[0] || 'GatorAuth';
+        if (!pageHash || pageHash.includes('access_token')) {
+          pageHash = 'GatorAuth';
         }
-      }
-
-      // Student flow (no invite code required for @ufl.edu)
-      if (pendingRole === 'gator' && hasAccessToken) {
-        console.log('🎯 [Student OAuth] Detected student invite flow with OAuth callback');
-        const processed = sessionStorage.getItem('oauth_processed_student');
-        
-        if (!processed) {
-          console.log('⏳ [Student OAuth] Processing - waiting 6s for SDK...');
-          sessionStorage.setItem('oauth_processed_student', 'true');
-          
-          await new Promise(resolve => setTimeout(resolve, 6000));
-          
-          console.log('✅ [Student OAuth] Redirecting to GatorWelcome');
-          window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
-          return;
-        } else {
-          sessionStorage.removeItem('oauth_processed_student');
-        }
+        console.log('📍 [Hash] Setting page:', pageHash);
+        setCurrentPage(pageHash);
+        setResolvedPage(null);
+        return;
       }
 
       // Normal hash change - extract page name
