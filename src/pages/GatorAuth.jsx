@@ -49,32 +49,32 @@ export default function GatorAuth() {
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms (mobile: ${isMobile})`);
       
       setTimeout(async () => {
-        console.log('✅ [GatorAuth] SDK ready, retrieving state from database...');
+        console.log('✅ [GatorAuth] SDK ready, retrieving state from backend...');
         
         try {
-          // Retrieve OAuth state from database
-          const states = await base44.entities.OAuthState.filter({ token: stateToken });
+          // Use backend function to retrieve OAuth state (bypasses auth check)
+          const response = await base44.functions.invoke('retrieveOAuthState', { 
+            token: stateToken 
+          });
           
-          if (states.length === 0) {
-            console.error('❌ [GatorAuth] State token not found or expired');
+          const result = response.data || response;
+          
+          if (!result.success) {
+            console.error('❌ [GatorAuth] State retrieval failed:', result.error);
             alert('Login session expired. Please try again.');
             window.location.href = window.location.origin + '/#LandingPage';
             return;
           }
           
-          const state = states[0];
-          console.log('✅ [GatorAuth] Retrieved state:', state);
-          
-          // Mark as used and delete
-          await base44.entities.OAuthState.delete(state.id);
+          console.log('✅ [GatorAuth] Retrieved state:', result);
           
           // Build redirect URL with retrieved parameters
           let redirectUrl = `${window.location.origin}/#GatorWelcome`;
           const params = new URLSearchParams();
-          if (state.role) params.set('role', state.role);
-          if (state.invite_code) params.set('code', state.invite_code);
-          if (state.email) params.set('email', state.email);
-          if (state.referral_code) params.set('ref', state.referral_code);
+          if (result.role) params.set('role', result.role);
+          if (result.invite_code) params.set('code', result.invite_code);
+          if (result.email) params.set('email', result.email);
+          if (result.referral_code) params.set('ref', result.referral_code);
           
           if (params.toString()) {
             redirectUrl += '?' + params.toString();
