@@ -140,16 +140,17 @@ export default function GatorWelcome() {
         await refreshUser();
         setRoleSetupComplete(true);
         
-        // Increment user counter
-        base44.functions.invoke('incrementUserCount', { user_id: user.id });
+        // Increment user counter (non-blocking)
+        base44.functions.invoke('incrementUserCount', { user_id: user.id })
+          .catch(e => console.log('incrementUserCount failed:', e.message));
         
-        // Notify admin of new user
+        // Notify admin of new user (non-blocking)
         base44.functions.invoke('notifyNewUserJoined', {
           user_email: user.email,
           user_name: user.full_name,
           user_persona: 'gator',
           user_id: user.id
-        });
+        }).catch(e => console.log('notifyNewUserJoined failed:', e.message));
       }).catch(err => {
         console.error('❌ [GatorWelcome] Failed to set student role:', err);
         setRoleSetupComplete(true); // Enable button even on error
@@ -170,16 +171,17 @@ export default function GatorWelcome() {
             });
             console.log('✅ [GatorWelcome] Parent persona set');
             
-            // Increment user counter
-            await base44.functions.invoke('incrementUserCount', { user_id: user.id });
+            // Increment user counter (non-blocking)
+            base44.functions.invoke('incrementUserCount', { user_id: user.id })
+              .catch(e => console.log('incrementUserCount failed:', e.message));
             
-            // Notify admin of new user
-            await base44.functions.invoke('notifyNewUserJoined', {
+            // Notify admin of new user (non-blocking)
+            base44.functions.invoke('notifyNewUserJoined', {
               user_email: user.email,
               user_name: user.full_name,
               user_persona: 'parent',
               user_id: user.id
-            });
+            }).catch(e => console.log('notifyNewUserJoined failed:', e.message));
             
             // Then process the invite code to link to student
             const response = await base44.functions.invoke('processParentInviteCode', { 
@@ -241,16 +243,17 @@ export default function GatorWelcome() {
           await refreshUser();
           setRoleSetupComplete(true);
           
-          // Increment user counter
-          base44.functions.invoke('incrementUserCount', { user_id: user.id });
+          // Increment user counter (non-blocking)
+          base44.functions.invoke('incrementUserCount', { user_id: user.id })
+            .catch(e => console.log('incrementUserCount failed:', e.message));
           
-          // Notify admin of new user
+          // Notify admin of new user (non-blocking)
           base44.functions.invoke('notifyNewUserJoined', {
             user_email: user.email,
             user_name: user.full_name,
             user_persona: pendingRoleResolved,
             user_id: user.id
-          });
+          }).catch(e => console.log('notifyNewUserJoined failed:', e.message));
       }).catch(err => {
         console.error('❌ [GatorWelcome] Failed to set role:', err);
         setRoleSetupComplete(true); // Set to true even on error to allow button click
