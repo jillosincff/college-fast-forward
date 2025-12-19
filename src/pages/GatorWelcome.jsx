@@ -16,8 +16,23 @@ export default function GatorWelcome() {
   useEffect(() => {
     localStorage.removeItem('oauth_attempt_count');
     localStorage.removeItem('oauth_start_time');
+    sessionStorage.removeItem('oauth_callback_detected');
+    sessionStorage.removeItem('oauth_state_token');
+    sessionStorage.removeItem('oauth_redirect_in_progress');
     console.log('✅ [OAuth] Success - cleared attempt tracking');
-  }, []);
+    
+    // Redirect if user is already fully onboarded
+    if (user?.persona && user?.onboarding_completed) {
+      console.log('✅ [GatorWelcome] User already onboarded, redirecting to dashboard');
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('ParentDashboard');
+      } else if (user.roles?.includes('admin')) {
+        navigate('AdminDashboard');
+      } else {
+        navigate('Dashboard');
+      }
+    }
+  }, [user, navigate]);
   
   // Get role from params or localStorage (survives redirects better)
   const pendingRole = localStorage.getItem('pending_invite_role');
