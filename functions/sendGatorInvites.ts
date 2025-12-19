@@ -116,32 +116,46 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
-            // Use SendGrid for email delivery
+            // Use Sender.net for email delivery (verified domain)
             let emailSent = false;
             
-            if (SENDGRID_API_KEY) {
+            if (SENDER_API_KEY) {
                 try {
-                    const msg = {
-                        to: email,
-                        from: {
-                            email: 'jill@uffastforward.com',
-                            name: 'College Fast Forward'
-                        },
-                        subject: subject,
-                        html: emailBody
-                    };
+                    console.log('📤 Sending via Sender.net to:', email);
                     
-                    console.log('📤 Sending via SendGrid to:', email);
-                    const [response] = await sgMail.send(msg);
-                    console.log('✅ SendGrid response status:', response.statusCode);
-                    console.log('✅ Email sent successfully via SendGrid to:', email);
-                    emailSent = true;
-                } catch (sgError) {
-                    console.error('❌ SendGrid error:', sgError.message);
-                    if (sgError.response) {
-                        console.error('❌ SendGrid response:', JSON.stringify(sgError.response.body));
+                    const response = await fetch('https://api.sender.net/v2/emails', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SENDER_API_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            from: {
+                                email: 'jill@uffastforward.com',
+                                name: 'College Fast Forward'
+                            },
+                            to: [{ email: email }],
+                            subject: subject,
+                            html: emailBody
+                        })
+                    });
+                    
+                    const responseData = await response.json();
+                    console.log('📬 Sender.net response status:', response.status);
+                    console.log('📬 Sender.net response:', JSON.stringify(responseData));
+                    
+                    if (response.ok) {
+                        console.log('✅ Email sent successfully via Sender.net to:', email);
+                        emailSent = true;
+                    } else {
+                        console.error('❌ Sender.net error:', responseData);
                     }
+                } catch (senderError) {
+                    console.error('❌ Sender.net error:', senderError.message);
                 }
+            } else {
+                console.error('❌ SENDER_API_KEY not set!');
             }
             
             if (!emailSent) {
