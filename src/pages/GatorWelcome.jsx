@@ -12,6 +12,13 @@ export default function GatorWelcome() {
   const params = useParams();
   const [roleSetupComplete, setRoleSetupComplete] = React.useState(false);
   
+  // Clear OAuth tracking state on successful arrival
+  useEffect(() => {
+    localStorage.removeItem('oauth_attempt_count');
+    localStorage.removeItem('oauth_start_time');
+    console.log('✅ [OAuth] Success - cleared attempt tracking');
+  }, []);
+  
   // Get role from params or localStorage (survives redirects better)
   const pendingRole = localStorage.getItem('pending_invite_role');
   const role = pendingRole || params.role || user?.persona;

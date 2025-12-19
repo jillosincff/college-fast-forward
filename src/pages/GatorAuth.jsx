@@ -7,6 +7,25 @@ export default function GatorAuth() {
   const [redirecting, setRedirecting] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [loopDetected, setLoopDetected] = useState(false);
+  const [authProgress, setAuthProgress] = useState('Connecting to Google...');
+
+  useEffect(() => {
+    // Progress messages to show user the process is working
+    const messages = [
+      'Connecting to Google...',
+      'Verifying your account...',
+      'Almost there...',
+      'Setting up your profile...'
+    ];
+    
+    let i = 0;
+    const progressInterval = setInterval(() => {
+      i = (i + 1) % messages.length;
+      setAuthProgress(messages[i]);
+    }, 3000);
+    
+    return () => clearInterval(progressInterval);
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -49,7 +68,7 @@ export default function GatorAuth() {
       
       // Wait longer for SDK initialization and auth processing
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const waitTime = isMobile ? 8000 : 4000;
+      const waitTime = isMobile ? 20000 : 10000; // Increased: 20s mobile, 10s desktop
       
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms for SDK (mobile: ${isMobile})`);
       
@@ -202,10 +221,10 @@ export default function GatorAuth() {
       <div className="text-center max-w-md px-4">
         <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-white text-lg font-semibold mb-2">
-          {user ? 'Setting up your account...' : 'Redirecting to Google...'}
+          {authProgress}
         </p>
         <p className="text-white/80 text-sm">
-          Please wait a moment
+          This may take a few moments on mobile
         </p>
       </div>
     </div>

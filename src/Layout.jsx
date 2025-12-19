@@ -815,8 +815,61 @@ function AppContent() {
 
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
+    // ═══════════════════════════════════════════════════════════════════
+    // MOBILE AUTH LOOP PROTECTION
+    // ═══════════════════════════════════════════════════════════════════
+    
+    const OAUTH_MAX_ATTEMPTS = 3;
+    const OAUTH_TIMEOUT_MS = 30000; // 30 seconds
+    
+    // Check for OAuth loop
+    const oauthAttempts = parseInt(localStorage.getItem('oauth_attempt_count') || '0');
+    const oauthStartTime = parseInt(localStorage.getItem('oauth_start_time') || '0');
+    const timeSinceStart = Date.now() - oauthStartTime;
+    
+    // If we've been trying for over 30 seconds OR exceeded max attempts, clear everything
+    if ((oauthStartTime && timeSinceStart > OAUTH_TIMEOUT_MS) || oauthAttempts >= OAUTH_MAX_ATTEMPTS) {
+      console.log('🛑 [OAuth Loop Protection] Clearing stale OAuth state', {
+        attempts: oauthAttempts,
+        timeSinceStart: Math.round(timeSinceStart / 1000) + 's'
+      });
+      
+      // Clear ALL OAuth-related storage
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_student_email');
+      localStorage.removeItem('pending_referral_code');
+      localStorage.removeItem('oauth_attempt_count');
+      localStorage.removeItem('oauth_start_time');
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
+      sessionStorage.removeItem('pending_student_email');
+      sessionStorage.removeItem('pending_referral_code');
+      sessionStorage.removeItem('oauth_state_token');
+      sessionStorage.removeItem('oauth_callback_detected');
+      
+      // If we're in a loop, send to landing with error message
+      if (oauthAttempts >= OAUTH_MAX_ATTEMPTS && currentPage !== 'LandingPage') {
+        navigate('LandingPage?auth_error=timeout');
+        return;
+      }
+    }
+    
     // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing - use localStorage
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+    
+    // Increment attempt counter if we have a pending role but no user persona
+    if (pendingRole && user && !user.persona) {
+      const newCount = oauthAttempts + 1;
+      localStorage.setItem('oauth_attempt_count', newCount.toString());
+      
+      // Set start time if this is first attempt
+      if (!oauthStartTime) {
+        localStorage.setItem('oauth_start_time', Date.now().toString());
+      }
+      
+      console.log('🔄 [OAuth] Attempt', newCount, 'of', OAUTH_MAX_ATTEMPTS);
+    }
     
     // If we have a pending role (from OAuth flow), let it complete first
     if (user && pendingRole && !user.persona) {
