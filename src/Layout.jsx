@@ -855,84 +855,44 @@ function AppContent() {
       }
     }
     
-    // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing - use localStorage
-    const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-    
-    // Increment attempt counter if we have a pending role but no user persona
-    if (pendingRole && user && !user.persona) {
-      const newCount = oauthAttempts + 1;
-      localStorage.setItem('oauth_attempt_count', newCount.toString());
-      
-      // Set start time if this is first attempt
-      if (!oauthStartTime) {
-        localStorage.setItem('oauth_start_time', Date.now().toString());
-      }
-      
-      console.log('🔄 [OAuth] Attempt', newCount, 'of', OAUTH_MAX_ATTEMPTS);
-    }
-    
-    // If we have a pending role (from OAuth flow), let it complete first
-    if (user && pendingRole && !user.persona) {
-      console.log('🎯 [OAuth Flow Active] pendingRole:', pendingRole, 'currentPage:', currentPage);
-      
-      // Allow all new user flow pages (role selection, email entry, etc.)
+    // CRITICAL: Check user.persona directly - OAuth flow now sets it immediately
+    // No need for localStorage checks - data is in user record
+
+    if (user && !user.persona) {
+      console.log('🎯 [No Persona] User needs role assignment');
+
+      // Allow new user flow pages
       if (newUserFlowPages.includes(currentPage)) {
-        console.log('✅ [OAuth Flow] Allowing new user flow page:', currentPage);
+        console.log('✅ [No Persona] Allowing new user flow page:', currentPage);
         setResolvedPage(currentPage);
         return;
       }
-      
+
       // Otherwise redirect to GatorWelcome
-      console.log('🔄 [OAuth Flow] Redirecting to GatorWelcome');
-      navigate(`GatorWelcome?role=${pendingRole}`);
+      console.log('🔄 [No Persona] Redirecting to GatorWelcome');
+      navigate('GatorWelcome');
       return;
     }
-    
-    // CRITICAL CHECK #2: Parent invite flow - use localStorage
-    const pendingRoleInitial = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-    const pendingCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
-    
-    if (user && pendingRoleInitial === 'parent' && pendingCode) {
-      console.log('🎯 [Parent Flow] Detected! Code:', pendingCode);
-      
-      // If user doesn't have parent role yet, redirect to GatorWelcome
-      if (user.persona !== 'parent' && !user.roles?.includes('parent')) {
-        console.log('🔄 [Parent Flow] User needs parent setup -> GatorWelcome');
-        if (currentPage !== 'GatorWelcome') {
-          navigate('GatorWelcome?role=parent');
-          return;
-        }
-      }
-      
-      // If user has parent role but hasn't completed onboarding
-      if ((user.persona === 'parent' || user.roles?.includes('parent')) && !user.onboarding_completed) {
-        console.log('🔄 [Parent Flow] Parent needs onboarding -> Onboarding');
-        if (currentPage !== 'Onboarding' && currentPage !== 'GatorWelcome') {
-          navigate('Onboarding');
-          return;
-        }
-      }
-    }
-    
-    // CRITICAL CHECK #3: Student flow with pending role - use localStorage
-    const pendingGatorRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-    if (user && pendingGatorRole === 'gator') {
-      console.log('🎯 [Student Flow] Detected pending gator role');
-      
-      // If user doesn't have role yet, force to GatorWelcome
-      if (!user.persona && currentPage !== 'GatorWelcome' && currentPage !== 'GatorRoleSelection') {
-        console.log('🔄 [Student Flow] Forcing to GatorWelcome');
-        navigate('GatorWelcome');
+
+    // Parent invite flow - check user record
+    if (user && user.persona === 'parent' && user.invite_code_used && !user.onboarding_completed) {
+      console.log('🎯 [Parent Flow] Parent needs onboarding');
+
+      if (currentPage !== 'Onboarding' && currentPage !== 'GatorWelcome') {
+        console.log('🔄 [Parent Flow] -> Onboarding');
+        navigate('Onboarding');
         return;
       }
-      
-      // If user has gator role but needs onboarding
-      if ((user.persona === 'gator' || user.roles?.includes('gator')) && !user.onboarding_completed) {
-        console.log('🔄 [Student Flow] Gator needs onboarding -> StudentOnboarding');
-        if (currentPage !== 'StudentOnboarding' && currentPage !== 'GatorWelcome') {
-          navigate('StudentOnboarding');
-          return;
-        }
+    }
+
+    // Student flow - check user record
+    if (user && user.persona === 'gator' && !user.onboarding_completed) {
+      console.log('🎯 [Student Flow] Gator needs onboarding');
+
+      if (currentPage !== 'StudentOnboarding' && currentPage !== 'GatorWelcome') {
+        console.log('🔄 [Student Flow] -> StudentOnboarding');
+        navigate('StudentOnboarding');
+        return;
       }
     }
 
