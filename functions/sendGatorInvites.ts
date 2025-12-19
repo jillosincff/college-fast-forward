@@ -118,21 +118,32 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
-            // Use Base44 Core.SendEmail - better deliverability for university emails
+            // Use SendGrid for email delivery
             let emailSent = false;
             
-            try {
-                console.log('📤 Sending via Base44 Core.SendEmail to:', email);
-                await base44.integrations.Core.SendEmail({
-                    to: email,
-                    subject: subject,
-                    body: emailBody,
-                    from_name: 'College Fast Forward'
-                });
-                console.log('✅ Email sent successfully via Base44 to:', email);
-                emailSent = true;
-            } catch (emailError) {
-                console.error('❌ Base44 email error:', emailError.message);
+            if (SENDGRID_API_KEY) {
+                try {
+                    const msg = {
+                        to: email,
+                        from: {
+                            email: 'jill@uffastforward.com',
+                            name: 'College Fast Forward'
+                        },
+                        subject: subject,
+                        html: emailBody
+                    };
+                    
+                    console.log('📤 Sending via SendGrid to:', email);
+                    const [response] = await sgMail.send(msg);
+                    console.log('✅ SendGrid response status:', response.statusCode);
+                    console.log('✅ Email sent successfully via SendGrid to:', email);
+                    emailSent = true;
+                } catch (sgError) {
+                    console.error('❌ SendGrid error:', sgError.message);
+                    if (sgError.response) {
+                        console.error('❌ SendGrid response:', JSON.stringify(sgError.response.body));
+                    }
+                }
             }
             
             if (!emailSent) {
