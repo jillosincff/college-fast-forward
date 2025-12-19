@@ -34,9 +34,9 @@ export default function GatorWelcome() {
     }
   }, [user, navigate]);
   
-  // Get role from params or localStorage (survives redirects better)
-  const pendingRole = localStorage.getItem('pending_invite_role');
-  const role = pendingRole || params.role || user?.persona;
+  // CRITICAL: Trust user.persona from database (set by GatorAuth) as primary source
+  // Only fall back to localStorage/params if persona is not set yet
+  const role = user?.persona || localStorage.getItem('pending_invite_role') || params.role;
 
   useEffect(() => {
     // Extract parameters from hash fragment (hash-based routing)
@@ -121,7 +121,9 @@ export default function GatorWelcome() {
     if (urlEmail) localStorage.setItem('pending_student_email', urlEmail);
     if (urlRef) localStorage.setItem('pending_referral_code', urlRef);
     
-    const pendingRoleResolved = urlRole || localStorage.getItem('pending_invite_role');
+    // CRITICAL: Use user.persona from database as source of truth
+    // Only use localStorage/URL as fallback if persona not set yet
+    const pendingRoleResolved = user.persona || urlRole || localStorage.getItem('pending_invite_role');
     const pendingCode = urlCode || localStorage.getItem('pending_invite_code');
     
     console.log('🔍 [GatorWelcome] Debug state:', {
@@ -129,20 +131,17 @@ export default function GatorWelcome() {
       userPersona: user.persona,
       pendingRole: pendingRoleResolved,
       pendingCode,
-      roleSetupComplete
+      roleSetupComplete,
+      usingDatabasePersona: !!user.persona
     });
     
-    // If role already set and matches, we're done
-    if (user.persona === pendingRoleResolved) {
-      console.log('✅ [GatorWelcome] Role already set:', user.persona);
+    // If user.persona is already set (from GatorAuth), we're done - just enable button
+    if (user.persona && user.persona.trim()) {
+      console.log('✅ [GatorWelcome] Role already set in database:', user.persona);
       setRoleSetupComplete(true);
-      return;
-    }
-    
-    // Safety: if user already has a persona and we don't have a pending role, enable button
-    if (user.persona && !pendingRoleResolved) {
-      console.log('⚠️ [GatorWelcome] User has persona but no pendingRole, enabling button');
-      setRoleSetupComplete(true);
+      // Clear stale localStorage to prevent confusion
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
       return;
     }
     
