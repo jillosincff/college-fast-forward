@@ -8,6 +8,8 @@ export default function GatorAuth() {
   const [processing, setProcessing] = useState(false);
   const [loopDetected, setLoopDetected] = useState(false);
   const [authProgress, setAuthProgress] = useState('Connecting to Google...');
+  const [errorDetails, setErrorDetails] = useState(null);
+  const [debugLogs, setDebugLogs] = useState([]);
 
   useEffect(() => {
     // Progress messages to show user the process is working
@@ -30,6 +32,11 @@ export default function GatorAuth() {
   useEffect(() => {
     if (isLoading) return;
 
+    const addLog = (msg) => {
+      console.log(msg);
+      setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
+    };
+
     // Extract state token from sessionStorage (stored by Layout during OAuth callback)
     const stateToken = sessionStorage.getItem('oauth_state_token');
     const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
@@ -40,27 +47,45 @@ export default function GatorAuth() {
     
     const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token');
     const hasError = urlParams.has('error') || hashParams.has('error');
+    const stateFromUrl = urlParams.get('state') || hashParams.get('state');
     
-    console.log('🔍 [GatorAuth] Detected:', { stateToken, hasAccessToken, hasError });
+    addLog(`🔍 Detected: token=${stateToken?.slice(0,10)}..., fromUrl=${stateFromUrl?.slice(0,10)}..., hasAccess=${hasAccessToken}, error=${hasError}`);
 
     // Handle OAuth errors
     if (hasError) {
-      console.error('🚨 [GatorAuth] OAuth error:', hashParams.get('error'));
-      alert('Authentication was cancelled or failed. Please try again.');
-      window.location.href = window.location.origin + '/#LandingPage';
+      const errorMsg = hashParams.get('error');
+      addLog(`🚨 OAuth error: ${errorMsg}`);
+      setErrorDetails({ type: 'oauth_error', message: errorMsg });
       return;
     }
 
     // No user and no token - shouldn't happen (user should come with params)
     if (!user && !hasAccessToken) {
-      console.log('🔐 [GatorAuth] No auth detected, redirecting to landing...');
-      window.location.href = window.location.origin + '/#LandingPage';
+      addLog('🔐 No auth detected, redirecting to landing...');
+      setTimeout(() => {
+        window.location.href = window.location.origin + '/#LandingPage';
+      }, 2000);
+      return;
+    }
+
+    // Use state from URL as fallback if sessionStorage is empty (mobile issue)
+    const finalStateToken = stateToken || stateFromUrl;
+    
+    if (!finalStateToken && hasAccessToken) {
+      addLog('⚠️ No state token found - checking URL params');
+      setErrorDetails({ 
+        type: 'no_state_token', 
+        message: 'State token missing from both sessionStorage and URL',
+        stateToken,
+        stateFromUrl,
+        url: window.location.href
+      });
       return;
     }
 
     // Returning from OAuth - wait for SDK then retrieve state from DB
-    if (wasOAuthCallback && stateToken && !processing) {
-      console.log('🔐 [GatorAuth] OAuth callback detected with state token:', stateToken);
+    if (wasOAuthCallback && finalStateToken && !processing) {
+      addLog(`🔐 OAuth callback detected with token: ${finalStateToken.slice(0,10)}...`);
       setProcessing(true);
       
       // Clear session storage
@@ -73,7 +98,7 @@ export default function GatorAuth() {
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms for SDK (mobile: ${isMobile})`);
       
       setTimeout(async () => {
-        console.log('✅ [GatorAuth] SDK initialized, waiting for authentication...');
+        addLog('✅ SDK initialized, waiting for authentication...');
         
         // Poll for authentication with longer timeout
         const authStartTime = Date.now();
@@ -86,54 +111,63 @@ export default function GatorAuth() {
           try {
             const currentUser = await base44.auth.me();
             if (currentUser?.email) {
-              console.log(`✅ [GatorAuth] User authenticated after ${attempts} attempts:`, currentUser.email);
+              addLog(`✅ User authenticated after ${attempts} attempts: ${currentUser.email}`);
               authenticated = true;
               break;
             }
           } catch (e) {
             const elapsed = Date.now() - authStartTime;
-            console.log(`⏳ [GatorAuth] Attempt ${attempts}, waiting for auth... ${elapsed}ms / ${maxAuthWait}ms`);
+            if (attempts % 5 === 0) {
+              addLog(`⏳ Attempt ${attempts}, waiting... ${Math.round(elapsed/1000)}s / 30s`);
+            }
           }
           await new Promise(resolve => setTimeout(resolve, 1000)); // Check every 1 second
         }
         
         if (!authenticated) {
-          console.error('❌ [GatorAuth] Auth timeout after 30s');
-          alert('Authentication is taking longer than expected. Please try refreshing the page or logging in again.');
-          window.location.href = window.location.origin + '/#LandingPage';
+          addLog('❌ Auth timeout after 30s');
+          setErrorDetails({ 
+            type: 'auth_timeout', 
+            message: 'Authentication timed out after 30 seconds',
+            attempts 
+          });
           return;
         }
         
-        console.log('✅ [GatorAuth] Auth complete, retrieving state...');
+        addLog('✅ Auth complete, retrieving state...');
         
         try {
-          console.log('🔍 [GatorAuth] Calling retrieveOAuthState with token:', stateToken);
+          addLog(`🔍 Calling retrieveOAuthState with token: ${finalStateToken.slice(0,10)}...`);
           
           // Use backend function to retrieve OAuth state (bypasses auth check)
           const response = await base44.functions.invoke('retrieveOAuthState', { 
-            token: stateToken 
+            token: finalStateToken 
           });
           
-          console.log('📦 [GatorAuth] Full response:', response);
+          addLog(`📦 Response received: ${JSON.stringify(response).slice(0, 100)}...`);
           
           const result = response.data || response;
           
-          console.log('📋 [GatorAuth] Parsed result:', result);
+          addLog(`📋 Parsed result - success: ${result?.success}, role: ${result?.role}`);
           
           if (!result || !result.success || !result.role) {
-            console.error('❌ [GatorAuth] Invalid state result:', result);
-            alert(`Login session error: ${result?.error || 'Invalid state'}. Please try again.`);
-            window.location.href = window.location.origin + '/#LandingPage';
+            addLog(`❌ Invalid state result: ${result?.error || 'No role found'}`);
+            setErrorDetails({ 
+              type: 'invalid_state', 
+              message: result?.error || 'Invalid state or expired session',
+              result: JSON.stringify(result),
+              token: finalStateToken
+            });
             return;
           }
           
-          console.log('✅ [GatorAuth] Retrieved state:', result);
+          addLog(`✅ Retrieved state for role: ${result.role}`);
           
           // CRITICAL: Set ALL user data from OAuthState immediately
           let stateId = null;
           try {
-            console.log('📝 [GatorAuth] Setting user data from OAuthState:', result);
             stateId = result.id || result.state_id;
+            addLog(`📝 Setting user data for role: ${result.role}`);
             
             const updateData = {
               persona: result.role,
@@ -147,23 +181,24 @@ export default function GatorAuth() {
             if (result.referral_code) updateData.referral_code = result.referral_code;
             
             // Log current user state and update payload
-            console.log('📝 [GatorAuth] About to call updateMe with:', JSON.stringify(updateData, null, 2));
             const currentUser = await base44.auth.me();
-            console.log('📝 [GatorAuth] Current user state:', JSON.stringify(currentUser, null, 2));
+            addLog(`📝 Current user: ${currentUser.email}, updating with: ${JSON.stringify(updateData)}`);
             
             await base44.auth.updateMe(updateData);
-            console.log('✅ [GatorAuth] User data saved to database');
+            addLog('✅ User data saved to database');
             
             // Mark OAuthState as used to prevent reuse
             try {
               await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
-              console.log('✅ [GatorAuth] OAuthState marked as used');
+              addLog('✅ OAuthState marked as used');
             } catch (e) {
-              console.warn('⚠️ [GatorAuth] Could not mark OAuthState as used:', e.message);
+              addLog(`⚠️ Could not mark OAuthState as used: ${e.message}`);
             }
           } catch (roleError) {
-            console.error('❌ [GatorAuth] Failed to save user data:', roleError);
-            console.error('❌ [GatorAuth] Error details:', {
+            addLog(`❌ Failed to save user data: ${roleError.message}`);
+            
+            setErrorDetails({
+              type: 'update_failed',
               message: roleError.message,
               code: roleError.code,
               status: roleError.status,
@@ -175,12 +210,10 @@ export default function GatorAuth() {
               try {
                 await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
               } catch (e) {
-                console.warn('⚠️ [GatorAuth] Could not mark failed OAuthState as used:', e.message);
+                addLog(`⚠️ Could not mark failed OAuthState as used: ${e.message}`);
               }
             }
             
-            alert('Failed to complete setup: ' + roleError.message);
-            window.location.href = window.location.origin + '/#LandingPage';
             return;
           }
           
@@ -189,14 +222,15 @@ export default function GatorAuth() {
           
           // Redirect to GatorWelcome (user data is now in database, no need for URL params or localStorage)
           const redirectUrl = `${window.location.origin}/#GatorWelcome`;
-          console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
+          addLog(`🎯 Redirecting to: ${redirectUrl}`);
           window.location.href = redirectUrl;
         } catch (error) {
-          console.error('❌ [GatorAuth] Exception caught:', error);
-          console.error('❌ [GatorAuth] Error message:', error.message);
-          console.error('❌ [GatorAuth] Error stack:', error.stack);
-          alert(`Login failed: ${error.message}. Please try again.`);
-          window.location.href = window.location.origin + '/#LandingPage';
+          addLog(`❌ Exception: ${error.message}`);
+          setErrorDetails({
+            type: 'exception',
+            message: error.message,
+            stack: error.stack
+          });
         }
       }, waitTime);
       return;
@@ -209,6 +243,60 @@ export default function GatorAuth() {
     }
   }, [user, isLoading, processing]);
 
+  if (errorDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <div className="text-center max-w-2xl bg-white rounded-2xl shadow-xl p-8">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">❌</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Authentication Error</h2>
+          <p className="text-slate-600 mb-4 font-semibold">
+            {errorDetails.message}
+          </p>
+          
+          {/* Debug logs */}
+          <div className="bg-slate-50 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto text-left">
+            <p className="text-xs font-mono text-slate-700 whitespace-pre-wrap">
+              {debugLogs.join('\n')}
+            </p>
+          </div>
+          
+          {/* Error details */}
+          <details className="text-left mb-6">
+            <summary className="cursor-pointer text-sm text-slate-600 mb-2">Technical Details</summary>
+            <pre className="text-xs bg-slate-100 p-3 rounded overflow-x-auto">
+              {JSON.stringify(errorDetails, null, 2)}
+            </pre>
+          </details>
+          
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = window.location.origin + '/#LandingPage';
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => {
+                const logs = debugLogs.join('\n') + '\n\nError: ' + JSON.stringify(errorDetails, null, 2);
+                navigator.clipboard.writeText(logs);
+                alert('Logs copied to clipboard! Please share these with support.');
+              }}
+              className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-xl"
+            >
+              Copy Logs
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   if (loopDetected) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
