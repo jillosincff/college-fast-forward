@@ -118,14 +118,19 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
-            const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
+            // Use SendGrid directly since Base44 SendEmail only works for existing users
+            const msg = {
                 to: email,
+                from: {
+                    email: 'noreply@collegefastforward.com',
+                    name: 'College Fast Forward'
+                },
                 subject: subject,
-                body: emailBody,
-                from_name: 'College Fast Forward'
-            });
-            console.log('✅ Email sent successfully to:', email);
-            console.log('Email result:', emailResult);
+                html: emailBody
+            };
+            
+            await sgMail.send(msg);
+            console.log('✅ Email sent successfully via SendGrid to:', email);
 
             results.sent.push(email);
         } catch (err) {
