@@ -128,9 +128,12 @@ export default function GatorWelcome() {
     if (urlEmail) localStorage.setItem('pending_student_email', urlEmail);
     if (urlRef) localStorage.setItem('pending_referral_code', urlRef);
     
-    // CRITICAL: Use user.persona from database as source of truth
-    // Only use localStorage/URL as fallback if persona not set yet
-    const pendingRoleResolved = user.persona || urlRole || localStorage.getItem('pending_invite_role');
+    // CRITICAL: For new signups, prioritize the CURRENT flow's role over stale database persona
+    // This ensures a student signing up doesn't get stuck with old parent persona
+    const storedPendingRole = urlRole || localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+    const pendingRoleResolved = (!user.onboarding_completed && storedPendingRole) 
+      ? storedPendingRole 
+      : (user.persona || storedPendingRole);
     const pendingCode = urlCode || localStorage.getItem('pending_invite_code');
     
     console.log('🔍 [GatorWelcome] Debug state:', {
