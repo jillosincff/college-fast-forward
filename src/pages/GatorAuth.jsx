@@ -189,13 +189,9 @@ export default function GatorAuth() {
             await base44.auth.updateMe(updateData);
             addLog('✅ User data saved to database');
             
-            // Mark OAuthState as used to prevent reuse
-            try {
-              await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
-              addLog('✅ OAuthState marked as used');
-            } catch (e) {
-              addLog(`⚠️ Could not mark OAuthState as used: ${e.message}`);
-            }
+            // NOTE: OAuthState is already deleted by retrieveOAuthState backend function
+            // No need to mark as used - it's gone from DB
+            addLog('✅ OAuthState already cleaned up by backend');
           } catch (roleError) {
             addLog(`❌ Failed to save user data: ${roleError.message}`);
             
@@ -206,15 +202,6 @@ export default function GatorAuth() {
               status: roleError.status,
               response: roleError.response
             });
-            
-            // Mark OAuthState as used even on failure to force fresh OAuth flow
-            if (stateId) {
-              try {
-                await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
-              } catch (e) {
-                addLog(`⚠️ Could not mark failed OAuthState as used: ${e.message}`);
-              }
-            }
             
             return;
           }

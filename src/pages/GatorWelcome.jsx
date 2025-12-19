@@ -139,20 +139,30 @@ export default function GatorWelcome() {
     console.log('🔍 [GatorWelcome] Debug state:', {
       userEmail: user.email,
       userPersona: user.persona,
-      pendingRole: pendingRoleResolved,
+      storedPendingRole,
+      pendingRoleResolved,
       pendingCode,
       roleSetupComplete,
-      usingDatabasePersona: !!user.persona
+      onboarding_completed: user.onboarding_completed
     });
     
-    // If user.persona is already set (from GatorAuth), we're done - just enable button
-    if (user.persona && user.persona.trim()) {
-      console.log('✅ [GatorWelcome] Role already set in database:', user.persona);
+    // CRITICAL FIX: Only skip setup if persona MATCHES the intended role
+    // If user has stale persona that differs from pending role, we MUST update it
+    const personaMatchesIntendedRole = user.persona && user.persona === pendingRoleResolved;
+    
+    if (user.persona && user.persona.trim() && personaMatchesIntendedRole) {
+      console.log('✅ [GatorWelcome] Role already correctly set:', user.persona);
       setRoleSetupComplete(true);
-      // Clear stale localStorage to prevent confusion
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
       return;
+    }
+    
+    // Log if we need to correct a mismatched persona
+    if (user.persona && !personaMatchesIntendedRole && pendingRoleResolved) {
+      console.log('⚠️ [GatorWelcome] Persona mismatch detected! Current:', user.persona, 'Intended:', pendingRoleResolved);
     }
     
     console.log('✅ User on welcome page:', user.email, 'role:', role);
@@ -263,16 +273,24 @@ export default function GatorWelcome() {
       processParentFlow();
     }
     // Otherwise just set role (or correct wrong persona)
+    // CRITICAL: This handles both new users AND users with mismatched personas
     else if (pendingRoleResolved && user.persona !== pendingRoleResolved && !roleSetupComplete) {
-        console.log('🔄 [GatorWelcome] Setting role:', pendingRoleResolved);
+        console.log('🔄 [GatorWelcome] Setting/correcting role to:', pendingRoleResolved, '(was:', user.persona || 'none', ')');
         base44.auth.updateMe({
           persona: pendingRoleResolved,
           roles: [pendingRoleResolved],
-          onboarding_completed: false
+          onboarding_completed: false,
+          is_new_signup: true
         }).then(async () => {
-          console.log('✅ [GatorWelcome] Role set successfully');
+          console.log('✅ [GatorWelcome] Role set/corrected successfully to:', pendingRoleResolved);
           await refreshUser();
           setRoleSetupComplete(true);
+          
+          // Clear storage after successful update
+          localStorage.removeItem('pending_invite_role');
+          localStorage.removeItem('pending_invite_code');
+          sessionStorage.removeItem('pending_invite_role');
+          sessionStorage.removeItem('pending_invite_code');
           
           // Increment user counter (non-blocking)
           base44.functions.invoke('incrementUserCount', { user_id: user.id })
@@ -289,6 +307,12 @@ export default function GatorWelcome() {
         console.error('❌ [GatorWelcome] Failed to set role:', err);
         setRoleSetupComplete(true); // Set to true even on error to allow button click
       });
+    }
+    // Handle case where no pending role but user has no persona (shouldn't happen but safety net)
+    else if (!user.persona && !pendingRoleResolved && !roleSetupComplete) {
+      console.log('⚠️ [GatorWelcome] No persona and no pending role - redirecting to role selection');
+      navigate('GatorRoleSelection');
+      return;
     }
   }, [user, roleSetupComplete, isLoading]);
 
