@@ -150,7 +150,7 @@ export default function GatorWelcome() {
         setRoleSetupComplete(true); // Set to true even on error to allow button click
       });
     }
-  }, [user, roleSetupComplete]);
+  }, [user, roleSetupComplete, isLoading]);
 
   useEffect(() => {
     // Confetti effect
