@@ -196,20 +196,57 @@ export default function GatorAuth() {
             await base44.auth.updateMe(updateData);
             addLog('✅ User data saved to database');
             
-            // CRITICAL: Verify the update actually worked
-            const verifyUser = await base44.auth.me();
-            if (verifyUser.persona !== result.role) {
-              addLog(`⚠️ VERIFICATION FAILED: persona is ${verifyUser.persona}, expected ${result.role}`);
-              // Try one more time
-              await base44.auth.updateMe(updateData);
-              const reVerify = await base44.auth.me();
-              addLog(`🔄 Retry result: persona is now ${reVerify.persona}`);
-            } else {
-              addLog(`✅ VERIFIED: persona correctly set to ${verifyUser.persona}`);
+            // CRITICAL: Verify the update with retry loop (max 2 attempts)
+            let verified = false;
+            let attempts = 0;
+            let currentUser;
+            const MAX_VERIFY_ATTEMPTS = 2;
+            
+            while (attempts < MAX_VERIFY_ATTEMPTS && !verified) {
+              attempts++;
+              
+              // Small delay before verification to allow DB propagation
+              await new Promise(resolve => setTimeout(resolve, 500));
+              
+              currentUser = await base44.auth.me();
+              
+              if (currentUser.persona === result.role) {
+                verified = true;
+                addLog(`✅ VERIFIED on attempt ${attempts}: persona = ${currentUser.persona}`);
+              } else {
+                addLog(`⚠️ VERIFICATION FAILED on attempt ${attempts}: got ${currentUser.persona}, expected ${result.role}`);
+                
+                // Log mismatch to backend for monitoring (non-blocking)
+                base44.functions.invoke('logPersonaMismatch', {
+                  user_id: currentUser.id,
+                  email: currentUser.email,
+                  expected: result.role,
+                  actual: currentUser.persona,
+                  attempt: attempts,
+                  location: 'GatorAuth'
+                }).catch(() => {});
+                
+                if (attempts < MAX_VERIFY_ATTEMPTS) {
+                  addLog(`🔄 Retrying update...`);
+                  await base44.auth.updateMe(updateData);
+                }
+              }
+            }
+            
+            if (!verified) {
+              addLog(`❌ FINAL VERIFICATION FAILED after ${MAX_VERIFY_ATTEMPTS} attempts`);
+              // Don't proceed - show error to user
+              setErrorDetails({
+                type: 'persona_verification_failed',
+                message: 'Failed to save your role after multiple attempts. Please try again.',
+                expected: result.role,
+                actual: currentUser?.persona,
+                attempts: MAX_VERIFY_ATTEMPTS
+              });
+              return;
             }
             
             // NOTE: OAuthState is already deleted by retrieveOAuthState backend function
-            // No need to mark as used - it's gone from DB
             addLog('✅ OAuthState already cleaned up by backend');
           } catch (roleError) {
             addLog(`❌ Failed to save user data: ${roleError.message}`);

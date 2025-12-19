@@ -114,36 +114,79 @@ export default function GatorWelcome() {
         is_new_signup: true
       };
       
+      const MAX_VERIFY_ATTEMPTS = 2;
+      
       base44.auth.updateMe(updateData)
         .then(async () => {
           // Only update state if still mounted
           if (!isMountedRef.current) return;
           
-          // CRITICAL: Verify the update actually worked
-          const verifyUser = await base44.auth.me();
-          if (verifyUser.persona !== intendedRole) {
-            console.warn('⚠️ [GatorWelcome] VERIFICATION FAILED: persona is', verifyUser.persona, 'expected', intendedRole);
-            // Retry once
-            await base44.auth.updateMe(updateData);
-            const reVerify = await base44.auth.me();
-            console.log('🔄 [GatorWelcome] Retry result: persona is now', reVerify.persona);
-          } else {
-            console.log('✅ [GatorWelcome] VERIFIED: persona correctly set to', verifyUser.persona);
+          // CRITICAL: Verify the update with retry loop (max 2 attempts)
+          let verified = false;
+          let attempts = 0;
+          let currentUser;
+          
+          while (attempts < MAX_VERIFY_ATTEMPTS && !verified) {
+            attempts++;
+            
+            // Small delay before verification to allow DB propagation
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            currentUser = await base44.auth.me();
+            
+            if (currentUser.persona === intendedRole) {
+              verified = true;
+              console.log(`✅ [GatorWelcome] VERIFIED on attempt ${attempts}: persona = ${currentUser.persona}`);
+            } else {
+              console.warn(`⚠️ [GatorWelcome] VERIFICATION FAILED on attempt ${attempts}: got ${currentUser.persona}, expected ${intendedRole}`);
+              
+              // Log mismatch to backend for monitoring (non-blocking)
+              base44.functions.invoke('logPersonaMismatch', {
+                user_id: currentUser.id,
+                email: currentUser.email,
+                expected: intendedRole,
+                actual: currentUser.persona,
+                attempt: attempts,
+                location: 'GatorWelcome'
+              }).catch(() => {});
+              
+              if (attempts < MAX_VERIFY_ATTEMPTS) {
+                console.log('🔄 [GatorWelcome] Retrying update...');
+                await base44.auth.updateMe(updateData);
+              }
+            }
           }
           
-          clearPendingInviteData();
-          refreshUser();
-          setStatus('ready');
-          updateInProgressRef.current = false;
-          
-          // Non-blocking notifications
-          base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
-          base44.functions.invoke('notifyNewUserJoined', {
-            user_email: user.email,
-            user_name: user.full_name,
-            user_persona: intendedRole,
-            user_id: user.id
-          }).catch(() => {});
+          if (verified) {
+            clearPendingInviteData();
+            refreshUser();
+            setStatus('ready');
+            updateInProgressRef.current = false;
+            
+            // Non-blocking notifications
+            base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
+            base44.functions.invoke('notifyNewUserJoined', {
+              user_email: user.email,
+              user_name: user.full_name,
+              user_persona: intendedRole,
+              user_id: user.id
+            }).catch(() => {});
+          } else {
+            console.error(`❌ [GatorWelcome] FINAL VERIFICATION FAILED after ${MAX_VERIFY_ATTEMPTS} attempts`);
+            setError('Failed to save your role. Please refresh and try again.');
+            setStatus('error');
+            updateInProgressRef.current = false;
+            
+            // Log final failure to backend for monitoring
+            base44.functions.invoke('logPersonaMismatch', {
+              user_id: currentUser?.id,
+              email: currentUser?.email,
+              expected: intendedRole,
+              actual: currentUser?.persona,
+              attempt: 'final_failure',
+              location: 'GatorWelcome'
+            }).catch(() => {});
+          }
         })
         .catch((err) => {
           if (!isMountedRef.current) return;
