@@ -35,6 +35,9 @@ export default function GatorAuth() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hasAccessToken = hashParams.has('access_token');
     const hasError = hashParams.has('error');
+    
+    // Check if we're already in OAuth callback processing
+    const isProcessingOAuth = sessionStorage.getItem('oauth_processing') === 'true';
 
     // Handle OAuth errors
     if (hasError) {
@@ -42,12 +45,13 @@ export default function GatorAuth() {
       alert('Authentication was cancelled or failed. Please try again.');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('oauth_processing');
       window.location.href = window.location.origin + '/#LandingPage';
       return;
     }
 
-    // No user and no token - trigger login
-    if (!user && !hasAccessToken) {
+    // No user and no token - trigger login (but not if we're already processing OAuth)
+    if (!user && !hasAccessToken && !isProcessingOAuth) {
       if (!redirecting) {
         console.log('🔐 [GatorAuth] Redirecting to Google login...');
         setRedirecting(true);
@@ -72,6 +76,9 @@ export default function GatorAuth() {
       console.log('🔐 [GatorAuth] OAuth callback detected, waiting for SDK...');
       setProcessing(true);
       
+      // Set flag to prevent re-entry
+      sessionStorage.setItem('oauth_processing', 'true');
+      
       // Clear auth loop tracking on success
       localStorage.setItem('auth_attempts', '0');
       
@@ -87,6 +94,9 @@ export default function GatorAuth() {
         
         console.log('✅ [GatorAuth] SDK ready, role:', pendingRole, 'hasCode:', !!pendingCode);
         
+        // Clear processing flag before redirect
+        sessionStorage.removeItem('oauth_processing');
+        
         if (pendingRole === 'gator') {
           window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
         } else if (pendingRole === 'parent') {
@@ -99,9 +109,10 @@ export default function GatorAuth() {
     }
 
     // User authenticated - go to role selection
-    if (user && !hasAccessToken) {
+    if (user && !hasAccessToken && !isProcessingOAuth) {
       console.log('✅ [GatorAuth] User authenticated, going to role selection');
       localStorage.setItem('auth_attempts', '0');
+      sessionStorage.removeItem('oauth_processing');
       window.location.hash = 'GatorRoleSelection';
     }
   }, [user, isLoading, redirecting, processing]);
@@ -123,6 +134,7 @@ export default function GatorAuth() {
               localStorage.removeItem('last_auth_attempt');
               localStorage.removeItem('pending_invite_code');
               localStorage.removeItem('pending_invite_role');
+              sessionStorage.removeItem('oauth_processing');
               window.location.href = window.location.origin + '/#LandingPage';
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl"
