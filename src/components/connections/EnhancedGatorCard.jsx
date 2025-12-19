@@ -408,11 +408,13 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
         </div>
       </motion.div>
 
-      <MessageUserModal
-        isOpen={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        recipientUser={gator}
-      />
+      {showMessageModal && (
+        <MessageUserModal
+          isOpen={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          recipientUser={gator}
+        />
+      )}
 
       <style jsx>{`
         .gator-card-enhanced {
@@ -716,7 +718,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           gap: 8px;
           margin-top: 4px;
           position: relative;
-          z-index: 999;
+          z-index: 1;
           pointer-events: auto;
         }
 
@@ -740,7 +742,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           background: #f3f4f6;
           pointer-events: auto !important;
           position: relative;
-          z-index: 9999;
+          z-index: 1;
           user-select: none;
           border: 2px solid transparent;
           outline: none;
