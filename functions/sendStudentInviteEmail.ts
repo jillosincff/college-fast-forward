@@ -2,7 +2,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
     console.log('=== SEND STUDENT INVITE EMAIL STARTED ===');
+    console.log('Request method:', req.method);
     console.log('Timestamp:', new Date().toISOString());
+    
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+        return new Response(null, { status: 204 });
+    }
     
     try {
         const base44 = createClientFromRequest(req);
