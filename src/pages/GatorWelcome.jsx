@@ -8,7 +8,7 @@ import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
 export default function GatorWelcome() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isLoading } = useAuth();
   const params = useParams();
   const [roleSetupComplete, setRoleSetupComplete] = React.useState(false);
   
