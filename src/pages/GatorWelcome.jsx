@@ -102,6 +102,7 @@ export default function GatorWelcome() {
             if (result.success) {
               console.log('✅ [GatorWelcome] Parent linked successfully:', result);
               await refreshUser();
+              setRoleSetupComplete(true);
               
               // Show success message
               if (result.student_name) {
@@ -116,12 +117,14 @@ export default function GatorWelcome() {
               });
             } else {
               console.error('❌ [GatorWelcome] Failed to link:', result.error);
-              await refreshUser(); // Still refresh to get the parent persona
+              await refreshUser();
+              setRoleSetupComplete(true);
               alert(`❌ ${result.error || 'Unable to process invite code'}. You can connect to your student later from your dashboard.`);
             }
           } catch (error) {
             console.error('❌ [GatorWelcome] Error:', error);
-            await refreshUser(); // Refresh to get parent persona
+            await refreshUser();
+            setRoleSetupComplete(true);
             alert('❌ Invite code processing had an issue, but you can connect to your student from the dashboard.');
           }
         };
