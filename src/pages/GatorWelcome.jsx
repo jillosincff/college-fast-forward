@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/components/auth/AuthContext';
@@ -8,7 +8,7 @@ import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
 /**
- * GatorWelcome - Simple, bulletproof welcome page
+ * GatorWelcome - Bulletproof welcome page
  * 
  * FLOW:
  * 1. Determine the intended role (from localStorage > user.persona)
@@ -16,11 +16,33 @@ import { base44 } from '@/api/base44Client';
  * 3. Show welcome message and button
  * 4. Navigate to correct onboarding
  */
+
+// Helper to clear all pending invite data from storage
+const clearPendingInviteData = () => {
+  localStorage.removeItem('pending_invite_role');
+  localStorage.removeItem('pending_invite_code');
+  sessionStorage.removeItem('pending_invite_role');
+  sessionStorage.removeItem('pending_invite_code');
+};
+
 export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
   const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
   const [role, setRole] = useState(null);
   const [error, setError] = useState(null);
+  
+  // Track if update is in progress to prevent duplicate calls
+  const updateInProgressRef = useRef(false);
+  // Track if component is mounted for safe async updates
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Clear OAuth tracking on mount
   useEffect(() => {
@@ -51,14 +73,15 @@ export default function GatorWelcome() {
     }
 
     // STEP 1: Determine the intended role
-    // Priority: localStorage (current signup flow) > user.persona (database)
+    // Read fresh from localStorage inside effect to avoid stale closures
     const pendingRole = localStorage.getItem('pending_invite_role');
     const intendedRole = pendingRole || user.persona;
 
     console.log('🔍 [GatorWelcome] Role determination:', {
       pendingRole,
       userPersona: user.persona,
-      intendedRole
+      intendedRole,
+      updateInProgress: updateInProgressRef.current
     });
 
     // No role anywhere - redirect to role selection
@@ -68,14 +91,15 @@ export default function GatorWelcome() {
       return;
     }
 
-    // Set role for display immediately
+    // Set role for display immediately (optimistic UI)
     setRole(intendedRole);
 
     // STEP 2: Check if we need to update the database
     const needsUpdate = user.persona !== intendedRole;
 
-    if (needsUpdate) {
+    if (needsUpdate && !updateInProgressRef.current) {
       console.log('🔄 [GatorWelcome] Updating persona from', user.persona, 'to', intendedRole);
+      updateInProgressRef.current = true;
       
       base44.auth.updateMe({
         persona: intendedRole,
@@ -84,15 +108,14 @@ export default function GatorWelcome() {
         is_new_signup: true
       })
         .then(() => {
+          // Only update state if still mounted
+          if (!isMountedRef.current) return;
+          
           console.log('✅ [GatorWelcome] Persona updated successfully');
+          clearPendingInviteData();
           refreshUser();
           setStatus('ready');
-          
-          // Clear storage
-          localStorage.removeItem('pending_invite_role');
-          localStorage.removeItem('pending_invite_code');
-          sessionStorage.removeItem('pending_invite_role');
-          sessionStorage.removeItem('pending_invite_code');
+          updateInProgressRef.current = false;
           
           // Non-blocking notifications
           base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
@@ -104,21 +127,21 @@ export default function GatorWelcome() {
           }).catch(() => {});
         })
         .catch((err) => {
+          if (!isMountedRef.current) return;
+          
           console.error('❌ [GatorWelcome] Failed to update persona:', err);
-          setError(err.message);
+          setError(err.message || 'Failed to set up your account');
           setStatus('error');
+          updateInProgressRef.current = false;
         });
-    } else {
+    } else if (!needsUpdate) {
       // Persona already correct
       console.log('✅ [GatorWelcome] Persona already correct:', intendedRole);
+      clearPendingInviteData();
       setStatus('ready');
-      
-      // Clear storage
-      localStorage.removeItem('pending_invite_role');
-      localStorage.removeItem('pending_invite_code');
-      sessionStorage.removeItem('pending_invite_role');
-      sessionStorage.removeItem('pending_invite_code');
     }
+    // If needsUpdate && updateInProgressRef.current, do nothing (update already in flight)
+    
   }, [user, isLoading, refreshUser]);
 
   const handleGetStarted = () => {
@@ -130,6 +153,8 @@ export default function GatorWelcome() {
     } else if (role === 'parent' || role === 'alumni') {
       navigate('Onboarding');
     } else {
+      // Unexpected role - log warning and fallback
+      console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
       navigate('Dashboard');
     }
   };
@@ -139,8 +164,11 @@ export default function GatorWelcome() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="text-center">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-xl">
+            <span className="text-4xl">🐊</span>
+          </div>
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Setting up your account...</p>
+          <p className="text-slate-600 font-medium">Setting up your account...</p>
         </div>
       </div>
     );
@@ -167,10 +195,10 @@ export default function GatorWelcome() {
   // Ready state
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-2xl shadow-2xl border-0">
+      <Card className="w-full max-w-2xl shadow-2xl border-0 relative overflow-hidden">
         <CardContent className="pt-16 pb-12 px-8 text-center">
           {/* Progress bar */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-slate-200 rounded-t-lg overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-2 bg-slate-200">
             <div className="h-full bg-gradient-to-r from-orange-500 to-red-600 w-full" />
           </div>
 
