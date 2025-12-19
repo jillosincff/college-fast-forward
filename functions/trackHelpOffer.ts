@@ -129,10 +129,11 @@ Deno.serve(async (req) => {
         // Step 5: Update request metrics (optional, non-blocking)
         console.log('Step 5: Update request metrics');
         try {
-            // Try to update the request's offer count, but don't fail if it doesn't work
+            // Try to update the request's message count, but don't fail if it doesn't work
             const request = await base44.asServiceRole.entities.JobRequest.get(requestId);
             if (request) {
                 await base44.asServiceRole.entities.JobRequest.update(requestId, {
+                    messages_count: (request.messages_count || 0) + 1,
                     offers_count: (request.offers_count || 0) + 1,
                     last_activity_at: new Date().toISOString()
                 });
