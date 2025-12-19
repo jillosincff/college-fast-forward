@@ -19,6 +19,8 @@ export default function TestingDashboard() {
   const [isFixingPersonas, setIsFixingPersonas] = useState(false);
   const [recentSignups, setRecentSignups] = useState(null);
   const [isLoadingSignups, setIsLoadingSignups] = useState(false);
+  const [foundingMarkResults, setFoundingMarkResults] = useState(null);
+  const [isMarkingFounding, setIsMarkingFounding] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -345,9 +347,94 @@ export default function TestingDashboard() {
               >
                 {isLoadingSignups ? 'Loading...' : 'Recent Signups (24h)'}
               </Button>
+
+              <Button
+                onClick={async () => {
+                  if (!confirm('Mark ALL users without founding status as Founding Members? This will assign them founding numbers and ensure they never get charged.')) {
+                    return;
+                  }
+                  setIsMarkingFounding(true);
+                  setFoundingMarkResults(null);
+                  try {
+                    const result = await base44.functions.invoke('markAsFoundingMembers', {});
+                    setFoundingMarkResults(result.data);
+                    // Refresh counts
+                    loadCounts();
+                    if (recentSignups) {
+                      const refreshResult = await base44.functions.invoke('getRecentSignups', {});
+                      setRecentSignups(refreshResult.data.users || []);
+                    }
+                  } catch (error) {
+                    setFoundingMarkResults({ error: error.message });
+                  }
+                  setIsMarkingFounding(false);
+                }}
+                disabled={isMarkingFounding}
+                size="lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                {isMarkingFounding ? 'Marking...' : '🏆 Mark All as Founding Members'}
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Founding Member Marking Results */}
+        {foundingMarkResults && (
+          <Card className="mb-8 border-orange-200 bg-orange-50">
+            <CardHeader>
+              <CardTitle className="text-orange-900">Founding Member Marking Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {foundingMarkResults.error ? (
+                <div className="text-red-600">Error: {foundingMarkResults.error}</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-white rounded border">
+                      <div className="text-2xl font-bold text-blue-600">{foundingMarkResults.total_processed}</div>
+                      <div className="text-xs text-gray-600">Total Processed</div>
+                    </div>
+                    <div className="p-3 bg-white rounded border">
+                      <div className="text-2xl font-bold text-green-600">{foundingMarkResults.updated}</div>
+                      <div className="text-xs text-gray-600">Marked as Founding</div>
+                    </div>
+                    <div className="p-3 bg-white rounded border">
+                      <div className="text-2xl font-bold text-orange-600">{foundingMarkResults.skipped}</div>
+                      <div className="text-xs text-gray-600">Skipped</div>
+                    </div>
+                  </div>
+
+                  {foundingMarkResults.updated_users?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm">✅ Successfully Marked:</h4>
+                      <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                        {foundingMarkResults.updated_users.map((u, i) => (
+                          <div key={i} className="p-2 bg-white rounded border text-xs">
+                            🏆 #{u.number} - {u.name} ({u.email})
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {foundingMarkResults.skipped_users?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm">⚠️ Skipped:</h4>
+                      <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                        {foundingMarkResults.skipped_users.map((u, i) => (
+                          <div key={i} className="p-2 bg-white rounded border text-xs">
+                            {u.email} - {u.error}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recent Signups */}
         {recentSignups && (
