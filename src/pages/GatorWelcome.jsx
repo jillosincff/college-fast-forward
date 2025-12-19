@@ -213,10 +213,17 @@ export default function GatorWelcome() {
               alert(`❌ ${result.error || 'Unable to process invite code'}. You can connect to your student later from your dashboard.`);
             }
           } catch (error) {
-            console.error('❌ [GatorWelcome] Error:', error);
+            console.error('❌ [GatorWelcome] Error details:', {
+              message: error.message,
+              stack: error.stack,
+              response: error.response,
+              data: error.data,
+              status: error.status,
+              fullError: error
+            });
             await refreshUser();
             setRoleSetupComplete(true);
-            alert('❌ Invite code processing had an issue, but you can connect to your student from the dashboard.');
+            alert(`❌ Error processing invite code: ${error.message || 'Unknown error'}. You can connect to your student from the dashboard.`);
           }
         };
         
