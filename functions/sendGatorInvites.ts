@@ -63,11 +63,13 @@ Deno.serve(async (req) => {
 
     for (const email of emailsToSend) {
         try {
+            console.log('📧 Processing invite for:', email);
             const token = uuidv4();
             const expires_at = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(); // 14 days
 
+            console.log('Creating CommunityInvite record...');
             // Force campus to UF for College Fast Forward branding
-            await base44.asServiceRole.entities.CommunityInvite.create({
+            const invite = await base44.asServiceRole.entities.CommunityInvite.create({
                 inviter_user_id: user.id,
                 email,
                 role: role || 'student',
@@ -77,8 +79,11 @@ Deno.serve(async (req) => {
                 status: 'pending',
                 expires_at,
             });
+            console.log('✅ CommunityInvite created:', invite.id);
 
             const inviteLink = `${appUrl}/#PreAuth?inviteToken=${token}`;
+            console.log('📨 Sending email to:', email);
+            console.log('Invite link:', inviteLink);
             
             // College Fast Forward branded email
             const subject = `You're invited to College Fast Forward (UF)`;
