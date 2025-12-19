@@ -12,17 +12,31 @@ Deno.serve(async (req) => {
 
     const { dryRun = true } = await req.json().catch(() => ({ dryRun: true }));
 
+    console.log(`[Audit] Starting audit - dryRun: ${dryRun}`);
+
     // Get all users and invite codes
     const [allUsers, inviteCodes] = await Promise.all([
       base44.asServiceRole.entities.User.list(),
       base44.asServiceRole.entities.InviteCode.list()
     ]);
 
+    console.log(`[Audit] Found ${allUsers.length} users and ${inviteCodes.length} invite codes`);
+
     const issues = [];
     const fixes = [];
+    
+    // Get highest founding number to continue from
+    const foundingUsers = allUsers.filter(u => u.founding_gator_number);
+    const highestNumber = foundingUsers.length > 0 
+      ? Math.max(...foundingUsers.map(u => u.founding_gator_number || 0))
+      : 0;
+    let nextFoundingNumber = highestNumber + 1;
+
+    console.log(`[Audit] Highest founding number: ${highestNumber}, starting from: ${nextFoundingNumber}`);
 
     for (const u of allUsers) {
       const userIssues = [];
+      const userFixes = {};
       
       // Check 1: Missing persona
       if (!u.persona) {
@@ -47,10 +61,8 @@ Deno.serve(async (req) => {
           }
           
           if (assignedPersona) {
-            await base44.asServiceRole.entities.User.update(u.id, {
-              persona: assignedPersona,
-              roles: [assignedPersona]
-            });
+            userFixes.persona = assignedPersona;
+            userFixes.roles = [assignedPersona];
             fixes.push({ email: u.email, fix: 'persona', value: assignedPersona });
           }
         }
@@ -61,17 +73,11 @@ Deno.serve(async (req) => {
         userIssues.push('not_founding_member');
         
         if (!dryRun) {
-          const countResult = await base44.asServiceRole.functions.invoke('getUserCount', {});
-          const nextNumber = (countResult.data?.count || 0) + 1;
-          
-          await base44.asServiceRole.entities.User.update(u.id, {
-            is_founding_gator: true,
-            founding_gator_number: nextNumber,
-            membership_tier: 'founding_gator'
-          });
-          
-          await base44.asServiceRole.functions.invoke('incrementUserCount', {});
-          fixes.push({ email: u.email, fix: 'founding_member', number: nextNumber });
+          userFixes.is_founding_gator = true;
+          userFixes.founding_gator_number = nextFoundingNumber;
+          userFixes.membership_tier = 'founding_gator';
+          fixes.push({ email: u.email, fix: 'founding_member', number: nextFoundingNumber });
+          nextFoundingNumber++;
         }
       }
       
@@ -84,11 +90,22 @@ Deno.serve(async (req) => {
       if (!u.roles || u.roles.length === 0) {
         userIssues.push('no_roles');
         
-        if (!dryRun && u.persona) {
-          await base44.asServiceRole.entities.User.update(u.id, {
-            roles: [u.persona]
-          });
-          fixes.push({ email: u.email, fix: 'roles', value: [u.persona] });
+        if (!dryRun && (u.persona || userFixes.persona)) {
+          const roleToAssign = userFixes.persona || u.persona;
+          userFixes.roles = [roleToAssign];
+          if (!fixes.some(f => f.email === u.email && f.fix === 'roles')) {
+            fixes.push({ email: u.email, fix: 'roles', value: [roleToAssign] });
+          }
+        }
+      }
+      
+      // Apply all fixes for this user in one update
+      if (!dryRun && Object.keys(userFixes).length > 0) {
+        try {
+          await base44.asServiceRole.entities.User.update(u.id, userFixes);
+          console.log(`[Audit] Fixed user ${u.email}:`, userFixes);
+        } catch (err) {
+          console.error(`[Audit] Failed to fix user ${u.email}:`, err);
         }
       }
       
