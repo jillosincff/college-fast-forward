@@ -128,8 +128,10 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
       
       onClose();
       
-      // Trigger page refresh to update message counts
-      document.dispatchEvent(new CustomEvent('cff:message-sent'));
+      // Trigger page refresh to update message counts - with small delay to ensure backend completes
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent('cff:message-sent'));
+      }, 500);
 
     } catch (error) {
       console.error('❌ Failed to send help offer:', error);
