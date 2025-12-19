@@ -763,21 +763,15 @@ function AppContent() {
   useEffect(() => {
     const handleHashChange = async () => {
       const hashFragment = window.location.hash.substring(1);
-      const hashParams = new URLSearchParams(hashFragment);
       
-      const hasAccessToken = hashParams.has('access_token');
-      const hasStateToken = hashParams.has('state') || new URLSearchParams(window.location.search).has('state');
+      // Check for OAuth callback (access_token in hash)
+      const hasAccessToken = hashFragment.includes('access_token=');
+      const hasStateToken = hashFragment.includes('state=');
 
-      // CRITICAL: If this is an OAuth callback with state token, let GatorAuth handle it
-      if (hasAccessToken && hasStateToken) {
-        console.log('🔐 [Layout] OAuth callback detected with state - letting GatorAuth handle it');
-        // Extract page from hash (should be GatorAuth)
-        let pageHash = hashFragment.split('?')[0].split('&')[0] || 'GatorAuth';
-        if (!pageHash || pageHash.includes('access_token')) {
-          pageHash = 'GatorAuth';
-        }
-        console.log('📍 [Hash] Setting page:', pageHash);
-        setCurrentPage(pageHash);
+      // CRITICAL: If this is an OAuth callback, always route to GatorAuth
+      if (hasAccessToken) {
+        console.log('🔐 [Layout] OAuth callback detected - routing to GatorAuth');
+        setCurrentPage('GatorAuth');
         setResolvedPage(null);
         return;
       }
