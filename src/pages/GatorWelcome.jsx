@@ -62,6 +62,9 @@ export default function GatorWelcome() {
           user_persona: 'gator',
           user_id: user.id
         });
+      }).catch(err => {
+        console.error('❌ [GatorWelcome] Failed to set student role:', err);
+        setRoleSetupComplete(true); // Enable button even on error
       });
     }
     // If parent with invite code, set persona first then process invite
