@@ -651,21 +651,36 @@ export default function StudentOnboarding() {
                       </Select>
                     </div>
 
-                    {/* Description */}
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Tell us more about what you're looking for *
-                      </label>
+                    {/* Description - EMPHASIZED */}
+                    <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-base font-bold text-slate-900">
+                            ⭐ This is the most important part! Tell us what you're looking for *
+                          </label>
+                          <p className="text-sm text-orange-700 mt-1">
+                            The more detail you provide, the better we can match you with Gator parents & alumni who can actually help.
+                          </p>
+                        </div>
+                      </div>
                       <Textarea
                         value={formData.help_description}
                         onChange={(e) => updateField('help_description', e.target.value)}
-                        placeholder="e.g., Looking for advice on breaking into tech consulting. Interested in learning about the interview process and what skills are most valued..."
-                        rows={4}
-                        className="text-base"
+                        placeholder="e.g., Looking for advice on breaking into tech consulting. Interested in learning about the interview process and what skills are most valued. I have experience in X and am passionate about Y..."
+                        rows={5}
+                        className="text-base border-orange-300 focus:border-orange-500 focus:ring-orange-500"
                       />
-                      <p className="text-xs text-slate-500 mt-1">
-                        {formData.help_description?.length || 0} characters (minimum 10)
-                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-slate-600">
+                          {formData.help_description?.length || 0} characters (minimum 10)
+                        </p>
+                        <p className="text-xs text-orange-600 font-medium">
+                          💡 Tip: Mention your experience, passions, and specific goals
+                        </p>
+                      </div>
                     </div>
 
                     {/* Timeline */}
@@ -930,9 +945,25 @@ export default function StudentOnboarding() {
                 )}
               </div>
 
-              {/* Progress Indicator */}
-              <div className="text-center mt-6 text-sm text-slate-500">
-                Step {currentStep + 1} of 8
+              {/* Progress Indicator with Step Dots */}
+              <div className="mt-8">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => (
+                    <div
+                      key={step}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        step === currentStep
+                          ? 'w-8 bg-[#FA4616]'
+                          : step < currentStep
+                          ? 'w-2 bg-[#0021A5]'
+                          : 'w-2 bg-slate-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-center text-sm text-slate-500">
+                  Step {currentStep + 1} of 8
+                </p>
               </div>
             </CardContent>
           </Card>
