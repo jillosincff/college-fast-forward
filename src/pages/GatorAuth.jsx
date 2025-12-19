@@ -21,8 +21,12 @@ export default function GatorAuth() {
       localStorage.setItem('auth_attempts', '0');
     }
     
-    // If more than 3 attempts in 5 minutes, show error
-    if (authAttempts > 3) {
+    // More lenient on mobile - allow 5 attempts instead of 3
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const maxAttempts = isMobile ? 5 : 3;
+    
+    // If more than max attempts in 5 minutes, show error
+    if (authAttempts > maxAttempts) {
       console.error('🚨 [GatorAuth] Auth loop detected!');
       setLoopDetected(true);
       return;
@@ -71,6 +75,12 @@ export default function GatorAuth() {
       // Clear auth loop tracking on success
       localStorage.setItem('auth_attempts', '0');
       
+      // Mobile needs more time for SDK initialization
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const waitTime = isMobile ? 10000 : 6000;
+      
+      console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms (mobile: ${isMobile})`);
+      
       setTimeout(() => {
         const pendingRole = localStorage.getItem('pending_invite_role');
         const pendingCode = localStorage.getItem('pending_invite_code');
@@ -84,7 +94,7 @@ export default function GatorAuth() {
         } else {
           window.location.href = window.location.origin + '/#GatorRoleSelection';
         }
-      }, 6000);
+      }, waitTime);
       return;
     }
 
