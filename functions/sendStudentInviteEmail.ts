@@ -60,23 +60,26 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    try {
-        await base44.asServiceRole.integrations.Core.SendEmail({
+        console.log('📤 Calling SendEmail integration...');
+        console.log('To:', student_email);
+        console.log('Subject:', subject);
+        
+        const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
             to: student_email,
             subject: subject,
             body: emailBody,
             from_name: "College Fast Forward"
         });
 
-        return new Response(JSON.stringify({ success: true, message: 'Invite email sent successfully.' }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        console.log('✅ Email sent successfully!');
+        console.log('Email result:', emailResult);
+
+        return Response.json({ success: true, message: 'Invite email sent successfully.' });
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        console.error('=== SEND STUDENT INVITE EMAIL ERROR ===');
+        console.error('❌ Error:', error.message);
+        console.error('Stack:', error.stack);
+        return Response.json({ error: error.message }, { status: 500 });
     }
 });
