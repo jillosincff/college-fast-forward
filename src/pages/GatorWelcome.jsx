@@ -17,39 +17,67 @@ export default function GatorWelcome() {
   const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
-    if (isLoading) {
-      console.log('⏳ [GatorWelcome] Still loading user...');
-      return;
-    }
-    
     // Extract parameters from hash fragment (hash-based routing)
-    const hashFragment = window.location.hash.substring(1); // Remove #
+    const hashFragment = window.location.hash.substring(1);
     const hashParts = hashFragment.split('?');
     const queryString = hashParts[1] || '';
     const urlParams = new URLSearchParams(queryString);
     const hasOAuthParams = urlParams.has('role') || urlParams.has('code');
     
-    console.log('🔍 [GatorWelcome] Checking params - hash:', window.location.hash, 'hasOAuthParams:', hasOAuthParams, 'role:', urlParams.get('role'), 'code:', urlParams.get('code'));
+    console.log('🔍 [GatorWelcome] State check:', {
+      isLoading,
+      hasUser: !!user,
+      hash: window.location.hash,
+      queryString,
+      hasOAuthParams,
+      role: urlParams.get('role'),
+      code: urlParams.get('code')
+    });
+    
+    if (isLoading) {
+      console.log('⏳ [GatorWelcome] Still loading user...');
+      return;
+    }
     
     if (!user) {
-      // If we have OAuth params, give SDK more time (up to 10s) before redirecting
+      // If we have OAuth params, wait for SDK to finish authentication
       if (hasOAuthParams) {
-        const waitStart = Date.now();
-        const maxWait = 10000; // 10 seconds
+        console.log('⏳ [GatorWelcome] OAuth params detected, waiting for authentication...');
         
-        console.log('⏳ [GatorWelcome] OAuth params detected but no user yet, waiting for SDK...');
+        // Poll for user every 500ms for up to 15 seconds
+        const startTime = Date.now();
+        const maxWait = 15000;
         
-        const checkUser = setInterval(() => {
-          const elapsed = Date.now() - waitStart;
+        const pollInterval = setInterval(async () => {
+          const elapsed = Date.now() - startTime;
           
           if (elapsed > maxWait) {
-            console.error('❌ [GatorWelcome] Timeout waiting for user after OAuth');
-            clearInterval(checkUser);
+            console.error('❌ [GatorWelcome] Timeout - user not authenticated after 15s');
+            clearInterval(pollInterval);
+            // Store params and redirect to auth to try again
+            localStorage.setItem('pending_invite_role', urlParams.get('role'));
+            if (urlParams.get('code')) {
+              localStorage.setItem('pending_invite_code', urlParams.get('code'));
+            }
             navigate('GatorAuth');
+            return;
+          }
+          
+          // Check if user became available
+          try {
+            const currentUser = await base44.auth.me();
+            if (currentUser) {
+              console.log('✅ [GatorWelcome] User authenticated:', currentUser.email);
+              clearInterval(pollInterval);
+              // Trigger refresh by updating state
+              refreshUser();
+            }
+          } catch (e) {
+            console.log('⏳ [GatorWelcome] Still waiting for auth... elapsed:', elapsed + 'ms');
           }
         }, 500);
         
-        return () => clearInterval(checkUser);
+        return () => clearInterval(pollInterval);
       }
       
       console.log('❌ [GatorWelcome] No user and no OAuth params, redirecting to auth');
