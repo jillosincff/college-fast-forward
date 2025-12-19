@@ -190,8 +190,8 @@ export default function GatorAuth() {
             addLog(`📝 Stored role in localStorage as backup: ${result.role}`);
             
             // Log current user state and update payload
-            const currentUser = await base44.auth.me();
-            addLog(`📝 Current user: ${currentUser.email}, updating with: ${JSON.stringify(updateData)}`);
+            const preUpdateUser = await base44.auth.me();
+            addLog(`📝 Current user: ${preUpdateUser.email}, updating with: ${JSON.stringify(updateData)}`);
             
             await base44.auth.updateMe(updateData);
             addLog('✅ User data saved to database');
