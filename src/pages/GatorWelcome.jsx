@@ -11,8 +11,8 @@ export default function GatorWelcome() {
   const { user, refreshUser } = useAuth();
   const params = useParams();
   
-  // Get role from params or sessionStorage (prioritize pendingRole over existing persona)
-  const pendingRole = sessionStorage.getItem('pending_invite_role');
+  // Get role from params or localStorage (survives redirects better)
+  const pendingRole = localStorage.getItem('pending_invite_role');
   const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function GatorWelcome() {
     } else {
       console.log('✅ User on welcome page:', user.email, 'role:', role);
       
-      const pendingCode = sessionStorage.getItem('pending_invite_code');
+      const pendingCode = localStorage.getItem('pending_invite_code');
       const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
       
       // If student without code and UFL email, auto-verify
@@ -184,7 +184,9 @@ export default function GatorWelcome() {
     const referralCode = sessionStorage.getItem('pending_referral_code');
     console.log('🎟️ [GatorWelcome] Preserving referral code for onboarding:', referralCode);
     
-    // Clear other pending flags since we're completing onboarding
+    // Clear pending flags from both storage types
+    localStorage.removeItem('pending_invite_role');
+    localStorage.removeItem('pending_invite_code');
     sessionStorage.removeItem('pending_invite_role');
     sessionStorage.removeItem('pending_invite_code');
     sessionStorage.removeItem('selected_role');

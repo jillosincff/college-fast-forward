@@ -58,6 +58,34 @@ export default function GatorAuth() {
     }
   }, [user, isLoading, redirecting, processing]);
 
+  if (loopDetected) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <div className="text-center max-w-md bg-white rounded-2xl shadow-xl p-8">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Authentication Issue</h2>
+          <p className="text-slate-600 mb-6">
+            We detected a login loop. This usually happens if cookies are blocked or if there was a network issue.
+          </p>
+          <button
+            onClick={() => {
+              localStorage.removeItem('auth_attempts');
+              localStorage.removeItem('last_auth_attempt');
+              localStorage.removeItem('pending_invite_code');
+              localStorage.removeItem('pending_invite_role');
+              window.location.href = window.location.origin + '/#LandingPage';
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl"
+          >
+            Start Over
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
       <div className="text-center max-w-md px-4">
