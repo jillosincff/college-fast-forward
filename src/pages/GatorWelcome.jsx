@@ -107,17 +107,30 @@ export default function GatorWelcome() {
       console.log('🔄 [GatorWelcome] Updating persona from', user.persona, 'to', intendedRole);
       updateInProgressRef.current = true;
       
-      base44.auth.updateMe({
+      const updateData = {
         persona: intendedRole,
         roles: [intendedRole],
         onboarding_completed: false,
         is_new_signup: true
-      })
-        .then(() => {
+      };
+      
+      base44.auth.updateMe(updateData)
+        .then(async () => {
           // Only update state if still mounted
           if (!isMountedRef.current) return;
           
-          console.log('✅ [GatorWelcome] Persona updated successfully');
+          // CRITICAL: Verify the update actually worked
+          const verifyUser = await base44.auth.me();
+          if (verifyUser.persona !== intendedRole) {
+            console.warn('⚠️ [GatorWelcome] VERIFICATION FAILED: persona is', verifyUser.persona, 'expected', intendedRole);
+            // Retry once
+            await base44.auth.updateMe(updateData);
+            const reVerify = await base44.auth.me();
+            console.log('🔄 [GatorWelcome] Retry result: persona is now', reVerify.persona);
+          } else {
+            console.log('✅ [GatorWelcome] VERIFIED: persona correctly set to', verifyUser.persona);
+          }
+          
           clearPendingInviteData();
           refreshUser();
           setStatus('ready');
