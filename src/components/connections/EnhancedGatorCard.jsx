@@ -379,32 +379,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
               >
                 💬 {messagesCount}
               </span>
-              <div
-                className={`signal-badge signal-clickable ${isLiked ? 'signal-liked' : ''}`}
-                onClick={(e) => {
-                  console.log('🎯 DIV CLICKED!', 
-                    '\n  isLiked:', isLiked, 
-                    '\n  requestId:', requestId,
-                    '\n  isLikedByUser prop:', isLikedByUser
-                  );
-                  e.stopPropagation();
-                  if (!isLiked) {
-                    console.log('🎯 Calling handleThumbsUp...');
-                    handleThumbsUp();
-                  } else {
-                    console.log('⏭️ Already liked, skipping - isLiked is:', isLiked);
-                  }
-                }}
-                style={{ cursor: isLiked ? 'default' : 'pointer' }}
-                title={isLiked ? 'You supported this student!' : 'Show support'}
-              >
-                👍 {displayCount}
-              </div>
-              {isFeatured && (
-                <span className="signal-badge signal-fire" title="Trending this week">
-                  🔥
-                </span>
-              )}
             </div>
           )}
         </div>
