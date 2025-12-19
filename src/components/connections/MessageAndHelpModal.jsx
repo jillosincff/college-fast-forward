@@ -1,14 +1,15 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Send, Sparkles, MessageCircle, Users, Briefcase, Lightbulb } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { trackEvent } from '@/components/utils/analytics';
+import { getDisplayName } from '@/components/utils/nameUtils';
 
 const helpOptions = [
   {
@@ -126,6 +127,9 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
       setSelectedTemplate('');
       
       onClose();
+      
+      // Trigger page refresh to update message counts
+      document.dispatchEvent(new CustomEvent('cff:message-sent'));
 
     } catch (error) {
       console.error('❌ Failed to send help offer:', error);
