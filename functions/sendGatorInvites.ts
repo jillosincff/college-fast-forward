@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
                     const msg = {
                         to: email,
                         from: {
-                            email: 'support@collegefastforward.com',
+                            email: 'jill@uffastforward.com',
                             name: 'College Fast Forward'
                         },
                         subject: subject,
