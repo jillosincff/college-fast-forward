@@ -74,14 +74,20 @@ export default function GatorWelcome() {
 
     // STEP 1: Determine the intended role
     // Read fresh from localStorage inside effect to avoid stale closures
+    // Priority: localStorage (set by GatorAuth after OAuth) > user.persona (database)
     const pendingRole = localStorage.getItem('pending_invite_role');
+    
+    // CRITICAL: For new signups, ALWAYS trust localStorage over user.persona
+    // This handles the case where user.persona hasn't been updated yet due to propagation delay
+    // or where user had a stale persona from a previous incomplete signup
     const intendedRole = pendingRole || user.persona;
 
     console.log('🔍 [GatorWelcome] Role determination:', {
       pendingRole,
       userPersona: user.persona,
       intendedRole,
-      updateInProgress: updateInProgressRef.current
+      updateInProgress: updateInProgressRef.current,
+      isNewSignup: user.is_new_signup
     });
 
     // No role anywhere - redirect to role selection
