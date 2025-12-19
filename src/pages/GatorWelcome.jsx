@@ -59,9 +59,9 @@ export default function GatorWelcome() {
         });
       });
     }
-      // If parent with invite code, set persona first then process invite
-      // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
-      else if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
+    // If parent with invite code, set persona first then process invite
+    // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
+    else if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
         console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
         
         const processParentFlow = async () => {
@@ -121,10 +121,10 @@ export default function GatorWelcome() {
           }
         };
         
-        processParentFlow();
-      }
-      // Otherwise just set role (or correct wrong persona)
-      else if (pendingRole && user.persona !== pendingRole && !roleSetupComplete) {
+      processParentFlow();
+    }
+    // Otherwise just set role (or correct wrong persona)
+    else if (pendingRole && user.persona !== pendingRole && !roleSetupComplete) {
         console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
         base44.auth.updateMe({
           persona: pendingRole,
@@ -145,11 +145,10 @@ export default function GatorWelcome() {
             user_persona: pendingRole,
             user_id: user.id
           });
-        }).catch(err => {
-          console.error('❌ [GatorWelcome] Failed to set role:', err);
-          setRoleSetupComplete(true); // Set to true even on error to allow button click
-        });
-      }
+      }).catch(err => {
+        console.error('❌ [GatorWelcome] Failed to set role:', err);
+        setRoleSetupComplete(true); // Set to true even on error to allow button click
+      });
     }
   }, [user, roleSetupComplete]);
 
