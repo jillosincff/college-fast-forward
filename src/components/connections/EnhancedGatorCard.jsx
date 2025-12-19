@@ -369,7 +369,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           </Button>
 
           {/* Quick-Win Engagement Signals */}
-          {request && (
+          {request && !showMessageModal && (
             <div className="engagement-signals">
               <span 
                 className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
