@@ -29,7 +29,7 @@ export default function GatorStudentEmail() {
         expires_at: expiresAt
       });
       
-      const callbackUrl = `${window.location.origin}/#GatorAuth?state=${token}`;
+      const callbackUrl = `${window.location.origin}/?state=${token}#GatorAuth`;
       console.log('🎓 [GatorStudentEmail] Stored state in DB, redirecting:', { token, email });
       
       base44.auth.redirectToLogin(callbackUrl);
