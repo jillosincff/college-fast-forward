@@ -129,48 +129,41 @@ export default function GatorAuth() {
           
           console.log('✅ [GatorAuth] Retrieved state:', result);
           
-          // CRITICAL: Set user role IMMEDIATELY after auth (before redirect)
+          // CRITICAL: Set ALL user data from OAuthState immediately
           try {
-            console.log('📝 [GatorAuth] Setting role:', result.role);
-            const currentUser = await base44.auth.me();
+            console.log('📝 [GatorAuth] Setting user data from OAuthState:', result);
             
             const updateData = {
               persona: result.role,
-              roles: [result.role]
+              roles: [result.role],
+              onboarding_completed: false
             };
             
-            // Store invite code if present
-            if (result.invite_code) {
-              updateData.invite_code_used = result.invite_code;
-            }
+            // Store all available data from OAuthState
+            if (result.invite_code) updateData.invite_code_used = result.invite_code;
+            if (result.email && result.role === 'gator') updateData.student_email_verified = result.email;
+            if (result.referral_code) updateData.referral_code = result.referral_code;
             
             await base44.auth.updateMe(updateData);
-            console.log('✅ [GatorAuth] Role set successfully:', result.role);
+            console.log('✅ [GatorAuth] User data saved to database');
+            
+            // Mark OAuthState as used to prevent reuse
+            try {
+              await base44.asServiceRole.entities.OAuthState.update(result.id || result.state_id, { used: true });
+              console.log('✅ [GatorAuth] OAuthState marked as used');
+            } catch (e) {
+              console.warn('⚠️ [GatorAuth] Could not mark OAuthState as used:', e.message);
+            }
           } catch (roleError) {
-            console.error('⚠️ [GatorAuth] Failed to set role:', roleError);
-            // Continue anyway - GatorWelcome will handle it
+            console.error('❌ [GatorAuth] Failed to save user data:', roleError);
+            alert('Failed to complete setup. Please try logging in again.');
+            window.location.href = window.location.origin + '/#LandingPage';
+            return;
           }
           
-          // Build redirect URL with retrieved parameters
-          let redirectUrl = `${window.location.origin}/#GatorWelcome`;
-          const params = new URLSearchParams();
-          if (result.role) params.set('role', result.role);
-          if (result.invite_code) params.set('code', result.invite_code);
-          if (result.email) params.set('email', result.email);
-          if (result.referral_code) params.set('ref', result.referral_code);
-          
-          if (params.toString()) {
-            redirectUrl += '?' + params.toString();
-          }
-          
-          console.log('🎯 [GatorAuth] Final redirect URL:', redirectUrl);
-          console.log('📍 [GatorAuth] Parameters:', {
-            role: result.role,
-            code: result.invite_code,
-            email: result.email,
-            ref: result.referral_code
-          });
-          
+          // Redirect to GatorWelcome (user data is now in database, no need for URL params or localStorage)
+          const redirectUrl = `${window.location.origin}/#GatorWelcome`;
+          console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
           window.location.href = redirectUrl;
         } catch (error) {
           console.error('❌ [GatorAuth] Exception caught:', error);
