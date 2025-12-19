@@ -91,6 +91,7 @@ Deno.serve(async (req) => {
       }
       
       // Apply all fixes for this user in one update
+      let fixFailed = false;
       if (!dryRun && Object.keys(userFixes).length > 0) {
         try {
           await base44.asServiceRole.entities.User.update(u.id, userFixes);
@@ -98,10 +99,12 @@ Deno.serve(async (req) => {
         } catch (err) {
           console.error(`[Audit] Failed to fix user ${u.email}:`, err);
           fixes.push({ email: u.email, fix: 'ERROR', error: err.message });
+          fixFailed = true;
         }
       }
       
-      if (userIssues.length > 0) {
+      // Only add to issues if in dry run mode OR if fixes failed
+      if (userIssues.length > 0 && (dryRun || fixFailed)) {
         issues.push({
           id: u.id,
           email: u.email,
