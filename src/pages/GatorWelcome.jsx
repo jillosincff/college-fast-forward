@@ -17,14 +17,14 @@ export default function GatorWelcome() {
   const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
-    // Check if we just came from OAuth (have role/code params but no user yet)
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasOAuthParams = urlParams.has('role') || urlParams.has('code');
-    
     if (isLoading) {
       console.log('⏳ [GatorWelcome] Still loading user...');
       return;
     }
+    
+    // Extract parameters from URL early
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasOAuthParams = urlParams.has('role') || urlParams.has('code');
     
     if (!user) {
       // If we have OAuth params, give SDK more time (up to 10s) before redirecting
@@ -53,7 +53,6 @@ export default function GatorWelcome() {
     }
     
     // Extract parameters from URL (more reliable than storage)
-    const urlParams = new URLSearchParams(window.location.search);
     const urlRole = urlParams.get('role');
     const urlCode = urlParams.get('code');
     const urlEmail = urlParams.get('email');
