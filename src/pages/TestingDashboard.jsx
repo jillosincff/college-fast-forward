@@ -17,6 +17,8 @@ export default function TestingDashboard() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [personaFixResults, setPersonaFixResults] = useState(null);
   const [isFixingPersonas, setIsFixingPersonas] = useState(false);
+  const [recentSignups, setRecentSignups] = useState(null);
+  const [isLoadingSignups, setIsLoadingSignups] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -323,9 +325,76 @@ export default function TestingDashboard() {
               >
                 {isFixingPersonas ? 'Fixing Personas...' : 'Fix Missing Personas'}
               </Button>
+
+              <Button
+                onClick={async () => {
+                  setIsLoadingSignups(true);
+                  setRecentSignups(null);
+                  try {
+                    const allUsers = await base44.asServiceRole.entities.User.list();
+                    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                    const recent = allUsers
+                      .filter(u => new Date(u.created_date) > yesterday)
+                      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+                    setRecentSignups(recent);
+                  } catch (error) {
+                    setRecentSignups({ error: error.message });
+                  }
+                  setIsLoadingSignups(false);
+                }}
+                disabled={isLoadingSignups}
+                size="lg"
+                variant="secondary"
+                className="bg-blue-100 hover:bg-blue-200 text-blue-900"
+              >
+                {isLoadingSignups ? 'Loading...' : 'Recent Signups (24h)'}
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Recent Signups */}
+        {recentSignups && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Recent Signups (Last 24 Hours)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentSignups.error ? (
+                <div className="text-red-600">Error: {recentSignups.error}</div>
+              ) : recentSignups.length === 0 ? (
+                <div className="text-gray-500">No signups in the last 24 hours</div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold mb-2">Total: {recentSignups.length} users</div>
+                  <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                    {recentSignups.map((user) => (
+                      <div key={user.id} className="p-3 bg-slate-50 rounded border text-sm">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-semibold">{user.full_name || 'No name'}</div>
+                            <div className="text-xs text-gray-600">{user.email}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              Persona: <span className="font-medium">{user.persona || 'None'}</span>
+                              {user.is_founding_gator && (
+                                <span className="ml-2 text-orange-600 font-bold">
+                                  🏆 Founding Gator #{user.founding_gator_number}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(user.created_date).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Persona Fix Results */}
         {personaFixResults && (
