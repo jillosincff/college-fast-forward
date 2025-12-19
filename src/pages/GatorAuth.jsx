@@ -146,6 +146,11 @@ export default function GatorAuth() {
             if (result.email && result.role === 'gator') updateData.student_email_verified = result.email;
             if (result.referral_code) updateData.referral_code = result.referral_code;
             
+            // Log current user state and update payload
+            console.log('📝 [GatorAuth] About to call updateMe with:', JSON.stringify(updateData, null, 2));
+            const currentUser = await base44.auth.me();
+            console.log('📝 [GatorAuth] Current user state:', JSON.stringify(currentUser, null, 2));
+            
             await base44.auth.updateMe(updateData);
             console.log('✅ [GatorAuth] User data saved to database');
             
@@ -158,6 +163,12 @@ export default function GatorAuth() {
             }
           } catch (roleError) {
             console.error('❌ [GatorAuth] Failed to save user data:', roleError);
+            console.error('❌ [GatorAuth] Error details:', {
+              message: roleError.message,
+              code: roleError.code,
+              status: roleError.status,
+              response: roleError.response
+            });
             
             // Mark OAuthState as used even on failure to force fresh OAuth flow
             if (stateId) {
@@ -168,7 +179,7 @@ export default function GatorAuth() {
               }
             }
             
-            alert('Failed to complete setup. Please try logging in again.');
+            alert('Failed to complete setup: ' + roleError.message);
             window.location.href = window.location.origin + '/#LandingPage';
             return;
           }
