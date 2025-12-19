@@ -143,15 +143,24 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   const isOpenToRelocate = request?.relocation_ok || false;
   const needsVisaSponsorship = request?.visa_needed || false;
 
-  // Real engagement stats - use cached count from request object
-  const messagesCount = request?.messages_count || 0;
+  // Real engagement stats - count from actual HelpOffers
+  const [messagesCount, setMessagesCount] = useState(0);
   
-  // Debug logging for message count
   useEffect(() => {
-    if (request) {
-      console.log('📧 [EnhancedGatorCard] Message count for', fullName, ':', messagesCount, 'from request:', request.messages_count);
-    }
-  }, [messagesCount, request?.messages_count]);
+    if (!request?.id) return;
+    
+    const loadHelpOffersCount = async () => {
+      try {
+        const offers = await base44.entities.HelpOffer.filter({ job_request_id: request.id });
+        setMessagesCount(offers?.length || 0);
+      } catch (err) {
+        console.error('Failed to load help offers count:', err);
+        setMessagesCount(0);
+      }
+    };
+    
+    loadHelpOffersCount();
+  }, [request?.id]);
 
   const handleMessage = () => {
     if (onHelp) {

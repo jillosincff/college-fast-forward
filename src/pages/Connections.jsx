@@ -159,18 +159,10 @@ export default function DiscoverEmergingGatorsPage() {
     loadUserLikes();
     loadLikeCounts();
     
-    // Listen for message-sent events to reload job requests (updates message counts)
-    const handleMessageSent = async () => {
-      console.log('🔄 Message sent - reloading job requests to update counts');
-      console.log('⏳ Waiting 1 second for backend to complete...');
-      
-      // Wait for backend to finish updating
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('🔄 Now reloading data...');
-      await loadData(true); // Silent reload
-      
-      console.log('✅ Data reload complete');
+    // Listen for message-sent events to reload cards (triggers HelpOffer count refresh)
+    const handleMessageSent = () => {
+      console.log('🔄 Message sent - cards will refresh their counts automatically');
+      // Cards will re-fetch HelpOffer counts via useEffect
     };
     
     document.addEventListener('cff:message-sent', handleMessageSent);
