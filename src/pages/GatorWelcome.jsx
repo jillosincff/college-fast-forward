@@ -17,6 +17,11 @@ export default function GatorWelcome() {
   const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
+    if (isLoading) {
+      console.log('⏳ [GatorWelcome] Still loading user...');
+      return;
+    }
+    
     if (!user) {
       console.log('❌ No user on welcome, redirecting to auth');
       navigate('GatorAuth');
