@@ -40,7 +40,30 @@ Deno.serve(async (req) => {
 
         console.log('Step 2: Init SDK');
         const base44 = createClientFromRequest(req);
-        console.log('SDK initialized');
+        const user = await base44.auth.me();
+        console.log('SDK initialized, user:', user?.email);
+
+        // Step 2.5: Create HelpOffer record (CRITICAL - this is what we count!)
+        console.log('Step 2.5: Create HelpOffer record');
+        let helpOfferId = null;
+        
+        try {
+            const helpOffer = await base44.asServiceRole.entities.HelpOffer.create({
+                job_request_id: requestId,
+                offerer_user_id: user?.id || 'unknown',
+                offerer_name: helperName,
+                offerer_email: helperEmail,
+                request_creator_email: requestCreatorEmail,
+                help_type: helpTypes[0] || 'career_guidance', // Use first help type or default
+                message: message,
+                status: 'pending'
+            });
+            helpOfferId = helpOffer.id;
+            console.log('✅ HelpOffer created:', helpOfferId);
+        } catch (offerErr) {
+            console.error('❌ HelpOffer creation failed:', offerErr.message);
+            // This is critical - if we can't create the offer, the count won't work
+        }
 
         // Step 3: Create in-app message
         console.log('Step 3: Create in-app message');
@@ -193,10 +216,12 @@ Deno.serve(async (req) => {
 
         console.log('Step 7: Return success');
         return new Response(JSON.stringify({
-            success: messageCreated || emailSent,
+            success: (messageCreated || emailSent) && helpOfferId !== null,
             messageCreated,
             emailSent,
-            messageId
+            helpOfferCreated: helpOfferId !== null,
+            messageId,
+            helpOfferId
         }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
