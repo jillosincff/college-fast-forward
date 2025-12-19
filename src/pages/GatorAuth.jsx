@@ -221,10 +221,10 @@ export default function GatorAuth() {
       <div className="text-center max-w-md px-4">
         <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-white text-lg font-semibold mb-2">
-          {authProgress}
+          {user ? 'Setting up your account...' : authProgress}
         </p>
         <p className="text-white/80 text-sm">
-          This may take a few moments on mobile
+          {user ? 'Almost done...' : 'This may take a few moments on mobile'}
         </p>
       </div>
     </div>

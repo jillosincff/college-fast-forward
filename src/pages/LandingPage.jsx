@@ -9,6 +9,7 @@ import FeaturePreviewModal from '@/components/home/FeaturePreviewModal';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 
 const LazyLandingSections = React.lazy(() => import('../components/home/LazyLandingSections'));
 
@@ -98,6 +99,19 @@ export default function LandingPage() {
       }
     };
     loadFoundingStats();
+    
+    // Check for OAuth timeout error
+    const urlParams = new URLSearchParams(window.location.search);
+    const authError = urlParams.get('auth_error');
+    
+    if (authError === 'timeout') {
+      toast.error('Sign-in timed out. Please try again.', {
+        duration: 5000
+      });
+      
+      // Clean the URL
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+    }
   }, []);
 
   return (
