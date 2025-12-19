@@ -48,21 +48,36 @@ Deno.serve(async (req) => {
         let helpOfferId = null;
         
         try {
+            console.log('📝 Creating HelpOffer with data:', {
+                job_request_id: requestId,
+                offerer_user_id: user?.id || 'unknown',
+                offerer_name: helperName,
+                offerer_email: helperEmail,
+                request_creator_email: requestCreatorEmail,
+                help_type: helpTypes[0] || 'career_guidance',
+                message: message?.substring(0, 50) + '...',
+                status: 'pending'
+            });
+            
             const helpOffer = await base44.asServiceRole.entities.HelpOffer.create({
                 job_request_id: requestId,
                 offerer_user_id: user?.id || 'unknown',
                 offerer_name: helperName,
                 offerer_email: helperEmail,
                 request_creator_email: requestCreatorEmail,
-                help_type: helpTypes[0] || 'career_guidance', // Use first help type or default
+                help_type: helpTypes[0] || 'career_guidance',
                 message: message,
                 status: 'pending'
             });
             helpOfferId = helpOffer.id;
-            console.log('✅ HelpOffer created:', helpOfferId);
+            console.log('✅ HelpOffer created successfully:', helpOfferId);
+            console.log('📊 HelpOffer details:', helpOffer);
         } catch (offerErr) {
-            console.error('❌ HelpOffer creation failed:', offerErr.message);
+            console.error('❌ HelpOffer creation FAILED:', offerErr);
+            console.error('Error details:', offerErr.message);
+            console.error('Stack:', offerErr.stack);
             // This is critical - if we can't create the offer, the count won't work
+            throw offerErr; // Throw to prevent false success response
         }
 
         // Step 3: Create in-app message
