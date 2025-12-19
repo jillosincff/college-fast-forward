@@ -29,8 +29,16 @@ export default function GatorStudentEmail() {
         expires_at: expiresAt
       });
       
+      // CRITICAL: Store role in localStorage BEFORE OAuth redirect
+      // This ensures GatorWelcome knows the role even if DB propagation is slow
+      localStorage.setItem('pending_invite_role', 'gator');
+      localStorage.setItem('pending_student_email', email.trim());
+      if (referralCode.trim()) {
+        localStorage.setItem('pending_referral_code', referralCode.trim().toUpperCase());
+      }
+      
       const callbackUrl = `${window.location.origin}/?state=${token}`;
-      console.log('🎓 [GatorStudentEmail] Stored state in DB, redirecting:', { token, email });
+      console.log('🎓 [GatorStudentEmail] Stored state in DB + localStorage, redirecting:', { token, email });
       
       base44.auth.redirectToLogin(callbackUrl);
     } catch (error) {
