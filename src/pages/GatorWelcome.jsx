@@ -37,9 +37,13 @@ export default function GatorWelcome() {
     }
   }, [user, navigate]);
   
-  // CRITICAL: Trust user.persona from database (set by GatorAuth) as primary source
-  // Only fall back to localStorage/params if persona is not set yet
-  const role = user?.persona || localStorage.getItem('pending_invite_role') || params.role;
+  // CRITICAL: For users in active signup flow (onboarding not completed), 
+  // prioritize the pending role from current flow over stale database persona
+  // This fixes the bug where a returning user with old persona gets wrong welcome screen
+  const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+  const role = (!user?.onboarding_completed && pendingRole) 
+    ? pendingRole 
+    : (user?.persona || pendingRole || params.role);
 
   useEffect(() => {
     // Extract parameters from hash fragment (hash-based routing)
