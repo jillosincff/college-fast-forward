@@ -977,6 +977,7 @@ function AppContent() {
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
     // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
+    const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
     console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, pendingRole, inNewUserFlow });
