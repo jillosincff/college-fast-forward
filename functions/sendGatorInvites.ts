@@ -134,13 +134,27 @@ Deno.serve(async (req) => {
                         html: emailBody
                     };
                     
-                    await sgMail.send(msg);
+                    console.log('📤 Attempting SendGrid send with:', JSON.stringify({
+                        to: msg.to,
+                        from: msg.from,
+                        subject: msg.subject
+                    }));
+                    
+                    const [response] = await sgMail.send(msg);
+                    console.log('✅ SendGrid response status:', response.statusCode);
+                    console.log('✅ SendGrid response headers:', JSON.stringify(response.headers));
                     console.log('✅ Email sent successfully via SendGrid to:', email);
                     emailSent = true;
                 } catch (sgError) {
-                    console.error('SendGrid error:', sgError.message);
+                    console.error('❌ SendGrid error:', sgError.message);
+                    console.error('❌ SendGrid error code:', sgError.code);
+                    if (sgError.response) {
+                        console.error('❌ SendGrid response body:', JSON.stringify(sgError.response.body));
+                    }
                     console.log('Attempting fallback to Base44 Core.SendEmail...');
                 }
+            } else {
+                console.error('❌ SENDGRID_API_KEY not set!');
             }
             
             // Fallback: Use the inviting user to forward the invite
