@@ -15,10 +15,10 @@ Deno.serve(async (req) => {
 
     // FIXED: Use service role to bypass RLS restrictions
     const users = await base44.asServiceRole.entities.User.filter({
-      includeInDirectory: true
+      visible_in_directory: true
     });
 
-    console.log(`📊 Total users with includeInDirectory=true: ${users.length}`);
+    console.log(`📊 Total users with visible_in_directory=true: ${users.length}`);
 
     // Filter and format users for directory with lenient criteria
     const directoryUsers = users
