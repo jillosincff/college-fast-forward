@@ -33,7 +33,6 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import ParentMatchesWidget from '@/components/dashboard/ParentMatchesWidget';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -241,11 +240,14 @@ export default function ParentDashboard() {
     
     setIsSending(true);
     try {
-      await base44.functions.invoke('sendGatorInvites', {
+      console.log('📧 Sending invite to:', inviteEmail);
+      const result = await base44.functions.invoke('sendGatorInvites', {
         emails: [inviteEmail],
-        inviterName: user?.full_name || 'A Gator Parent',
-        message: `Join the Gator Network to connect with UF parents and alumni who can help with your career!`
+        role: 'student',
+        campus: 'UF',
+        note: inviteName ? `${inviteName}, join College Fast Forward!` : `Join College Fast Forward to connect with the Gator community!`
       });
+      console.log('📧 Invite result:', result);
       
       toast({
         title: "Invite Sent! 🐊",
@@ -343,9 +345,6 @@ export default function ParentDashboard() {
           </div>
         )}
 
-        {/* Parent Matches Widget - Students You Can Help */}
-        <ParentMatchesWidget user={user} />
-        
         {/* Connect With Your Gator Card */}
         <Card className="border-2 border-slate-200 shadow-lg">
           <CardContent className="p-8">
