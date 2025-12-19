@@ -324,6 +324,12 @@ export default function GatorWelcome() {
       navigate('GatorRoleSelection');
       return;
     }
+    // FALLBACK: If we have a persona and no pending role mismatch, just enable the button
+    else if (user.persona && !roleSetupComplete) {
+      console.log('✅ [GatorWelcome] Fallback: enabling button for existing persona:', user.persona);
+      setDisplayRole(user.persona);
+      setRoleSetupComplete(true);
+    }
   }, [user, roleSetupComplete, isLoading]);
 
   useEffect(() => {
