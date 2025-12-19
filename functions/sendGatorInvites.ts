@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
                         },
                         body: JSON.stringify({
                             from: {
-                                email: 'jill@uffastforward.com',
+                                email: 'support@collegefastforward.com',
                                 name: 'College Fast Forward'
                             },
                             to: [{ email: email }],
