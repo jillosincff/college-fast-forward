@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
       persona: 'parent',
       roles: ['parent'],
       family_group_id: familyGroupId,
-      student_emails: student.email,
+      student_emails: [student.email],
       invite_code_used: normalizedCode
     };
 
