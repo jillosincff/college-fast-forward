@@ -42,37 +42,40 @@ export default function GatorAuth() {
       console.log('🔐 [GatorAuth] OAuth callback detected with state token:', stateToken);
       setProcessing(true);
       
-      // Mobile needs more time for SDK initialization
+      // Wait longer for SDK initialization and auth processing
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const waitTime = isMobile ? 10000 : 6000;
+      const waitTime = isMobile ? 8000 : 4000;
       
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms for SDK (mobile: ${isMobile})`);
       
       setTimeout(async () => {
         console.log('✅ [GatorAuth] SDK initialized, waiting for authentication...');
         
-        // Poll for authentication (access token processed)
+        // Poll for authentication with longer timeout
         const authStartTime = Date.now();
-        const maxAuthWait = 15000;
+        const maxAuthWait = 30000; // Increased to 30 seconds
         let authenticated = false;
+        let attempts = 0;
         
         while (Date.now() - authStartTime < maxAuthWait) {
+          attempts++;
           try {
             const currentUser = await base44.auth.me();
             if (currentUser?.email) {
-              console.log('✅ [GatorAuth] User authenticated:', currentUser.email);
+              console.log(`✅ [GatorAuth] User authenticated after ${attempts} attempts:`, currentUser.email);
               authenticated = true;
               break;
             }
           } catch (e) {
-            console.log('⏳ [GatorAuth] Waiting for auth... elapsed:', (Date.now() - authStartTime) + 'ms');
+            const elapsed = Date.now() - authStartTime;
+            console.log(`⏳ [GatorAuth] Attempt ${attempts}, waiting for auth... ${elapsed}ms / ${maxAuthWait}ms`);
           }
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Check every 1 second
         }
         
         if (!authenticated) {
-          console.error('❌ [GatorAuth] Auth timeout after 15s');
-          alert('Authentication timed out. Please try again.');
+          console.error('❌ [GatorAuth] Auth timeout after 30s');
+          alert('Authentication is taking longer than expected. Please try refreshing the page or logging in again.');
           window.location.href = window.location.origin + '/#LandingPage';
           return;
         }
