@@ -767,9 +767,9 @@ function AppContent() {
       
       const hasAccessToken = hashParams.has('access_token');
 
-      // CRITICAL: Check for parent/student invite flow FIRST
-      const pendingRole = sessionStorage.getItem('pending_invite_role');
-      const pendingCode = sessionStorage.getItem('pending_invite_code');
+      // CRITICAL: Check for parent/student invite flow FIRST - use localStorage
+      const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      const pendingCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
 
       // Parent flow with invite code
       if (pendingRole === 'parent' && pendingCode && hasAccessToken) {
@@ -839,8 +839,8 @@ function AppContent() {
 
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
-    // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing
-    const pendingRole = sessionStorage.getItem('pending_invite_role');
+    // CRITICAL: Check for active OAuth flows FIRST - bypass normal routing - use localStorage
+    const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     
     // If we have a pending role (from OAuth flow), let it complete first
     if (user && pendingRole && !user.persona) {
@@ -859,9 +859,9 @@ function AppContent() {
       return;
     }
     
-    // CRITICAL CHECK #2: Parent invite flow
-    const pendingRoleInitial = sessionStorage.getItem('pending_invite_role');
-    const pendingCode = sessionStorage.getItem('pending_invite_code');
+    // CRITICAL CHECK #2: Parent invite flow - use localStorage
+    const pendingRoleInitial = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+    const pendingCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
     
     if (user && pendingRoleInitial === 'parent' && pendingCode) {
       console.log('🎯 [Parent Flow] Detected! Code:', pendingCode);
@@ -885,8 +885,8 @@ function AppContent() {
       }
     }
     
-    // CRITICAL CHECK #3: Student flow with pending role
-    const pendingGatorRole = sessionStorage.getItem('pending_invite_role');
+    // CRITICAL CHECK #3: Student flow with pending role - use localStorage
+    const pendingGatorRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     if (user && pendingGatorRole === 'gator') {
       console.log('🎯 [Student Flow] Detected pending gator role');
       
@@ -926,10 +926,10 @@ function AppContent() {
     if (newUserFlowPages.includes(currentPage)) {
       console.log('✅ [NewUserFlow] Page accessible:', currentPage);
       
-      // CRITICAL: Set parent role when landing on GatorWelcome after OAuth
+      // CRITICAL: Set parent role when landing on GatorWelcome after OAuth - use localStorage
       if (currentPage === 'GatorWelcome' && user) {
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        const pendingCode = sessionStorage.getItem('pending_invite_code');
+        const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+        const pendingCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
         
         if (pendingRole === 'parent' && user.persona !== 'parent') {
           console.log('🔄 [GatorWelcome] Setting parent role for:', user.email);
@@ -944,7 +944,9 @@ function AppContent() {
             // Don't remove session items yet - GatorWelcome will handle that
           }).catch(err => {
             console.error('❌ [GatorWelcome] Failed to set parent role:', err);
-            // Clear on error
+            // Clear on error - both storage types
+            localStorage.removeItem('pending_invite_code');
+            localStorage.removeItem('pending_invite_role');
             sessionStorage.removeItem('pending_invite_code');
             sessionStorage.removeItem('pending_invite_role');
           });
