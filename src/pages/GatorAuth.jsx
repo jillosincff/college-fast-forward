@@ -46,10 +46,38 @@ export default function GatorAuth() {
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const waitTime = isMobile ? 10000 : 6000;
       
-      console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms (mobile: ${isMobile})`);
+      console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms for SDK (mobile: ${isMobile})`);
       
       setTimeout(async () => {
-        console.log('✅ [GatorAuth] SDK ready, retrieving state from backend...');
+        console.log('✅ [GatorAuth] SDK initialized, waiting for authentication...');
+        
+        // Poll for authentication (access token processed)
+        const authStartTime = Date.now();
+        const maxAuthWait = 15000;
+        let authenticated = false;
+        
+        while (Date.now() - authStartTime < maxAuthWait) {
+          try {
+            const currentUser = await base44.auth.me();
+            if (currentUser?.email) {
+              console.log('✅ [GatorAuth] User authenticated:', currentUser.email);
+              authenticated = true;
+              break;
+            }
+          } catch (e) {
+            console.log('⏳ [GatorAuth] Waiting for auth... elapsed:', (Date.now() - authStartTime) + 'ms');
+          }
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        if (!authenticated) {
+          console.error('❌ [GatorAuth] Auth timeout after 15s');
+          alert('Authentication timed out. Please try again.');
+          window.location.href = window.location.origin + '/#LandingPage';
+          return;
+        }
+        
+        console.log('✅ [GatorAuth] Auth complete, retrieving state...');
         
         try {
           console.log('🔍 [GatorAuth] Calling retrieveOAuthState with token:', stateToken);
