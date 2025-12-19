@@ -54,11 +54,11 @@ export default function GatorRoleSelection() {
     try {
       if (selectedRole === 'gator') {
         console.log('🐊 [GatorRoleSelection] Student selected -> GatorStudentEmail');
-        sessionStorage.setItem('pending_invite_role', 'gator');
+        localStorage.setItem('pending_invite_role', 'gator');
         navigate('GatorStudentEmail');
       } else if (selectedRole === 'parent') {
         console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
-        sessionStorage.setItem('pending_invite_role', 'parent');
+        localStorage.setItem('pending_invite_role', 'parent');
         navigate('GatorParentInvite');
       }
     } catch (error) {
