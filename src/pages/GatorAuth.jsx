@@ -16,14 +16,37 @@ export default function GatorAuth() {
     const hashFragment = window.location.hash.substring(1);
     const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
     
-    // Combine both sources
-    const role = urlParams.get('role') || hashParams.get('role');
-    const code = urlParams.get('code') || hashParams.get('code');
-    const email = urlParams.get('email') || hashParams.get('email');
-    const ref = urlParams.get('ref') || hashParams.get('ref');
+    // Try URL params first, then fall back to storage (Base44 SSO strips URL params)
+    let role = urlParams.get('role') || hashParams.get('role');
+    let code = urlParams.get('code') || hashParams.get('code');
+    let email = urlParams.get('email') || hashParams.get('email');
+    let ref = urlParams.get('ref') || hashParams.get('ref');
+    
+    // If no URL params, check storage (sessionStorage first, then localStorage)
+    if (!role && !code && !email) {
+      console.log('🔍 [GatorAuth] No URL params, checking storage...');
+      const sessionData = sessionStorage.getItem('pending_auth_data');
+      const localData = localStorage.getItem('pending_auth_data');
+      const authDataStr = sessionData || localData;
+      
+      if (authDataStr) {
+        try {
+          const authData = JSON.parse(authDataStr);
+          console.log('✅ [GatorAuth] Retrieved from storage:', authData);
+          role = authData.role;
+          code = authData.code;
+          email = authData.email;
+          ref = authData.ref;
+        } catch (e) {
+          console.error('❌ [GatorAuth] Failed to parse auth data:', e);
+        }
+      }
+    }
     
     const hasAccessToken = hashParams.has('access_token');
     const hasError = hashParams.has('error');
+    
+    console.log('🔍 [GatorAuth] Final params:', { role, code, email, ref, hasAccessToken, hasError });
 
     // Handle OAuth errors
     if (hasError) {
@@ -45,6 +68,10 @@ export default function GatorAuth() {
       console.log('🔐 [GatorAuth] OAuth callback detected');
       console.log('📦 [GatorAuth] Params:', { role, code, email, ref });
       setProcessing(true);
+      
+      // Clear auth data from storage after retrieval
+      sessionStorage.removeItem('pending_auth_data');
+      localStorage.removeItem('pending_auth_data');
       
       // Mobile needs more time for SDK initialization
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

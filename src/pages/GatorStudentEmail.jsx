@@ -18,17 +18,22 @@ export default function GatorStudentEmail() {
 
     const isUFL = email.toLowerCase().endsWith('@ufl.edu');
     
-    // Encode in callback URL instead of localStorage (Safari-safe)
-    let callbackUrl = `${window.location.origin}/#GatorAuth?role=gator&email=${encodeURIComponent(email.trim())}`;
+    // Triple redundancy: URL params + both storage types (Base44 SSO strips URL params)
+    const authData = JSON.stringify({ 
+      role: 'gator', 
+      email: email.trim(), 
+      ref: referralCode.trim().toUpperCase() || null,
+      timestamp: Date.now() 
+    });
+    localStorage.setItem('pending_auth_data', authData);
+    sessionStorage.setItem('pending_auth_data', authData);
     
+    let callbackUrl = `${window.location.origin}/#GatorAuth?role=gator&email=${encodeURIComponent(email.trim())}`;
     if (referralCode.trim()) {
       callbackUrl += `&ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
     }
     
-    console.log('🎓 [GatorStudentEmail] UFL student:', isUFL, 'email:', email);
-    console.log('🎟️ [GatorStudentEmail] Referral code:', referralCode || 'none');
-    
-    // Redirect to Google OAuth
+    console.log('🎓 [GatorStudentEmail] Storing auth data + redirecting:', { email, ref: referralCode || 'none', callbackUrl });
     base44.auth.redirectToLogin(callbackUrl);
   };
 

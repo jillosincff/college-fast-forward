@@ -319,11 +319,16 @@ export default function GatorParentInvite() {
                 onClick={() => {
                   if (inviteCode.trim()) {
                     setIsVerifyingCode(true);
-                    // Encode in callback URL instead of localStorage (Safari-safe)
                     const code = inviteCode.trim().toUpperCase();
-                    const callbackUrl = `${window.location.origin}/#GatorAuth?role=parent&code=${encodeURIComponent(code)}`;
                     
-                    console.log('🔐 [GatorParentInvite] Redirecting with code in URL:', code);
+                    // Triple redundancy: URL params + both storage types (Base44 SSO strips URL params)
+                    const authData = JSON.stringify({ role: 'parent', code, timestamp: Date.now() });
+                    localStorage.setItem('pending_auth_data', authData);
+                    sessionStorage.setItem('pending_auth_data', authData);
+                    
+                    const callbackUrl = `${window.location.origin}/#GatorAuth?role=parent&code=${encodeURIComponent(code)}`;
+                    console.log('🔐 [GatorParentInvite] Storing auth data + redirecting:', { code, callbackUrl });
+                    
                     base44.auth.redirectToLogin(callbackUrl);
                   } else {
                     toast({
