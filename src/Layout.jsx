@@ -420,8 +420,8 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
               {user && (
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                   <SheetTrigger asChild className="md:hidden">
-                    <ShadButton variant="ghost" className="h-10 w-10 rounded-full">
-                      <Menu className="h-5 w-5" />
+                    <ShadButton variant="outline" className="h-10 w-10 rounded-full p-0 border-2 border-slate-300">
+                      <Menu className="h-5 w-5 text-slate-700" />
                       <span className="sr-only">Toggle navigation menu</span>
                     </ShadButton>
                   </SheetTrigger>
