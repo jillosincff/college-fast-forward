@@ -10,6 +10,7 @@ import { base44 } from '@/api/base44Client';
 export default function GatorWelcome() {
   const { user, refreshUser } = useAuth();
   const params = useParams();
+  const [roleSetupComplete, setRoleSetupComplete] = React.useState(false);
   
   // Get role from params or localStorage (survives redirects better)
   const pendingRole = localStorage.getItem('pending_invite_role');
@@ -19,35 +20,45 @@ export default function GatorWelcome() {
     if (!user) {
       console.log('❌ No user on welcome, redirecting to auth');
       navigate('GatorAuth');
-    } else {
-      console.log('✅ User on welcome page:', user.email, 'role:', role);
-      
-      const pendingCode = localStorage.getItem('pending_invite_code');
-      const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
-      
-      // If student without code and UFL email, auto-verify
-      if (pendingRole === 'gator' && !pendingCode && isUFL) {
-        console.log('✅ [GatorWelcome] UFL student - auto-verifying');
-        base44.auth.updateMe({
-          persona: 'gator',
-          roles: ['gator'],
-          onboarding_completed: false
-        }).then(() => {
-          console.log('✅ [GatorWelcome] UFL student role set');
-          refreshUser();
-          
-          // Increment user counter
-          base44.functions.invoke('incrementUserCount', { user_id: user.id });
-          
-          // Notify admin of new user
-          base44.functions.invoke('notifyNewUserJoined', {
-            user_email: user.email,
-            user_name: user.full_name,
-            user_persona: 'gator',
-            user_id: user.id
-          });
+      return;
+    }
+    
+    // If role already set and matches, we're done
+    if (user.persona === pendingRole) {
+      console.log('✅ [GatorWelcome] Role already set:', user.persona);
+      setRoleSetupComplete(true);
+      return;
+    }
+    
+    console.log('✅ User on welcome page:', user.email, 'role:', role);
+    
+    const pendingCode = localStorage.getItem('pending_invite_code');
+    const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
+    
+    // If student without code and UFL email, auto-verify
+    if (pendingRole === 'gator' && !pendingCode && isUFL && !roleSetupComplete) {
+      console.log('✅ [GatorWelcome] UFL student - auto-verifying');
+      base44.auth.updateMe({
+        persona: 'gator',
+        roles: ['gator'],
+        onboarding_completed: false
+      }).then(async () => {
+        console.log('✅ [GatorWelcome] UFL student role set');
+        await refreshUser();
+        setRoleSetupComplete(true);
+        
+        // Increment user counter
+        base44.functions.invoke('incrementUserCount', { user_id: user.id });
+        
+        // Notify admin of new user
+        base44.functions.invoke('notifyNewUserJoined', {
+          user_email: user.email,
+          user_name: user.full_name,
+          user_persona: 'gator',
+          user_id: user.id
         });
-      }
+      });
+    }
       // If parent with invite code, set persona first then process invite
       // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
       else if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
@@ -113,15 +124,16 @@ export default function GatorWelcome() {
         processParentFlow();
       }
       // Otherwise just set role (or correct wrong persona)
-      else if (pendingRole && user.persona !== pendingRole) {
+      else if (pendingRole && user.persona !== pendingRole && !roleSetupComplete) {
         console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
         base44.auth.updateMe({
           persona: pendingRole,
           roles: [pendingRole],
           onboarding_completed: false
-        }).then(() => {
+        }).then(async () => {
           console.log('✅ [GatorWelcome] Role set successfully');
-          refreshUser();
+          await refreshUser();
+          setRoleSetupComplete(true);
           
           // Increment user counter
           base44.functions.invoke('incrementUserCount', { user_id: user.id });
@@ -135,10 +147,11 @@ export default function GatorWelcome() {
           });
         }).catch(err => {
           console.error('❌ [GatorWelcome] Failed to set role:', err);
+          setRoleSetupComplete(true); // Set to true even on error to allow button click
         });
       }
     }
-  }, [user]);
+  }, [user, roleSetupComplete]);
 
   useEffect(() => {
     // Confetti effect
@@ -284,11 +297,21 @@ export default function GatorWelcome() {
           <Button
             onClick={handleGetStarted}
             size="lg"
-            className="h-14 px-12 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+            disabled={!roleSetupComplete}
+            className="h-14 px-12 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: role === 'gator' ? '#0021A5' : '#FA4616' }}
           >
-            Let's Get Started
-            <ArrowRight className="w-6 h-6 ml-2" />
+            {roleSetupComplete ? (
+              <>
+                Let's Get Started
+                <ArrowRight className="w-6 h-6 ml-2" />
+              </>
+            ) : (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Setting up your account...
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
