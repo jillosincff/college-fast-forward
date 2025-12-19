@@ -146,20 +146,32 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
   // Real engagement stats - count from actual HelpOffers
   const [messagesCount, setMessagesCount] = useState(0);
   
-  useEffect(() => {
+  const loadHelpOffersCount = async () => {
     if (!request?.id) return;
     
-    const loadHelpOffersCount = async () => {
-      try {
-        const offers = await base44.entities.HelpOffer.filter({ job_request_id: request.id });
-        setMessagesCount(offers?.length || 0);
-      } catch (err) {
-        console.error('Failed to load help offers count:', err);
-        setMessagesCount(0);
-      }
+    try {
+      const offers = await base44.entities.HelpOffer.filter({ job_request_id: request.id });
+      setMessagesCount(offers?.length || 0);
+      console.log('📊 [EnhancedGatorCard] Loaded', offers?.length || 0, 'help offers for', fullName);
+    } catch (err) {
+      console.error('Failed to load help offers count:', err);
+      setMessagesCount(0);
+    }
+  };
+  
+  useEffect(() => {
+    loadHelpOffersCount();
+  }, [request?.id]);
+  
+  // Listen for message-sent events to refresh count
+  useEffect(() => {
+    const handleMessageSent = () => {
+      console.log('🔄 [EnhancedGatorCard] Refreshing count for', fullName);
+      loadHelpOffersCount();
     };
     
-    loadHelpOffersCount();
+    document.addEventListener('cff:message-sent', handleMessageSent);
+    return () => document.removeEventListener('cff:message-sent', handleMessageSent);
   }, [request?.id]);
 
   const handleMessage = () => {
