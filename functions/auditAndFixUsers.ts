@@ -43,28 +43,14 @@ Deno.serve(async (req) => {
         userIssues.push('no_persona');
         
         if (!dryRun) {
-          let assignedPersona = null;
+          // Assign based on email domain
+          const assignedPersona = u.email?.toLowerCase().endsWith('@ufl.edu') 
+            ? 'gator' 
+            : 'parent';
           
-          // Check email domain
-          if (u.email?.toLowerCase().endsWith('@ufl.edu')) {
-            assignedPersona = 'gator';
-          } else if (u.invite_code_used) {
-            // Check invite code
-            const inviteCode = inviteCodes.find(ic => ic.code === u.invite_code_used);
-            if (inviteCode) {
-              if (inviteCode.invite_type?.includes('parent')) {
-                assignedPersona = 'parent';
-              } else if (inviteCode.invite_type?.includes('gator')) {
-                assignedPersona = 'gator';
-              }
-            }
-          }
-          
-          if (assignedPersona) {
-            userFixes.persona = assignedPersona;
-            userFixes.roles = [assignedPersona];
-            fixes.push({ email: u.email, fix: 'persona', value: assignedPersona });
-          }
+          userFixes.persona = assignedPersona;
+          userFixes.roles = [assignedPersona];
+          fixes.push({ email: u.email, fix: 'persona', value: assignedPersona });
         }
       }
       
