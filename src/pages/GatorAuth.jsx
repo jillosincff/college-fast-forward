@@ -6,14 +6,41 @@ export default function GatorAuth() {
   const { user, isLoading } = useAuth();
   const [redirecting, setRedirecting] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [loopDetected, setLoopDetected] = useState(false);
 
   useEffect(() => {
-    // Wait for auth state to load
     if (isLoading) return;
 
-    // Check if we're returning from OAuth (has access_token in hash)
+    // LOOP DETECTION - prevent infinite redirects
+    const authAttempts = parseInt(localStorage.getItem('auth_attempts') || '0');
+    const lastAttempt = parseInt(localStorage.getItem('last_auth_attempt') || '0');
+    const now = Date.now();
+    
+    // Reset counter if last attempt was >5 minutes ago
+    if (now - lastAttempt > 300000) {
+      localStorage.setItem('auth_attempts', '0');
+    }
+    
+    // If more than 3 attempts in 5 minutes, show error
+    if (authAttempts > 3) {
+      console.error('🚨 [GatorAuth] Auth loop detected!');
+      setLoopDetected(true);
+      return;
+    }
+
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hasAccessToken = hashParams.has('access_token');
+    const hasError = hashParams.has('error');
+
+    // Handle OAuth errors
+    if (hasError) {
+      console.error('🚨 [GatorAuth] OAuth error:', hashParams.get('error'));
+      alert('Authentication was cancelled or failed. Please try again.');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_invite_role');
+      window.location.href = window.location.origin + '/#LandingPage';
+      return;
+    }
 
     // No user and no token - trigger login
     if (!user && !hasAccessToken) {
@@ -21,29 +48,39 @@ export default function GatorAuth() {
         console.log('🔐 [GatorAuth] Redirecting to Google login...');
         setRedirecting(true);
         
-        // Preserve pending data in session
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        const pendingReferral = sessionStorage.getItem('pending_referral_code');
-        console.log('📦 [GatorAuth] Preserving session:', { pendingRole, pendingReferral });
+        // Use localStorage instead of sessionStorage (survives redirects better)
+        const pendingRole = localStorage.getItem('pending_invite_role');
+        const pendingCode = localStorage.getItem('pending_invite_code');
         
-        sessionStorage.setItem('oauth_flow_active', 'true');
+        console.log('📦 [GatorAuth] Preserving:', { pendingRole, pendingCode });
+        
+        // Track attempt
+        localStorage.setItem('auth_attempts', String(authAttempts + 1));
+        localStorage.setItem('last_auth_attempt', String(now));
+        
         base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
       }
       return;
     }
 
-    // Returning from OAuth - wait for SDK to process token
+    // Returning from OAuth - wait for SDK
     if (hasAccessToken && !processing) {
       console.log('🔐 [GatorAuth] OAuth callback detected, waiting for SDK...');
       setProcessing(true);
       
+      // Clear auth loop tracking on success
+      localStorage.setItem('auth_attempts', '0');
+      
       setTimeout(() => {
-        const pendingRole = sessionStorage.getItem('pending_invite_role');
-        console.log('✅ [GatorAuth] SDK ready, pendingRole:', pendingRole);
+        const pendingRole = localStorage.getItem('pending_invite_role');
+        const pendingCode = localStorage.getItem('pending_invite_code');
         
-        // If student with pending role, go straight to welcome
+        console.log('✅ [GatorAuth] SDK ready, role:', pendingRole, 'hasCode:', !!pendingCode);
+        
         if (pendingRole === 'gator') {
           window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
+        } else if (pendingRole === 'parent') {
+          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
         } else {
           window.location.href = window.location.origin + '/#GatorRoleSelection';
         }
@@ -51,9 +88,10 @@ export default function GatorAuth() {
       return;
     }
 
-    // User is authenticated and no token in URL - send to role selection
+    // User authenticated - go to role selection
     if (user && !hasAccessToken) {
-      console.log('✅ [GatorAuth] User authenticated, going to GatorRoleSelection');
+      console.log('✅ [GatorAuth] User authenticated, going to role selection');
+      localStorage.setItem('auth_attempts', '0');
       window.location.hash = 'GatorRoleSelection';
     }
   }, [user, isLoading, redirecting, processing]);
