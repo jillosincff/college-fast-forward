@@ -21,6 +21,8 @@ export default function TestingDashboard() {
   const [isLoadingSignups, setIsLoadingSignups] = useState(false);
   const [foundingMarkResults, setFoundingMarkResults] = useState(null);
   const [isMarkingFounding, setIsMarkingFounding] = useState(false);
+  const [auditResults, setAuditResults] = useState(null);
+  const [isAuditing, setIsAuditing] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -350,34 +352,137 @@ export default function TestingDashboard() {
 
               <Button
                 onClick={async () => {
-                  if (!confirm('Mark ALL users without founding status as Founding Members? This will assign them founding numbers and ensure they never get charged.')) {
+                  setIsAuditing(true);
+                  setAuditResults(null);
+                  try {
+                    const result = await base44.functions.invoke('auditAndFixUsers', { dryRun: true });
+                    setAuditResults(result.data);
+                  } catch (error) {
+                    setAuditResults({ error: error.message });
+                  }
+                  setIsAuditing(false);
+                }}
+                disabled={isAuditing}
+                size="lg"
+                variant="secondary"
+                className="bg-purple-100 hover:bg-purple-200 text-purple-900"
+              >
+                {isAuditing ? 'Auditing...' : '🔍 Audit All Users'}
+              </Button>
+
+              <Button
+                onClick={async () => {
+                  if (!confirm('FIX ALL user data issues? This will:\n• Assign missing personas\n• Mark as Founding Members\n• Set missing roles\n\nContinue?')) {
                     return;
                   }
-                  setIsMarkingFounding(true);
-                  setFoundingMarkResults(null);
+                  setIsAuditing(true);
+                  setAuditResults(null);
                   try {
-                    const result = await base44.functions.invoke('markAsFoundingMembers', {});
-                    setFoundingMarkResults(result.data);
-                    // Refresh counts
+                    const result = await base44.functions.invoke('auditAndFixUsers', { dryRun: false });
+                    setAuditResults(result.data);
                     loadCounts();
-                    if (recentSignups) {
-                      const refreshResult = await base44.functions.invoke('getRecentSignups', {});
-                      setRecentSignups(refreshResult.data.users || []);
-                    }
                   } catch (error) {
-                    setFoundingMarkResults({ error: error.message });
+                    setAuditResults({ error: error.message });
                   }
-                  setIsMarkingFounding(false);
+                  setIsAuditing(false);
                 }}
-                disabled={isMarkingFounding}
+                disabled={isAuditing}
                 size="lg"
-                className="bg-orange-500 hover:bg-orange-600 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
-                {isMarkingFounding ? 'Marking...' : '🏆 Mark All as Founding Members'}
+                {isAuditing ? 'Fixing...' : '✅ Fix All Issues'}
               </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Audit Results */}
+        {auditResults && (
+          <Card className="mb-8 border-purple-200 bg-purple-50">
+            <CardHeader>
+              <CardTitle className="text-purple-900">User Audit Results</CardTitle>
+              <CardDescription className="text-purple-700 font-semibold">{auditResults.mode}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {auditResults.error ? (
+                <div className="text-red-600">Error: {auditResults.error}</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-white rounded border">
+                      <div className="text-2xl font-bold text-purple-600">{auditResults.total_users}</div>
+                      <div className="text-xs text-gray-600">Total Users</div>
+                    </div>
+                    <div className="p-3 bg-white rounded border">
+                      <div className="text-2xl font-bold text-red-600">{auditResults.users_with_issues}</div>
+                      <div className="text-xs text-gray-600">Users with Issues</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                    <div className="p-2 bg-red-100 rounded">
+                      <div className="font-bold text-red-900">{auditResults.summary?.no_persona || 0}</div>
+                      <div className="text-gray-600">No Persona</div>
+                    </div>
+                    <div className="p-2 bg-orange-100 rounded">
+                      <div className="font-bold text-orange-900">{auditResults.summary?.not_founding || 0}</div>
+                      <div className="text-gray-600">Not Founding</div>
+                    </div>
+                    <div className="p-2 bg-yellow-100 rounded">
+                      <div className="font-bold text-yellow-900">{auditResults.summary?.no_onboarding || 0}</div>
+                      <div className="text-gray-600">No Onboarding</div>
+                    </div>
+                    <div className="p-2 bg-blue-100 rounded">
+                      <div className="font-bold text-blue-900">{auditResults.summary?.no_roles || 0}</div>
+                      <div className="text-gray-600">No Roles</div>
+                    </div>
+                  </div>
+
+                  {auditResults.fixes?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm text-green-800">✅ Applied Fixes ({auditResults.fixes.length}):</h4>
+                      <div className="space-y-1 max-h-[250px] overflow-y-auto">
+                        {auditResults.fixes.map((fix, i) => (
+                          <div key={i} className="p-2 bg-green-50 rounded border border-green-200 text-xs">
+                            {fix.email} → {fix.fix}: {JSON.stringify(fix.value || fix.number)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {auditResults.issues?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm">⚠️ Users with Issues:</h4>
+                      <div className="space-y-1 max-h-[400px] overflow-y-auto">
+                        {auditResults.issues.map((issue, i) => (
+                          <div key={i} className="p-3 bg-white rounded border text-xs">
+                            <div className="font-semibold">{issue.name || 'No name'} ({issue.email})</div>
+                            <div className="text-gray-600 mt-1">
+                              Persona: {issue.persona || '❌ Missing'} | 
+                              Founding: {issue.is_founding ? '✅' : '❌'} | 
+                              Onboarding: {issue.onboarding ? '✅' : '❌'}
+                            </div>
+                            <div className="mt-1 flex gap-1 flex-wrap">
+                              {issue.issues.map((iss, j) => (
+                                <span key={j} className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                                  {iss.replace(/_/g, ' ')}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="text-gray-400 text-xs mt-1">
+                              Signed up: {new Date(issue.created).toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Founding Member Marking Results */}
         {foundingMarkResults && (
