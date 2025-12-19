@@ -28,22 +28,41 @@ export default function GatorWelcome() {
       return;
     }
     
+    // Extract parameters from URL (more reliable than storage)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRole = urlParams.get('role');
+    const urlCode = urlParams.get('code');
+    const urlEmail = urlParams.get('email');
+    const urlRef = urlParams.get('ref');
+    
+    console.log('🎯 [GatorWelcome] URL params:', { role: urlRole, code: urlCode, email: urlEmail, ref: urlRef });
+    
+    // Store params in localStorage as backup
+    if (urlRole) localStorage.setItem('pending_invite_role', urlRole);
+    if (urlCode) localStorage.setItem('pending_invite_code', urlCode);
+    if (urlEmail) localStorage.setItem('pending_student_email', urlEmail);
+    if (urlRef) localStorage.setItem('pending_referral_code', urlRef);
+    
+    const pendingRoleResolved = urlRole || localStorage.getItem('pending_invite_role');
+    const pendingCode = urlCode || localStorage.getItem('pending_invite_code');
+    
     console.log('🔍 [GatorWelcome] Debug state:', {
       userEmail: user.email,
       userPersona: user.persona,
-      pendingRole,
+      pendingRole: pendingRoleResolved,
+      pendingCode,
       roleSetupComplete
     });
     
     // If role already set and matches, we're done
-    if (user.persona === pendingRole) {
+    if (user.persona === pendingRoleResolved) {
       console.log('✅ [GatorWelcome] Role already set:', user.persona);
       setRoleSetupComplete(true);
       return;
     }
     
     // Safety: if user already has a persona and we don't have a pending role, enable button
-    if (user.persona && !pendingRole) {
+    if (user.persona && !pendingRoleResolved) {
       console.log('⚠️ [GatorWelcome] User has persona but no pendingRole, enabling button');
       setRoleSetupComplete(true);
       return;
@@ -51,11 +70,10 @@ export default function GatorWelcome() {
     
     console.log('✅ User on welcome page:', user.email, 'role:', role);
     
-    const pendingCode = localStorage.getItem('pending_invite_code');
     const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
     
     // If student without code and UFL email, auto-verify
-    if (pendingRole === 'gator' && !pendingCode && isUFL && !roleSetupComplete) {
+    if (pendingRoleResolved === 'gator' && !pendingCode && isUFL && !roleSetupComplete) {
       console.log('✅ [GatorWelcome] UFL student - auto-verifying');
       base44.auth.updateMe({
         persona: 'gator',
@@ -83,7 +101,7 @@ export default function GatorWelcome() {
     }
     // If parent with invite code, set persona first then process invite
     // CRITICAL: Also check if current persona doesn't match pendingRole (fixes wrong persona from previous attempts)
-    else if (pendingRole === 'parent' && pendingCode && user.persona !== 'parent') {
+    else if (pendingRoleResolved === 'parent' && pendingCode && user.persona !== 'parent') {
         console.log('🔄 [GatorWelcome] Setting parent persona first, then processing invite code:', pendingCode);
         
         const processParentFlow = async () => {
@@ -149,11 +167,11 @@ export default function GatorWelcome() {
       processParentFlow();
     }
     // Otherwise just set role (or correct wrong persona)
-    else if (pendingRole && user.persona !== pendingRole && !roleSetupComplete) {
-        console.log('🔄 [GatorWelcome] Setting role:', pendingRole);
+    else if (pendingRoleResolved && user.persona !== pendingRoleResolved && !roleSetupComplete) {
+        console.log('🔄 [GatorWelcome] Setting role:', pendingRoleResolved);
         base44.auth.updateMe({
-          persona: pendingRole,
-          roles: [pendingRole],
+          persona: pendingRoleResolved,
+          roles: [pendingRoleResolved],
           onboarding_completed: false
         }).then(async () => {
           console.log('✅ [GatorWelcome] Role set successfully');
@@ -167,7 +185,7 @@ export default function GatorWelcome() {
           base44.functions.invoke('notifyNewUserJoined', {
             user_email: user.email,
             user_name: user.full_name,
-            user_persona: pendingRole,
+            user_persona: pendingRoleResolved,
             user_id: user.id
           });
       }).catch(err => {

@@ -319,12 +319,12 @@ export default function GatorParentInvite() {
                 onClick={() => {
                   if (inviteCode.trim()) {
                     setIsVerifyingCode(true);
-                    // Use localStorage instead of sessionStorage (survives redirects better)
-                    localStorage.setItem('pending_invite_code', inviteCode.trim());
-                    localStorage.setItem('pending_invite_role', 'parent');
+                    // Encode in callback URL instead of localStorage (Safari-safe)
+                    const code = inviteCode.trim().toUpperCase();
+                    const callbackUrl = `${window.location.origin}/#GatorAuth?role=parent&code=${encodeURIComponent(code)}`;
                     
-                    console.log('🔐 [GatorParentInvite] Redirecting to Google OAuth');
-                    base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
+                    console.log('🔐 [GatorParentInvite] Redirecting with code in URL:', code);
+                    base44.auth.redirectToLogin(callbackUrl);
                   } else {
                     toast({
                       title: "Code Required",
