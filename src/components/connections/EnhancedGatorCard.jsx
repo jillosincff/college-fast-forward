@@ -712,7 +712,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
         /* Engagement Signals */
         .engagement-signals {
-          display: flex;
+          display: ${hideEngagement ? 'none' : 'flex'};
           align-items: center;
           justify-content: flex-end;
           gap: 8px;
