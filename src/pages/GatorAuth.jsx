@@ -196,6 +196,18 @@ export default function GatorAuth() {
             await base44.auth.updateMe(updateData);
             addLog('✅ User data saved to database');
             
+            // CRITICAL: Verify the update actually worked
+            const verifyUser = await base44.auth.me();
+            if (verifyUser.persona !== result.role) {
+              addLog(`⚠️ VERIFICATION FAILED: persona is ${verifyUser.persona}, expected ${result.role}`);
+              // Try one more time
+              await base44.auth.updateMe(updateData);
+              const reVerify = await base44.auth.me();
+              addLog(`🔄 Retry result: persona is now ${reVerify.persona}`);
+            } else {
+              addLog(`✅ VERIFIED: persona correctly set to ${verifyUser.persona}`);
+            }
+            
             // NOTE: OAuthState is already deleted by retrieveOAuthState backend function
             // No need to mark as used - it's gone from DB
             addLog('✅ OAuthState already cleaned up by backend');
