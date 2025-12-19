@@ -126,21 +126,42 @@ Deno.serve(async (req) => {
             console.error('❌ Email sending failed:', emailErr.message);
         }
 
-        // Step 5: Update request metrics (optional, non-blocking)
+        // Step 5: Update request metrics (CRITICAL for message counter)
         console.log('Step 5: Update request metrics');
         try {
-            // Try to update the request's message count, but don't fail if it doesn't work
             const request = await base44.asServiceRole.entities.JobRequest.get(requestId);
+            console.log('📊 Current request state:', {
+                id: request?.id,
+                messages_count: request?.messages_count,
+                offers_count: request?.offers_count
+            });
+            
             if (request) {
-                await base44.asServiceRole.entities.JobRequest.update(requestId, {
-                    messages_count: (request.messages_count || 0) + 1,
-                    offers_count: (request.offers_count || 0) + 1,
+                const newMessagesCount = (request.messages_count || 0) + 1;
+                const newOffersCount = (request.offers_count || 0) + 1;
+                
+                console.log('📈 Updating counts:', {
+                    messages_count: `${request.messages_count || 0} → ${newMessagesCount}`,
+                    offers_count: `${request.offers_count || 0} → ${newOffersCount}`
+                });
+                
+                const updated = await base44.asServiceRole.entities.JobRequest.update(requestId, {
+                    messages_count: newMessagesCount,
+                    offers_count: newOffersCount,
                     last_activity_at: new Date().toISOString()
                 });
-                console.log('✅ Request metrics updated');
+                
+                console.log('✅ Request metrics updated successfully:', {
+                    id: updated?.id,
+                    messages_count: updated?.messages_count,
+                    offers_count: updated?.offers_count
+                });
+            } else {
+                console.error('❌ Request not found:', requestId);
             }
         } catch (updateErr) {
-            console.log('⚠️ Could not update metrics (non-critical):', updateErr.message);
+            console.error('❌ FAILED to update metrics:', updateErr.message);
+            console.error('Stack:', updateErr.stack);
         }
 
         // Step 6: If parent is helping, trigger boost for linked students

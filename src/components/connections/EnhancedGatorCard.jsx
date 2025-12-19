@@ -145,6 +145,13 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
   // Real engagement stats - use cached count from request object
   const messagesCount = request?.messages_count || 0;
+  
+  // Debug logging for message count
+  useEffect(() => {
+    if (request) {
+      console.log('📧 [EnhancedGatorCard] Message count for', fullName, ':', messagesCount, 'from request:', request.messages_count);
+    }
+  }, [messagesCount, request?.messages_count]);
 
   const handleMessage = () => {
     if (onHelp) {
