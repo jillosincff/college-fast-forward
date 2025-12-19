@@ -22,6 +22,8 @@ const cardVariants = {
 };
 
 export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, likeCount = 0, onLikeChange, hideEngagement = false }) {
+  console.log('🟢 [EnhancedGatorCard] Render - hideEngagement:', hideEngagement, 'gatorName:', gator?.full_name);
+  
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const { toast } = useToast();

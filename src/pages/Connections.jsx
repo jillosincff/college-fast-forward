@@ -38,6 +38,10 @@ export default function DiscoverEmergingGatorsPage() {
   const [sortBy, setSortBy] = useState('relevance');
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+
+  useEffect(() => {
+    console.log('🔴 [Connections] showHelpModal changed to:', showHelpModal);
+  }, [showHelpModal]);
   const [visibleCount, setVisibleCount] = useState(20);
   const [showFilters, setShowFilters] = useState(false);
   
@@ -433,6 +437,7 @@ export default function DiscoverEmergingGatorsPage() {
                     }
                   }}
                 >
+                  {console.log('🟡 [Connections] Rendering cards with hideEngagement:', showHelpModal)}
                   <AnimatePresence mode="sync">
                     {displayedProfiles.map((profile) => (
                       <EnhancedGatorCard
