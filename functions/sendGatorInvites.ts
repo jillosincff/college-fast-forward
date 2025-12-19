@@ -114,16 +114,20 @@ Deno.serve(async (req) => {
                 </div>
             `;
 
-            await base44.asServiceRole.integrations.Core.SendEmail({
+            const emailResult = await base44.asServiceRole.integrations.Core.SendEmail({
                 to: email,
                 subject: subject,
                 body: emailBody,
                 from_name: 'College Fast Forward'
             });
+            console.log('✅ Email sent successfully to:', email);
+            console.log('Email result:', emailResult);
 
             results.sent.push(email);
         } catch (err) {
-            console.error(`Failed to send invite to ${email}:`, err);
+            console.error(`❌ Failed to send invite to ${email}:`, err);
+            console.error('Error message:', err.message);
+            console.error('Error stack:', err.stack);
             results.invalid.push(email); // Add to invalid if sending fails
         }
     }
