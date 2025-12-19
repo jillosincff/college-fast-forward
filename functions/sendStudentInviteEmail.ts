@@ -1,16 +1,33 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
-    const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const { student_email, student_name, parent_name } = body;
+    console.log('=== SEND STUDENT INVITE EMAIL STARTED ===');
+    console.log('Timestamp:', new Date().toISOString());
+    
+    try {
+        const base44 = createClientFromRequest(req);
+        const user = await base44.auth.me();
+        
+        console.log('User authenticated:', user?.email);
+        
+        if (!user) {
+            console.error('❌ No user authenticated');
+            return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        
+        const body = await req.json();
+        const { student_email, student_name, parent_name } = body;
+        
+        console.log('📧 Sending invite to:', student_email);
+        console.log('Student name:', student_name);
+        console.log('Parent name:', parent_name);
 
-    if (!student_email || !student_name || !parent_name) {
-        return new Response(JSON.stringify({ error: 'Missing required parameters: student_email, student_name, parent_name' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
+        if (!student_email || !student_name || !parent_name) {
+            console.error('❌ Missing required parameters');
+            return Response.json({ error: 'Missing required parameters: student_email, student_name, parent_name' }, {
+                status: 400,
+            });
+        }
 
     const subject = `🌟 ${student_name}, unlock opportunities through the Gator network`;
     
