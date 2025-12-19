@@ -17,13 +17,37 @@ export default function GatorWelcome() {
   const role = pendingRole || params.role || user?.persona;
 
   useEffect(() => {
+    // Check if we just came from OAuth (have role/code params but no user yet)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasOAuthParams = urlParams.has('role') || urlParams.has('code');
+    
     if (isLoading) {
       console.log('⏳ [GatorWelcome] Still loading user...');
       return;
     }
     
     if (!user) {
-      console.log('❌ No user on welcome, redirecting to auth');
+      // If we have OAuth params, give SDK more time (up to 10s) before redirecting
+      if (hasOAuthParams) {
+        const waitStart = Date.now();
+        const maxWait = 10000; // 10 seconds
+        
+        console.log('⏳ [GatorWelcome] OAuth params detected but no user yet, waiting for SDK...');
+        
+        const checkUser = setInterval(() => {
+          const elapsed = Date.now() - waitStart;
+          
+          if (elapsed > maxWait) {
+            console.error('❌ [GatorWelcome] Timeout waiting for user after OAuth');
+            clearInterval(checkUser);
+            navigate('GatorAuth');
+          }
+        }, 500);
+        
+        return () => clearInterval(checkUser);
+      }
+      
+      console.log('❌ [GatorWelcome] No user and no OAuth params, redirecting to auth');
       navigate('GatorAuth');
       return;
     }
