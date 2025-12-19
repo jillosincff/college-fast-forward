@@ -380,7 +380,7 @@ export default function TestingDashboard() {
                   try {
                     const result = await base44.functions.invoke('auditAndFixUsers', { dryRun: false });
                     setAuditResults(result.data);
-                    loadCounts();
+                    loadCurrentCount();
                   } catch (error) {
                     setAuditResults({ error: error.message });
                   }
