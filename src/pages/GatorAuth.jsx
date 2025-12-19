@@ -130,8 +130,10 @@ export default function GatorAuth() {
           console.log('✅ [GatorAuth] Retrieved state:', result);
           
           // CRITICAL: Set ALL user data from OAuthState immediately
+          let stateId = null;
           try {
             console.log('📝 [GatorAuth] Setting user data from OAuthState:', result);
+            stateId = result.id || result.state_id;
             
             const updateData = {
               persona: result.role,
@@ -149,17 +151,30 @@ export default function GatorAuth() {
             
             // Mark OAuthState as used to prevent reuse
             try {
-              await base44.asServiceRole.entities.OAuthState.update(result.id || result.state_id, { used: true });
+              await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
               console.log('✅ [GatorAuth] OAuthState marked as used');
             } catch (e) {
               console.warn('⚠️ [GatorAuth] Could not mark OAuthState as used:', e.message);
             }
           } catch (roleError) {
             console.error('❌ [GatorAuth] Failed to save user data:', roleError);
+            
+            // Mark OAuthState as used even on failure to force fresh OAuth flow
+            if (stateId) {
+              try {
+                await base44.asServiceRole.entities.OAuthState.update(stateId, { used: true });
+              } catch (e) {
+                console.warn('⚠️ [GatorAuth] Could not mark failed OAuthState as used:', e.message);
+              }
+            }
+            
             alert('Failed to complete setup. Please try logging in again.');
             window.location.href = window.location.origin + '/#LandingPage';
             return;
           }
+          
+          // Set redirect flag to prevent routing race condition
+          sessionStorage.setItem('oauth_redirect_in_progress', 'true');
           
           // Redirect to GatorWelcome (user data is now in database, no need for URL params or localStorage)
           const redirectUrl = `${window.location.origin}/#GatorWelcome`;

@@ -813,6 +813,12 @@ function AppContent() {
       return;
     }
 
+    // Skip routing if OAuth redirect is in progress
+    if (sessionStorage.getItem('oauth_redirect_in_progress') === 'true') {
+      console.log('⏸️ [Layout Routing] OAuth redirect in progress, skipping routing');
+      return;
+    }
+
     console.log('🔍 [Layout Routing] Start - page:', currentPage, 'user:', user?.email, 'persona:', user?.persona, 'onboarding:', user?.onboarding_completed);
     
     // ═══════════════════════════════════════════════════════════════════
@@ -858,7 +864,7 @@ function AppContent() {
     // CRITICAL: Check user.persona directly - OAuth flow now sets it immediately
     // No need for localStorage checks - data is in user record
 
-    if (user && !user.persona) {
+    if (user && !user.persona?.trim()) {
       console.log('🎯 [No Persona] User needs role assignment');
 
       // Allow new user flow pages
