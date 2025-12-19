@@ -158,6 +158,15 @@ export default function DiscoverEmergingGatorsPage() {
     loadData();
     loadUserLikes();
     loadLikeCounts();
+    
+    // Listen for message-sent events to reload job requests (updates message counts)
+    const handleMessageSent = () => {
+      console.log('🔄 Message sent - reloading job requests to update counts');
+      loadData(true); // Silent reload
+    };
+    
+    document.addEventListener('cff:message-sent', handleMessageSent);
+    return () => document.removeEventListener('cff:message-sent', handleMessageSent);
   }, [user?.email]);
 
   const handleOfferHelp = (request) => {
