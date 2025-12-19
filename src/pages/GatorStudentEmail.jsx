@@ -18,19 +18,17 @@ export default function GatorStudentEmail() {
 
     const isUFL = email.toLowerCase().endsWith('@ufl.edu');
     
-    // Store info in localStorage (survives OAuth redirects)
-    localStorage.setItem('pending_invite_role', 'gator');
-    localStorage.setItem('pending_student_email', email.trim());
+    // Encode in callback URL instead of localStorage (Safari-safe)
+    let callbackUrl = `${window.location.origin}/#GatorAuth?role=gator&email=${encodeURIComponent(email.trim())}`;
     
     if (referralCode.trim()) {
-      localStorage.setItem('pending_referral_code', referralCode.trim().toUpperCase());
+      callbackUrl += `&ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
     }
     
     console.log('🎓 [GatorStudentEmail] UFL student:', isUFL, 'email:', email);
     console.log('🎟️ [GatorStudentEmail] Referral code:', referralCode || 'none');
     
-    // Redirect to Google OAuth - callback to GatorAuth
-    const callbackUrl = `${window.location.origin}/#GatorAuth`;
+    // Redirect to Google OAuth
     base44.auth.redirectToLogin(callbackUrl);
   };
 

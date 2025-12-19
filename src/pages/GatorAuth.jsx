@@ -11,76 +11,40 @@ export default function GatorAuth() {
   useEffect(() => {
     if (isLoading) return;
 
-    // LOOP DETECTION - prevent infinite redirects
-    const authAttempts = parseInt(localStorage.getItem('auth_attempts') || '0');
-    const lastAttempt = parseInt(localStorage.getItem('last_auth_attempt') || '0');
-    const now = Date.now();
+    // Extract parameters from URL (role, code, email, ref)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashFragment = window.location.hash.substring(1);
+    const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
     
-    // Reset counter if last attempt was >5 minutes ago
-    if (now - lastAttempt > 300000) {
-      localStorage.setItem('auth_attempts', '0');
-    }
+    // Combine both sources
+    const role = urlParams.get('role') || hashParams.get('role');
+    const code = urlParams.get('code') || hashParams.get('code');
+    const email = urlParams.get('email') || hashParams.get('email');
+    const ref = urlParams.get('ref') || hashParams.get('ref');
     
-    // More lenient on mobile - allow 5 attempts instead of 3
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const maxAttempts = isMobile ? 5 : 3;
-    
-    // If more than max attempts in 5 minutes, show error
-    if (authAttempts > maxAttempts) {
-      console.error('🚨 [GatorAuth] Auth loop detected!');
-      setLoopDetected(true);
-      return;
-    }
-
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hasAccessToken = hashParams.has('access_token');
     const hasError = hashParams.has('error');
-    
-    // Check if we're already in OAuth callback processing
-    const isProcessingOAuth = sessionStorage.getItem('oauth_processing') === 'true';
 
     // Handle OAuth errors
     if (hasError) {
       console.error('🚨 [GatorAuth] OAuth error:', hashParams.get('error'));
       alert('Authentication was cancelled or failed. Please try again.');
-      localStorage.removeItem('pending_invite_code');
-      localStorage.removeItem('pending_invite_role');
-      sessionStorage.removeItem('oauth_processing');
       window.location.href = window.location.origin + '/#LandingPage';
       return;
     }
 
-    // No user and no token - trigger login (but not if we're already processing OAuth)
-    if (!user && !hasAccessToken && !isProcessingOAuth) {
-      if (!redirecting) {
-        console.log('🔐 [GatorAuth] Redirecting to Google login...');
-        setRedirecting(true);
-        
-        // Use localStorage instead of sessionStorage (survives redirects better)
-        const pendingRole = localStorage.getItem('pending_invite_role');
-        const pendingCode = localStorage.getItem('pending_invite_code');
-        
-        console.log('📦 [GatorAuth] Preserving:', { pendingRole, pendingCode });
-        
-        // Track attempt
-        localStorage.setItem('auth_attempts', String(authAttempts + 1));
-        localStorage.setItem('last_auth_attempt', String(now));
-        
-        base44.auth.redirectToLogin(`${window.location.origin}/#GatorAuth`);
-      }
+    // No user and no token - shouldn't happen (user should come with params)
+    if (!user && !hasAccessToken) {
+      console.log('🔐 [GatorAuth] No auth detected, redirecting to landing...');
+      window.location.href = window.location.origin + '/#LandingPage';
       return;
     }
 
     // Returning from OAuth - wait for SDK
     if (hasAccessToken && !processing) {
-      console.log('🔐 [GatorAuth] OAuth callback detected, waiting for SDK...');
+      console.log('🔐 [GatorAuth] OAuth callback detected');
+      console.log('📦 [GatorAuth] Params:', { role, code, email, ref });
       setProcessing(true);
-      
-      // Set flag to prevent re-entry
-      sessionStorage.setItem('oauth_processing', 'true');
-      
-      // Clear auth loop tracking on success
-      localStorage.setItem('auth_attempts', '0');
       
       // Mobile needs more time for SDK initialization
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -89,33 +53,32 @@ export default function GatorAuth() {
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms (mobile: ${isMobile})`);
       
       setTimeout(() => {
-        const pendingRole = localStorage.getItem('pending_invite_role');
-        const pendingCode = localStorage.getItem('pending_invite_code');
+        console.log('✅ [GatorAuth] SDK ready, redirecting...');
         
-        console.log('✅ [GatorAuth] SDK ready, role:', pendingRole, 'hasCode:', !!pendingCode);
+        // Build redirect URL with parameters
+        let redirectUrl = `${window.location.origin}/#GatorWelcome`;
+        const params = new URLSearchParams();
+        if (role) params.set('role', role);
+        if (code) params.set('code', code);
+        if (email) params.set('email', email);
+        if (ref) params.set('ref', ref);
         
-        // Clear processing flag before redirect
-        sessionStorage.removeItem('oauth_processing');
-        
-        if (pendingRole === 'gator') {
-          window.location.href = window.location.origin + '/#GatorWelcome?role=gator';
-        } else if (pendingRole === 'parent') {
-          window.location.href = window.location.origin + '/#GatorWelcome?role=parent';
-        } else {
-          window.location.href = window.location.origin + '/#GatorRoleSelection';
+        if (params.toString()) {
+          redirectUrl += '?' + params.toString();
         }
+        
+        console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
+        window.location.href = redirectUrl;
       }, waitTime);
       return;
     }
 
-    // User authenticated - go to role selection
-    if (user && !hasAccessToken && !isProcessingOAuth) {
+    // User authenticated without OAuth callback - go to role selection
+    if (user && !hasAccessToken) {
       console.log('✅ [GatorAuth] User authenticated, going to role selection');
-      localStorage.setItem('auth_attempts', '0');
-      sessionStorage.removeItem('oauth_processing');
       window.location.hash = 'GatorRoleSelection';
     }
-  }, [user, isLoading, redirecting, processing]);
+  }, [user, isLoading, processing]);
 
   if (loopDetected) {
     return (
@@ -130,11 +93,8 @@ export default function GatorAuth() {
           </p>
           <button
             onClick={() => {
-              localStorage.removeItem('auth_attempts');
-              localStorage.removeItem('last_auth_attempt');
-              localStorage.removeItem('pending_invite_code');
-              localStorage.removeItem('pending_invite_role');
-              sessionStorage.removeItem('oauth_processing');
+              localStorage.clear();
+              sessionStorage.clear();
               window.location.href = window.location.origin + '/#LandingPage';
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl"
