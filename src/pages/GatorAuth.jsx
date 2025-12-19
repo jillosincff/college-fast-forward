@@ -52,16 +52,22 @@ export default function GatorAuth() {
         console.log('✅ [GatorAuth] SDK ready, retrieving state from backend...');
         
         try {
+          console.log('🔍 [GatorAuth] Calling retrieveOAuthState with token:', stateToken);
+          
           // Use backend function to retrieve OAuth state (bypasses auth check)
           const response = await base44.functions.invoke('retrieveOAuthState', { 
             token: stateToken 
           });
           
+          console.log('📦 [GatorAuth] Full response:', response);
+          
           const result = response.data || response;
           
-          if (!result.success) {
-            console.error('❌ [GatorAuth] State retrieval failed:', result.error);
-            alert('Login session expired. Please try again.');
+          console.log('📋 [GatorAuth] Parsed result:', result);
+          
+          if (!result || !result.success || !result.role) {
+            console.error('❌ [GatorAuth] Invalid state result:', result);
+            alert(`Login session error: ${result?.error || 'Invalid state'}. Please try again.`);
             window.location.href = window.location.origin + '/#LandingPage';
             return;
           }
@@ -80,11 +86,20 @@ export default function GatorAuth() {
             redirectUrl += '?' + params.toString();
           }
           
-          console.log('🎯 [GatorAuth] Redirecting to:', redirectUrl);
+          console.log('🎯 [GatorAuth] Final redirect URL:', redirectUrl);
+          console.log('📍 [GatorAuth] Parameters:', {
+            role: result.role,
+            code: result.invite_code,
+            email: result.email,
+            ref: result.referral_code
+          });
+          
           window.location.href = redirectUrl;
         } catch (error) {
-          console.error('❌ [GatorAuth] Failed to retrieve state:', error);
-          alert('Login failed. Please try again.');
+          console.error('❌ [GatorAuth] Exception caught:', error);
+          console.error('❌ [GatorAuth] Error message:', error.message);
+          console.error('❌ [GatorAuth] Error stack:', error.stack);
+          alert(`Login failed: ${error.message}. Please try again.`);
           window.location.href = window.location.origin + '/#LandingPage';
         }
       }, waitTime);
