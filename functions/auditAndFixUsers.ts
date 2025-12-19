@@ -70,6 +70,11 @@ Deno.serve(async (req) => {
       // Check 3: Onboarding not completed
       if (!u.onboarding_completed) {
         userIssues.push('onboarding_incomplete');
+        
+        if (!dryRun) {
+          userFixes.onboarding_completed = true;
+          fixes.push({ email: u.email, fix: 'onboarding', value: true });
+        }
       }
       
       // Check 4: Missing roles array
@@ -92,6 +97,7 @@ Deno.serve(async (req) => {
           console.log(`[Audit] Fixed user ${u.email}:`, userFixes);
         } catch (err) {
           console.error(`[Audit] Failed to fix user ${u.email}:`, err);
+          fixes.push({ email: u.email, fix: 'ERROR', error: err.message });
         }
       }
       
