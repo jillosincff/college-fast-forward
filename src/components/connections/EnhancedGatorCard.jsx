@@ -717,9 +717,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           justify-content: flex-end;
           gap: 8px;
           margin-top: 4px;
-          position: relative;
-          z-index: 1;
-          pointer-events: auto;
         }
 
         .signal-badge {
@@ -740,9 +737,6 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           padding: 6px 10px;
           border-radius: 8px;
           background: #f3f4f6;
-          pointer-events: auto !important;
-          position: relative;
-          z-index: 1;
           user-select: none;
           border: 2px solid transparent;
           outline: none;
