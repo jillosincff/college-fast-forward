@@ -342,7 +342,7 @@ export default function GatorParentInvite() {
                       localStorage.setItem('pending_invite_role', 'parent');
                       localStorage.setItem('pending_invite_code', code);
                       
-                      const callbackUrl = `${window.location.origin}/?state=${token}#GatorAuth`;
+                      const callbackUrl = `${window.location.origin}/?state=${token}`;
                       console.log('🔐 [GatorParentInvite] Redirecting to:', callbackUrl);
                       
                       base44.auth.redirectToLogin(callbackUrl);

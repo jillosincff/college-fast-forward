@@ -11,14 +11,16 @@ export default function GatorAuth() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Extract state token from URL
+    // Extract state token from sessionStorage (stored by Layout during OAuth callback)
+    const stateToken = sessionStorage.getItem('oauth_state_token');
+    const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
+    
     const urlParams = new URLSearchParams(window.location.search);
     const hashFragment = window.location.hash.substring(1);
     const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
     
-    const stateToken = urlParams.get('state') || hashParams.get('state');
-    const hasAccessToken = hashParams.has('access_token');
-    const hasError = hashParams.has('error');
+    const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token');
+    const hasError = urlParams.has('error') || hashParams.has('error');
     
     console.log('🔍 [GatorAuth] Detected:', { stateToken, hasAccessToken, hasError });
 
@@ -38,9 +40,12 @@ export default function GatorAuth() {
     }
 
     // Returning from OAuth - wait for SDK then retrieve state from DB
-    if (hasAccessToken && stateToken && !processing) {
+    if (wasOAuthCallback && stateToken && !processing) {
       console.log('🔐 [GatorAuth] OAuth callback detected with state token:', stateToken);
       setProcessing(true);
+      
+      // Clear session storage
+      sessionStorage.removeItem('oauth_callback_detected');
       
       // Wait longer for SDK initialization and auth processing
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

@@ -760,21 +760,30 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState(null);
   const [resolvedPage, setResolvedPage] = useState(null);
 
+  // Detect OAuth callback in query params (before hash routing)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const stateToken = urlParams.get('state');
+    const accessToken = urlParams.get('access_token');
+    
+    // If we have state and access_token, this is an OAuth callback
+    if (stateToken && stateToken.startsWith('oauth_') && accessToken) {
+      console.log('🔐 [Layout] OAuth callback detected in query params');
+      sessionStorage.setItem('oauth_state_token', stateToken);
+      sessionStorage.setItem('oauth_callback_detected', 'true');
+      
+      // Let SDK process access_token, then navigate to GatorAuth
+      setTimeout(() => {
+        console.log('🔐 [Layout] Navigating to GatorAuth');
+        window.location.href = window.location.origin + '/#GatorAuth';
+      }, 500);
+      return;
+    }
+  }, []);
+
   useEffect(() => {
     const handleHashChange = async () => {
       const hashFragment = window.location.hash.substring(1);
-      
-      // Check for OAuth callback (access_token in hash)
-      const hasAccessToken = hashFragment.includes('access_token=');
-      const hasStateToken = hashFragment.includes('state=');
-
-      // CRITICAL: If this is an OAuth callback, always route to GatorAuth
-      if (hasAccessToken) {
-        console.log('🔐 [Layout] OAuth callback detected - routing to GatorAuth');
-        setCurrentPage('GatorAuth');
-        setResolvedPage(null);
-        return;
-      }
 
       // Normal hash change - extract page name
       let pageHash = hashFragment.split('?')[0] || 'LandingPage';
