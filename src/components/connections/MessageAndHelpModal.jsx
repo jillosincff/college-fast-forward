@@ -109,6 +109,14 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
       });
 
       console.log('✅ Help offer response:', response.data);
+      
+      // Manually increment the counter after successful send
+      try {
+        await base44.functions.invoke('incrementMessageCount', { requestId: request.id });
+        console.log('✅ Message count incremented');
+      } catch (err) {
+        console.error('❌ Failed to increment message count:', err);
+      }
 
       trackEvent('help_offer_sent', { 
         requestId: request.id,
