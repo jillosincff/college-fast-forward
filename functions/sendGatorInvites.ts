@@ -122,6 +122,8 @@ Deno.serve(async (req) => {
             let emailSent = false;
             
             // Try SendGrid first (works for external emails)
+            console.log('🔑 SENDGRID_API_KEY exists:', !!SENDGRID_API_KEY);
+            console.log('🔑 SENDGRID_API_KEY length:', SENDGRID_API_KEY?.length || 0);
             if (SENDGRID_API_KEY) {
                 try {
                     const msg = {
