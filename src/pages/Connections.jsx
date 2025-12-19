@@ -445,6 +445,7 @@ export default function DiscoverEmergingGatorsPage() {
                         isLikedByUser={profile.request ? userLikes.get(profile.request.id) : false}
                         likeCount={profile.request ? (likeCounts.get(profile.request.id) || 0) : 0}
                         onLikeChange={() => { loadUserLikes(); loadLikeCounts(); }}
+                        hideEngagement={showHelpModal}
                       />
                     ))}
                   </AnimatePresence>
@@ -560,11 +561,13 @@ export default function DiscoverEmergingGatorsPage() {
         </footer>
       </div>
 
-      <MessageAndHelpModal
-        isOpen={showHelpModal}
-        onClose={() => setShowHelpModal(false)}
-        request={selectedRequest}
-      />
+      {showHelpModal && (
+        <MessageAndHelpModal
+          isOpen={showHelpModal}
+          onClose={() => setShowHelpModal(false)}
+          request={selectedRequest}
+        />
+      )}
 
       <style jsx>{`
         .discover-gators-page {

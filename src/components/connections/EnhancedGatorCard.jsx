@@ -21,7 +21,7 @@ const cardVariants = {
   }
 };
 
-export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, likeCount = 0, onLikeChange }) {
+export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, currentUser, isLikedByUser = false, likeCount = 0, onLikeChange, hideEngagement = false }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const { toast } = useToast();
@@ -369,7 +369,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           </Button>
 
           {/* Quick-Win Engagement Signals */}
-          {request && !showMessageModal && (
+          {request && !showMessageModal && !hideEngagement && (
             <div className="engagement-signals">
               <span 
                 className={`signal-badge ${messagesCount >= 3 ? 'signal-hot' : ''}`}
