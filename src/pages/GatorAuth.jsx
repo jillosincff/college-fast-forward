@@ -182,6 +182,13 @@ export default function GatorAuth() {
             if (result.email && result.role === 'gator') updateData.student_email_verified = result.email;
             if (result.referral_code) updateData.referral_code = result.referral_code;
             
+            // CRITICAL: Also store in localStorage as backup for GatorWelcome
+            // This ensures role is available even if DB update hasn't propagated yet
+            localStorage.setItem('pending_invite_role', result.role);
+            if (result.invite_code) localStorage.setItem('pending_invite_code', result.invite_code);
+            if (result.referral_code) localStorage.setItem('pending_referral_code', result.referral_code);
+            addLog(`📝 Stored role in localStorage as backup: ${result.role}`);
+            
             // Log current user state and update payload
             const currentUser = await base44.auth.me();
             addLog(`📝 Current user: ${currentUser.email}, updating with: ${JSON.stringify(updateData)}`);
