@@ -95,7 +95,7 @@ export default function StudentOnboarding() {
   const [profileErrors, setProfileErrors] = useState({});
   const [emailError, setEmailError] = useState('');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     // Profile fields (Step 0)
     first_name: '',
     last_name: '',
@@ -119,7 +119,7 @@ export default function StudentOnboarding() {
     custom_location: '',
     timeline: '',
     one_sentence_pitch: ''
-  });
+  }));
 
   // Initialize profile from user data + validate @ufl.edu
   useEffect(() => {
@@ -151,12 +151,21 @@ export default function StudentOnboarding() {
     return () => clearTimeout(timer);
   }, [formData]);
 
-  // Load draft on mount
+  // Load draft on mount - merge with defaults to ensure arrays exist
   useEffect(() => {
     const draft = localStorage.getItem('student_onboarding_draft');
     if (draft) {
       try {
-        setFormData(JSON.parse(draft));
+        const parsed = JSON.parse(draft);
+        setFormData(prev => ({
+          ...prev,
+          ...parsed,
+          // Ensure arrays are always arrays (protect against corrupted data)
+          help_types: Array.isArray(parsed.help_types) ? parsed.help_types : [],
+          target_roles: Array.isArray(parsed.target_roles) ? parsed.target_roles : [],
+          target_industries: Array.isArray(parsed.target_industries) ? parsed.target_industries : [],
+          location_preferences: Array.isArray(parsed.location_preferences) ? parsed.location_preferences : []
+        }));
       } catch (e) {
         console.error('Failed to load draft');
       }
@@ -168,12 +177,15 @@ export default function StudentOnboarding() {
   };
 
   const toggleMultiSelect = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].includes(value)
-        ? prev[field].filter(v => v !== value)
-        : [...prev[field], value]
-    }));
+    setFormData(prev => {
+      const currentArray = Array.isArray(prev[field]) ? prev[field] : [];
+      return {
+        ...prev,
+        [field]: currentArray.includes(value)
+          ? currentArray.filter(v => v !== value)
+          : [...currentArray, value]
+      };
+    });
   };
 
   const validateProfile = () => {
