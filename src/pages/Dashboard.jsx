@@ -307,14 +307,8 @@ export default function Dashboard() {
         {/* Draft Request Banner */}
         <DraftRequestBanner user={user} />
         
-        {/* Student Matches Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <StudentMatchesWidget user={user} />
-        </motion.div>
+        {/* Student Matches Widget - Shows parents matched to help this student */}
+        <StudentMatchesWidget user={user} />
         
         {/* Edit Help Request Button */}
         {existingRequest && (
