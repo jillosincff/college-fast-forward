@@ -323,18 +323,27 @@ export default function GatorParentInvite() {
                     
                     try {
                       // Generate unique token and store in database
-                      const token = `oauth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                      const token = `oauth_parent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                       const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min
                       
-                      await base44.entities.OAuthState.create({
+                      console.log('💾 [GatorParentInvite] Creating OAuth state:', { token, role: 'parent', code });
+                      
+                      const created = await base44.entities.OAuthState.create({
                         token,
                         role: 'parent',
                         invite_code: code,
-                        expires_at: expiresAt
+                        expires_at: expiresAt,
+                        used: false
                       });
                       
+                      console.log('✅ [GatorParentInvite] State stored:', created);
+                      
+                      // Store in localStorage as backup
+                      localStorage.setItem('pending_invite_role', 'parent');
+                      localStorage.setItem('pending_invite_code', code);
+                      
                       const callbackUrl = `${window.location.origin}/#GatorAuth?state=${token}`;
-                      console.log('🔐 [GatorParentInvite] Stored state in DB, redirecting:', { token, code });
+                      console.log('🔐 [GatorParentInvite] Redirecting to:', callbackUrl);
                       
                       base44.auth.redirectToLogin(callbackUrl);
                     } catch (error) {
