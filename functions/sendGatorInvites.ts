@@ -1,9 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import { v4 as uuidv4 } from 'npm:uuid';
-import sgMail from 'npm:@sendgrid/mail@8.1.0';
 
-const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-sgMail.setApiKey(SENDGRID_API_KEY);
+const SENDER_API_KEY = Deno.env.get('SENDER_API_KEY');
 
 const isEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
