@@ -22,9 +22,14 @@ export default function GatorWelcome() {
       return;
     }
     
-    // Extract parameters from URL early
-    const urlParams = new URLSearchParams(window.location.search);
+    // Extract parameters from hash fragment (hash-based routing)
+    const hashFragment = window.location.hash.substring(1); // Remove #
+    const hashParts = hashFragment.split('?');
+    const queryString = hashParts[1] || '';
+    const urlParams = new URLSearchParams(queryString);
     const hasOAuthParams = urlParams.has('role') || urlParams.has('code');
+    
+    console.log('🔍 [GatorWelcome] Checking params - hash:', window.location.hash, 'hasOAuthParams:', hasOAuthParams, 'role:', urlParams.get('role'), 'code:', urlParams.get('code'));
     
     if (!user) {
       // If we have OAuth params, give SDK more time (up to 10s) before redirecting
