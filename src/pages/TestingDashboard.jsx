@@ -15,6 +15,8 @@ export default function TestingDashboard() {
   const [accuracyCheck, setAccuracyCheck] = useState(null);
   const [isCheckingAccuracy, setIsCheckingAccuracy] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [personaFixResults, setPersonaFixResults] = useState(null);
+  const [isFixingPersonas, setIsFixingPersonas] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
@@ -304,18 +306,55 @@ export default function TestingDashboard() {
 
               <Button
                 onClick={async () => {
-                  const result = await base44.functions.invoke('fixMissingPersonas', {});
-                  alert(JSON.stringify(result.data, null, 2));
+                  setIsFixingPersonas(true);
+                  setPersonaFixResults(null);
+                  try {
+                    const result = await base44.functions.invoke('fixMissingPersonas', {});
+                    setPersonaFixResults(result.data);
+                  } catch (error) {
+                    setPersonaFixResults({ error: error.message });
+                  }
+                  setIsFixingPersonas(false);
                 }}
+                disabled={isFixingPersonas}
                 size="lg"
                 variant="secondary"
                 className="bg-purple-100 hover:bg-purple-200 text-purple-900"
               >
-                Fix Missing Personas
+                {isFixingPersonas ? 'Fixing Personas...' : 'Fix Missing Personas'}
               </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Persona Fix Results */}
+        {personaFixResults && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Fix Missing Personas Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 rounded-lg border bg-white">
+                  <div className="mt-0.5">
+                    {personaFixResults.error ? 
+                      <XCircle className="w-5 h-5 text-red-600" /> : 
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 mb-2">
+                      {personaFixResults.error ? 'Error' : `Fixed ${personaFixResults.fixed_count} users, Skipped ${personaFixResults.skipped_count}`}
+                    </h3>
+                    <pre className="p-4 bg-slate-50 rounded text-xs overflow-auto">
+                      {JSON.stringify(personaFixResults, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Parent Test Results */}
         {parentTestResults && (
