@@ -324,10 +324,13 @@ Deno.serve(async (req) => {
       createdMatches.push(match);
     }
     
-    // Update match counts
+    // Update match counts - count ALL matches for this request, not just new ones
     if (mode === 'for_request' && helpRequests.length > 0) {
+      const allMatches = await base44.asServiceRole.entities.Match.filter({
+        help_request_id: helpRequests[0].id
+      });
       await base44.asServiceRole.entities.HelpRequest.update(helpRequests[0].id, {
-        match_count: createdMatches.length
+        match_count: allMatches.length
       });
     }
     
