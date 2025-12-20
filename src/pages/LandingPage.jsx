@@ -491,67 +491,91 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 4: FOR STUDENTS vs FOR PARENTS */}
+        {/* SECTION 4: FOR STUDENTS & ALUMNI vs FOR PARENTS */}
         <section className="py-20 bg-white">
           <div className="max-w-6xl mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-8">
-              {/* For Students */}
-              <Card className="p-8 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">For Students</h3>
-                <p className="text-slate-600 mb-6">Get Career Help from Real Professionals</p>
-                
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Resume reviews from people who actually hire',
-                    'Interview prep from industry experts',
-                    'Job referrals and warm introductions',
-                    'Career advice from people who\'ve been there',
-                    'Unlimited help requests and messages'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* For Students & Alumni */}
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white h-full hover:shadow-xl hover:-translate-y-1 transition-all">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">For Students & Alumni</h3>
+                  <p className="text-slate-600 mb-6">Get the Connections That Actually Matter</p>
+                  
+                  <p className="text-slate-600 mb-4 text-sm">
+                    Whether you're still in school or recently graduated, get matched with experienced professionals who can help:
+                  </p>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {[
+                      'Resume reviews from people who hire',
+                      'Interview prep from industry experts',
+                      'Job referrals and warm introductions',
+                      'Career advice from people ahead of you',
+                      'Unlimited help requests and messages'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Button
-                  onClick={handleStudentClick}
-                  className="w-full bg-[#0021A5] hover:bg-blue-800 text-white py-6 text-lg font-bold"
-                >
-                  Join as Student
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Card>
+                  <Button
+                    onClick={handleStudentAlumniClick}
+                    className="w-full bg-[#0021A5] hover:bg-blue-800 text-white py-6 text-lg font-bold"
+                  >
+                    Join as Student/Alumni
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Card>
+              </motion.div>
 
               {/* For Parents */}
-              <Card className="p-8 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white">
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">For Parents & Alumni</h3>
-                <p className="text-slate-600 mb-6">Help UF Students Launch Their Careers</p>
-                
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Get matched with students you can actually help',
-                    '10 minutes per student makes a huge impact',
-                    'Stay connected to the UF community',
-                    'See the direct results of your advice',
-                    'Always free for parents and alumni'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Card className="p-8 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white h-full hover:shadow-xl hover:-translate-y-1 transition-all">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">For Parents</h3>
+                  <p className="text-slate-600 mb-6">Help UF Students Launch Their Careers</p>
+                  
+                  <p className="text-slate-600 mb-4 text-sm">
+                    As a parent, you have the network and experience students need. Make a difference:
+                  </p>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {[
+                      'Get matched with students you can actually help',
+                      '10 minutes per student = life-changing impact',
+                      'See direct results of your advice',
+                      'Stay connected to the UF community',
+                      'Always FREE for parents (we pay with our time)'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Button
-                  onClick={handleParentClick}
-                  className="w-full bg-[#FA4616] hover:bg-orange-600 text-white py-6 text-lg font-bold"
-                >
-                  Join as Parent
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Card>
+                  <Button
+                    onClick={handleParentClick}
+                    className="w-full bg-[#FA4616] hover:bg-orange-600 text-white py-6 text-lg font-bold"
+                  >
+                    Join as Parent
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </section>
