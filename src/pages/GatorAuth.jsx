@@ -62,30 +62,30 @@ export default function GatorAuth() {
     // No user and no token - initiate OAuth login
     if (!user && !hasAccessToken && !wasOAuthCallback) {
       addLog('🔐 No auth detected, initiating OAuth login...');
+      
+      // Check if we have pending role/code from role selection flow
+      const pendingRole = localStorage.getItem('pending_invite_role');
+      const pendingCode = localStorage.getItem('pending_invite_code');
+      addLog(`📋 Pending role: ${pendingRole}, code: ${pendingCode?.slice(0,5)}...`);
+      
       // Redirect to Google OAuth via Base44 SDK
       const callbackUrl = window.location.origin + '/#GatorAuth';
       base44.auth.redirectToLogin(callbackUrl);
       return;
     }
 
+    // Check localStorage for pending role (from role selection flow)
+    const pendingRoleFromStorage = localStorage.getItem('pending_invite_role');
+    
     // Use state from URL as fallback if sessionStorage is empty (mobile issue)
     const finalStateToken = stateToken || stateFromUrl;
-    
-    if (!finalStateToken && hasAccessToken) {
-      addLog('⚠️ No state token found - checking URL params');
-      setErrorDetails({ 
-        type: 'no_state_token', 
-        message: 'State token missing from both sessionStorage and URL',
-        stateToken,
-        stateFromUrl,
-        url: window.location.href
-      });
-      return;
-    }
 
-    // Returning from OAuth - wait for SDK then retrieve state from DB
-    if (wasOAuthCallback && finalStateToken && !processing) {
-      addLog(`🔐 OAuth callback detected with token: ${finalStateToken.slice(0,10)}...`);
+    // Returning from OAuth - check localStorage for role (simpler flow)
+    if (wasOAuthCallback && !processing) {
+      const pendingRole = localStorage.getItem('pending_invite_role');
+      const pendingCode = localStorage.getItem('pending_invite_code');
+      
+      addLog(`🔐 OAuth callback detected. Pending role: ${pendingRole}, code: ${pendingCode?.slice(0,5)}...`);
       setProcessing(true);
       
       // Clear session storage
@@ -134,34 +134,34 @@ export default function GatorAuth() {
           return;
         }
         
-        addLog('✅ Auth complete, retrieving state...');
+        addLog('✅ Auth complete, processing role...');
         
         try {
-          addLog(`🔍 Calling retrieveOAuthState with token: ${finalStateToken.slice(0,10)}...`);
+          // Get role from localStorage (set during role selection flow)
+          const role = localStorage.getItem('pending_invite_role');
+          const inviteCode = localStorage.getItem('pending_invite_code');
+          const referralCode = localStorage.getItem('pending_referral_code');
           
-          // Use backend function to retrieve OAuth state (bypasses auth check)
-          const response = await base44.functions.invoke('retrieveOAuthState', { 
-            token: finalStateToken 
-          });
+          addLog(`📋 Role from localStorage: ${role}, code: ${inviteCode?.slice(0,5)}...`);
           
-          addLog(`📦 Response received: ${JSON.stringify(response).slice(0, 100)}...`);
-          
-          const result = response.data || response;
-          
-          addLog(`📋 Parsed result - success: ${result?.success}, role: ${result?.role}`);
-          
-          if (!result || !result.success || !result.role) {
-            addLog(`❌ Invalid state result: ${result?.error || 'No role found'}`);
+          if (!role) {
+            addLog(`❌ No pending role found in localStorage`);
             setErrorDetails({ 
-              type: 'invalid_state', 
-              message: result?.error || 'Invalid state or expired session',
-              result: JSON.stringify(result),
-              token: finalStateToken
+              type: 'no_role', 
+              message: 'No role selected. Please start over.',
             });
             return;
           }
           
-          addLog(`✅ Retrieved state for role: ${result.role}`);
+          // Create result object matching expected format
+          const result = {
+            success: true,
+            role: role,
+            invite_code: inviteCode,
+            referral_code: referralCode
+          };
+          
+          addLog(`✅ Using role: ${result.role}`);
           
           // CRITICAL: Set ALL user data from OAuthState immediately
           // This MUST override any existing persona to handle re-signups correctly
@@ -246,8 +246,11 @@ export default function GatorAuth() {
               return;
             }
             
-            // NOTE: OAuthState is already deleted by retrieveOAuthState backend function
-            addLog('✅ OAuthState already cleaned up by backend');
+            // Clean up localStorage
+            localStorage.removeItem('pending_invite_role');
+            localStorage.removeItem('pending_invite_code');
+            localStorage.removeItem('pending_referral_code');
+            addLog('✅ Cleaned up localStorage');
           } catch (roleError) {
             addLog(`❌ Failed to save user data: ${roleError.message}`);
             
