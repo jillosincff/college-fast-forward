@@ -9,6 +9,7 @@ import { motion, useInView, useAnimation } from 'framer-motion';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import JoinModal from '@/components/invite/JoinModal';
 
 // Transparent logo URL
 const TRANSPARENT_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/bce7b6d4c_Untitleddesign31.png";
@@ -57,6 +58,7 @@ export default function LandingPage() {
     total_users: 700,
     current_tier: 'founding'
   });
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   useEffect(() => {
     const loadFoundingStats = async () => {
@@ -85,12 +87,12 @@ export default function LandingPage() {
 
   const handleStudentAlumniClick = () => {
     trackEvent('cta_student_alumni_clicked');
-    navigate('GatorRoleSelection');
+    setShowJoinModal(true);
   };
 
   const handleParentClick = () => {
     trackEvent('cta_parent_clicked');
-    navigate('GatorRoleSelection');
+    setShowJoinModal(true);
   };
 
   const spotsRemaining = foundingStats.spots_left;
@@ -124,7 +126,7 @@ export default function LandingPage() {
 
   const handleMainCTA = () => {
     trackEvent('cta_main_clicked');
-    navigate('GatorRoleSelection');
+    setShowJoinModal(true);
   };
 
   // Animated stats card component
@@ -877,6 +879,9 @@ export default function LandingPage() {
             </div>
           </div>
         </footer>
+
+        {/* Join Modal */}
+        <JoinModal open={showJoinModal} onOpenChange={setShowJoinModal} />
       </div>
     </>
   );
