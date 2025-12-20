@@ -220,9 +220,9 @@ export default function StudentOnboarding() {
   const handleNext = async () => {
     if (currentStep === 0) {
       if (!validateProfile()) return;
-      // Save profile data immediately
+      // Save profile data immediately - MUST use base44.auth.updateMe for proper session sync
       try {
-        await User.updateMyUserData({
+        await base44.auth.updateMe({
           first_name: formData.first_name.trim(),
           last_name: formData.last_name.trim(),
           full_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
