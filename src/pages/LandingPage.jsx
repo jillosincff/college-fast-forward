@@ -606,29 +606,69 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 6: FINAL CTA */}
-        <section className="py-20 md:py-28" style={{
-          background: 'linear-gradient(135deg, #FA4616 0%, #9333ea 100%)'
-        }}>
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Join {totalFamilies} Gator Families Building Careers Together
-            </h2>
-            <p className="text-xl text-white/90 mb-10">
-              Students get career help. Parents give back. Everyone wins.
-            </p>
-
-            <Button
-              onClick={handleMainCTA}
-              size="lg"
-              className="bg-white text-slate-900 hover:bg-slate-100 px-12 py-6 text-xl font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all"
+        <section className="py-20 md:py-28 relative overflow-hidden">
+          {/* Stadium background */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/c035843a2_IMG_0892.jpg')`
+            }}
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0" style={{
+            background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.9) 0%, rgba(147, 51, 234, 0.9) 100%)'
+          }} />
+          
+          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <motion.h2 
+              className="text-3xl md:text-5xl font-bold text-white mb-6"
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
             >
-              Join as Founding Member — Free Forever
-              <ArrowRight className="w-6 h-6 ml-2" />
-            </Button>
+              Join {totalFamilies} Gator Families Building Careers Together
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-white/90 mb-10"
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              Students get career help. Parents give back. Everyone wins.
+            </motion.p>
 
-            <p className="text-white/80 mt-6 text-sm">
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleMainCTA}
+                  size="lg"
+                  className="bg-white text-slate-900 hover:bg-slate-100 px-12 py-6 text-xl font-bold shadow-2xl cta-pulse transition-all"
+                >
+                  Join as Founding Member — Free Forever
+                  <ArrowRight className="w-6 h-6 ml-2" />
+                </Button>
+              </motion.div>
+            </motion.div>
+
+            <motion.p 
+              className="text-white/80 mt-6 text-sm"
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
               Only {spotsRemaining} founding spots remaining
-            </p>
+            </motion.p>
           </div>
         </section>
 
