@@ -170,6 +170,7 @@ export default function GatorAuth() {
     }
 
     // CASE 0: Authenticated user with pending invite role - AUTO-APPLY ROLE (skip role selection)
+    // This handles alumni, parent, and gator roles from invite codes
     if (user && pendingRole && !user.persona) {
       addLog(`🎯 AUTO-APPLYING invite role: ${pendingRole} for user: ${user.email}`);
 
@@ -177,16 +178,29 @@ export default function GatorAuth() {
       processingRef.current = true;
       setProcessing(true);
 
+      const pendingCode = localStorage.getItem('pending_invite_code');
+
       (async () => {
         try {
           await base44.auth.updateMe({
             persona: pendingRole,
             roles: [pendingRole],
             onboarding_completed: false,
-            is_new_signup: true
+            is_new_signup: true,
+            invite_code_used: pendingCode || 'direct'
           });
 
           addLog('✅ Role auto-applied successfully');
+
+          // Mark the invite code as used (if not already done during verification)
+          if (pendingCode) {
+            try {
+              await base44.functions.invoke('verifyInviteCode', { code: pendingCode });
+            } catch (e) {
+              // Already used or expired - that's fine
+              addLog(`ℹ️ Code already processed: ${e.message}`);
+            }
+          }
 
           // Clean up localStorage
           localStorage.removeItem('pending_invite_role');
@@ -201,6 +215,7 @@ export default function GatorAuth() {
           addLog(`❌ Auto-role set failed: ${err.message}`);
           // Fallback to role selection if something goes wrong
           localStorage.removeItem('pending_invite_role');
+          localStorage.removeItem('pending_invite_code');
           navigate('GatorRoleSelection');
         } finally {
           processingRef.current = false;
