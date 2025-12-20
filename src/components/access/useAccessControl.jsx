@@ -85,176 +85,23 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
     const premiumActivated = isPremiumActive(totalUserCount);
     const isFoundingGator = user.is_founding_gator === true || (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT);
 
-    // Parents always have full access
-    if (user.persona === 'parent') {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: false,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: false,
-        hasLinkedParent: false,
-        premiumActivated,
-        reason: 'parent'
-      };
-    }
-
-    // Admins always have full access
-    if (user.roles?.includes('admin')) {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: false,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: false,
-        hasLinkedParent: false,
-        premiumActivated,
-        reason: 'admin'
-      };
-    }
-
-    // Check if Founding Gator (first 1,000 users)
-    const isFoundingGator = user.is_founding_gator === true || 
-                           (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT);
-
-    if (isFoundingGator) {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: true,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: true,
-        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-        premiumActivated,
-        reason: 'founding_gator'
-      };
-    }
-
-    // Check for lifetime family membership
-    const hasLifetimeMembership = user.subscription_tier === 'lifetime_family' || 
-                                  user.subscription_status === 'lifetime';
-
-    if (hasLifetimeMembership) {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: false,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: true,
-        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-        premiumActivated,
-        reason: 'lifetime_family'
-      };
-    }
-
-    // Check if student has their own premium subscription (self-pay)
-    const hasSelfPaidPremium = user.subscription_status === 'active' && 
-                               user.subscription_type === 'student_self_pay';
-
-    if (hasSelfPaidPremium) {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: false,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: true,
-        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-        premiumActivated,
-        reason: 'student_self_pay'
-      };
-    }
-
-    // Check if linked parent has active subscription
-    const hasLinkedParentFlag = !!user.linked_parent_id || !!user.parent_email;
-    const parentSubscriptionActive = linkedParent?.subscription_status === 'active' ||
-                                    user.linked_parent_subscription_active === true ||
-                                    user.has_active_parent_subscription === true;
-
-    if (parentSubscriptionActive) {
-      return {
-        hasFullAccess: true,
-        isPremium: true,
-        isFoundingGator: false,
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: true,
-        hasLinkedParent: true,
-        premiumActivated,
-        reason: 'parent_subscription'
-      };
-    }
-
-    // FREE TIER - calculate remaining messages for today (resets midnight ET)
-    const currentDayET = getCurrentDayET();
-    const messagesSentToday = user.messages_day_reset === currentDayET 
-      ? (user.messages_sent_today || 0) 
-      : 0;
-    const messagesRemaining = Math.max(0, FREE_DAILY_MESSAGE_LIMIT - messagesSentToday);
-
+    // Everyone gets full access - no limits
     return {
-      hasFullAccess: false,
-      isPremium: false,
-      isFoundingGator: false,
-      isLimitedMode: true,
-      canSendMessages: messagesRemaining > 0,
-      messagesRemaining,
-      messageLimit: FREE_DAILY_MESSAGE_LIMIT,
-      canAccessTalentSpotlight: false,
-      canApplyToOpportunities: true, // Free users can still apply
-      canSaveOpportunities: true, // Free users can save
-      canMessageInDirectory: messagesRemaining > 0,
-      canSeeFullContactInfo: false, // Free users can't see parent email/LinkedIn
-      isFeatured: false,
-      hasLinkedParent: hasLinkedParentFlag,
+      hasFullAccess: true,
+      isPremium: true,
+      isFoundingGator,
+      isLimitedMode: false,
+      canSendMessages: true,
+      messagesRemaining: Infinity,
+      messageLimit: Infinity,
+      canApplyToOpportunities: true,
+      canSaveOpportunities: true,
+      canMessageInDirectory: true,
+      canSeeFullContactInfo: true,
+      isFeatured: isFoundingGator,
+      hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
       premiumActivated,
-      reason: 'free_tier'
+      reason: user.persona === 'parent' ? 'parent' : user.roles?.includes('admin') ? 'admin' : isFoundingGator ? 'founding_gator' : 'full_access'
     };
   }, [user, linkedParent, totalUserCount]);
 }
