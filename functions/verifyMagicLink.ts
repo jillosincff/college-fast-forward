@@ -69,16 +69,16 @@ Deno.serve(async (req) => {
       console.log('📝 New user - will be created during OAuth');
     }
 
-    console.log('✅ User ready:', user.id, 'persona:', user.persona, 'onboarding:', user.onboarding_completed);
+    console.log('✅ Magic link verified for:', email, user ? `(user: ${user.id})` : '(new user)');
 
     return new Response(JSON.stringify({ 
       success: true, 
       email: email,
-      user_id: user.id,
-      full_name: user.full_name,
-      is_new_user: !user.onboarding_completed,
-      persona: user.persona || null,
-      onboarding_completed: user.onboarding_completed || false
+      user_id: user?.id || null,
+      full_name: user?.full_name || null,
+      is_new_user: !user || !user.onboarding_completed,
+      persona: user?.persona || null,
+      onboarding_completed: user?.onboarding_completed || false
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
