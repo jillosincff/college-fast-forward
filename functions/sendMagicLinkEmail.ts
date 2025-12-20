@@ -1,4 +1,3 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 const corsHeaders = {
@@ -22,48 +21,76 @@ Deno.serve(async (req) => {
         }
 
         const emailLower = email.toLowerCase().trim();
+        const base44 = createClientFromRequest(req);
         
-        // Get Supabase credentials from Base44's environment
-        const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://qtrypzzcjebvfcihiynt.supabase.co';
-        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        // Generate token and store in MagicLink entity
+        const token = `ml_${crypto.randomUUID()}`;
+        const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+        console.log(`🔐 Creating magic link for: ${emailLower}`);
         
-        if (!supabaseServiceKey) {
-            console.error('❌ SUPABASE_SERVICE_ROLE_KEY not configured');
-            // Fall back to custom magic link via SendGrid
-            return await sendCustomMagicLink(req, emailLower);
+        await base44.asServiceRole.entities.MagicLink.create({
+            email: emailLower,
+            token,
+            expires_at,
+            used: false
+        });
+
+        const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+        if (!SENDGRID_API_KEY) {
+            throw new Error("Email service not configured.");
         }
         
-        console.log(`🔐 Sending Supabase magic link to: ${emailLower}`);
-        
-        // Initialize Supabase admin client
-        const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-            auth: { autoRefreshToken: false, persistSession: false }
-        });
-        
-        // Get origin for redirect URL
         const originHeader = req.headers.get('origin');
         const forwardedHost = req.headers.get('x-forwarded-host');
         const appOrigin = originHeader || (forwardedHost ? `https://${forwardedHost}` : 'https://collegefastforward.com');
-        const redirectTo = `${appOrigin}/#GatorWelcome`;
         
-        // Use Supabase's built-in magic link - this creates a real session!
-        const { data, error } = await supabase.auth.signInWithOtp({
-            email: emailLower,
-            options: {
-                emailRedirectTo: redirectTo,
-                shouldCreateUser: true,
-            }
+        const magicLink = `${appOrigin}/#MagicLogin?token=${token}`;
+        
+        const emailBody = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px 20px; color: #333; max-width: 600px; margin: auto;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #0021A5; margin: 0;">🐊 College Fast Forward</h1>
+                </div>
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 30px; border: 1px solid #e9ecef;">
+                    <h2 style="color: #333; margin-top: 0;">Sign in to your account</h2>
+                    <p style="color: #666; line-height: 1.6;">Click the button below to securely sign in. This link expires in 15 minutes.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${magicLink}" style="display: inline-block; background: linear-gradient(135deg, #FA4616 0%, #e03d12 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                            Sign In Securely
+                        </a>
+                    </div>
+                    <p style="color: #999; font-size: 13px; margin-bottom: 0;">If you didn't request this email, you can safely ignore it.</p>
+                </div>
+                <p style="text-align: center; color: #999; font-size: 12px; margin-top: 30px;">
+                    Go Gators! 🐊
+                </p>
+            </div>
+        `;
+        
+        const sendgridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${SENDGRID_API_KEY}`, 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+                personalizations: [{ to: [{ email: emailLower }] }],
+                from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
+                subject: '🐊 Your Sign-In Link for College Fast Forward',
+                content: [{ type: 'text/html', value: emailBody }],
+            }),
         });
         
-        if (error) {
-            console.error('❌ Supabase magic link error:', error);
-            // Fall back to custom magic link
-            return await sendCustomMagicLink(req, emailLower);
+        if (!sendgridResponse.ok) {
+            const errorText = await sendgridResponse.text();
+            console.error('❌ SendGrid error:', sendgridResponse.status, errorText);
+            throw new Error(`Email delivery failed (${sendgridResponse.status})`);
         }
+
+        console.log('✅ Magic link email sent successfully');
         
-        console.log('✅ Supabase magic link sent successfully');
-        
-        return new Response(JSON.stringify({ success: true, method: 'supabase' }), { 
+        return new Response(JSON.stringify({ success: true }), { 
             status: 200, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         });
@@ -75,76 +102,3 @@ Deno.serve(async (req) => {
         });
     }
 });
-
-// Fallback: Custom magic link via SendGrid (requires additional verification step)
-async function sendCustomMagicLink(req, emailLower) {
-    const base44 = createClientFromRequest(req);
-    
-    // Generate token and store in MagicLink entity
-    const token = `ml_${crypto.randomUUID()}`;
-    const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
-    console.log(`🔐 Creating custom magic link for: ${emailLower}`);
-    
-    await base44.asServiceRole.entities.MagicLink.create({
-        email: emailLower,
-        token,
-        expires_at,
-        used: false
-    });
-
-    const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-    if (!SENDGRID_API_KEY) {
-        throw new Error("Email service not configured.");
-    }
-    
-    const originHeader = req.headers.get('origin');
-    const forwardedHost = req.headers.get('x-forwarded-host');
-    const appOrigin = originHeader || (forwardedHost ? `https://${forwardedHost}` : 'https://collegefastforward.com');
-    
-    const magicLink = `${appOrigin}/#MagicLogin?token=${token}`;
-    
-    const emailBody = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px 20px; color: #333; max-width: 600px; margin: auto;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0021A5; margin: 0;">🐊 College Fast Forward</h1>
-            </div>
-            <div style="background: #f8f9fa; border-radius: 12px; padding: 30px; border: 1px solid #e9ecef;">
-                <h2 style="color: #333; margin-top: 0;">Sign in to your account</h2>
-                <p style="color: #666; line-height: 1.6;">Click the button below to securely sign in. This link expires in 15 minutes.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="${magicLink}" style="display: inline-block; background: linear-gradient(135deg, #FA4616 0%, #e03d12 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                        Sign In Securely
-                    </a>
-                </div>
-                <p style="color: #999; font-size: 13px; margin-bottom: 0;">If you didn't request this email, you can safely ignore it.</p>
-            </div>
-            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 30px;">
-                Go Gators! 🐊
-            </p>
-        </div>
-    `;
-    
-    const sendgridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: { 
-            'Authorization': `Bearer ${SENDGRID_API_KEY}`, 
-            'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-            personalizations: [{ to: [{ email: emailLower }] }],
-            from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
-            subject: '🐊 Your Sign-In Link for College Fast Forward',
-            content: [{ type: 'text/html', value: emailBody }],
-        }),
-    });
-    
-    if (!sendgridResponse.ok) {
-        throw new Error(`Email delivery failed (${sendgridResponse.status})`);
-    }
-
-    return new Response(JSON.stringify({ success: true, method: 'custom' }), { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    });
-}
