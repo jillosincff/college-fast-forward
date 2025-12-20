@@ -11,7 +11,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
 // Transparent logo URL
-const TRANSPARENT_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/f850251da_UFFastForwardontransparent.jpg";
+const TRANSPARENT_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/bce7b6d4c_Untitleddesign31.png";
 
 // Animated counter hook
 function useCountUp(end, duration = 2000, startOnView = true) {
