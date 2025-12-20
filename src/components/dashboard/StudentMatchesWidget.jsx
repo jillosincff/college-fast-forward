@@ -197,10 +197,14 @@ export default function StudentMatchesWidget({ user }) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showBroaderMatches, setShowBroaderMatches] = useState(false);
+  const [isRefreshingMatches, setIsRefreshingMatches] = useState(false);
+  const [refreshResult, setRefreshResult] = useState(null);
+  const [helpRequests, setHelpRequests] = useState([]);
 
   useEffect(() => {
     if (user?.id) {
       loadMatches();
+      loadHelpRequests();
     }
   }, [user?.id]);
 
@@ -223,6 +227,73 @@ export default function StudentMatchesWidget({ user }) {
       setMatches([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadHelpRequests = async () => {
+    try {
+      const requests = await base44.entities.HelpRequest.filter(
+        { student_id: user.id, status: 'active' },
+        '-created_date',
+        10
+      );
+      setHelpRequests(requests || []);
+    } catch (error) {
+      console.error('Failed to load help requests:', error);
+      setHelpRequests([]);
+    }
+  };
+
+  const handleFindNewMatches = async () => {
+    if (helpRequests.length === 0) return;
+    
+    setIsRefreshingMatches(true);
+    setRefreshResult(null);
+
+    try {
+      let totalNewMatches = 0;
+      let parentMatches = 0;
+      let peerMatches = 0;
+
+      // Re-run matching for each active help request
+      for (const request of helpRequests) {
+        const { data: result } = await base44.functions.invoke('generateMatches', {
+          help_request_id: request.id,
+          mode: 'for_request'
+        });
+
+        if (result?.matches_created) {
+          totalNewMatches += result.matches_created;
+          parentMatches += result.parent_matches || 0;
+          peerMatches += result.peer_matches || 0;
+        }
+      }
+
+      // Reload matches
+      await loadMatches();
+
+      // Get total count
+      const totalMatches = matches.length + totalNewMatches;
+
+      setRefreshResult({
+        newMatches: totalNewMatches,
+        totalMatches: totalMatches,
+        breakdown: { parents: parentMatches, peers: peerMatches }
+      });
+
+      // Auto-hide after 8 seconds
+      setTimeout(() => setRefreshResult(null), 8000);
+
+    } catch (error) {
+      console.error('Error refreshing matches:', error);
+      setRefreshResult({
+        newMatches: 0,
+        totalMatches: matches.length,
+        breakdown: { parents: 0, peers: 0 },
+        error: true
+      });
+    } finally {
+      setIsRefreshingMatches(false);
     }
   };
 
@@ -362,6 +433,7 @@ export default function StudentMatchesWidget({ user }) {
               </Button>
               <p className="text-sm text-slate-500 mt-3">
                 You can create additional requests anytime to get more help.
+                <strong className="block mt-1">New members join daily, so you can re-run matching anytime!</strong>
               </p>
             </div>
           </CardContent>
@@ -379,7 +451,7 @@ export default function StudentMatchesWidget({ user }) {
         <Card className="border-2 border-purple-200 shadow-xl bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden">
           <CardContent className="pt-6 pb-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
                   <Sparkles className="w-6 h-6 text-white" />
@@ -389,14 +461,79 @@ export default function StudentMatchesWidget({ user }) {
                     Your Matches & Collaboration Opportunities
                   </h3>
                   <p className="text-sm text-slate-600">
-                    Connect with parents, alumni, and fellow Gators
+                    New parents & students join daily – refresh to find fresh connections
                   </p>
                 </div>
               </div>
-              <Badge className="bg-purple-100 text-purple-700 border-purple-200">
-                {matches.length} total
-              </Badge>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFindNewMatches}
+                  disabled={isRefreshingMatches || helpRequests.length === 0}
+                  className="border-2 border-[#FA4616] text-[#FA4616] hover:bg-orange-50 font-semibold"
+                >
+                  {isRefreshingMatches ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Finding...
+                    </>
+                  ) : (
+                    <>
+                      🔄 Find New Matches
+                    </>
+                  )}
+                </Button>
+                <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                  {matches.length} total
+                </Badge>
+              </div>
             </div>
+
+            {/* Refresh Results Banner */}
+            {refreshResult && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={`flex items-center gap-4 p-4 mb-6 rounded-xl border-l-4 ${
+                  refreshResult.newMatches > 0 
+                    ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-400'
+                    : 'bg-blue-50 border-blue-400'
+                }`}
+              >
+                <div className="text-3xl flex-shrink-0">
+                  {refreshResult.newMatches > 0 ? '✨' : 'ℹ️'}
+                </div>
+                <div className="flex-1">
+                  {refreshResult.newMatches > 0 ? (
+                    <>
+                      <p className="font-bold text-amber-900">
+                        Found {refreshResult.newMatches} new match{refreshResult.newMatches !== 1 ? 'es' : ''}!
+                      </p>
+                      <p className="text-sm text-amber-800">
+                        {refreshResult.breakdown.parents > 0 && `${refreshResult.breakdown.parents} parent${refreshResult.breakdown.parents !== 1 ? 's' : ''}`}
+                        {refreshResult.breakdown.parents > 0 && refreshResult.breakdown.peers > 0 && ' and '}
+                        {refreshResult.breakdown.peers > 0 && `${refreshResult.breakdown.peers} peer${refreshResult.breakdown.peers !== 1 ? 's' : ''}`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-bold text-blue-900">No new matches found</p>
+                      <p className="text-sm text-blue-800">
+                        You already have all current matches. Check back tomorrow as new members join!
+                      </p>
+                    </>
+                  )}
+                </div>
+                <button
+                  onClick={() => setRefreshResult(null)}
+                  className="w-7 h-7 rounded-full bg-white/80 hover:bg-white flex items-center justify-center text-slate-500 hover:text-slate-700 transition-all"
+                >
+                  ×
+                </button>
+              </motion.div>
+            )}
 
             {/* SECTION 1: Parents & Alumni */}
             {parentMatches.length > 0 && (
