@@ -211,14 +211,21 @@ export default function StudentOnboarding() {
       console.log('✅ HelpRequest created:', helpRequest.id);
 
       // Update user profile
-      await base44.auth.updateMe({
+      const userUpdate = {
         onboarding_completed: true,
         profile_completion_score: 85,
         is_new_signup: false,
         major: formData.major.trim(),
         year: formData.year,
         currently_seeking: formData.description?.trim() || null
-      });
+      };
+      
+      // Add referral code if provided
+      if (formData.referral_code?.trim()) {
+        userUpdate.referral_code = formData.referral_code.trim();
+      }
+      
+      await base44.auth.updateMe(userUpdate);
 
       // Generate matches (fire and forget, but wait a bit for UX)
       let matchCount = 0;
