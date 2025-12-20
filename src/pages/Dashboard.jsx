@@ -15,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
 import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
+import PricingTierBadge from '@/components/pricing/PricingTierBadge';
 
 import StudentMatchesWidget from '@/components/dashboard/StudentMatchesWidget';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
@@ -241,9 +242,11 @@ export default function Dashboard() {
                 <p className="text-white/90 text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {localStorage.getItem('cff:seenDashboard') ? 'Welcome back,' : 'Welcome,'}
                 </p>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <p className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {user.first_name || user.full_name?.split(' ')[0] || 'Gator'}! 🎓
                 </p>
+                {/* Pricing Tier Badge */}
+                <PricingTierBadge user={user} size="default" />
               </div>
             )}
 
