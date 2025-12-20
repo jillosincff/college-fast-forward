@@ -19,7 +19,7 @@ import { base44 } from '@/api/base44Client';
 import ResumeUpload from '@/components/profile/ResumeUpload';
 import ShareableProfile from '@/components/profile/ShareableProfile';
 import ExpertiseTagSelector from '@/components/profile/ExpertiseTagSelector';
-import PeerCollaborationSettings from '@/components/settings/PeerCollaborationSettings';
+
 
 import {
   ArrowLeft,
@@ -509,9 +509,6 @@ export default function ProfileEdit() {
 
 
 
-          {/* Peer Collaboration Settings - Students Only */}
-          <PeerCollaborationSettings user={user} />
-
           {/* Directory Settings */}
           <Card>
             <CardHeader>
@@ -534,33 +531,6 @@ export default function ProfileEdit() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Talent Spotlight Banner - Students Only */}
-          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">
-                      🌟 Join the Talent Spotlight
-                    </h3>
-                    <p className="text-slate-700 mb-4">
-                      Get discovered by UF parents, alumni, and recruiters. Showcase your skills, 
-                      projects, and career goals to stand out from the crowd!
-                    </p>
-                    <Button
-                      onClick={() => navigate('TalentSpotlight')}
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                    >
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Learn More
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
           {/* Save Button */}
           <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 border">
