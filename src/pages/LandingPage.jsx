@@ -120,10 +120,55 @@ export default function LandingPage() {
       <div className="min-h-screen bg-white">
         
         {/* SECTION 1: HERO */}
-        <section className="relative overflow-hidden" style={{
-          background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
+        <section className="relative overflow-hidden hero-animated-bg" style={{
           minHeight: '100vh'
         }}>
+          <style>{`
+            @keyframes gradientShift {
+              0%, 100% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+            }
+            .hero-animated-bg {
+              background: linear-gradient(-45deg, #001540, #0021A5, #002157, #001a4d);
+              background-size: 400% 400%;
+              animation: gradientShift 15s ease infinite;
+            }
+            @keyframes pulseGlow {
+              0%, 100% { box-shadow: 0 0 20px rgba(250, 70, 22, 0.4), 0 0 40px rgba(250, 70, 22, 0.2); }
+              50% { box-shadow: 0 0 30px rgba(250, 70, 22, 0.6), 0 0 60px rgba(250, 70, 22, 0.3); }
+            }
+            .urgency-box-glow {
+              animation: pulseGlow 2s ease-in-out infinite;
+            }
+            @keyframes borderGlow {
+              0%, 100% { box-shadow: 0 0 10px rgba(250, 200, 50, 0.5), inset 0 0 10px rgba(250, 200, 50, 0.1); }
+              50% { box-shadow: 0 0 25px rgba(250, 200, 50, 0.8), inset 0 0 15px rgba(250, 200, 50, 0.2); }
+            }
+            .founding-card-glow {
+              animation: borderGlow 2s ease-in-out infinite;
+            }
+            @keyframes pulseBadge {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.05); }
+            }
+            .pulse-badge {
+              animation: pulseBadge 1.5s ease-in-out infinite;
+            }
+            @keyframes ctaPulse {
+              0%, 100% { box-shadow: 0 10px 40px rgba(255,255,255,0.3); }
+              50% { box-shadow: 0 15px 60px rgba(255,255,255,0.5); }
+            }
+            .cta-pulse {
+              animation: ctaPulse 2s ease-in-out infinite;
+            }
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-8px); }
+            }
+            .bounce-subtle {
+              animation: bounce 3s ease-in-out infinite;
+            }
+          `}</style>
           {/* Texture overlay */}
           <div className="absolute inset-0 opacity-5" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
