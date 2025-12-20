@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
-import { Users, Briefcase, MessageSquare, ArrowRight, Sparkles, Loader2, Building2, Clock, GraduationCap, Handshake, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Briefcase, MessageSquare, ArrowRight, Sparkles, Loader2, Building2, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
