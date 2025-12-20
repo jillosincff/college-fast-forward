@@ -413,9 +413,10 @@ export default function GatorAuth() {
     );
   }
 
-  // Handle Google sign in
+  // Handle Google sign in - use root URL as callback (Base44 handles token processing)
   const handleGoogleSignIn = () => {
-    const callbackUrl = window.location.origin + '/#GatorAuth';
+    // Use clean root URL - Base44 will add is_new_user param on callback
+    const callbackUrl = window.location.origin;
     base44.auth.redirectToLogin(callbackUrl);
   };
 
