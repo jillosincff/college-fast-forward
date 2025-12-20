@@ -91,25 +91,26 @@ export default function GatorAuth() {
       // Clear session storage
       sessionStorage.removeItem('oauth_callback_detected');
       
-      // Wait longer for SDK initialization and auth processing
+      // Wait for SDK initialization and auth processing
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const waitTime = isMobile ? 20000 : 10000; // Increased: 20s mobile, 10s desktop
+      const waitTime = isMobile ? 5000 : 2000; // Reduced wait times
       
       console.log(`⏱️ [GatorAuth] Waiting ${waitTime}ms for SDK (mobile: ${isMobile})`);
       
       setTimeout(async () => {
         addLog('✅ SDK initialized, waiting for authentication...');
         
-        // Poll for authentication with longer timeout
+        // Poll for authentication
         const authStartTime = Date.now();
-        const maxAuthWait = 30000; // Increased to 30 seconds
+        const maxAuthWait = 15000; // 15 seconds max
         let authenticated = false;
         let attempts = 0;
+        let currentUser = null;
         
         while (Date.now() - authStartTime < maxAuthWait) {
           attempts++;
           try {
-            const currentUser = await base44.auth.me();
+            currentUser = await base44.auth.me();
             if (currentUser?.email) {
               addLog(`✅ User authenticated after ${attempts} attempts: ${currentUser.email}`);
               authenticated = true;
@@ -118,17 +119,17 @@ export default function GatorAuth() {
           } catch (e) {
             const elapsed = Date.now() - authStartTime;
             if (attempts % 5 === 0) {
-              addLog(`⏳ Attempt ${attempts}, waiting... ${Math.round(elapsed/1000)}s / 30s`);
+              addLog(`⏳ Attempt ${attempts}, waiting... ${Math.round(elapsed/1000)}s / 15s`);
             }
           }
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Check every 1 second
+          await new Promise(resolve => setTimeout(resolve, 500)); // Check every 0.5 second
         }
         
         if (!authenticated) {
-          addLog('❌ Auth timeout after 30s');
+          addLog('❌ Auth timeout after 15s');
           setErrorDetails({ 
             type: 'auth_timeout', 
-            message: 'Authentication timed out after 30 seconds',
+            message: 'Authentication timed out. Please try again.',
             attempts 
           });
           return;
@@ -138,18 +139,31 @@ export default function GatorAuth() {
         
         try {
           // Get role from localStorage (set during role selection flow)
-          const role = localStorage.getItem('pending_invite_role');
-          const inviteCode = localStorage.getItem('pending_invite_code');
+          const role = pendingRole;
+          const inviteCode = pendingCode;
           const referralCode = localStorage.getItem('pending_referral_code');
           
           addLog(`📋 Role from localStorage: ${role}, code: ${inviteCode?.slice(0,5)}...`);
           
+          // If no pending role but user already has persona, they're returning users
+          if (!role && currentUser.persona && currentUser.onboarding_completed) {
+            addLog(`✅ Returning user with persona: ${currentUser.persona}`);
+            const destination = currentUser.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+            window.location.href = `${window.location.origin}/#${destination}`;
+            return;
+          }
+          
+          // If no pending role but user has persona (incomplete onboarding)
+          if (!role && currentUser.persona) {
+            addLog(`✅ User has persona ${currentUser.persona}, resuming onboarding`);
+            window.location.href = `${window.location.origin}/#GatorWelcome`;
+            return;
+          }
+          
+          // No role anywhere - send to role selection
           if (!role) {
-            addLog(`❌ No pending role found in localStorage`);
-            setErrorDetails({ 
-              type: 'no_role', 
-              message: 'No role selected. Please start over.',
-            });
+            addLog(`⚠️ No pending role, sending to role selection`);
+            window.location.href = `${window.location.origin}/#GatorRoleSelection`;
             return;
           }
           
