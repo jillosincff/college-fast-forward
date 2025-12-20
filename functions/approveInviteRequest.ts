@@ -101,8 +101,14 @@ Deno.serve(async (req) => {
                         <p style="color: white; font-size: 32px; font-weight: bold; letter-spacing: 3px; margin: 0; font-family: monospace;">${code}</p>
                     </div>
                     
+                    <p style="color: #334155; font-size: 14px; margin-bottom: 20px;">
+                        You're joining as: <strong style="color: ${assignedRole === 'alumni' ? '#0021A5' : '#FA4616'};">
+                            ${assignedRole === 'alumni' ? '🎓 UF Alumni' : '👨‍👩‍👧 UF Parent'}
+                        </strong>
+                    </p>
+                    
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="https://www.collegefastforward.com/#GatorInviteCode?code=${code}" 
+                        <a href="https://www.collegefastforward.com" 
                            style="background: #FA4616; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                             Join the Network →
                         </a>
