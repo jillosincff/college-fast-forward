@@ -157,8 +157,17 @@ export default function GatorAuth() {
       return;
     }
 
+    // CASE 0: is_new_user param detected with existing user - route immediately
+    if (isNewUser && user) {
+      addLog('🎯 is_new_user param detected with authenticated user - routing to role selection');
+      // Clean up URL params
+      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+      navigate('GatorRoleSelection');
+      return;
+    }
+
     // CASE 1: No auth at all - show login options instead of auto-redirect
-    if (!user && !hasAccessToken && !wasOAuthCallback && !isFreshOAuthCallback) {
+    if (!user && !hasAccessToken && !wasOAuthCallback && !isFreshOAuthCallback && !isNewUser) {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
