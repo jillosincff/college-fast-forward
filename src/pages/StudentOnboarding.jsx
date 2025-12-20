@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { LogOut, Check, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { LogOut, Check, AlertCircle, ArrowLeft, Loader2, Upload, FileText, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Match } from '@/entities/Match';
@@ -76,7 +76,9 @@ export default function StudentOnboarding() {
     major: '',
     timeline: 'one_to_three_months',
     description: '',
-    referral_code: ''
+    referral_code: '',
+    resume_url: '',
+    resume_name: ''
   });
 
   // Validate @ufl.edu email
@@ -239,6 +241,11 @@ export default function StudentOnboarding() {
       // Add referral code if provided
       if (formData.referral_code?.trim()) {
         userUpdate.referral_code = formData.referral_code.trim();
+      }
+      
+      // Add resume URL if provided
+      if (formData.resume_url) {
+        userUpdate.resume_url = formData.resume_url;
       }
       
       await base44.auth.updateMe(userUpdate);
@@ -655,21 +662,86 @@ export default function StudentOnboarding() {
                     </div>
                   </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Describe what you're looking for <span className="font-normal text-slate-500">(optional)</span>
-                    </label>
+                  {/* Description - Emphasized */}
+                  <div className="bg-gradient-to-r from-blue-50 to-orange-50 border-2 border-[#0021A5] rounded-xl p-5">
+                    <div className="flex items-start gap-2 mb-3">
+                      <span className="text-xl">📝</span>
+                      <div>
+                        <label className="block text-base font-bold text-slate-800">
+                          Your Public Help Request
+                        </label>
+                        <p className="text-sm text-slate-600">This is what parents & alumni will see when deciding to help you</p>
+                      </div>
+                    </div>
                     <Textarea
                       value={formData.description}
                       onChange={(e) => updateField('description', e.target.value.slice(0, 500))}
-                      placeholder="E.g., Looking for help preparing for consulting interviews and getting resume feedback for MBB firms."
-                      rows={4}
+                      placeholder="E.g., I'm a junior Finance major looking for help preparing for investment banking interviews. Ideally looking for someone in wealth management or private equity who can help me understand the industry and review my resume."
+                      rows={5}
+                      className="border-2 border-slate-300 focus:border-[#FA4616] bg-white"
                     />
-                    <div className="flex justify-between mt-1">
-                      <p className="text-xs text-slate-500">This helps parents understand your specific needs</p>
-                      <p className="text-xs text-slate-400">{formData.description?.length || 0}/500</p>
+                    <div className="flex justify-between mt-2">
+                      <p className="text-xs text-[#0021A5] font-medium">💡 Tip: Be specific! Mention roles, companies, or industries you're targeting.</p>
+                      <p className="text-xs text-slate-500">{formData.description?.length || 0}/500</p>
                     </div>
+                  </div>
+
+                  {/* Resume Upload */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Upload Your Resume <span className="font-normal text-slate-500">(optional but recommended)</span>
+                    </label>
+                    {formData.resume_url ? (
+                      <div className="flex items-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                        <FileText className="w-8 h-8 text-green-600" />
+                        <div className="flex-1">
+                          <p className="font-medium text-green-800">{formData.resume_name || 'Resume uploaded'}</p>
+                          <p className="text-xs text-green-600">Ready to share with parents</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            updateField('resume_url', '');
+                            updateField('resume_name', '');
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-[#FA4616] transition-all">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                          <p className="text-sm text-slate-600"><span className="font-semibold text-[#FA4616]">Click to upload</span> or drag and drop</p>
+                          <p className="text-xs text-slate-500">PDF, DOC, or DOCX (max 5MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (file.size > 5 * 1024 * 1024) {
+                              alert('File too large. Maximum size is 5MB.');
+                              return;
+                            }
+                            try {
+                              const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                              updateField('resume_url', file_url);
+                              updateField('resume_name', file.name);
+                            } catch (err) {
+                              console.error('Upload failed:', err);
+                              alert('Failed to upload resume. Please try again.');
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                    <p className="text-xs text-slate-500 mt-2">Parents can review your resume and provide feedback</p>
                   </div>
 
                   {/* Referral Code */}
