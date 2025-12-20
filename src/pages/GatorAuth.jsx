@@ -177,18 +177,20 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 2: Fresh OAuth callback (access_token in URL) - mark it and start polling
+    // CASE 2: Fresh OAuth callback (access_token in URL or is_new_user param) - mark it and start polling
     if (isFreshOAuthCallback) {
-      addLog('🔐 Fresh OAuth callback detected with access_token in URL');
+      addLog(`🔐 Fresh OAuth callback detected (isNewUser=${isNewUser}, hasToken=${hasAccessToken})`);
       sessionStorage.setItem('oauth_callback_detected', 'true');
       
       // CRITICAL: Extract token and try to set it manually before cleaning URL
       let extractedToken = null;
       try {
-        // Try to extract access_token from hash
+        // Try to extract access_token from hash or URL params
         const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
-        if (tokenMatch) {
-          extractedToken = tokenMatch[1];
+        const urlToken = urlParams.get('access_token');
+        extractedToken = tokenMatch?.[1] || urlToken;
+        
+        if (extractedToken) {
           addLog(`🔑 Extracted token: ${extractedToken.substring(0, 20)}...`);
           
           // Try to set the session manually via SDK if available (sync methods only here)
@@ -198,17 +200,17 @@ export default function GatorAuth() {
           } else {
             addLog('⚠️ No SDK method to set token manually');
           }
+        } else {
+          addLog('📋 No token in URL (may be handled by SDK automatically)');
         }
       } catch (tokenErr) {
         addLog(`⚠️ Token extraction/setting error: ${tokenErr.message}`);
       }
       
-      // Clean URL - remove tokens from hash for security
+      // Clean URL - remove tokens and params for security
       const cleanHash = '#GatorAuth';
-      if (window.location.hash !== cleanHash) {
-        window.history.replaceState(null, '', window.location.origin + cleanHash);
-        addLog('🧹 Cleaned URL, starting session polling...');
-      }
+      window.history.replaceState(null, '', window.location.origin + cleanHash);
+      addLog('🧹 Cleaned URL, starting session polling...');
       
       // Fall through to polling logic below
     }
