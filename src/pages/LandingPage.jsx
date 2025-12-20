@@ -239,22 +239,26 @@ export default function LandingPage() {
               transition={{ delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
             >
-              <Button
-                onClick={handleStudentClick}
-                size="lg"
-                className="bg-white text-[#0021A5] hover:bg-slate-100 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-              >
-                I'm a Student — Get Career Help
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button
-                onClick={handleParentClick}
-                size="lg"
-                className="bg-[#FA4616] text-white hover:bg-orange-600 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-              >
-                I'm a Parent/Alumni — Help Students
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleStudentClick}
+                  size="lg"
+                  className="bg-white text-[#0021A5] hover:bg-slate-100 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                >
+                  I'm a Student — Get Career Help
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleParentClick}
+                  size="lg"
+                  className="bg-[#FA4616] text-white hover:bg-orange-600 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                >
+                  I'm a Parent/Alumni — Help Students
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </motion.div>
             </motion.div>
 
             {/* Social Proof */}
