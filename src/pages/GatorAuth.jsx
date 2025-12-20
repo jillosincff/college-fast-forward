@@ -151,8 +151,13 @@ export default function GatorAuth() {
       return;
     }
 
+    // Check if this is a magic link callback (already verified)
+    const magicLinkVerified = sessionStorage.getItem('magic_link_verified') === 'true';
+    const magicLinkEmail = sessionStorage.getItem('magic_link_email');
+    
     // CASE 1: No auth at all - show login options instead of auto-redirect
-    if (!user && !hasAccessToken && !wasOAuthCallback) {
+    // Exception: if magic link was verified, we need to complete the OAuth flow
+    if (!user && !hasAccessToken && !wasOAuthCallback && !magicLinkVerified) {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
@@ -160,6 +165,13 @@ export default function GatorAuth() {
         setShowLoginOptions(true);
       }
       return;
+    }
+    
+    // Clear magic link session markers once we're past initial check
+    if (magicLinkVerified) {
+      addLog(`📧 Magic link login for: ${magicLinkEmail}`);
+      sessionStorage.removeItem('magic_link_verified');
+      sessionStorage.removeItem('magic_link_email');
     }
 
     // CASE 2: OAuth callback - poll for session with timeout
