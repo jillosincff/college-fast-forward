@@ -5,7 +5,6 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Mail, Loader2, ArrowLeft } from 'lucide-react';
-import { sendMagicLinkEmail } from '@/functions/sendMagicLinkEmail';
 
 /**
  * Centralized routing logic - single source of truth
