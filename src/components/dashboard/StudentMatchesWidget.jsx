@@ -373,7 +373,7 @@ export default function StudentMatchesWidget({ user }) {
   }
 
   if (matches.length === 0) {
-    // Show educational fallback UI
+    // Show educational fallback UI with visual differentiation
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -391,18 +391,33 @@ export default function StudentMatchesWidget({ user }) {
               </p>
             </div>
 
-            {/* Match types grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="rounded-xl p-5 border-2 border-orange-200 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-[#FA4616] bg-gradient-to-br from-orange-50 to-white">
-                <div className="text-5xl mb-3">💼</div>
-                <h3 className="font-bold text-slate-900 mb-2">Parents & Alumni</h3>
+            {/* Match types grid - visually differentiated */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
+              {/* Parents & Alumni - Warm orange theme */}
+              <div 
+                className="rounded-xl p-6 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-xl"
+                style={{
+                  background: 'linear-gradient(135deg, #FEF3E8 0%, #FFFFFF 100%)',
+                  border: '2px solid #FDBA74'
+                }}
+              >
+                <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>💼</div>
+                <h3 className="font-bold text-slate-900 mb-2 text-lg">Parents & Alumni</h3>
                 <p className="text-sm text-slate-600">
                   Industry pros with hiring connections and career expertise
                 </p>
               </div>
-              <div className="rounded-xl p-5 border-2 border-teal-200 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-teal-500 bg-gradient-to-br from-teal-50 to-white">
-                <div className="text-5xl mb-3">🤝</div>
-                <h3 className="font-bold text-slate-900 mb-2">Fellow Gators</h3>
+              
+              {/* Fellow Gators - Cool teal theme */}
+              <div 
+                className="rounded-xl p-6 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-xl"
+                style={{
+                  background: 'linear-gradient(135deg, #E6FFFA 0%, #FFFFFF 100%)',
+                  border: '2px solid #5EEAD4'
+                }}
+              >
+                <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>🤝</div>
+                <h3 className="font-bold text-slate-900 mb-2 text-lg">Fellow Gators</h3>
                 <p className="text-sm text-slate-600">
                   Students with similar backgrounds to collaborate with
                 </p>
