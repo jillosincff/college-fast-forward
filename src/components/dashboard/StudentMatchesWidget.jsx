@@ -432,51 +432,87 @@ export default function StudentMatchesWidget({ user }) {
 
             {/* CTA Section */}
             <div className="text-center">
-              <Button
-                onClick={handleFindNewMatches}
-                disabled={isRefreshingMatches || helpRequests.length === 0}
-                className="text-white px-10 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
-                style={{ 
-                  background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
-                  borderRadius: '14px',
-                  fontSize: '1.125rem'
-                }}
-              >
-                {isRefreshingMatches ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Finding Your Matches...
-                  </>
-                ) : (
-                  <>🔍 Find My Matches</>
-                )}
-              </Button>
-              
               {helpRequests.length > 0 ? (
-                <p className="text-sm text-slate-600 mt-4 font-medium">
-                  ✅ You have {helpRequests.length} active help request{helpRequests.length !== 1 ? 's' : ''} ready to match
-                </p>
+                <>
+                  {/* Main instruction */}
+                  <p className="text-lg text-slate-700 mb-4 font-medium">
+                    👇 Click below to discover people who match your career interests
+                  </p>
+                  
+                  <Button
+                    onClick={handleFindNewMatches}
+                    disabled={isRefreshingMatches}
+                    className="text-white px-10 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
+                      borderRadius: '14px',
+                      fontSize: '1.125rem'
+                    }}
+                  >
+                    {isRefreshingMatches ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Finding Your Matches...
+                      </>
+                    ) : (
+                      <>🔍 Find My Matches</>
+                    )}
+                  </Button>
+                  
+                  <p className="text-sm text-green-600 mt-4 font-medium">
+                    ✅ Your profile is ready! Click above to see who can help you.
+                  </p>
+                </>
               ) : (
-                <p className="text-sm text-amber-600 mt-4 font-medium">
-                  ⚠️ No active help requests found. Complete onboarding to create one.
-                </p>
+                <>
+                  {/* No help request state - more helpful */}
+                  <div 
+                    style={{
+                      padding: '20px 24px',
+                      background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                      border: '2px solid #F59E0B',
+                      borderRadius: '12px',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    <p style={{ fontSize: '1rem', color: '#92400e', margin: 0, fontWeight: '600' }}>
+                      ⚠️ Almost there! You need to complete your profile first.
+                    </p>
+                    <p style={{ fontSize: '0.875rem', color: '#a16207', marginTop: '8px', marginBottom: '0' }}>
+                      Tell us what kind of help you're looking for so we can find the right matches.
+                    </p>
+                  </div>
+                  
+                  <Button
+                    onClick={() => navigate('StudentOnboarding')}
+                    className="text-white px-8 py-5 text-base font-bold shadow-lg"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #0021A5 0%, #1e40af 100%)',
+                      borderRadius: '12px'
+                    }}
+                  >
+                    Complete My Profile →
+                  </Button>
+                </>
               )}
               
-              {/* Tip box */}
-              <div 
-                style={{
-                  marginTop: '20px',
-                  display: 'inline-block',
-                  padding: '14px 24px',
-                  background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-                  border: '2px solid #60A5FA',
-                  borderRadius: '12px'
-                }}
-              >
-                <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
-                  💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
-                </p>
-              </div>
+              {/* Tip box - only show when they have requests */}
+              {helpRequests.length > 0 && (
+                <div 
+                  style={{
+                    marginTop: '20px',
+                    display: 'inline-block',
+                    padding: '14px 24px',
+                    background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+                    border: '2px solid #60A5FA',
+                    borderRadius: '12px'
+                  }}
+                >
+                  <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
+                    💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
