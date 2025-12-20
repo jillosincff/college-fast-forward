@@ -86,6 +86,7 @@ export default function GatorAuth() {
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkStatus, setMagicLinkStatus] = useState('input'); // input, loading, sent, error
   const [magicLinkMessage, setMagicLinkMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent double submission
   
   // Prevent double execution
   const processingRef = useRef(false);
