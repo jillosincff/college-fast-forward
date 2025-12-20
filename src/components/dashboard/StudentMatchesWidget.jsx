@@ -385,153 +385,269 @@ export default function StudentMatchesWidget({ user }) {
     );
   }
 
-  // EMPTY STATE - No matches yet
+  // EMPTY STATE - No matches yet - Modern dark theme design
   if (matches.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
       >
-        <Card className="border-2 border-[#FA4616]/20 shadow-lg overflow-hidden" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 50%, #F0F9FF 100%)' }}>
-          <CardContent className="pt-8 pb-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🤝</div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                Your Gator Network Matches
-              </h2>
-              <p className="text-slate-600">
-                We'll connect you with parents, alumni, and peers who can help:
+        <Card 
+          className="overflow-hidden border-0 shadow-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #0f172a 100%)',
+          }}
+        >
+          <CardContent className="p-0">
+            
+            {/* Hero Section with Gradient Overlay */}
+            <div 
+              className="relative px-6 py-12 md:px-12 md:py-16"
+              style={{
+                background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.1) 0%, rgba(251, 146, 60, 0.05) 100%)',
+              }}
+            >
+              
+              {/* Animated background elements */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+              
+              <div className="relative z-10">
+                
+                {/* Main Headline */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-full mb-4">
+                    <span className="text-2xl">🚀</span>
+                    <span className="text-orange-200 text-sm font-semibold uppercase tracking-wider">
+                      Launch Your Network
+                    </span>
+                  </div>
+                  
+                  <h1 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">
+                    Get Connected with<br />
+                    <span 
+                      className="bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: 'linear-gradient(135deg, #FA4616 0%, #fb923c 100%)'
+                      }}
+                    >
+                      People Who Can Help
+                    </span>
+                  </h1>
+                  
+                  <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+                    Match with industry pros and fellow students who want to see you succeed
+                  </p>
+                </div>
+
+                {/* Feature Cards - Side by Side with Modern Design */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 max-w-4xl mx-auto">
+                  
+                  {/* Parents & Alumni Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    className="group relative overflow-hidden rounded-2xl p-6 cursor-default"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.15) 0%, rgba(249, 115, 22, 0.1) 100%)',
+                      border: '2px solid rgba(251, 146, 60, 0.3)',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/10 group-hover:to-transparent transition-all duration-300"></div>
+                    
+                    <div className="relative z-10">
+                      <div className="text-5xl mb-3">💼</div>
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        Parents & Alumni
+                        <span className="text-xs px-2 py-1 bg-orange-500/30 text-orange-200 rounded-full font-semibold">
+                          PRO
+                        </span>
+                      </h3>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        Industry veterans with hiring power, insider knowledge, and career wisdom
+                      </p>
+                      
+                      {/* Quick stats */}
+                      <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <span className="text-green-400">●</span> Active now
+                        </span>
+                        <span>|</span>
+                        <span>Career advice • Job leads • Mentorship</span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Fellow Gators Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    className="group relative overflow-hidden rounded-2xl p-6 cursor-default"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(45, 212, 191, 0.1) 100%)',
+                      border: '2px solid rgba(94, 234, 212, 0.3)',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-400/0 to-teal-400/0 group-hover:from-teal-400/10 group-hover:to-transparent transition-all duration-300"></div>
+                    
+                    <div className="relative z-10">
+                      <div className="text-5xl mb-3">🤝</div>
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        Fellow Gators
+                        <span className="text-xs px-2 py-1 bg-teal-400/30 text-teal-200 rounded-full font-semibold">
+                          PEER
+                        </span>
+                      </h3>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        Students like you navigating the same journey - share experiences and grow together
+                      </p>
+                      
+                      {/* Quick stats */}
+                      <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <span className="text-green-400">●</span> Online now
+                        </span>
+                        <span>|</span>
+                        <span>Resume swaps • Interview prep • Study groups</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* How It Works - Streamlined */}
+                <div className="max-w-2xl mx-auto mb-10">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center md:text-left">
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg">
+                        1
+                      </div>
+                      <span className="text-slate-200 font-medium">Post what you need</span>
+                    </div>
+                    
+                    <div className="hidden md:block text-slate-500">→</div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg">
+                        2
+                      </div>
+                      <span className="text-slate-200 font-medium">We find matches</span>
+                    </div>
+                    
+                    <div className="hidden md:block text-slate-500">→</div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg">
+                        3
+                      </div>
+                      <span className="text-slate-200 font-medium">Start connecting</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA Section */}
+                <div className="text-center">
+                  {helpRequests.length > 0 ? (
+                    <>
+                      <Button
+                        onClick={handleFindNewMatches}
+                        disabled={isRefreshingMatches}
+                        className="group relative px-10 py-6 text-lg font-bold text-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-orange-500/50 hover:-translate-y-1"
+                        style={{
+                          background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
+                        }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          {isRefreshingMatches ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              Finding Your Matches...
+                            </>
+                          ) : (
+                            <>
+                              🔍 Find My Matches
+                              <motion.span
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                              >
+                                →
+                              </motion.span>
+                            </>
+                          )}
+                        </span>
+                        
+                        {/* Animated gradient overlay on hover */}
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-400/0 via-orange-400/30 to-orange-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </Button>
+                      
+                      <p className="text-slate-400 text-sm mt-4">
+                        ✅ Profile ready • Instant matches • Free forever
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={() => navigate('StudentOnboarding')}
+                        className="group relative px-10 py-6 text-lg font-bold text-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-orange-500/50 hover:-translate-y-1"
+                        style={{
+                          background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
+                        }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Create Your First Request
+                          <motion.span
+                            animate={{ x: [0, 4, 0] }}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                          >
+                            →
+                          </motion.span>
+                        </span>
+                        
+                        {/* Animated gradient overlay on hover */}
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-400/0 via-orange-400/30 to-orange-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </Button>
+                      
+                      <p className="text-slate-400 text-sm mt-4">
+                        Free forever • No credit card • Instant matches
+                      </p>
+                    </>
+                  )}
+                  
+                  {/* Social proof */}
+                  <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-full">
+                    <div className="flex -space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-slate-900"></div>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-slate-900"></div>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 border-2 border-slate-900"></div>
+                    </div>
+                    <span className="text-slate-300 text-sm font-medium">
+                      Join <span className="text-orange-400 font-bold">100+</span> Gators already connected
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Bottom tip bar */}
+            <div 
+              className="px-6 py-4 text-center"
+              style={{
+                background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%)',
+                borderTop: '1px solid rgba(148, 163, 184, 0.1)',
+              }}
+            >
+              <p className="text-slate-300 text-sm flex items-center justify-center gap-2 flex-wrap">
+                <span className="text-lg">💡</span>
+                <span>
+                  <strong className="text-white">New members join daily</strong> — you can re-run matching anytime to discover fresh connections
+                </span>
               </p>
             </div>
 
-            {/* Match types grid with strong visual differentiation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
-              {/* Parents & Alumni Card - Orange theme */}
-              <div 
-                style={{
-                  background: 'linear-gradient(145deg, #FFF7ED 0%, #FED7AA 100%)',
-                  border: '3px solid #F97316',
-                  borderRadius: '16px',
-                  padding: '28px 24px',
-                  textAlign: 'center',
-                  boxShadow: '0 4px 12px rgba(249, 115, 22, 0.15)'
-                }}
-              >
-                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>💼</div>
-                <h3 style={{ fontWeight: '700', color: '#9a3412', marginBottom: '8px', fontSize: '1.25rem' }}>
-                  Parents & Alumni
-                </h3>
-                <p style={{ fontSize: '0.875rem', color: '#c2410c' }}>
-                  Industry pros with hiring connections and career expertise
-                </p>
-              </div>
-              
-              {/* Fellow Gators Card - Teal theme */}
-              <div 
-                style={{
-                  background: 'linear-gradient(145deg, #F0FDFA 0%, #99F6E4 100%)',
-                  border: '3px solid #14B8A6',
-                  borderRadius: '16px',
-                  padding: '28px 24px',
-                  textAlign: 'center',
-                  boxShadow: '0 4px 12px rgba(20, 184, 166, 0.15)'
-                }}
-              >
-                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🎓</div>
-                <h3 style={{ fontWeight: '700', color: '#115e59', marginBottom: '8px', fontSize: '1.25rem' }}>
-                  Fellow Gators
-                </h3>
-                <p style={{ fontSize: '0.875rem', color: '#0f766e' }}>
-                  Students with similar backgrounds to collaborate with
-                </p>
-              </div>
-            </div>
-
-            {/* CTA Section */}
-            <div className="text-center">
-              {helpRequests.length > 0 ? (
-                <>
-                  {/* Main instruction */}
-                  <p className="text-lg text-slate-700 mb-4 font-medium">
-                    👇 Click below to discover people who match your career interests
-                  </p>
-                  
-                  <Button
-                    onClick={handleFindNewMatches}
-                    disabled={isRefreshingMatches}
-                    className="text-white px-10 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
-                      borderRadius: '14px',
-                      fontSize: '1.125rem'
-                    }}
-                  >
-                    {isRefreshingMatches ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Finding Your Matches...
-                      </>
-                    ) : (
-                      <>🔍 Find My Matches</>
-                    )}
-                  </Button>
-                  
-                  <p className="text-sm text-green-600 mt-4 font-medium">
-                    ✅ Your profile is ready! Click above to see who can help you.
-                  </p>
-                </>
-              ) : (
-                <>
-                  {/* No help request state - more helpful */}
-                  <div 
-                    style={{
-                      padding: '20px 24px',
-                      background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-                      border: '2px solid #F59E0B',
-                      borderRadius: '12px',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    <p style={{ fontSize: '1rem', color: '#92400e', margin: 0, fontWeight: '600' }}>
-                      ⚠️ Almost there! You need to complete your profile first.
-                    </p>
-                    <p style={{ fontSize: '0.875rem', color: '#a16207', marginTop: '8px', marginBottom: '0' }}>
-                      Tell us what kind of help you're looking for so we can find the right matches.
-                    </p>
-                  </div>
-                  
-                  <Button
-                    onClick={() => navigate('StudentOnboarding')}
-                    className="text-white px-8 py-5 text-base font-bold shadow-lg"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #0021A5 0%, #1e40af 100%)',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    Complete My Profile →
-                  </Button>
-                </>
-              )}
-              
-              {/* Tip box - only show when they have requests */}
-              {helpRequests.length > 0 && (
-                <div 
-                  style={{
-                    marginTop: '20px',
-                    display: 'inline-block',
-                    padding: '14px 24px',
-                    background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-                    border: '2px solid #60A5FA',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
-                    💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
-                  </p>
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </motion.div>
