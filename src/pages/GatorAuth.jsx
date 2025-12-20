@@ -169,9 +169,50 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 0: is_new_user param detected with existing user - check if they have a pending role or need selection
+    // CASE 0: Authenticated user with pending invite role - AUTO-APPLY ROLE (skip role selection)
+    if (user && pendingRole && !user.persona) {
+      addLog(`🎯 AUTO-APPLYING invite role: ${pendingRole} for user: ${user.email}`);
+
+      if (processingRef.current) return;
+      processingRef.current = true;
+      setProcessing(true);
+
+      (async () => {
+        try {
+          await base44.auth.updateMe({
+            persona: pendingRole,
+            roles: [pendingRole],
+            onboarding_completed: false,
+            is_new_signup: true
+          });
+
+          addLog('✅ Role auto-applied successfully');
+
+          // Clean up localStorage
+          localStorage.removeItem('pending_invite_role');
+          localStorage.removeItem('pending_invite_code');
+          localStorage.removeItem('pending_referral_code');
+
+          // Refresh user context and navigate
+          if (refreshUser) await refreshUser();
+
+          navigate('GatorWelcome');
+        } catch (err) {
+          addLog(`❌ Auto-role set failed: ${err.message}`);
+          // Fallback to role selection if something goes wrong
+          localStorage.removeItem('pending_invite_role');
+          navigate('GatorRoleSelection');
+        } finally {
+          processingRef.current = false;
+          if (isMountedRef.current) setProcessing(false);
+        }
+      })();
+      return;
+    }
+
+    // CASE 0b: is_new_user param detected - route based on state
     if (isNewUser && user) {
-      addLog(`🎯 is_new_user detected - user: ${user.email}, persona: ${user.persona}, pendingRole: ${pendingRole}`);
+      addLog(`🎯 is_new_user detected - user: ${user.email}, persona: ${user.persona}`);
       // Clean up URL params
       window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
 
@@ -182,15 +223,8 @@ export default function GatorAuth() {
         return;
       }
 
-      // If there's a pending role from before OAuth, use it
-      if (pendingRole) {
-        addLog(`✅ Pending role found: ${pendingRole}, routing to GatorWelcome`);
-        navigate('GatorWelcome');
-        return;
-      }
-
-      // Otherwise, need role selection
-      addLog('➡️ No persona or pending role, routing to GatorRoleSelection');
+      // Otherwise, need role selection (non-invited user)
+      addLog('➡️ No persona, routing to GatorRoleSelection');
       navigate('GatorRoleSelection');
       return;
     }
