@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,13 +22,10 @@ Deno.serve(async (req) => {
 
     console.log('🔐 Verifying magic link token...');
 
-    const base44 = createClient({
-      appId: Deno.env.get('BASE44_APP_ID'),
-      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
-    });
+    const base44 = createClientFromRequest(req);
 
-    // Find magic link by token
-    const links = await base44.entities.MagicLink.filter({ token });
+    // Find magic link by token using service role (unauthenticated request)
+    const links = await base44.asServiceRole.entities.MagicLink.filter({ token });
     const link = Array.isArray(links) ? links[0] : (links?.[0] || null);
 
     if (!link) {
