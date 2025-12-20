@@ -16,6 +16,8 @@ import confetti from 'canvas-confetti';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import PeerCollaborationSection from '@/components/onboarding/PeerCollaborationSection';
+import { StudentPeerProfile } from '@/entities/StudentPeerProfile';
 
 const PRIMARY_GOALS = [
   { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
@@ -110,6 +112,11 @@ export default function StudentOnboarding() {
     help_timeline: '',
     post_to_emerging: true,
     show_on_directory: true,
+    // Peer collaboration fields
+    openToCollaboration: true,
+    canCollaborateOn: [],
+    whatImWorkingOn: '',
+    whatICanShare: '',
     // Career fields (Steps 2-7)
     target_roles: [],
     custom_role: '',
@@ -164,7 +171,8 @@ export default function StudentOnboarding() {
           help_types: Array.isArray(parsed.help_types) ? parsed.help_types : [],
           target_roles: Array.isArray(parsed.target_roles) ? parsed.target_roles : [],
           target_industries: Array.isArray(parsed.target_industries) ? parsed.target_industries : [],
-          location_preferences: Array.isArray(parsed.location_preferences) ? parsed.location_preferences : []
+          location_preferences: Array.isArray(parsed.location_preferences) ? parsed.location_preferences : [],
+          canCollaborateOn: Array.isArray(parsed.canCollaborateOn) ? parsed.canCollaborateOn : []
         }));
       } catch (e) {
         console.error('Failed to load draft');
