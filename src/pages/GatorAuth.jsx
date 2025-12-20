@@ -109,7 +109,7 @@ export default function GatorAuth() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || processingRef.current) return;
+    if (isLoading || processing) return;
 
     const addLog = (msg) => {
       console.log(msg);
@@ -129,7 +129,7 @@ export default function GatorAuth() {
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
 
-    addLog(`🔍 State: user=${user?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
+    addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
 
     // Handle OAuth errors
     if (hasError) {
@@ -139,7 +139,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 1: No user and not returning from OAuth - initiate login
+    // CASE 1: No auth at all - initiate OAuth login
     if (!user && !hasAccessToken && !wasOAuthCallback) {
       addLog('🔐 No auth detected, initiating OAuth login...');
       addLog(`📋 Pending role: ${pendingRole}`);
@@ -149,35 +149,35 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 2: Returning from OAuth callback - process authentication
-    if (wasOAuthCallback && !processing) {
+    // CASE 2: OAuth callback - poll for session with timeout
+    if (wasOAuthCallback && !currentUser) {
       processingRef.current = true;
       setProcessing(true);
       
       // Clear session storage
       sessionStorage.removeItem('oauth_callback_detected');
       
-      addLog(`🔐 OAuth callback detected. Pending role: ${pendingRole}`);
+      addLog(`🔐 OAuth callback detected. Polling for session...`);
       
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const waitTime = isMobile ? 3000 : 1500;
+      const initialWait = isMobile ? 2000 : 1000;
       
       setTimeout(async () => {
         if (!isMountedRef.current) return;
         
         addLog('✅ SDK initialized, polling for authentication...');
         
-        // Poll for authentication
+        // Poll for authentication with timeout
         const maxAuthWait = 15000;
         const pollInterval = 500;
         let elapsed = 0;
-        let currentUser = null;
+        let polledUser = null;
         
         while (elapsed < maxAuthWait) {
           try {
-            currentUser = await base44.auth.me();
-            if (currentUser?.email) {
-              addLog(`✅ Authenticated: ${currentUser.email} (${Math.round(elapsed/1000)}s)`);
+            polledUser = await base44.auth.me();
+            if (polledUser?.email) {
+              addLog(`✅ Session acquired: ${polledUser.email} (${Math.round(elapsed/1000)}s)`);
               break;
             }
           } catch (e) {
@@ -191,70 +191,81 @@ export default function GatorAuth() {
           }
         }
         
-        if (!currentUser?.email) {
-          addLog('❌ Auth timeout after 15s');
+        if (!polledUser?.email) {
+          addLog('⏰ OAuth callback timed out waiting for session');
           if (isMountedRef.current) {
             setErrorDetails({ 
               type: 'auth_timeout', 
-              message: 'Authentication timed out. Please try again.'
+              message: 'Login taking longer than expected. Please try again.'
             });
+            processingRef.current = false;
+            setProcessing(false);
           }
           return;
         }
         
-        // Determine next route
-        const nextRoute = determineNextRoute(currentUser, pendingRole);
-        addLog(`📋 Next route: ${nextRoute} (persona: ${currentUser.persona}, pendingRole: ${pendingRole})`);
-        
-        // If new signup with pending role, update persona first
-        if (pendingRole && currentUser.persona !== pendingRole) {
-          addLog(`📝 Updating persona to: ${pendingRole}`);
-          
-          const updateData = {
-            persona: pendingRole,
-            roles: [pendingRole],
-            onboarding_completed: false,
-            is_new_signup: true
-          };
-          
-          const inviteCode = localStorage.getItem('pending_invite_code');
-          const referralCode = localStorage.getItem('pending_referral_code');
-          if (inviteCode) updateData.invite_code_used = inviteCode;
-          if (referralCode) updateData.referral_code = referralCode;
-          
-          const result = await updatePersonaWithRetry(updateData);
-          
-          if (result.success) {
-            addLog('✅ Persona set and verified');
-            // Clear localStorage after successful update
-            localStorage.removeItem('pending_invite_role');
-            localStorage.removeItem('pending_invite_code');
-            localStorage.removeItem('pending_referral_code');
-          } else {
-            addLog('⚠️ Persona verification failed, but continuing (GatorWelcome will retry)');
-            // Keep localStorage - GatorWelcome will handle the update
-          }
+        // Store polled user and let next effect cycle handle routing
+        if (isMountedRef.current) {
+          setCurrentUser(polledUser);
+          // Don't reset processing yet - let the routing logic handle it
         }
-        
-        // Navigate using helper (preserves React context)
-        addLog(`🎯 Navigating to: ${nextRoute}`);
-        sessionStorage.setItem('oauth_redirect_in_progress', 'true');
-        navigate(nextRoute);
-        
-      }, waitTime);
+      }, initialWait);
       return;
     }
 
-    // CASE 3: User already authenticated (no OAuth callback)
-    if (user && !hasAccessToken && !wasOAuthCallback && !processing) {
-      addLog(`✅ User authenticated: ${user.email}, persona: ${user.persona}, onboarded: ${user.onboarding_completed}`);
+    // CASE 3: New signup via invite (OAuth callback completed, have currentUser and pendingRole)
+    if (wasOAuthCallback && pendingRole && currentUser) {
+      addLog(`📝 New signup: updating persona to ${pendingRole}`);
       
-      const nextRoute = determineNextRoute(user, pendingRole);
+      (async () => {
+        const updateData = {
+          persona: pendingRole,
+          roles: [pendingRole],
+          onboarding_completed: false,
+          is_new_signup: true
+        };
+        
+        const inviteCode = localStorage.getItem('pending_invite_code');
+        const referralCode = localStorage.getItem('pending_referral_code');
+        if (inviteCode) updateData.invite_code_used = inviteCode;
+        if (referralCode) updateData.referral_code = referralCode;
+        
+        const result = await updatePersonaWithRetry(updateData);
+        
+        if (result.success) {
+          addLog('✅ Persona set and verified');
+          localStorage.removeItem('pending_invite_role');
+          localStorage.removeItem('pending_invite_code');
+          localStorage.removeItem('pending_referral_code');
+        } else {
+          addLog('⚠️ Persona verification failed - GatorWelcome will retry');
+          // Keep localStorage for GatorWelcome to handle
+        }
+        
+        addLog('🎯 Navigating to GatorWelcome');
+        navigate('GatorWelcome');
+      })();
+      return;
+    }
+
+    // CASE 4: Normal routing (new or returning user)
+    const reliableUser = currentUser || user;
+    if (reliableUser && !wasOAuthCallback) {
+      addLog(`✅ Reliable user: ${reliableUser.email}, persona: ${reliableUser.persona}, onboarded: ${reliableUser.onboarding_completed}`);
+      
+      const nextRoute = determineNextRoute(reliableUser, pendingRole);
       addLog(`🎯 Routing to: ${nextRoute}`);
       
       navigate(nextRoute);
     }
-  }, [user, isLoading, processing]);
+    
+    // CASE 5: Have currentUser from OAuth polling, no pendingRole - route based on user state
+    if (currentUser && !pendingRole) {
+      const nextRoute = determineNextRoute(currentUser, null);
+      addLog(`🎯 OAuth complete, routing to: ${nextRoute}`);
+      navigate(nextRoute);
+    }
+  }, [user, currentUser, isLoading, processing]);
 
   // Error state
   if (errorDetails) {
