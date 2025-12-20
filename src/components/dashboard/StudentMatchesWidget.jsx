@@ -728,53 +728,6 @@ export default function StudentMatchesWidget({ user }) {
               </div>
             )}
 
-            {/* SECTION 2: Fellow Gators (Peers) */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <GraduationCap className="w-5 h-5 text-teal-600" />
-                <h4 className="font-bold text-slate-900">
-                  🤝 Fellow Gators to Collaborate With ({peerMatches.length} matches)
-                </h4>
-              </div>
-              <p className="text-sm text-slate-600 mb-4">
-                Students with similar backgrounds navigating similar paths
-              </p>
-
-              {peerMatches.length > 0 ? (
-                <div className="space-y-3">
-                  <AnimatePresence>
-                    {peerMatches.slice(0, 3).map((match) => (
-                      <PeerMatchCard
-                        key={match.id}
-                        match={match}
-                        onConnect={handleConnectPeer}
-                      />
-                    ))}
-                  </AnimatePresence>
-
-                  {peerMatches.length > 3 && (
-                    <div className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('GatorDirectory')}
-                        className="text-teal-600 hover:text-teal-700"
-                      >
-                        View all {peerMatches.length} peer matches
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="bg-teal-50 rounded-lg p-4 border border-teal-200 text-center">
-                  <p className="text-teal-700 text-sm">
-                    No peer matches yet - encourage other students to opt into collaboration!
-                  </p>
-                </div>
-              )}
-            </div>
-
             {/* All connected state */}
             {matches.length > 0 && matches.every(m => m.status === 'student_connected') && (
               <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200 text-center">
