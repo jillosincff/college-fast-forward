@@ -841,9 +841,9 @@ export default function LandingPage() {
         <footer className="py-8 bg-slate-900 text-center">
           <div className="max-w-6xl mx-auto px-4">
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+              src={TRANSPARENT_LOGO}
               alt="College Fast Forward"
-              className="h-12 mx-auto mb-4 opacity-80"
+              className="h-16 mx-auto mb-4 opacity-90"
             />
             <p className="text-slate-400 text-sm mb-4">
               © {new Date().getFullYear()} College Fast Forward. All rights reserved.
