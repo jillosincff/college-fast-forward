@@ -209,7 +209,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 md:p-8 max-w-xl mx-auto mb-10 shadow-2xl"
+              className="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 md:p-8 max-w-xl mx-auto mb-10 shadow-2xl urgency-box-glow"
             >
               <div className="flex items-center justify-center gap-2 mb-3">
                 <span className="text-2xl">🔥</span>
