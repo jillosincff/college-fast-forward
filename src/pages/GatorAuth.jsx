@@ -535,12 +535,12 @@ export default function GatorAuth() {
 
           <div className="mt-6 text-center">
             <Button
-              onClick={() => setShowMagicLink(false)}
+              onClick={() => { setShowMagicLink(false); setMagicLinkStatus('input'); setMagicLinkEmail(''); }}
               variant="ghost"
               className="text-white/60 hover:text-white hover:bg-white/10"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Google Sign In
+              Back to login options
             </Button>
           </div>
         </div>
