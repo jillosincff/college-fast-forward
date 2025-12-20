@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Crown, Star, Check, Loader2 } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
@@ -27,9 +27,11 @@ const clearPendingInviteData = () => {
 
 export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
-  const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
+  const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error' | 'payment_required'
   const [role, setRole] = useState(null);
   const [error, setError] = useState(null);
+  const [pricingInfo, setPricingInfo] = useState(null);
+  const [isCreatingFamily, setIsCreatingFamily] = useState(false);
   
   // Track if update is in progress to prevent duplicate calls
   const updateInProgressRef = useRef(false);
@@ -206,16 +208,61 @@ export default function GatorWelcome() {
     
   }, [user, isLoading, refreshUser]);
 
-  const handleGetStarted = () => {
-    console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
-    trackEvent('onboarding_started', { role });
+  // Load pricing info on mount
+  useEffect(() => {
+    const loadPricing = async () => {
+      try {
+        const response = await base44.functions.invoke('getPricingTierForSignup', {});
+        if (response.data?.success) {
+          setPricingInfo(response.data);
+        }
+      } catch (err) {
+        console.error('Failed to load pricing info:', err);
+      }
+    };
+    loadPricing();
+  }, []);
 
+  const handleGetStarted = async () => {
+    console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
+    trackEvent('onboarding_started', { role, tier: pricingInfo?.tier });
+
+    // For founding members, go straight to onboarding
+    if (!pricingInfo || pricingInfo.tier === 'founding' || !pricingInfo.requires_payment) {
+      proceedToOnboarding();
+      return;
+    }
+
+    // For paid tiers, create family and redirect to Stripe
+    setIsCreatingFamily(true);
+    try {
+      const response = await base44.functions.invoke('createFamilyAndCheckout', {
+        successUrl: `${window.location.origin}/#${role === 'gator' ? 'StudentOnboarding' : 'Onboarding'}?payment=success`,
+        cancelUrl: `${window.location.origin}/#GatorWelcome?payment=cancelled`
+      });
+
+      if (response.data?.requires_payment && response.data?.checkout_url) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.checkout_url;
+      } else if (response.data?.success) {
+        // No payment required (edge case - became founding during signup)
+        proceedToOnboarding();
+      } else {
+        throw new Error(response.data?.error || 'Failed to create checkout');
+      }
+    } catch (err) {
+      console.error('Failed to create checkout:', err);
+      setError(err.message || 'Failed to start subscription');
+      setIsCreatingFamily(false);
+    }
+  };
+
+  const proceedToOnboarding = () => {
     if (role === 'gator') {
       navigate('StudentOnboarding');
     } else if (role === 'parent' || role === 'alumni') {
       navigate('Onboarding');
     } else {
-      // Unexpected role - log warning and fallback
       console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
       navigate('Dashboard');
     }
@@ -286,6 +333,45 @@ export default function GatorWelcome() {
             }
           </p>
 
+          {/* Pricing Tier Display */}
+          {pricingInfo && (
+            <div className={`mb-6 p-4 rounded-xl border-2 ${
+              pricingInfo.tier === 'founding' 
+                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300'
+                : pricingInfo.tier === 'early_adopter'
+                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300'
+                : 'bg-slate-50 border-slate-300'
+            }`}>
+              <div className="flex items-center justify-center gap-3 mb-2">
+                {pricingInfo.tier === 'founding' ? (
+                  <Crown className="w-6 h-6 text-yellow-600" />
+                ) : pricingInfo.tier === 'early_adopter' ? (
+                  <Star className="w-6 h-6 text-blue-600" />
+                ) : (
+                  <Check className="w-6 h-6 text-slate-600" />
+                )}
+                <span className={`font-bold text-lg ${
+                  pricingInfo.tier === 'founding' ? 'text-yellow-800' :
+                  pricingInfo.tier === 'early_adopter' ? 'text-blue-800' : 'text-slate-800'
+                }`}>
+                  {pricingInfo.badge_type}
+                </span>
+              </div>
+              <p className={`text-center font-semibold ${
+                pricingInfo.tier === 'founding' ? 'text-yellow-700' :
+                pricingInfo.tier === 'early_adopter' ? 'text-blue-700' : 'text-slate-700'
+              }`}>
+                {pricingInfo.locked_price_display}
+                {pricingInfo.tier !== 'founding' && ' • 7-day free trial'}
+              </p>
+              {pricingInfo.spots_remaining && pricingInfo.tier !== 'standard' && (
+                <p className="text-center text-sm mt-1 opacity-80">
+                  Only {pricingInfo.spots_remaining} {pricingInfo.tier === 'founding' ? 'free' : '$9'} spots left!
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="inline-flex items-center gap-2 bg-orange-50 border-2 border-orange-200 rounded-full px-6 py-3 mb-10">
             <span className="text-orange-800 font-semibold text-sm">
               ✨ Takes just 2 minutes
@@ -295,12 +381,30 @@ export default function GatorWelcome() {
           <Button
             onClick={handleGetStarted}
             size="lg"
-            className="h-14 px-12 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+            disabled={isCreatingFamily}
+            className="h-14 px-12 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50"
             style={{ backgroundColor: role === 'gator' ? '#0021A5' : '#FA4616' }}
           >
-            Let's Get Started
-            <ArrowRight className="w-6 h-6 ml-2" />
+            {isCreatingFamily ? (
+              <>
+                <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                Setting up...
+              </>
+            ) : (
+              <>
+                {pricingInfo?.tier === 'founding' 
+                  ? "Let's Get Started" 
+                  : `Start ${pricingInfo?.trial_days || 7}-Day Free Trial`}
+                <ArrowRight className="w-6 h-6 ml-2" />
+              </>
+            )}
           </Button>
+          
+          {pricingInfo?.tier !== 'founding' && (
+            <p className="text-sm text-slate-500 mt-4">
+              No charge today. Cancel anytime during your trial.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
