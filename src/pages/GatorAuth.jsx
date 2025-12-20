@@ -400,11 +400,13 @@ export default function GatorAuth() {
                 value={magicLinkEmail}
                 onChange={(e) => setMagicLinkEmail(e.target.value)}
                 className="h-12 text-lg bg-white/90 border-0 placeholder:text-slate-500"
+                autoFocus
                 required
               />
               <Button
                 type="submit"
-                className="w-full h-12 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold text-lg rounded-xl"
+                disabled={isSubmitting}
+                className="w-full h-12 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold text-lg rounded-xl disabled:opacity-50"
               >
                 <Mail className="w-5 h-5 mr-2" />
                 Send Magic Link
