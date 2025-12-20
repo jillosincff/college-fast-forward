@@ -194,7 +194,7 @@ export default function GatorAuth() {
       
       // SUCCESS: User persona is already set correctly - navigate now!
       if (user.persona === targetRole) {
-        addLog(`✅ Persona confirmed: ${user.persona} - navigating to GatorWelcome`);
+        addLog(`✅ Persona CONFIRMED in React state: ${user.persona} - navigating to GatorWelcome`);
         
         // Clear magic link context
         localStorage.removeItem('post_magic_verified');
@@ -207,7 +207,7 @@ export default function GatorAuth() {
         return;
       }
       
-      // Persona not set yet - update it and wait for re-render
+      // Persona not set yet - update it and wait for AuthContext to update
       if (!processingRef.current) {
         processingRef.current = true;
         setProcessing(true);
@@ -215,26 +215,41 @@ export default function GatorAuth() {
         
         addLog(`📝 Updating persona from "${user.persona}" to "${targetRole}"`);
         
-        base44.auth.updateMe({
-          persona: targetRole,
-          roles: [targetRole],
-          onboarding_completed: false,
-          is_new_signup: true,
-          magic_link_verified: true
-        }).then(() => {
-          addLog('✅ Persona update sent, refreshing user...');
-          refreshUser(); // This triggers useEffect re-run with updated user
-        }).catch(err => {
-          addLog(`❌ Persona update failed: ${err.message}`);
-          setProcessing(false);
-          processingRef.current = false;
-        });
+        (async () => {
+          try {
+            await base44.auth.updateMe({
+              persona: targetRole,
+              roles: [targetRole],
+              onboarding_completed: false,
+              is_new_signup: true,
+              magic_link_verified: true
+            });
+            
+            addLog('✅ Persona update sent to server');
+            
+            // Now call refreshUser and WAIT for it
+            await refreshUser();
+            
+            addLog('✅ refreshUser completed - useEffect will re-run with updated user');
+            
+            // Reset processing so the useEffect can check persona again
+            processingRef.current = false;
+            setProcessing(false);
+            
+            // The useEffect will re-run because refreshUser updates the user state
+            // and the check "if (user.persona === targetRole)" will pass
+            
+          } catch (err) {
+            addLog(`❌ Error: ${err.message}`);
+            processingRef.current = false;
+            setProcessing(false);
+          }
+        })();
       } else {
-        addLog('⏳ Update already in progress, waiting...');
+        addLog('⏳ Update already in progress, waiting for user state change...');
       }
       
       // DON'T navigate here - useEffect will re-run when user changes
-      // and the "if (user.persona === targetRole)" check above will pass
       return;
     }
 
