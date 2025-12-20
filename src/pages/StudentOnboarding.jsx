@@ -317,6 +317,27 @@ export default function StudentOnboarding() {
         }
       }
 
+      // Create peer profile if open to collaboration
+      if (formData.openToCollaboration) {
+        try {
+          await StudentPeerProfile.create({
+            student_id: user.id,
+            student_email: user.email,
+            student_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
+            student_major: formData.major?.trim(),
+            student_year: formData.graduation_year ? `Class of ${formData.graduation_year}` : 'Current Student',
+            open_to_collaboration: true,
+            can_collaborate_on: formData.canCollaborateOn || [],
+            what_im_working_on: formData.whatImWorkingOn || '',
+            what_i_can_share: formData.whatICanShare || '',
+            target_industry: formData.help_industry || formData.target_industries?.[0] || ''
+          });
+          console.log('✅ Created peer collaboration profile');
+        } catch (peerError) {
+          console.error('Failed to create peer profile:', peerError);
+        }
+      }
+
       // Update user profile - mark onboarding complete and clear new signup flag
       const userUpdate = {
         onboarding_completed: true,
