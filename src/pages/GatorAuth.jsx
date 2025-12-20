@@ -59,12 +59,12 @@ export default function GatorAuth() {
       return;
     }
 
-    // No user and no token - shouldn't happen (user should come with params)
-    if (!user && !hasAccessToken) {
-      addLog('🔐 No auth detected, redirecting to landing...');
-      setTimeout(() => {
-        window.location.href = window.location.origin + '/#LandingPage';
-      }, 2000);
+    // No user and no token - initiate OAuth login
+    if (!user && !hasAccessToken && !wasOAuthCallback) {
+      addLog('🔐 No auth detected, initiating OAuth login...');
+      // Redirect to Google OAuth via Base44 SDK
+      const callbackUrl = window.location.origin + '/#GatorAuth';
+      base44.auth.redirectToLogin(callbackUrl);
       return;
     }
 
