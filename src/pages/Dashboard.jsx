@@ -118,11 +118,22 @@ export default function Dashboard() {
       );
       
       // Load HelpRequest for editing (this is what onboarding creates)
-      const myHelpRequests = await base44.entities.HelpRequest.filter(
+      // Try by student_id first, then fallback to student_email
+      let myHelpRequests = await base44.entities.HelpRequest.filter(
         { student_id: user.id, status: 'active' },
         '-created_date',
         1
       );
+      
+      // Fallback to email if ID didn't match
+      if (!myHelpRequests || myHelpRequests.length === 0) {
+        myHelpRequests = await base44.entities.HelpRequest.filter(
+          { student_email: user.email, status: 'active' },
+          '-created_date',
+          1
+        );
+      }
+      
       if (myHelpRequests && myHelpRequests.length > 0) {
         setExistingHelpRequest(myHelpRequests[0]);
       }
