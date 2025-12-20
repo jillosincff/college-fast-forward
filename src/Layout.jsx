@@ -303,14 +303,11 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   };
 
   const allNavItems = useMemo(() => [
-    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
-    { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
-    { name: 'Talent Spotlight', page: 'TalentSpotlight', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
-    { name: 'Roommates', page: 'Roommates', icon: Users, roles: ['gator', 'parent'] },
-    { name: 'Pricing', page: 'Pricing', icon: Users, roles: ['gator', 'parent', 'admin'], isPublic: true },
-  ], []);
+        { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
+        { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
+        { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
+        { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
+      ], []);
 
   const filteredNavItems = useMemo(() => {
     if (!user) {
