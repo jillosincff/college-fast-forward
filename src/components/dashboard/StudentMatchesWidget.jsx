@@ -95,15 +95,15 @@ function ParentMatchCard({ match, onConnect, isBroader = false }) {
           disabled={match.status === 'student_connected'}
           className={match.status === 'student_connected' 
             ? 'bg-green-100 text-green-700 hover:bg-green-100'
-            : 'bg-purple-600 hover:bg-purple-700 text-white'
+            : 'bg-[#FA4616] hover:bg-[#e63e13] text-white'
           }
         >
           {match.status === 'student_connected' ? (
-            <>✓ Reached out</>
+            <>✓ Sent</>
           ) : (
             <>
               <MessageSquare className="w-4 h-4 mr-1" />
-              Message
+              Connect
             </>
           )}
         </Button>
@@ -172,15 +172,15 @@ function PeerMatchCard({ match, onConnect }) {
           disabled={match.status === 'student_connected'}
           className={match.status === 'student_connected' 
             ? 'bg-green-100 text-green-700 hover:bg-green-100'
-            : 'bg-teal-600 hover:bg-teal-700 text-white'
+            : 'bg-[#FA4616] hover:bg-[#e63e13] text-white'
           }
         >
           {match.status === 'student_connected' ? (
-            <>✓ Connected</>
+            <>✓ Sent</>
           ) : (
             <>
               <Handshake className="w-4 h-4 mr-1" />
-              Connect
+              Collaborate
             </>
           )}
         </Button>
@@ -298,34 +298,71 @@ export default function StudentMatchesWidget({ user }) {
   }
 
   if (matches.length === 0) {
-    // Show encouraging empty state instead of hiding
+    // Show educational fallback UI
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="border-2 border-purple-200 shadow-lg bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
-          <CardContent className="pt-6 pb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
+        <Card className="border-2 border-[#FA4616]/20 shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-blue-50/30 overflow-hidden">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">🤝</div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                Get Matched with Gator Parents, Alumni & Peers
+              </h2>
+              <p className="text-slate-600">
+                When you create a help request, we'll automatically connect you with:
+              </p>
+            </div>
+
+            {/* Match types grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-white rounded-xl p-5 border-2 border-slate-200 text-center hover:border-[#FA4616]/50 transition-colors">
+                <div className="text-4xl mb-3">💼</div>
+                <h3 className="font-bold text-slate-900 mb-2">Parents & Alumni</h3>
+                <p className="text-sm text-slate-600">
+                  Industry pros with hiring connections and career expertise
+                </p>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900">Your Matches</h3>
-                <p className="text-sm text-slate-600">Parents and peers who can help you</p>
+              <div className="bg-white rounded-xl p-5 border-2 border-slate-200 text-center hover:border-[#FA4616]/50 transition-colors">
+                <div className="text-4xl mb-3">🤝</div>
+                <h3 className="font-bold text-slate-900 mb-2">Fellow Gators</h3>
+                <p className="text-sm text-slate-600">
+                  Students with similar backgrounds to collaborate with
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 border border-purple-200 text-center">
-              <p className="text-lg text-slate-700 mb-2">🔍 Finding your matches...</p>
-              <p className="text-sm text-slate-500">
-                Complete your help request to get matched with Gator parents and peers who can assist with your career goals.
-              </p>
+
+            {/* How it works */}
+            <div className="bg-slate-50 rounded-xl p-5 mb-6 max-w-md mx-auto">
+              <h3 className="font-bold text-slate-900 mb-3">How it works:</h3>
+              <ol className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                  <span>Tell us what help you need</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                  <span>We match you with relevant people</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                  <span>Connect with them directly</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="text-center">
               <Button
-                onClick={() => navigate('Connections')}
-                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={() => navigate('PostRequest')}
+                className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
               >
-                Browse Emerging Gators
+                Create Your First Request
               </Button>
+              <p className="text-sm text-slate-500 mt-3">
+                You can create additional requests anytime to get more help.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -558,11 +595,7 @@ export default function StudentMatchesWidget({ user }) {
               <Button
                 onClick={sendMessage}
                 disabled={!message.trim() || sending}
-                className={`flex-1 ${
-                  selectedMatch?.match_type === 'peer'
-                    ? 'bg-teal-600 hover:bg-teal-700'
-                    : 'bg-purple-600 hover:bg-purple-700'
-                }`}
+                className="flex-1 bg-[#FA4616] hover:bg-[#e63e13]"
               >
                 {sending ? (
                   <>
@@ -572,7 +605,7 @@ export default function StudentMatchesWidget({ user }) {
                 ) : (
                   <>
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Send Message
+                    Send Connection Request
                   </>
                 )}
               </Button>
