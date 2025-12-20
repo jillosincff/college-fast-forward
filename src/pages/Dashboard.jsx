@@ -112,21 +112,15 @@ export default function Dashboard() {
 
   const loadStudentStats = async (myMessages, opps) => {
     try {
-      // Load HelpRequests for editing (these are what the matching system uses)
-      const myHelpRequests = await base44.entities.HelpRequest.filter(
-        { student_id: user.id },
-        '-created_date'
-      );
-      
-      // Set most recent help request for editing
-      if (myHelpRequests && myHelpRequests.length > 0) {
-        setExistingHelpRequest(myHelpRequests[0]);
-      }
-      
       const myRequests = await base44.entities.JobRequest.filter(
         { created_by: user.email },
         '-created_date'
       );
+      
+      // Set most recent request for editing
+      if (myRequests && myRequests.length > 0) {
+        setExistingRequest(myRequests[0]);
+      }
 
       let helpOffersCount = 0;
       if (myRequests && myRequests.length > 0) {
@@ -173,9 +167,20 @@ export default function Dashboard() {
     await loadDashboardData();
   };
   
-  const handleEditRequestSuccess = async () => {
-    trackEvent('help_request_updated');
-    await loadDashboardData();
+  const handleEditRequestSubmit = async (data) => {
+    try {
+      if (existingRequest) {
+        await base44.entities.JobRequest.update(existingRequest.id, data);
+        trackEvent('job_request_updated');
+      } else {
+        await base44.entities.JobRequest.create(data);
+        trackEvent('job_request_created');
+      }
+      setShowEditRequestModal(false);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Failed to save job request:', error);
+    }
   };
 
   if (isLoading || !user) {
@@ -305,7 +310,7 @@ export default function Dashboard() {
         <StudentMatchesWidget user={user} />
         
         {/* Edit Help Request Button */}
-        {existingRequest && (
+        {existingHelpRequest && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -320,7 +325,7 @@ export default function Dashboard() {
                       Update Your Help Request
                     </h3>
                     <p className="text-slate-700 font-medium">
-                      Keep your profile fresh! Edit your job search details, target companies, or resume
+                      Keep your request fresh! Update what kind of help you need to find better matches.
                     </p>
                   </div>
                   <Button
