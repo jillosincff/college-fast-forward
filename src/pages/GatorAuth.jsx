@@ -225,22 +225,19 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 0b: is_new_user param detected - route based on state
-    if (isNewUser && user) {
-      addLog(`🎯 is_new_user detected - user: ${user.email}, persona: ${user.persona}`);
-      // Clean up URL params
-      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
-
-      // If user already has a persona, route to welcome/onboarding
-      if (user.persona) {
-        addLog('✅ User has persona, routing to GatorWelcome');
-        navigate('GatorWelcome');
-        return;
+    // CASE 0b: Authenticated user without persona - auto-assign role or route to selection
+    // This handles BOTH is_new_user param AND returning users who somehow lost their persona
+    if (user && !user.persona) {
+      addLog(`🎯 User without persona: ${user.email}`);
+      
+      // Clean up URL params if present
+      if (isNewUser) {
+        window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
       }
 
       // CRITICAL: Auto-assign 'gator' role for @ufl.edu students
       const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-      if (isUFLStudent && !user.persona) {
+      if (isUFLStudent) {
         addLog(`🎓 UFL student detected - auto-assigning gator role`);
         
         if (processingRef.current) return;
@@ -270,9 +267,17 @@ export default function GatorAuth() {
         return;
       }
 
-      // Otherwise, need role selection (non-invited, non-UFL user)
+      // Non-UFL user without persona - need role selection
       addLog('➡️ No persona, routing to GatorRoleSelection');
       navigate('GatorRoleSelection');
+      return;
+    }
+    
+    // CASE 0c: is_new_user param with user who HAS persona - route to welcome
+    if (isNewUser && user && user.persona) {
+      addLog(`🎯 is_new_user with existing persona: ${user.persona}`);
+      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+      navigate('GatorWelcome');
       return;
     }
 
