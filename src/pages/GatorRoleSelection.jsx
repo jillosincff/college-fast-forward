@@ -8,38 +8,21 @@ import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
 export default function GatorRoleSelection() {
-  const { user, refreshUser, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [selectedRole, setSelectedRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [authTimeout, setAuthTimeout] = useState(false);
 
+  // If user is already authenticated with a persona, redirect to appropriate page
   useEffect(() => {
-    if (user) {
-      console.log('✅ [GatorRoleSelection] User authenticated:', user.email);
-    } else if (!authLoading) {
-      const timer = setTimeout(() => {
-        console.log('⏱️ [GatorRoleSelection] Auth timeout - no user after 10s');
-        setAuthTimeout(true);
-      }, 10000);
-      return () => clearTimeout(timer);
+    if (user && user.persona) {
+      console.log('✅ [GatorRoleSelection] User already has persona:', user.persona);
+      if (user.onboarding_completed) {
+        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+      } else {
+        navigate('GatorWelcome');
+      }
     }
-  }, [user, authLoading]);
-
-  if (authTimeout) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-8 pb-8 px-6 text-center">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Authentication Error</h2>
-            <p className="text-slate-600 mb-6">We couldn't complete your sign-in. Please try again.</p>
-            <Button onClick={() => navigate('GatorAuth')} className="w-full">
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  }, [user]);
 
   const handleContinue = async () => {
     if (!selectedRole) {
@@ -52,13 +35,14 @@ export default function GatorRoleSelection() {
     trackEvent('role_selected', { role: selectedRole });
 
     try {
+      // Store role in localStorage for after OAuth
+      localStorage.setItem('pending_invite_role', selectedRole);
+      
       if (selectedRole === 'gator') {
         console.log('🐊 [GatorRoleSelection] Student selected -> GatorStudentEmail');
-        localStorage.setItem('pending_invite_role', 'gator');
         navigate('GatorStudentEmail');
       } else if (selectedRole === 'parent') {
         console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
-        localStorage.setItem('pending_invite_role', 'parent');
         navigate('GatorParentInvite');
       }
     } catch (error) {
@@ -67,17 +51,6 @@ export default function GatorRoleSelection() {
       setIsLoading(false);
     }
   };
-
-  if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Completing sign-in...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
