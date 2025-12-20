@@ -425,16 +425,41 @@ export default function StudentMatchesWidget({ user }) {
             </div>
 
             <div className="text-center">
-              <Button
-                onClick={() => navigate('PostRequest')}
-                className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                Create Your First Request
-              </Button>
-              <p className="text-sm text-slate-500 mt-3">
-                You can create additional requests anytime to get more help.
-                <strong className="block mt-1">New members join daily, so you can re-run matching anytime!</strong>
-              </p>
+              {helpRequests.length > 0 ? (
+                <>
+                  <Button
+                    onClick={handleFindNewMatches}
+                    disabled={isRefreshingMatches}
+                    className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {isRefreshingMatches ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Finding Matches...
+                      </>
+                    ) : (
+                      '🔄 Find New Matches'
+                    )}
+                  </Button>
+                  <p className="text-sm text-slate-500 mt-3">
+                    You have {helpRequests.length} active request{helpRequests.length !== 1 ? 's' : ''}.
+                    <strong className="block mt-1">New members join daily – click above to discover fresh connections!</strong>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => navigate('PostRequest')}
+                    className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    Create Your First Request
+                  </Button>
+                  <p className="text-sm text-slate-500 mt-3">
+                    You can create additional requests anytime to get more help.
+                    <strong className="block mt-1">New members join daily, so you can re-run matching anytime!</strong>
+                  </p>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
