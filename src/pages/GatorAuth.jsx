@@ -330,15 +330,28 @@ export default function GatorAuth() {
     );
   }
 
-  // Magic link handler
+  // Pre-fill email from URL if present
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlEmail = urlParams.get('email');
+    if (urlEmail) {
+      setMagicLinkEmail(urlEmail);
+      setShowMagicLink(true);
+    }
+  }, []);
+
+  // Magic link handler with double-submission prevention
   const handleMagicLinkSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double submission
+    
     if (!magicLinkEmail.trim()) {
       setMagicLinkStatus('error');
       setMagicLinkMessage('Please enter your email address.');
       return;
     }
 
+    setIsSubmitting(true);
     setMagicLinkStatus('loading');
     setMagicLinkMessage('Sending your secure login link...');
 
@@ -351,8 +364,20 @@ export default function GatorAuth() {
         throw new Error(res?.data?.error || 'Failed to send link.');
       }
     } catch (err) {
+      const errMsg = err?.response?.data?.error || err?.message || '';
+      
+      // Handle rate limiting
+      let message = 'Failed to send link. Please try again.';
+      if (errMsg.toLowerCase().includes('rate limit') || errMsg.toLowerCase().includes('too many')) {
+        message = 'Too many attempts. Please wait a minute before trying again.';
+      } else if (errMsg) {
+        message = errMsg;
+      }
+      
       setMagicLinkStatus('error');
-      setMagicLinkMessage(err?.response?.data?.error || err?.message || 'Failed to send link. Please try again.');
+      setMagicLinkMessage(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
