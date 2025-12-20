@@ -112,15 +112,21 @@ export default function Dashboard() {
 
   const loadStudentStats = async (myMessages, opps) => {
     try {
+      // Load HelpRequests for editing (these are what the matching system uses)
+      const myHelpRequests = await base44.entities.HelpRequest.filter(
+        { student_id: user.id },
+        '-created_date'
+      );
+      
+      // Set most recent help request for editing
+      if (myHelpRequests && myHelpRequests.length > 0) {
+        setExistingHelpRequest(myHelpRequests[0]);
+      }
+      
       const myRequests = await base44.entities.JobRequest.filter(
         { created_by: user.email },
         '-created_date'
       );
-      
-      // Set most recent request for editing
-      if (myRequests && myRequests.length > 0) {
-        setExistingRequest(myRequests[0]);
-      }
 
       let helpOffersCount = 0;
       if (myRequests && myRequests.length > 0) {
