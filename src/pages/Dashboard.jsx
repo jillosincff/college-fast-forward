@@ -192,9 +192,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-      {/* Limited Mode Banner */}
-      <LimitedModeBanner user={user} accessInfo={accessInfo} />
-      
       {/* Lifetime Access Banner */}
       {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
         <motion.div
