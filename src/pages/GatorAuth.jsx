@@ -179,11 +179,8 @@ export default function GatorAuth() {
           extractedToken = tokenMatch[1];
           addLog(`🔑 Extracted token: ${extractedToken.substring(0, 20)}...`);
           
-          // Try to set the session manually via SDK if available
-          if (base44.auth.setSession) {
-            await base44.auth.setSession(extractedToken);
-            addLog('✅ Manually set session via SDK');
-          } else if (base44.auth.setToken) {
+          // Try to set the session manually via SDK if available (sync methods only here)
+          if (base44.auth.setToken) {
             base44.auth.setToken(extractedToken);
             addLog('✅ Manually set token via SDK');
           } else {
