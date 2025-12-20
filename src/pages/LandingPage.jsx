@@ -286,37 +286,69 @@ export default function LandingPage() {
 
             <div className="grid md:grid-cols-3 gap-8 md:gap-12">
               {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
+              <motion.div 
+                className="text-center"
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0 }}
+              >
+                <motion.div 
+                  className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl bounce-subtle"
+                  whileHover={{ scale: 1.1 }}
+                >
                   <span className="text-3xl font-bold">1</span>
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">Post What You Need</h3>
                 <p className="text-slate-600">
                   Students describe the career help they need — resume review, interview prep, job leads, industry advice
                 </p>
-              </div>
+              </motion.div>
 
               {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
+              <motion.div 
+                className="text-center"
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
+                <motion.div 
+                  className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl bounce-subtle"
+                  style={{ animationDelay: '0.5s' }}
+                  whileHover={{ scale: 1.1 }}
+                >
                   <span className="text-3xl font-bold">2</span>
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">Get Matched Instantly</h3>
                 <p className="text-slate-600">
                   Our proprietary algorithm matches you with parents in your industry who can actually help
                 </p>
-              </div>
+              </motion.div>
 
               {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
+              <motion.div 
+                className="text-center"
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <motion.div 
+                  className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-xl bounce-subtle"
+                  style={{ animationDelay: '1s' }}
+                  whileHover={{ scale: 1.1 }}
+                >
                   <span className="text-3xl font-bold">3</span>
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">Connect & Get Help</h3>
                 <p className="text-slate-600">
                   Message directly, schedule calls, get the help you need — no cold outreach, no ghosting
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
