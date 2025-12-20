@@ -193,10 +193,17 @@ export default function GatorAuth() {
       
       addLog(`✅ Email verified match: ${user.email}`);
       
+      // Prevent double execution
+      if (processingRef.current) {
+        addLog('⏳ Already processing magic link flow...');
+        return;
+      }
+      
       // Apply the persona from magic link verification
       (async () => {
         processingRef.current = true;
         setProcessing(true);
+        setAuthProgress('Completing your account setup...');
         
         const role = postMagicRole || 'parent';
         addLog(`📝 Applying magic link role: ${role}`);
@@ -211,21 +218,44 @@ export default function GatorAuth() {
         
         const result = await updatePersonaWithRetry(updateData);
         
-        // Clear magic link context regardless of result
+        if (!result.success) {
+          addLog('⚠️ Persona update failed, retrying...');
+          // One more attempt
+          await updatePersonaWithRetry(updateData);
+        }
+        
+        // CRITICAL: Wait for user state to fully propagate
+        addLog('⏳ Waiting for session to propagate...');
+        let attempts = 0;
+        let freshUser = null;
+        while (attempts < 10) {
+          await new Promise(r => setTimeout(r, 300));
+          try {
+            freshUser = await base44.auth.me();
+            if (freshUser?.persona === role) {
+              addLog(`✅ Session confirmed: persona=${freshUser.persona}`);
+              break;
+            }
+          } catch (e) {
+            // Keep trying
+          }
+          attempts++;
+          if (attempts % 3 === 0) {
+            addLog(`⏳ Still waiting... attempt ${attempts}/10`);
+          }
+        }
+        
+        // Clear magic link context AFTER confirming session
         localStorage.removeItem('post_magic_verified');
         localStorage.removeItem('post_magic_email');
         localStorage.removeItem('post_magic_role');
         localStorage.removeItem('post_magic_timestamp');
         localStorage.removeItem('post_magic_needs_onboarding');
         
-        if (result.success) {
-          addLog('✅ Magic link persona applied successfully');
-        } else {
-          addLog('⚠️ Persona update failed, but continuing to GatorWelcome');
-        }
-        
         addLog('🎯 Magic link flow complete → GatorWelcome');
-        navigate('GatorWelcome');
+        
+        // Force full navigation to ensure fresh state
+        window.location.href = window.location.origin + '/#GatorWelcome';
       })();
       return;
     }
