@@ -85,22 +85,12 @@ export default function LandingPage() {
 
   const handleStudentAlumniClick = () => {
     trackEvent('cta_student_alumni_clicked');
-    if (user) {
-      navigate(user.onboarding_completed ? 'Dashboard' : 'StudentOnboarding');
-    } else {
-      sessionStorage.setItem('pending_invite_role', 'gator');
-      navigate('WelcomeRole');
-    }
+    navigate('GatorAuth');
   };
 
   const handleParentClick = () => {
     trackEvent('cta_parent_clicked');
-    if (user) {
-      navigate(user.onboarding_completed ? 'ParentDashboard' : 'Onboarding');
-    } else {
-      sessionStorage.setItem('pending_invite_role', 'parent');
-      navigate('WelcomeRole');
-    }
+    navigate('GatorAuth');
   };
 
   const spotsRemaining = foundingStats.spots_left;
