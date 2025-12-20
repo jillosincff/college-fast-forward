@@ -663,7 +663,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorStudentEmail', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
-const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'UFAmbassador'];
+const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
@@ -913,7 +913,7 @@ function AppContent() {
     }
 
     // STEP 2: Public pages ALWAYS accessible
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile', 'AdminSetup', 'LandingPage', 'UFAmbassador'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'LandingPage'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ [Public] Page accessible:', currentPage);
       setResolvedPage(currentPage);
