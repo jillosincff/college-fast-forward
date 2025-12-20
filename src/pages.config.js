@@ -28,7 +28,6 @@ import DebugVerification from './pages/DebugVerification';
 import AdminEmail from './pages/AdminEmail';
 import ParentDashboard from './pages/ParentDashboard';
 import Dashboard from './pages/Dashboard';
-import Roommates from './pages/Roommates';
 import Profile from './pages/Profile';
 import Opportunities from './pages/Opportunities';
 import PostOpportunity from './pages/PostOpportunity';
@@ -40,7 +39,6 @@ import MyImpact from './pages/MyImpact';
 import MyApplications from './pages/MyApplications';
 import TestingDashboard from './pages/TestingDashboard';
 import AdminSetup from './pages/AdminSetup';
-import TalentSpotlight from './pages/TalentSpotlight';
 import JobSpotlightLibrary from './pages/JobSpotlightLibrary';
 import CareerWishlist from './pages/CareerWishlist';
 import InterviewPrep from './pages/InterviewPrep';
@@ -51,8 +49,6 @@ import RequestInvite from './pages/RequestInvite';
 import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
 import ShareExpertise from './pages/ShareExpertise';
-import UFAmbassador from './pages/UFAmbassador';
-import AmbassadorLeaderboard from './pages/AmbassadorLeaderboard';
 import Notifications from './pages/Notifications';
 import ReferralAnalytics from './pages/ReferralAnalytics';
 import GatorAuth from './pages/GatorAuth';
@@ -60,7 +56,6 @@ import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorInviteCode from './pages/GatorInviteCode';
 import GatorWelcome from './pages/GatorWelcome';
 import GatorParentInvite from './pages/GatorParentInvite';
-import AmbassadorDashboard from './pages/AmbassadorDashboard';
 import GatorStudentEmail from './pages/GatorStudentEmail';
 import __Layout from './Layout.jsx';
 
@@ -96,7 +91,6 @@ export const PAGES = {
     "AdminEmail": AdminEmail,
     "ParentDashboard": ParentDashboard,
     "Dashboard": Dashboard,
-    "Roommates": Roommates,
     "Profile": Profile,
     "Opportunities": Opportunities,
     "PostOpportunity": PostOpportunity,
@@ -108,7 +102,6 @@ export const PAGES = {
     "MyApplications": MyApplications,
     "TestingDashboard": TestingDashboard,
     "AdminSetup": AdminSetup,
-    "TalentSpotlight": TalentSpotlight,
     "JobSpotlightLibrary": JobSpotlightLibrary,
     "CareerWishlist": CareerWishlist,
     "InterviewPrep": InterviewPrep,
@@ -119,8 +112,6 @@ export const PAGES = {
     "Pricing": Pricing,
     "PublicProfile": PublicProfile,
     "ShareExpertise": ShareExpertise,
-    "UFAmbassador": UFAmbassador,
-    "AmbassadorLeaderboard": AmbassadorLeaderboard,
     "Notifications": Notifications,
     "ReferralAnalytics": ReferralAnalytics,
     "GatorAuth": GatorAuth,
@@ -128,7 +119,6 @@ export const PAGES = {
     "GatorInviteCode": GatorInviteCode,
     "GatorWelcome": GatorWelcome,
     "GatorParentInvite": GatorParentInvite,
-    "AmbassadorDashboard": AmbassadorDashboard,
     "GatorStudentEmail": GatorStudentEmail,
 }
 
