@@ -549,13 +549,6 @@ export default function Dashboard() {
         }}
       />
 
-      <TalentSpotlightSetupModal
-        isOpen={showSpotlightModal}
-        onClose={() => setShowSpotlightModal(false)}
-        user={user}
-        onSuccess={handleSpotlightSuccess}
-      />
-      
       <EditHelpRequestModal
         isOpen={showEditRequestModal}
         onClose={() => setShowEditRequestModal(false)}
