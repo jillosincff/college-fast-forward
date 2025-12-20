@@ -550,10 +550,18 @@ export default function LandingPage() {
                   <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Parents help students for free</li>
                   <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan (up to 2 students + 2 parents)</li>
                 </ul>
-              </Card>
+                </Card>
+              </motion.div>
 
               {/* Early Adopters */}
-              <Card className="p-6 border-2 border-blue-200 bg-white">
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Card className="p-6 border-2 border-blue-200 bg-white opacity-80 hover:opacity-100 transition-opacity">
                 <div className="flex items-center gap-3 mb-4">
                   <Star className="w-8 h-8 text-blue-600" />
                   <div>
