@@ -282,7 +282,7 @@ export default function GatorAuth() {
     }
 
     // CASE 1: No auth at all - show login options instead of auto-redirect
-    if (!user && !hasAccessToken && !wasOAuthCallback && !isFreshOAuthCallback && !isNewUser) {
+    if (!user && !currentUser && !hasAccessToken && !wasOAuthCallback && !isFreshOAuthCallback && !isNewUser) {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
@@ -290,6 +290,13 @@ export default function GatorAuth() {
         setShowLoginOptions(true);
       }
       return;
+    }
+    
+    // CASE 1b: OAuth callback completed but we already have user - clear flag and process
+    if (wasOAuthCallback && user) {
+      addLog('🔄 OAuth callback with existing user - clearing flag');
+      sessionStorage.removeItem('oauth_callback_detected');
+      // Fall through to let other cases handle routing
     }
 
     // CASE 2: Fresh OAuth callback (access_token in URL or is_new_user param) - mark it and start polling
