@@ -332,40 +332,6 @@ export default function Dashboard() {
         {/* Full Access Upgrade Card (for free-tier students without linked parent) */}
         <FullAccessUpgradeCard user={user} />
         
-        {/* Brand Ambassador Promotion */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <Card className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-[#FF6B3D] border-0 shadow-2xl hover:shadow-3xl transition-all">
-            <CardContent className="pt-10 pb-10">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-white">
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-                    <span className="text-4xl">💰</span>
-                    <h3 className="text-2xl md:text-3xl font-extrabold">
-                      Earn While You Share
-                    </h3>
-                  </div>
-                  <p className="text-white/95 text-lg font-medium leading-relaxed">
-                    Become a Brand Ambassador and get paid to help fellow Gators discover opportunities!
-                  </p>
-                </div>
-                <Button
-                  onClick={() => navigate('UFAmbassador')}
-                  className="bg-white text-[#FA4616] hover:bg-slate-50 font-bold px-10 py-7 text-lg shadow-2xl rounded-xl transition-all hover:scale-105"
-                >
-                  Learn More →
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        
-        {/* Campus Ambassador Widget */}
-        <CampusAmbassadorWidget />
-        
         {/* Primary CTA - Find Opportunities */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
