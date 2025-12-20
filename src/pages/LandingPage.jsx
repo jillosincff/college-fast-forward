@@ -526,10 +526,17 @@ export default function LandingPage() {
 
             <div className="space-y-6">
               {/* Founding Members */}
-              <Card className="p-6 border-4 border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 px-4 py-1 text-sm font-bold">
-                  {spotsRemaining} spots left
-                </div>
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-6 border-4 border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 relative overflow-hidden founding-card-glow">
+                  <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 px-4 py-1 text-sm font-bold pulse-badge">
+                    {spotsRemaining} spots left
+                  </div>
                 <div className="flex items-center gap-3 mb-4">
                   <Crown className="w-8 h-8 text-yellow-600" />
                   <div>
