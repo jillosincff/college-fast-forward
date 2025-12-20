@@ -68,7 +68,7 @@ export default function StudentOnboarding() {
 
   const [formData, setFormData] = useState({
     // Step 1
-    industry: '',
+    industries: [],
     custom_industry: '',
     help_types: ['career_guidance', 'resume_review', 'interview_prep'],
     // Step 2
@@ -112,6 +112,16 @@ export default function StudentOnboarding() {
     setErrors(prev => ({ ...prev, [field]: null }));
   };
 
+  const toggleIndustry = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      industries: prev.industries.includes(value)
+        ? prev.industries.filter(v => v !== value)
+        : [...prev.industries, value]
+    }));
+    setErrors(prev => ({ ...prev, industries: null }));
+  };
+
   const toggleHelpType = (value) => {
     setFormData(prev => ({
       ...prev,
@@ -124,8 +134,8 @@ export default function StudentOnboarding() {
 
   const validateStep1 = () => {
     const newErrors = {};
-    if (!formData.industry && !formData.custom_industry?.trim()) {
-      newErrors.industry = 'Please select an industry';
+    if (formData.industries.length === 0 && !formData.custom_industry?.trim()) {
+      newErrors.industries = 'Please select at least one industry';
     }
     if (formData.help_types.length === 0) {
       newErrors.help_types = 'Please select at least one type of help';
@@ -161,9 +171,6 @@ export default function StudentOnboarding() {
     setShowLoading(true);
 
     try {
-      // Determine final industry value
-      const industryValue = formData.industry || 'other';
-      
       // Map internal values to HelpRequest schema values
       const industryMapping = {
         'technology': 'Technology & Software',
@@ -181,6 +188,10 @@ export default function StudentOnboarding() {
         'other': 'Other'
       };
 
+      // Get primary industry (first selected) for HelpRequest
+      const primaryIndustry = formData.industries[0] || 'other';
+      const mappedPrimaryIndustry = industryMapping[primaryIndustry] || 'Other';
+
       // Map help types to schema values
       const helpTypeMapping = {
         'career_guidance': 'career_advice',
@@ -194,6 +205,11 @@ export default function StudentOnboarding() {
       const mappedHelpTypes = formData.help_types.map(t => helpTypeMapping[t] || t);
 
       // Create HelpRequest
+      const allIndustries = formData.industries.map(i => industryMapping[i] || i);
+      if (formData.custom_industry?.trim()) {
+        allIndustries.push(formData.custom_industry.trim());
+      }
+      
       const helpRequest = await HelpRequest.create({
         student_id: user.id,
         student_email: user.email,
@@ -201,8 +217,8 @@ export default function StudentOnboarding() {
         student_major: formData.major.trim(),
         student_year: formData.year,
         help_types: mappedHelpTypes,
-        industry: industryMapping[industryValue] || 'Other',
-        description: formData.description?.trim() || `Looking for help in ${industryMapping[industryValue] || formData.custom_industry}`,
+        industry: mappedPrimaryIndustry,
+        description: formData.description?.trim() || `Looking for help in ${allIndustries.join(', ') || 'various industries'}`,
         timeline: formData.timeline === 'asap' ? 'this_week' : 
                   formData.timeline === 'one_to_three_months' ? 'this_month' : 'no_rush',
         status: 'active'
@@ -453,50 +469,52 @@ export default function StudentOnboarding() {
               {/* Industry Selection */}
               <div className="mb-8">
                 <label className="block text-lg font-semibold text-slate-800 mb-4">
-                  What industry are you interested in? *
+                  What industries are you interested in? * <span className="font-normal text-slate-500">(Select all that apply)</span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  {INDUSTRIES.map(ind => (
-                    <button
-                      key={ind.value}
-                      type="button"
-                      onClick={() => {
-                        updateField('industry', ind.value);
-                        updateField('custom_industry', '');
-                      }}
-                      className={`p-4 rounded-xl border-3 transition-all text-center ${
-                        formData.industry === ind.value
-                          ? 'border-[#FA4616] bg-orange-50 border-3'
-                          : 'border-slate-200 bg-white hover:bg-orange-50 hover:border-orange-200'
-                      }`}
-                      style={{ borderWidth: formData.industry === ind.value ? '3px' : '2px' }}
-                    >
-                      <span className="text-2xl block mb-1">{ind.icon}</span>
-                      <span className={`text-sm font-medium ${
-                        formData.industry === ind.value ? 'text-[#FA4616]' : 'text-slate-700'
-                      }`}>
-                        {ind.label}
-                      </span>
-                    </button>
-                  ))}
+                  {INDUSTRIES.map(ind => {
+                    const isSelected = formData.industries.includes(ind.value);
+                    return (
+                      <button
+                        key={ind.value}
+                        type="button"
+                        onClick={() => toggleIndustry(ind.value)}
+                        className={`p-4 rounded-xl transition-all text-center relative ${
+                          isSelected
+                            ? 'border-[#FA4616] bg-orange-50'
+                            : 'border-slate-200 bg-white hover:bg-orange-50 hover:border-orange-200'
+                        }`}
+                        style={{ borderWidth: isSelected ? '3px' : '2px', borderStyle: 'solid' }}
+                      >
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 bg-[#FA4616] rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                        <span className="text-2xl block mb-1">{ind.icon}</span>
+                        <span className={`text-sm font-medium ${
+                          isSelected ? 'text-[#FA4616]' : 'text-slate-700'
+                        }`}>
+                          {ind.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
                 
                 <div className="mt-4">
                   <p className="text-sm text-slate-600 mb-2">Not seeing your industry?</p>
                   <Input
                     value={formData.custom_industry}
-                    onChange={(e) => {
-                      updateField('custom_industry', e.target.value);
-                      if (e.target.value.trim()) updateField('industry', '');
-                    }}
-                    placeholder="Specify your industry"
+                    onChange={(e) => updateField('custom_industry', e.target.value)}
+                    placeholder="Specify additional industry"
                     className="max-w-sm"
                   />
                 </div>
                 
-                {errors.industry && (
+                {errors.industries && (
                   <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" /> {errors.industry}
+                    <AlertCircle className="w-4 h-4" /> {errors.industries}
                   </p>
                 )}
               </div>
