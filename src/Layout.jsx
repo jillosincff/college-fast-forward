@@ -712,12 +712,12 @@ const getPageComponent = (pageName) => {
     case 'ParentDashboard': return ParentDashboard;
     case 'AdminDashboard': return AdminDashboard;
     case 'Connections': return Connections;
-    case 'TalentSpotlight': return React.lazy(() => import('./pages/TalentSpotlight'));
+
     case 'CompanyProfile': return CompanyProfile;
     case 'Opportunities': return Opportunities;
     case 'PostOpportunity': return PostOpportunity;
     case 'PostRequest': return PostRequest;
-    case 'Roommates': return Roommates;
+
     case 'Profile': return Profile;
     case 'ProfileEdit': return ProfileEdit;
     case 'WelcomeRole': return WelcomeRole;
@@ -739,7 +739,7 @@ const getPageComponent = (pageName) => {
     case 'PublicProfile': return PublicProfile;
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
-    case 'UFAmbassador': return UFAmbassador;
+
     case 'Notifications': return Notifications;
     case 'ReferralAnalytics': return ReferralAnalytics;
     case 'GatorAuth': return GatorAuth;
