@@ -34,7 +34,7 @@ export default function Dashboard() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSpotlightModal, setShowSpotlightModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
-  const [existingRequest, setExistingRequest] = useState(null);
+  const [existingHelpRequest, setExistingHelpRequest] = useState(null);
   const [networkStats, setNetworkStats] = useState({
     totalUsers: 226,
     totalStudents: 66,
