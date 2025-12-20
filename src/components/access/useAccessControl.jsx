@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 
 const FOUNDING_GATOR_LIMIT = 1000;
-const FREE_DAILY_MESSAGE_LIMIT = 3;
-const EARLY_ADOPTER_THRESHOLD = 5000; // After 5,000 users, price goes to $19
-const PREMIUM_PRICE_EARLY = 9; // $9/month for users 1,001-4,999
-const PREMIUM_PRICE_STANDARD = 19; // $19/month for users 5,000+
-const PREMIUM_ACTIVATION_THRESHOLD = 1000; // Premium features activate after 1,000 users
-const LIFETIME_DEAL_START = 451; // Lifetime deal available from user 451
-const LIFETIME_DEAL_END = 2000; // Lifetime deal ends at user 2,000
-const LIFETIME_DEAL_PRICE = 149; // $149 one-time payment
+const EARLY_ADOPTER_THRESHOLD = 5000;
+const PREMIUM_PRICE_EARLY = 9;
+const PREMIUM_PRICE_STANDARD = 19;
+const PREMIUM_ACTIVATION_THRESHOLD = 1000;
+const LIFETIME_DEAL_START = 451;
+const LIFETIME_DEAL_END = 2000;
+const LIFETIME_DEAL_PRICE = 149;
 
 // Cache for user count to avoid repeated API calls
 let cachedUserCount = null;
@@ -67,11 +66,10 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
         hasFullAccess: false,
         isPremium: false,
         isFoundingGator: false,
-        isLimitedMode: true,
+        isLimitedMode: false,
         canSendMessages: false,
-        messagesRemaining: 0,
-        messageLimit: FREE_DAILY_MESSAGE_LIMIT,
-        canAccessTalentSpotlight: false,
+        messagesRemaining: Infinity,
+        messageLimit: Infinity,
         canApplyToOpportunities: false,
         canSaveOpportunities: false,
         canMessageInDirectory: false,
@@ -83,28 +81,9 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
       };
     }
 
-    // If premium features not yet activated (< 1,000 users), everyone gets full access
+    // Everyone gets full access - no freemium limits
     const premiumActivated = isPremiumActive(totalUserCount);
-    if (!premiumActivated && user.persona !== 'parent' && !user.roles?.includes('admin')) {
-      return {
-        hasFullAccess: true,
-        isPremium: false, // Not premium, just pre-activation
-        isFoundingGator: user.is_founding_gator === true || (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT),
-        isLimitedMode: false,
-        canSendMessages: true,
-        messagesRemaining: Infinity,
-        messageLimit: Infinity,
-        canAccessTalentSpotlight: true,
-        canApplyToOpportunities: true,
-        canSaveOpportunities: true,
-        canMessageInDirectory: true,
-        canSeeFullContactInfo: true,
-        isFeatured: false,
-        hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-        premiumActivated: false,
-        reason: 'pre_activation_free'
-      };
-    }
+    const isFoundingGator = user.is_founding_gator === true || (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT);
 
     // Parents always have full access
     if (user.persona === 'parent') {
