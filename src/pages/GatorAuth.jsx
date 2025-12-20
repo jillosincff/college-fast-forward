@@ -170,6 +170,30 @@ export default function GatorAuth() {
       addLog('🔐 Fresh OAuth callback detected with access_token in URL');
       sessionStorage.setItem('oauth_callback_detected', 'true');
       
+      // CRITICAL: Extract token and try to set it manually before cleaning URL
+      let extractedToken = null;
+      try {
+        // Try to extract access_token from hash
+        const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
+        if (tokenMatch) {
+          extractedToken = tokenMatch[1];
+          addLog(`🔑 Extracted token: ${extractedToken.substring(0, 20)}...`);
+          
+          // Try to set the session manually via SDK if available
+          if (base44.auth.setSession) {
+            await base44.auth.setSession(extractedToken);
+            addLog('✅ Manually set session via SDK');
+          } else if (base44.auth.setToken) {
+            base44.auth.setToken(extractedToken);
+            addLog('✅ Manually set token via SDK');
+          } else {
+            addLog('⚠️ No SDK method to set token manually');
+          }
+        }
+      } catch (tokenErr) {
+        addLog(`⚠️ Token extraction/setting error: ${tokenErr.message}`);
+      }
+      
       // Clean URL - remove tokens from hash for security
       const cleanHash = '#GatorAuth';
       if (window.location.hash !== cleanHash) {
