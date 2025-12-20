@@ -238,7 +238,39 @@ export default function GatorAuth() {
         return;
       }
 
-      // Otherwise, need role selection (non-invited user)
+      // CRITICAL: Auto-assign 'gator' role for @ufl.edu students
+      const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+      if (isUFLStudent && !user.persona) {
+        addLog(`🎓 UFL student detected - auto-assigning gator role`);
+        
+        if (processingRef.current) return;
+        processingRef.current = true;
+        setProcessing(true);
+        
+        (async () => {
+          try {
+            await base44.auth.updateMe({
+              persona: 'gator',
+              roles: ['gator'],
+              onboarding_completed: false,
+              is_new_signup: true
+            });
+            
+            addLog('✅ Gator role auto-applied for UFL student');
+            if (refreshUser) await refreshUser();
+            navigate('GatorWelcome');
+          } catch (err) {
+            addLog(`❌ Auto-role set failed: ${err.message}`);
+            navigate('GatorRoleSelection');
+          } finally {
+            processingRef.current = false;
+            if (isMountedRef.current) setProcessing(false);
+          }
+        })();
+        return;
+      }
+
+      // Otherwise, need role selection (non-invited, non-UFL user)
       addLog('➡️ No persona, routing to GatorRoleSelection');
       navigate('GatorRoleSelection');
       return;
@@ -424,6 +456,38 @@ export default function GatorAuth() {
     const reliableUser = currentUser || user;
     if (reliableUser && !wasOAuthCallback && !pendingRole) {
       addLog(`✅ Reliable user: ${reliableUser.email}, persona: ${reliableUser.persona}, onboarded: ${reliableUser.onboarding_completed}`);
+
+      // CRITICAL: Auto-assign 'gator' role for @ufl.edu students who somehow don't have a persona
+      const isUFLStudent = reliableUser.email?.toLowerCase().endsWith('@ufl.edu');
+      if (isUFLStudent && !reliableUser.persona) {
+        addLog(`🎓 UFL student without persona - auto-assigning gator role`);
+        
+        if (processingRef.current) return;
+        processingRef.current = true;
+        setProcessing(true);
+        
+        (async () => {
+          try {
+            await base44.auth.updateMe({
+              persona: 'gator',
+              roles: ['gator'],
+              onboarding_completed: false,
+              is_new_signup: true
+            });
+            
+            addLog('✅ Gator role auto-applied for UFL student');
+            if (refreshUser) await refreshUser();
+            navigate('GatorWelcome');
+          } catch (err) {
+            addLog(`❌ Auto-role set failed: ${err.message}`);
+            navigate('GatorRoleSelection');
+          } finally {
+            processingRef.current = false;
+            if (isMountedRef.current) setProcessing(false);
+          }
+        })();
+        return;
+      }
 
       const nextRoute = determineNextRoute(reliableUser, null);
       addLog(`🎯 Routing to: ${nextRoute}`);
