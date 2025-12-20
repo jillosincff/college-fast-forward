@@ -151,13 +151,14 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 1: No auth at all - initiate OAuth login
+    // CASE 1: No auth at all - show login options instead of auto-redirect
     if (!user && !hasAccessToken && !wasOAuthCallback) {
-      addLog('🔐 No auth detected, initiating OAuth login...');
+      addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
-      const callbackUrl = window.location.origin + '/#GatorAuth';
-      base44.auth.redirectToLogin(callbackUrl);
+      if (isMountedRef.current) {
+        setShowLoginOptions(true);
+      }
       return;
     }
 
