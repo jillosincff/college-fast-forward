@@ -393,15 +393,27 @@ export default function StudentMatchesWidget({ user }) {
 
             {/* Match types grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-white rounded-xl p-5 border-2 border-slate-200 text-center hover:border-[#FA4616]/50 transition-colors">
-                <div className="text-4xl mb-3">💼</div>
+              <div 
+                className="rounded-xl p-5 border-2 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-[#FA4616]"
+                style={{ 
+                  background: 'linear-gradient(135deg, #FEF9F5 0%, #FFFFFF 100%)',
+                  borderColor: '#FED7AA'
+                }}
+              >
+                <div className="text-5xl mb-3">💼</div>
                 <h3 className="font-bold text-slate-900 mb-2">Parents & Alumni</h3>
                 <p className="text-sm text-slate-600">
                   Industry pros with hiring connections and career expertise
                 </p>
               </div>
-              <div className="bg-white rounded-xl p-5 border-2 border-slate-200 text-center hover:border-[#FA4616]/50 transition-colors">
-                <div className="text-4xl mb-3">🤝</div>
+              <div 
+                className="rounded-xl p-5 border-2 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-teal-500"
+                style={{ 
+                  background: 'linear-gradient(135deg, #F0FDFA 0%, #FFFFFF 100%)',
+                  borderColor: '#99F6E4'
+                }}
+              >
+                <div className="text-5xl mb-3">🤝</div>
                 <h3 className="font-bold text-slate-900 mb-2">Fellow Gators</h3>
                 <p className="text-sm text-slate-600">
                   Students with similar backgrounds to collaborate with
@@ -442,13 +454,17 @@ export default function StudentMatchesWidget({ user }) {
                         Finding Matches...
                       </>
                     ) : (
-                      '🔄 Find New Matches'
+                      '🔄 Find My Matches Now'
                     )}
                   </Button>
                   <p className="text-sm text-slate-500 mt-3">
-                    You have {helpRequests.length} active request{helpRequests.length !== 1 ? 's' : ''}.
-                    <strong className="block mt-1">New members join daily – click above to discover fresh connections!</strong>
+                    You have {helpRequests.length} active request{helpRequests.length !== 1 ? 's' : ''} from onboarding.
                   </p>
+                  <div className="mt-3 inline-block px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
+                    </p>
+                  </div>
                 </>
               ) : (
                 <>
@@ -460,8 +476,12 @@ export default function StudentMatchesWidget({ user }) {
                   </Button>
                   <p className="text-sm text-slate-500 mt-3">
                     You can create additional requests anytime to get more help.
-                    <strong className="block mt-1">New members join daily, so you can re-run matching anytime!</strong>
                   </p>
+                  <div className="mt-3 inline-block px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
+                    </p>
+                  </div>
                 </>
               )}
             </div>
