@@ -757,20 +757,21 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState(null);
   const [resolvedPage, setResolvedPage] = useState(null);
 
-  // CRITICAL: Detect OAuth callback via is_new_user param FIRST (before any other routing)
+  // CRITICAL: Detect OAuth callback via is_new_user param (before any other routing)
+  // But DON'T immediately route - let the normal routing logic handle it after user is loaded
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const isNewUser = urlParams.has('is_new_user');
     const stateToken = urlParams.get('state');
     const accessToken = urlParams.get('access_token');
     
-    // PRIORITY 1: is_new_user param - this is the primary OAuth callback indicator from Base44
+    // PRIORITY 1: is_new_user param - mark OAuth callback but let routing logic decide destination
     if (isNewUser) {
       console.log('🔐 [Layout] OAuth callback: is_new_user param detected');
       sessionStorage.setItem('oauth_callback_detected', 'true');
       
-      // Clean URL and navigate to role selection
-      window.history.replaceState(null, '', window.location.origin + '/#GatorRoleSelection');
+      // Clean URL but DON'T navigate yet - let routing logic decide based on user state
+      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
       return;
     }
     
