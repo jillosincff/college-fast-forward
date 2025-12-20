@@ -225,10 +225,21 @@ export default function GatorWelcome() {
           updateInProgressRef.current = false;
         });
     } else if (!needsUpdate) {
-      // Persona already correct
-      console.log('✅ [GatorWelcome] Persona already correct:', intendedRole);
+      // Persona already correct - but still show welcome if new signup
+      console.log('✅ [GatorWelcome] Persona already correct:', intendedRole, 'onboarding_completed:', user.onboarding_completed);
       clearPendingInviteData();
-      setStatus('ready');
+      
+      // CRITICAL: Always show welcome for new signups (onboarding not completed)
+      // This ensures new users see the welcome screen before proceeding
+      if (user.onboarding_completed !== true) {
+        console.log('📝 [GatorWelcome] New signup - showing welcome screen');
+        setStatus('ready');
+      } else {
+        // Truly returning user - redirect to dashboard
+        console.log('✅ [GatorWelcome] Returning user - redirecting to dashboard');
+        const destination = intendedRole === 'parent' || intendedRole === 'alumni' ? 'ParentDashboard' : 'Dashboard';
+        navigate(destination);
+      }
     }
     // If needsUpdate && updateInProgressRef.current, do nothing (update already in flight)
     
