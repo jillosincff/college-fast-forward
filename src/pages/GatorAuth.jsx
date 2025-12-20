@@ -129,11 +129,6 @@ export default function GatorAuth() {
     const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
     const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token');
     const hasError = urlParams.has('error') || hashParams.has('error');
-    
-    // Check for magic_token in URL (new direct flow - skips MagicLogin page)
-    const magicToken = hashParams.get('magic_token') || urlParams.get('magic_token');
-    const magicRole = hashParams.get('role') || urlParams.get('role');
-
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
     
