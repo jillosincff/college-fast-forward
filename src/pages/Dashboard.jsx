@@ -9,7 +9,6 @@ import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
 import EditHelpRequestModal from '@/components/dashboard/EditHelpRequestModal';
 import ParentSlotsCard from '@/components/dashboard/ParentSlotsCard';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UserPlus, Edit } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
