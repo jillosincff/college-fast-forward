@@ -1,8 +1,8 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
+import { createClient } from 'npm:@base44/sdk@0.8.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'content-type',
+  'Access-Control-Allow-Headers': 'content-type, authorization',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -20,6 +20,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log('🔐 Verifying magic link token...');
+
     const base44 = createClient({
       appId: Deno.env.get('BASE44_APP_ID'),
       serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
@@ -30,6 +32,7 @@ Deno.serve(async (req) => {
     const link = Array.isArray(links) ? links[0] : (links?.[0] || null);
 
     if (!link) {
+      console.log('❌ Magic link not found');
       return new Response(JSON.stringify({ error: 'Invalid or expired link.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -40,13 +43,17 @@ Deno.serve(async (req) => {
     const now = new Date();
     const expiresAt = new Date(link.expires_at);
     if (link.used === true || now > expiresAt) {
+      console.log('❌ Magic link expired or used');
       return new Response(JSON.stringify({ error: 'This link has expired or already been used.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Mark as used
+    const email = link.email.toLowerCase().trim();
+    console.log('✅ Magic link valid for:', email);
+
+    // Mark as used immediately to prevent replay attacks
     await base44.entities.MagicLink.update(link.id, {
       used: true,
       used_at: new Date().toISOString(),
@@ -54,13 +61,44 @@ Deno.serve(async (req) => {
       user_agent: req.headers.get('user-agent') || '',
     });
 
-    // Success; frontend will now trigger a proper login redirect
-    return new Response(JSON.stringify({ success: true, email: link.email }), {
+    // Find or create user
+    let user = null;
+    const existingUsers = await base44.entities.User.filter({ email });
+    user = Array.isArray(existingUsers) ? existingUsers[0] : null;
+
+    if (!user) {
+      console.log('📝 Creating new user for:', email);
+      // New user - they'll need to complete onboarding
+      user = await base44.entities.User.create({
+        email: email,
+        full_name: email.split('@')[0], // Temporary name from email
+        role: 'user',
+        onboarding_completed: false,
+      });
+      console.log('✅ New user created:', user.id);
+    } else {
+      console.log('✅ Existing user found:', user.id);
+    }
+
+    // Generate a session token for this user
+    // This creates an authenticated session without OAuth
+    const sessionToken = await base44.auth.createSessionForUser(user.id);
+    
+    console.log('✅ Session created for user');
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      email: email,
+      user_id: user.id,
+      session_token: sessionToken,
+      is_new_user: !user.onboarding_completed,
+      persona: user.persona || null
+    }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    console.error('verifyMagicLink error:', err);
+    console.error('❌ verifyMagicLink error:', err);
     return new Response(JSON.stringify({ error: err.message || 'Unexpected error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
