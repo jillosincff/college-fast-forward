@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { User } from '@/entities/User';
+// User entity import removed - MUST use base44.auth.updateMe() for self-updates
 import { JobRequest } from '@/entities/JobRequest';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { navigate } from '@/components/utils/navigation';
