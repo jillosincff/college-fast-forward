@@ -298,7 +298,39 @@ export default function StudentMatchesWidget({ user }) {
   }
 
   if (matches.length === 0) {
-    return null;
+    // Show encouraging empty state instead of hiding
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Card className="border-2 border-purple-200 shadow-lg bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
+          <CardContent className="pt-6 pb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Your Matches</h3>
+                <p className="text-sm text-slate-600">Parents and peers who can help you</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-purple-200 text-center">
+              <p className="text-lg text-slate-700 mb-2">🔍 Finding your matches...</p>
+              <p className="text-sm text-slate-500">
+                Complete your help request to get matched with Gator parents and peers who can assist with your career goals.
+              </p>
+              <Button
+                onClick={() => navigate('Connections')}
+                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Browse Emerging Gators
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
   }
 
   return (
