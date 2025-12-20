@@ -890,7 +890,9 @@ function AppContent() {
 
     // CRITICAL: Check if user is in active new signup flow (onboarding not completed)
     // This ensures users going through signup aren't redirected to dashboard prematurely
-    if (user && !user.onboarding_completed) {
+    // BUT: Only auto-redirect if they're on a page that would trigger the redirect (Dashboard, ParentDashboard, LandingPage)
+    // Don't auto-redirect if they're browsing other pages or just landed on the site
+    if (user && !user.onboarding_completed && user.persona) {
       console.log('🎯 [Onboarding Flow] User needs to complete onboarding, persona:', user.persona);
 
       // Allow new user flow pages during signup
@@ -900,15 +902,16 @@ function AppContent() {
         return;
       }
 
-      // Route to correct onboarding based on persona
-      if (user.persona === 'parent') {
-        if (currentPage !== 'Onboarding') {
+      // ONLY redirect to onboarding if user is on Dashboard/ParentDashboard (not LandingPage or other pages)
+      // This prevents auto-redirect when user first visits the site
+      const dashboardPages = ['Dashboard', 'ParentDashboard'];
+      if (dashboardPages.includes(currentPage)) {
+        // Route to correct onboarding based on persona
+        if (user.persona === 'parent' || user.persona === 'alumni') {
           console.log('🔄 [Parent Flow] -> Onboarding');
           navigate('Onboarding');
           return;
-        }
-      } else if (user.persona === 'gator') {
-        if (currentPage !== 'StudentOnboarding') {
+        } else if (user.persona === 'gator') {
           console.log('🔄 [Student Flow] -> StudentOnboarding');
           navigate('StudentOnboarding');
           return;
