@@ -59,10 +59,33 @@ export default function GatorWelcome() {
   useEffect(() => {
     if (isLoading) return;
 
-    // No user - redirect to auth
+    // No user - wait a bit then redirect (session might still be loading)
     if (!user) {
-      console.log('❌ [GatorWelcome] No user, redirecting to GatorAuth');
-      navigate('GatorAuth');
+      console.log('⏳ [GatorWelcome] No user yet, waiting for session...');
+      
+      // Poll for user session before giving up
+      let attempts = 0;
+      const checkSession = async () => {
+        while (attempts < 10) {
+          attempts++;
+          await new Promise(r => setTimeout(r, 500));
+          try {
+            const freshUser = await base44.auth.me();
+            if (freshUser?.email) {
+              console.log('✅ [GatorWelcome] Session found after polling:', freshUser.email);
+              refreshUser(); // Trigger AuthContext update
+              return; // Effect will re-run with user
+            }
+          } catch (e) {
+            // Keep polling
+          }
+        }
+        // After 5 seconds, redirect to auth
+        console.log('❌ [GatorWelcome] No session after polling, redirecting to GatorAuth');
+        navigate('GatorAuth');
+      };
+      
+      checkSession();
       return;
     }
 
