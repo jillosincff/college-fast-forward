@@ -147,7 +147,7 @@ export default function GatorAuth() {
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
 
-    addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, freshOAuth=${isFreshOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
+    addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, freshOAuth=${isFreshOAuthCallback}, isNewUser=${isNewUser}, token=${hasAccessToken}, role=${pendingRole}`);
 
     // Handle OAuth errors
     if (hasError) {
