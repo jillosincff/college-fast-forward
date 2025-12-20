@@ -922,11 +922,24 @@ const AdminDashboard = () => {
                           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-start gap-3 mb-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                                  request.role === 'alumni' 
+                                    ? 'bg-gradient-to-br from-blue-500 to-blue-700' 
+                                    : 'bg-gradient-to-br from-orange-500 to-orange-700'
+                                }`}>
                                   {request.full_name?.charAt(0) || request.email?.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-semibold text-slate-900">{request.full_name || 'Anonymous'}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold text-slate-900">{request.full_name || 'Anonymous'}</h3>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                      request.role === 'alumni'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-orange-100 text-orange-700'
+                                    }`}>
+                                      {request.role === 'alumni' ? '🎓 Alumni' : '👨‍👩‍👧 Parent'}
+                                    </span>
+                                  </div>
                                   <p className="text-sm text-slate-600">{request.email}</p>
                                   <p className="text-xs text-slate-500 mt-1">
                                     Requested {new Date(request.created_date).toLocaleDateString()}
