@@ -72,6 +72,7 @@ async function updatePersonaWithRetry(updateData, maxAttempts = 2) {
 export default function GatorAuth() {
   const { user, isLoading } = useAuth();
   const [processing, setProcessing] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); // Fresh user from polling
   const [authProgress, setAuthProgress] = useState('Connecting to Google...');
   const [errorDetails, setErrorDetails] = useState(null);
   const [debugLogs, setDebugLogs] = useState([]);
