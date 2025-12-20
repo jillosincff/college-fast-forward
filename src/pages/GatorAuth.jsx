@@ -279,7 +279,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 4: Normal routing (new or returning user)
+    // CASE 5: Normal routing (new or returning user)
     const reliableUser = currentUser || user;
     if (reliableUser && !wasOAuthCallback) {
       addLog(`✅ Reliable user: ${reliableUser.email}, persona: ${reliableUser.persona}, onboarded: ${reliableUser.onboarding_completed}`);
