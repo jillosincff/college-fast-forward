@@ -145,8 +145,6 @@ export default function GatorAuth() {
     const magicLinkExpired = postMagicTimestamp && (Date.now() - postMagicTimestamp > 10 * 60 * 1000); // 10 min expiry
 
     addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
-    addLog(`📧 Magic link: verified=${postMagicVerified}, email=${postMagicEmail}, role=${postMagicRole}`);
-    addLog(`🔗 URL magic_token: ${magicToken ? 'present' : 'none'}, role=${magicRole}`);
 
     // Handle OAuth errors
     if (hasError) {
