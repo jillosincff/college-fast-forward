@@ -122,28 +122,40 @@ export default function GatorAuth() {
       }
     };
 
+    // Check for role param in URL (from invite link)
+    const hashFragment = window.location.hash.substring(1);
+    const hashQueryPart = hashFragment.includes('?') ? hashFragment.split('?')[1] : '';
+    const hashUrlParams = new URLSearchParams(hashQueryPart);
+    const roleFromUrl = hashUrlParams.get('role');
+
+    if (roleFromUrl && !localStorage.getItem('pending_invite_role')) {
+      addLog(`📧 Invite role detected in URL: ${roleFromUrl}`);
+      localStorage.setItem('pending_invite_role', roleFromUrl);
+      // Clean URL
+      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+    }
+
     // Check OAuth callback indicators - check both URL params and hash
     const urlParams = new URLSearchParams(window.location.search);
-    const hashFragment = window.location.hash.substring(1);
-    
+
     // CRITICAL: Check is_new_user param FIRST - this is the main OAuth callback indicator
     const isNewUser = urlParams.has('is_new_user');
-    
+
     // Parse hash params more robustly - handle #GatorAuth?access_token=... or #access_token=... format
     let hashParams = new URLSearchParams();
     if (hashFragment.includes('access_token') || hashFragment.includes('error')) {
       // Token might be directly in hash or after ? 
-      const hashQueryPart = hashFragment.includes('?') ? hashFragment.split('?')[1] : hashFragment.replace('GatorAuth', '').replace(/^&/, '');
-      hashParams = new URLSearchParams(hashQueryPart);
+      const tokenHashPart = hashFragment.includes('?') ? hashFragment.split('?')[1] : hashFragment.replace('GatorAuth', '').replace(/^&/, '');
+      hashParams = new URLSearchParams(tokenHashPart);
     }
-    
+
     const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token') || hashFragment.includes('access_token=');
     const hasError = urlParams.has('error') || hashParams.has('error') || hashFragment.includes('error=');
     const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
-    
+
     // Detect fresh OAuth callback - is_new_user param is the primary indicator
     const isFreshOAuthCallback = (isNewUser || hasAccessToken) && !currentUser && !wasOAuthCallback;
-    
+
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
 
