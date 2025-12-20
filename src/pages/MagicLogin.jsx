@@ -8,6 +8,7 @@ export default function MagicLogin() {
   const params = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [errorMessage, setErrorMessage] = useState('');
+  const [verifiedEmail, setVerifiedEmail] = useState('');
 
   useEffect(() => {
     const verifyAndLogin = async () => {
@@ -35,21 +36,28 @@ export default function MagicLogin() {
         if (data?.success && data?.email) {
           console.log('✅ Magic link verified for:', data.email);
           setStatus('success');
+          setVerifiedEmail(data.email);
           
-          // Store verified user info in session for the auth flow
-          sessionStorage.setItem('magic_link_verified', 'true');
-          sessionStorage.setItem('magic_link_email', data.email);
-          sessionStorage.setItem('magic_link_user_id', data.user_id);
-          sessionStorage.setItem('magic_link_persona', data.persona || '');
-          sessionStorage.setItem('magic_link_onboarding', data.onboarding_completed ? 'true' : 'false');
+          // Store verified user info - use BOTH localStorage and sessionStorage for persistence
+          localStorage.setItem('magic_link_verified', 'true');
+          localStorage.setItem('magic_link_email', data.email);
+          localStorage.setItem('magic_link_user_id', data.user_id || '');
+          localStorage.setItem('magic_link_persona', data.persona || '');
+          localStorage.setItem('magic_link_onboarding', data.onboarding_completed ? 'true' : 'false');
+          
+          // Also set pending role based on their existing data or default to parent (most magic link users)
+          if (!data.persona) {
+            localStorage.setItem('pending_invite_role', 'parent');
+          }
           
           // Since Base44 requires OAuth for session creation, redirect to Google OAuth
-          // but the GatorAuth page will recognize this as a magic link user
+          // The user MUST sign in with Google using the SAME email they verified
           setTimeout(() => {
-            console.log('🔄 Redirecting to OAuth with magic link context...');
-            const callbackUrl = window.location.origin + '/#GatorAuth?magic_link=true';
+            console.log('🔄 Redirecting to Google OAuth...');
+            console.log('⚠️ User must sign in with:', data.email);
+            const callbackUrl = window.location.origin + '/#GatorWelcome';
             base44.auth.redirectToLogin(callbackUrl);
-          }, 1500);
+          }, 2000);
         } else {
           throw new Error(data?.error || 'Verification failed');
         }
