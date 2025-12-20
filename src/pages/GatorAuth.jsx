@@ -132,12 +132,7 @@ export default function GatorAuth() {
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
     
-    // Check for POST-MAGIC LINK context (user verified via magic link, now completing OAuth)
-    const postMagicVerified = localStorage.getItem('post_magic_verified') === 'true';
-    const postMagicEmail = localStorage.getItem('post_magic_email');
-    const postMagicRole = localStorage.getItem('post_magic_role');
-    const postMagicTimestamp = parseInt(localStorage.getItem('post_magic_timestamp') || '0');
-    const magicLinkExpired = postMagicTimestamp && (Date.now() - postMagicTimestamp > 10 * 60 * 1000); // 10 min expiry
+
 
     addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
 
