@@ -330,7 +330,8 @@ export default function StudentOnboarding() {
         console.log('🎟️ [StudentOnboarding] Saving referral code:', referralCode);
       }
 
-      await User.updateMyUserData(userUpdate);
+      // MUST use base44.auth.updateMe for proper session sync - NOT User.updateMyUserData
+      await base44.auth.updateMe(userUpdate);
 
       localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
