@@ -266,7 +266,7 @@ export default function LandingPage() {
               resume reviews, interview prep, job intros, and career advice — from people who actually want to help.
             </motion.p>
 
-            {/* Urgency Box */}
+            {/* Urgency Box - Dynamic from database */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -277,21 +277,23 @@ export default function LandingPage() {
                 <span className="text-2xl">🔥</span>
                 <span className="text-white font-bold text-lg md:text-xl">FOUNDING MEMBER OPPORTUNITY</span>
               </div>
-              <p className="text-white text-lg mb-6">
-                First 1,000 families join <span className="font-extrabold text-yellow-300">FREE FOREVER</span>
-              </p>
+              {totalFamilies <= 1000 && (
+                <p className="text-white text-lg mb-6">
+                  First 1,000 families join <span className="font-extrabold text-yellow-300">FREE FOREVER</span>
+                </p>
+              )}
               <div className="flex items-center justify-center gap-8 text-white">
                 <div className="text-center">
                   <div className="text-5xl md:text-6xl font-extrabold text-yellow-300">{totalFamilies}</div>
-                  <div className="text-base font-semibold mt-1">Families Claimed</div>
+                  <div className="text-base font-semibold mt-1">{urgencyMessage.primary.split(' ').slice(1).join(' ')}</div>
                 </div>
                 <div className="w-px h-16 bg-white/30"></div>
                 <div className="text-center">
                   <div className="text-5xl md:text-6xl font-extrabold text-yellow-300">{spotsRemaining}</div>
-                  <div className="text-base font-semibold mt-1">FREE Spots Left</div>
+                  <div className="text-base font-semibold mt-1">{urgencyMessage.secondary.split(' ').slice(1).join(' ') || 'Spots Left'}</div>
                 </div>
               </div>
-              <p className="text-white/90 text-sm mt-6 font-medium">After 1,000 members: $9-19/month</p>
+              <p className="text-white/90 text-sm mt-6 font-medium">{urgencyMessage.note}</p>
             </motion.div>
 
             {/* Two CTA Buttons */}
