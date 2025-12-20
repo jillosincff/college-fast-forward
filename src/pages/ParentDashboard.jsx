@@ -24,7 +24,6 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
-import FoundingCircleLeaderWidget from '@/components/dashboard/FoundingCircleLeaderWidget';
 import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
@@ -339,26 +338,6 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Founding Circle Leader Banner */}
-        {user?.is_founding_circle_lead && (
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-center md:text-left">
-                <h3 className="text-2xl font-black mb-2">🎉 You're a Founding Circle Leader!</h3>
-                <p className="text-orange-100">
-                  Earn 25% commission + team overrides. Track your earnings and team growth.
-                </p>
-              </div>
-              <Button
-                onClick={() => navigate('ReferralAnalytics')}
-                className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold rounded-full px-8 py-3 shadow-lg"
-              >
-                View Earnings Dashboard
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Connect With Your Gator Card */}
         <Card className="border-2 border-slate-200 shadow-lg">
           <CardContent className="p-8">
@@ -498,33 +477,6 @@ export default function ParentDashboard() {
               Start by answering a student's help request →
             </Button>
           </div>
-        </div>
-
-        {/* 7. Ambassador CTA */}
-        <div className="text-center py-6">
-          <p className="text-lg text-slate-600 mb-4">
-            Want to earn money while helping more Gators?
-          </p>
-          <Button
-            onClick={() => navigate('UFAmbassador')}
-            size="lg"
-            className="h-14 px-10 text-xl font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            style={{ backgroundColor: '#0021A5' }}
-          >
-            Yes – Make Me a Campus Ambassador
-          </Button>
-          {!user?.is_founding_circle_lead && (
-            <p className="mt-4 text-slate-500">
-              Founding Circle tier (25% + override)?{' '}
-              <Button 
-                variant="link"
-                onClick={() => navigate('UFAmbassador')}
-                className="text-[#FA4616] hover:underline font-medium p-0 h-auto"
-              >
-                Apply here →
-              </Button>
-            </p>
-          )}
         </div>
 
       </div>
