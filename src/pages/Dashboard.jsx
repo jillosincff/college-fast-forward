@@ -14,9 +14,7 @@ import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
-import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
-import FullAccessUpgradeCard from '@/components/dashboard/FullAccessUpgradeCard';
 
 import StudentMatchesWidget from '@/components/dashboard/StudentMatchesWidget';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
@@ -328,9 +326,6 @@ export default function Dashboard() {
             </Card>
           </motion.div>
         )}
-        
-        {/* Full Access Upgrade Card (for free-tier students without linked parent) */}
-        <FullAccessUpgradeCard user={user} />
         
         {/* Primary CTA - Find Opportunities */}
         <motion.div
