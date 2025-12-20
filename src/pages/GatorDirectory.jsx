@@ -12,8 +12,6 @@ import ProfileModal from '@/components/directory/ProfileModal';
 import { navigate } from '@/components/utils/navigation';
 import logger from '@/components/utils/logger';
 import { useAccessControl } from '@/components/access/useAccessControl';
-import LimitedModeBanner from '@/components/access/LimitedModeBanner';
-import UpgradeBanner from '@/components/access/UpgradeBanner';
 
 // --- Helper Component: Moved outside the main component ---
 const ErrorState = ({ error, onRetry }) => (
@@ -262,23 +260,6 @@ export default function GatorDirectory() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
-      {/* Upgrade Banner - shown when user hits message limit */}
-      {accessInfo.isLimitedMode && accessInfo.messagesRemaining === 0 && (
-        <div className="bg-slate-900 px-4 py-8">
-          <div className="max-w-7xl mx-auto">
-            <UpgradeBanner 
-              user={user} 
-              messagesRemaining={accessInfo.messagesRemaining}
-            />
-          </div>
-        </div>
-      )}
-      
-      {/* Limited Mode Banner - shown when user has messages remaining */}
-      {accessInfo.isLimitedMode && accessInfo.messagesRemaining > 0 && (
-        <LimitedModeBanner user={user} accessInfo={accessInfo} />
-      )}
-      
       {/* Hero Section - Gator Stadium Night Sky */}
       <div className="relative text-white py-20 px-4 overflow-hidden" style={{
         background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
