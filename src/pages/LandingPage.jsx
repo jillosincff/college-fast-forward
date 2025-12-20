@@ -8,6 +8,7 @@ import AnimatedNetworkHero from '../components/home/AnimatedNetworkHero';
 import FeaturePreviewModal from '@/components/home/FeaturePreviewModal';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import GenerateInviteModal from '@/components/dashboard/GenerateInviteModal';
+import LivePricingCounter from '@/components/pricing/LivePricingCounter';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
@@ -25,7 +26,12 @@ export default function LandingPage() {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [showAuthInstructions, setShowAuthInstructions] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [foundingStats, setFoundingStats] = useState({ spots_left: 430, total_users: 570 });
+  const [foundingStats, setFoundingStats] = useState({ 
+    spots_left: 300, 
+    total_users: 700,
+    current_tier: 'founding',
+    urgency_message: '🔥 Only 300 FREE Founding Spots Left!'
+  });
   
   const handleSeeHowItWorks = () => {
     const howItWorksSection = document.getElementById('how-it-works');
@@ -92,7 +98,10 @@ export default function LandingPage() {
         if (response.data.success) {
           setFoundingStats({
             spots_left: response.data.spots_left,
-            total_users: response.data.total_users
+            total_users: response.data.total_users || response.data.total_families,
+            current_tier: response.data.current_tier,
+            urgency_message: response.data.urgency_message,
+            next_tier_price: response.data.next_tier_price
           });
         }
       } catch (error) {
@@ -131,24 +140,50 @@ export default function LandingPage() {
       `}</style>
 
       <div className="min-h-screen bg-white">
-        {/* Founding Gator Bar */}
-        {foundingStats.spots_left > 0 && (
+        {/* Dynamic Pricing Bar */}
+        {foundingStats.spots_left !== null && (
           <div 
-            className="sticky top-0 z-50 text-white text-center py-3 px-4 font-bold shadow-lg"
-            style={{ backgroundColor: '#FA4616' }}
+            className={`sticky top-0 z-50 text-white text-center py-3 px-4 font-bold shadow-lg ${
+              foundingStats.current_tier === 'founding' 
+                ? 'bg-gradient-to-r from-orange-500 to-red-600' 
+                : foundingStats.current_tier === 'early_adopter'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-700'
+                : 'bg-gradient-to-r from-slate-700 to-slate-800'
+            }`}
           >
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3">
-              <span className="text-sm sm:text-base">
-                ⚡ ONLY <span className="text-2xl mx-1">{foundingStats.spots_left}</span> FOUNDING SPOTS LEFT (out of 1000) ⚡
-              </span>
-              <span className="text-xs sm:text-sm">
-                Lifetime free + permanent Founding Gator Family badge — claim yours now →
-              </span>
+              {foundingStats.current_tier === 'founding' ? (
+                <>
+                  <span className="text-sm sm:text-base">
+                    🔥 ONLY <span className="text-2xl mx-1 text-yellow-300">{foundingStats.spots_left}</span> FREE FOUNDING SPOTS LEFT! 🔥
+                  </span>
+                  <span className="text-xs sm:text-sm text-white/90">
+                    After 1,000 families: {foundingStats.next_tier_price}
+                  </span>
+                </>
+              ) : foundingStats.current_tier === 'early_adopter' ? (
+                <>
+                  <span className="text-sm sm:text-base">
+                    ⚡ <span className="text-2xl mx-1 text-yellow-300">{foundingStats.spots_left?.toLocaleString()}</span> spots left at $9/month! ⚡
+                  </span>
+                  <span className="text-xs sm:text-sm text-white/90">
+                    Lock in $9/month forever • After 5,000: {foundingStats.next_tier_price}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm sm:text-base">
+                  Join <span className="text-blue-300">{foundingStats.total_users?.toLocaleString()}+</span> Gator Families • $19/month Family Plan
+                </span>
+              )}
               <Button
                 onClick={() => !user ? handleTopRightJoinClick() : navigate('Dashboard')}
-                className="bg-yellow-400 text-slate-900 hover:bg-yellow-500 font-bold px-6 py-2 shadow-xl"
+                className="bg-yellow-400 text-slate-900 hover:bg-yellow-300 font-bold px-6 py-2 shadow-xl"
               >
-                Claim My Spot Free
+                {foundingStats.current_tier === 'founding' 
+                  ? 'Claim My FREE Spot' 
+                  : foundingStats.current_tier === 'early_adopter'
+                  ? 'Lock In $9/month'
+                  : 'Start Free Trial'}
               </Button>
             </div>
           </div>
