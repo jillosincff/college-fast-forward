@@ -1,0 +1,364 @@
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FileText, Users, MessageSquare, Clock, AlertTriangle, CheckCircle, Edit, RefreshCw, ArrowRight, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
+import { formatDistanceToNow, differenceInDays, addDays } from 'date-fns';
+
+const HELP_TYPE_LABELS = {
+  'career_advice': 'Career advice',
+  'internship_leads': 'Internship leads',
+  'resume_review': 'Resume review',
+  'interview_prep': 'Interview prep',
+  'industry_insights': 'Industry insights',
+  'networking_intros': 'Networking intros',
+  'informational_interview': 'Informational interviews'
+};
+
+export default function StudentHelpRequestCard({ 
+  helpRequest, 
+  matchCount = 0, 
+  responseCount = 0,
+  onRefresh,
+  parentMatches = []
+}) {
+  const [showRenewModal, setShowRenewModal] = useState(false);
+  const [showResolveModal, setShowResolveModal] = useState(false);
+  const [renewOption, setRenewOption] = useState('keep');
+  const [selectedHelper, setSelectedHelper] = useState('');
+  const [thankYouNote, setThankYouNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!helpRequest) {
+    return (
+      <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
+        <CardContent className="pt-6 pb-6 text-center">
+          <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-slate-700 mb-2">No Active Help Request</h3>
+          <p className="text-slate-500 mb-4">Create a help request to get matched with parents and alumni who can help your career.</p>
+          <Button 
+            onClick={() => navigate('StudentOnboarding')}
+            className="bg-[#FA4616] hover:bg-orange-600"
+          >
+            Create Help Request
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const now = new Date();
+  const expiresAt = helpRequest.expires_at ? new Date(helpRequest.expires_at) : addDays(new Date(helpRequest.created_date), 30);
+  const daysUntilExpiry = differenceInDays(expiresAt, now);
+  const isExpired = helpRequest.status === 'expired' || daysUntilExpiry < 0;
+  const isExpiringSoon = daysUntilExpiry <= 5 && daysUntilExpiry >= 0;
+  const createdDate = new Date(helpRequest.created_date);
+  const daysSincePosted = differenceInDays(now, createdDate);
+
+  const handleRenew = async () => {
+    setIsSubmitting(true);
+    try {
+      const newExpiresAt = addDays(new Date(), 30).toISOString();
+      await base44.entities.HelpRequest.update(helpRequest.id, {
+        status: 'active',
+        expires_at: newExpiresAt,
+        renewed_count: (helpRequest.renewed_count || 0) + 1
+      });
+      setShowRenewModal(false);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Failed to renew request:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResolve = async () => {
+    setIsSubmitting(true);
+    try {
+      await base44.entities.HelpRequest.update(helpRequest.id, {
+        status: 'resolved',
+        resolved_helper_id: selectedHelper || null,
+        resolved_thank_you: thankYouNote || null
+      });
+      setShowResolveModal(false);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Failed to resolve request:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const helpTypesText = (helpRequest.help_types || [])
+    .map(t => HELP_TYPE_LABELS[t] || t)
+    .join(', ');
+
+  return (
+    <>
+      <Card className={`border-2 shadow-lg ${
+        isExpired 
+          ? 'border-red-200 bg-red-50' 
+          : isExpiringSoon 
+            ? 'border-amber-200 bg-amber-50' 
+            : 'border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50'
+      }`}>
+        <CardContent className="pt-6 pb-6">
+          <div className="flex items-start gap-4 mb-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+              isExpired ? 'bg-red-100' : 'bg-blue-100'
+            }`}>
+              <FileText className={`w-6 h-6 ${isExpired ? 'text-red-600' : 'text-blue-600'}`} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-slate-900 mb-1">Your Help Request</h3>
+              <p className="text-slate-600 text-sm italic">"{helpRequest.description}"</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="outline" className="bg-white">
+              Looking for: {helpTypesText}
+            </Badge>
+            <Badge variant="outline" className="bg-white">
+              Industry: {helpRequest.industry}
+            </Badge>
+          </div>
+
+          <div className="border-t border-slate-200 pt-4 mb-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
+                  <Users className="w-4 h-4" />
+                  <span className="text-2xl font-bold">{matchCount}</span>
+                </div>
+                <p className="text-xs text-slate-500">Parent matches</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-2xl font-bold">{responseCount}</span>
+                </div>
+                <p className="text-xs text-slate-500">Responses</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-1 text-slate-600 mb-1">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {daysSincePosted === 0 ? 'Today' : `${daysSincePosted}d ago`}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  {isExpired 
+                    ? 'Expired' 
+                    : `Expires in ${daysUntilExpiry}d`
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Button
+              onClick={() => navigate('Connections')}
+              className="flex-1 bg-[#FA4616] hover:bg-orange-600"
+            >
+              View Your Matches
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('Connections')}
+              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+            >
+              View on Emerging Gators
+            </Button>
+          </div>
+
+          {/* Expiration warnings */}
+          {isExpired && (
+            <div className="bg-red-100 border border-red-200 rounded-lg p-4 mt-4">
+              <div className="flex items-center gap-2 text-red-700 mb-3">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="font-semibold">Your request expired {Math.abs(daysUntilExpiry)} days ago</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate('StudentOnboarding')}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Post New Request
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowRenewModal(true)}
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Renew Previous Request
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {isExpiringSoon && !isExpired && (
+            <div className="bg-amber-100 border border-amber-200 rounded-lg p-4 mt-4">
+              <div className="flex items-center gap-2 text-amber-700 mb-3">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="font-semibold">Your request expires in {daysUntilExpiry} days</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => setShowRenewModal(true)}
+                  className="bg-amber-600 hover:bg-amber-700"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Renew for 30 More Days
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('StudentOnboarding')}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit & Renew
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowResolveModal(true)}
+                  className="border-green-300 text-green-700 hover:bg-green-50"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Mark Resolved
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Renew Modal */}
+      <Dialog open={showRenewModal} onOpenChange={setShowRenewModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Renew Your Help Request</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <p className="text-sm text-slate-600 mb-2">Your current request:</p>
+              <p className="font-medium">"{helpRequest.description}"</p>
+              <p className="text-sm text-slate-500 mt-1">Looking for: {helpTypesText}</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+                <input
+                  type="radio"
+                  name="renewOption"
+                  value="keep"
+                  checked={renewOption === 'keep'}
+                  onChange={(e) => setRenewOption(e.target.value)}
+                />
+                <span>Keep as-is (renew for 30 days)</span>
+              </label>
+              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+                <input
+                  type="radio"
+                  name="renewOption"
+                  value="edit"
+                  checked={renewOption === 'edit'}
+                  onChange={(e) => setRenewOption(e.target.value)}
+                />
+                <span>Update request (edit text and help types)</span>
+              </label>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowRenewModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={renewOption === 'edit' ? () => navigate('StudentOnboarding') : handleRenew}
+                disabled={isSubmitting}
+                className="flex-1 bg-[#FA4616] hover:bg-orange-600"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Renew Request'}
+              </Button>
+            </div>
+
+            <p className="text-xs text-slate-500 text-center">
+              This will extend your request for 30 more days and keep you visible on Emerging Gators.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resolve Modal */}
+      <Dialog open={showResolveModal} onOpenChange={setShowResolveModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark Request as Resolved</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-600">Did you get the help you needed?</p>
+
+            {parentMatches.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Who helped you the most? (optional)
+                </label>
+                <Select value={selectedHelper} onValueChange={setSelectedHelper}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a helper..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parentMatches.map(match => (
+                      <SelectItem key={match.id} value={match.parent_id || match.id}>
+                        {match.parent_name || 'Unknown helper'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Want to thank them publicly? (optional)
+              </label>
+              <Textarea
+                value={thankYouNote}
+                onChange={(e) => setThankYouNote(e.target.value)}
+                placeholder="Brief thank you note..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowResolveModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleResolve}
+                disabled={isSubmitting}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Mark as Resolved'}
+              </Button>
+            </div>
+
+            <p className="text-xs text-slate-500 text-center">
+              This will close your request and thank your helpers. You can post a new request anytime.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
