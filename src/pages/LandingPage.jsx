@@ -244,25 +244,25 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 md:p-8 max-w-xl mx-auto mb-10 shadow-2xl urgency-box-glow"
             >
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="text-2xl">🔥</span>
                 <span className="text-white font-bold text-lg md:text-xl">FOUNDING MEMBER OPPORTUNITY</span>
               </div>
-              <p className="text-white text-lg mb-4">
+              <p className="text-white text-lg mb-6">
                 First 1,000 families join <span className="font-extrabold text-yellow-300">FREE FOREVER</span>
               </p>
-              <div className="flex items-center justify-center gap-6 text-white">
+              <div className="flex items-center justify-center gap-8 text-white">
                 <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-extrabold text-yellow-300">{totalFamilies}</div>
-                  <div className="text-sm opacity-90">spots claimed</div>
+                  <div className="text-5xl md:text-6xl font-extrabold text-yellow-300">{totalFamilies}</div>
+                  <div className="text-base font-semibold mt-1">Families Claimed</div>
                 </div>
-                <div className="text-3xl">•</div>
+                <div className="w-px h-16 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-extrabold text-yellow-300">{spotsRemaining}</div>
-                  <div className="text-sm opacity-90">remaining</div>
+                  <div className="text-5xl md:text-6xl font-extrabold text-yellow-300">{spotsRemaining}</div>
+                  <div className="text-base font-semibold mt-1">FREE Spots Left</div>
                 </div>
               </div>
-              <p className="text-white/80 text-sm mt-4">After 1,000 members: $9-19/month</p>
+              <p className="text-white/90 text-sm mt-6 font-medium">After 1,000 members: $9-19/month</p>
             </motion.div>
 
             {/* Two CTA Buttons */}
