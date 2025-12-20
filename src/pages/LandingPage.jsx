@@ -587,18 +587,18 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <Card className="p-6 border-2 border-slate-200 bg-white opacity-80 hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-3 mb-4">
-                  <Check className="w-8 h-8 text-slate-600" />
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">STANDARD</h3>
-                    <p className="text-slate-600">Members 5,001+</p>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Check className="w-8 h-8 text-slate-600" />
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">STANDARD</h3>
+                      <p className="text-slate-600">Members 5,001+</p>
+                    </div>
                   </div>
-                </div>
-                <div className="text-4xl font-extrabold text-slate-700 mb-4">$19<span className="text-lg font-normal text-slate-500">/month</span></div>
-                <ul className="space-y-2 text-slate-700">
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> All features</li>
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan included</li>
-                </ul>
+                  <div className="text-4xl font-extrabold text-slate-700 mb-4">$19<span className="text-lg font-normal text-slate-500">/month</span></div>
+                  <ul className="space-y-2 text-slate-700">
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> All features</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan included</li>
+                  </ul>
                 </Card>
               </motion.div>
             </div>
