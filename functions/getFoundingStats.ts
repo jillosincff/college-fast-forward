@@ -7,25 +7,40 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Get family count from GlobalCounter (more accurate for tiered pricing)
-    let familyCount = 0;
+    // ALWAYS get real user count from database
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const actualUserCount = allUsers.length;
     
+    // Update GlobalCounter to stay in sync with actual users
     try {
       const counters = await base44.asServiceRole.entities.GlobalCounter.filter({
         counter_name: 'family_count'
       });
       
       if (counters.length > 0) {
-        familyCount = counters[0].counter_value || 0;
+        // Only update if different (avoid unnecessary writes)
+        if (counters[0].counter_value !== actualUserCount) {
+          await base44.asServiceRole.entities.GlobalCounter.update(counters[0].id, {
+            counter_value: actualUserCount,
+            last_updated: new Date().toISOString()
+          });
+          console.log(`📊 Synced GlobalCounter: ${counters[0].counter_value} → ${actualUserCount}`);
+        }
       } else {
-        // Fallback: estimate from users
-        const allUsers = await base44.asServiceRole.entities.User.list();
-        familyCount = Math.ceil(allUsers.length * 0.7); // ~70% conversion to families
+        // Create counter if it doesn't exist
+        await base44.asServiceRole.entities.GlobalCounter.create({
+          counter_name: 'family_count',
+          counter_value: actualUserCount,
+          last_updated: new Date().toISOString()
+        });
+        console.log(`📊 Created GlobalCounter with value: ${actualUserCount}`);
       }
-    } catch (error) {
-      const allUsers = await base44.asServiceRole.entities.User.list();
-      familyCount = Math.ceil(allUsers.length * 0.7);
+    } catch (syncError) {
+      console.error('Failed to sync GlobalCounter:', syncError);
     }
+    
+    // Use actual user count for all calculations
+    const familyCount = actualUserCount;
 
     // Determine current tier
     let currentTier, spotsLeft, nextTierPrice;
