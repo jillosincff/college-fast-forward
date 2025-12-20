@@ -164,6 +164,58 @@ export default function GatorAuth() {
       return;
     }
 
+    // CASE -1: DIRECT MAGIC TOKEN IN URL - verify and start OAuth
+    // This is the new simplified flow: email link → GatorAuth?magic_token=xxx → verify → OAuth → done
+    if (magicToken && !processingRef.current) {
+      processingRef.current = true;
+      setProcessing(true);
+      setAuthProgress('Verifying your email...');
+      addLog(`🔐 Magic token detected: ${magicToken.substring(0, 10)}...`);
+      
+      (async () => {
+        try {
+          // Verify the magic token via backend
+          const verifyRes = await base44.functions.invoke('verifyMagicLink', { token: magicToken });
+          
+          if (verifyRes?.data?.success) {
+            const verifiedEmail = verifyRes.data.email;
+            addLog(`✅ Magic link verified for: ${verifiedEmail}`);
+            
+            // Store context for after OAuth completes
+            localStorage.setItem('post_magic_verified', 'true');
+            localStorage.setItem('post_magic_email', verifiedEmail);
+            localStorage.setItem('post_magic_role', magicRole || 'parent');
+            localStorage.setItem('post_magic_timestamp', Date.now().toString());
+            localStorage.setItem('pending_invite_role', magicRole || 'parent');
+            
+            // Clean URL and start OAuth
+            const cleanUrl = window.location.origin + '/#GatorAuth';
+            window.history.replaceState(null, '', cleanUrl);
+            
+            addLog('🚀 Starting Google OAuth...');
+            setAuthProgress('Connecting to Google...');
+            
+            // Small delay then redirect to Google OAuth
+            setTimeout(() => {
+              base44.auth.redirectToLogin(cleanUrl);
+            }, 500);
+          } else {
+            throw new Error(verifyRes?.data?.error || 'Invalid or expired link');
+          }
+        } catch (err) {
+          addLog(`❌ Magic link verification failed: ${err.message}`);
+          processingRef.current = false;
+          setProcessing(false);
+          setErrorDetails({
+            type: 'magic_link_invalid',
+            message: 'This sign-in link is invalid or expired. Please request a new one.'
+          });
+        }
+      })();
+      
+      return;
+    }
+
     // Clear expired magic link context
     if (magicLinkExpired) {
       addLog('⏰ Magic link context expired, clearing...');
