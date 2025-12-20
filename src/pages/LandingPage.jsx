@@ -510,10 +510,10 @@ export default function LandingPage() {
               >
                 <Card className="p-8 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white h-full hover:shadow-xl hover:-translate-y-1 transition-all">
                   <h3 className="text-2xl font-bold text-slate-900 mb-2">For Students & Alumni</h3>
-                  <p className="text-slate-600 mb-6">Get the Connections That Actually Matter</p>
+                  <p className="text-slate-600 mb-6">Get Career Help from Industry Professionals</p>
                   
                   <p className="text-slate-600 mb-4 text-sm">
-                    Whether you're still in school or recently graduated, get matched with experienced professionals who can help:
+                    Whether you're still in school or recently graduated, get matched with experienced parents and established alumni who can help:
                   </p>
                   
                   <ul className="space-y-3 mb-8">
@@ -551,19 +551,19 @@ export default function LandingPage() {
               >
                 <Card className="p-8 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white h-full hover:shadow-xl hover:-translate-y-1 transition-all">
                   <h3 className="text-2xl font-bold text-slate-900 mb-2">For Parents</h3>
-                  <p className="text-slate-600 mb-6">Help UF Students Launch Their Careers</p>
+                  <p className="text-slate-600 mb-6">Help UF Students & Alumni Launch Their Careers</p>
                   
                   <p className="text-slate-600 mb-4 text-sm">
-                    As a parent, you have the network and experience students need. Make a difference:
+                    As a parent, you have the network and experience young Gators need:
                   </p>
                   
                   <ul className="space-y-3 mb-8">
                     {[
                       'Get matched with students you can actually help',
-                      '10 minutes per student = life-changing impact',
+                      '10 minutes can change a career trajectory',
                       'See direct results of your advice',
                       'Stay connected to the UF community',
-                      'Always FREE for parents (we pay with our time)'
+                      'Always FREE for parents'
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
