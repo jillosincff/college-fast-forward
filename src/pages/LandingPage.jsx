@@ -124,7 +124,7 @@ export default function LandingPage() {
 
   const handleMainCTA = () => {
     trackEvent('cta_main_clicked');
-    navigate('WelcomeRole');
+    navigate('GatorAuth');
   };
 
   // Animated stats card component
