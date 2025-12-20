@@ -331,7 +331,8 @@ export default function GatorAuth() {
     }
 
     // CASE 3: OAuth callback - poll for session with timeout
-    if ((wasOAuthCallback || isFreshOAuthCallback) && !currentUser) {
+    // CRITICAL: Skip polling if we already have a user from AuthContext
+    if ((wasOAuthCallback || isFreshOAuthCallback) && !currentUser && !user) {
       processingRef.current = true;
       setProcessing(true);
       
