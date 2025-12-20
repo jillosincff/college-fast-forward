@@ -85,12 +85,12 @@ export default function LandingPage() {
 
   const handleStudentAlumniClick = () => {
     trackEvent('cta_student_alumni_clicked');
-    navigate('GatorAuth');
+    navigate('GatorRoleSelection');
   };
 
   const handleParentClick = () => {
     trackEvent('cta_parent_clicked');
-    navigate('GatorAuth');
+    navigate('GatorRoleSelection');
   };
 
   const spotsRemaining = foundingStats.spots_left;
@@ -124,7 +124,7 @@ export default function LandingPage() {
 
   const handleMainCTA = () => {
     trackEvent('cta_main_clicked');
-    navigate('GatorAuth');
+    navigate('GatorRoleSelection');
   };
 
   // Animated stats card component
@@ -180,7 +180,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
-                onClick={() => navigate('GatorAuth')}
+                onClick={() => navigate('GatorRoleSelection')}
                 className="text-white hover:bg-white/10 text-sm font-medium"
               >
                 Sign In
