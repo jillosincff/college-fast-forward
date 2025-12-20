@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
+import { Loader2, Briefcase, Users, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import EditHelpRequestModal from '@/components/dashboard/EditHelpRequestModal';
