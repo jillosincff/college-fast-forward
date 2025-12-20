@@ -381,113 +381,99 @@ export default function StudentMatchesWidget({ user }) {
       >
         <Card className="border-2 border-[#FA4616]/20 shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-blue-50/30 overflow-hidden">
           <CardContent className="pt-8 pb-8">
-            {/* Updated: Dec 20, 2025 - Visual differentiation */}
+            {/* WIDGET_VERSION: 2025-12-20-v2 */}
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🤝</div>
+              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🤝</div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                Get Matched with Gator Parents, Alumni & Peers
+                Your Gator Network Matches
               </h2>
               <p className="text-slate-600">
-                When you create a help request, we'll automatically connect you with:
+                We'll connect you with parents, alumni, and peers who can help:
               </p>
             </div>
 
-            {/* Match types grid - visually differentiated */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
+            {/* Match types grid - visually differentiated with inline styles for reliability */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 max-w-2xl mx-auto">
               {/* Parents & Alumni - Warm orange theme */}
               <div 
-                className="rounded-xl p-6 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-xl"
                 style={{
-                  background: 'linear-gradient(135deg, #FEF3E8 0%, #FFFFFF 100%)',
-                  border: '2px solid #FDBA74'
+                  background: 'linear-gradient(145deg, #FFF7ED 0%, #FFFFFF 100%)',
+                  border: '3px solid #FB923C',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  cursor: 'default'
                 }}
+                className="hover:-translate-y-1 hover:shadow-xl"
               >
-                <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>💼</div>
-                <h3 className="font-bold text-slate-900 mb-2 text-lg">Parents & Alumni</h3>
-                <p className="text-sm text-slate-600">
+                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>💼</div>
+                <h3 style={{ fontWeight: '700', color: '#1e293b', marginBottom: '8px', fontSize: '1.125rem' }}>Parents & Alumni</h3>
+                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
                   Industry pros with hiring connections and career expertise
                 </p>
               </div>
               
               {/* Fellow Gators - Cool teal theme */}
               <div 
-                className="rounded-xl p-6 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-xl"
                 style={{
-                  background: 'linear-gradient(135deg, #E6FFFA 0%, #FFFFFF 100%)',
-                  border: '2px solid #5EEAD4'
+                  background: 'linear-gradient(145deg, #F0FDFA 0%, #FFFFFF 100%)',
+                  border: '3px solid #2DD4BF',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  cursor: 'default'
                 }}
+                className="hover:-translate-y-1 hover:shadow-xl"
               >
-                <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>🤝</div>
-                <h3 className="font-bold text-slate-900 mb-2 text-lg">Fellow Gators</h3>
-                <p className="text-sm text-slate-600">
+                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🎓</div>
+                <h3 style={{ fontWeight: '700', color: '#1e293b', marginBottom: '8px', fontSize: '1.125rem' }}>Fellow Gators</h3>
+                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
                   Students with similar backgrounds to collaborate with
                 </p>
               </div>
             </div>
 
-            {/* How it works */}
-            <div className="bg-slate-50 rounded-xl p-5 mb-6 max-w-md mx-auto">
-              <h3 className="font-bold text-slate-900 mb-3">How it works:</h3>
-              <ol className="space-y-2 text-sm text-slate-700">
-                <li className="flex items-start gap-2">
-                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                  <span>Tell us what help you need</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                  <span>We match you with relevant people</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-[#FA4616] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                  <span>Connect with them directly</span>
-                </li>
-              </ol>
-            </div>
-
+            {/* CTA Section */}
             <div className="text-center">
-              {helpRequests.length > 0 ? (
-                <>
-                  <Button
-                    onClick={handleFindNewMatches}
-                    disabled={isRefreshingMatches}
-                    className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-                  >
-                    {isRefreshingMatches ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Finding Matches...
-                      </>
-                    ) : (
-                      '🔄 Find My Matches Now'
-                    )}
-                  </Button>
-                  <p className="text-sm text-slate-500 mt-3">
-                    You have {helpRequests.length} active request{helpRequests.length !== 1 ? 's' : ''} from onboarding.
-                  </p>
-                  <div className="mt-3 inline-block px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => navigate('PostRequest')}
-                    className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Create Your First Request
-                  </Button>
-                  <p className="text-sm text-slate-500 mt-3">
-                    You can create additional requests anytime to get more help.
-                  </p>
-                  <div className="mt-3 inline-block px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
-                    </p>
-                  </div>
-                </>
+              <Button
+                onClick={handleFindNewMatches}
+                disabled={isRefreshingMatches}
+                className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-10 py-4 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                style={{ borderRadius: '12px' }}
+              >
+                {isRefreshingMatches ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Finding Your Matches...
+                  </>
+                ) : (
+                  '🔍 Find My Matches'
+                )}
+              </Button>
+              
+              {helpRequests.length > 0 && (
+                <p className="text-sm text-slate-600 mt-4 font-medium">
+                  ✅ You have {helpRequests.length} active help request{helpRequests.length !== 1 ? 's' : ''} ready to match
+                </p>
               )}
+              
+              {/* Tip box */}
+              <div 
+                style={{
+                  marginTop: '16px',
+                  display: 'inline-block',
+                  padding: '12px 20px',
+                  background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+                  border: '2px solid #93C5FD',
+                  borderRadius: '12px'
+                }}
+              >
+                <p style={{ fontSize: '0.875rem', color: '#1e40af' }}>
+                  💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
