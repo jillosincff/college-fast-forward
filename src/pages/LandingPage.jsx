@@ -873,7 +873,7 @@ export default function LandingPage() {
         {/* Simple Footer */}
         <footer className="py-8 bg-slate-900 text-center">
           <div className="max-w-6xl mx-auto px-4">
-            <p className="text-white font-bold text-xl mb-2">Gator Network</p>
+
             <p className="text-slate-400 text-sm mb-4">
               Powered by College Fast Forward
             </p>
