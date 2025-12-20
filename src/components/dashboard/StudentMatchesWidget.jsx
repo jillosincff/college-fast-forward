@@ -393,26 +393,14 @@ export default function StudentMatchesWidget({ user }) {
 
             {/* Match types grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div 
-                className="rounded-xl p-5 border-2 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-[#FA4616]"
-                style={{ 
-                  background: 'linear-gradient(135deg, #FEF9F5 0%, #FFFFFF 100%)',
-                  borderColor: '#FED7AA'
-                }}
-              >
+              <div className="rounded-xl p-5 border-2 border-orange-200 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-[#FA4616] bg-gradient-to-br from-orange-50 to-white">
                 <div className="text-5xl mb-3">💼</div>
                 <h3 className="font-bold text-slate-900 mb-2">Parents & Alumni</h3>
                 <p className="text-sm text-slate-600">
                   Industry pros with hiring connections and career expertise
                 </p>
               </div>
-              <div 
-                className="rounded-xl p-5 border-2 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-teal-500"
-                style={{ 
-                  background: 'linear-gradient(135deg, #F0FDFA 0%, #FFFFFF 100%)',
-                  borderColor: '#99F6E4'
-                }}
-              >
+              <div className="rounded-xl p-5 border-2 border-teal-200 text-center transition-all duration-300 cursor-default hover:-translate-y-1 hover:shadow-lg hover:border-teal-500 bg-gradient-to-br from-teal-50 to-white">
                 <div className="text-5xl mb-3">🤝</div>
                 <h3 className="font-bold text-slate-900 mb-2">Fellow Gators</h3>
                 <p className="text-sm text-slate-600">
