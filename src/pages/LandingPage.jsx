@@ -223,6 +223,13 @@ export default function LandingPage() {
             .cta-pulse {
               animation: ctaPulse 2s ease-in-out infinite;
             }
+            @keyframes ctaButtonPulse {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.02); }
+            }
+            .cta-button-pulse {
+              animation: ctaButtonPulse 2s ease-in-out infinite;
+            }
             @keyframes bounce {
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(-8px); }
