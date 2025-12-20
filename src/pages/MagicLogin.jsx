@@ -34,30 +34,31 @@ export default function MagicLogin() {
         const data = res?.data;
         
         if (data?.success && data?.email) {
-          console.log('✅ Magic link verified for:', data.email);
+          const emailLower = data.email.toLowerCase();
+          console.log('✅ Magic link verified for:', emailLower);
           setStatus('success');
-          setVerifiedEmail(data.email);
+          setVerifiedEmail(emailLower);
           
-          // Store verified user info - use BOTH localStorage and sessionStorage for persistence
-          localStorage.setItem('magic_link_verified', 'true');
-          localStorage.setItem('magic_link_email', data.email);
-          localStorage.setItem('magic_link_user_id', data.user_id || '');
-          localStorage.setItem('magic_link_persona', data.persona || '');
-          localStorage.setItem('magic_link_onboarding', data.onboarding_completed ? 'true' : 'false');
+          // Store post-magic context in localStorage (survives redirects)
+          localStorage.setItem('post_magic_email', emailLower);
+          localStorage.setItem('post_magic_verified', 'true');
+          localStorage.setItem('post_magic_timestamp', Date.now().toString());
           
-          // Also set pending role based on their existing data or default to parent (most magic link users)
-          if (!data.persona) {
-            localStorage.setItem('pending_invite_role', 'parent');
-          }
+          // Set role - existing persona or default to parent (most magic link users are parents)
+          const role = data.persona || 'parent';
+          localStorage.setItem('post_magic_role', role);
           
-          // Since Base44 requires OAuth for session creation, redirect to Google OAuth
-          // The user MUST sign in with Google using the SAME email they verified
+          // Store if they need onboarding
+          localStorage.setItem('post_magic_needs_onboarding', data.onboarding_completed ? 'false' : 'true');
+          
+          console.log('📦 Stored post-magic context:', { email: emailLower, role, needsOnboarding: !data.onboarding_completed });
+          
+          // Redirect to Google OAuth - callback goes to GatorAuth which handles the context
           setTimeout(() => {
             console.log('🔄 Redirecting to Google OAuth...');
-            console.log('⚠️ User must sign in with:', data.email);
-            const callbackUrl = window.location.origin + '/#GatorWelcome';
+            const callbackUrl = window.location.origin + '/#GatorAuth';
             base44.auth.redirectToLogin(callbackUrl);
-          }, 2000);
+          }, 1500);
         } else {
           throw new Error(data?.error || 'Verification failed');
         }
@@ -87,8 +88,10 @@ export default function MagicLogin() {
           <>
             <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-white mb-2">Email Verified! 🐊</h2>
-            <p className="text-white/70 mb-2">One more step - sign in with Google</p>
-            <p className="text-white/60 text-sm">Use the same email: <strong>{verifiedEmail}</strong></p>
+            <p className="text-white/70 mb-2">Quick Google sign-in to complete setup...</p>
+            <p className="text-white/60 text-sm bg-white/10 rounded-lg px-3 py-2 mt-2">
+              Sign in with: <strong>{verifiedEmail}</strong>
+            </p>
             <div className="mt-4">
               <Loader2 className="w-5 h-5 animate-spin text-white/50 mx-auto" />
             </div>
