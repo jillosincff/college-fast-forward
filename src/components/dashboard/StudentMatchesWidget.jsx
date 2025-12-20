@@ -189,6 +189,7 @@ function PeerMatchCard({ match, onConnect }) {
   );
 }
 
+// VERSION: 2025-12-20-v3-FORCE-REBUILD
 export default function StudentMatchesWidget({ user }) {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -259,7 +260,6 @@ export default function StudentMatchesWidget({ user }) {
       let parentMatches = 0;
       let peerMatches = 0;
 
-      // Re-run matching for each active help request
       for (const request of helpRequests) {
         const { data: result } = await base44.functions.invoke('generateMatches', {
           help_request_id: request.id,
@@ -273,10 +273,8 @@ export default function StudentMatchesWidget({ user }) {
         }
       }
 
-      // Reload matches
       await loadMatches();
 
-      // Get total count
       const totalMatches = matches.length + totalNewMatches;
 
       setRefreshResult({
@@ -285,7 +283,6 @@ export default function StudentMatchesWidget({ user }) {
         breakdown: { parents: parentMatches, peers: peerMatches }
       });
 
-      // Auto-hide after 8 seconds
       setTimeout(() => setRefreshResult(null), 8000);
 
     } catch (error) {
@@ -325,7 +322,6 @@ export default function StudentMatchesWidget({ user }) {
       const recipientEmail = isPeer 
         ? selectedMatch.peer_email 
         : (selectedMatch.parent_email || `parent_${selectedMatch.parent_id}@gator.network`);
-      const recipientName = isPeer ? selectedMatch.peer_name : selectedMatch.parent_name;
 
       await base44.entities.Message.create({
         recipient_email: recipientEmail,
@@ -354,7 +350,6 @@ export default function StudentMatchesWidget({ user }) {
     }
   };
 
-  // Separate matches by type and category
   const parentMatches = matches.filter(m => m.match_type === 'parent' || !m.match_type);
   const peerMatches = matches.filter(m => m.match_type === 'peer');
   const highQualityParentMatches = parentMatches.filter(m => m.match_category === 'high' || m.match_score >= 20);
@@ -372,17 +367,17 @@ export default function StudentMatchesWidget({ user }) {
     );
   }
 
+  // EMPTY STATE - No matches yet
   if (matches.length === 0) {
-    // Show educational fallback UI with visual differentiation
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="border-2 border-[#FA4616]/20 shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-blue-50/30 overflow-hidden">
+        <Card className="border-2 border-[#FA4616]/20 shadow-lg overflow-hidden" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 50%, #F0F9FF 100%)' }}>
           <CardContent className="pt-8 pb-8">
-            {/* WIDGET_VERSION: 2025-12-20-v2 */}
-            <div className="text-center mb-6">
+            {/* Header */}
+            <div className="text-center mb-8">
               <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🤝</div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
                 Your Gator Network Matches
@@ -392,44 +387,44 @@ export default function StudentMatchesWidget({ user }) {
               </p>
             </div>
 
-            {/* Match types grid - visually differentiated with inline styles for reliability */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 max-w-2xl mx-auto">
-              {/* Parents & Alumni - Warm orange theme */}
+            {/* Match types grid with strong visual differentiation */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
+              {/* Parents & Alumni Card - Orange theme */}
               <div 
                 style={{
-                  background: 'linear-gradient(145deg, #FFF7ED 0%, #FFFFFF 100%)',
-                  border: '3px solid #FB923C',
+                  background: 'linear-gradient(145deg, #FFF7ED 0%, #FED7AA 100%)',
+                  border: '3px solid #F97316',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px 24px',
                   textAlign: 'center',
-                  transition: 'all 0.3s ease',
-                  cursor: 'default'
+                  boxShadow: '0 4px 12px rgba(249, 115, 22, 0.15)'
                 }}
-                className="hover:-translate-y-1 hover:shadow-xl"
               >
                 <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>💼</div>
-                <h3 style={{ fontWeight: '700', color: '#1e293b', marginBottom: '8px', fontSize: '1.125rem' }}>Parents & Alumni</h3>
-                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                <h3 style={{ fontWeight: '700', color: '#9a3412', marginBottom: '8px', fontSize: '1.25rem' }}>
+                  Parents & Alumni
+                </h3>
+                <p style={{ fontSize: '0.875rem', color: '#c2410c' }}>
                   Industry pros with hiring connections and career expertise
                 </p>
               </div>
               
-              {/* Fellow Gators - Cool teal theme */}
+              {/* Fellow Gators Card - Teal theme */}
               <div 
                 style={{
-                  background: 'linear-gradient(145deg, #F0FDFA 0%, #FFFFFF 100%)',
-                  border: '3px solid #2DD4BF',
+                  background: 'linear-gradient(145deg, #F0FDFA 0%, #99F6E4 100%)',
+                  border: '3px solid #14B8A6',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px 24px',
                   textAlign: 'center',
-                  transition: 'all 0.3s ease',
-                  cursor: 'default'
+                  boxShadow: '0 4px 12px rgba(20, 184, 166, 0.15)'
                 }}
-                className="hover:-translate-y-1 hover:shadow-xl"
               >
                 <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🎓</div>
-                <h3 style={{ fontWeight: '700', color: '#1e293b', marginBottom: '8px', fontSize: '1.125rem' }}>Fellow Gators</h3>
-                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                <h3 style={{ fontWeight: '700', color: '#115e59', marginBottom: '8px', fontSize: '1.25rem' }}>
+                  Fellow Gators
+                </h3>
+                <p style={{ fontSize: '0.875rem', color: '#0f766e' }}>
                   Students with similar backgrounds to collaborate with
                 </p>
               </div>
@@ -439,9 +434,13 @@ export default function StudentMatchesWidget({ user }) {
             <div className="text-center">
               <Button
                 onClick={handleFindNewMatches}
-                disabled={isRefreshingMatches}
-                className="bg-[#FA4616] hover:bg-[#e63e13] text-white px-10 py-4 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
-                style={{ borderRadius: '12px' }}
+                disabled={isRefreshingMatches || helpRequests.length === 0}
+                className="text-white px-10 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                style={{ 
+                  background: 'linear-gradient(135deg, #FA4616 0%, #ea580c 100%)',
+                  borderRadius: '14px',
+                  fontSize: '1.125rem'
+                }}
               >
                 {isRefreshingMatches ? (
                   <>
@@ -449,28 +448,32 @@ export default function StudentMatchesWidget({ user }) {
                     Finding Your Matches...
                   </>
                 ) : (
-                  '🔍 Find My Matches'
+                  <>🔍 Find My Matches</>
                 )}
               </Button>
               
-              {helpRequests.length > 0 && (
+              {helpRequests.length > 0 ? (
                 <p className="text-sm text-slate-600 mt-4 font-medium">
                   ✅ You have {helpRequests.length} active help request{helpRequests.length !== 1 ? 's' : ''} ready to match
+                </p>
+              ) : (
+                <p className="text-sm text-amber-600 mt-4 font-medium">
+                  ⚠️ No active help requests found. Complete onboarding to create one.
                 </p>
               )}
               
               {/* Tip box */}
               <div 
                 style={{
-                  marginTop: '16px',
+                  marginTop: '20px',
                   display: 'inline-block',
-                  padding: '12px 20px',
+                  padding: '14px 24px',
                   background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-                  border: '2px solid #93C5FD',
+                  border: '2px solid #60A5FA',
                   borderRadius: '12px'
                 }}
               >
-                <p style={{ fontSize: '0.875rem', color: '#1e40af' }}>
+                <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
                   💡 <strong>New members join daily!</strong> Re-run matching anytime to discover fresh connections.
                 </p>
               </div>
@@ -481,6 +484,7 @@ export default function StudentMatchesWidget({ user }) {
     );
   }
 
+  // HAS MATCHES - Show the match cards
   return (
     <>
       <motion.div
@@ -518,9 +522,7 @@ export default function StudentMatchesWidget({ user }) {
                       Finding...
                     </>
                   ) : (
-                    <>
-                      🔄 Find New Matches
-                    </>
+                    <>🔄 Find New Matches</>
                   )}
                 </Button>
                 <Badge className="bg-purple-100 text-purple-700 border-purple-200">
@@ -587,10 +589,9 @@ export default function StudentMatchesWidget({ user }) {
                   Industry professionals with hiring connections and career expertise
                 </p>
 
-                {/* High-quality matches */}
                 <div className="space-y-3">
                   <AnimatePresence>
-                    {highQualityParentMatches.slice(0, 3).map((match, index) => (
+                    {highQualityParentMatches.slice(0, 3).map((match) => (
                       <ParentMatchCard
                         key={match.id}
                         match={match}
@@ -600,7 +601,6 @@ export default function StudentMatchesWidget({ user }) {
                   </AnimatePresence>
                 </div>
 
-                {/* Broader matches section */}
                 {broaderParentMatches.length > 0 && (
                   <div className="mt-4">
                     <button
