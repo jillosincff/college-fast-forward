@@ -86,8 +86,12 @@ export default function MagicLogin() {
         {status === 'success' && (
           <>
             <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">You're in! 🐊</h2>
-            <p className="text-white/70">Taking you to your dashboard...</p>
+            <h2 className="text-xl font-semibold text-white mb-2">Email Verified! 🐊</h2>
+            <p className="text-white/70 mb-2">One more step - sign in with Google</p>
+            <p className="text-white/60 text-sm">Use the same email: <strong>{verifiedEmail}</strong></p>
+            <div className="mt-4">
+              <Loader2 className="w-5 h-5 animate-spin text-white/50 mx-auto" />
+            </div>
           </>
         )}
 
