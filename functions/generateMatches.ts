@@ -32,6 +32,26 @@ function isRelatedMajor(major1, major2) {
   );
 }
 
+// Convert raw score to percentage (max 50 points = 99%)
+function scoreToPercentage(score) {
+  return Math.min(Math.round((score / 50) * 100), 99);
+}
+
+// Generate quirky match message based on score
+function getMatchMessage(score, category) {
+  if (score >= 35) {
+    return "🎯 Great match! This parent can really help.";
+  } else if (score >= 25) {
+    return "💪 Solid match. Worth reaching out!";
+  } else if (score >= 15) {
+    return "👍 Decent match - different industry but can still help.";
+  } else if (score >= 10) {
+    return "🤝 Not exact, but all career advice helps!";
+  } else {
+    return "🌱 New to the network - help us grow!";
+  }
+}
+
 function calculateParentMatchScore(helpRequest, parentExpertise) {
   let score = 0;
   const reasons = [];
@@ -55,13 +75,17 @@ function calculateParentMatchScore(helpRequest, parentExpertise) {
     reasons.push(`Can help with: ${matchedLabels.join(', ')}`);
   }
   
-  // 2. Industry Match (20 points for exact, 10 for related)
+  // 2. Industry Match (20 points for exact, 10 for related, 2 for different)
   if (helpRequest.industry === parentExpertise.industry) {
     score += 20;
     reasons.push(`${parentExpertise.industry} industry experience`);
   } else if (isRelatedIndustry(helpRequest.industry, parentExpertise.industry)) {
     score += 10;
     reasons.push(`Related industry experience`);
+  } else {
+    // Even different industry gets some points - general career advice is valuable
+    score += 2;
+    reasons.push(`General career advice`);
   }
   
   // 3. Company Connections (15 points if student mentioned target companies)
@@ -76,11 +100,23 @@ function calculateParentMatchScore(helpRequest, parentExpertise) {
     }
   }
   
-  // 4. Experience Level Bonus (5 points for 15+ years)
-  if (['15-20', '20+'].includes(parentExpertise.years_experience)) {
+  // 4. Experience Level Bonus
+  if (parentExpertise.years_experience === '20+') {
+    score += 7;
+    reasons.push('20+ years experience');
+  } else if (parentExpertise.years_experience === '15-20') {
     score += 5;
-    reasons.push(`${parentExpertise.years_experience} years experience`);
+    reasons.push('15-20 years experience');
+  } else if (parentExpertise.years_experience === '10-15') {
+    score += 3;
+    reasons.push('10-15 years experience');
+  } else {
+    score += 1;
+    reasons.push(`${parentExpertise.years_experience || '5+'} years experience`);
   }
+  
+  // MINIMUM SCORE: Every parent gets at least 5 points
+  score = Math.max(score, 5);
   
   // Determine category
   const category = score >= 20 ? 'high' : 'broader';
@@ -180,10 +216,8 @@ Deno.serve(async (req) => {
       }
       helpRequests = request;
       
-      // Get all available parent profiles
-      parentProfiles = await base44.asServiceRole.entities.ParentExpertise.filter(
-        { available: true }
-      );
+      // Get ALL parent profiles (not just available ones - we need to always show something)
+      parentProfiles = await base44.asServiceRole.entities.ParentExpertise.list('-created_date', 100);
       
       // Get all peer profiles open to collaboration (excluding the requesting student)
       const allPeerProfiles = await base44.asServiceRole.entities.StudentPeerProfile.filter(
@@ -209,12 +243,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid mode. Use "for_request" or "for_parent"' }, { status: 400 });
     }
     
-    const matchesData = [];
+    // CRITICAL: If no parents exist at all, return early with helpful message
+    if (parentProfiles.length === 0 && mode === 'for_request') {
+      console.log('No parents in database yet - skipping match generation');
+      return Response.json({
+        success: true,
+        matches_created: 0,
+        parent_matches: 0,
+        peer_matches: 0,
+        matches: [],
+        message: 'No parents in the network yet. Matches will appear as parents join.'
+      });
+    }
     
-    // Generate PARENT matches
+    const allScoredParents = [];
+    
+    // Score ALL parents for the help request
     for (const helpRequest of helpRequests) {
       for (const parent of parentProfiles) {
-        // Skip if match already exists
+        // Check if match already exists
         const existingMatch = await base44.asServiceRole.entities.Match.filter({
           help_request_id: helpRequest.id,
           parent_id: parent.parent_id,
@@ -222,30 +269,114 @@ Deno.serve(async (req) => {
         });
         
         if (existingMatch && existingMatch.length > 0) {
-          continue;
+          continue; // Skip existing matches
         }
         
         const { score, reasons, category } = calculateParentMatchScore(helpRequest, parent);
         
-        // Lower threshold to 10 points to include broader matches
-        if (score >= 10) {
+        allScoredParents.push({
+          helpRequest,
+          parent,
+          score,
+          reasons,
+          category
+        });
+      }
+    }
+    
+    // Sort by score (highest first)
+    allScoredParents.sort((a, b) => b.score - a.score);
+    
+    // CRITICAL: Always take TOP 5 parents, regardless of score
+    const MIN_MATCHES = 5;
+    const topParentMatches = allScoredParents.slice(0, MIN_MATCHES);
+    
+    const matchesData = [];
+    
+    // Create matches for top parents
+    for (const { helpRequest, parent, score, reasons, category } of topParentMatches) {
+      const matchPercentage = scoreToPercentage(score);
+      const matchMessage = getMatchMessage(score, category);
+      
+      matchesData.push({
+        help_request_id: helpRequest.id,
+        parent_id: parent.parent_id,
+        student_id: helpRequest.student_id,
+        match_type: 'parent',
+        match_category: category,
+        match_score: score,
+        match_percentage: matchPercentage,
+        match_message: matchMessage,
+        match_reasons: reasons,
+        status: 'pending',
+        // Cache parent data
+        parent_name: parent.parent_name,
+        parent_email: parent.parent_email,
+        parent_role: parent.current_role,
+        parent_company: parent.current_company,
+        parent_industry: parent.industry,
+        parent_years_experience: parent.years_experience,
+        // Cache student data
+        student_name: helpRequest.student_name,
+        student_major: helpRequest.student_major,
+        student_year: helpRequest.student_year,
+        // Cache request data
+        help_types: helpRequest.help_types,
+        timeline: helpRequest.timeline,
+        request_description: helpRequest.description
+      });
+    }
+    
+    // Generate PEER matches (only in for_request mode)
+    if (mode === 'for_request' && helpRequests.length > 0) {
+      const helpRequest = helpRequests[0];
+      let peerMatchCount = 0;
+      
+      for (const peer of peerProfiles) {
+        if (peerMatchCount >= 5) break; // Limit to 5 peer matches
+        
+        // Skip if match already exists
+        const existingPeerMatch = await base44.asServiceRole.entities.Match.filter({
+          help_request_id: helpRequest.id,
+          peer_id: peer.student_id,
+          match_type: 'peer'
+        });
+        
+        if (existingPeerMatch && existingPeerMatch.length > 0) {
+          continue;
+        }
+        
+        const { score, reasons, category } = calculatePeerMatchScore(
+          helpRequest, 
+          peer, 
+          helpRequest.student_major
+        );
+        
+        // Lower threshold for peer matches too
+        if (score >= 15) {
+          const matchPercentage = scoreToPercentage(score);
+          const matchMessage = getMatchMessage(score, category);
+          
           matchesData.push({
             help_request_id: helpRequest.id,
-            parent_id: parent.parent_id,
+            peer_id: peer.student_id,
             student_id: helpRequest.student_id,
-            match_type: 'parent',
+            match_type: 'peer',
             match_category: category,
             match_score: score,
+            match_percentage: matchPercentage,
+            match_message: matchMessage,
             match_reasons: reasons,
             status: 'pending',
-            // Cache parent data
-            parent_name: parent.parent_name,
-            parent_email: parent.parent_email,
-            parent_role: parent.current_role,
-            parent_company: parent.current_company,
-            parent_industry: parent.industry,
-            parent_years_experience: parent.years_experience,
-            // Cache student data
+            // Cache peer data
+            peer_name: peer.student_name,
+            peer_email: peer.student_email,
+            peer_major: peer.student_major,
+            peer_year: peer.student_year,
+            peer_working_on: peer.what_im_working_on,
+            peer_can_share: peer.what_i_can_share,
+            peer_collaborate_on: peer.can_collaborate_on,
+            // Cache student (requester) data
             student_name: helpRequest.student_name,
             student_major: helpRequest.student_major,
             student_year: helpRequest.student_year,
@@ -254,68 +385,10 @@ Deno.serve(async (req) => {
             timeline: helpRequest.timeline,
             request_description: helpRequest.description
           });
-        }
-      }
-      
-      // Generate PEER matches (only in for_request mode)
-      if (mode === 'for_request') {
-        let peerMatchCount = 0;
-        for (const peer of peerProfiles) {
-          if (peerMatchCount >= 10) break; // Limit to 10 peer matches
-          
-          // Skip if match already exists
-          const existingPeerMatch = await base44.asServiceRole.entities.Match.filter({
-            help_request_id: helpRequest.id,
-            peer_id: peer.student_id,
-            match_type: 'peer'
-          });
-          
-          if (existingPeerMatch && existingPeerMatch.length > 0) {
-            continue;
-          }
-          
-          const { score, reasons, category } = calculatePeerMatchScore(
-            helpRequest, 
-            peer, 
-            helpRequest.student_major
-          );
-          
-          // Minimum threshold: 25 points for peer matches
-          if (score >= 25) {
-            matchesData.push({
-              help_request_id: helpRequest.id,
-              peer_id: peer.student_id,
-              student_id: helpRequest.student_id,
-              match_type: 'peer',
-              match_category: category,
-              match_score: score,
-              match_reasons: reasons,
-              status: 'pending',
-              // Cache peer data
-              peer_name: peer.student_name,
-              peer_email: peer.student_email,
-              peer_major: peer.student_major,
-              peer_year: peer.student_year,
-              peer_working_on: peer.what_im_working_on,
-              peer_can_share: peer.what_i_can_share,
-              peer_collaborate_on: peer.can_collaborate_on,
-              // Cache student (requester) data
-              student_name: helpRequest.student_name,
-              student_major: helpRequest.student_major,
-              student_year: helpRequest.student_year,
-              // Cache request data
-              help_types: helpRequest.help_types,
-              timeline: helpRequest.timeline,
-              request_description: helpRequest.description
-            });
-            peerMatchCount++;
-          }
+          peerMatchCount++;
         }
       }
     }
-    
-    // Sort by score (highest first)
-    matchesData.sort((a, b) => b.match_score - a.match_score);
     
     // Insert matches
     const createdMatches = [];
@@ -324,7 +397,7 @@ Deno.serve(async (req) => {
       createdMatches.push(match);
     }
     
-    // Update match counts - count ALL matches for this request, not just new ones
+    // Update match counts - count ALL matches for this request
     if (mode === 'for_request' && helpRequests.length > 0) {
       const allMatches = await base44.asServiceRole.entities.Match.filter({
         help_request_id: helpRequests[0].id
@@ -337,12 +410,23 @@ Deno.serve(async (req) => {
     const parentMatches = createdMatches.filter(m => m.match_type === 'parent' || !m.match_type);
     const peerMatches = createdMatches.filter(m => m.match_type === 'peer');
     
+    // Check if all matches are low quality (for messaging purposes)
+    const avgScore = createdMatches.length > 0 
+      ? createdMatches.reduce((sum, m) => sum + m.match_score, 0) / createdMatches.length 
+      : 0;
+    const isLowQualityMatches = avgScore < 15;
+    
     return Response.json({
       success: true,
       matches_created: createdMatches.length,
       parent_matches: parentMatches.length,
       peer_matches: peerMatches.length,
-      matches: createdMatches
+      matches: createdMatches,
+      average_score: Math.round(avgScore),
+      is_growing_network: isLowQualityMatches,
+      message: isLowQualityMatches 
+        ? 'We found some matches! More parents in your industry are joining daily.' 
+        : 'Great matches found!'
     });
     
   } catch (error) {
