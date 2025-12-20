@@ -859,7 +859,27 @@ function AppContent() {
     }
     
     // CRITICAL: Check user.persona directly - OAuth flow now sets it immediately
-    // No need for localStorage checks - data is in user record
+    // Also check for magic link verified users who need to complete signup
+
+    // Check if this is a magic link verified user
+    const magicLinkVerified = localStorage.getItem('magic_link_verified') === 'true';
+    const magicLinkEmail = localStorage.getItem('magic_link_email');
+
+    if (magicLinkVerified && user && magicLinkEmail) {
+      // Verify the Google OAuth email matches the magic link email
+      if (user.email?.toLowerCase() !== magicLinkEmail?.toLowerCase()) {
+        console.warn('⚠️ [Magic Link] Email mismatch! Magic link:', magicLinkEmail, 'OAuth:', user.email);
+        // Clear magic link data and let them try again
+        localStorage.removeItem('magic_link_verified');
+        localStorage.removeItem('magic_link_email');
+        localStorage.removeItem('magic_link_user_id');
+        localStorage.removeItem('magic_link_persona');
+        localStorage.removeItem('magic_link_onboarding');
+        localStorage.removeItem('pending_invite_role');
+      } else {
+        console.log('✅ [Magic Link] Email verified, user authenticated:', user.email);
+      }
+    }
 
     if (user && !user.persona?.trim()) {
       console.log('🎯 [No Persona] User needs role assignment');
