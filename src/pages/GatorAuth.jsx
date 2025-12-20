@@ -191,18 +191,29 @@ export default function GatorAuth() {
       addLog(`🔐 OAuth callback detected. Polling for session...`);
       
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const initialWait = isMobile ? 2000 : 1000;
+      const initialWait = isMobile ? 2500 : 1000;
       
       setTimeout(async () => {
         if (!isMountedRef.current) return;
         
         addLog('✅ SDK initialized, polling for authentication...');
         
-        // Poll for authentication with timeout
-        const maxAuthWait = 15000;
+        // Poll for authentication with extended timeout (60s for mobile)
+        const maxAuthWait = isMobile ? 60000 : 30000;
         const pollInterval = 500;
         let elapsed = 0;
         let polledUser = null;
+        
+        // Try to force session recovery first
+        try {
+          addLog('🔄 Attempting session recovery...');
+          const session = await base44.auth.getSession?.();
+          if (session) {
+            addLog(`📋 Session found: ${JSON.stringify(session).substring(0, 100)}...`);
+          }
+        } catch (e) {
+          addLog(`⚠️ Session recovery attempt: ${e.message}`);
+        }
         
         while (elapsed < maxAuthWait) {
           try {
@@ -212,22 +223,27 @@ export default function GatorAuth() {
               break;
             }
           } catch (e) {
-            // Keep polling
+            // Log every 10s for debugging
+            if (elapsed % 10000 === 0 && elapsed > 0) {
+              addLog(`⚠️ Polling error at ${Math.round(elapsed/1000)}s: ${e.message}`);
+            }
           }
           await new Promise(resolve => setTimeout(resolve, pollInterval));
           elapsed += pollInterval;
           
-          if (elapsed % 3000 === 0) {
-            addLog(`⏳ Still waiting... ${Math.round(elapsed/1000)}s / 15s`);
+          if (elapsed % 5000 === 0) {
+            addLog(`⏳ Still waiting... ${Math.round(elapsed/1000)}s / ${Math.round(maxAuthWait/1000)}s`);
           }
         }
         
         if (!polledUser?.email) {
-          addLog('⏰ OAuth callback timed out waiting for session');
+          addLog(`⏰ OAuth callback timed out after ${Math.round(maxAuthWait/1000)}s`);
           if (isMountedRef.current) {
             setErrorDetails({ 
               type: 'auth_timeout', 
-              message: 'Login taking longer than expected. Please try again.'
+              message: isMobile 
+                ? 'Mobile login timed out. Try: 1) Incognito mode, 2) Disable ad blocker, 3) Different browser'
+                : 'Login taking longer than expected. Please try again or use incognito mode.'
             });
             processingRef.current = false;
             setProcessing(false);
