@@ -296,30 +296,31 @@ export default function LandingPage() {
               <p className="text-white/90 text-sm mt-6 font-medium">{urgencyMessage.note}</p>
             </motion.div>
 
-            {/* Two CTA Buttons */}
+            {/* Two CTA Buttons - Alumni grouped with Students */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
             >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className="cta-button-pulse">
                 <Button
-                  onClick={handleStudentClick}
+                  onClick={handleStudentAlumniClick}
                   size="lg"
-                  className="bg-white text-[#0021A5] hover:bg-slate-100 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                  className="bg-white text-[#0021A5] hover:bg-slate-100 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto"
                 >
-                  I'm a Student — Get Career Help
+                  <GraduationCap className="w-5 h-5 mr-2" />
+                  I'm a Student/Alumni
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className="cta-button-pulse">
                 <Button
                   onClick={handleParentClick}
                   size="lg"
-                  className="bg-[#FA4616] text-white hover:bg-orange-600 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all"
+                  className="bg-[#FA4616] text-white hover:bg-orange-600 px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto"
                 >
-                  I'm a Parent/Alumni — Help Students
+                  🐊 I'm a Parent
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
