@@ -41,16 +41,7 @@ export function isPremiumActive(userCount) {
   return userCount >= PREMIUM_ACTIVATION_THRESHOLD;
 }
 
-/**
- * Get current day key in ET timezone for daily message reset
- */
-function getCurrentDayET() {
-  const now = new Date();
-  // Convert to Eastern Time
-  const etOptions = { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' };
-  const etDate = new Intl.DateTimeFormat('en-US', etOptions).format(now);
-  return etDate; // MM/DD/YYYY format
-}
+
 
 /**
  * Hook to determine user's access level and restrictions
@@ -130,8 +121,7 @@ export function hasLinkedParent(user) {
   return !!user.linked_parent_id || !!user.parent_email;
 }
 
-// Re-export the private function for external use
-export { getCurrentDayET };
+
 
 /**
  * Get current premium price based on total user count
@@ -187,7 +177,6 @@ export function isLifetimeDealAvailable(userCount) {
 
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
-  FREE_DAILY_MESSAGE_LIMIT,
   PREMIUM_PRICE_EARLY,
   PREMIUM_PRICE_STANDARD,
   EARLY_ADOPTER_THRESHOLD,
