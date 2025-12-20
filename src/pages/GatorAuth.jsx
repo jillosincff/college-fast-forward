@@ -177,7 +177,6 @@ export default function GatorAuth() {
       // Verify email match (security check)
       if (user.email?.toLowerCase() !== postMagicEmail?.toLowerCase()) {
         addLog(`⚠️ Email mismatch! Magic: ${postMagicEmail}, OAuth: ${user.email}`);
-        // Clear magic link context - wrong account
         localStorage.removeItem('post_magic_verified');
         localStorage.removeItem('post_magic_email');
         localStorage.removeItem('post_magic_role');
@@ -191,83 +190,51 @@ export default function GatorAuth() {
         return;
       }
       
-      addLog(`✅ Email verified match: ${user.email}`);
+      const targetRole = postMagicRole || 'parent';
       
-      // Prevent double execution
-      if (processingRef.current) {
-        addLog('⏳ Already processing magic link flow...');
-        return;
-      }
-      
-      // Apply the persona from magic link verification
-      (async () => {
-        processingRef.current = true;
-        setProcessing(true);
-        setAuthProgress('Completing your account setup...');
+      // SUCCESS: User persona is already set correctly - navigate now!
+      if (user.persona === targetRole) {
+        addLog(`✅ Persona confirmed: ${user.persona} - navigating to GatorWelcome`);
         
-        const role = postMagicRole || 'parent';
-        addLog(`📝 Applying magic link role: ${role}`);
-        
-        const updateData = {
-          persona: role,
-          roles: [role],
-          onboarding_completed: false,
-          is_new_signup: true,
-          magic_link_verified: true
-        };
-        
-        const result = await updatePersonaWithRetry(updateData);
-        
-        if (!result.success) {
-          addLog('⚠️ Persona update failed, retrying...');
-          // One more attempt
-          await updatePersonaWithRetry(updateData);
-        }
-        
-        // CRITICAL: Wait for user state to fully propagate - don't navigate until confirmed
-        addLog('⏳ Waiting for session to propagate...');
-        let attempts = 0;
-        let freshUser = null;
-        let confirmed = false;
-        
-        while (attempts < 20) { // Up to 6 seconds
-          await new Promise(r => setTimeout(r, 300));
-          try {
-            freshUser = await base44.auth.me();
-            addLog(`🔍 Attempt ${attempts + 1}: persona=${freshUser?.persona}, email=${freshUser?.email}`);
-            
-            if (freshUser?.persona === role && freshUser?.email) {
-              addLog(`✅ Session CONFIRMED: persona=${freshUser.persona}, email=${freshUser.email}`);
-              confirmed = true;
-              break;
-            }
-          } catch (e) {
-            addLog(`⚠️ Attempt ${attempts + 1} error: ${e.message}`);
-          }
-          attempts++;
-        }
-        
-        if (!confirmed) {
-          addLog('⚠️ Session not confirmed after 20 attempts, but proceeding...');
-        }
-        
-        // Clear magic link context AFTER confirming session
+        // Clear magic link context
         localStorage.removeItem('post_magic_verified');
         localStorage.removeItem('post_magic_email');
         localStorage.removeItem('post_magic_role');
         localStorage.removeItem('post_magic_timestamp');
         localStorage.removeItem('post_magic_needs_onboarding');
         
-        // Store confirmed user in state to trigger re-render
-        if (freshUser && isMountedRef.current) {
-          setCurrentUser(freshUser);
-        }
+        navigate('GatorWelcome');
+        return;
+      }
+      
+      // Persona not set yet - update it and wait for re-render
+      if (!processingRef.current) {
+        processingRef.current = true;
+        setProcessing(true);
+        setAuthProgress('Setting up your account...');
         
-        addLog('🎯 Magic link flow complete → GatorWelcome');
+        addLog(`📝 Updating persona from "${user.persona}" to "${targetRole}"`);
         
-        // Use window.location.replace to ensure clean navigation with fresh state
-        window.location.replace(window.location.origin + '/#GatorWelcome');
-      })();
+        base44.auth.updateMe({
+          persona: targetRole,
+          roles: [targetRole],
+          onboarding_completed: false,
+          is_new_signup: true,
+          magic_link_verified: true
+        }).then(() => {
+          addLog('✅ Persona update sent, refreshing user...');
+          refreshUser(); // This triggers useEffect re-run with updated user
+        }).catch(err => {
+          addLog(`❌ Persona update failed: ${err.message}`);
+          setProcessing(false);
+          processingRef.current = false;
+        });
+      } else {
+        addLog('⏳ Update already in progress, waiting...');
+      }
+      
+      // DON'T navigate here - useEffect will re-run when user changes
+      // and the "if (user.persona === targetRole)" check above will pass
       return;
     }
 
