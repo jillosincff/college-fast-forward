@@ -646,6 +646,19 @@ export default function StudentOnboarding() {
                     </div>
                   </div>
 
+                  {/* Referral Code */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Referral Code <span className="font-normal text-slate-500">(optional)</span>
+                    </label>
+                    <Input
+                      value={formData.referral_code}
+                      onChange={(e) => updateField('referral_code', e.target.value.toUpperCase())}
+                      placeholder="Enter code if someone referred you"
+                      className="max-w-xs"
+                    />
+                  </div>
+
                   <div className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
