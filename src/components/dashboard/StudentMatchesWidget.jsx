@@ -241,13 +241,7 @@ export default function StudentMatchesWidget({ user }) {
     setShowMessageModal(true);
   };
 
-  const handleConnectPeer = (match) => {
-    setSelectedMatch(match);
-    const commonInterest = match.peer_major || 'our shared interests';
-    const helpTypesText = (match.help_types || []).map(t => HELP_TYPE_LABELS[t] || t).join(', ');
-    setMessage(`Hey ${match.peer_name?.split(' ')[0] || 'there'}!\n\nI saw we're both ${user.major || 'students'} navigating ${commonInterest}. I'd love to connect and swap experiences - maybe we can help each other out?\n\nI'm specifically working on ${helpTypesText || 'career development'} and saw you're open to collaborating on this. Would you be up for a quick chat?\n\nThanks!\n${user.first_name || user.full_name?.split(' ')[0] || 'A fellow Gator'}`);
-    setShowMessageModal(true);
-  };
+
 
   const sendMessage = async () => {
     if (!message.trim() || !selectedMatch) return;
