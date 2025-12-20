@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Zap, Users, MessageSquare, Check, Crown, Star, Clock } from "lucide-react";
+import { ArrowRight, Zap, Users, MessageSquare, Check, Crown, Star, Clock, GraduationCap } from "lucide-react";
 import { useAuth } from '@/components/auth/AuthContext';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
@@ -9,6 +9,9 @@ import { motion, useInView, useAnimation } from 'framer-motion';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+
+// Transparent logo URL
+const TRANSPARENT_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/f850251da_UFFastForwardontransparent.jpg";
 
 // Animated counter hook
 function useCountUp(end, duration = 2000, startOnView = true) {
