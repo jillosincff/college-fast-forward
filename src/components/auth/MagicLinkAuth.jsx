@@ -156,11 +156,11 @@ export default function MagicLinkAuth() {
 
         <div className="mt-8 text-center">
           <Button
-            onClick={() => navigate('LandingPage')}
+            onClick={() => navigate('GatorAuth')}
             variant="ghost"
             className="text-white/60 hover:text-white hover:bg-white/10"
           >
-            ← Back to Home
+            ← Back to Sign In Options
           </Button>
         </div>
       </div>
