@@ -89,18 +89,21 @@ export default function GatorWelcome() {
       return;
     }
 
-    // Already fully onboarded - redirect to dashboard
-    if (user.onboarding_completed && !user.is_new_signup) {
+    // Check if there's a pending invite role - if so, this is a NEW user flow, don't redirect
+    const pendingRole = localStorage.getItem('pending_invite_role');
+    
+    // Already fully onboarded AND no pending role - redirect to dashboard
+    // CRITICAL: Only redirect if onboarding is EXPLICITLY true AND there's no pending role
+    if (user.onboarding_completed === true && !pendingRole) {
       console.log('✅ [GatorWelcome] Already onboarded, redirecting to dashboard');
-      const destination = user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+      const destination = user.persona === 'parent' || user.persona === 'alumni' ? 'ParentDashboard' : 'Dashboard';
       navigate(destination);
       return;
     }
 
     // STEP 1: Determine the intended role
-    // Read fresh from localStorage inside effect to avoid stale closures
     // Priority: localStorage (set by GatorAuth after OAuth) > user.persona (database)
-    const pendingRole = localStorage.getItem('pending_invite_role');
+    // (pendingRole already read above for redirect check)
     
     // CRITICAL: For new signups, ALWAYS trust localStorage over user.persona
     // This handles the case where user.persona hasn't been updated yet due to propagation delay
