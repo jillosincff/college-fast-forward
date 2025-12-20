@@ -45,7 +45,8 @@ Deno.serve(async (req) => {
         const forwardedHost = req.headers.get('x-forwarded-host');
         const appOrigin = originHeader || (forwardedHost ? `https://${forwardedHost}` : 'https://collegefastforward.com');
         
-        const magicLink = `${appOrigin}/#MagicLogin?token=${token}`;
+        // Link directly to GatorAuth with token - skips MagicLogin page entirely
+        const magicLink = `${appOrigin}/#GatorAuth?magic_token=${token}&role=parent`;
         
         const emailBody = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px 20px; color: #333; max-width: 600px; margin: auto;">
