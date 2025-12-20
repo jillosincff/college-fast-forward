@@ -274,7 +274,7 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed"
             >
-              Our proprietary matching algorithm connects students and alumni with industry professionals for 
+              Our proprietary matching algorithm connects students with parents and established alumni for 
               resume reviews, interview prep, job intros, and career advice — from people who actually want to help.
             </motion.p>
 
