@@ -766,7 +766,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 6: FINAL CTA */}
+        {/* SECTION 7: FINAL CTA - High contrast white text */}
         <section className="py-20 md:py-28 relative overflow-hidden">
           {/* Stadium background */}
           <div 
@@ -775,12 +775,13 @@ export default function LandingPage() {
               backgroundImage: `url('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/c035843a2_IMG_0892.jpg')`
             }}
           />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/70" />
+          {/* Dark overlay for contrast */}
+          <div className="absolute inset-0 bg-black/80" />
           
           <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
             <motion.h2 
               className="text-4xl md:text-6xl font-extrabold text-white mb-8"
+              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
@@ -789,17 +790,18 @@ export default function LandingPage() {
               THE GATOR NETWORK IS WAITING
             </motion.h2>
             <motion.div 
-              className="text-xl md:text-2xl text-white/90 mb-12 space-y-2"
+              className="text-xl md:text-2xl text-white mb-12 space-y-3"
+              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <p>{totalFamilies} families are already inside.</p>
-              <p>Students are getting hired.</p>
-              <p>Parents are changing lives.</p>
-              <p className="pt-4 font-semibold text-white">The only question is: Are you in or are you out?</p>
+              <p className="font-medium">{totalFamilies} families are already inside.</p>
+              <p className="font-medium">Students and alumni are getting hired.</p>
+              <p className="font-medium">Parents are changing lives.</p>
+              <p className="pt-6 font-bold text-2xl md:text-3xl">The only question is:<br/>Are you in or are you out?</p>
             </motion.div>
 
             <motion.div
@@ -822,7 +824,8 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.p 
-              className="text-yellow-300 mt-8 text-lg font-semibold"
+              className="text-yellow-300 mt-8 text-lg font-bold"
+              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
