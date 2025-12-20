@@ -244,7 +244,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 3: New signup via invite (OAuth callback completed, have currentUser and pendingRole)
+    // CASE 4: New signup via invite (OAuth callback completed, have currentUser and pendingRole)
     if (currentUser && pendingRole) {
       addLog(`📝 New signup: updating persona to ${pendingRole}`);
       
