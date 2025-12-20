@@ -282,9 +282,21 @@ export default function GatorAuth() {
     }
 
     // User authenticated without OAuth callback - go to role selection
-    if (user && !hasAccessToken) {
+    if (user && !hasAccessToken && !wasOAuthCallback && !processing) {
       console.log('✅ [GatorAuth] User authenticated, going to role selection');
-      window.location.hash = 'GatorRoleSelection';
+      
+      // Check if user already has a persona set - if so, go to appropriate dashboard
+      if (user.persona === 'gator' && user.onboarding_completed) {
+        window.location.hash = 'Dashboard';
+      } else if (user.persona === 'parent' && user.onboarding_completed) {
+        window.location.hash = 'ParentDashboard';
+      } else if (user.persona && !user.onboarding_completed) {
+        // Has persona but needs onboarding
+        window.location.hash = 'GatorWelcome';
+      } else {
+        // No persona - needs role selection
+        window.location.hash = 'GatorRoleSelection';
+      }
     }
   }, [user, isLoading, processing]);
 
