@@ -46,11 +46,9 @@ import CompanyProfile from './pages/CompanyProfile';
 import MyMessages from './pages/MyMessages';
 import InviteRequired from './pages/InviteRequired';
 import RequestInvite from './pages/RequestInvite';
-import Pricing from './pages/Pricing';
 import PublicProfile from './pages/PublicProfile';
 import ShareExpertise from './pages/ShareExpertise';
 import Notifications from './pages/Notifications';
-import ReferralAnalytics from './pages/ReferralAnalytics';
 import GatorAuth from './pages/GatorAuth';
 import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorInviteCode from './pages/GatorInviteCode';
@@ -109,11 +107,9 @@ export const PAGES = {
     "MyMessages": MyMessages,
     "InviteRequired": InviteRequired,
     "RequestInvite": RequestInvite,
-    "Pricing": Pricing,
     "PublicProfile": PublicProfile,
     "ShareExpertise": ShareExpertise,
     "Notifications": Notifications,
-    "ReferralAnalytics": ReferralAnalytics,
     "GatorAuth": GatorAuth,
     "GatorRoleSelection": GatorRoleSelection,
     "GatorInviteCode": GatorInviteCode,
