@@ -108,6 +108,39 @@ export default function LandingPage() {
   const spotsRemaining = foundingStats.spots_left;
   const totalFamilies = foundingStats.total_users;
 
+  // Animated stats card component
+  const AnimatedStatsCard = () => {
+    const { count, ref } = useCountUp(87, 1500);
+    
+    return (
+      <motion.div
+        ref={ref}
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <motion.div variants={cardHover} initial="rest" whileHover="hover">
+          <Card className="p-6 border-2 border-green-200 bg-white transition-all cursor-default">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Clock className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">⚡ Fast Results</h3>
+                <p className="text-slate-600">
+                  <span className="text-2xl font-extrabold text-green-600">{count}%</span> of students get responses within 48 hours. No waiting weeks for a cold LinkedIn 
+                  message to maybe get a response.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   return (
     <>
       <SocialMetaTags 
