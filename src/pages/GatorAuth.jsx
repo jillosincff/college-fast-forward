@@ -231,9 +231,21 @@ export default function GatorAuth() {
         // Try to force session recovery first
         try {
           addLog('🔄 Attempting session recovery...');
+          
+          // Check if SDK has isAuthenticated method
+          const isAuth = await base44.auth.isAuthenticated?.();
+          addLog(`📋 isAuthenticated: ${isAuth}`);
+          
+          // Try getSession
           const session = await base44.auth.getSession?.();
           if (session) {
             addLog(`📋 Session found: ${JSON.stringify(session).substring(0, 100)}...`);
+          }
+          
+          // Try refreshing the session
+          if (base44.auth.refreshSession) {
+            await base44.auth.refreshSession();
+            addLog('🔄 Attempted session refresh');
           }
         } catch (e) {
           addLog(`⚠️ Session recovery attempt: ${e.message}`);
