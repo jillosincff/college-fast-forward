@@ -407,17 +407,23 @@ export default function GatorAuth() {
 
     // CASE 5: Normal routing (new or returning user)
     const reliableUser = currentUser || user;
-    if (reliableUser && !wasOAuthCallback) {
+    if (reliableUser && !wasOAuthCallback && !pendingRole) {
       addLog(`✅ Reliable user: ${reliableUser.email}, persona: ${reliableUser.persona}, onboarded: ${reliableUser.onboarding_completed}`);
-      
-      const nextRoute = determineNextRoute(reliableUser, pendingRole);
+
+      const nextRoute = determineNextRoute(reliableUser, null);
       addLog(`🎯 Routing to: ${nextRoute}`);
-      
+
       navigate(nextRoute);
     }
-    
-    // CASE 6: Have currentUser from OAuth polling, no pendingRole - route based on user state
-    if (currentUser && !pendingRole) {
+
+    // CASE 6: Have currentUser from OAuth polling - auto-apply pending role or route
+    if (currentUser) {
+      // If there's a pending role and no persona, let CASE 0 handle it on next render
+      if (pendingRole && !currentUser.persona) {
+        addLog('🔄 OAuth complete with pending role - will auto-apply on next cycle');
+        return;
+      }
+
       const nextRoute = determineNextRoute(currentUser, null);
       addLog(`🎯 OAuth complete, routing to: ${nextRoute}`);
       navigate(nextRoute);
