@@ -181,8 +181,32 @@ export default function LandingPage() {
 
       <div className="min-h-screen bg-white">
         
+        {/* TOP NAVIGATION */}
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0021A5]/95 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="#" className="flex items-center gap-2">
+              <span className="text-white font-bold text-lg md:text-xl tracking-tight">College Fast Forward</span>
+            </a>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('GatorAuth')}
+                className="text-white hover:bg-white/10 text-sm font-medium"
+              >
+                Sign In
+              </Button>
+              <Button
+                onClick={handleMainCTA}
+                className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-4 py-2"
+              >
+                Join Now
+              </Button>
+            </div>
+          </div>
+        </nav>
+
         {/* SECTION 1: HERO */}
-        <section className="relative overflow-hidden hero-animated-bg" style={{
+        <section className="relative overflow-hidden hero-animated-bg pt-16" style={{
           minHeight: '100vh'
         }}>
           <style>{`
@@ -767,12 +791,15 @@ export default function LandingPage() {
             }}
           />
           {/* Dark overlay for contrast */}
-          <div className="absolute inset-0 bg-black/80" />
+          <div className="absolute inset-0 bg-black/85" />
           
           <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
             <motion.h2 
-              className="text-4xl md:text-6xl font-extrabold text-white mb-8"
-              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+              className="text-4xl md:text-6xl font-extrabold mb-8"
+              style={{ 
+                color: '#FFFFFF',
+                textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9)'
+              }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
@@ -781,18 +808,24 @@ export default function LandingPage() {
               THE GATOR NETWORK IS WAITING
             </motion.h2>
             <motion.div 
-              className="text-xl md:text-2xl text-white mb-12 space-y-3"
-              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
+              className="text-xl md:text-2xl mb-12 space-y-4"
+              style={{ 
+                color: '#FFFFFF',
+                textShadow: '0 3px 8px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9)',
+                lineHeight: 1.6
+              }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <p className="font-medium">{totalFamilies} families are already inside.</p>
-              <p className="font-medium">Students and alumni are getting hired.</p>
-              <p className="font-medium">Parents are changing lives.</p>
-              <p className="pt-6 font-bold text-2xl md:text-3xl">The only question is:<br/>Are you in or are you out?</p>
+              <p className="font-semibold">{totalFamilies} families are already inside.</p>
+              <p className="font-semibold">Students and alumni are getting hired.</p>
+              <p className="font-semibold">Parents are changing lives.</p>
+              <p className="pt-6 font-bold text-2xl md:text-3xl" style={{ color: '#FFFFFF' }}>
+                The only question is:<br/>Are you in or are you out?
+              </p>
             </motion.div>
 
             <motion.div
@@ -815,15 +848,23 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.p 
-              className="text-yellow-300 mt-8 text-lg font-bold"
-              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
+              className="mt-8 text-lg font-bold"
+              style={{ 
+                color: '#FDE047',
+                textShadow: '0 3px 8px rgba(0,0,0,0.8)'
+              }}
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              ⚡ {spotsRemaining} Free Founding Spots Remaining
+              {totalFamilies <= 1000 
+                ? `⚡ ${spotsRemaining} Free Founding Spots Remaining`
+                : totalFamilies <= 5000
+                  ? `⚡ ${5000 - totalFamilies} Spots Left at $9/month`
+                  : `⚡ Join ${totalFamilies.toLocaleString()}+ Gator Families`
+              }
             </motion.p>
           </div>
         </section>
@@ -831,12 +872,11 @@ export default function LandingPage() {
         {/* Simple Footer */}
         <footer className="py-8 bg-slate-900 text-center">
           <div className="max-w-6xl mx-auto px-4">
-            <img 
-              src={TRANSPARENT_LOGO}
-              alt="College Fast Forward"
-              className="h-16 mx-auto mb-4 opacity-90"
-            />
+            <p className="text-white font-bold text-xl mb-2">Gator Network</p>
             <p className="text-slate-400 text-sm mb-4">
+              Powered by College Fast Forward
+            </p>
+            <p className="text-slate-500 text-sm mb-4">
               © {new Date().getFullYear()} College Fast Forward. All rights reserved.
             </p>
             <div className="flex justify-center gap-6 text-sm">
