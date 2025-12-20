@@ -126,6 +126,9 @@ export default function GatorAuth() {
     const urlParams = new URLSearchParams(window.location.search);
     const hashFragment = window.location.hash.substring(1);
     
+    // CRITICAL: Check is_new_user param FIRST - this is the main OAuth callback indicator
+    const isNewUser = urlParams.has('is_new_user');
+    
     // Parse hash params more robustly - handle #GatorAuth?access_token=... or #access_token=... format
     let hashParams = new URLSearchParams();
     if (hashFragment.includes('access_token') || hashFragment.includes('error')) {
@@ -138,8 +141,8 @@ export default function GatorAuth() {
     const hasError = urlParams.has('error') || hashParams.has('error') || hashFragment.includes('error=');
     const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
     
-    // Detect fresh OAuth callback (token in URL but not yet processed)
-    const isFreshOAuthCallback = hasAccessToken && !currentUser && !wasOAuthCallback;
+    // Detect fresh OAuth callback - is_new_user param is the primary indicator
+    const isFreshOAuthCallback = (isNewUser || hasAccessToken) && !currentUser && !wasOAuthCallback;
     
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
