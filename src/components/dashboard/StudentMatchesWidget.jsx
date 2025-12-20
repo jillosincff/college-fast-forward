@@ -192,6 +192,7 @@ function PeerMatchCard({ match, onConnect }) {
 export default function StudentMatchesWidget({ user }) {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [message, setMessage] = useState('');
@@ -231,6 +232,7 @@ export default function StudentMatchesWidget({ user }) {
   };
 
   const loadHelpRequests = async () => {
+    setLoadingRequests(true);
     try {
       const requests = await base44.entities.HelpRequest.filter(
         { student_id: user.id, status: 'active' },
@@ -241,6 +243,8 @@ export default function StudentMatchesWidget({ user }) {
     } catch (error) {
       console.error('Failed to load help requests:', error);
       setHelpRequests([]);
+    } finally {
+      setLoadingRequests(false);
     }
   };
 
@@ -356,7 +360,7 @@ export default function StudentMatchesWidget({ user }) {
   const highQualityParentMatches = parentMatches.filter(m => m.match_category === 'high' || m.match_score >= 20);
   const broaderParentMatches = parentMatches.filter(m => m.match_category === 'broader' && m.match_score < 20);
 
-  if (loading) {
+  if (loading || loadingRequests) {
     return (
       <Card className="border-2 border-purple-100 shadow-lg">
         <CardContent className="pt-6 pb-6">
