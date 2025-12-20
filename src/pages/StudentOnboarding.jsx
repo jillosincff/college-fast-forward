@@ -248,6 +248,8 @@ export default function StudentOnboarding() {
     if (!canProceed()) return;
     
     setIsSubmitting(true);
+    console.log('🚀 [StudentOnboarding] Starting submission...');
+    
     try {
       // Build the job request description
       const roles = formData.target_roles.length > 0 
@@ -264,6 +266,7 @@ export default function StudentOnboarding() {
       const isPublicRequest = formData.post_to_emerging || formData.show_on_directory;
 
       // Create job request with poster name for display
+      console.log('📝 [StudentOnboarding] Creating JobRequest...');
       await JobRequest.create({
         role: roles.split(',')[0].trim(), // First role as main role
         title: `${roles.split(',')[0].trim()} - ${formData.target_industries[0] || 'Various'}`,
@@ -279,6 +282,7 @@ export default function StudentOnboarding() {
         resume_url: formData.resume_url?.trim() || '',
         linkedin_url: formData.linkedin_url?.trim() || ''
       });
+      console.log('✅ [StudentOnboarding] JobRequest created');
 
       // Create HelpRequest for matching (if they provided help request info)
       if (formData.help_types?.length > 0 && formData.help_industry) {
@@ -286,6 +290,7 @@ export default function StudentOnboarding() {
           ? `Class of ${formData.graduation_year}` 
           : 'Current Student';
         
+        console.log('📝 [StudentOnboarding] Creating HelpRequest...');
         const helpRequest = await HelpRequest.create({
           student_id: user.id,
           student_email: user.email,
@@ -298,18 +303,17 @@ export default function StudentOnboarding() {
           timeline: formData.help_timeline || 'no_rush',
           status: 'active'
         });
+        console.log('✅ [StudentOnboarding] HelpRequest created:', helpRequest.id);
 
-        // Trigger matching algorithm
-        try {
-          const matchResult = await base44.functions.invoke('generateMatches', {
-            help_request_id: helpRequest.id,
-            mode: 'for_request'
-          });
-          console.log('✅ Matches generated for help request:', helpRequest.id, 'Count:', matchResult?.matches?.length || 0);
-        } catch (matchError) {
-          console.error('Failed to generate matches:', matchError);
-          // Don't fail the whole onboarding if matching fails
-        }
+        // Trigger matching algorithm - fire and forget, don't block onboarding
+        base44.functions.invoke('generateMatches', {
+          help_request_id: helpRequest.id,
+          mode: 'for_request'
+        }).then(matchResult => {
+          console.log('✅ Matches generated:', matchResult?.data?.matches_created || 0);
+        }).catch(matchError => {
+          console.error('Failed to generate matches (non-blocking):', matchError);
+        });
       }
 
       // Update user profile - mark onboarding complete and clear new signup flag
@@ -331,17 +335,21 @@ export default function StudentOnboarding() {
       }
 
       // MUST use base44.auth.updateMe for proper session sync - NOT User.updateMyUserData
+      console.log('📝 [StudentOnboarding] Updating user profile...');
       await base44.auth.updateMe(userUpdate);
+      console.log('✅ [StudentOnboarding] User profile updated');
 
       localStorage.removeItem('student_onboarding_draft');
       sessionStorage.removeItem('pending_invite_code');
       sessionStorage.removeItem('pending_referral_code');
 
       // Show parent invite modal
+      console.log('🎉 [StudentOnboarding] Showing parent invite modal');
+      setIsSubmitting(false); // Reset submitting state before showing modal
       setShowParentInviteModal(true);
 
     } catch (error) {
-      console.error('Failed to submit onboarding:', error);
+      console.error('❌ [StudentOnboarding] Failed to submit:', error);
       alert('Failed to submit your request. Please try again.');
       setIsSubmitting(false);
     }
