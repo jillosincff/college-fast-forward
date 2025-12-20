@@ -16,8 +16,7 @@ import confetti from 'canvas-confetti';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import PeerCollaborationSection from '@/components/onboarding/PeerCollaborationSection';
-import { StudentPeerProfile } from '@/entities/StudentPeerProfile';
+
 
 const PRIMARY_GOALS = [
   { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
@@ -112,11 +111,7 @@ export default function StudentOnboarding() {
     help_timeline: '',
     post_to_emerging: true,
     show_on_directory: true,
-    // Peer collaboration fields
-    openToCollaboration: true,
-    canCollaborateOn: [],
-    whatImWorkingOn: '',
-    whatICanShare: '',
+
     // Career fields (Steps 2-7)
     target_roles: [],
     custom_role: '',
@@ -172,7 +167,7 @@ export default function StudentOnboarding() {
           target_roles: Array.isArray(parsed.target_roles) ? parsed.target_roles : [],
           target_industries: Array.isArray(parsed.target_industries) ? parsed.target_industries : [],
           location_preferences: Array.isArray(parsed.location_preferences) ? parsed.location_preferences : [],
-          canCollaborateOn: Array.isArray(parsed.canCollaborateOn) ? parsed.canCollaborateOn : []
+
         }));
       } catch (e) {
         console.error('Failed to load draft');
@@ -314,27 +309,6 @@ export default function StudentOnboarding() {
         } catch (matchError) {
           console.error('Failed to generate matches:', matchError);
           // Don't fail the whole onboarding if matching fails
-        }
-      }
-
-      // Create peer profile if open to collaboration
-      if (formData.openToCollaboration) {
-        try {
-          await StudentPeerProfile.create({
-            student_id: user.id,
-            student_email: user.email,
-            student_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
-            student_major: formData.major?.trim(),
-            student_year: formData.graduation_year ? `Class of ${formData.graduation_year}` : 'Current Student',
-            open_to_collaboration: true,
-            can_collaborate_on: formData.canCollaborateOn || [],
-            what_im_working_on: formData.whatImWorkingOn || '',
-            what_i_can_share: formData.whatICanShare || '',
-            target_industry: formData.help_industry || formData.target_industries?.[0] || ''
-          });
-          console.log('✅ Created peer collaboration profile');
-        } catch (peerError) {
-          console.error('Failed to create peer profile:', peerError);
         }
       }
 
@@ -774,12 +748,6 @@ export default function StudentOnboarding() {
                       </label>
                     </div>
 
-                    {/* Peer Collaboration Section */}
-                    <PeerCollaborationSection 
-                      formData={formData}
-                      updateField={updateField}
-                      toggleMultiSelect={toggleMultiSelect}
-                    />
                   </motion.div>
                 )}
 
