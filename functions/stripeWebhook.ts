@@ -33,31 +33,70 @@ Deno.serve(async (req) => {
         const customerId = session.customer;
         const subscriptionId = session.subscription;
         const subscriptionType = session.metadata?.subscription_type || 'parent_paid';
+        const familyId = session.metadata?.family_id;
+        const priceTier = session.metadata?.price_tier;
+        const memberNumber = session.metadata?.member_number;
+        
+        // Update Family record if exists
+        if (familyId) {
+          try {
+            await base44.entities.Family.update(familyId, {
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId,
+              subscription_status: 'active'
+            });
+            console.log('Updated family subscription:', familyId);
+          } catch (familyError) {
+            console.error('Failed to update family:', familyError);
+          }
+        }
         
         // Find user by customer ID
         const users = await base44.entities.User.filter({ stripe_customer_id: customerId });
         if (users && users.length > 0) {
           const user = users[0];
           
-          // Check if this is a student self-pay subscription
-          if (subscriptionType === 'student_self_pay') {
-            // Student is paying for themselves
-            await base44.entities.User.update(user.id, {
-              stripe_subscription_id: subscriptionId,
-              subscription_status: 'active',
-              subscription_type: 'student_self_pay',
-              messages_sent_today: 0,
-              messages_day_reset: null
-            });
-            console.log('Updated student self-pay subscription:', user.id);
-          } else {
-            // Parent is paying (default behavior)
-            await base44.entities.User.update(user.id, {
-              stripe_subscription_id: subscriptionId,
-              subscription_status: 'active',
-              subscription_type: 'parent_paid'
-            });
-            console.log('Updated parent subscription:', user.id);
+          // Update user with subscription info and tier
+          const userUpdate = {
+            stripe_subscription_id: subscriptionId,
+            subscription_status: 'active',
+            subscription_type: subscriptionType,
+            messages_sent_today: 0,
+            messages_day_reset: null
+          };
+          
+          // Set tier info if from tiered signup
+          if (priceTier) {
+            userUpdate.price_tier = priceTier;
+          }
+          if (memberNumber) {
+            userUpdate.member_number = parseInt(memberNumber, 10);
+          }
+          
+          await base44.entities.User.update(user.id, userUpdate);
+          console.log('Updated user subscription:', user.id, 'tier:', priceTier);
+          
+          // Update all family members if family exists
+          if (familyId) {
+            try {
+              const family = await base44.entities.Family.get(familyId);
+              const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
+              
+              for (const memberId of allMemberIds) {
+                if (memberId !== user.id) {
+                  await base44.entities.User.update(memberId, {
+                    subscription_status: 'active',
+                    price_tier: priceTier,
+                    member_number: parseInt(memberNumber, 10),
+                    has_active_parent_subscription: true,
+                    linked_parent_subscription_active: true
+                  });
+                  console.log('Updated family member subscription:', memberId);
+                }
+              }
+            } catch (familyMemberError) {
+              console.error('Failed to update family members:', familyMemberError);
+            }
           }
         }
         break;
@@ -149,19 +188,53 @@ Deno.serve(async (req) => {
         const delUsers = await base44.entities.User.filter({ stripe_customer_id: delCustomerId });
         if (delUsers && delUsers.length > 0) {
           const user = delUsers[0];
+          
+          // Don't cancel if founding member (they're free forever)
+          if (user.price_tier === 'founding' || user.is_founding_member) {
+            console.log('Skipping cancellation for founding member:', user.id);
+            break;
+          }
+          
           await base44.entities.User.update(user.id, {
             subscription_status: 'canceled'
           });
           console.log('Canceled user subscription:', user.id);
 
-          // If parent subscription canceled, update linked gators (unless they're founding gators)
+          // Update Family record
+          if (user.family_id) {
+            try {
+              await base44.entities.Family.update(user.family_id, {
+                subscription_status: 'canceled'
+              });
+              
+              // Update all family members
+              const family = await base44.entities.Family.get(user.family_id);
+              const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
+              
+              for (const memberId of allMemberIds) {
+                const member = await base44.entities.User.get(memberId);
+                // Don't downgrade founding members
+                if (!member.is_founding_member && member.price_tier !== 'founding') {
+                  await base44.entities.User.update(memberId, {
+                    subscription_status: 'canceled',
+                    linked_parent_subscription_active: false
+                  });
+                  console.log('Updated family member subscription to canceled:', memberId);
+                }
+              }
+            } catch (familyError) {
+              console.error('Failed to update family:', familyError);
+            }
+          }
+
+          // Legacy: If parent subscription canceled, update linked gators
           if (user.persona === 'parent' && user.linked_gator_ids?.length > 0) {
             console.log('Parent subscription canceled, updating linked gators:', user.linked_gator_ids);
             for (const gatorId of user.linked_gator_ids) {
               try {
                 const gator = await base44.entities.User.get(gatorId);
-                // Don't downgrade founding gators
-                if (!gator.is_founding_gator && !(gator.signup_order && gator.signup_order <= 1000)) {
+                // Don't downgrade founding members
+                if (!gator.is_founding_member && gator.price_tier !== 'founding' && !gator.is_founding_gator) {
                   await base44.entities.User.update(gatorId, {
                     linked_parent_subscription_active: false
                   });
@@ -172,6 +245,40 @@ Deno.serve(async (req) => {
               }
             }
           }
+        }
+        break;
+      
+      case 'invoice.payment_failed':
+        const failedInvoice = event.data.object;
+        const failedCustomerId = failedInvoice.customer;
+        
+        const failedUsers = await base44.entities.User.filter({ stripe_customer_id: failedCustomerId });
+        if (failedUsers && failedUsers.length > 0) {
+          const user = failedUsers[0];
+          
+          // Don't mark as past_due if founding member
+          if (user.price_tier === 'founding' || user.is_founding_member) {
+            console.log('Skipping payment_failed for founding member:', user.id);
+            break;
+          }
+          
+          await base44.entities.User.update(user.id, {
+            subscription_status: 'past_due'
+          });
+          console.log('Marked user subscription as past_due:', user.id);
+          
+          // Update Family record
+          if (user.family_id) {
+            try {
+              await base44.entities.Family.update(user.family_id, {
+                subscription_status: 'past_due'
+              });
+            } catch (familyError) {
+              console.error('Failed to update family:', familyError);
+            }
+          }
+          
+          // TODO: Send payment failed email with 7-day grace period warning
         }
         break;
 
