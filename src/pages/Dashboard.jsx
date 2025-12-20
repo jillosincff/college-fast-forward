@@ -7,7 +7,7 @@ import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRigh
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
-import JobRequestForm from '@/components/jobs/JobRequestForm';
+import EditHelpRequestModal from '@/components/dashboard/EditHelpRequestModal';
 import ParentSlotsCard from '@/components/dashboard/ParentSlotsCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UserPlus, Edit } from 'lucide-react';
