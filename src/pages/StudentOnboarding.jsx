@@ -75,7 +75,8 @@ export default function StudentOnboarding() {
     year: '',
     major: '',
     timeline: 'one_to_three_months',
-    description: ''
+    description: '',
+    referral_code: ''
   });
 
   // Validate @ufl.edu email
