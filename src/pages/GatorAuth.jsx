@@ -157,11 +157,28 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 0: is_new_user param detected with existing user - route immediately
+    // CASE 0: is_new_user param detected with existing user - check if they have a pending role or need selection
     if (isNewUser && user) {
-      addLog('🎯 is_new_user param detected with authenticated user - routing to role selection');
+      addLog(`🎯 is_new_user detected - user: ${user.email}, persona: ${user.persona}, pendingRole: ${pendingRole}`);
       // Clean up URL params
       window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+
+      // If user already has a persona, route to welcome/onboarding
+      if (user.persona) {
+        addLog('✅ User has persona, routing to GatorWelcome');
+        navigate('GatorWelcome');
+        return;
+      }
+
+      // If there's a pending role from before OAuth, use it
+      if (pendingRole) {
+        addLog(`✅ Pending role found: ${pendingRole}, routing to GatorWelcome`);
+        navigate('GatorWelcome');
+        return;
+      }
+
+      // Otherwise, need role selection
+      addLog('➡️ No persona or pending role, routing to GatorRoleSelection');
       navigate('GatorRoleSelection');
       return;
     }
