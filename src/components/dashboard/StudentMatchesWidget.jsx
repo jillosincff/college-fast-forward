@@ -281,7 +281,6 @@ export default function StudentMatchesWidget({ user }) {
   };
 
   const parentMatches = matches.filter(m => m.match_type === 'parent' || !m.match_type);
-  const peerMatches = matches.filter(m => m.match_type === 'peer');
   const highQualityParentMatches = parentMatches.filter(m => m.match_category === 'high' || m.match_score >= 20);
   const broaderParentMatches = parentMatches.filter(m => m.match_category === 'broader' && m.match_score < 20);
 
