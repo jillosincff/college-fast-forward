@@ -104,13 +104,43 @@ export function checkFullAccess(user, linkedParent = null) {
   if (!user) return false;
   if (user.persona === 'parent') return true;
   if (user.roles?.includes('admin')) return true;
+  
+  // Founding members always have access
+  if (user.is_founding_member === true) return true;
   if (user.is_founding_gator === true) return true;
+  if (user.price_tier === 'founding') return true;
   if (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT) return true;
-  if (user.subscription_status === 'active' && user.subscription_type === 'student_self_pay') return true;
+  
+  // Active subscription (any tier)
+  if (user.subscription_status === 'active') return true;
+  if (user.subscription_status === 'trialing') return true;
+  
+  // Legacy fields
   if (linkedParent?.subscription_status === 'active') return true;
   if (user.linked_parent_subscription_active === true) return true;
   if (user.has_active_parent_subscription === true) return true;
+  
   return false;
+}
+
+/**
+ * Get user's pricing tier info
+ */
+export function getUserTierInfo(user) {
+  if (!user) return null;
+  
+  const tier = user.price_tier || (user.is_founding_member || user.is_founding_gator ? 'founding' : null);
+  const memberNumber = user.member_number || user.founding_gator_number || user.signup_order;
+  
+  if (!tier) return null;
+  
+  return {
+    tier,
+    memberNumber,
+    priceDisplay: tier === 'founding' ? 'FREE FOREVER' : tier === 'early_adopter' ? '$9/month' : '$19/month',
+    badgeLabel: tier === 'founding' ? '👑 FOUNDING MEMBER' : tier === 'early_adopter' ? '⭐ EARLY ADOPTER' : '✓ MEMBER',
+    isFounder: tier === 'founding'
+  };
 }
 
 /**
