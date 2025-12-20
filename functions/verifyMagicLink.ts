@@ -51,30 +51,22 @@ Deno.serve(async (req) => {
     console.log('✅ Magic link valid for:', email);
 
     // Mark as used immediately to prevent replay attacks
-    await base44.entities.MagicLink.update(link.id, {
+    await base44.asServiceRole.entities.MagicLink.update(link.id, {
       used: true,
       used_at: new Date().toISOString(),
       ip_address: req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '',
       user_agent: req.headers.get('user-agent') || '',
     });
 
-    // Find or create user
+    // Find existing user (don't create - OAuth will handle that)
     let user = null;
-    const existingUsers = await base44.entities.User.filter({ email });
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     user = Array.isArray(existingUsers) ? existingUsers[0] : null;
 
-    if (!user) {
-      console.log('📝 Creating new user for:', email);
-      // New user - they'll need to complete onboarding
-      user = await base44.entities.User.create({
-        email: email,
-        full_name: email.split('@')[0], // Temporary name from email
-        role: 'user',
-        onboarding_completed: false,
-      });
-      console.log('✅ New user created:', user.id);
-    } else {
+    if (user) {
       console.log('✅ Existing user found:', user.id);
+    } else {
+      console.log('📝 New user - will be created during OAuth');
     }
 
     console.log('✅ User ready:', user.id, 'persona:', user.persona, 'onboarding:', user.onboarding_completed);
