@@ -353,10 +353,10 @@ export default function GatorAuth() {
     }
   }, []);
 
-  // Magic link handler with double-submission prevention
+  // Magic link handler using Supabase's built-in OTP (client-side, no server needed)
   const handleMagicLinkSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     
     if (!magicLinkEmail.trim()) {
       setMagicLinkStatus('error');
@@ -368,27 +368,38 @@ export default function GatorAuth() {
     setMagicLinkStatus('loading');
     setMagicLinkMessage('Sending your secure login link...');
 
+    const emailLower = magicLinkEmail.toLowerCase().trim();
+    const callbackUrl = window.location.origin + '/#GatorWelcome';
+
     try {
-      const res = await sendMagicLinkEmail({ email: magicLinkEmail.toLowerCase() });
-      if (res?.data?.success) {
-        setMagicLinkStatus('sent');
-        setMagicLinkMessage('Check your email for a sign-in link (valid for 15 minutes).');
-      } else {
-        throw new Error(res?.data?.error || 'Failed to send link.');
+      // Use Supabase's built-in magic link (client-side, creates real session)
+      const { data, error } = await base44.auth.signInWithOtp({
+        email: emailLower,
+        options: {
+          emailRedirectTo: callbackUrl,
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) {
+        throw error;
       }
+
+      console.log('✅ Magic link sent via Supabase OTP');
+      setMagicLinkStatus('sent');
+      setMagicLinkMessage('Check your email for a sign-in link (valid for 15 minutes).');
     } catch (err) {
-      const errMsg = err?.response?.data?.error || err?.message || '';
+      console.error('❌ Magic link error:', err);
+      const errMsg = err?.message || 'Failed to send link. Please try again.';
       
-      // Handle rate limiting
-      let message = 'Failed to send link. Please try again.';
-      if (errMsg.toLowerCase().includes('rate limit') || errMsg.toLowerCase().includes('too many')) {
-        message = 'Too many attempts. Please wait a minute before trying again.';
-      } else if (errMsg) {
-        message = errMsg;
+      // Rate limit handling (Supabase has 60s cooldown)
+      if (errMsg.includes('rate') || errMsg.includes('60') || errMsg.includes('seconds')) {
+        setMagicLinkStatus('error');
+        setMagicLinkMessage('Please wait 60 seconds before requesting another link.');
+      } else {
+        setMagicLinkStatus('error');
+        setMagicLinkMessage(errMsg);
       }
-      
-      setMagicLinkStatus('error');
-      setMagicLinkMessage(message);
     } finally {
       setIsSubmitting(false);
     }
