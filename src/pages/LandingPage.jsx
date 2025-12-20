@@ -362,52 +362,59 @@ export default function LandingPage() {
 
             <div className="space-y-6">
               {/* Point 1 */}
-              <Card className="p-6 border-2 border-blue-200 bg-white">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">🎯 Smart Matching Algorithm</h3>
-                    <p className="text-slate-600">
-                      Not a directory. Not random networking. Our system matches students with parents based on 
-                      industry, help needed, experience, and availability. <strong>Every match is relevant.</strong>
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <motion.div variants={cardHover} initial="rest" whileHover="hover">
+                  <Card className="p-6 border-2 border-blue-200 bg-white transition-all cursor-default">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Zap className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">🎯 Smart Matching Algorithm</h3>
+                        <p className="text-slate-600">
+                          Not a directory. Not random networking. Our system matches students with parents based on 
+                          industry, help needed, experience, and availability. <strong>Every match is relevant.</strong>
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              </motion.div>
 
               {/* Point 2 */}
-              <Card className="p-6 border-2 border-orange-200 bg-white">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">👨‍👩‍👧 Parents Actually Want to Help</h3>
-                    <p className="text-slate-600">
-                      These aren't strangers — they're UF parents and alumni who signed up specifically to help 
-                      students succeed. <strong>They respond, they care.</strong>
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <motion.div variants={cardHover} initial="rest" whileHover="hover">
+                  <Card className="p-6 border-2 border-orange-200 bg-white transition-all cursor-default">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Users className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">👨‍👩‍👧 Parents Actually Want to Help</h3>
+                        <p className="text-slate-600">
+                          These aren't strangers — they're UF parents and alumni who signed up specifically to help 
+                          students succeed. <strong>They respond, they care.</strong>
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              </motion.div>
 
-              {/* Point 3 */}
-              <Card className="p-6 border-2 border-green-200 bg-white">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">⚡ Fast Results</h3>
-                    <p className="text-slate-600">
-                      87% of students get responses within 48 hours. No waiting weeks for a cold LinkedIn 
-                      message to maybe get a response.
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              {/* Point 3 - with animated counter */}
+              <AnimatedStatsCard />
             </div>
           </div>
         </section>
