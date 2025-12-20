@@ -117,9 +117,14 @@ export default function Dashboard() {
         '-created_date'
       );
       
-      // Set most recent request for editing
-      if (myRequests && myRequests.length > 0) {
-        setExistingRequest(myRequests[0]);
+      // Load HelpRequest for editing (this is what onboarding creates)
+      const myHelpRequests = await base44.entities.HelpRequest.filter(
+        { student_id: user.id, status: 'active' },
+        '-created_date',
+        1
+      );
+      if (myHelpRequests && myHelpRequests.length > 0) {
+        setExistingHelpRequest(myHelpRequests[0]);
       }
 
       let helpOffersCount = 0;
