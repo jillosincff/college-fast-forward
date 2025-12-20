@@ -122,19 +122,29 @@ export default function GatorAuth() {
       }
     };
 
-    // Check OAuth callback indicators
-    const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
+    // Check OAuth callback indicators - check both URL params and hash
     const urlParams = new URLSearchParams(window.location.search);
     const hashFragment = window.location.hash.substring(1);
-    const hashParams = new URLSearchParams(hashFragment.includes('?') ? hashFragment.split('?')[1] : '');
-    const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token');
-    const hasError = urlParams.has('error') || hashParams.has('error');
+    
+    // Parse hash params more robustly - handle #GatorAuth?access_token=... or #access_token=... format
+    let hashParams = new URLSearchParams();
+    if (hashFragment.includes('access_token') || hashFragment.includes('error')) {
+      // Token might be directly in hash or after ? 
+      const hashQueryPart = hashFragment.includes('?') ? hashFragment.split('?')[1] : hashFragment.replace('GatorAuth', '').replace(/^&/, '');
+      hashParams = new URLSearchParams(hashQueryPart);
+    }
+    
+    const hasAccessToken = urlParams.has('access_token') || hashParams.has('access_token') || hashFragment.includes('access_token=');
+    const hasError = urlParams.has('error') || hashParams.has('error') || hashFragment.includes('error=');
+    const wasOAuthCallback = sessionStorage.getItem('oauth_callback_detected') === 'true';
+    
+    // Detect fresh OAuth callback (token in URL but not yet processed)
+    const isFreshOAuthCallback = hasAccessToken && !currentUser && !wasOAuthCallback;
+    
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
-    
 
-
-    addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
+    addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, freshOAuth=${isFreshOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
 
     // Handle OAuth errors
     if (hasError) {
