@@ -599,7 +599,8 @@ export default function LandingPage() {
                   <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> All features</li>
                   <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan included</li>
                 </ul>
-              </Card>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </section>
