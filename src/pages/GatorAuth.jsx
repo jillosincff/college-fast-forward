@@ -140,8 +140,16 @@ export default function GatorAuth() {
 
     // Get pending role from localStorage
     const pendingRole = localStorage.getItem('pending_invite_role');
+    
+    // Check for POST-MAGIC LINK context (user verified via magic link, now completing OAuth)
+    const postMagicVerified = localStorage.getItem('post_magic_verified') === 'true';
+    const postMagicEmail = localStorage.getItem('post_magic_email');
+    const postMagicRole = localStorage.getItem('post_magic_role');
+    const postMagicTimestamp = parseInt(localStorage.getItem('post_magic_timestamp') || '0');
+    const magicLinkExpired = postMagicTimestamp && (Date.now() - postMagicTimestamp > 10 * 60 * 1000); // 10 min expiry
 
     addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, token=${hasAccessToken}, role=${pendingRole}`);
+    addLog(`📧 Magic link: verified=${postMagicVerified}, email=${postMagicEmail}, role=${postMagicRole}`);
 
     // Handle OAuth errors
     if (hasError) {
@@ -151,13 +159,79 @@ export default function GatorAuth() {
       return;
     }
 
-    // Check if this is a magic link callback (already verified)
-    const magicLinkVerified = sessionStorage.getItem('magic_link_verified') === 'true';
-    const magicLinkEmail = sessionStorage.getItem('magic_link_email');
+    // Clear expired magic link context
+    if (magicLinkExpired) {
+      addLog('⏰ Magic link context expired, clearing...');
+      localStorage.removeItem('post_magic_verified');
+      localStorage.removeItem('post_magic_email');
+      localStorage.removeItem('post_magic_role');
+      localStorage.removeItem('post_magic_timestamp');
+      localStorage.removeItem('post_magic_needs_onboarding');
+    }
     
+    // CASE 0: POST-MAGIC LINK FLOW - user verified email, now has OAuth session
+    // This is the key integration point for magic link users
+    if (postMagicVerified && !magicLinkExpired && user) {
+      addLog(`🔮 Post-magic link flow detected for: ${postMagicEmail}`);
+      
+      // Verify email match (security check)
+      if (user.email?.toLowerCase() !== postMagicEmail?.toLowerCase()) {
+        addLog(`⚠️ Email mismatch! Magic: ${postMagicEmail}, OAuth: ${user.email}`);
+        // Clear magic link context - wrong account
+        localStorage.removeItem('post_magic_verified');
+        localStorage.removeItem('post_magic_email');
+        localStorage.removeItem('post_magic_role');
+        localStorage.removeItem('post_magic_timestamp');
+        localStorage.removeItem('post_magic_needs_onboarding');
+        
+        setErrorDetails({
+          type: 'email_mismatch',
+          message: `Please sign in with ${postMagicEmail} to continue. You signed in with ${user.email}.`
+        });
+        return;
+      }
+      
+      addLog(`✅ Email verified match: ${user.email}`);
+      
+      // Apply the persona from magic link verification
+      (async () => {
+        processingRef.current = true;
+        setProcessing(true);
+        
+        const role = postMagicRole || 'parent';
+        addLog(`📝 Applying magic link role: ${role}`);
+        
+        const updateData = {
+          persona: role,
+          roles: [role],
+          onboarding_completed: false,
+          is_new_signup: true,
+          magic_link_verified: true
+        };
+        
+        const result = await updatePersonaWithRetry(updateData);
+        
+        // Clear magic link context regardless of result
+        localStorage.removeItem('post_magic_verified');
+        localStorage.removeItem('post_magic_email');
+        localStorage.removeItem('post_magic_role');
+        localStorage.removeItem('post_magic_timestamp');
+        localStorage.removeItem('post_magic_needs_onboarding');
+        
+        if (result.success) {
+          addLog('✅ Magic link persona applied successfully');
+        } else {
+          addLog('⚠️ Persona update failed, but continuing to GatorWelcome');
+        }
+        
+        addLog('🎯 Magic link flow complete → GatorWelcome');
+        navigate('GatorWelcome');
+      })();
+      return;
+    }
+
     // CASE 1: No auth at all - show login options instead of auto-redirect
-    // Exception: if magic link was verified, we need to complete the OAuth flow
-    if (!user && !hasAccessToken && !wasOAuthCallback && !magicLinkVerified) {
+    if (!user && !hasAccessToken && !wasOAuthCallback) {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
@@ -165,13 +239,6 @@ export default function GatorAuth() {
         setShowLoginOptions(true);
       }
       return;
-    }
-    
-    // Clear magic link session markers once we're past initial check
-    if (magicLinkVerified) {
-      addLog(`📧 Magic link login for: ${magicLinkEmail}`);
-      sessionStorage.removeItem('magic_link_verified');
-      sessionStorage.removeItem('magic_link_email');
     }
 
     // CASE 2: OAuth callback - poll for session with timeout
@@ -239,7 +306,7 @@ export default function GatorAuth() {
     }
 
     // CASE 3: New signup via invite (OAuth callback completed, have currentUser and pendingRole)
-    if (wasOAuthCallback && pendingRole && currentUser) {
+    if (currentUser && pendingRole) {
       addLog(`📝 New signup: updating persona to ${pendingRole}`);
       
       (async () => {
