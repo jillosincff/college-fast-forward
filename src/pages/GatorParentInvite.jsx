@@ -41,25 +41,14 @@ export default function GatorParentInvite() {
     const code = inviteCode.trim().toUpperCase();
     
     try {
-      // Generate unique token and store in database
-      const token = `oauth_parent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-      
-      await base44.entities.OAuthState.create({
-        token,
-        role: 'parent',
-        invite_code: code,
-        expires_at: expiresAt,
-        used: false
-      });
-      
+      // Store role and code for after OAuth
       localStorage.setItem('pending_invite_role', 'parent');
       localStorage.setItem('pending_invite_code', code);
       
-      const callbackUrl = `${window.location.origin}/?state=${token}`;
-      base44.auth.redirectToLogin(callbackUrl);
+      // Redirect to GatorAuth which will handle the OAuth flow
+      navigate('GatorAuth');
     } catch (error) {
-      console.error('Failed to create OAuth state:', error);
+      console.error('Failed to initiate login:', error);
       toast({
         title: "Error",
         description: "Failed to initiate login. Please try again.",
@@ -372,7 +361,7 @@ export default function GatorParentInvite() {
         {/* Back Link */}
         <div className="text-center mt-8">
           <button
-            onClick={() => navigate('GatorAuth')}
+            onClick={() => navigate('GatorRoleSelection')}
             className="text-slate-500 hover:text-slate-700 text-sm flex items-center justify-center gap-1 mx-auto"
           >
             <ArrowLeft className="w-4 h-4" />
