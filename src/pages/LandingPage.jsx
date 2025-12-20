@@ -237,12 +237,12 @@ export default function LandingPage() {
           }} />
           
           <div className="relative z-10 max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
-            {/* Logo */}
+            {/* Logo - Transparent background */}
             <div className="mb-8">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                src={TRANSPARENT_LOGO}
                 alt="College Fast Forward"
-                className="h-20 md:h-24 mx-auto"
+                className="h-24 md:h-32 mx-auto"
               />
             </div>
 
