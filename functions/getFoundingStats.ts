@@ -80,14 +80,10 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Get founding stats error:', error);
+    // Return error status but don't use hardcoded fallbacks
     return Response.json({ 
       error: error.message || 'Failed to get founding stats',
-      success: true,
-      total_users: 700,
-      spots_left: 300,
-      founding_limit: FOUNDING_LIMIT,
-      founding_active: true,
-      current_tier: 'founding'
+      success: false
     }, { status: 500 });
   }
 });
