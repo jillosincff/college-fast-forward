@@ -155,7 +155,7 @@ export default function GatorAuth() {
     }
 
     // CASE 1: No auth at all - show login options instead of auto-redirect
-    if (!user && !hasAccessToken && !wasOAuthCallback) {
+    if (!user && !hasAccessToken && !wasOAuthCallback && !isFreshOAuthCallback) {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
@@ -165,8 +165,23 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 2: OAuth callback - poll for session with timeout
-    if (wasOAuthCallback && !currentUser) {
+    // CASE 2: Fresh OAuth callback (access_token in URL) - mark it and start polling
+    if (isFreshOAuthCallback) {
+      addLog('🔐 Fresh OAuth callback detected with access_token in URL');
+      sessionStorage.setItem('oauth_callback_detected', 'true');
+      
+      // Clean URL - remove tokens from hash for security
+      const cleanHash = '#GatorAuth';
+      if (window.location.hash !== cleanHash) {
+        window.history.replaceState(null, '', window.location.origin + cleanHash);
+        addLog('🧹 Cleaned URL, starting session polling...');
+      }
+      
+      // Fall through to polling logic below
+    }
+
+    // CASE 3: OAuth callback - poll for session with timeout
+    if ((wasOAuthCallback || isFreshOAuthCallback) && !currentUser) {
       processingRef.current = true;
       setProcessing(true);
       
