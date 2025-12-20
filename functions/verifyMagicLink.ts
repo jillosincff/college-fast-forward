@@ -80,19 +80,16 @@ Deno.serve(async (req) => {
       console.log('✅ Existing user found:', user.id);
     }
 
-    // Generate a session token for this user
-    // This creates an authenticated session without OAuth
-    const sessionToken = await base44.auth.createSessionForUser(user.id);
-    
-    console.log('✅ Session created for user');
+    console.log('✅ User ready:', user.id, 'persona:', user.persona, 'onboarding:', user.onboarding_completed);
 
     return new Response(JSON.stringify({ 
       success: true, 
       email: email,
       user_id: user.id,
-      session_token: sessionToken,
+      full_name: user.full_name,
       is_new_user: !user.onboarding_completed,
-      persona: user.persona || null
+      persona: user.persona || null,
+      onboarding_completed: user.onboarding_completed || false
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
