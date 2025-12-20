@@ -103,6 +103,9 @@ export default function LandingPage() {
     }
   };
 
+  const spotsRemaining = foundingStats.spots_left;
+  const totalFamilies = foundingStats.total_users;
+
   // Dynamic urgency messaging based on member count
   const getUrgencyMessage = () => {
     const count = totalFamilies;
@@ -133,9 +136,6 @@ export default function LandingPage() {
     trackEvent('cta_main_clicked');
     navigate('WelcomeRole');
   };
-
-  const spotsRemaining = foundingStats.spots_left;
-  const totalFamilies = foundingStats.total_users;
 
   // Animated stats card component
   const AnimatedStatsCard = () => {
