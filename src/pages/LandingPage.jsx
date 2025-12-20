@@ -683,19 +683,29 @@ export default function LandingPage() {
                   <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 px-4 py-1 text-sm font-bold pulse-badge">
                     {spotsRemaining} spots left
                   </div>
-                <div className="flex items-center gap-3 mb-4">
-                  <Crown className="w-8 h-8 text-yellow-600" />
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">FOUNDING MEMBERS</h3>
-                    <p className="text-slate-600">First 1,000 families</p>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Crown className="w-8 h-8 text-yellow-600" />
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">FOUNDING MEMBERS</h3>
+                      <p className="text-slate-600">First 1,000 families</p>
+                    </div>
                   </div>
-                </div>
-                <div className="text-4xl font-extrabold text-green-600 mb-4">FREE FOREVER</div>
-                <ul className="space-y-2 text-slate-700">
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Students get unlimited help</li>
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Parents help students for free</li>
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan (up to 2 students + 2 parents)</li>
-                </ul>
+                  <div className="text-4xl font-extrabold text-green-600 mb-4">FREE FOREVER</div>
+                  <ul className="space-y-2 text-slate-700">
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Students & alumni get unlimited help</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Parents help for free</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan (2 students + 2 parents)</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Founding Member badge</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Early access to features</li>
+                  </ul>
+                  <Button
+                    onClick={handleMainCTA}
+                    className="w-full mt-6 bg-[#FA4616] hover:bg-orange-600 text-white py-4 text-lg font-bold cta-pulse"
+                  >
+                    CLAIM YOUR SPOT
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                  <p className="text-center text-sm text-slate-600 mt-3">{totalFamilies}/1,000 claimed</p>
                 </Card>
               </motion.div>
 
@@ -707,20 +717,21 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <Card className="p-6 border-2 border-blue-200 bg-white opacity-80 hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-3 mb-4">
-                  <Star className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">EARLY ADOPTERS</h3>
-                    <p className="text-slate-600">Members 1,001-5,000</p>
+                <Card className="p-6 border-2 border-blue-200 bg-white opacity-75 hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Star className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">EARLY ADOPTERS</h3>
+                      <p className="text-slate-600">Members 1,001-5,000</p>
+                    </div>
                   </div>
-                </div>
-                <div className="text-4xl font-extrabold text-blue-600 mb-4">$9<span className="text-lg font-normal text-slate-500">/month</span></div>
-                <p className="text-sm text-slate-600 mb-4">Locked in forever — your price never increases</p>
-                <ul className="space-y-2 text-slate-700">
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Same benefits as founding members</li>
-                  <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan included</li>
-                </ul>
+                  <div className="text-4xl font-extrabold text-blue-600 mb-4">$9<span className="text-lg font-normal text-slate-500">/month</span></div>
+                  <p className="text-sm text-slate-600 mb-4">Locked in forever — your price never increases</p>
+                  <ul className="space-y-2 text-slate-700">
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> All founding member benefits</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Price never increases</li>
+                    <li className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" /> Family plan included</li>
+                  </ul>
                 </Card>
               </motion.div>
 
@@ -732,7 +743,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <Card className="p-6 border-2 border-slate-200 bg-white opacity-80 hover:opacity-100 transition-opacity">
+                <Card className="p-6 border-2 border-slate-200 bg-white opacity-75 hover:opacity-100 transition-opacity">
                   <div className="flex items-center gap-3 mb-4">
                     <Check className="w-8 h-8 text-slate-600" />
                     <div>
@@ -748,6 +759,10 @@ export default function LandingPage() {
                 </Card>
               </motion.div>
             </div>
+
+            <p className="text-center text-slate-500 mt-8 text-sm">
+              Students & alumni pay. Parents are always FREE.
+            </p>
           </div>
         </section>
 
