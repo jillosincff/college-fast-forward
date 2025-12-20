@@ -752,6 +752,13 @@ export default function StudentOnboarding() {
                         </div>
                       </label>
                     </div>
+
+                    {/* Peer Collaboration Section */}
+                    <PeerCollaborationSection 
+                      formData={formData}
+                      updateField={updateField}
+                      toggleMultiSelect={toggleMultiSelect}
+                    />
                   </motion.div>
                 )}
 
