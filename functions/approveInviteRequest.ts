@@ -30,33 +30,49 @@ Deno.serve(async (req) => {
         const inviteRequest = requests[0];
 
         if (action === 'approve') {
-            // Generate invite code
+            // Generate invite code with role prefix for clarity
+            const requestRole = inviteRequest.role || 'parent';
+            const prefix = requestRole === 'alumni' ? 'ALUM' : 'PRNT';
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            let suffix = '';
+            for (let i = 0; i < 6; i++) {
+                suffix += chars.charAt(Math.floor(Math.random() * chars.length));
             }
+            const code = `${prefix}-${suffix}`;
 
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + 30); // 30 days for admin-approved codes
 
-            // Determine invite type based on user_type field
-            const inviteTypeMap = {
-                'uf_student': 'admin_to_gator',
-                'uf_parent': 'admin_to_parent', 
-                'uf_alumni': 'admin_to_gator'
-            };
-            const userType = inviteRequest.user_type || 'uf_parent';
-            const inviteType = inviteTypeMap[userType] || 'admin_to_parent';
+            // Determine invite type based on new role field (fallback to user_type for legacy)
+            let inviteType = 'admin_to_parent';
+            let assignedRole = 'parent';
+            
+            if (requestRole === 'alumni') {
+                inviteType = 'admin_to_alumni';
+                assignedRole = 'alumni';
+            } else if (requestRole === 'parent') {
+                inviteType = 'admin_to_parent';
+                assignedRole = 'parent';
+            } else if (inviteRequest.user_type) {
+                // Legacy fallback
+                const inviteTypeMap = {
+                    'uf_student': 'admin_to_gator',
+                    'uf_parent': 'admin_to_parent', 
+                    'uf_alumni': 'admin_to_alumni'
+                };
+                inviteType = inviteTypeMap[inviteRequest.user_type] || 'admin_to_parent';
+                assignedRole = inviteRequest.user_type === 'uf_alumni' ? 'alumni' : 'parent';
+            }
 
-            // Create invite code
-            console.log('Creating invite code with:', { code, inviteType, userType });
+            // Create invite code with role field
+            console.log('Creating invite code with:', { code, inviteType, assignedRole });
             await base44.asServiceRole.entities.InviteCode.create({
                 code: code,
                 inviter_id: user.id,
                 inviter_email: 'jill@uffastforward.com',
                 inviter_name: 'CFF Admin Team',
                 invite_type: inviteType,
+                role: assignedRole,
                 status: 'active',
                 expires_at: expiresAt.toISOString()
             });

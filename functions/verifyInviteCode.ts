@@ -283,9 +283,25 @@ College Fast Forward Team`
       console.log('User count increment skipped (not authenticated yet)');
     }
 
+    // Determine the role from invite
+    let assignedRole = invite.role || null;
+    if (!assignedRole) {
+      // Fallback: derive from invite_type
+      if (invite.invite_type?.includes('alumni')) {
+        assignedRole = 'alumni';
+      } else if (invite.invite_type?.includes('parent')) {
+        assignedRole = 'parent';
+      } else if (invite.invite_type?.includes('gator')) {
+        assignedRole = 'gator';
+      }
+    }
+
+    console.log('✅ Invite verified. Assigned role:', assignedRole);
+
     return Response.json({
       success: true,
       invite_type: invite.invite_type,
+      role: assignedRole,
       inviter_name: invite.inviter_name,
       is_community_invite: invite.is_community_invite || false,
       group_name: invite.group_name || null,
