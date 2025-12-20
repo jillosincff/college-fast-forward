@@ -517,7 +517,90 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 5: PRICING */}
+        {/* SECTION 5: TESTIMONIALS */}
+        <section className="py-20 bg-slate-50">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-12">
+              Real Gators, Real Results
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Testimonial 1 */}
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0 }}
+              >
+                <Card className="p-6 bg-white border-l-4 border-l-orange-500 h-full">
+                  <p className="text-slate-700 mb-6 italic">
+                    "I posted my resume for review on Monday. By Wednesday I had 3 parents helping me. By Friday I had 2 interview intros. This actually works."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold">
+                      MT
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Marcus T.</p>
+                      <p className="text-sm text-slate-500">Class of 2024, Now at Deloitte</p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Testimonial 2 */}
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Card className="p-6 bg-white border-l-4 border-l-orange-500 h-full">
+                  <p className="text-slate-700 mb-6 italic">
+                    "My daughter's classmates needed help breaking into consulting. I helped 5 students in one month. 3 got interviews. Feels good to give back."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center text-white font-bold">
+                      JK
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Jennifer K.</p>
+                      <p className="text-sm text-slate-500">Parent, Partner at McKinsey</p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Testimonial 3 */}
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Card className="p-6 bg-white border-l-4 border-l-orange-500 h-full">
+                  <p className="text-slate-700 mb-6 italic">
+                    "Not another 'networking platform' where nothing happens. This matched me with people who responded, cared, and helped. Game changer."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white font-bold">
+                      AR
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Alicia R.</p>
+                      <p className="text-sm text-slate-500">Junior, Warrington College of Business</p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 6: PRICING */}
         <section className="py-20 bg-slate-50">
           <div className="max-w-4xl mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-12">
