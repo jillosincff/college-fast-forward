@@ -298,20 +298,33 @@ export default function GatorAuth() {
       return;
     }
 
-    // User authenticated without OAuth callback - go to role selection
+    // User authenticated without OAuth callback - route appropriately
     if (user && !hasAccessToken && !wasOAuthCallback && !processing) {
-      console.log('✅ [GatorAuth] User authenticated, going to role selection');
+      console.log('✅ [GatorAuth] User authenticated:', user.email, 'persona:', user.persona, 'onboarded:', user.onboarding_completed);
       
-      // Check if user already has a persona set - if so, go to appropriate dashboard
-      if (user.persona === 'gator' && user.onboarding_completed) {
-        window.location.hash = 'Dashboard';
-      } else if (user.persona === 'parent' && user.onboarding_completed) {
-        window.location.hash = 'ParentDashboard';
+      // Check pending role from localStorage (set during role selection)
+      const pendingRole = localStorage.getItem('pending_invite_role');
+      
+      // If pending role exists, this is a new signup - go to welcome
+      if (pendingRole) {
+        console.log('🔄 [GatorAuth] Pending role found, going to GatorWelcome');
+        window.location.hash = 'GatorWelcome';
+        return;
+      }
+      
+      // Returning user - check persona and onboarding status
+      if (user.persona && user.onboarding_completed) {
+        // Fully onboarded - go to dashboard
+        const destination = user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+        console.log('✅ [GatorAuth] Returning user -> ', destination);
+        window.location.hash = destination;
       } else if (user.persona && !user.onboarding_completed) {
-        // Has persona but needs onboarding
+        // Has persona but needs to complete onboarding
+        console.log('🔄 [GatorAuth] Incomplete onboarding -> GatorWelcome');
         window.location.hash = 'GatorWelcome';
       } else {
         // No persona - needs role selection
+        console.log('🔄 [GatorAuth] No persona -> GatorRoleSelection');
         window.location.hash = 'GatorRoleSelection';
       }
     }
