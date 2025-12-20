@@ -24,13 +24,11 @@ import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
-  const accessInfo = useAccessControl(user);
   const [opportunities, setOpportunities] = useState([]);
   const [requests, setRequests] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showSpotlightModal, setShowSpotlightModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
   const [existingHelpRequest, setExistingHelpRequest] = useState(null);
   const [networkStats, setNetworkStats] = useState({
@@ -174,11 +172,6 @@ export default function Dashboard() {
         opportunitiesMatched: 0
       });
     }
-  };
-
-  const handleSpotlightSuccess = async () => {
-    await refreshUser();
-    await loadDashboardData();
   };
 
   if (isLoading || !user) {
