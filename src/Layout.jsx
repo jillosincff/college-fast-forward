@@ -101,11 +101,11 @@ import TestingDashboard from './pages/TestingDashboard';
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
 const Favorites = React.lazy(() => import('./pages/Favorites'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
-const ReferralAnalytics = React.lazy(() => import('./pages/ReferralAnalytics'));
+
 const Terms = React.lazy(() => import('./pages/Terms'));
 const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
-const Pricing = React.lazy(() => import('./pages/Pricing'));
+
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 
 const Notifications = React.lazy(() => import('./pages/Notifications'));
@@ -735,13 +735,13 @@ const getPageComponent = (pageName) => {
     case 'Privacy': return Privacy;
     case 'Terms': return Terms;
     case 'CookiePolicy': return CookiePolicy;
-    case 'Pricing': return Pricing;
+
     case 'PublicProfile': return PublicProfile;
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
 
     case 'Notifications': return Notifications;
-    case 'ReferralAnalytics': return ReferralAnalytics;
+
     case 'GatorAuth': return GatorAuth;
     case 'GatorRoleSelection': return GatorRoleSelection;
     case 'GatorStudentEmail': return GatorStudentEmail;
