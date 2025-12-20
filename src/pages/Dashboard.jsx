@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Briefcase, Users, Home, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
-import TalentSpotlightSetupModal from '@/components/dashboard/TalentSpotlightSetupModal';
 import EditHelpRequestModal from '@/components/dashboard/EditHelpRequestModal';
 import ParentSlotsCard from '@/components/dashboard/ParentSlotsCard';
 import { UserPlus, Edit } from 'lucide-react';
@@ -18,11 +17,10 @@ import { getUserCount } from '@/functions/getUserCount';
 import MembershipStatusCard from '@/components/dashboard/MembershipStatusCard';
 import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
 import FullAccessUpgradeCard from '@/components/dashboard/FullAccessUpgradeCard';
-import CampusAmbassadorWidget from '@/components/dashboard/CampusAmbassadorWidget';
+
 import StudentMatchesWidget from '@/components/dashboard/StudentMatchesWidget';
 import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
-import { useAccessControl } from '@/components/access/useAccessControl';
-import LimitedModeBanner from '@/components/access/LimitedModeBanner';
+
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
