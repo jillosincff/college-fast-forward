@@ -235,11 +235,29 @@ export default function StudentMatchesWidget({ user }) {
   const loadHelpRequests = async () => {
     setLoadingRequests(true);
     try {
-      const requests = await base44.entities.HelpRequest.filter(
+      console.log('🔍 DEBUG - User ID:', user.id);
+      console.log('🔍 DEBUG - User email:', user.email);
+      
+      // Try filtering by student_id first
+      let requests = await base44.entities.HelpRequest.filter(
         { student_id: user.id, status: 'active' },
         '-created_date',
         10
       );
+      
+      console.log('🔍 DEBUG - Requests by student_id:', requests?.length || 0);
+      
+      // If no results, try by email (fallback)
+      if (!requests || requests.length === 0) {
+        console.log('🔍 DEBUG - Trying by student_email instead...');
+        requests = await base44.entities.HelpRequest.filter(
+          { student_email: user.email, status: 'active' },
+          '-created_date',
+          10
+        );
+        console.log('🔍 DEBUG - Requests by student_email:', requests?.length || 0);
+      }
+      
       setHelpRequests(requests || []);
     } catch (error) {
       console.error('Failed to load help requests:', error);
