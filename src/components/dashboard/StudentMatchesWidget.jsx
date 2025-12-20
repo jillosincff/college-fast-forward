@@ -19,14 +19,7 @@ const HELP_TYPE_LABELS = {
   'informational_interview': 'Informational interviews'
 };
 
-const COLLAB_LABELS = {
-  'resume_review': 'Resume feedback',
-  'interview_prep': 'Interview prep',
-  'internship_search': 'Internship search',
-  'certifications': 'Certifications',
-  'study_groups': 'Study groups',
-  'career_development': 'Career development'
-};
+
 
 function ParentMatchCard({ match, onConnect, isBroader = false }) {
   return (
@@ -112,82 +105,7 @@ function ParentMatchCard({ match, onConnect, isBroader = false }) {
   );
 }
 
-function PeerMatchCard({ match, onConnect }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="bg-white rounded-xl p-4 border-2 border-teal-200 hover:border-teal-400 hover:shadow-md transition-all"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-green-600 flex items-center justify-center text-white font-bold">
-              {match.peer_name?.charAt(0) || 'G'}
-            </div>
-            <div>
-              <p className="font-semibold text-slate-900">
-                {match.peer_name || 'Fellow Gator'}
-              </p>
-              <p className="text-sm text-slate-600">
-                {match.peer_year} • {match.peer_major}
-              </p>
-            </div>
-          </div>
 
-          {match.peer_working_on && (
-            <div className="mt-2 text-sm">
-              <span className="font-medium text-slate-700">Working on: </span>
-              <span className="text-slate-600">{match.peer_working_on}</span>
-            </div>
-          )}
-
-          {match.peer_can_share && (
-            <div className="mt-1 text-sm">
-              <span className="font-medium text-slate-700">Can share: </span>
-              <span className="text-slate-600">{match.peer_can_share}</span>
-            </div>
-          )}
-
-          {match.peer_collaborate_on?.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {match.peer_collaborate_on.slice(0, 3).map(area => (
-                <Badge key={area} variant="outline" className="text-xs bg-teal-50 text-teal-700 border-teal-200">
-                  {COLLAB_LABELS[area] || area}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {match.match_reasons?.length > 0 && (
-            <p className="text-xs text-slate-500 mt-2 line-clamp-1">
-              ✨ {match.match_reasons.slice(0, 2).join(' • ')}
-            </p>
-          )}
-        </div>
-
-        <Button
-          size="sm"
-          onClick={() => onConnect(match)}
-          disabled={match.status === 'student_connected'}
-          className={match.status === 'student_connected' 
-            ? 'bg-green-100 text-green-700 hover:bg-green-100'
-            : 'bg-[#FA4616] hover:bg-[#e63e13] text-white'
-          }
-        >
-          {match.status === 'student_connected' ? (
-            <>✓ Sent</>
-          ) : (
-            <>
-              <Handshake className="w-4 h-4 mr-1" />
-              Collaborate
-            </>
-          )}
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
 
 // VERSION: 2025-12-20-v3-FORCE-REBUILD
 export default function StudentMatchesWidget({ user }) {
