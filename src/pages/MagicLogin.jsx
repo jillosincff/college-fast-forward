@@ -28,30 +28,50 @@ export default function MagicLogin() {
       console.log('🔐 Verifying magic link token...');
 
       try {
-        // Verify the token with our backend
+        // Verify the token with our backend - this also creates a session
         const res = await verifyMagicLink({ token });
+        const data = res?.data;
         
-        if (res?.data?.success && res?.data?.email) {
-          console.log('✅ Magic link verified for:', res.data.email);
+        if (data?.success && data?.session_token) {
+          console.log('✅ Magic link verified, session created for:', data.email);
           setStatus('success');
           
-          // Store the verified email so GatorAuth knows this is a magic link login
-          sessionStorage.setItem('magic_link_email', res.data.email);
-          sessionStorage.setItem('magic_link_verified', 'true');
+          // Set the session token - this authenticates the user
+          base44.auth.setToken(data.session_token);
           
-          // Redirect to platform login with the email pre-filled
-          // The platform will recognize this as a verified magic link session
+          // Determine where to redirect based on user state
           setTimeout(() => {
-            const callbackUrl = window.location.origin + '/#GatorAuth';
-            base44.auth.redirectToLogin(callbackUrl);
+            if (data.is_new_user || !data.persona) {
+              // New user or no persona - go to welcome/role selection
+              console.log('🆕 New user, redirecting to GatorWelcome');
+              navigate('GatorWelcome');
+            } else {
+              // Existing user with persona - go to dashboard
+              console.log('👤 Existing user, redirecting to Dashboard');
+              const destination = data.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+              navigate(destination);
+            }
           }, 1500);
+        } else if (data?.success && data?.email) {
+          // Fallback: session token not available, but verification succeeded
+          // This means Base44 SDK might not support createSessionForUser
+          console.log('⚠️ Magic link verified but no session token - falling back');
+          setStatus('error');
+          setErrorMessage('Magic link login is not fully configured. Please use Google sign-in or contact support.');
         } else {
-          throw new Error(res?.data?.error || 'Verification failed');
+          throw new Error(data?.error || 'Verification failed');
         }
       } catch (err) {
         console.error('❌ Magic link verification failed:', err);
         setStatus('error');
-        setErrorMessage(err?.response?.data?.error || err?.message || 'This link is invalid or has expired.');
+        const errorMsg = err?.response?.data?.error || err?.message || 'This link is invalid or has expired.';
+        
+        // Check if it's a SDK limitation error
+        if (errorMsg.includes('createSessionForUser') || errorMsg.includes('not a function')) {
+          setErrorMessage('Magic link login requires platform configuration. Please use Google sign-in for now.');
+        } else {
+          setErrorMessage(errorMsg);
+        }
       }
     };
 
@@ -72,8 +92,8 @@ export default function MagicLogin() {
         {status === 'success' && (
           <>
             <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Link verified!</h2>
-            <p className="text-white/70">Signing you in...</p>
+            <h2 className="text-xl font-semibold text-white mb-2">You're in! 🐊</h2>
+            <p className="text-white/70">Taking you to your dashboard...</p>
           </>
         )}
 
