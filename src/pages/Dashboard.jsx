@@ -390,27 +390,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card
-              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 border-2 border-slate-200"
-              onClick={() => {
-                navigate('Roommates');
-                trackEvent('quick_action_clicked', { action: 'roommates' });
-              }}
-            >
-              <CardContent className="pt-8 pb-8">
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Home className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-extrabold text-slate-900 mb-2" style={{
-                      fontFamily: "'Inter', sans-serif"
-                    }}>Find a Roommate</h3>
-                    <p className="text-base text-slate-700 font-medium">Connect with Gators for housing</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </motion.div>
 
