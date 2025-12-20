@@ -19,6 +19,7 @@ import { base44 } from '@/api/base44Client';
 import ResumeUpload from '@/components/profile/ResumeUpload';
 import ShareableProfile from '@/components/profile/ShareableProfile';
 import ExpertiseTagSelector from '@/components/profile/ExpertiseTagSelector';
+import PeerCollaborationSettings from '@/components/settings/PeerCollaborationSettings';
 
 import {
   ArrowLeft,
@@ -507,6 +508,9 @@ export default function ProfileEdit() {
           </Card>
 
 
+
+          {/* Peer Collaboration Settings - Students Only */}
+          <PeerCollaborationSettings user={user} />
 
           {/* Directory Settings */}
           <Card>
