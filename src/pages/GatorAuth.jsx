@@ -329,7 +329,119 @@ export default function GatorAuth() {
     );
   }
 
-  // Loading state
+  // Magic link handler
+  const handleMagicLinkSubmit = async (e) => {
+    e.preventDefault();
+    if (!magicLinkEmail.trim()) {
+      setMagicLinkStatus('error');
+      setMagicLinkMessage('Please enter your email address.');
+      return;
+    }
+
+    setMagicLinkStatus('loading');
+    setMagicLinkMessage('Sending your secure login link...');
+
+    try {
+      const res = await sendMagicLinkEmail({ email: magicLinkEmail.toLowerCase() });
+      if (res?.data?.success) {
+        setMagicLinkStatus('sent');
+        setMagicLinkMessage('Check your email for a sign-in link (valid for 15 minutes).');
+      } else {
+        throw new Error(res?.data?.error || 'Failed to send link.');
+      }
+    } catch (err) {
+      setMagicLinkStatus('error');
+      setMagicLinkMessage(err?.response?.data?.error || err?.message || 'Failed to send link. Please try again.');
+    }
+  };
+
+  // Magic link UI
+  if (showMagicLink) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616] p-4">
+        <div className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">🐊</div>
+            <h1 className="text-2xl font-bold text-white mb-2">Sign in with Email</h1>
+            <p className="text-white/80 text-sm">We'll send you a secure login link</p>
+          </div>
+
+          {magicLinkStatus === 'input' && (
+            <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={magicLinkEmail}
+                onChange={(e) => setMagicLinkEmail(e.target.value)}
+                className="h-12 text-lg bg-white/90 border-0 placeholder:text-slate-500"
+                required
+              />
+              <Button
+                type="submit"
+                className="w-full h-12 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold text-lg rounded-xl"
+              >
+                <Mail className="w-5 h-5 mr-2" />
+                Send Magic Link
+              </Button>
+            </form>
+          )}
+
+          {magicLinkStatus === 'loading' && (
+            <div className="text-center text-white py-8">
+              <Loader2 className="w-10 h-10 mx-auto animate-spin mb-4" />
+              <p>{magicLinkMessage}</p>
+            </div>
+          )}
+
+          {magicLinkStatus === 'sent' && (
+            <div className="text-center text-white py-4">
+              <div className="w-12 h-12 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-4">
+                <span className="text-white text-xl">✓</span>
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Check Your Email!</h2>
+              <p className="text-white/80 mb-6">{magicLinkMessage}</p>
+              <Button
+                onClick={() => { setMagicLinkStatus('input'); setMagicLinkEmail(''); }}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
+                Use a different email
+              </Button>
+            </div>
+          )}
+
+          {magicLinkStatus === 'error' && (
+            <div className="text-center py-4">
+              <div className="w-12 h-12 mx-auto bg-red-500 rounded-full flex items-center justify-center mb-4">
+                <span className="text-white text-xl">!</span>
+              </div>
+              <p className="text-white/80 mb-4">{magicLinkMessage}</p>
+              <Button
+                onClick={() => setMagicLinkStatus('input')}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          <div className="mt-6 text-center">
+            <Button
+              onClick={() => setShowMagicLink(false)}
+              variant="ghost"
+              className="text-white/60 hover:text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Google Sign In
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state with magic link option
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
       <div className="text-center max-w-md px-4">
@@ -337,9 +449,19 @@ export default function GatorAuth() {
         <p className="text-white text-lg font-semibold mb-2">
           {user ? 'Setting up your account...' : authProgress}
         </p>
-        <p className="text-white/80 text-sm">
+        <p className="text-white/80 text-sm mb-6">
           {user ? 'Almost done...' : 'This may take a few moments on mobile'}
         </p>
+        
+        {/* Magic link alternative */}
+        {!user && (
+          <button
+            onClick={() => setShowMagicLink(true)}
+            className="text-white/70 hover:text-white text-sm underline underline-offset-2 transition-colors"
+          >
+            Having trouble? Sign in with email instead
+          </button>
+        )}
       </div>
     </div>
   );
