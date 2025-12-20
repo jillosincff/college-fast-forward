@@ -90,15 +90,26 @@ export default function Dashboard() {
         setHelpRequest(myHelpRequest[0]);
       }
 
-      // Fetch matches for this student
-      const studentMatches = await base44.entities.Match.filter(
+      // Fetch matches for this student - try both user.id and by email-based lookup
+      let studentMatches = await base44.entities.Match.filter(
         { student_id: user.id },
         '-match_score',
         50
       );
+      
+      // If no matches by user.id, also check via help_request_id from the request we found
+      if ((!studentMatches || studentMatches.length === 0) && myHelpRequest && myHelpRequest.length > 0) {
+        studentMatches = await base44.entities.Match.filter(
+          { help_request_id: myHelpRequest[0].id },
+          '-match_score',
+          50
+        );
+      }
+      
       const activeMatches = (studentMatches || []).filter(m => 
         m.status === 'pending' || m.status === 'student_connected'
       );
+      console.log('📊 Dashboard matches found:', activeMatches.length, 'for user:', user.id);
       setMatches(activeMatches);
 
       // Count active requests for stats
