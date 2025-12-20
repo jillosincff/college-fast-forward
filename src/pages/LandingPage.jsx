@@ -811,8 +811,9 @@ export default function LandingPage() {
               className="text-xl md:text-2xl mb-12 space-y-4"
               style={{ 
                 color: '#FFFFFF',
-                textShadow: '0 3px 8px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9)',
-                lineHeight: 1.6
+                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.7)',
+                lineHeight: 1.6,
+                fontWeight: 600
               }}
               variants={fadeInUp}
               initial="hidden"
