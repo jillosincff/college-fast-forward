@@ -325,54 +325,6 @@ export default function GatorAuth() {
     );
   }
 
-  // Pre-fill email from URL if present
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlEmail = urlParams.get('email');
-    if (urlEmail) {
-      setMagicLinkEmail(urlEmail);
-      setShowMagicLink(true);
-    }
-  }, []);
-
-  // Magic link handler - uses backend function to send via SendGrid
-  const handleMagicLinkSubmit = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    
-    if (!magicLinkEmail.trim()) {
-      setMagicLinkStatus('error');
-      setMagicLinkMessage('Please enter your email address.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setMagicLinkStatus('loading');
-    setMagicLinkMessage('Sending your secure login link...');
-
-    const emailLower = magicLinkEmail.toLowerCase().trim();
-
-    try {
-      // Use our backend function to send magic link via SendGrid
-      const res = await sendMagicLinkEmail({ email: emailLower });
-      
-      if (res?.data?.success) {
-        console.log('✅ Magic link sent');
-        setMagicLinkStatus('sent');
-        setMagicLinkMessage('Check your email for a sign-in link (valid for 15 minutes).');
-      } else {
-        throw new Error(res?.data?.error || 'Failed to send link.');
-      }
-    } catch (err) {
-      console.error('❌ Magic link error:', err);
-      const errMsg = err?.response?.data?.error || err?.message || 'Failed to send link. Please try again.';
-      setMagicLinkStatus('error');
-      setMagicLinkMessage(errMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Handle Google sign in
   const handleGoogleSignIn = () => {
     const callbackUrl = window.location.origin + '/#GatorAuth';
