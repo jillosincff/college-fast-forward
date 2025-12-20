@@ -224,25 +224,31 @@ export default function GatorAuth() {
           await updatePersonaWithRetry(updateData);
         }
         
-        // CRITICAL: Wait for user state to fully propagate
+        // CRITICAL: Wait for user state to fully propagate - don't navigate until confirmed
         addLog('⏳ Waiting for session to propagate...');
         let attempts = 0;
         let freshUser = null;
-        while (attempts < 10) {
+        let confirmed = false;
+        
+        while (attempts < 20) { // Up to 6 seconds
           await new Promise(r => setTimeout(r, 300));
           try {
             freshUser = await base44.auth.me();
-            if (freshUser?.persona === role) {
-              addLog(`✅ Session confirmed: persona=${freshUser.persona}`);
+            addLog(`🔍 Attempt ${attempts + 1}: persona=${freshUser?.persona}, email=${freshUser?.email}`);
+            
+            if (freshUser?.persona === role && freshUser?.email) {
+              addLog(`✅ Session CONFIRMED: persona=${freshUser.persona}, email=${freshUser.email}`);
+              confirmed = true;
               break;
             }
           } catch (e) {
-            // Keep trying
+            addLog(`⚠️ Attempt ${attempts + 1} error: ${e.message}`);
           }
           attempts++;
-          if (attempts % 3 === 0) {
-            addLog(`⏳ Still waiting... attempt ${attempts}/10`);
-          }
+        }
+        
+        if (!confirmed) {
+          addLog('⚠️ Session not confirmed after 20 attempts, but proceeding...');
         }
         
         // Clear magic link context AFTER confirming session
@@ -252,10 +258,15 @@ export default function GatorAuth() {
         localStorage.removeItem('post_magic_timestamp');
         localStorage.removeItem('post_magic_needs_onboarding');
         
+        // Store confirmed user in state to trigger re-render
+        if (freshUser && isMountedRef.current) {
+          setCurrentUser(freshUser);
+        }
+        
         addLog('🎯 Magic link flow complete → GatorWelcome');
         
-        // Force full navigation to ensure fresh state
-        window.location.href = window.location.origin + '/#GatorWelcome';
+        // Use window.location.replace to ensure clean navigation with fresh state
+        window.location.replace(window.location.origin + '/#GatorWelcome');
       })();
       return;
     }
