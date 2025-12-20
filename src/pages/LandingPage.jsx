@@ -83,8 +83,8 @@ export default function LandingPage() {
     }
   }, []);
 
-  const handleStudentClick = () => {
-    trackEvent('cta_student_clicked');
+  const handleStudentAlumniClick = () => {
+    trackEvent('cta_student_alumni_clicked');
     if (user) {
       navigate(user.onboarding_completed ? 'Dashboard' : 'StudentOnboarding');
     } else {
@@ -102,6 +102,32 @@ export default function LandingPage() {
       navigate('WelcomeRole');
     }
   };
+
+  // Dynamic urgency messaging based on member count
+  const getUrgencyMessage = () => {
+    const count = totalFamilies;
+    if (count <= 1000) {
+      return {
+        primary: `${count} Families Claimed`,
+        secondary: `${1000 - count} FREE Spots Left`,
+        note: 'After 1,000 members: $9-19/month'
+      };
+    } else if (count <= 5000) {
+      return {
+        primary: `${count} Families Joined`,
+        secondary: `${5000 - count} Spots at $9/month`,
+        note: 'After 5,000 members: $19/month'
+      };
+    } else {
+      return {
+        primary: `${count} Gator Families Strong`,
+        secondary: 'Join the Network',
+        note: 'Standard pricing: $19/month'
+      };
+    }
+  };
+
+  const urgencyMessage = getUrgencyMessage();
 
   const handleMainCTA = () => {
     trackEvent('cta_main_clicked');
