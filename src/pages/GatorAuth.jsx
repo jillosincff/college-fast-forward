@@ -81,6 +81,12 @@ export default function GatorAuth() {
   const [errorDetails, setErrorDetails] = useState(null);
   const [debugLogs, setDebugLogs] = useState([]);
   
+  // Magic link state
+  const [showMagicLink, setShowMagicLink] = useState(false);
+  const [magicLinkEmail, setMagicLinkEmail] = useState('');
+  const [magicLinkStatus, setMagicLinkStatus] = useState('input'); // input, loading, sent, error
+  const [magicLinkMessage, setMagicLinkMessage] = useState('');
+  
   // Prevent double execution
   const processingRef = useRef(false);
   const isMountedRef = useRef(true);
