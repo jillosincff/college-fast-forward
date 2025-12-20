@@ -387,19 +387,9 @@ export default function GatorAuth() {
         <p className="text-white text-lg font-semibold mb-2">
           {user ? 'Setting up your account...' : authProgress}
         </p>
-        <p className="text-white/80 text-sm mb-6">
+        <p className="text-white/80 text-sm">
           {user ? 'Almost done...' : 'This may take a few moments on mobile'}
         </p>
-        
-        {/* Magic link alternative */}
-        {!user && (
-          <button
-            onClick={() => setShowMagicLink(true)}
-            className="text-white/70 hover:text-white text-sm underline underline-offset-2 transition-colors"
-          >
-            Having trouble? Sign in with email instead
-          </button>
-        )}
       </div>
     </div>
   );
