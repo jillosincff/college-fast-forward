@@ -173,20 +173,9 @@ export default function Dashboard() {
     await loadDashboardData();
   };
   
-  const handleEditRequestSubmit = async (data) => {
-    try {
-      if (existingRequest) {
-        await base44.entities.JobRequest.update(existingRequest.id, data);
-        trackEvent('job_request_updated');
-      } else {
-        await base44.entities.JobRequest.create(data);
-        trackEvent('job_request_created');
-      }
-      setShowEditRequestModal(false);
-      await loadDashboardData();
-    } catch (error) {
-      console.error('Failed to save job request:', error);
-    }
+  const handleEditRequestSuccess = async () => {
+    trackEvent('help_request_updated');
+    await loadDashboardData();
   };
 
   if (isLoading || !user) {
