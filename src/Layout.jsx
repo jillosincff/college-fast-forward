@@ -80,7 +80,7 @@ function PageLoader() {
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Connections = React.lazy(() => import('./pages/Connections'));
-const Roommates = React.lazy(() => import('./pages/Roommates'));
+
 const Profile = React.lazy(() => import('./pages/Profile'));
 const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
@@ -107,7 +107,7 @@ const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const Pricing = React.lazy(() => import('./pages/Pricing'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
-const UFAmbassador = React.lazy(() => import('./pages/UFAmbassador'));
+
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection'));
