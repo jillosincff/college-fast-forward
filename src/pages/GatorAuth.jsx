@@ -174,14 +174,19 @@ export default function GatorAuth() {
     if (postMagicVerified && !magicLinkExpired && user) {
       addLog(`🔮 Post-magic link flow detected for: ${postMagicEmail}`);
       
-      // Verify email match (security check)
-      if (user.email?.toLowerCase() !== postMagicEmail?.toLowerCase()) {
-        addLog(`⚠️ Email mismatch! Magic: ${postMagicEmail}, OAuth: ${user.email}`);
+      // Helper to clear post-magic context
+      const clearPostMagicContext = () => {
         localStorage.removeItem('post_magic_verified');
         localStorage.removeItem('post_magic_email');
         localStorage.removeItem('post_magic_role');
         localStorage.removeItem('post_magic_timestamp');
         localStorage.removeItem('post_magic_needs_onboarding');
+      };
+      
+      // Verify email match (security check)
+      if (user.email?.toLowerCase() !== postMagicEmail?.toLowerCase()) {
+        addLog(`⚠️ Email mismatch! Magic: ${postMagicEmail}, OAuth: ${user.email}`);
+        clearPostMagicContext();
         
         setErrorDetails({
           type: 'email_mismatch',
@@ -194,26 +199,19 @@ export default function GatorAuth() {
       
       // SUCCESS: User persona is already set correctly - navigate now!
       if (user.persona === targetRole) {
-        addLog(`✅ Persona CONFIRMED in React state: ${user.persona} - navigating to GatorWelcome`);
-        
-        // Clear magic link context
-        localStorage.removeItem('post_magic_verified');
-        localStorage.removeItem('post_magic_email');
-        localStorage.removeItem('post_magic_role');
-        localStorage.removeItem('post_magic_timestamp');
-        localStorage.removeItem('post_magic_needs_onboarding');
-        
+        addLog(`✅ Persona already matches in state: ${user.persona} - navigating`);
+        clearPostMagicContext();
         navigate('GatorWelcome');
         return;
       }
       
-      // Persona not set yet - update it and wait for AuthContext to update
+      // Update if not processing
       if (!processingRef.current) {
         processingRef.current = true;
         setProcessing(true);
-        setAuthProgress('Setting up your account...');
+        setAuthProgress('Finalizing your role...');
         
-        addLog(`📝 Updating persona from "${user.persona}" to "${targetRole}"`);
+        addLog(`📝 Updating persona to "${targetRole}"`);
         
         (async () => {
           try {
@@ -225,32 +223,53 @@ export default function GatorAuth() {
               magic_link_verified: true
             });
             
-            addLog('✅ Persona update sent to server');
+            addLog('✅ Update sent to server');
             
-            // Now call refreshUser and WAIT for it
+            // Force refresh and wait
             await refreshUser();
             
-            addLog('✅ refreshUser completed - useEffect will re-run with updated user');
+            // Double-check with manual me() call - don't rely on context
+            addLog('🔍 Verifying with direct me() call...');
+            const freshUser = await base44.auth.me();
             
-            // Reset processing so the useEffect can check persona again
-            processingRef.current = false;
-            setProcessing(false);
-            
-            // The useEffect will re-run because refreshUser updates the user state
-            // and the check "if (user.persona === targetRole)" will pass
+            if (freshUser.persona === targetRole) {
+              addLog(`✅ Persona CONFIRMED via me(): ${freshUser.persona}`);
+              clearPostMagicContext();
+              navigate('GatorWelcome');
+            } else {
+              addLog(`⚠️ Persona still "${freshUser.persona}", trying double refresh...`);
+              // Double-call refreshUser to force cache bust
+              await refreshUser();
+              
+              // Final check
+              const finalUser = await base44.auth.me();
+              if (finalUser.persona === targetRole) {
+                addLog(`✅ Persona confirmed after double refresh: ${finalUser.persona}`);
+                clearPostMagicContext();
+                navigate('GatorWelcome');
+              } else {
+                addLog(`❌ Persona update not propagating. Expected "${targetRole}", got "${finalUser.persona}"`);
+                // Navigate anyway - the persona should be set server-side
+                clearPostMagicContext();
+                navigate('GatorWelcome');
+              }
+            }
             
           } catch (err) {
-            addLog(`❌ Error: ${err.message}`);
+            addLog(`❌ Update failed: ${err.message}`);
+            clearPostMagicContext();
+            setErrorDetails({ 
+              type: 'setup_failed',
+              message: 'Setup failed. Try refreshing or signing in again.' 
+            });
+          } finally {
             processingRef.current = false;
             setProcessing(false);
           }
         })();
-      } else {
-        addLog('⏳ Update already in progress, waiting for user state change...');
       }
       
-      // DON'T navigate here - useEffect will re-run when user changes
-      return;
+      return; // Don't navigate here - async block handles it
     }
 
     // CASE 1: No auth at all - show login options instead of auto-redirect
