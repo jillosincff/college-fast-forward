@@ -381,6 +381,7 @@ export default function StudentMatchesWidget({ user }) {
       >
         <Card className="border-2 border-[#FA4616]/20 shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-blue-50/30 overflow-hidden">
           <CardContent className="pt-8 pb-8">
+            {/* Updated: Dec 20, 2025 - Visual differentiation */}
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">🤝</div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
