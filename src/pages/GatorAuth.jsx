@@ -290,7 +290,7 @@ export default function GatorAuth() {
       navigate(nextRoute);
     }
     
-    // CASE 5: Have currentUser from OAuth polling, no pendingRole - route based on user state
+    // CASE 6: Have currentUser from OAuth polling, no pendingRole - route based on user state
     if (currentUser && !pendingRole) {
       const nextRoute = determineNextRoute(currentUser, null);
       addLog(`🎯 OAuth complete, routing to: ${nextRoute}`);
