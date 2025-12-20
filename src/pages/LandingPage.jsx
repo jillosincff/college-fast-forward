@@ -615,30 +615,31 @@ export default function LandingPage() {
             }}
           />
           {/* Dark overlay */}
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.9) 0%, rgba(147, 51, 234, 0.9) 100%)'
-          }} />
+          <div className="absolute inset-0 bg-black/70" />
           
           <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
             <motion.h2 
-              className="text-3xl md:text-5xl font-bold text-white mb-6"
+              className="text-4xl md:text-6xl font-extrabold text-white mb-8"
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
             >
-              Join {totalFamilies} Gator Families Building Careers Together
+              THE GATOR NETWORK IS WAITING
             </motion.h2>
-            <motion.p 
-              className="text-xl text-white/90 mb-10"
+            <motion.div 
+              className="text-xl md:text-2xl text-white/90 mb-12 space-y-2"
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              Students get career help. Parents give back. Everyone wins.
-            </motion.p>
+              <p>{totalFamilies} families are already inside.</p>
+              <p>Students are getting hired.</p>
+              <p>Parents are changing lives.</p>
+              <p className="pt-4 font-semibold text-white">The only question is: Are you in or are you out?</p>
+            </motion.div>
 
             <motion.div
               variants={fadeInUp}
@@ -651,23 +652,23 @@ export default function LandingPage() {
                 <Button
                   onClick={handleMainCTA}
                   size="lg"
-                  className="bg-white text-slate-900 hover:bg-slate-100 px-12 py-6 text-xl font-bold shadow-2xl cta-pulse transition-all"
+                  className="bg-[#FA4616] hover:bg-orange-600 text-white px-12 py-7 text-xl font-bold shadow-2xl cta-pulse transition-all"
                 >
-                  Join as Founding Member — Free Forever
+                  JOIN THE GATOR NETWORK
                   <ArrowRight className="w-6 h-6 ml-2" />
                 </Button>
               </motion.div>
             </motion.div>
 
             <motion.p 
-              className="text-white/80 mt-6 text-sm"
+              className="text-yellow-300 mt-8 text-lg font-semibold"
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              Only {spotsRemaining} founding spots remaining
+              ⚡ {spotsRemaining} Free Founding Spots Remaining
             </motion.p>
           </div>
         </section>
