@@ -8,126 +8,103 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { LogOut, Check, AlertCircle, ArrowLeft, Sparkles, GraduationCap, Briefcase, Target } from 'lucide-react';
+import { LogOut, Check, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import InviteParentModal from '@/components/dashboard/InviteParentModal';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Match } from '@/entities/Match';
 
-// Constants
-const currentYear = new Date().getFullYear();
-const GRADUATION_YEARS = Array.from({ length: 7 }, (_, i) => currentYear + i);
-
+// Industry options with icons
 const INDUSTRIES = [
-  { value: 'Technology & Software', label: 'Technology & Software', icon: '💻' },
-  { value: 'Finance & Banking', label: 'Finance & Banking', icon: '💰' },
-  { value: 'Consulting', label: 'Consulting', icon: '📊' },
-  { value: 'Healthcare', label: 'Healthcare', icon: '🏥' },
-  { value: 'Engineering', label: 'Engineering', icon: '⚙️' },
-  { value: 'Marketing', label: 'Marketing', icon: '📱' },
-  { value: 'Law & Legal', label: 'Law & Legal', icon: '⚖️' },
-  { value: 'Education', label: 'Education', icon: '📚' },
-  { value: 'Real Estate', label: 'Real Estate', icon: '🏠' },
-  { value: 'Media & Entertainment', label: 'Media & Entertainment', icon: '🎬' },
-  { value: 'Non-Profit', label: 'Non-Profit', icon: '❤️' },
-  { value: 'Government', label: 'Government', icon: '🏛️' },
-  { value: 'Other', label: 'Other', icon: '🔮' }
+  { value: 'technology', label: 'Technology', icon: '💻' },
+  { value: 'healthcare_biotech', label: 'Healthcare & Biotech', icon: '🏥' },
+  { value: 'finance_banking', label: 'Finance & Banking', icon: '💰' },
+  { value: 'tech_engineering', label: 'Tech & Engineering', icon: '🏗️' },
+  { value: 'education', label: 'Education', icon: '🎓' },
+  { value: 'real_estate', label: 'Real Estate', icon: '🏢' },
+  { value: 'energy', label: 'Energy', icon: '⚡' },
+  { value: 'retail', label: 'Retail', icon: '🛒' },
+  { value: 'manufacturing', label: 'Manufacturing', icon: '🏭' },
+  { value: 'advertising_media', label: 'Advertising & Media', icon: '📺' },
+  { value: 'construction', label: 'Construction', icon: '👷' },
+  { value: 'insurance', label: 'Insurance', icon: '🛡️' }
 ];
 
+// Help types with descriptions
 const HELP_TYPES = [
-  { value: 'career_advice', label: 'Career advice', icon: '💡' },
-  { value: 'internship_leads', label: 'Internship/job leads', icon: '🎯' },
-  { value: 'resume_review', label: 'Resume review', icon: '📄' },
-  { value: 'interview_prep', label: 'Interview prep', icon: '🎤' },
-  { value: 'networking_intros', label: 'Networking intros', icon: '🤝' },
-  { value: 'informational_interview', label: 'Coffee chat', icon: '☕' }
+  { value: 'career_guidance', label: 'Career Guidance', description: 'Get advice on career paths and next steps', defaultChecked: true },
+  { value: 'resume_review', label: 'Resume Review', description: 'Get feedback on your resume from professionals', defaultChecked: true },
+  { value: 'interview_prep', label: 'Interview Preparation', description: 'Practice interviews and get coaching', defaultChecked: true },
+  { value: 'job_referrals', label: 'Job Referrals & Introductions', description: 'Get connected to hiring managers and recruiters', defaultChecked: false },
+  { value: 'networking_advice', label: 'Networking Advice', description: 'Learn how to build your professional network', defaultChecked: false },
+  { value: 'salary_negotiation', label: 'Salary Negotiation', description: 'Get help negotiating your job offer', defaultChecked: false }
 ];
 
-const GOAL_OPTIONS = [
-  { value: 'summer_internship', label: 'Summer 2025 internship', icon: '☀️' },
-  { value: 'fall_internship', label: 'Fall 2025 internship', icon: '🍂' },
-  { value: 'full_time', label: 'Full-time job after graduation', icon: '💼' },
-  { value: 'exploring', label: 'Just exploring options', icon: '🔍' }
+// Year options
+const YEAR_OPTIONS = [
+  { value: 'freshman', label: 'Freshman' },
+  { value: 'sophomore', label: 'Sophomore' },
+  { value: 'junior', label: 'Junior' },
+  { value: 'senior', label: 'Senior' },
+  { value: 'graduate', label: 'Graduate Student' }
 ];
 
+// Timeline options
 const TIMELINE_OPTIONS = [
-  { value: 'this_week', label: 'ASAP - this week' },
-  { value: 'this_month', label: 'Within a month' },
-  { value: 'no_rush', label: 'No rush' }
+  { value: 'asap', label: 'ASAP (within 2 weeks)' },
+  { value: 'one_to_three_months', label: 'Next 1-3 months' },
+  { value: 'three_to_six_months', label: '3-6 months' },
+  { value: 'exploring', label: "I'm just exploring" }
 ];
 
 export default function StudentOnboarding() {
   const { user, refreshUser, logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showParentInviteModal, setShowParentInviteModal] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [matches, setMatches] = useState([]);
   const [errors, setErrors] = useState({});
   const [emailError, setEmailError] = useState('');
 
   const [formData, setFormData] = useState({
-    // Step 1: Profile
-    first_name: '',
-    last_name: '',
-    graduation_year: currentYear + 2,
-    major: '',
-    
-    // Step 2: Help Request
-    primary_goal: '',
+    // Step 1
     industry: '',
-    help_types: [],
-    
-    // Step 3: Details
-    description: '',
-    timeline: 'this_month',
-    dream_companies: '',
-    linkedin_url: ''
+    custom_industry: '',
+    help_types: ['career_guidance', 'resume_review', 'interview_prep'],
+    // Step 2
+    year: '',
+    major: '',
+    timeline: 'one_to_three_months',
+    description: ''
   });
 
-  // Initialize from user data + validate @ufl.edu
+  // Validate @ufl.edu email
   useEffect(() => {
     if (user) {
       const email = user.email?.toLowerCase() || '';
       if (!email.endsWith('@ufl.edu')) {
         setEmailError('Please use your @ufl.edu email to sign up as a student.');
-        return;
       }
-      
-      setFormData(prev => ({
-        ...prev,
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        graduation_year: user.graduation_year || currentYear + 2,
-        major: user.major || ''
-      }));
     }
   }, [user]);
 
-  // Auto-save to localStorage
+  // Load saved state from session
   useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem('student_onboarding_v2', JSON.stringify(formData));
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [formData]);
-
-  // Load draft
-  useEffect(() => {
-    const draft = localStorage.getItem('student_onboarding_v2');
-    if (draft) {
+    const saved = sessionStorage.getItem('student_onboarding_data');
+    if (saved) {
       try {
-        const parsed = JSON.parse(draft);
-        setFormData(prev => ({
-          ...prev,
-          ...parsed,
-          help_types: Array.isArray(parsed.help_types) ? parsed.help_types : []
-        }));
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({ ...prev, ...parsed }));
       } catch (e) {
-        console.error('Failed to load draft');
+        console.error('Failed to load saved state');
       }
     }
   }, []);
+
+  // Save state to session on change
+  useEffect(() => {
+    sessionStorage.setItem('student_onboarding_data', JSON.stringify(formData));
+  }, [formData]);
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -141,140 +118,158 @@ export default function StudentOnboarding() {
         ? prev.help_types.filter(v => v !== value)
         : [...prev.help_types, value]
     }));
+    setErrors(prev => ({ ...prev, help_types: null }));
   };
 
-  const validateStep = (step) => {
+  const validateStep1 = () => {
     const newErrors = {};
-    
-    if (step === 1) {
-      if (!formData.first_name?.trim()) newErrors.first_name = 'Required';
-      if (!formData.last_name?.trim()) newErrors.last_name = 'Required';
-      if (!formData.graduation_year) newErrors.graduation_year = 'Required';
-      if (!formData.major?.trim()) newErrors.major = 'Required';
-    } else if (step === 2) {
-      if (!formData.primary_goal) newErrors.primary_goal = 'Please select your goal';
-      if (!formData.industry) newErrors.industry = 'Please select an industry';
-      if (formData.help_types.length === 0) newErrors.help_types = 'Select at least one';
-    } else if (step === 3) {
-      if (!formData.description?.trim() || formData.description.trim().length < 20) {
-        newErrors.description = 'Please write at least 20 characters';
-      }
+    if (!formData.industry && !formData.custom_industry?.trim()) {
+      newErrors.industry = 'Please select an industry';
     }
-    
+    if (formData.help_types.length === 0) {
+      newErrors.help_types = 'Please select at least one type of help';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = async () => {
-    if (!validateStep(currentStep)) return;
-    
-    // Save profile on step 1
-    if (currentStep === 1) {
-      try {
-        await base44.auth.updateMe({
-          first_name: formData.first_name.trim(),
-          last_name: formData.last_name.trim(),
-          full_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
-          graduation_year: formData.graduation_year,
-          major: formData.major.trim()
-        });
-      } catch (error) {
-        console.error('Failed to save profile:', error);
-      }
+  const validateStep2 = () => {
+    const newErrors = {};
+    if (!formData.year) newErrors.year = 'Please select your year';
+    if (!formData.major?.trim()) newErrors.major = 'Please enter your major';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleContinue = () => {
+    if (validateStep1()) {
+      setCurrentStep(2);
+      window.scrollTo(0, 0);
     }
-    
-    setCurrentStep(prev => prev + 1);
   };
 
   const handleBack = () => {
-    setCurrentStep(prev => Math.max(1, prev - 1));
+    setCurrentStep(1);
+    window.scrollTo(0, 0);
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(3)) return;
-    
+    if (!validateStep2()) return;
+
     setIsSubmitting(true);
-    console.log('🚀 [StudentOnboarding] Starting submission...');
-    
+    setShowLoading(true);
+
     try {
-      const studentYear = formData.graduation_year 
-        ? `Class of ${formData.graduation_year}` 
-        : 'Current Student';
+      // Determine final industry value
+      const industryValue = formData.industry || 'other';
       
-      // Create HelpRequest for matching
-      console.log('📝 Creating HelpRequest...');
+      // Map internal values to HelpRequest schema values
+      const industryMapping = {
+        'technology': 'Technology & Software',
+        'healthcare_biotech': 'Healthcare',
+        'finance_banking': 'Finance & Banking',
+        'tech_engineering': 'Engineering',
+        'education': 'Education',
+        'real_estate': 'Real Estate',
+        'energy': 'Other',
+        'retail': 'Retail',
+        'manufacturing': 'Manufacturing',
+        'advertising_media': 'Media & Entertainment',
+        'construction': 'Other',
+        'insurance': 'Other',
+        'other': 'Other'
+      };
+
+      // Map help types to schema values
+      const helpTypeMapping = {
+        'career_guidance': 'career_advice',
+        'resume_review': 'resume_review',
+        'interview_prep': 'interview_prep',
+        'job_referrals': 'networking_intros',
+        'networking_advice': 'industry_insights',
+        'salary_negotiation': 'career_advice'
+      };
+
+      const mappedHelpTypes = formData.help_types.map(t => helpTypeMapping[t] || t);
+
+      // Create HelpRequest
       const helpRequest = await HelpRequest.create({
         student_id: user.id,
         student_email: user.email,
-        student_name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
-        student_major: formData.major?.trim(),
-        student_year: studentYear,
-        help_types: formData.help_types,
-        industry: formData.industry,
-        description: formData.description.trim(),
-        timeline: formData.timeline,
+        student_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        student_major: formData.major.trim(),
+        student_year: formData.year,
+        help_types: mappedHelpTypes,
+        industry: industryMapping[industryValue] || 'Other',
+        description: formData.description?.trim() || `Looking for help in ${industryMapping[industryValue] || formData.custom_industry}`,
+        timeline: formData.timeline === 'asap' ? 'this_week' : 
+                  formData.timeline === 'one_to_three_months' ? 'this_month' : 'no_rush',
         status: 'active'
       });
+
       console.log('✅ HelpRequest created:', helpRequest.id);
 
-      // Trigger matching (fire and forget)
-      base44.functions.invoke('generateMatches', {
-        help_request_id: helpRequest.id,
-        mode: 'for_request'
-      }).then(result => {
-        console.log('✅ Matches generated:', result?.data?.matches_created || 0);
-      }).catch(err => {
-        console.error('Match generation failed (non-blocking):', err);
-      });
-
       // Update user profile
-      const userUpdate = {
+      await base44.auth.updateMe({
         onboarding_completed: true,
         profile_completion_score: 85,
         is_new_signup: false,
-        currently_seeking: formData.description.trim(),
-        linkedin_url: formData.linkedin_url?.trim() || ''
-      };
+        major: formData.major.trim(),
+        year: formData.year,
+        currently_seeking: formData.description?.trim() || null
+      });
 
-      // Handle referral code
-      const referralCode = sessionStorage.getItem('pending_referral_code');
-      if (referralCode) {
-        userUpdate.referral_code = referralCode;
+      // Generate matches (fire and forget, but wait a bit for UX)
+      let matchCount = 0;
+      try {
+        await base44.functions.invoke('generateMatches', {
+          help_request_id: helpRequest.id,
+          mode: 'for_request'
+        });
+        
+        // Wait a moment then fetch matches
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const studentMatches = await Match.filter(
+          { help_request_id: helpRequest.id },
+          '-match_score',
+          3
+        );
+        setMatches(studentMatches || []);
+        matchCount = studentMatches?.length || 0;
+        
+        // Update match count on help request
+        if (matchCount > 0) {
+          await HelpRequest.update(helpRequest.id, { match_count: matchCount });
+        }
+      } catch (matchError) {
+        console.error('Match generation failed:', matchError);
       }
 
-      await base44.auth.updateMe(userUpdate);
-      console.log('✅ User profile updated');
-
       // Clean up
-      localStorage.removeItem('student_onboarding_v2');
+      sessionStorage.removeItem('student_onboarding_data');
       sessionStorage.removeItem('pending_invite_code');
       sessionStorage.removeItem('pending_referral_code');
 
-      setIsSubmitting(false);
-      setShowParentInviteModal(true);
+      await refreshUser();
+
+      // Show welcome page
+      setShowLoading(false);
+      setShowWelcome(true);
+
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FA4616', '#0021A5', '#FF6B35']
+      });
 
     } catch (error) {
-      console.error('❌ Failed to submit:', error);
-      alert('Something went wrong. Please try again.');
+      console.error('❌ Onboarding failed:', error);
+      setShowLoading(false);
       setIsSubmitting(false);
+      alert('Something went wrong. Please try again.');
     }
-  };
-
-  const handleParentInviteComplete = () => {
-    setShowParentInviteModal(false);
-    
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#FA4616', '#0021A5', '#FF6B35']
-    });
-
-    setShowSuccess(true);
-    
-    setTimeout(() => {
-      refreshUser().then(() => navigate('Dashboard'));
-    }, 3000);
   };
 
   // Email error screen
@@ -299,49 +294,139 @@ export default function StudentOnboarding() {
     );
   }
 
-  // Success screen
-  if (showSuccess) {
+  // Loading overlay
+  if (showLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FA4616] to-[#0021A5] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white/95 flex items-center justify-center p-4">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="max-w-lg w-full bg-white rounded-3xl p-10 text-center shadow-2xl"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
         >
-          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-white" />
+          <div className="text-6xl mb-6 animate-bounce">🐊</div>
+          <h2 className="text-2xl font-bold text-[#0021A5] mb-3">Finding your matches...</h2>
+          <p className="text-slate-600 mb-6">Searching 700+ parents and alumni who can help</p>
+          <div className="w-64 mx-auto">
+            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-[#FA4616] to-[#0021A5]"
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 3, ease: 'easeInOut' }}
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-[#0021A5] mb-3">You're all set!</h1>
-          <p className="text-lg text-slate-600 mb-6">
-            We're matching you with Gator parents & alumni who can help.
-          </p>
-          <div className="text-5xl mb-4">🐊</div>
-          <p className="text-slate-500">Redirecting to your dashboard...</p>
         </motion.div>
       </div>
     );
   }
 
-  const progressPercent = (currentStep / 3) * 100;
+  // Welcome/celebration page
+  if (showWelcome) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-3xl font-bold text-[#0021A5] mb-2">
+              Welcome to Gator Network, {user?.first_name || 'Gator'}!
+            </h1>
+            {matches.length > 0 ? (
+              <p className="text-xl text-slate-600">
+                We found <span className="font-bold text-[#FA4616]">{matches.length}</span> parents who can help you!
+              </p>
+            ) : (
+              <div>
+                <p className="text-lg text-slate-600 mb-2">Your request is live on Emerging Gators!</p>
+                <p className="text-slate-500">New parents join daily - we'll notify you when matches appear.</p>
+              </div>
+            )}
+          </motion.div>
+
+          {matches.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8"
+            >
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">Your top matches:</h3>
+              <div className="space-y-4">
+                {matches.slice(0, 3).map((match, idx) => (
+                  <Card key={match.id} className="border-2 border-slate-200 hover:border-[#FA4616] transition-all">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-bold text-slate-900">{match.parent_name || 'Gator Parent'}</h4>
+                          <p className="text-slate-600">{match.parent_role} {match.parent_company && `at ${match.parent_company}`}</p>
+                          <p className="text-sm text-slate-500">{match.parent_industry} • {match.parent_years_experience} experience</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                            {Math.round(match.match_score)}% match
+                          </span>
+                        </div>
+                      </div>
+                      {match.match_reasons?.length > 0 && (
+                        <p className="text-sm text-slate-500 mt-2">
+                          Can help with: {match.match_reasons.slice(0, 2).join(', ')}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8"
+          >
+            <h4 className="font-semibold text-slate-900 mb-3">💡 Quick Tips:</h4>
+            <ul className="space-y-2 text-slate-700">
+              <li>• Message 2-3 parents to start</li>
+              <li>• Be specific about what you need help with</li>
+              <li>• Most parents respond within 24 hours</li>
+            </ul>
+          </motion.div>
+
+          <Button
+            onClick={() => navigate('Dashboard')}
+            className="w-full h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
+          >
+            Go to Dashboard →
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const progressPercent = currentStep === 1 ? 50 : 100;
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-            alt="College Fast Forward"
-            className="h-10"
-          />
-          <div className="text-sm text-slate-500">Step {currentStep} of 3</div>
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🐊</span>
+            <span className="font-bold text-[#0021A5]">Join Gator Network</span>
+          </div>
+          <div className="text-sm text-slate-500">Step {currentStep} of 2</div>
         </div>
         <Progress value={progressPercent} className="h-1" />
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
-          {/* STEP 1: Profile */}
+          {/* STEP 1: Industry & Help Types */}
           {currentStep === 1 && (
             <motion.div
               key="step1"
@@ -349,80 +434,115 @@ export default function StudentOnboarding() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <div className="text-center mb-6">
-                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <GraduationCap className="w-7 h-7 text-[#0021A5]" />
-                </div>
-                <h1 className="text-2xl font-bold text-slate-900">Welcome to Gator Network</h1>
-                <p className="text-slate-600 mt-1">Let's set up your profile</p>
+              {/* Greeting */}
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                  Hi {user?.first_name || 'there'}! Let's find you the right parents & alumni.
+                </h1>
+                <p className="text-slate-600">Step 1 of 2 - Tell us how we can help</p>
               </div>
 
-              <Card className="shadow-lg border-slate-200">
-                <CardContent className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">First Name *</label>
-                      <Input
-                        value={formData.first_name}
-                        onChange={(e) => updateField('first_name', e.target.value)}
-                        placeholder="John"
-                        className={errors.first_name ? 'border-red-300' : ''}
-                      />
-                      {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Last Name *</label>
-                      <Input
-                        value={formData.last_name}
-                        onChange={(e) => updateField('last_name', e.target.value)}
-                        placeholder="Smith"
-                        className={errors.last_name ? 'border-red-300' : ''}
-                      />
-                      {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">🎓 Graduation Year *</label>
-                    <Select 
-                      value={formData.graduation_year?.toString()} 
-                      onValueChange={(v) => updateField('graduation_year', parseInt(v))}
+              {/* Industry Selection */}
+              <div className="mb-8">
+                <label className="block text-lg font-semibold text-slate-800 mb-4">
+                  What industry are you interested in? *
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  {INDUSTRIES.map(ind => (
+                    <button
+                      key={ind.value}
+                      type="button"
+                      onClick={() => {
+                        updateField('industry', ind.value);
+                        updateField('custom_industry', '');
+                      }}
+                      className={`p-4 rounded-xl border-3 transition-all text-center ${
+                        formData.industry === ind.value
+                          ? 'border-[#FA4616] bg-orange-50 border-3'
+                          : 'border-slate-200 bg-white hover:bg-orange-50 hover:border-orange-200'
+                      }`}
+                      style={{ borderWidth: formData.industry === ind.value ? '3px' : '2px' }}
                     >
-                      <SelectTrigger className={errors.graduation_year ? 'border-red-300' : ''}>
-                        <SelectValue placeholder="Select year" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GRADUATION_YEARS.map(year => (
-                          <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.graduation_year && <p className="text-red-500 text-xs mt-1">{errors.graduation_year}</p>}
-                  </div>
+                      <span className="text-2xl block mb-1">{ind.icon}</span>
+                      <span className={`text-sm font-medium ${
+                        formData.industry === ind.value ? 'text-[#FA4616]' : 'text-slate-700'
+                      }`}>
+                        {ind.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="mt-4">
+                  <p className="text-sm text-slate-600 mb-2">Not seeing your industry?</p>
+                  <Input
+                    value={formData.custom_industry}
+                    onChange={(e) => {
+                      updateField('custom_industry', e.target.value);
+                      if (e.target.value.trim()) updateField('industry', '');
+                    }}
+                    placeholder="Specify your industry"
+                    className="max-w-sm"
+                  />
+                </div>
+                
+                {errors.industry && (
+                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" /> {errors.industry}
+                  </p>
+                )}
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">📚 Major *</label>
-                    <Input
-                      value={formData.major}
-                      onChange={(e) => updateField('major', e.target.value)}
-                      placeholder="e.g., Computer Science"
-                      className={errors.major ? 'border-red-300' : ''}
-                    />
-                    {errors.major && <p className="text-red-500 text-xs mt-1">{errors.major}</p>}
-                  </div>
+              {/* Help Types */}
+              <div className="mb-8">
+                <label className="block text-lg font-semibold text-slate-800 mb-4">
+                  What help do you need? * <span className="font-normal text-slate-500">(Select all that apply)</span>
+                </label>
+                <div className="space-y-3">
+                  {HELP_TYPES.map(type => (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => toggleHelpType(type.value)}
+                      className={`w-full p-5 rounded-xl border-2 text-left transition-all flex items-start gap-4 ${
+                        formData.help_types.includes(type.value)
+                          ? 'border-[#0021A5] bg-blue-50'
+                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        formData.help_types.includes(type.value)
+                          ? 'bg-[#0021A5] border-[#0021A5]'
+                          : 'border-slate-300 bg-white'
+                      }`}>
+                        {formData.help_types.includes(type.value) && (
+                          <Check className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">{type.label}</p>
+                        <p className="text-sm text-slate-600">{type.description}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {errors.help_types && (
+                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" /> {errors.help_types}
+                  </p>
+                )}
+              </div>
 
-                  <Button
-                    onClick={handleNext}
-                    className="w-full h-12 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-semibold text-base"
-                  >
-                    Continue →
-                  </Button>
-                </CardContent>
-              </Card>
+              <Button
+                onClick={handleContinue}
+                className="w-full h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
+              >
+                Continue to Details →
+              </Button>
             </motion.div>
           )}
 
-          {/* STEP 2: What do you need help with? */}
+          {/* STEP 2: Details */}
           {currentStep === 2 && (
             <motion.div
               key="step2"
@@ -430,248 +550,128 @@ export default function StudentOnboarding() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <button onClick={handleBack} className="flex items-center text-slate-600 mb-4 hover:text-slate-900">
+              <button
+                onClick={handleBack}
+                className="flex items-center text-slate-600 mb-6 hover:text-slate-900 transition-colors"
+              >
                 <ArrowLeft className="w-4 h-4 mr-1" /> Back
               </button>
 
-              <div className="text-center mb-6">
-                <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Briefcase className="w-7 h-7 text-[#FA4616]" />
-                </div>
-                <h1 className="text-2xl font-bold text-slate-900">What do you need?</h1>
-                <p className="text-slate-600 mt-1">This helps us match you with the right people</p>
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">Almost done!</h1>
+                <p className="text-slate-600">This helps us find the best matches.</p>
               </div>
 
               <Card className="shadow-lg border-slate-200">
-                <CardContent className="p-6 space-y-5">
-                  {/* Primary Goal */}
+                <CardContent className="p-6 space-y-6">
+                  {/* Year */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      What's your primary goal? *
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {GOAL_OPTIONS.map(goal => (
-                        <button
-                          key={goal.value}
-                          type="button"
-                          onClick={() => updateField('primary_goal', goal.value)}
-                          className={`p-3 rounded-xl border-2 text-left transition-all ${
-                            formData.primary_goal === goal.value
-                              ? 'border-[#FA4616] bg-orange-50'
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          <span className="text-lg">{goal.icon}</span>
-                          <p className="text-sm font-medium text-slate-800 mt-1">{goal.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                    {errors.primary_goal && <p className="text-red-500 text-xs mt-1">{errors.primary_goal}</p>}
-                  </div>
-
-                  {/* Industry */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Which industry interests you? *
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {INDUSTRIES.slice(0, 9).map(ind => (
-                        <button
-                          key={ind.value}
-                          type="button"
-                          onClick={() => updateField('industry', ind.value)}
-                          className={`p-2 rounded-lg border-2 text-center transition-all ${
-                            formData.industry === ind.value
-                              ? 'border-[#0021A5] bg-blue-50'
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          <span className="text-lg">{ind.icon}</span>
-                          <p className="text-xs font-medium text-slate-700 mt-0.5 truncate">{ind.label.split(' ')[0]}</p>
-                        </button>
-                      ))}
-                    </div>
-                    <Select value={formData.industry} onValueChange={(v) => updateField('industry', v)}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Or select from all industries..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INDUSTRIES.map(ind => (
-                          <SelectItem key={ind.value} value={ind.value}>
-                            {ind.icon} {ind.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.industry && <p className="text-red-500 text-xs mt-1">{errors.industry}</p>}
-                  </div>
-
-                  {/* Help Types */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      What kind of help? * <span className="font-normal text-slate-500">(select all)</span>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      What year are you? *
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {HELP_TYPES.map(type => (
-                        <button
-                          key={type.value}
-                          type="button"
-                          onClick={() => toggleHelpType(type.value)}
-                          className={`px-3 py-2 rounded-full border-2 text-sm font-medium transition-all ${
-                            formData.help_types.includes(type.value)
-                              ? 'border-[#0021A5] bg-blue-50 text-[#0021A5]'
-                              : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                          }`}
-                        >
-                          {type.icon} {type.label}
-                        </button>
-                      ))}
-                    </div>
-                    {errors.help_types && <p className="text-red-500 text-xs mt-1">{errors.help_types}</p>}
-                  </div>
-
-                  <Button
-                    onClick={handleNext}
-                    className="w-full h-12 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-semibold text-base"
-                  >
-                    Continue →
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* STEP 3: Tell us more */}
-          {currentStep === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <button onClick={handleBack} className="flex items-center text-slate-600 mb-4 hover:text-slate-900">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
-              </button>
-
-              <div className="text-center mb-6">
-                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Target className="w-7 h-7 text-green-600" />
-                </div>
-                <h1 className="text-2xl font-bold text-slate-900">Almost done!</h1>
-                <p className="text-slate-600 mt-1">Add details to get better matches</p>
-              </div>
-
-              <Card className="shadow-lg border-slate-200">
-                <CardContent className="p-6 space-y-5">
-                  {/* Description - THE KEY FIELD */}
-                  <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-5 h-5 text-orange-500" />
-                      <label className="text-sm font-bold text-slate-900">
-                        Tell us what you're looking for *
-                      </label>
-                    </div>
-                    <Textarea
-                      value={formData.description}
-                      onChange={(e) => updateField('description', e.target.value)}
-                      placeholder="e.g., I'm a junior studying Finance looking for a summer internship at an investment bank. I've done some coursework in valuation and financial modeling, and I'd love to connect with someone who can give me advice on recruiting..."
-                      rows={4}
-                      className={`text-base ${errors.description ? 'border-red-300' : 'border-orange-200'}`}
-                    />
-                    <div className="flex justify-between mt-2">
-                      <p className="text-xs text-slate-600">
-                        {formData.description?.length || 0} characters
-                      </p>
-                      {errors.description && <p className="text-red-500 text-xs">{errors.description}</p>}
-                    </div>
-                  </div>
-
-                  {/* Timeline */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      How soon do you need help?
-                    </label>
-                    <div className="flex gap-2">
-                      {TIMELINE_OPTIONS.map(opt => (
+                      {YEAR_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
                           type="button"
-                          onClick={() => updateField('timeline', opt.value)}
-                          className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                            formData.timeline === opt.value
+                          onClick={() => updateField('year', opt.value)}
+                          className={`px-4 py-2 rounded-full border-2 font-medium transition-all ${
+                            formData.year === opt.value
                               ? 'border-[#0021A5] bg-blue-50 text-[#0021A5]'
-                              : 'border-slate-200 text-slate-600'
+                              : 'border-slate-200 text-slate-600 hover:border-slate-300'
                           }`}
                         >
                           {opt.label}
                         </button>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Optional: Dream companies */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Dream companies <span className="text-slate-400">(optional)</span>
-                    </label>
-                    <Input
-                      value={formData.dream_companies}
-                      onChange={(e) => updateField('dream_companies', e.target.value)}
-                      placeholder="e.g., Google, Goldman Sachs, McKinsey"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      We'll prioritize parents/alumni at these companies
-                    </p>
-                  </div>
-
-                  {/* Optional: LinkedIn */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      LinkedIn <span className="text-slate-400">(optional)</span>
-                    </label>
-                    <Input
-                      value={formData.linkedin_url}
-                      onChange={(e) => updateField('linkedin_url', e.target.value)}
-                      placeholder="https://linkedin.com/in/yourprofile"
-                      type="url"
-                    />
-                  </div>
-
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Setting up your matches...
-                      </span>
-                    ) : (
-                      'Find My Matches 🐊'
+                    {errors.year && (
+                      <p className="text-red-500 text-sm mt-2">{errors.year}</p>
                     )}
-                  </Button>
+                  </div>
 
-                  <p className="text-center text-xs text-slate-500">
-                    By continuing, you agree to our Terms of Service
-                  </p>
+                  {/* Major */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      What's your major? *
+                    </label>
+                    <Input
+                      value={formData.major}
+                      onChange={(e) => updateField('major', e.target.value)}
+                      placeholder="e.g., Computer Science, Marketing, Finance"
+                      className={errors.major ? 'border-red-300' : ''}
+                    />
+                    {errors.major && (
+                      <p className="text-red-500 text-sm mt-1">{errors.major}</p>
+                    )}
+                  </div>
+
+                  {/* Timeline */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      When do you need help? *
+                    </label>
+                    <div className="space-y-2">
+                      {TIMELINE_OPTIONS.map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => updateField('timeline', opt.value)}
+                          className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                            formData.timeline === opt.value
+                              ? 'border-[#0021A5] bg-blue-50'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className="font-medium text-slate-800">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Describe what you're looking for <span className="font-normal text-slate-500">(optional)</span>
+                    </label>
+                    <Textarea
+                      value={formData.description}
+                      onChange={(e) => updateField('description', e.target.value.slice(0, 500))}
+                      placeholder="E.g., Looking for help preparing for consulting interviews and getting resume feedback for MBB firms."
+                      rows={4}
+                    />
+                    <div className="flex justify-between mt-1">
+                      <p className="text-xs text-slate-500">This helps parents understand your specific needs</p>
+                      <p className="text-xs text-slate-400">{formData.description?.length || 0}/500</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleBack}
+                      className="flex-1 h-14"
+                    >
+                      ← Back
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="flex-1 h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg animate-pulse"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        'Find My Matches →'
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      {/* Parent Invite Modal */}
-      <Dialog open={showParentInviteModal} onOpenChange={setShowParentInviteModal}>
-        <DialogContent className="max-w-lg">
-          <InviteParentModal
-            isOpen={showParentInviteModal}
-            onClose={handleParentInviteComplete}
-            onSuccess={handleParentInviteComplete}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
