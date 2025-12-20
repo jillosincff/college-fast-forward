@@ -3,44 +3,28 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Briefcase, Users, Target, MessageSquare, Mail, ArrowRight, Star, Sparkles } from 'lucide-react';
+import { Loader2, Briefcase, Users, MessageSquare, Mail, ArrowRight, ChevronDown } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
-import EditHelpRequestModal from '@/components/dashboard/EditHelpRequestModal';
-import ParentSlotsCard from '@/components/dashboard/ParentSlotsCard';
-import { UserPlus, Edit } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { formatDistanceToNow } from 'date-fns';
 import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
-import DraftRequestBanner from '@/components/dashboard/DraftRequestBanner';
-import PricingTierBadge from '@/components/pricing/PricingTierBadge';
-
-import StudentMatchesWidget from '@/components/dashboard/StudentMatchesWidget';
-import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
-
+import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCard';
+import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
-  const [requests, setRequests] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showEditRequestModal, setShowEditRequestModal] = useState(false);
-  const [existingHelpRequest, setExistingHelpRequest] = useState(null);
+  const [helpRequest, setHelpRequest] = useState(null);
+  const [matches, setMatches] = useState([]);
   const [networkStats, setNetworkStats] = useState({
     totalUsers: 226,
-    totalStudents: 66,
+    activeRequests: 0,
     spotsLeft: 774
-  });
-  
-  const [stats, setStats] = useState({
-    parentsViewed: 0,
-    peerConnections: 0,
-    warmIntros: 0,
-    opportunitiesMatched: 0
   });
 
   useEffect(() => {
@@ -59,117 +43,79 @@ export default function Dashboard() {
       return;
     }
 
-    // Mark that user has seen dashboard
-    if (!localStorage.getItem('cff:seenDashboard')) {
-      localStorage.setItem('cff:seenDashboard', 'true');
-    }
-
+    localStorage.setItem('cff:seenDashboard', 'true');
     loadDashboardData();
   }, [user, isLoading]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      // Fetch user counts from backend
+      // Fetch user counts
       try {
-        console.log('🔍 Dashboard: Fetching user count...');
         const response = await getUserCount();
         const data = response.data;
-        
-        console.log('📊 Dashboard: Received data:', data);
-        
         setNetworkStats({
           totalUsers: data?.totalUsers || data?.count || 226,
-          totalStudents: data?.gatorCount || data?.studentCount || 66,
+          activeRequests: data?.activeRequests || 15,
           spotsLeft: data?.spotsLeft || 774
         });
       } catch (error) {
-        console.error('❌ Dashboard: Failed to fetch network stats:', error);
+        console.error('Failed to fetch network stats:', error);
       }
 
+      // Fetch messages
       const { data: messagesResponse } = await getUserMessages();
-      const myMessages = messagesResponse?.messages || [];
-      setMessages(myMessages);
+      setMessages(messagesResponse?.messages || []);
 
-      const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 5);
+      // Fetch opportunities
+      const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
       setOpportunities(opps || []);
 
-      const reqs = await base44.entities.JobRequest.filter({ status: 'active' }, '-created_date', 3);
-      setRequests(reqs || []);
-
-      await loadStudentStats(myMessages, opps);
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
-  const loadStudentStats = async (myMessages, opps) => {
-    try {
-      const myRequests = await base44.entities.JobRequest.filter(
-        { created_by: user.email },
-        '-created_date'
-      );
-      
-      // Load HelpRequest for editing (this is what onboarding creates)
-      // Try by student_id first, then fallback to student_email
-      let myHelpRequests = await base44.entities.HelpRequest.filter(
+      // Fetch user's help request (students have ONE active request)
+      let myHelpRequest = await base44.entities.HelpRequest.filter(
         { student_id: user.id, status: 'active' },
         '-created_date',
         1
       );
       
-      // Fallback to email if ID didn't match
-      if (!myHelpRequests || myHelpRequests.length === 0) {
-        myHelpRequests = await base44.entities.HelpRequest.filter(
+      if (!myHelpRequest || myHelpRequest.length === 0) {
+        myHelpRequest = await base44.entities.HelpRequest.filter(
           { student_email: user.email, status: 'active' },
           '-created_date',
           1
         );
       }
       
-      if (myHelpRequests && myHelpRequests.length > 0) {
-        setExistingHelpRequest(myHelpRequests[0]);
+      if (myHelpRequest && myHelpRequest.length > 0) {
+        setHelpRequest(myHelpRequest[0]);
       }
 
-      let helpOffersCount = 0;
-      if (myRequests && myRequests.length > 0) {
-        const requestIds = myRequests.map(req => req.id);
-        const allHelpOffers = await base44.entities.HelpOffer.list();
-        helpOffersCount = allHelpOffers.filter(offer => 
-          requestIds.includes(offer.job_request_id)
-        ).length;
-      }
-
-      const intros = await base44.entities.Intro.filter(
-        { student_id: user.id }
+      // Fetch matches for this student
+      const studentMatches = await base44.entities.Match.filter(
+        { student_id: user.id },
+        '-match_score',
+        50
       );
-      const introsCount = intros?.length || 0;
+      const activeMatches = (studentMatches || []).filter(m => 
+        m.status === 'pending' || m.status === 'student_connected'
+      );
+      setMatches(activeMatches);
 
-      const parentMessages = myMessages.filter(msg => {
-        return msg.sender_email !== user.email;
-      });
-      const parentsViewedCount = Math.max(parentMessages.length, helpOffersCount);
+      // Count active requests for stats
+      const allActiveRequests = await base44.entities.HelpRequest.filter(
+        { status: 'active' },
+        undefined,
+        100
+      );
+      setNetworkStats(prev => ({
+        ...prev,
+        activeRequests: allActiveRequests?.length || 15
+      }));
 
-      const peerConnectionsCount = helpOffersCount + introsCount;
-
-      const matchedOpps = opps?.length || 0;
-
-      setStats({
-        parentsViewed: parentsViewedCount,
-        peerConnections: peerConnectionsCount,
-        warmIntros: introsCount,
-        opportunitiesMatched: matchedOpps
-      });
     } catch (error) {
-      console.error('Failed to load student stats:', error);
-      setStats({
-        parentsViewed: 0,
-        peerConnections: 0,
-        warmIntros: 0,
-        opportunitiesMatched: 0
-      });
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -185,256 +131,254 @@ export default function Dashboard() {
   }
 
   const unreadCount = messages.filter(m => !m.is_read).length;
-  const isSpotlightActive = user?.talent_spotlight_enabled && user?.spotlight_enabled_date;
-
-  console.log('📊 Dashboard displaying:', networkStats);
+  const parentMatches = matches.filter(m => m.match_type === 'parent' || !m.match_type);
+  const responseCount = matches.filter(m => m.status === 'student_connected').length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-      {/* Lifetime Access Banner */}
+      
+      {/* Founding Member Banner */}
       {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-5 px-4 shadow-xl border-b-4 border-yellow-400"
+          className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-4 px-4"
         >
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-center md:text-left flex-1">
-                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                  <span className="text-4xl animate-bounce">🎉</span>
-                  <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                    Congrats! You are part of our first 1000 users.
-                  </h3>
-                </div>
-                <p className="text-lg text-white/95 font-semibold">
-                  You've earned a <span className="text-yellow-300 font-extrabold">free, lifetime membership!</span>
-                </p>
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎉</span>
+              <div>
+                <span className="font-bold">You're a Founding Member!</span>
+                <span className="text-white/90 ml-2">FREE FOREVER</span>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <div className="text-5xl font-extrabold text-yellow-300 drop-shadow-lg">{networkStats.spotsLeft}</div>
-                  <div className="text-sm text-white/90 font-bold uppercase tracking-wide">Spots Left</div>
-                </div>
-              </div>
+            </div>
+            <div className="text-center md:text-right">
+              <span className="text-2xl font-bold text-yellow-300">{networkStats.spotsLeft}</span>
+              <span className="text-white/90 ml-2">founding spots remaining</span>
             </div>
           </div>
         </motion.div>
       )}
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden text-white py-16 px-4 mb-16" style={{
-      background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
-      boxShadow: '0 4px 20px rgba(0, 33, 165, 0.15)'
-      }}>
-        {HERO_TEXTURE_OVERLAY}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 text-9xl">🐊</div>
+
+      {/* Welcome Header */}
+      <div className="bg-white border-b border-slate-200 py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+            Welcome back, {user.first_name || user.full_name?.split(' ')[0] || 'Gator'}! 👋
+          </h1>
         </div>
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {user && (
-              <div className="mb-4">
-                <p className="text-white/90 text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  {localStorage.getItem('cff:seenDashboard') ? 'Welcome back,' : 'Welcome,'}
-                </p>
-                <p className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  {user.first_name || user.full_name?.split(' ')[0] || 'Gator'}! 🎓
-                </p>
-                {/* Pricing Tier Badge */}
-                <PricingTierBadge user={user} size="default" />
-              </div>
-            )}
-
-            {networkStats.spotsLeft > 0 && (
-              <div className="mb-6">
-                <div className="inline-block bg-[#FA4616] text-white px-8 py-3 rounded-full font-extrabold text-base shadow-2xl animate-pulse">
-                  🔥 {networkStats.spotsLeft} founding member spots left out of 1,000
-                </div>
-              </div>
-            )}
-
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight" style={{ 
-              textShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-            }}>
-              Get Hired Through Warm Introductions
-            </h1>
-            <p className="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto font-semibold" style={{
-              textShadow: '0 2px 8px rgba(0,0,0,0.2)'
-            }}>
-              Tap into the First-Ever Gator Nation Network That Includes Parents — Connecting You to Real Opportunities
-            </p>
-
-            {!loadingData && (
-              <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm md:text-base">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <span>🎓 {networkStats.totalStudents} students in network</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <span>👥 {networkStats.totalUsers} total Gators</span>
-                </div>
-                {stats.parentsViewed > 0 && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span>👨‍💼 {stats.parentsViewed} parent{stats.parentsViewed !== 1 ? 's' : ''} reached out</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
+      </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Draft Request Banner */}
-        <DraftRequestBanner user={user} />
-        
-        {/* Student Matches Widget - Shows parents matched to help this student */}
-        <StudentMatchesWidget user={user} />
-        
-        {/* Edit Help Request Button */}
-        {existingHelpRequest && (
+        {/* Your Active Help Request */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <StudentHelpRequestCard
+            helpRequest={helpRequest}
+            matchCount={parentMatches.length}
+            responseCount={responseCount}
+            parentMatches={parentMatches}
+            onRefresh={loadDashboardData}
+          />
+        </motion.div>
+
+        {/* Network Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="grid grid-cols-3 gap-4"
+        >
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
+            <CardContent className="pt-6 pb-6 text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-1">{networkStats.activeRequests}</div>
+              <p className="text-sm text-slate-600">Active Help Requests</p>
+              <p className="text-xs text-slate-500">(All students)</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200">
+            <CardContent className="pt-6 pb-6 text-center">
+              <div className="text-3xl font-bold text-orange-600 mb-1">{parentMatches.length}</div>
+              <p className="text-sm text-slate-600">Parents Matched</p>
+              <p className="text-xs text-slate-500">to You</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
+            <CardContent className="pt-6 pb-6 text-center">
+              <div className="text-3xl font-bold text-green-600 mb-1">{responseCount}</div>
+              <p className="text-sm text-slate-600">Responses</p>
+              <p className="text-xs text-slate-500">Received</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Your Parent Matches */}
+        {parentMatches.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
+            transition={{ delay: 0.1 }}
           >
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md hover:shadow-lg transition-all">
+            <StudentParentMatchesWidget
+              user={user}
+              matches={parentMatches}
+              onRefresh={loadDashboardData}
+            />
+          </motion.div>
+        )}
+
+        {/* Recent Messages */}
+        {messages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <Card className="border-2 border-slate-200 shadow-lg">
               <CardContent className="pt-6 pb-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2 flex items-center justify-center md:justify-start gap-2">
-                      <span className="text-2xl">📝</span>
-                      Update Your Help Request
-                    </h3>
-                    <p className="text-slate-700 font-medium">
-                      Keep your request fresh! Update what kind of help you need to find better matches.
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-blue-600" />
+                    Messages
+                    {unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                        {unreadCount} unread
+                      </span>
+                    )}
+                  </h3>
                   <Button
-                    onClick={() => setShowEditRequestModal(true)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-6 text-base shadow-lg whitespace-nowrap"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('MyMessages')}
+                    className="text-blue-600"
                   >
-                    <Edit className="w-5 h-5 mr-2" />
-                    Edit My Request
+                    View All Messages
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
+                </div>
+
+                <div className="space-y-2">
+                  {messages.slice(0, 3).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`p-3 rounded-lg border cursor-pointer hover:shadow-md transition-all ${
+                        !msg.is_read ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+                      }`}
+                      onClick={() => navigate('MyMessages')}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        {!msg.is_read && (
+                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        )}
+                        <p className="font-semibold text-sm text-slate-900">{msg.sender_email?.split('@')[0]}</p>
+                        <span className="text-xs text-slate-400">
+                          {new Date(msg.created_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-700 font-medium line-clamp-1">{msg.subject}</p>
+                      <p className="text-xs text-slate-500 line-clamp-1">{msg.body}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         )}
-        
-        {/* Primary CTA - Find Opportunities */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card
-            className="hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-[#0021A5] via-[#0039C7] to-blue-500 border-0 shadow-2xl"
-            onClick={() => {
-              navigate('Opportunities');
-              trackEvent('quick_action_clicked', { action: 'opportunities' });
-            }}
-          >
-            <CardContent className="pt-10 pb-10 text-center">
-              <div className="w-24 h-24 bg-white/25 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-xl">
-                <Briefcase className="w-12 h-12 text-white" />
-              </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight" style={{
-                fontFamily: "'Inter', sans-serif"
-              }}>Find Your Next Opportunity</h2>
-              <p className="text-white/95 text-lg md:text-xl mb-8 max-w-2xl mx-auto font-medium leading-relaxed">Browse jobs, internships, and student gigs posted by Gator parents and employers</p>
-              <div className="inline-flex items-center gap-3 bg-white text-[#0021A5] px-10 py-5 rounded-2xl font-extrabold text-xl hover:bg-slate-50 hover:shadow-2xl transition-all">
-                View Opportunities
-                <ArrowRight className="w-6 h-6" />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
-        {/* Secondary Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card
-              className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer bg-gradient-to-br from-teal-50 via-green-50 to-emerald-50 border-2 border-teal-100"
-              onClick={() => {
-                navigate('GatorDirectory');
-                trackEvent('quick_action_clicked', { action: 'directory' });
-              }}
-            >
-              <CardContent className="pt-8 pb-8">
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#00A550] to-teal-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Users className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-extrabold text-slate-900 mb-2" style={{
-                      fontFamily: "'Inter', sans-serif"
-                    }}>Reach Out to Gators for Help</h3>
-                    <p className="text-base text-slate-700 font-medium">Connect with parents and alumni for warm intros</p>
-                  </div>
+        {/* Opportunities */}
+        {opportunities.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="border-2 border-slate-200 shadow-lg">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-purple-600" />
+                    💼 Latest Opportunities from Gator Parents
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('Opportunities')}
+                    className="text-purple-600"
+                  >
+                    Browse All
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {opportunities.slice(0, 2).map((opp) => (
+                    <div
+                      key={opp.id}
+                      className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:shadow-md cursor-pointer transition-all"
+                      onClick={() => navigate(`Opportunities?id=${opp.id}`)}
+                    >
+                      <h4 className="font-semibold text-slate-900">{opp.title}</h4>
+                      <p className="text-sm text-slate-600">
+                        {opp.company} • Posted {new Date(opp.created_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+        )}
 
-
-          </div>
-        </motion.div>
-
-        {/* Parent Superpower - Shows Slots with Status */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <ParentSlotsCard
-            user={user}
-            onInviteClick={() => setShowInviteModal(true)}
-            onUpdate={async () => {
-              await refreshUser();
-              await loadDashboardData();
-            }}
-          />
-        </motion.div>
-
-
-
-        {/* More Tools Section - Collapsed */}
+        {/* Your Family - Collapsed */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          <details className="group bg-white rounded-2xl shadow-lg border-2 border-slate-100 overflow-hidden">
-            <summary className="cursor-pointer p-6 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
-              <ArrowRight className="w-5 h-5 text-slate-400 transform group-open:rotate-90 transition-transform" />
+          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
+            <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                👨‍👩‍👧 Your Family
+              </h3>
+              <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
             </summary>
-            <div className="p-6 pt-0 border-t border-slate-100">
+            <div className="p-5 pt-0 border-t border-slate-100">
+              <p className="text-slate-600 mb-4">Invite your parents to join and unlock the full network!</p>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-[#FA4616] hover:bg-orange-600"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Invite a Parent
+              </Button>
+            </div>
+          </details>
+        </motion.div>
+
+        {/* More Tools Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
+            <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
+              <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="p-5 pt-0 border-t border-slate-100">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Button
                   onClick={() => navigate('MyMessages')}
                   variant="outline"
-                  className="justify-start relative h-auto py-4"
+                  className="justify-start h-auto py-4"
                 >
-                  <MessageSquare className="w-5 h-5 mr-2" />
+                  <Mail className="w-5 h-5 mr-2" />
                   My Messages
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
                 </Button>
                 <Button
                   onClick={() => navigate('MyApplications')}
@@ -449,93 +393,13 @@ export default function Dashboard() {
                   variant="outline"
                   className="justify-start h-auto py-4"
                 >
-                  <Target className="w-5 h-5 mr-2" />
+                  <Users className="w-5 h-5 mr-2" />
                   My Profile
                 </Button>
               </div>
             </div>
           </details>
         </motion.div>
-
-        {/* Network Activity - Consolidated */}
-        {(!loadingData && (messages.length > 0 || stats.warmIntros > 0 || stats.parentsViewed > 0)) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="border-2 border-blue-100 shadow-lg">
-              <CardContent className="pt-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <MessageSquare className="w-6 h-6 text-blue-600" />
-                  Your Network Activity
-                </h3>
-
-                {/* Stats */}
-                {(stats.warmIntros > 0 || stats.parentsViewed > 0) && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <div className="text-center p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-2 border-blue-200 shadow-md">
-                      <div className="text-3xl font-extrabold text-blue-600 mb-1">{stats.parentsViewed}</div>
-                      <p className="text-sm text-slate-700 font-semibold">Network reach</p>
-                    </div>
-                    <div className="text-center p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border-2 border-purple-200 shadow-md">
-                      <div className="text-3xl font-extrabold text-purple-600 mb-1">{stats.warmIntros}</div>
-                      <p className="text-sm text-slate-700 font-semibold">Warm intros</p>
-                    </div>
-                    <div className="text-center p-5 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border-2 border-green-200 shadow-md">
-                      <div className="text-3xl font-extrabold text-green-600 mb-1">{opportunities.length}</div>
-                      <p className="text-sm text-slate-700 font-semibold">Available jobs</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Recent Messages */}
-                {messages.length > 0 && (
-                  <>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <Mail className="w-5 h-5 text-blue-600" />
-                        Recent Messages
-                        {unreadCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                            {unreadCount}
-                          </span>
-                        )}
-                      </h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('MyMessages')}
-                        className="text-blue-600 hover:text-blue-700 text-sm"
-                      >
-                        View All
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {messages.slice(0, 2).map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
-                            !msg.is_read ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
-                          }`}
-                          onClick={() => navigate('MyMessages')}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-sm text-slate-900 line-clamp-1">{msg.subject}</p>
-                            {!msg.is_read && (
-                              <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0">New</span>
-                            )}
-                          </div>
-                          <p className="text-xs text-slate-600 line-clamp-1">{msg.body}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
       </div>
 
       <InviteParentModal
@@ -543,15 +407,6 @@ export default function Dashboard() {
         onClose={() => setShowInviteModal(false)}
         onSuccess={async () => {
           await refreshUser();
-          await loadDashboardData();
-        }}
-      />
-
-      <EditHelpRequestModal
-        isOpen={showEditRequestModal}
-        onClose={() => setShowEditRequestModal(false)}
-        helpRequest={existingHelpRequest}
-        onSuccess={async () => {
           await loadDashboardData();
         }}
       />
