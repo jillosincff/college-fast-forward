@@ -14,18 +14,18 @@ export default function EmergingGatorsHero({ onBrowse }) {
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-          ✅ Gators find help every day through our network!
+          💬 Students are asking questions - share your advice!
         </div>
-        <h1 className={HERO_HEADING_CLASSES}>Students Seeking Your Help</h1>
+        <h1 className={HERO_HEADING_CLASSES}>Students With Questions</h1>
         <p className={`${HERO_SUBHEADING_CLASSES} mb-8 mt-4`}>
-          Your network could be their breakthrough
+          Your experience could be their breakthrough
         </p>
         <div className="flex flex-wrap gap-4 justify-center mb-6">
           <button 
             onClick={onBrowse} 
             className="bg-white text-[#0021A5] hover:bg-white/90 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
           >
-            View All Requests
+            Browse Questions
           </button>
           <button 
             onClick={scrollToHowItWorks} 
@@ -36,10 +36,10 @@ export default function EmergingGatorsHero({ onBrowse }) {
         </div>
         <div className="flex flex-wrap gap-4 justify-center">
           <span className="flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-            <Users size={16} /> 3+ new requests this week
+            <Users size={16} /> 3+ new questions this week
           </span>
           <span className="flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-            <BrainCircuit size={16} /> AI-matched by industry & goals
+            <BrainCircuit size={16} /> AI-matched by experience & expertise
           </span>
         </div>
       </div>
