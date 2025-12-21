@@ -1,5 +1,6 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -350,7 +351,7 @@ export default function HelpRequestCard({
             className="btn-offer-help"
             onClick={() => setShowHelpModal(true)}
           >
-            Offer Help
+            Share Your Advice
           </button>
 
           {/* Keep existing modals */}
@@ -494,9 +495,9 @@ export default function HelpRequestCard({
         <button
           onClick={handleOfferHelp}
           className="offer-help-btn w-full text-white border-none py-3 px-6 rounded-xl font-semibold cursor-pointer"
-          aria-label={`Offer help for ${request.role || request.title}`}
+          aria-label={`Share your advice for ${request.role || request.title}`}
         >
-          💫 Offer Help
+          💬 Share Your Advice
         </button>
 
         {showBoost && (
