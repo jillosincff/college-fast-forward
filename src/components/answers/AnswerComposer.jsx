@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Answer } from '@/entities/Answer';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
+import { base44 } from '@/api/base44Client';
 
 const MAX_CHARS = 5000;
 
@@ -76,12 +77,28 @@ export default function AnswerComposer({
         });
       }
 
+      // Award karma for posting an answer
+      if (currentUser.family_group_id) {
+        base44.functions.invoke('awardKarma', {
+          familyGroupId: currentUser.family_group_id,
+          parentUserId: currentUser.id,
+          parentEmail: currentUser.email,
+          actionType: 'answer',
+          referenceId: newAnswer.id,
+          description: 'Posted an answer'
+        }).then(res => {
+          console.log('Karma awarded for answer:', res?.data);
+        }).catch(err => {
+          console.log('Karma award failed (non-critical):', err.message);
+        });
+      }
+
       // Clear form
       setAnswerText('');
 
       toast({
         title: "✅ Answer posted!",
-        description: "Thank you for sharing your wisdom"
+        description: "Thank you for sharing your wisdom (+10 karma)"
       });
 
       // Notify parent component to update UI immediately
