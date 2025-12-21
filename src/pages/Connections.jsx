@@ -641,6 +641,37 @@ export default function DiscoverEmergingGatorsPage() {
           padding: 0 20px;
         }
 
+        .quick-filter-pills {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 12px;
+          overflow-x: auto;
+          padding-bottom: 4px;
+        }
+
+        .quick-pill {
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 600;
+          background: #f3f4f6;
+          border: 2px solid transparent;
+          color: #374151;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .quick-pill:hover {
+          background: #e5e7eb;
+        }
+
+        .quick-pill.active {
+          background: #0021A5;
+          color: white;
+          border-color: #0021A5;
+        }
+
         .search-and-actions {
           display: flex;
           gap: 12px;
