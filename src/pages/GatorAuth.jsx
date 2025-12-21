@@ -286,9 +286,23 @@ export default function GatorAuth() {
       addLog('🔐 No auth detected, showing login options...');
       addLog(`📋 Pending role: ${pendingRole}`);
       
-      if (isMountedRef.current) {
-        setShowLoginOptions(true);
-      }
+      // CRITICAL: Try to check if SDK has a session we don't know about yet
+      (async () => {
+        try {
+          const isAuth = await base44.auth.isAuthenticated();
+          if (isAuth) {
+            addLog('🔄 Found existing session, refreshing...');
+            if (refreshUser) await refreshUser();
+            return; // Let the next effect cycle handle routing
+          }
+        } catch (e) {
+          addLog(`⚠️ Session check: ${e.message}`);
+        }
+        
+        if (isMountedRef.current) {
+          setShowLoginOptions(true);
+        }
+      })();
       return;
     }
     
