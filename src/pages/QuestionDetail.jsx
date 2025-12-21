@@ -34,9 +34,11 @@ export default function QuestionDetailPage() {
   const loadQuestion = async () => {
     setIsLoading(true);
     try {
-      // Load question
-      const questions = await HelpRequest.filter({ id: questionId });
-      if (questions.length === 0) {
+      // Load question - use list and find since filter by id doesn't work
+      const allQuestions = await HelpRequest.list('-created_date', 500);
+      const q = allQuestions.find(question => question.id === questionId);
+      
+      if (!q) {
         toast({
           title: "Question not found",
           variant: "destructive"
@@ -45,7 +47,6 @@ export default function QuestionDetailPage() {
         return;
       }
       
-      const q = questions[0];
       setQuestion(q);
 
       // Increment view count
