@@ -114,10 +114,15 @@ export default function QuestionDetailPage() {
       // Track view in session storage to avoid counting multiple views from same user
       const viewKey = `viewed_${questionId}`;
       const hasViewed = sessionStorage.getItem(viewKey);
-      
+
       console.log('View tracking check:', { viewKey, hasViewed, questionId, questionSource });
-      
-      // TEMP: Always track view for testing (remove session check temporarily)
+
+      // Only track if user hasn't viewed this question in this session
+      if (hasViewed) {
+        console.log('Already viewed this question in this session, skipping view tracking');
+        return;
+      }
+
       console.log('Calling trackQuestionView function...');
       
       // Use backend function to increment view count (bypasses RLS)
