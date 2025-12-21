@@ -323,6 +323,7 @@ export default function GatorAuth() {
     if (isNewUser && user && user.persona) {
       addLog(`🎯 is_new_user with existing persona: ${user.persona}`);
       window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+      setIsTransitioning(true);
       navigate('GatorWelcome');
       return;
     }
