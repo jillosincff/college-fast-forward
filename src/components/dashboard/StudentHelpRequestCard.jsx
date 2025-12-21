@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Users, MessageSquare, Clock, AlertTriangle, CheckCircle, Edit, RefreshCw, ArrowRight, Loader2 } from 'lucide-react';
+import { FileText, Users, MessageSquare, Clock, AlertTriangle, CheckCircle, Edit, RefreshCw, ArrowRight, Loader2, ChevronUp, Eye, Award } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { formatDistanceToNow, differenceInDays, addDays } from 'date-fns';
@@ -132,20 +132,27 @@ export default function StudentHelpRequestCard({
           </div>
 
           <div className="border-t border-slate-200 pt-4 mb-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="flex items-center justify-center gap-1 text-orange-600 mb-1">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-2xl font-bold">{helpRequest.answer_count || 0}</span>
+                </div>
+                <p className="text-xs text-slate-500">Answers</p>
+              </div>
               <div>
                 <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
-                  <Users className="w-4 h-4" />
-                  <span className="text-2xl font-bold">{matchCount}</span>
+                  <ChevronUp className="w-4 h-4" />
+                  <span className="text-2xl font-bold">{helpRequest.total_upvotes || 0}</span>
                 </div>
-                <p className="text-xs text-slate-500">Parent matches</p>
+                <p className="text-xs text-slate-500">Upvotes</p>
               </div>
               <div>
                 <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
-                  <MessageSquare className="w-4 h-4" />
-                  <span className="text-2xl font-bold">{responseCount}</span>
+                  <Eye className="w-4 h-4" />
+                  <span className="text-2xl font-bold">{helpRequest.view_count || 0}</span>
                 </div>
-                <p className="text-xs text-slate-500">Responses</p>
+                <p className="text-xs text-slate-500">Views</p>
               </div>
               <div>
                 <div className="flex items-center justify-center gap-1 text-slate-600 mb-1">
@@ -162,15 +169,23 @@ export default function StudentHelpRequestCard({
                 </p>
               </div>
             </div>
+            
+            {/* Best Answer Badge */}
+            {helpRequest.has_best_answer && (
+              <div className="mt-3 flex items-center justify-center gap-2 text-green-700 bg-green-100 rounded-lg py-2">
+                <Award className="w-4 h-4" />
+                <span className="text-sm font-semibold">Best answer selected!</span>
+              </div>
+            )}
           </div>
 
           {/* Action buttons */}
           <div className="flex flex-wrap gap-3 mb-4">
             <Button
-              onClick={() => navigate('Dashboard')}
+              onClick={() => navigate('QuestionDetail', { id: helpRequest.id })}
               className="flex-1 bg-[#FA4616] hover:bg-orange-600"
             >
-              View Matches
+              View All Answers
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
