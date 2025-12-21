@@ -32,23 +32,23 @@ function isRelatedMajor(major1, major2) {
   );
 }
 
-// Convert raw score to percentage (max 50 points = 99%)
+// Convert raw score to percentage (max 100 points = 99%)
 function scoreToPercentage(score) {
-  return Math.min(Math.round((score / 50) * 100), 99);
+  return Math.min(Math.round((score / 100) * 100), 99);
 }
 
 // Generate quirky match message based on score
 function getMatchMessage(score, category) {
-  if (score >= 35) {
-    return "🎯 Great match! This parent can really help.";
-  } else if (score >= 25) {
-    return "💪 Solid match. Worth reaching out!";
-  } else if (score >= 15) {
-    return "👍 Decent match - different industry but can still help.";
-  } else if (score >= 10) {
-    return "🤝 Not exact, but all career advice helps!";
+  if (score >= 70) {
+    return "🎯 Excellent match! Highly relevant experience.";
+  } else if (score >= 50) {
+    return "💪 Great match! Can definitely help.";
+  } else if (score >= 35) {
+    return "👍 Solid match. Worth reaching out!";
+  } else if (score >= 20) {
+    return "🤝 Good general career advice available.";
   } else {
-    return "🌱 New to the network - help us grow!";
+    return "🌱 Growing network - every connection counts!";
   }
 }
 
@@ -56,70 +56,147 @@ function calculateParentMatchScore(helpRequest, parentExpertise) {
   let score = 0;
   const reasons = [];
   
-  // 1. Help Type Overlap (10 points per match)
+  // ═══════════════════════════════════════════════════════
+  // TIER 1: HELP TYPE MATCH (0-40 points) - MOST IMPORTANT
+  // ═══════════════════════════════════════════════════════
+  const helpTypeLabels = {
+    'career_advice': 'Career advice',
+    'internship_leads': 'Internship leads',
+    'resume_review': 'Resume review',
+    'interview_prep': 'Interview prep',
+    'industry_insights': 'Industry insights',
+    'networking_intros': 'Networking intros',
+    'informational_interview': 'Informational interviews'
+  };
+  
   const helpTypeMatches = (helpRequest.help_types || []).filter(type => 
     (parentExpertise.help_types || []).includes(type)
   );
+  
+  // Each matching help type = 10 points
   score += helpTypeMatches.length * 10;
+  
   if (helpTypeMatches.length > 0) {
-    const labels = {
-      'career_advice': 'Career advice',
-      'internship_leads': 'Internship leads',
-      'resume_review': 'Resume review',
-      'interview_prep': 'Interview prep',
-      'industry_insights': 'Industry insights',
-      'networking_intros': 'Networking intros',
-      'informational_interview': 'Informational interviews'
-    };
-    const matchedLabels = helpTypeMatches.map(t => labels[t] || t);
+    const matchedLabels = helpTypeMatches.map(t => helpTypeLabels[t] || t);
     reasons.push(`Can help with: ${matchedLabels.join(', ')}`);
   }
   
-  // 2. Industry Match (20 points for exact, 10 for related, 2 for different)
-  if (helpRequest.industry === parentExpertise.industry) {
-    score += 20;
-    reasons.push(`${parentExpertise.industry} industry experience`);
-  } else if (isRelatedIndustry(helpRequest.industry, parentExpertise.industry)) {
+  // Bonus: Parent has PROVEN they help students
+  const studentsHelped = parentExpertise.students_helped || 0;
+  if (studentsHelped > 10) {
     score += 10;
-    reasons.push(`Related industry experience`);
-  } else {
-    // Even different industry gets some points - general career advice is valuable
+    reasons.push(`✅ Helped ${studentsHelped} students`);
+  } else if (studentsHelped > 5) {
+    score += 5;
+    reasons.push(`Helped ${studentsHelped} students`);
+  } else if (studentsHelped > 0) {
     score += 2;
-    reasons.push(`General career advice`);
   }
   
-  // 3. Company Connections (15 points if student mentioned target companies)
+  // ═══════════════════════════════════════════════════════
+  // TIER 2: RESPONSIVENESS (0-30 points) - SECOND MOST IMPORTANT
+  // ═══════════════════════════════════════════════════════
+  const responseRate = parentExpertise.response_rate || 0;
+  const avgResponseHours = parentExpertise.avg_response_hours || 24;
+  
+  // Response rate (0-15 points)
+  if (responseRate >= 0.9) {
+    score += 15;
+    reasons.push('⚡ Quick responder (responds to 90%+ messages)');
+  } else if (responseRate >= 0.7) {
+    score += 10;
+    reasons.push('Responds to most messages');
+  } else if (responseRate >= 0.5) {
+    score += 5;
+  }
+  
+  // Average response time (0-15 points)
+  if (avgResponseHours <= 4) {
+    score += 15;
+    reasons.push('💨 Responds within hours');
+  } else if (avgResponseHours <= 24) {
+    score += 10;
+    reasons.push('Responds within 24h');
+  } else if (avgResponseHours <= 48) {
+    score += 5;
+    reasons.push('Responds within 2 days');
+  }
+  
+  // ═══════════════════════════════════════════════════════
+  // TIER 3: INDUSTRY MATCH (0-15 points) - NICE TO HAVE
+  // ═══════════════════════════════════════════════════════
+  if (helpRequest.industry === parentExpertise.industry) {
+    score += 15;
+    reasons.push(`${parentExpertise.industry} industry expert`);
+  } else if (isRelatedIndustry(helpRequest.industry, parentExpertise.industry)) {
+    score += 8;
+    reasons.push(`Related industry (${parentExpertise.industry})`);
+  } else {
+    // Everyone gets SOME points - general career advice is valuable
+    score += 2;
+    reasons.push('General career expertise');
+  }
+  
+  // ═══════════════════════════════════════════════════════
+  // TIER 4: EXPERIENCE (0-15 points)
+  // ═══════════════════════════════════════════════════════
+  if (parentExpertise.years_experience === '20+') {
+    score += 15;
+    reasons.push('20+ years experience');
+  } else if (parentExpertise.years_experience === '15-20') {
+    score += 12;
+    reasons.push('15-20 years experience');
+  } else if (parentExpertise.years_experience === '10-15') {
+    score += 8;
+    reasons.push('10-15 years experience');
+  } else {
+    score += 3;
+    reasons.push(`${parentExpertise.years_experience || '5+'} years experience`);
+  }
+  
+  // ═══════════════════════════════════════════════════════
+  // BONUS: Company Connections (0-10 points)
+  // ═══════════════════════════════════════════════════════
   if (parentExpertise.company_connections && helpRequest.description) {
     const companies = parentExpertise.company_connections.toLowerCase().split(',');
     const mentionedCompany = companies.some(company => 
       helpRequest.description.toLowerCase().includes(company.trim())
     );
     if (mentionedCompany) {
-      score += 15;
-      reasons.push('Has connections at companies you mentioned');
+      score += 10;
+      reasons.push('🎯 Has connections at companies you mentioned');
     }
   }
   
-  // 4. Experience Level Bonus
-  if (parentExpertise.years_experience === '20+') {
-    score += 7;
-    reasons.push('20+ years experience');
-  } else if (parentExpertise.years_experience === '15-20') {
-    score += 5;
-    reasons.push('15-20 years experience');
-  } else if (parentExpertise.years_experience === '10-15') {
-    score += 3;
-    reasons.push('10-15 years experience');
-  } else {
-    score += 1;
-    reasons.push(`${parentExpertise.years_experience || '5+'} years experience`);
+  // ═══════════════════════════════════════════════════════
+  // BONUS MULTIPLIERS
+  // ═══════════════════════════════════════════════════════
+  
+  // Parent marked as "Super Helper" (admin flagged)
+  if (parentExpertise.is_super_helper) {
+    score = Math.round(score * 1.2); // 20% boost
+    reasons.unshift('🌟 Top-rated helper');
+  }
+  
+  // Parent recently active (last 7 days)
+  if (parentExpertise.last_active_at) {
+    const daysSinceActive = (Date.now() - new Date(parentExpertise.last_active_at).getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceActive <= 7) {
+      score += 5;
+      reasons.push('Recently active');
+    }
+  }
+  
+  // Fast responder badge
+  if (parentExpertise.is_fast_responder) {
+    reasons.unshift('⚡ Fast responder');
   }
   
   // MINIMUM SCORE: Every parent gets at least 5 points
   score = Math.max(score, 5);
   
   // Determine category
-  const category = score >= 20 ? 'high' : 'broader';
+  const category = score >= 40 ? 'high' : 'broader';
   
   return { score, reasons, category };
 }
@@ -287,8 +364,8 @@ Deno.serve(async (req) => {
     // Sort by score (highest first)
     allScoredParents.sort((a, b) => b.score - a.score);
     
-    // CRITICAL: Always take TOP 5 parents, regardless of score
-    const MIN_MATCHES = 5;
+    // CRITICAL: Always take TOP 10 parents (more options = better)
+    const MIN_MATCHES = 10;
     const topParentMatches = allScoredParents.slice(0, MIN_MATCHES);
     
     const matchesData = [];
