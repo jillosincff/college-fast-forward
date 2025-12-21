@@ -232,7 +232,7 @@ export default function QuestionsPage() {
         <div className="page-header">
           <div className="header-content">
             <div className="header-left">
-              <h1>Questions From UF Students</h1>
+              <h1>Questions From The Swamp 🐊</h1>
               <p className="subtitle">
                 Browse questions and share your advice
               </p>
@@ -286,16 +286,34 @@ export default function QuestionsPage() {
                   All Questions
                 </button>
                 <button
-                  className={`filter-tab ${filters.noAnswers ? 'active' : ''}`}
-                  onClick={() => setFilters({...filters, noAnswers: !filters.noAnswers, urgent: false})}
+                  className={`filter-tab ${filters.questionType === 'student' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, questionType: 'student', noAnswers: false, urgent: false})}
                 >
-                  No Answers 🆘
+                  🎓 Students
+                </button>
+                <button
+                  className={`filter-tab ${filters.questionType === 'parent' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, questionType: 'parent', noAnswers: false, urgent: false})}
+                >
+                  👨‍👩‍👧 Parents
+                </button>
+                <button
+                  className={`filter-tab ${filters.questionType === 'alumni' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, questionType: 'alumni', noAnswers: false, urgent: false})}
+                >
+                  🎯 Alumni
+                </button>
+                <button
+                  className={`filter-tab ${filters.noAnswers ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, questionType: 'all', noAnswers: !filters.noAnswers, urgent: false})}
+                >
+                  🆘 No Answers
                 </button>
                 <button
                   className={`filter-tab ${filters.urgent ? 'active' : ''}`}
-                  onClick={() => setFilters({...filters, urgent: !filters.urgent, noAnswers: false})}
+                  onClick={() => setFilters({...filters, questionType: 'all', urgent: !filters.urgent, noAnswers: false})}
                 >
-                  ASAP 🔥
+                  🔥 ASAP
                 </button>
               </div>
               <div className="filter-stats">
