@@ -139,6 +139,13 @@ export default function QuestionCard({ question, gator }) {
         )}
       </div>
 
+      {/* Karma Boost Badge */}
+      {question.karma_boost > 0 && (
+        <div className="karma-boost-badge">
+          ⚡ Boosted by Family Karma (+{question.karma_boost})
+        </div>
+      )}
+
       {/* Stats */}
       <div className="question-stats">
         <span className="stat">
@@ -322,6 +329,18 @@ export default function QuestionCard({ question, gator }) {
         .best-answer-indicator {
           color: #10B981;
           font-weight: 500;
+        }
+
+        .karma-boost-badge {
+          display: inline-block;
+          background: linear-gradient(90deg, #FEFCE8 0%, #FEF9C3 100%);
+          color: #A16207;
+          font-size: 12px;
+          font-weight: 600;
+          padding: 6px 12px;
+          border-radius: 16px;
+          margin-bottom: 12px;
+          border: 1px solid #FDE047;
         }
 
         .card-action-button {
