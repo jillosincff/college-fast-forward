@@ -15,8 +15,11 @@ export default function JobRequestForm({
   onSubmit,
   isSubmitting = false,
   initialData = null,
-  user
+  user,
+  isParentQuestion = false
 }) {
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent') || isParentQuestion;
+  const [isAnonymous, setIsAnonymous] = useState(initialData?.is_anonymous || false);
   const { toast } = useToast();
   const [resumeUrl, setResumeUrl] = useState(initialData?.resume_url || '');
   const [resumeUploading, setResumeUploading] = useState(false);
@@ -185,7 +188,8 @@ export default function JobRequestForm({
       ...data,
       resume_url: resumeUrl,
       title: data.role,
-      target_helpers: ['alumni', 'parents']
+      target_helpers: ['alumni', 'parents'],
+      is_anonymous: isParent ? isAnonymous : false
     };
     
     // Submit the request first
@@ -461,6 +465,34 @@ export default function JobRequestForm({
           </div>
         </CardContent>
       </Card>
+
+      {/* Anonymous Posting Option - Parents Only */}
+      {isParent && (
+        <Card>
+          <CardContent className="pt-6">
+            <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-blue-300 transition-colors">
+              <Checkbox
+                id="is_anonymous"
+                checked={isAnonymous}
+                onCheckedChange={(checked) => setIsAnonymous(!!checked)}
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="is_anonymous" className="font-medium text-slate-900 cursor-pointer">
+                    Post anonymously
+                  </Label>
+                </div>
+                <p className="text-sm text-slate-600 mt-1">
+                  Your question will show as "Anonymous Parent" instead of your name. Your identity stays private.
+                </p>
+                <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
+                  💡 Recommended for sensitive family topics
+                </p>
+              </div>
+            </label>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Submit Button */}
       <div className="flex justify-center pt-6">

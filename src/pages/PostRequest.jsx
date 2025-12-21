@@ -65,6 +65,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
         ...values,
         status: 'active', // Added status: 'active'
         poster_type: posterType,
+        is_anonymous: values.is_anonymous || false,
         poster_profile_image: user?.profile_image_url || null, // Ensure this is included for new requests
       };
 
