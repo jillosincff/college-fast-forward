@@ -485,9 +485,8 @@ export default function DiscoverEmergingGatorsPage() {
           </div>
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content Area - Full Width, No Sidebar */}
         <div className="main-content-area">
-          {/* Profile Grid */}
           <div className="profile-grid-section">
             {isLoading ? (
               <div className="loading-state">
@@ -579,50 +578,6 @@ export default function DiscoverEmergingGatorsPage() {
               </>
             )}
           </div>
-
-          {/* Sidebar */}
-          <aside className="sidebar-section">
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">
-                <TrendingUp className="w-5 h-5" />
-                Featured Requests
-              </h3>
-              <div className="featured-requests">
-                {requests.length > 0 ? (
-                  requests.slice(0, 3).map((req) => (
-                    <div key={req.id} className="featured-request-item">
-                      <p className="request-text">{req.description?.substring(0, 80)}...</p>
-                      <Button 
-                        size="sm" 
-                        className="quick-reply-btn"
-                        onClick={() => handleOfferHelp(req)}
-                      >
-                        Quick Reply
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="empty-sidebar-state">
-                    <p>Students will post their career requests here soon!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Success Stories</h3>
-              <div className="success-stories">
-                <div className="story-item">
-                  <p className="story-text">"Landed my dream job through a parent connection!"</p>
-                  <span className="story-author">- Sarah M., Class of '23</span>
-                </div>
-                <div className="story-item">
-                  <p className="story-text">"An alum's advice helped me ace my interview!"</p>
-                  <span className="story-author">- Mike R., Class of '24</span>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
 
         {/* Footer */}
@@ -843,12 +798,9 @@ export default function DiscoverEmergingGatorsPage() {
         }
 
         .main-content-area {
-          max-width: 1400px;
+          max-width: 900px;
           margin: 20px auto;
           padding: 0 20px;
-          display: grid;
-          grid-template-columns: 1fr 300px;
-          gap: 24px;
         }
 
         .profile-grid-section {
@@ -948,95 +900,7 @@ export default function DiscoverEmergingGatorsPage() {
           max-width: 400px;
         }
 
-        .sidebar-section {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
 
-        .sidebar-card {
-          background: white;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .sidebar-title {
-          font-size: 18px;
-          font-weight: 700;
-          color: #0f172a;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .featured-requests {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .empty-sidebar-state {
-          padding: 16px;
-          background: #F9FAFB;
-          border-radius: 8px;
-          text-align: center;
-        }
-
-        .empty-sidebar-state p {
-          font-size: 14px;
-          color: #6b7280;
-          line-height: 1.5;
-        }
-
-        .featured-request-item {
-          padding: 12px;
-          background: #F9FAFB;
-          border-radius: 8px;
-          border-left: 3px solid #0021A5;
-        }
-
-        .request-text {
-          font-size: 14px;
-          color: #374151;
-          margin-bottom: 8px;
-          line-height: 1.4;
-        }
-
-        .quick-reply-btn {
-          background: #FA4616;
-          color: white;
-          font-size: 12px;
-          padding: 6px 12px;
-          border-radius: 6px;
-        }
-
-        .success-stories {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .story-item {
-          padding: 12px;
-          background: #FFF4ED;
-          border-radius: 8px;
-        }
-
-        .story-text {
-          font-size: 14px;
-          color: #374151;
-          font-style: italic;
-          margin-bottom: 8px;
-          line-height: 1.4;
-        }
-
-        .story-author {
-          font-size: 12px;
-          color: #FA4616;
-          font-weight: 600;
-        }
 
         .page-footer {
           background: #0021A5;
@@ -1160,15 +1024,7 @@ export default function DiscoverEmergingGatorsPage() {
           margin: 0 auto;
         }
 
-        @media (max-width: 1200px) {
-          .main-content-area {
-            grid-template-columns: 1fr;
-          }
-          
-          .sidebar-section {
-            display: none;
-          }
-        }
+
 
         @media (max-width: 768px) {
           .cta-banner-students {
