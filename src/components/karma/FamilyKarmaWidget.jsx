@@ -5,10 +5,10 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 
 const LEVEL_COLORS = {
-  bronze: { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B', gradient: 'linear-gradient(135deg, #CD7F32 0%, #B87333 100%)' },
-  silver: { bg: '#F3F4F6', text: '#374151', border: '#9CA3AF', gradient: 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%)' },
-  gold: { bg: '#FEF9C3', text: '#854D0E', border: '#EAB308', gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' },
-  platinum: { bg: '#E0E7FF', text: '#4338CA', border: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
+  bronze: { bg: '#FEF3C7', text: 'white', border: '#8B7355', gradient: 'linear-gradient(135deg, #8B7355 0%, #6B5A44 100%)' },
+  silver: { bg: '#F3F4F6', text: '#1F2937', border: '#B8B8B8', gradient: 'linear-gradient(135deg, #E8E8E8 0%, #B8B8B8 100%)' },
+  gold: { bg: '#FEF9C3', text: '#1F2937', border: '#FFD700', gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' },
+  platinum: { bg: '#E0E7FF', text: 'white', border: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
 };
 
 const LEVEL_ICONS = {
