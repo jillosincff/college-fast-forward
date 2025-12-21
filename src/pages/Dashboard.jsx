@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       // Fetch user's help request (students have ONE active request)
       // CRITICAL: Query by email first since user IDs can change between sessions
-      console.log('🔍 Dashboard: Loading help request for user:', user.email, 'user.id:', user.id);
+      console.log('🔍🔍🔍 HELP REQUEST SECTION START - user:', user.email, 'user.id:', user.id);
       
       let myHelpRequest = [];
       
