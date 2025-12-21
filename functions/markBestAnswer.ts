@@ -46,10 +46,28 @@ Deno.serve(async (req) => {
     // Update question
     await base44.asServiceRole.entities.HelpRequest.update(questionId, { has_best_answer: true });
 
-    // Get the answer to notify the answerer
+    // Get the answer to notify the answerer and award karma
     const answers = await base44.asServiceRole.entities.Answer.filter({ id: answerId });
     if (answers.length > 0) {
       const bestAnswer = answers[0];
+      
+      // Award karma for best answer (+50)
+      try {
+        const answerAuthor = await base44.asServiceRole.entities.User.filter({ id: bestAnswer.answerer_user_id });
+        if (answerAuthor.length > 0 && answerAuthor[0].family_group_id) {
+          await base44.functions.invoke('awardKarma', {
+            familyGroupId: answerAuthor[0].family_group_id,
+            parentUserId: bestAnswer.answerer_user_id,
+            parentEmail: bestAnswer.answerer_email,
+            actionType: 'best_answer',
+            referenceId: answerId,
+            description: 'Answer marked as best'
+          });
+          console.log('Awarded 50 karma for best answer');
+        }
+      } catch (karmaErr) {
+        console.log('Karma award failed (non-critical):', karmaErr.message);
+      }
       
       // Send notification to answerer (create a notification record or send email)
       try {
@@ -57,7 +75,7 @@ Deno.serve(async (req) => {
           user_id: bestAnswer.answerer_user_id,
           user_email: bestAnswer.answerer_email,
           type: 'best_answer',
-          title: '🏆 Your answer was marked as Best Answer!',
+          title: '🏆 Your answer was marked as Best Answer! (+50 karma)',
           message: `${user.full_name || 'The question asker'} marked your answer as the best answer to their question.`,
           link: `QuestionDetail?id=${questionId}`,
           is_read: false
