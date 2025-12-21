@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
 import ConnectGatorStep from '@/components/onboarding/parent/ConnectGatorStep';
 import { ParentExpertise } from '@/entities/ParentExpertise';
+import { HelpRequest } from '@/entities/HelpRequest';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const INDUSTRIES = [
@@ -177,6 +178,27 @@ export default function Onboarding() {
           console.log('Linked students:', response);
         } catch (linkError) {
           console.error('Failed to link students:', linkError);
+        }
+      }
+
+      // Create parent's question as a HelpRequest if they provided one
+      if (formData.question?.trim()) {
+        try {
+          await HelpRequest.create({
+            student_id: user.id,
+            student_email: user.email,
+            student_name: formData.full_name,
+            poster_type: 'parent',
+            help_types: ['career_advice'],
+            industry: formData.industry || 'Other',
+            description: formData.question,
+            timeline: 'no_rush',
+            status: 'active',
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          });
+          console.log('✅ Created parent question');
+        } catch (questionError) {
+          console.error('Failed to create parent question:', questionError);
         }
       }
 

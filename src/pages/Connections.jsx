@@ -331,6 +331,27 @@ export default function DiscoverEmergingGatorsPage() {
           </div>
         )}
 
+        {/* CTA Banner for Parents */}
+        {(user?.persona === 'parent' || user?.roles?.includes('parent')) && !requests.find(r => r.created_by === user.email) && (
+          <div className="cta-banner-parents">
+            <div className="cta-content">
+              <div className="cta-icon">👨‍👩‍👧</div>
+              <div className="cta-text">
+                <h3>Have a question about helping your student?</h3>
+                <p>Ask other parents and alumni - they've been through it too!</p>
+              </div>
+              <Button 
+                onClick={() => navigate('PostRequest')}
+                className="cta-button"
+                size="lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Ask a Question
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Search and Filters - Sticky */}
         <div className="filters-section-sticky" id="listings-section">
           <div className="filters-container-compact">
@@ -1044,10 +1065,15 @@ export default function DiscoverEmergingGatorsPage() {
           opacity: 0.8;
         }
 
-        .cta-banner-students {
+        .cta-banner-students,
+        .cta-banner-parents {
           max-width: 1400px;
           margin: -16px auto 32px;
           padding: 0 20px;
+        }
+
+        .cta-banner-parents .cta-content {
+          background: linear-gradient(135deg, #0021A5 0%, #003865 100%);
         }
 
         .cta-content {
