@@ -761,10 +761,21 @@ function AppContent() {
   // CRITICAL: Detect OAuth callback via is_new_user param (before any other routing)
   // But DON'T immediately route - let the normal routing logic handle it after user is loaded
   useEffect(() => {
+    const fullUrl = window.location.href;
+    const hash = window.location.hash;
+    console.log('🔐 [Layout] OAuth check - URL:', fullUrl);
+    console.log('🔐 [Layout] OAuth check - hash:', hash);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const isNewUser = urlParams.has('is_new_user');
     const stateToken = urlParams.get('state');
     const accessToken = urlParams.get('access_token');
+    
+    // Also check hash for access_token (Base44 SDK format)
+    const hashParams = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : hash.replace('#', ''));
+    const hashAccessToken = hashParams.get('access_token');
+    
+    console.log('🔐 [Layout] isNewUser:', isNewUser, 'accessToken:', !!accessToken, 'hashAccessToken:', !!hashAccessToken);
     
     // PRIORITY 1: is_new_user param - mark OAuth callback but let routing logic decide destination
     if (isNewUser) {
@@ -787,6 +798,14 @@ function AppContent() {
         console.log('🔐 [Layout] Navigating to GatorAuth');
         window.location.href = window.location.origin + '/#GatorAuth';
       }, 500);
+      return;
+    }
+    
+    // PRIORITY 3: Hash contains access_token (SDK callback format)
+    if (hashAccessToken) {
+      console.log('🔐 [Layout] OAuth callback: access_token in hash detected');
+      sessionStorage.setItem('oauth_callback_detected', 'true');
+      // Don't redirect - let SDK handle it and AuthContext will pick up the user
       return;
     }
   }, []);
