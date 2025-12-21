@@ -264,12 +264,43 @@ function ParentMatchCard({ match, user, onMessageSent }) {
 }
 
 export default function StudentParentMatchesWidget({ user, matches = [], onRefresh }) {
+  const [filter, setFilter] = useState('all');
+  
   if (matches.length === 0) {
     return null;
   }
 
-  const displayMatches = matches.slice(0, 3);
-  const hasMore = matches.length > 3;
+  // Sort and filter matches
+  const sortedMatches = [...matches].sort((a, b) => {
+    // Super helpers first
+    const aSuper = a.match_reasons?.some(r => r.includes('🌟')) ? 1 : 0;
+    const bSuper = b.match_reasons?.some(r => r.includes('🌟')) ? 1 : 0;
+    if (bSuper !== aSuper) return bSuper - aSuper;
+    
+    // Then by match score
+    return (b.match_score || 0) - (a.match_score || 0);
+  });
+
+  // Filter matches
+  const filteredMatches = sortedMatches.filter(m => {
+    if (filter === 'all') return true;
+    if (filter === 'fast') {
+      return m.match_reasons?.some(r => 
+        r.includes('⚡') || r.includes('Fast') || r.includes('responds within hours') || r.includes('💨')
+      );
+    }
+    if (filter === 'experienced') {
+      return m.match_reasons?.some(r => r.includes('15') || r.includes('20+'));
+    }
+    return true;
+  });
+
+  const fastResponderCount = sortedMatches.filter(m => 
+    m.match_reasons?.some(r => r.includes('⚡') || r.includes('💨'))
+  ).length;
+
+  const displayMatches = filteredMatches.slice(0, 3);
+  const hasMore = filteredMatches.length > 3;
 
   return (
     <Card className="border-2 border-blue-200 shadow-lg bg-gradient-to-br from-white to-blue-50">
@@ -281,15 +312,51 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">
-                💬 People Who Can Answer Your Question ({matches.length})
+                💬 People Who Can Help ({matches.length})
               </h3>
-              <p className="text-sm text-slate-500">Message them directly to start a conversation</p>
+              <p className="text-sm text-slate-500">Matched based on who can actually help you</p>
             </div>
           </div>
         </div>
 
+        {/* Quick Filters */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              filter === 'all' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            All Matches
+          </button>
+          {fastResponderCount > 0 && (
+            <button
+              onClick={() => setFilter('fast')}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
+                filter === 'fast' 
+                  ? 'bg-amber-500 text-white' 
+                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+              }`}
+            >
+              <Zap className="w-3 h-3" /> Fast Responders ({fastResponderCount})
+            </button>
+          )}
+          <button
+            onClick={() => setFilter('experienced')}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
+              filter === 'experienced' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+            }`}
+          >
+            <TrendingUp className="w-3 h-3" /> Most Experienced
+          </button>
+        </div>
+
         <div className="space-y-4">
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {displayMatches.map(match => (
               <ParentMatchCard 
                 key={match.id} 
@@ -299,6 +366,18 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
               />
             ))}
           </AnimatePresence>
+          
+          {filteredMatches.length === 0 && (
+            <div className="text-center py-8 text-slate-500">
+              <p>No matches found for this filter.</p>
+              <button 
+                onClick={() => setFilter('all')}
+                className="text-blue-600 underline mt-2"
+              >
+                Show all matches
+              </button>
+            </div>
+          )}
         </div>
 
         {hasMore && (
@@ -308,7 +387,7 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
               onClick={() => navigate('GatorDirectory')}
               className="text-blue-600 border-blue-300 hover:bg-blue-50"
             >
-              View All {matches.length} Matches
+              View All {filteredMatches.length} Matches
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
