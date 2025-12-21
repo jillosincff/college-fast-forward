@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2, Zap, Star } from 'lucide-react';
+import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2, Zap, Star, CheckCircle, TrendingUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,47 @@ const HELP_TYPE_LABELS = {
   'networking_intros': 'Networking intros',
   'informational_interview': 'Informational interviews'
 };
+
+// Parse match reasons to extract key stats
+function parseMatchStats(reasons = []) {
+  const stats = {
+    isFastResponder: false,
+    responseTime: null,
+    studentsHelped: null,
+    isSuperHelper: false,
+    isRecentlyActive: false,
+    isUrgentMatch: false,
+    industryMatch: null,
+    experience: null
+  };
+  
+  for (const reason of reasons) {
+    if (reason.includes('⚡') || reason.includes('Fast') || reason.toLowerCase().includes('responds within')) {
+      stats.isFastResponder = true;
+      if (reason.includes('hours')) stats.responseTime = 'hours';
+      else if (reason.includes('24h')) stats.responseTime = '24h';
+      else if (reason.includes('2 days')) stats.responseTime = '2 days';
+    }
+    if (reason.includes('💨')) stats.responseTime = 'hours';
+    if (reason.includes('Helped')) {
+      const match = reason.match(/(\d+)\s*students/);
+      if (match) stats.studentsHelped = parseInt(match[1]);
+    }
+    if (reason.includes('🌟') || reason.includes('Top-rated')) stats.isSuperHelper = true;
+    if (reason.includes('Recently active')) stats.isRecentlyActive = true;
+    if (reason.includes('🚨') || reason.includes('urgent')) stats.isUrgentMatch = true;
+    if (reason.includes('industry expert')) {
+      const match = reason.match(/^(.+?)\s+industry/);
+      if (match) stats.industryMatch = match[1];
+    }
+    if (reason.includes('years experience')) {
+      const match = reason.match(/(\d+\+?)\s*years/);
+      if (match) stats.experience = match[1];
+    }
+  }
+  
+  return stats;
+}
 
 function ParentMatchCard({ match, user, onMessageSent }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
