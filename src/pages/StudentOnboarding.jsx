@@ -394,8 +394,8 @@ export default function StudentOnboarding() {
               </p>
             ) : (
               <div>
-                <p className="text-lg text-slate-600 mb-2">Your question is live on Emerging Gators!</p>
-                <p className="text-slate-500">New parents join daily - we'll notify you when someone can help.</p>
+                <p className="text-lg text-slate-600 mb-2">Your question is live!</p>
+                <p className="text-slate-500">Parents and alumni are notified when questions match their expertise. We'll email you when someone reaches out!</p>
               </div>
             )}
           </motion.div>
@@ -444,11 +444,11 @@ export default function StudentOnboarding() {
             transition={{ delay: 0.4 }}
             className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8"
           >
-            <h4 className="font-semibold text-slate-900 mb-3">💡 Quick Tips:</h4>
+            <h4 className="font-semibold text-slate-900 mb-3">💡 What's Next:</h4>
             <ul className="space-y-2 text-slate-700">
-              <li>• Message 2-3 parents to start</li>
-              <li>• Be specific about what you need help with</li>
-              <li>• Most parents respond within 24 hours</li>
+              <li>• <strong>Message 2-3 people</strong> from your matches to start conversations</li>
+              <li>• <strong>Be specific</strong> about what you want to learn from them</li>
+              <li>• <strong>Most respond within 24 hours</strong> - check your inbox!</li>
             </ul>
           </motion.div>
 
