@@ -88,7 +88,8 @@ export default function GatorDirectory() {
         throw new Error(responseData?.details || 'Invalid data from server.');
       }
       
-      const validUsers = responseData.data.filter(u => u && u.full_name && u.persona);
+      // Accept users with full_name - persona may be normalized by the backend
+      const validUsers = responseData.data.filter(u => u && u.full_name);
       setAllUsers(validUsers);
       
       // Calculate persona breakdown - handle both 'student' and 'gator' personas
