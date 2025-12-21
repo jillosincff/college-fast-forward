@@ -146,6 +146,16 @@ export default function QuestionsPage() {
     loadData();
     loadUserLikes();
     loadLikeCounts();
+    
+    // Refresh data when returning to this page (e.g., after viewing a question)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(true); // silent refresh
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user?.email]);
 
   // Build profiles from requests
