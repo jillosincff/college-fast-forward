@@ -82,12 +82,17 @@ export default function AnswerComposer({
         description: "Thank you for sharing your wisdom"
       });
 
-      // Notify parent component
+      // Notify parent component to update UI immediately
+      console.log('Answer created, calling onAnswerPosted callback');
       if (onAnswerPosted) {
-        onAnswerPosted({
+        const answerWithDate = {
           ...newAnswer,
           created_date: new Date().toISOString()
-        });
+        };
+        console.log('Calling onAnswerPosted with:', answerWithDate);
+        onAnswerPosted(answerWithDate);
+      } else {
+        console.warn('onAnswerPosted callback not provided');
       }
 
     } catch (err) {
