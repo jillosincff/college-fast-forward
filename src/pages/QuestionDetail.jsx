@@ -59,20 +59,27 @@ export default function QuestionDetailPage() {
       
       setQuestion(q);
 
-      // Increment view count
-      await HelpRequest.update(questionId, { 
-        view_count: (q.view_count || 0) + 1 
-      });
+      // Increment view count - try both entities since we don't know which one it came from
+      try {
+        await HelpRequest.update(questionId, { 
+          view_count: (q.view_count || 0) + 1 
+        });
+      } catch {
+        // If HelpRequest update fails, try JobRequest
+        try {
+          await JobRequest.update(questionId, { 
+            views_count: (q.views_count || 0) + 1 
+          });
+        } catch {
+          // Silently ignore if view count update fails
+        }
+      }
 
       // Load answers
       await loadAnswers();
 
     } catch (err) {
       console.error('Failed to load question:', err);
-      toast({
-        title: "Error loading question",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }
