@@ -456,29 +456,12 @@ export default function ParentDashboard() {
 
 
 
-        {/* Messages & Activity */}
-        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <ParentActivityWidget />
-        </div>
-
-        {/* 6. Recent Activity Feed */}
-        <div className="bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <h3 className="text-lg font-bold mb-3" style={{ color: '#0021A5' }}>
-            Your Recent Activity
+        {/* Combined Activity Section */}
+        <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: '#0021A5' }}>
+            📊 Your Activity
           </h3>
-          <div className="text-center py-6">
-            <div className="text-4xl mb-3">🌟</div>
-            <p className="text-slate-600 mb-4">
-              Your advice and messages to students will show here
-            </p>
-            <Button 
-              onClick={() => navigate('Connections')} 
-              className="rounded-full px-6"
-              style={{ backgroundColor: '#FA4616' }}
-            >
-              Start by answering a student question →
-            </Button>
-          </div>
+          <ParentActivityWidget />
         </div>
 
       </div>
