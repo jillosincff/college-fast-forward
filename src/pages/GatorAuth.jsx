@@ -353,59 +353,10 @@ export default function GatorAuth() {
       // Fall through to let other cases handle routing
     }
 
-    // CASE 2: Fresh OAuth callback (access_token in URL or is_new_user param) - extract token and set it
-    if (isFreshOAuthCallback) {
-      addLog(`🔐 Fresh OAuth callback detected (isNewUser=${isNewUser}, hasToken=${hasAccessToken})`);
-      sessionStorage.setItem('oauth_callback_detected', 'true');
-      
-      // CRITICAL: Extract token and set it BEFORE any polling
-      let extractedToken = null;
-      try {
-        // Try to extract access_token from hash or URL params
-        const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
-        const urlToken = urlParams.get('access_token');
-        extractedToken = tokenMatch?.[1] || urlToken;
-        
-        if (extractedToken) {
-          addLog(`🔑 Extracted token: ${extractedToken.substring(0, 20)}...`);
-          
-          // Try to set the session manually via SDK if available
-          if (base44.auth.setToken) {
-            base44.auth.setToken(extractedToken);
-            addLog('✅ Manually set token via SDK');
-            
-            // CRITICAL: Wait a moment then try to get user immediately
-            setTimeout(async () => {
-              try {
-                const freshUser = await base44.auth.me();
-                if (freshUser?.email) {
-                  addLog(`✅ Got user immediately after token set: ${freshUser.email}`);
-                  if (isMountedRef.current) {
-                    setCurrentUser(freshUser);
-                    sessionStorage.removeItem('oauth_callback_detected');
-                  }
-                  if (refreshUser) await refreshUser();
-                }
-              } catch (e) {
-                addLog(`⚠️ Post-token user fetch: ${e.message}`);
-              }
-            }, 500);
-          } else {
-            addLog('⚠️ No SDK method to set token manually');
-          }
-        } else {
-          addLog('📋 No token in URL (may be handled by SDK automatically)');
-        }
-      } catch (tokenErr) {
-        addLog(`⚠️ Token extraction/setting error: ${tokenErr.message}`);
-      }
-      
-      // Clean URL - remove tokens and params for security
-      const cleanHash = '#GatorAuth';
-      window.history.replaceState(null, '', window.location.origin + cleanHash);
-      addLog('🧹 Cleaned URL');
-      
-      // Don't fall through to polling - let the setTimeout above handle it
+    // CASE 2: Fresh OAuth callback - this should be handled by PRIORITY 0 above
+    // This case now only handles when the token was already processed
+    if (isFreshOAuthCallback && !hasAccessToken) {
+      addLog(`🔐 OAuth callback without token in URL - waiting for token processing`);
       return;
     }
 
