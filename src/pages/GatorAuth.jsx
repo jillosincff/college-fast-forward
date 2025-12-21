@@ -78,6 +78,7 @@ export default function GatorAuth() {
   const [authProgress, setAuthProgress] = useState('Connecting to Google...');
   const [errorDetails, setErrorDetails] = useState(null);
   const [debugLogs, setDebugLogs] = useState([]);
+  const [isTransitioning, setIsTransitioning] = useState(false); // Prevent flashes during navigation
   
   const [showLoginOptions, setShowLoginOptions] = useState(false); // Show login screen instead of auto-redirect
   
