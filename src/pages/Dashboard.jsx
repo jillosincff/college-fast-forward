@@ -72,44 +72,54 @@ export default function Dashboard() {
       setOpportunities(opps || []);
 
       // Fetch user's help request (students have ONE active request)
+      // CRITICAL: Query by email first since user IDs can change between sessions
       let myHelpRequest = await base44.entities.HelpRequest.filter(
-        { student_id: user.id, status: 'active' },
+        { student_email: user.email, status: 'active' },
         '-created_date',
         1
       );
       
+      // Fallback to user.id if email lookup fails
       if (!myHelpRequest || myHelpRequest.length === 0) {
         myHelpRequest = await base44.entities.HelpRequest.filter(
-          { student_email: user.email, status: 'active' },
+          { student_id: user.id, status: 'active' },
           '-created_date',
           1
         );
       }
       
-      if (myHelpRequest && myHelpRequest.length > 0) {
-        setHelpRequest(myHelpRequest[0]);
+      const foundRequest = myHelpRequest && myHelpRequest.length > 0 ? myHelpRequest[0] : null;
+      if (foundRequest) {
+        setHelpRequest(foundRequest);
       }
 
-      // Fetch matches for this student - try both user.id and by email-based lookup
-      let studentMatches = await base44.entities.Match.filter(
-        { student_id: user.id },
-        '-match_score',
-        50
-      );
+      // Fetch matches - ALWAYS use help_request_id if we have a request (most reliable)
+      let studentMatches = [];
       
-      // If no matches by user.id, also check via help_request_id from the request we found
-      if ((!studentMatches || studentMatches.length === 0) && myHelpRequest && myHelpRequest.length > 0) {
+      if (foundRequest) {
+        // Primary: Get matches by help_request_id (most reliable)
         studentMatches = await base44.entities.Match.filter(
-          { help_request_id: myHelpRequest[0].id },
+          { help_request_id: foundRequest.id },
           '-match_score',
           50
         );
+        console.log('📊 Matches by help_request_id:', studentMatches?.length || 0);
+      }
+      
+      // Fallback: Try by user.id if no matches found
+      if ((!studentMatches || studentMatches.length === 0)) {
+        studentMatches = await base44.entities.Match.filter(
+          { student_id: user.id },
+          '-match_score',
+          50
+        );
+        console.log('📊 Matches by student_id fallback:', studentMatches?.length || 0);
       }
       
       const activeMatches = (studentMatches || []).filter(m => 
         m.status === 'pending' || m.status === 'student_connected'
       );
-      console.log('📊 Dashboard matches found:', activeMatches.length, 'for user:', user.id);
+      console.log('📊 Dashboard matches found:', activeMatches.length, 'for user:', user.email);
       setMatches(activeMatches);
 
       // Count active requests for stats
