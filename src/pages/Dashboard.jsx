@@ -28,21 +28,30 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (isLoading) return;
+    console.log('🏠 Dashboard useEffect - isLoading:', isLoading, 'user:', user?.email);
+    
+    if (isLoading) {
+      console.log('🏠 Dashboard: Still loading auth...');
+      return;
+    }
     
     if (!user) {
+      console.log('🏠 Dashboard: No user, redirecting to LandingPage');
       navigate('LandingPage');
       return;
     }
 
     if (user.persona === 'parent') {
+      console.log('🏠 Dashboard: Parent user, redirecting to ParentDashboard');
       navigate('ParentDashboard');
       return;
     } else if (user.roles?.includes('admin')) {
+      console.log('🏠 Dashboard: Admin user, redirecting to AdminDashboard');
       navigate('AdminDashboard');
       return;
     }
 
+    console.log('🏠 Dashboard: Calling loadDashboardData for gator:', user.email);
     localStorage.setItem('cff:seenDashboard', 'true');
     loadDashboardData();
   }, [user, isLoading]);
