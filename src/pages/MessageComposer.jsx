@@ -52,34 +52,102 @@ export default function MessageComposer() {
   const loadConversation = async () => {
     setLoading(true);
     try {
-      // Load recipient info
-      const users = await base44.entities.User.filter({ id: recipientId });
-      if (users && users.length > 0) {
-        setRecipient(users[0]);
+      let recipientUser = null;
+      
+      // Try multiple strategies to find the recipient
+      // Strategy 1: Check if recipientId is an email
+      if (recipientId.includes('@')) {
+        const usersByEmail = await base44.entities.User.filter({ email: recipientId });
+        if (usersByEmail?.length > 0) {
+          recipientUser = usersByEmail[0];
+        }
+      }
+      
+      // Strategy 2: Try by user id
+      if (!recipientUser) {
+        try {
+          const usersById = await base44.entities.User.filter({ id: recipientId });
+          if (usersById?.length > 0) {
+            recipientUser = usersById[0];
+          }
+        } catch (e) {
+          console.log('User lookup by ID failed, trying ParentExpertise...');
+        }
+      }
+      
+      // Strategy 3: Look up from ParentExpertise (matches use parent_id which links here)
+      if (!recipientUser) {
+        try {
+          const expertise = await base44.entities.ParentExpertise.filter({ parent_id: recipientId });
+          if (expertise?.length > 0 && expertise[0].parent_email) {
+            // Now get the actual user by email
+            const usersByEmail = await base44.entities.User.filter({ email: expertise[0].parent_email });
+            if (usersByEmail?.length > 0) {
+              recipientUser = usersByEmail[0];
+            } else {
+              // Create a minimal user object from ParentExpertise data
+              recipientUser = {
+                id: recipientId,
+                email: expertise[0].parent_email,
+                full_name: expertise[0].parent_name,
+                persona: 'parent',
+                job_title: expertise[0].current_role,
+                current_company: expertise[0].current_company
+              };
+            }
+          }
+        } catch (e) {
+          console.log('ParentExpertise lookup failed:', e);
+        }
+      }
+      
+      // Strategy 4: Check Match records for cached parent info
+      if (!recipientUser) {
+        try {
+          const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
+          if (matches?.length > 0 && matches[0].parent_email) {
+            recipientUser = {
+              id: recipientId,
+              email: matches[0].parent_email,
+              full_name: matches[0].parent_name,
+              persona: 'parent',
+              job_title: matches[0].parent_role,
+              current_company: matches[0].parent_company
+            };
+          }
+        } catch (e) {
+          console.log('Match lookup failed:', e);
+        }
+      }
+
+      if (recipientUser) {
+        setRecipient(recipientUser);
       }
 
       // Load existing messages between these users
-      const sentMessages = await Message.filter({
-        sender_email: user.email,
-        recipient_email: users[0]?.email
-      }, 'created_date');
-      
-      const receivedMessages = await Message.filter({
-        sender_email: users[0]?.email,
-        recipient_email: user.email
-      }, 'created_date');
+      if (recipientUser?.email) {
+        const sentMessages = await Message.filter({
+          sender_email: user.email,
+          recipient_email: recipientUser.email
+        }, 'created_date');
+        
+        const receivedMessages = await Message.filter({
+          sender_email: recipientUser.email,
+          recipient_email: user.email
+        }, 'created_date');
 
-      // Combine and sort by date
-      const allMessages = [...(sentMessages || []), ...(receivedMessages || [])]
-        .sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
-      
-      setMessages(allMessages);
-      setIsFirstMessage(allMessages.length === 0);
+        // Combine and sort by date
+        const allMessages = [...(sentMessages || []), ...(receivedMessages || [])]
+          .sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+        
+        setMessages(allMessages);
+        setIsFirstMessage(allMessages.length === 0);
 
-      // Mark received messages as read
-      for (const msg of receivedMessages || []) {
-        if (!msg.is_read) {
-          await Message.update(msg.id, { is_read: true });
+        // Mark received messages as read
+        for (const msg of receivedMessages || []) {
+          if (!msg.is_read) {
+            await Message.update(msg.id, { is_read: true });
+          }
         }
       }
     } catch (error) {
