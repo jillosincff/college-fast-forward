@@ -36,8 +36,9 @@ Deno.serve(async (req) => {
         }
         
         // Must have EITHER persona/roles OR substantive profile content
-        const hasPersona = u.persona && ['student', 'alumni', 'parent'].includes(u.persona);
-        const hasValidRole = u.roles && Array.isArray(u.roles) && u.roles.some(role => ['student', 'alumni', 'parent'].includes(role));
+        // Include 'gator' as valid persona
+        const hasPersona = u.persona && ['student', 'alumni', 'parent', 'gator'].includes(u.persona);
+        const hasValidRole = u.roles && Array.isArray(u.roles) && u.roles.some(role => ['student', 'alumni', 'parent', 'gator'].includes(role));
         const hasPersonaOrRole = hasPersona || hasValidRole;
         
         // Check if user has substantive profile content
