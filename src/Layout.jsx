@@ -108,6 +108,7 @@ const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
+const QuestionDetail = React.lazy(() => import('./pages/QuestionDetail'));
 
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
@@ -739,6 +740,7 @@ const getPageComponent = (pageName) => {
     case 'CookiePolicy': return CookiePolicy;
 
     case 'PublicProfile': return PublicProfile;
+      case 'QuestionDetail': return QuestionDetail;
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
 

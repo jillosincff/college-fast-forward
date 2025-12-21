@@ -8,6 +8,7 @@ import { getDisplayName } from '@/components/utils/nameUtils';
 import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -389,11 +390,25 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
           {/* Their Question - Prominently Displayed */}
           {request?.description && (
-            <div className="question-section">
+            <div 
+              className="question-section clickable"
+              onClick={() => navigate('QuestionDetail', { id: request.id })}
+              role="button"
+              tabIndex={0}
+            >
               <span className="question-label">💬 Their Question:</span>
               <p className="question-text">
                 "{request.description.length > 200 ? request.description.substring(0, 200) + '...' : request.description}"
               </p>
+              {(request.answer_count > 0 || true) && (
+                <div className="question-stats">
+                  <span className="stat-item">💬 {request.answer_count || 0} answers</span>
+                  {request.total_upvotes > 0 && (
+                    <span className="stat-item">⬆️ {request.total_upvotes} upvotes</span>
+                  )}
+                  <span className="view-link">View & Answer →</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -721,6 +736,37 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           border-radius: 12px;
           padding: 12px 16px;
           margin: 8px 0;
+        }
+
+        .question-section.clickable {
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .question-section.clickable:hover {
+          transform: scale(1.02);
+          box-shadow: 0 4px 12px rgba(250, 70, 22, 0.2);
+        }
+
+        .question-stats {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px dashed rgba(250, 70, 22, 0.3);
+          font-size: 12px;
+        }
+
+        .stat-item {
+          color: #6B7280;
+          font-weight: 500;
+        }
+
+        .view-link {
+          margin-left: auto;
+          color: #FA4616;
+          font-weight: 700;
         }
 
         .question-label {
