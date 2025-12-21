@@ -43,17 +43,17 @@ const helpOptions = [
 ];
 
 const quickTemplates = {
-  direct_answer: {
-    name: 'Answer Their Question',
-    message: `Hi! I saw your question and wanted to share my perspective based on my experience. [Share your advice here - be specific and personal!] Happy to chat more if you have follow-up questions!`
+  introduction: {
+    name: 'Introduction Offer',
+    message: `Hi! I saw your request and I think I can help connect you with the right people. I have connections in your target industry and would be happy to make some warm introductions. Let me know if you'd like to chat about potential opportunities!`
   },
   guidance_offer: {
-    name: 'Offer to Chat',
-    message: `Hi! Great question! I've been through something similar and would be happy to share what I learned. Having spent [X years] in [industry], I can offer some practical advice. Would you like to hop on a quick call to discuss?`
+    name: 'Guidance Offer',
+    message: `Hi! I'd be happy to share insights about the industry and what companies look for. Having been through a similar path, I can offer some practical advice and help you think through your career strategy. Would love to have a quick chat!`
   },
-  introduction: {
-    name: 'Make an Introduction',
-    message: `Hi! I saw your question and I think I can help connect you with the right people. I have connections in your target industry and would be happy to make some warm introductions. Let me know if you'd like to chat about potential opportunities!`
+  resume_help: {
+    name: 'Resume Help',
+    message: `Hi! I noticed your request and would be glad to take a look at your resume. I've helped several students refine their applications and know what recruiters typically look for. Happy to provide some quick feedback if that would be helpful!`
   }
 };
 
@@ -154,25 +154,38 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
 
   if (!request) return null;
 
-  const studentName = request.student_name || request.created_by?.split('@')[0] || 'this student';
+  const isAnonymousQuestion = request.is_anonymous && request.poster_type === 'parent';
+  const studentName = isAnonymousQuestion 
+    ? 'Anonymous Parent' 
+    : (request.student_name || request.created_by?.split('@')[0] || 'this student');
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Anonymous Question Warning */}
+        {isAnonymousQuestion && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <h4 className="font-semibold text-amber-900">Anonymous Question</h4>
+                <p className="text-sm text-amber-800 mt-1">
+                  This parent posted anonymously. If you message them, both of you will see each other's identities.
+                </p>
+                <p className="text-xs text-amber-700 mt-2">
+                  Public answers keep their identity private. Private messages reveal both identities.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-blue-600" />
-            Share Your Advice with {studentName}
+            How can you help {studentName}?
           </DialogTitle>
         </DialogHeader>
-        
-        {/* Show the question */}
-        {request.description && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-2">
-            <p className="text-sm font-medium text-blue-800 mb-1">Their question:</p>
-            <p className="text-slate-700 italic">"{request.description.length > 200 ? request.description.substring(0, 200) + '...' : request.description}"</p>
-          </div>
-        )}
 
         <div className="space-y-6 mt-4">
           {/* Help Options */}
@@ -294,7 +307,7 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
             <Button 
               onClick={handleSubmit} 
               disabled={!message.trim() || selectedHelp.length === 0 || isSubmitting}
-              className="bg-[#FA4616] hover:bg-orange-600 text-white min-w-[140px]"
+              className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
@@ -304,7 +317,7 @@ export default function MessageAndHelpModal({ isOpen, onClose, request }) {
               ) : (
                 <div className="flex items-center gap-2">
                   <Send className="w-4 h-4" />
-                  Send Your Advice
+                  Send Help Offer
                 </div>
               )}
             </Button>
