@@ -380,8 +380,8 @@ export default function ParentDashboard() {
           </p>
         </div>
 
-        {/* 4. Three Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* 4. Four Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Card 1: Complete Profile */}
           <div 
             ref={el => actionCardsRef.current[0] = el}
@@ -425,6 +425,29 @@ export default function ParentDashboard() {
               style={{ backgroundColor: '#0021A5' }}
             >
               Browse Questions →
+            </Button>
+          </div>
+
+          {/* Card 2.5: Ask Your Own Question */}
+          <div 
+            ref={el => actionCardsRef.current[3] = el}
+            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow border-2 border-orange-200"
+            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
+          >
+            <div className="text-5xl mb-4">❓</div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#FA4616' }}>
+              Ask Your Own Question
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Wondering about something? Post a question for the community!<br />
+              <span className="font-semibold">Other parents & alumni can help you too</span>
+            </p>
+            <Button
+              onClick={() => navigate('PostRequest?type=parent')}
+              className="rounded-full px-6 py-2 font-bold text-sm"
+              style={{ backgroundColor: '#FA4616' }}
+            >
+              Ask a Question →
             </Button>
           </div>
 
