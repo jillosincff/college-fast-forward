@@ -76,14 +76,31 @@ export default function QuestionCard({ question, gator }) {
 
       {/* Stats */}
       <div className="question-stats">
-        <span>💬 {question.answer_count || 0} {(question.answer_count || 0) === 1 ? 'answer' : 'answers'}</span>
-        <span className="separator">•</span>
-        <span>⬆️ {question.total_upvotes || 0} upvotes</span>
-        <span className="separator">•</span>
-        <span>👁️ {question.view_count || 0} views</span>
+        <span className="stat">
+          <span className="stat-icon">💬</span>
+          <span className="stat-number">{question.answer_count || 0}</span>
+          <span className="stat-label">{(question.answer_count || 0) === 1 ? 'answer' : 'answers'}</span>
+        </span>
+        
+        <span className="stat-separator">•</span>
+        
+        <span className="stat">
+          <span className="stat-icon">⬆️</span>
+          <span className="stat-number">{question.total_upvotes || 0}</span>
+          <span className="stat-label">upvotes</span>
+        </span>
+        
+        <span className="stat-separator">•</span>
+        
+        <span className="stat">
+          <span className="stat-icon">👁️</span>
+          <span className="stat-number">{question.view_count || 0}</span>
+          <span className="stat-label">views</span>
+        </span>
+        
         {question.has_best_answer && (
           <>
-            <span className="separator">•</span>
+            <span className="stat-separator">•</span>
             <span className="best-answer-indicator">✅ Best answer</span>
           </>
         )}
@@ -157,9 +174,9 @@ export default function QuestionCard({ question, gator }) {
         }
 
         .question-text {
-          font-size: 18px;
-          font-weight: 600;
-          line-height: 1.6;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 1.5;
           color: #111827;
           margin-bottom: 16px;
           display: -webkit-box;
@@ -190,13 +207,35 @@ export default function QuestionCard({ question, gator }) {
         }
 
         .question-stats {
-          font-size: 14px;
-          color: #6B7280;
-          margin-bottom: 16px;
           display: flex;
+          gap: 12px;
           align-items: center;
           flex-wrap: wrap;
-          gap: 8px;
+          margin-bottom: 16px;
+          font-size: 14px;
+        }
+
+        .stat {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+        }
+
+        .stat-icon {
+          font-size: 16px;
+        }
+
+        .stat-number {
+          font-weight: 600;
+          color: #111827;
+        }
+
+        .stat-label {
+          color: #6B7280;
+        }
+
+        .stat-separator {
+          color: #D1D5DB;
         }
 
         .best-answer-indicator {
