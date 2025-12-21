@@ -251,6 +251,7 @@ export default function GatorAuth() {
           // Refresh user context and navigate
           if (refreshUser) await refreshUser();
 
+          setIsTransitioning(true);
           navigate('GatorWelcome');
         } catch (err) {
           addLog(`❌ Auto-role set failed: ${err.message}`);
