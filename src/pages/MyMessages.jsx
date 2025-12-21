@@ -159,7 +159,7 @@ export default function MyMessagesPage() {
                 My Messages
               </h1>
               <p className="text-slate-600 mt-1">
-                Messages from parents and alumni responding to your requests
+                Conversations with parents and alumni
               </p>
             </div>
           </div>
@@ -320,10 +320,10 @@ export default function MyMessagesPage() {
               <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-slate-900 mb-2">No Messages Yet</h3>
               <p className="text-slate-600 mb-4">
-                When parents and alumni respond to your help requests, you'll see their messages here
+                When parents and alumni respond to your questions, you'll see their messages here
               </p>
-              <Button onClick={() => navigate('Connections')}>
-                Post a Help Request
+              <Button onClick={() => navigate('StudentOnboarding')}>
+                Ask a Question
               </Button>
             </CardContent>
           </Card>
