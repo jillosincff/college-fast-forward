@@ -374,6 +374,18 @@ export default function DiscoverEmergingGatorsPage() {
                 transition={{ duration: 0.2 }}
               >
                 <div className="filter-grid">
+                  {/* Question Type Filter - Primary */}
+                  <select
+                    className="filter-select-compact filter-select-primary"
+                    value={filters.questionType}
+                    onChange={(e) => setFilters({...filters, questionType: e.target.value})}
+                  >
+                    <option value="student">🎓 Student Questions</option>
+                    <option value="parent">👨‍👩‍👧 Parent Questions</option>
+                    <option value="alumni">🎯 Alumni Questions</option>
+                    <option value="all">🌟 All Questions</option>
+                  </select>
+
                   <select
                     className="filter-select-compact"
                     value={filters.major}
@@ -396,17 +408,6 @@ export default function DiscoverEmergingGatorsPage() {
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
                     <option value="2027">2027</option>
-                  </select>
-
-                  <select
-                    className="filter-select-compact"
-                    value={filters.location}
-                    onChange={(e) => setFilters({...filters, location: e.target.value})}
-                  >
-                    <option value="all">All Locations</option>
-                    <option value="Florida">Florida</option>
-                    <option value="Remote">Remote</option>
-                    <option value="New York">New York</option>
                   </select>
 
                   <select
