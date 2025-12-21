@@ -32,7 +32,9 @@ export default function QuestionsPage() {
     major: 'all',
     graduationYear: 'all',
     location: 'all',
-    questionType: 'student'
+    questionType: 'all',
+    noAnswers: false,
+    urgent: false
   });
   const [sortBy, setSortBy] = useState('relevance');
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -187,6 +189,16 @@ export default function QuestionsPage() {
       if (filters.questionType !== posterType) return false;
     }
 
+    // Filter for "No Answers" questions
+    if (filters.noAnswers && profile.request) {
+      if ((profile.request.answer_count || 0) > 0) return false;
+    }
+
+    // Filter for "ASAP/Urgent" questions
+    if (filters.urgent && profile.request) {
+      if (profile.request.timeline !== 'this_week') return false;
+    }
+
     if (filters.major !== 'all' && profile.major !== filters.major) return false;
     if (filters.graduationYear !== 'all' && profile.graduation_year?.toString() !== filters.graduationYear) return false;
 
@@ -264,32 +276,31 @@ export default function QuestionsPage() {
         {/* Search and Filters */}
         <div className="filters-section">
           <div className="filters-container">
-            {/* Quick Filter Pills */}
-            <div className="quick-filter-pills">
-              <button
-                className={`quick-pill ${filters.questionType === 'student' ? 'active' : ''}`}
-                onClick={() => setFilters({...filters, questionType: 'student'})}
-              >
-                🎓 Student Questions
-              </button>
-              <button
-                className={`quick-pill ${filters.questionType === 'parent' ? 'active' : ''}`}
-                onClick={() => setFilters({...filters, questionType: 'parent'})}
-              >
-                👨‍👩‍👧 Parent Questions
-              </button>
-              <button
-                className={`quick-pill ${filters.questionType === 'alumni' ? 'active' : ''}`}
-                onClick={() => setFilters({...filters, questionType: 'alumni'})}
-              >
-                🎯 Alumni Questions
-              </button>
-              <button
-                className={`quick-pill ${filters.questionType === 'all' ? 'active' : ''}`}
-                onClick={() => setFilters({...filters, questionType: 'all'})}
-              >
-                🌟 All Questions
-              </button>
+            {/* Quick Filter Tabs */}
+            <div className="filter-tabs-row">
+              <div className="filter-tabs">
+                <button
+                  className={`filter-tab ${filters.questionType === 'all' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, questionType: 'all', noAnswers: false, urgent: false})}
+                >
+                  All Questions
+                </button>
+                <button
+                  className={`filter-tab ${filters.noAnswers ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, noAnswers: !filters.noAnswers, urgent: false})}
+                >
+                  No Answers 🆘
+                </button>
+                <button
+                  className={`filter-tab ${filters.urgent ? 'active' : ''}`}
+                  onClick={() => setFilters({...filters, urgent: !filters.urgent, noAnswers: false})}
+                >
+                  ASAP 🔥
+                </button>
+              </div>
+              <div className="filter-stats">
+                {totalQuestionsFiltered} questions
+              </div>
             </div>
 
             <div className="search-row">
@@ -568,35 +579,46 @@ export default function QuestionsPage() {
           margin: 0 auto;
         }
 
-        .quick-filter-pills {
+        .filter-tabs-row {
           display: flex;
-          gap: 8px;
+          justify-content: space-between;
+          align-items: center;
           margin-bottom: 12px;
-          overflow-x: auto;
-          padding-bottom: 4px;
         }
 
-        .quick-pill {
+        .filter-tabs {
+          display: flex;
+          gap: 8px;
+        }
+
+        .filter-tab {
+          background: white;
+          border: 1px solid #E5E7EB;
+          color: #6B7280;
           padding: 8px 16px;
-          border-radius: 20px;
+          border-radius: 8px;
           font-size: 14px;
-          font-weight: 600;
-          background: #f3f4f6;
-          border: 2px solid transparent;
-          color: #374151;
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
           white-space: nowrap;
         }
 
-        .quick-pill:hover {
-          background: #e5e7eb;
+        .filter-tab:hover {
+          border-color: #0021A5;
+          color: #0021A5;
         }
 
-        .quick-pill.active {
+        .filter-tab.active {
           background: #0021A5;
-          color: white;
           border-color: #0021A5;
+          color: white;
+        }
+
+        .filter-stats {
+          font-size: 14px;
+          color: #6B7280;
+          font-weight: 500;
         }
 
         .search-row {
@@ -812,13 +834,20 @@ export default function QuestionsPage() {
             padding: 12px 12px;
           }
 
-          .quick-filter-pills {
-            gap: 6px;
+          .filter-tabs-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
           }
 
-          .quick-pill {
+          .filter-tabs {
+            width: 100%;
+            overflow-x: auto;
+          }
+
+          .filter-tab {
             padding: 6px 12px;
-            font-size: 12px;
+            font-size: 13px;
           }
 
           .search-row {
