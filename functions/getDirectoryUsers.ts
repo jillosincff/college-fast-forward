@@ -14,11 +14,13 @@ Deno.serve(async (req) => {
     }
 
     // FIXED: Use service role to bypass RLS restrictions
+    // Get ALL users with completed onboarding (not just visible_in_directory=true)
+    // Most users haven't explicitly set visible_in_directory, so we include those with onboarding_completed
     const users = await base44.asServiceRole.entities.User.filter({
-      visible_in_directory: true
+      onboarding_completed: true
     });
 
-    console.log(`📊 Total users with visible_in_directory=true: ${users.length}`);
+    console.log(`📊 Total users with onboarding_completed=true: ${users.length}`);
 
     // Filter and format users for directory with lenient criteria
     const directoryUsers = users
