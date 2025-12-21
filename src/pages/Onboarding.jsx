@@ -362,6 +362,16 @@ Or: My son wants to drop out and start a business. How worried should I be?"
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
+          {/* Back button for step 2 */}
+          {currentStep === 2 && !user?.onboarding_completed && (
+            <button
+              onClick={() => setCurrentStep(1)}
+              className="flex items-center text-slate-600 mb-4 hover:text-slate-900 transition-colors text-sm"
+            >
+              ← Back to question
+            </button>
+          )}
+          
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center mx-auto mb-4">
