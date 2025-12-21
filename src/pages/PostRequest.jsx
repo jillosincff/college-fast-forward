@@ -53,9 +53,18 @@ export default function PostRequestPage() { // Renamed from PostRequest
     
     setIsSubmitting(true);
     try {
+      // Determine poster type based on user persona
+      let posterType = 'student';
+      if (user?.persona === 'parent' || user?.roles?.includes('parent')) {
+        posterType = 'parent';
+      } else if (user?.persona === 'alumni' || user?.roles?.includes('alumni')) {
+        posterType = 'alumni';
+      }
+
       const requestData = {
         ...values,
         status: 'active', // Added status: 'active'
+        poster_type: posterType,
         poster_profile_image: user?.profile_image_url || null, // Ensure this is included for new requests
       };
 
