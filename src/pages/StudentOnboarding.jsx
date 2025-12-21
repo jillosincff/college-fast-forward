@@ -768,7 +768,7 @@ export default function StudentOnboarding() {
                     <Button
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="flex-1 h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg animate-pulse"
+                      className="flex-1 h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
                     >
                       {isSubmitting ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
