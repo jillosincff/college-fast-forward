@@ -19,21 +19,28 @@ Deno.serve(async (req) => {
         }
 
         // Determine entity and field names
-        const entityName = questionType === 'HelpRequest' ? 'HelpRequest' : 'JobRequest';
-        const viewField = questionType === 'HelpRequest' ? 'view_count' : 'views_count';
+        const isHelpRequest = questionType === 'HelpRequest';
+        const viewField = isHelpRequest ? 'view_count' : 'views_count';
         
-        console.log('Using entity:', entityName, 'field:', viewField);
+        console.log('Using entity type:', questionType, 'field:', viewField);
         
         // Get current question using service role
         let question = null;
+        let questions = [];
+        
         try {
-            const questions = await base44.asServiceRole.entities[entityName].filter({ id: questionId });
+            if (isHelpRequest) {
+                questions = await base44.asServiceRole.entities.HelpRequest.filter({ id: questionId });
+            } else {
+                questions = await base44.asServiceRole.entities.JobRequest.filter({ id: questionId });
+            }
             console.log('Filter result:', questions?.length, 'questions found');
             if (questions && questions.length > 0) {
                 question = questions[0];
             }
         } catch (filterErr) {
-            console.error('Filter error:', filterErr);
+            console.error('Filter error:', filterErr.message);
+            return Response.json({ error: 'Filter failed: ' + filterErr.message }, { status: 500 });
         }
         
         if (!question) {
@@ -50,9 +57,17 @@ Deno.serve(async (req) => {
         
         console.log('Updating with:', updateData);
         
-        await base44.asServiceRole.entities[entityName].update(questionId, updateData);
-        
-        console.log('Update successful, new count:', currentViews + 1);
+        try {
+            if (isHelpRequest) {
+                await base44.asServiceRole.entities.HelpRequest.update(questionId, updateData);
+            } else {
+                await base44.asServiceRole.entities.JobRequest.update(questionId, updateData);
+            }
+            console.log('Update successful, new count:', currentViews + 1);
+        } catch (updateErr) {
+            console.error('Update error:', updateErr.message);
+            return Response.json({ error: 'Update failed: ' + updateErr.message }, { status: 500 });
+        }
         
         return Response.json({ 
             success: true, 
