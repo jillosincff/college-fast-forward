@@ -76,18 +76,20 @@ export default function Dashboard() {
       console.log('🔍 Dashboard: Loading help request for user:', user.email, 'user.id:', user.id);
       
       let myHelpRequest = [];
+      
+      // Strategy 1: By student_email
       try {
         myHelpRequest = await base44.entities.HelpRequest.filter(
           { student_email: user.email, status: 'active' },
           '-created_date',
           1
         );
-        console.log('🔍 HelpRequest by email result:', myHelpRequest?.length || 0);
+        console.log('🔍 HelpRequest by student_email result:', myHelpRequest?.length || 0);
       } catch (e) {
-        console.error('🔍 HelpRequest by email failed:', e);
+        console.error('🔍 HelpRequest by student_email failed:', e);
       }
       
-      // Fallback to user.id if email lookup fails
+      // Strategy 2: By user.id
       if (!myHelpRequest || myHelpRequest.length === 0) {
         try {
           myHelpRequest = await base44.entities.HelpRequest.filter(
@@ -95,28 +97,33 @@ export default function Dashboard() {
             '-created_date',
             1
           );
-          console.log('🔍 HelpRequest by user.id result:', myHelpRequest?.length || 0);
+          console.log('🔍 HelpRequest by student_id result:', myHelpRequest?.length || 0);
         } catch (e) {
-          console.error('🔍 HelpRequest by user.id failed:', e);
+          console.error('🔍 HelpRequest by student_id failed:', e);
         }
       }
       
-      // Strategy 3: Try created_by email match
+      // Strategy 3: Just get ALL active requests and filter client-side by email
       if (!myHelpRequest || myHelpRequest.length === 0) {
         try {
-          myHelpRequest = await base44.entities.HelpRequest.filter(
-            { created_by: user.email, status: 'active' },
+          // Get recent active requests and check if any match our email
+          const allActive = await base44.entities.HelpRequest.filter(
+            { status: 'active' },
             '-created_date',
-            1
+            50
           );
-          console.log('🔍 HelpRequest by created_by result:', myHelpRequest?.length || 0);
+          console.log('🔍 HelpRequest all active:', allActive?.length || 0);
+          myHelpRequest = (allActive || []).filter(r => 
+            r.student_email === user.email || r.created_by === user.email
+          );
+          console.log('🔍 HelpRequest filtered by email:', myHelpRequest?.length || 0);
         } catch (e) {
-          console.error('🔍 HelpRequest by created_by failed:', e);
+          console.error('🔍 HelpRequest all active failed:', e);
         }
       }
       
       const foundRequest = myHelpRequest && myHelpRequest.length > 0 ? myHelpRequest[0] : null;
-      console.log('🔍 Final HelpRequest found:', foundRequest ? foundRequest.id : 'NONE');
+      console.log('🔍 Final HelpRequest found:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
       if (foundRequest) {
         setHelpRequest(foundRequest);
       }
