@@ -114,22 +114,11 @@ function ParentMatchCard({ match, user, onMessageSent }) {
         {/* Large message button */}
         <div className="mt-4 flex gap-2">
           <Button
-            onClick={openMessageModal}
-            disabled={match.status === 'student_connected'}
-            className={`flex-1 h-12 text-base font-semibold ${
-              match.status === 'student_connected' 
-                ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                : 'bg-[#FA4616] hover:bg-orange-600 text-white'
-            }`}
+            onClick={() => navigate(`MessageComposer?recipient=${match.parent_id}`)}
+            className="flex-1 h-12 text-base font-semibold bg-[#FA4616] hover:bg-orange-600 text-white"
           >
-            {match.status === 'student_connected' ? (
-              <>✓ Message Sent</>
-            ) : (
-              <>
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Message {match.parent_name?.split(' ')[0] || 'them'}
-              </>
-            )}
+            <MessageSquare className="w-5 h-5 mr-2" />
+            Message {match.parent_name?.split(' ')[0] || 'them'}
           </Button>
           <Button
             variant="outline"
