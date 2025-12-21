@@ -12,6 +12,20 @@ const HELP_TYPE_LABELS = {
   'informational_interview': 'Info Interviews'
 };
 
+// Helper function to format student name (first name + last initial)
+function formatStudentName(fullName) {
+  if (!fullName) return 'Anonymous';
+  
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 0) return 'Anonymous';
+  
+  const firstName = parts[0];
+  const lastName = parts.length > 1 ? parts[parts.length - 1] : '';
+  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
+  
+  return `${firstName} ${lastInitial}`.trim();
+}
+
 export default function QuestionCard({ question, gator }) {
   const handleClick = () => {
     navigate('QuestionDetail', { id: question.id });
@@ -22,9 +36,10 @@ export default function QuestionCard({ question, gator }) {
   const isAnonymous = question.is_anonymous && posterType === 'parent';
   
   // Get name - prefer gator data, fallback to question data
-  const posterName = isAnonymous 
+  const rawPosterName = isAnonymous 
     ? 'Anonymous Parent'
     : gator?.full_name || gator?.first_name || question.poster_name || question.student_name || 'A Gator';
+  const posterName = isAnonymous ? rawPosterName : formatStudentName(rawPosterName);
   
   // Get student info
   const year = gator?.graduation_year || question.student_year || '';
