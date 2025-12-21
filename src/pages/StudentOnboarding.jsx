@@ -481,7 +481,7 @@ export default function StudentOnboarding() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
-          {/* STEP 1: Industry & Help Types */}
+          {/* STEP 1: Ask Your Question */}
           {currentStep === 1 && (
           <motion.div
           key="step1"
@@ -489,14 +489,6 @@ export default function StudentOnboarding() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           >
-          {/* Greeting */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              Hi {user?.first_name || 'there'}! Let's find you the right parents & alumni.
-            </h1>
-            <p className="text-slate-600">Step 1 of 2 - Tell us how we can help</p>
-          </div>
-
           {/* Referral Code - At Top */}
           <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 mb-8">
             <label className="block text-sm font-medium text-slate-600">Have a referral code?</label>
@@ -509,104 +501,107 @@ export default function StudentOnboarding() {
             />
           </div>
 
-          {/* Industry Selection */}
-              <div className="mb-8">
-                <label className="block text-lg font-semibold text-slate-800 mb-4">
-                  What industries are you interested in? * <span className="font-normal text-slate-500">(Select all that apply)</span>
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  {INDUSTRIES.map(ind => {
-                    const isSelected = formData.industries.includes(ind.value);
-                    return (
-                      <button
-                        key={ind.value}
-                        type="button"
-                        onClick={() => toggleIndustry(ind.value)}
-                        className={`p-4 rounded-xl transition-all text-center relative ${
-                          isSelected
-                            ? 'border-[#FA4616] bg-orange-50'
-                            : 'border-slate-200 bg-white hover:bg-orange-50 hover:border-orange-200'
-                        }`}
-                        style={{ borderWidth: isSelected ? '3px' : '2px', borderStyle: 'solid' }}
-                      >
-                        {isSelected && (
-                          <div className="absolute top-2 right-2 w-5 h-5 bg-[#FA4616] rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        )}
-                        <span className="text-2xl block mb-1">{ind.icon}</span>
-                        <span className={`text-sm font-medium ${
-                          isSelected ? 'text-[#FA4616]' : 'text-slate-700'
-                        }`}>
-                          {ind.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                
-                <div className="mt-4">
-                  <p className="text-sm text-slate-600 mb-2">Not seeing your industry?</p>
-                  <Input
-                    value={formData.custom_industry}
-                    onChange={(e) => updateField('custom_industry', e.target.value)}
-                    placeholder="Specify additional industry"
-                    className="max-w-sm"
-                  />
-                </div>
-                
-                {errors.industries && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" /> {errors.industries}
-                  </p>
-                )}
-              </div>
+          {/* SECTION 1: THE QUESTION - Primary */}
+          <div className="mb-10">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              What's on your mind?
+            </h1>
+            <p className="text-slate-600 mb-6">
+              Ask any career or life question. Parents and alumni with real experience will share their advice.
+            </p>
+            
+            <div className="bg-slate-50 rounded-xl p-1">
+              <Textarea
+                value={formData.question}
+                onChange={(e) => updateField('question', e.target.value.slice(0, 500))}
+                placeholder="E.g., I'm thinking about starting a business after graduation but not sure if I should get experience at a company first. Any entrepreneurs with advice?
 
-              {/* Help Types */}
-              <div className="mb-8">
-                <label className="block text-lg font-semibold text-slate-800 mb-4">
-                  What help do you need? * <span className="font-normal text-slate-500">(Select all that apply)</span>
-                </label>
-                <div className="space-y-3">
-                  {HELP_TYPES.map(type => (
-                    <button
-                      key={type.value}
-                      type="button"
-                      onClick={() => toggleHelpType(type.value)}
-                      className={`w-full p-5 rounded-xl border-2 text-left transition-all flex items-start gap-4 ${
-                        formData.help_types.includes(type.value)
-                          ? 'border-[#0021A5] bg-blue-50'
-                          : 'border-slate-200 bg-white hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        formData.help_types.includes(type.value)
-                          ? 'bg-[#0021A5] border-[#0021A5]'
-                          : 'border-slate-300 bg-white'
-                      }`}>
-                        {formData.help_types.includes(type.value) && (
-                          <Check className="w-4 h-4 text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{type.label}</p>
-                        <p className="text-sm text-slate-600">{type.description}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {errors.help_types && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" /> {errors.help_types}
-                  </p>
-                )}
+Or: I got into med school but worried about the debt. Is it worth it financially? Any doctors willing to share?"
+                rows={6}
+                className={`min-h-[150px] text-base bg-white border-2 ${errors.question ? 'border-red-300' : 'border-slate-200 focus:border-blue-500'}`}
+              />
+            </div>
+            <div className="flex justify-between mt-2">
+              {errors.question ? (
+                <p className="text-red-500 text-sm flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" /> {errors.question}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500">Be specific! The more detail, the better advice you'll get.</p>
+              )}
+              <p className="text-xs text-slate-500">{formData.question?.length || 0}/500</p>
+            </div>
+
+            {/* Example Questions */}
+            <div className="mt-4 text-sm text-slate-500">
+              <p className="font-medium mb-2">💡 Example questions:</p>
+              <ul className="space-y-2 text-slate-600">
+                <li className="italic">"Should I take the Big Tech job ($120K) or the startup ($80K + equity)? How do I decide?"</li>
+                <li className="italic">"I want to open a coffee shop after graduation. Any small business owners who can share what the first year is like?"</li>
+                <li className="italic">"Is consulting travel really 80% of the time? Trying to decide if the lifestyle is worth it."</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* SECTION 2: Helpful Details - Secondary */}
+          <div className="mb-8 pt-6 border-t border-slate-200">
+            <h2 className="text-lg font-semibold text-slate-800 mb-2">
+              Help us find the right people <span className="font-normal text-slate-500">(optional)</span>
+            </h2>
+            <p className="text-sm text-slate-500 mb-6">
+              These details help us match you with parents who can answer your question.
+            </p>
+
+            {/* Topic Tags */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-3">
+                What type of advice are you looking for?
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TOPIC_TAGS.map(tag => (
+                  <button
+                    key={tag.value}
+                    type="button"
+                    onClick={() => toggleTopicTag(tag.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      formData.topic_tags.includes(tag.value)
+                        ? 'bg-[#0021A5] text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {formData.topic_tags.includes(tag.value) && <Check className="w-3 h-3 inline mr-1" />}
+                    {tag.label}
+                  </button>
+                ))}
               </div>
+              <p className="text-xs text-slate-500 mt-2">Select any that apply - this helps us match you</p>
+            </div>
+
+            {/* Industry Dropdown */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Industry (if relevant)
+              </label>
+              <select
+                value={formData.industry}
+                onChange={(e) => updateField('industry', e.target.value)}
+                className="w-full max-w-sm p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none"
+              >
+                <option value="not_applicable">Not applicable</option>
+                {INDUSTRIES.map(ind => (
+                  <option key={ind.value} value={ind.value}>{ind.label}</option>
+                ))}
+                <option value="other">Other</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-1">Optional - only if your question is industry-specific</p>
+            </div>
+          </div>
 
               <Button
                 onClick={handleContinue}
                 className="w-full h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
               >
-                Continue to Details →
+                Continue →
               </Button>
             </motion.div>
           )}
@@ -628,7 +623,13 @@ export default function StudentOnboarding() {
 
               <div className="text-center mb-8">
                 <h1 className="text-2xl font-bold text-slate-900 mb-2">Almost done!</h1>
-                <p className="text-slate-600">This helps us find the best matches.</p>
+                <p className="text-slate-600">A few more details to find the right people.</p>
+              </div>
+
+              {/* Show the question they asked */}
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+                <p className="text-sm font-medium text-blue-800 mb-1">Your question:</p>
+                <p className="text-slate-700 italic">"{formData.question}"</p>
               </div>
 
               <Card className="shadow-lg border-slate-200">
@@ -678,7 +679,7 @@ export default function StudentOnboarding() {
                   {/* Timeline */}
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">
-                      When do you need help? *
+                      When do you need guidance? *
                     </label>
                     <div className="space-y-2">
                       {TIMELINE_OPTIONS.map(opt => (
@@ -695,30 +696,6 @@ export default function StudentOnboarding() {
                           <span className="font-medium text-slate-800">{opt.label}</span>
                         </button>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Description - Emphasized */}
-                  <div className="bg-gradient-to-r from-blue-50 to-orange-50 border-2 border-[#0021A5] rounded-xl p-5">
-                    <div className="flex items-start gap-2 mb-3">
-                      <span className="text-xl">📝</span>
-                      <div>
-                        <label className="block text-base font-bold text-slate-800">
-                          Your Public Help Request
-                        </label>
-                        <p className="text-sm text-slate-600">This is what parents & alumni will see when deciding to help you</p>
-                      </div>
-                    </div>
-                    <Textarea
-                      value={formData.description}
-                      onChange={(e) => updateField('description', e.target.value.slice(0, 500))}
-                      placeholder="E.g., I'm a junior Finance major looking for help preparing for investment banking interviews. Ideally looking for someone in wealth management or private equity who can help me understand the industry and review my resume."
-                      rows={5}
-                      className="border-2 border-slate-300 focus:border-[#FA4616] bg-white"
-                    />
-                    <div className="flex justify-between mt-2">
-                      <p className="text-xs text-[#0021A5] font-medium">💡 Tip: Be specific! Mention roles, companies, or industries you're targeting.</p>
-                      <p className="text-xs text-slate-500">{formData.description?.length || 0}/500</p>
                     </div>
                   </div>
 
@@ -780,8 +757,6 @@ export default function StudentOnboarding() {
                     <p className="text-xs text-slate-500 mt-2">Parents can review your resume and provide feedback</p>
                   </div>
 
-
-
                   <div className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
@@ -798,7 +773,7 @@ export default function StudentOnboarding() {
                       {isSubmitting ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        'Find My Matches →'
+                        'Find People Who Can Answer →'
                       )}
                     </Button>
                   </div>
