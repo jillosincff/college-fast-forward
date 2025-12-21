@@ -1177,6 +1177,16 @@ export default function DiscoverEmergingGatorsPage() {
             padding: 0 12px;
           }
 
+          .quick-filter-pills {
+            gap: 6px;
+            margin-bottom: 10px;
+          }
+
+          .quick-pill {
+            padding: 6px 12px;
+            font-size: 12px;
+          }
+
           .search-and-actions {
             flex-direction: column;
             gap: 8px;
