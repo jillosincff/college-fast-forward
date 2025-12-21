@@ -86,11 +86,16 @@ export default function QuestionDetailPage() {
         return;
       }
       
-      // NORMALIZE: Ensure answer_count and view_count are always numbers
+      // Load answers FIRST so we can get accurate count
+      const allAnswers = await Answer.filter({ question_id: questionId });
+      const sorted = sortAnswers(allAnswers, sortBy);
+      setAnswers(sorted);
+      
+      // NORMALIZE: Use actual answers count from DB as source of truth
       const normalizedQuestion = {
         ...q,
         _source: questionSource,
-        answer_count: Number(q.answer_count) || Number(q.comments_count) || 0,
+        answer_count: sorted.length, // Use actual count from answers
         view_count: Number(q.view_count) || Number(q.views_count) || 0,
         total_upvotes: Number(q.total_upvotes) || 0,
         has_best_answer: Boolean(q.has_best_answer)
@@ -100,8 +105,7 @@ export default function QuestionDetailPage() {
         id: normalizedQuestion.id,
         source: questionSource,
         answer_count: normalizedQuestion.answer_count,
-        raw_answer_count: q.answer_count,
-        raw_comments_count: q.comments_count
+        actual_answers: sorted.length
       });
       
       setQuestion(normalizedQuestion);
@@ -117,25 +121,10 @@ export default function QuestionDetailPage() {
         }).catch(() => {});
       }
 
-      // Load answers
-      await loadAnswers();
-
     } catch (err) {
       console.error('Failed to load question:', err);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadAnswers = async () => {
-    try {
-      const allAnswers = await Answer.filter({ question_id: questionId });
-      
-      // Sort answers
-      const sorted = sortAnswers(allAnswers, sortBy);
-      setAnswers(sorted);
-    } catch (err) {
-      console.error('Failed to load answers:', err);
     }
   };
 
@@ -364,11 +353,11 @@ export default function QuestionDetailPage() {
               )}
             </div>
 
-            {/* Stats */}
+            {/* Stats - use answers.length as source of truth since DB may not update due to RLS */}
             <div className="question-stats">
               <span className="stat">
                 <MessageSquare className="w-4 h-4" />
-                {question.answer_count || 0} answers
+                {answers.length} answers
               </span>
               <span className="stat">
                 <Eye className="w-4 h-4" />
