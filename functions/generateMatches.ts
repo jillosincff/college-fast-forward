@@ -192,6 +192,23 @@ function calculateParentMatchScore(helpRequest, parentExpertise) {
     reasons.unshift('⚡ Fast responder');
   }
   
+  // ═══════════════════════════════════════════════════════
+  // URGENCY-BASED BOOSTS
+  // ═══════════════════════════════════════════════════════
+  
+  // If student needs help ASAP, boost fast responders
+  if (helpRequest.timeline === 'this_week' && avgResponseHours <= 4) {
+    score += 10;
+    reasons.push('🚨 Available for urgent help');
+  }
+  
+  // If student is exploring, boost experienced mentors
+  if (helpRequest.timeline === 'no_rush' && 
+      (parentExpertise.years_experience === '20+' || parentExpertise.years_experience === '15-20')) {
+    score += 5;
+    reasons.push('Great for career exploration');
+  }
+  
   // MINIMUM SCORE: Every parent gets at least 5 points
   score = Math.max(score, 5);
   
