@@ -207,15 +207,15 @@ export default function Dashboard() {
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
             <CardContent className="pt-6 pb-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-1">{networkStats.activeRequests}</div>
-              <p className="text-sm text-slate-600">Active Help Requests</p>
+              <p className="text-sm text-slate-600">Active Questions</p>
               <p className="text-xs text-slate-500">(All students)</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200">
             <CardContent className="pt-6 pb-6 text-center">
               <div className="text-3xl font-bold text-orange-600 mb-1">{parentMatches.length}</div>
-              <p className="text-sm text-slate-600">Parents Matched</p>
-              <p className="text-xs text-slate-500">to You</p>
+              <p className="text-sm text-slate-600">People Matched</p>
+              <p className="text-xs text-slate-500">to Your Question</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
