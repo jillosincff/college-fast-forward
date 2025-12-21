@@ -28,6 +28,7 @@ import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
+import FamilyKarmaWidget from '@/components/karma/FamilyKarmaWidget';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { gsap } from 'gsap';
@@ -477,9 +478,14 @@ export default function ParentDashboard() {
 
 
 
-        {/* 5. Messages & Activity - Full Width */}
-        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <ParentActivityWidget />
+        {/* Family Karma Widget */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <FamilyKarmaWidget user={user} />
+          </div>
+          <div className="lg:col-span-2 bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
+            <ParentActivityWidget />
+          </div>
         </div>
 
         {/* 6. Recent Activity Feed */}
