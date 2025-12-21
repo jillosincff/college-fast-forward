@@ -308,8 +308,12 @@ export default function DiscoverEmergingGatorsPage() {
   return (
     <>
       <div className="discover-gators-page">
-        {/* Hero Banner */}
-        <EmergingGatorsHero onBrowse={handleBrowse} />
+        {/* Page Header */}
+        <EmergingGatorsHero 
+          totalQuestions={requests.length}
+          totalAnswers={requests.reduce((sum, r) => sum + (r.answer_count || 0), 0)}
+          urgentCount={requests.filter(r => r.timeline === 'this_week').length}
+        />
 
         {/* CTA Banner for Students */}
         {user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (

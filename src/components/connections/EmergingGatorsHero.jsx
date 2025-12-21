@@ -1,48 +1,85 @@
 import React from 'react';
-import { Users, BrainCircuit } from 'lucide-react';
-import { HERO_BG_GRADIENT, HERO_TEXTURE_OVERLAY, HERO_GLOW_EFFECTS, HERO_HEADING_CLASSES, HERO_SUBHEADING_CLASSES } from '@/components/home/HeroStyles';
 
-export default function EmergingGatorsHero({ onBrowse }) {
-  const scrollToHowItWorks = () => {
-    console.log("Scroll to how it works section");
-  };
-
+export default function EmergingGatorsHero({ totalQuestions = 0, totalAnswers = 0, urgentCount = 0 }) {
   return (
-    <div className="relative overflow-hidden text-white py-16 px-4" style={HERO_BG_GRADIENT}>
-      {HERO_TEXTURE_OVERLAY}
-      {HERO_GLOW_EFFECTS}
-
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <div className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-          💬 Students are asking questions - share your advice!
-        </div>
-        <h1 className={HERO_HEADING_CLASSES}>Students With Questions</h1>
-        <p className={`${HERO_SUBHEADING_CLASSES} mb-8 mt-4`}>
-          Your experience could be their breakthrough
-        </p>
-        <div className="flex flex-wrap gap-4 justify-center mb-6">
-          <button 
-            onClick={onBrowse} 
-            className="bg-white text-[#0021A5] hover:bg-white/90 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            Browse Questions
-          </button>
-          <button 
-            onClick={scrollToHowItWorks} 
-            className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border-2 border-white/30 px-6 py-3 rounded-xl font-semibold transition-all duration-200"
-          >
-            How It Works
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <span className="flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-            <Users size={16} /> 3+ new questions this week
-          </span>
-          <span className="flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-            <BrainCircuit size={16} /> AI-matched by experience & expertise
-          </span>
-        </div>
+    <div className="page-header">
+      <h1>Questions From UF Students</h1>
+      
+      <p className="header-subtitle">
+        Browse questions and share your advice. Anyone can answer.
+      </p>
+      
+      <div className="header-stats">
+        <span>📊 {totalQuestions} questions</span>
+        <span className="stat-separator">•</span>
+        <span>💬 {totalAnswers} answers</span>
+        {urgentCount > 0 && (
+          <>
+            <span className="stat-separator">•</span>
+            <span className="urgent-stat">🔥 {urgentCount} need help ASAP</span>
+          </>
+        )}
       </div>
+
+      <style jsx>{`
+        .page-header {
+          background: white;
+          padding: 40px 20px 24px;
+          border-bottom: 1px solid #E5E7EB;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        h1 {
+          font-size: 32px;
+          font-weight: 700;
+          color: #111827;
+          margin: 0 0 8px 0;
+        }
+
+        .header-subtitle {
+          font-size: 16px;
+          color: #6B7280;
+          margin: 0 0 16px 0;
+        }
+
+        .header-stats {
+          font-size: 14px;
+          color: #6B7280;
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .stat-separator {
+          color: #D1D5DB;
+        }
+
+        .urgent-stat {
+          color: #DC2626;
+          font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+          .page-header {
+            padding: 24px 16px 20px;
+          }
+
+          h1 {
+            font-size: 24px;
+          }
+
+          .header-subtitle {
+            font-size: 14px;
+          }
+
+          .header-stats {
+            font-size: 13px;
+            gap: 8px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
