@@ -62,52 +62,46 @@ export default function AnswerCard({
     setIsLoading(true);
 
     try {
-      if (upvoted) {
-        // Remove upvote
-        const existing = await Upvote.filter({
-          answer_id: answer.id,
-          user_id: currentUser.id
-        });
-        
-        if (existing.length > 0) {
-          await Upvote.delete(existing[0].id);
-          
-          // Update answer upvote count
-          const newCount = Math.max(0, upvoteCount - 1);
-          await Answer.update(answer.id, { upvote_count: newCount });
-          
-          setUpvoted(false);
-          setUpvoteCount(newCount);
-          
-          if (onUpvoteChange) onUpvoteChange(answer.id, newCount);
-        }
-      } else {
-        // Add upvote
-        await Upvote.create({
-          answer_id: answer.id,
-          user_id: currentUser.id,
-          user_email: currentUser.email
-        });
-        
-        // Update answer upvote count
-        const newCount = upvoteCount + 1;
-        await Answer.update(answer.id, { upvote_count: newCount });
-        
-        setUpvoted(true);
+      const action = upvoted ? 'remove' : 'add';
+      
+      // Use backend function to handle upvote (bypasses RLS)
+      const response = await base44.functions.invoke('handleUpvote', {
+        answerId: answer.id,
+        action: action
+      });
+
+      console.log('handleUpvote response:', response);
+
+      if (response?.data?.success) {
+        const newCount = response.data.upvote_count;
+        setUpvoted(!upvoted);
         setUpvoteCount(newCount);
         
         if (onUpvoteChange) onUpvoteChange(answer.id, newCount);
         
-        toast({
-          title: "⬆️ Upvoted!",
-          description: "You found this answer helpful"
-        });
+        if (action === 'add') {
+          toast({
+            title: "⬆️ Upvoted!",
+            description: "You found this answer helpful"
+          });
+        }
+      } else {
+        // Handle specific errors
+        if (response?.data?.error === 'Already upvoted') {
+          setUpvoted(true);
+          setUpvoteCount(response.data.upvote_count || upvoteCount);
+        } else if (response?.data?.error === 'No upvote found') {
+          setUpvoted(false);
+          setUpvoteCount(response.data.upvote_count || upvoteCount);
+        } else {
+          throw new Error(response?.data?.error || 'Failed to save vote');
+        }
       }
     } catch (err) {
       console.error('Failed to toggle upvote:', err);
       toast({
         title: "Error",
-        description: "Failed to save your vote. Please try again.",
+        description: err.message || "Failed to save your vote. Please try again.",
         variant: "destructive"
       });
     } finally {
