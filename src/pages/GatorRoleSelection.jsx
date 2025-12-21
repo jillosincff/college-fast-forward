@@ -39,8 +39,10 @@ export default function GatorRoleSelection() {
       localStorage.setItem('pending_invite_role', selectedRole);
       
       if (selectedRole === 'gator') {
-        console.log('🐊 [GatorRoleSelection] Student selected -> GatorStudentEmail');
-        navigate('GatorStudentEmail');
+        // Go directly to Google auth for students
+        console.log('🐊 [GatorRoleSelection] Student selected -> Google Auth');
+        const callbackUrl = window.location.origin;
+        base44.auth.redirectToLogin(callbackUrl);
       } else if (selectedRole === 'parent') {
         console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
         navigate('GatorParentInvite');
