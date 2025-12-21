@@ -64,6 +64,13 @@ export default function QuestionCard({ question, gator }) {
         "{question.description}"
       </div>
 
+      {/* Needs help badge */}
+      {(question.answer_count || 0) === 0 && (
+        <div className="needs-help-badge">
+          🆘 No answers yet - be the first to help!
+        </div>
+      )}
+
       {/* Topic tags */}
       <div className="topic-tags">
         {question.help_types?.slice(0, 3).map((type, idx) => (
@@ -185,9 +192,20 @@ export default function QuestionCard({ question, gator }) {
           color: #111827;
           margin-bottom: 16px;
           display: -webkit-box;
-          -webkit-line-clamp: 4;
+          -webkit-line-clamp: 5;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        .needs-help-badge {
+          background: #FEF3C7;
+          color: #D97706;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          margin-bottom: 12px;
+          display: inline-block;
         }
 
         .topic-tags {
