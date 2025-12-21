@@ -258,6 +258,7 @@ export default function GatorAuth() {
           // Fallback to role selection if something goes wrong
           localStorage.removeItem('pending_invite_role');
           localStorage.removeItem('pending_invite_code');
+          setIsTransitioning(true);
           navigate('GatorRoleSelection');
         } finally {
           processingRef.current = false;
