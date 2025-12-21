@@ -240,7 +240,8 @@ export default function StudentOnboarding() {
       
       // Add referral code if provided
       if (formData.referral_code?.trim()) {
-        userUpdate.referral_code = formData.referral_code.trim();
+        userUpdate.referral_code_used = formData.referral_code.trim();
+        userUpdate.referral_used_at = new Date().toISOString();
       }
       
       // Add resume URL if provided
@@ -459,21 +460,33 @@ export default function StudentOnboarding() {
         <AnimatePresence mode="wait">
           {/* STEP 1: Industry & Help Types */}
           {currentStep === 1 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              {/* Greeting */}
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                  Hi {user?.first_name || 'there'}! Let's find you the right parents & alumni.
-                </h1>
-                <p className="text-slate-600">Step 1 of 2 - Tell us how we can help</p>
-              </div>
+          <motion.div
+          key="step1"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          >
+          {/* Greeting */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              Hi {user?.first_name || 'there'}! Let's find you the right parents & alumni.
+            </h1>
+            <p className="text-slate-600">Step 1 of 2 - Tell us how we can help</p>
+          </div>
 
-              {/* Industry Selection */}
+          {/* Referral Code - At Top */}
+          <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 mb-8">
+            <label className="block text-sm font-medium text-slate-600">Have a referral code?</label>
+            <p className="text-xs text-slate-500 mb-2">Drop it here to give your friend credit! 🎁</p>
+            <Input
+              value={formData.referral_code}
+              onChange={(e) => updateField('referral_code', e.target.value.toUpperCase().slice(0, 20))}
+              placeholder="Enter code (optional)"
+              className="max-w-xs bg-white"
+            />
+          </div>
+
+          {/* Industry Selection */}
               <div className="mb-8">
                 <label className="block text-lg font-semibold text-slate-800 mb-4">
                   What industries are you interested in? * <span className="font-normal text-slate-500">(Select all that apply)</span>
@@ -744,18 +757,7 @@ export default function StudentOnboarding() {
                     <p className="text-xs text-slate-500 mt-2">Parents can review your resume and provide feedback</p>
                   </div>
 
-                  {/* Referral Code */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Referral Code <span className="font-normal text-slate-500">(optional)</span>
-                    </label>
-                    <Input
-                      value={formData.referral_code}
-                      onChange={(e) => updateField('referral_code', e.target.value.toUpperCase())}
-                      placeholder="Enter code if someone referred you"
-                      className="max-w-xs"
-                    />
-                  </div>
+
 
                   <div className="flex gap-3 pt-2">
                     <Button

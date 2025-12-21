@@ -55,6 +55,7 @@ import GatorInviteCode from './pages/GatorInviteCode';
 import GatorWelcome from './pages/GatorWelcome';
 import GatorParentInvite from './pages/GatorParentInvite';
 import GatorStudentEmail from './pages/GatorStudentEmail';
+import AdminReferrals from './pages/AdminReferrals';
 import __Layout from './Layout.jsx';
 
 
@@ -116,6 +117,7 @@ export const PAGES = {
     "GatorWelcome": GatorWelcome,
     "GatorParentInvite": GatorParentInvite,
     "GatorStudentEmail": GatorStudentEmail,
+    "AdminReferrals": AdminReferrals,
 }
 
 export const pagesConfig = {

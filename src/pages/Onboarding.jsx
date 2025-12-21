@@ -131,7 +131,8 @@ export default function Onboarding() {
 
       // Add referral code if provided
       if (referralCode?.trim()) {
-        updateData.referral_code = referralCode.trim();
+        updateData.referral_code_used = referralCode.trim();
+        updateData.referral_used_at = new Date().toISOString();
         console.log('🎟️ [Onboarding] Saving referral code:', referralCode.trim());
       }
 
@@ -300,6 +301,18 @@ export default function Onboarding() {
 
           {/* Form */}
           <div className="space-y-6">
+            {/* Referral Code - At Top */}
+            <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4">
+              <Label className="text-sm font-medium text-slate-600">Have a referral code?</Label>
+              <p className="text-xs text-slate-500 mb-2">Drop it here to give your friend credit! 🎁</p>
+              <Input
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase().slice(0, 20))}
+                placeholder="Enter code (optional)"
+                className="max-w-xs bg-white"
+              />
+            </div>
+
             {/* Full Name */}
             <div>
               <Label className="text-sm font-semibold text-slate-700">Full Name *</Label>
