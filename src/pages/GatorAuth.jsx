@@ -454,9 +454,11 @@ export default function GatorAuth() {
             
             addLog('✅ Gator role auto-applied for UFL student');
             if (refreshUser) await refreshUser();
+            setIsTransitioning(true);
             navigate('GatorWelcome');
           } catch (err) {
             addLog(`❌ Auto-role set failed: ${err.message}`);
+            setIsTransitioning(true);
             navigate('GatorRoleSelection');
           } finally {
             processingRef.current = false;
