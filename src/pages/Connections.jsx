@@ -222,8 +222,7 @@ export default function QuestionsPage() {
             <div className="header-left">
               <h1>Questions From UF Students</h1>
               <p className="subtitle">
-                {stats.totalQuestions} questions • {stats.totalAnswers} answers
-                {stats.urgentCount > 0 && ` • ${stats.urgentCount} need urgent help`}
+                Browse questions and share your advice
               </p>
             </div>
             
@@ -260,26 +259,7 @@ export default function QuestionsPage() {
           </div>
         )}
 
-        {/* CTA Banner for Parents */}
-        {(user?.persona === 'parent' || user?.roles?.includes('parent')) && !requests.find(r => r.created_by === user.email) && (
-          <div className="cta-banner cta-banner-parents">
-            <div className="cta-content">
-              <div className="cta-icon">👨‍👩‍👧</div>
-              <div className="cta-text">
-                <h3>Have a question about helping your student?</h3>
-                <p>Ask other parents and alumni - they've been through it too!</p>
-              </div>
-              <Button 
-                onClick={() => navigate('PostRequest')}
-                className="cta-button"
-                size="lg"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Ask a Question
-              </Button>
-            </div>
-          </div>
-        )}
+
 
         {/* Search and Filters */}
         <div className="filters-section">
@@ -540,10 +520,7 @@ export default function QuestionsPage() {
           box-shadow: 0 8px 24px rgba(250, 70, 22, 0.25);
         }
 
-        .cta-banner-parents .cta-content {
-          background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
-        }
+
 
         .cta-icon {
           font-size: 48px;
@@ -574,9 +551,7 @@ export default function QuestionsPage() {
           flex-shrink: 0;
         }
 
-        .cta-banner-parents .cta-button {
-          color: #6366F1 !important;
-        }
+
 
         /* FILTERS */
         .filters-section {
