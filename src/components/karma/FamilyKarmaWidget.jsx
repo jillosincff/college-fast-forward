@@ -71,62 +71,84 @@ export default function FamilyKarmaWidget({ user, compact = false }) {
   }
 
   if (!karmaData || !karmaData.family_group_id) {
-    // No family group - show starter widget with 0 karma
+    // No family group - show starter widget with connect CTA
     const level = 'bronze';
     const colors = LEVEL_COLORS[level];
     
     return (
       <div 
-        className="rounded-2xl p-6 text-white shadow-lg"
-        style={{ background: colors.gradient }}
+        className="rounded-2xl p-8 shadow-xl relative overflow-hidden"
+        style={{ background: colors.gradient, color: colors.text }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            Family Karma
-          </h3>
-          <span className="text-sm font-bold bg-white/20 px-3 py-1 rounded-full">
-            {LEVEL_ICONS[level]} BRONZE
-          </span>
-        </div>
-
-        {/* Big Number */}
-        <div className="text-center py-4 bg-white/15 rounded-xl mb-4">
-          <div className="text-5xl font-bold">0</div>
-          <div className="text-sm opacity-90">Karma Points</div>
-        </div>
-
-        {/* CTA */}
-        <div className="bg-white/20 rounded-xl p-4 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">🔗</span>
-            <span className="font-bold">Connect with your Gator!</span>
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-bold flex items-center gap-2">
+              <Sparkles className="w-6 h-6" />
+              Family Karma
+            </h3>
+            <span className="text-sm font-bold bg-white/25 backdrop-blur px-4 py-1.5 rounded-full">
+              {LEVEL_ICONS[level]} BRONZE
+            </span>
           </div>
-          <p className="text-sm opacity-90">
-            Link your student account to start earning karma and boost their questions in the feed!
-          </p>
-        </div>
 
-        {/* Ways to Earn */}
-        <div className="bg-white/15 rounded-xl p-4">
-          <h4 className="font-bold text-sm mb-3">Ways to Earn Karma:</h4>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between items-center">
-              <span>💬 Answer a question</span>
-              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+10</span>
+          {/* Big Number */}
+          <div className="text-center py-8 bg-white/15 backdrop-blur rounded-xl mb-6">
+            <div className="text-6xl font-bold mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
+            <div className="text-lg opacity-90 font-semibold">Karma Points</div>
+          </div>
+
+          {/* Connect CTA */}
+          <div className="bg-white/20 backdrop-blur border-2 border-white/30 rounded-xl p-5 mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-2xl">🔗</span>
+              <span className="font-bold text-lg">Connect with your Gator!</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span>⬆️ Get an upvote</span>
-              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+5</span>
+            <p className="text-sm opacity-90 mb-4">
+              Link your student account to start earning karma and boost their questions in the feed!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                onClick={onSearchStudent}
+                className="flex-1 bg-white/30 hover:bg-white/40 text-current border-2 border-white/40 font-bold"
+              >
+                Search & Link Student
+              </Button>
+              <Button 
+                onClick={onInviteStudent}
+                variant="outline"
+                className="flex-1 bg-transparent hover:bg-white/20 text-current border-2 border-white/40 font-bold"
+              >
+                Send Invite
+              </Button>
             </div>
-            <div className="flex justify-between items-center">
-              <span>✅ Best answer selected</span>
-              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+50</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>👥 Refer a parent</span>
-              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+25</span>
+          </div>
+
+          {/* Ways to Earn */}
+          <div className="bg-white/15 backdrop-blur rounded-xl p-5">
+            <h4 className="font-bold text-sm mb-4 opacity-90">Ways to Earn Karma:</h4>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span>💬 Answer a question</span>
+                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+10</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>⬆️ Get an upvote</span>
+                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+5</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>✅ Best answer selected</span>
+                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+50</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>👥 Refer a parent</span>
+                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+25</span>
+              </div>
             </div>
           </div>
         </div>
