@@ -99,54 +99,100 @@ function ParentMatchCard({ match, user, onMessageSent }) {
     }
   };
 
-  // Check for fast responder or high students helped
-  const isFastResponder = match.match_reasons?.some(r => r.includes('⚡') || r.includes('Fast') || r.includes('responds'));
-  const studentsHelpedMatch = match.match_reasons?.find(r => r.includes('Helped'));
+  // Parse match stats from reasons
+  const stats = parseMatchStats(match.match_reasons || []);
 
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-5 border-2 border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all"
+        className={`bg-white rounded-xl p-5 border-2 transition-all ${
+          stats.isSuperHelper 
+            ? 'border-amber-300 hover:border-amber-400 bg-gradient-to-br from-white to-amber-50' 
+            : 'border-slate-200 hover:border-blue-300'
+        } hover:shadow-lg`}
       >
+        {/* Super Helper Banner */}
+        {stats.isSuperHelper && (
+          <div className="mb-3 -mx-5 -mt-5 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm font-semibold rounded-t-xl flex items-center gap-2">
+            <Star className="w-4 h-4 fill-white" /> Top-Rated Helper
+          </div>
+        )}
+
         <div className="flex items-start gap-4">
-          <UserAvatar 
-            user={{ full_name: match.parent_name, email: match.parent_email }}
-            className="w-14 h-14 rounded-full flex-shrink-0"
-            showFallback={true}
-          />
+          <div className="relative">
+            <UserAvatar 
+              user={{ full_name: match.parent_name, email: match.parent_email }}
+              className="w-14 h-14 rounded-full flex-shrink-0"
+              showFallback={true}
+            />
+            {stats.isRecentlyActive && (
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" title="Recently active" />
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-bold text-slate-900 text-lg">{match.parent_name || 'Gator Parent'}</h4>
-              {isFastResponder && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                  <Zap className="w-3 h-3" /> Fast Responder
-                </span>
-              )}
             </div>
             <p className="text-sm text-slate-600">
               {match.parent_role || 'Professional'} {match.parent_company && `at ${match.parent_company}`}
             </p>
             
-            {/* Match percentage badge */}
-            {match.match_percentage && (
-              <div className="mt-2">
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+            {/* Badges row */}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {/* Match percentage */}
+              {match.match_percentage && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
                   🎯 {match.match_percentage}% match
                 </span>
-              </div>
-            )}
+              )}
+              
+              {/* Fast Responder Badge */}
+              {stats.isFastResponder && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
+                  <Zap className="w-3 h-3" /> 
+                  {stats.responseTime === 'hours' ? 'Responds in hours' : 'Fast Responder'}
+                </span>
+              )}
+              
+              {/* Students Helped Badge */}
+              {stats.studentsHelped && stats.studentsHelped >= 5 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                  <CheckCircle className="w-3 h-3" /> Helped {stats.studentsHelped}+ students
+                </span>
+              )}
+              
+              {/* Urgent Match Badge */}
+              {stats.isUrgentMatch && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold animate-pulse">
+                  🚨 Available for urgent help
+                </span>
+              )}
+              
+              {/* Experience Badge */}
+              {stats.experience && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  <TrendingUp className="w-3 h-3" /> {stats.experience} years exp
+                </span>
+              )}
+            </div>
 
-            {/* Match reasons from algorithm - prominent display */}
+            {/* Match reasons - cleaner display */}
             {match.match_reasons && match.match_reasons.length > 0 && (
               <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                <p className="text-xs font-medium text-slate-500 mb-1">Why this is a great match:</p>
-                <div className="space-y-1">
-                  {match.match_reasons.slice(0, 3).map((reason, i) => (
-                    <p key={i} className="text-sm text-slate-700">{reason}</p>
-                  ))}
-                </div>
+                <p className="text-xs font-medium text-slate-500 mb-2">Why this is a great match:</p>
+                <ul className="space-y-1">
+                  {match.match_reasons
+                    .filter(r => !r.includes('🌟')) // Don't duplicate super helper
+                    .slice(0, 4)
+                    .map((reason, i) => (
+                      <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                        <span className="text-green-500 mt-0.5">✓</span>
+                        {reason}
+                      </li>
+                    ))}
+                </ul>
               </div>
             )}
           </div>
