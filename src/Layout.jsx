@@ -946,10 +946,30 @@ function AppContent() {
       return;
     }
 
-    // STEP 2: Public pages ALWAYS accessible
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'LandingPage'];
+    // STEP 2: Public pages ALWAYS accessible (but redirect authenticated users from LandingPage)
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ [Public] Page accessible:', currentPage);
+      setResolvedPage(currentPage);
+      return;
+    }
+    
+    // LandingPage: redirect authenticated users to their dashboard
+    if (currentPage === 'LandingPage') {
+      if (user) {
+        // User is logged in - redirect to appropriate dashboard
+        let destination = 'Dashboard';
+        if (user.roles?.includes('admin')) {
+          destination = 'AdminDashboard';
+        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          destination = 'ParentDashboard';
+        }
+        console.log('🔄 [LandingPage] Authenticated user → redirecting to:', destination);
+        navigate(destination);
+        return;
+      }
+      // Not logged in - show landing page
+      console.log('✅ [Public] LandingPage accessible (not authenticated)');
       setResolvedPage(currentPage);
       return;
     }
