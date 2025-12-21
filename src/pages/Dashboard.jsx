@@ -71,6 +71,7 @@ export default function Dashboard() {
       // Fetch opportunities
       const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
       setOpportunities(opps || []);
+      console.log('✅ Opportunities loaded, now loading HelpRequest...');
 
       // Fetch user's help request (students have ONE active request)
       console.log('🔍🔍🔍 HELP REQUEST SECTION START');
