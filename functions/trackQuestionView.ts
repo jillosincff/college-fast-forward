@@ -12,29 +12,47 @@ Deno.serve(async (req) => {
 
         const { questionId, questionType } = await req.json();
         
+        console.log('trackQuestionView called:', { questionId, questionType, user: user.email });
+        
         if (!questionId) {
             return Response.json({ error: 'questionId is required' }, { status: 400 });
         }
 
-        // Use service role to bypass RLS and update view count
+        // Determine entity and field names
         const entityName = questionType === 'HelpRequest' ? 'HelpRequest' : 'JobRequest';
         const viewField = questionType === 'HelpRequest' ? 'view_count' : 'views_count';
         
-        // Get current question
-        const questions = await base44.asServiceRole.entities[entityName].filter({ id: questionId });
+        console.log('Using entity:', entityName, 'field:', viewField);
         
-        if (!questions || questions.length === 0) {
+        // Get current question using service role
+        let question = null;
+        try {
+            const questions = await base44.asServiceRole.entities[entityName].filter({ id: questionId });
+            console.log('Filter result:', questions?.length, 'questions found');
+            if (questions && questions.length > 0) {
+                question = questions[0];
+            }
+        } catch (filterErr) {
+            console.error('Filter error:', filterErr);
+        }
+        
+        if (!question) {
+            console.log('Question not found, returning 404');
             return Response.json({ error: 'Question not found' }, { status: 404 });
         }
         
-        const question = questions[0];
-        const currentViews = question[viewField] || question.view_count || question.views_count || 0;
+        const currentViews = Number(question[viewField]) || Number(question.view_count) || Number(question.views_count) || 0;
+        console.log('Current views:', currentViews);
         
         // Increment view count using service role
         const updateData = {};
         updateData[viewField] = currentViews + 1;
         
+        console.log('Updating with:', updateData);
+        
         await base44.asServiceRole.entities[entityName].update(questionId, updateData);
+        
+        console.log('Update successful, new count:', currentViews + 1);
         
         return Response.json({ 
             success: true, 
@@ -43,6 +61,6 @@ Deno.serve(async (req) => {
         
     } catch (error) {
         console.error('Error tracking view:', error);
-        return Response.json({ error: error.message }, { status: 500 });
+        return Response.json({ error: error.message, stack: error.stack }, { status: 500 });
     }
 });
