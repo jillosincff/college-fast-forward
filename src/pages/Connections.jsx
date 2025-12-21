@@ -521,21 +521,21 @@ export default function DiscoverEmergingGatorsPage() {
                   </AnimatePresence>
                 </motion.div>
 
-                {sortedProfiles.length > visibleCount && (
+                {sortedProfiles.filter(p => p.request).length > visibleCount && (
                   <div className="load-more-section">
                     <Button 
                       onClick={() => setVisibleCount(prev => prev + 20)}
                       className="load-more-btn"
                     >
-                      Load More Students
+                      Load More Questions
                     </Button>
                     <p className="results-count">
-                      Showing {displayedProfiles.length} of {sortedProfiles.length}
+                      Showing {displayedProfiles.filter(p => p.request).slice(0, visibleCount).length} of {sortedProfiles.filter(p => p.request).length} questions
                     </p>
                   </div>
                 )}
 
-                {filteredProfiles.length === 0 && (
+                {filteredProfiles.filter(p => p.request).length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🐊</div>
                     <h3>No questions yet in this category</h3>
@@ -561,11 +561,11 @@ export default function DiscoverEmergingGatorsPage() {
                   </div>
                 )}
                 
-                {filteredProfiles.length > 0 && filteredProfiles.length < 5 && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
+                {filteredProfiles.filter(p => p.request).length > 0 && filteredProfiles.filter(p => p.request).length < 5 && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
                   <div className="encourage-post-card">
                     <div className="encourage-content">
                       <h4>🌟 Get personalized advice!</h4>
-                      <p>Only {filteredProfiles.length} students have asked so far. Ask your question and get advice from parents and alumni with real experience.</p>
+                      <p>Only {filteredProfiles.filter(p => p.request).length} questions so far. Ask your question and get advice from parents and alumni with real experience.</p>
                       <Button onClick={() => navigate('StudentOnboarding')} className="mt-3" variant="outline">
                         Ask a Question
                       </Button>
