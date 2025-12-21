@@ -74,11 +74,15 @@ export default function QuestionCard({ question, gator }) {
   const posterType = question.poster_type || 'student';
   const isAnonymous = question.is_anonymous && posterType === 'parent';
   
-  // Get name - prefer gator data, fallback to question data
-  const rawPosterName = isAnonymous 
+  // Get name - use formatStudentName with all available data
+  const posterName = isAnonymous 
     ? 'Anonymous Parent'
-    : gator?.full_name || gator?.first_name || question.poster_name || question.student_name || 'A Gator';
-  const posterName = isAnonymous ? rawPosterName : formatStudentName(rawPosterName);
+    : formatStudentName(
+        gator?.full_name || question.poster_name || question.student_name,
+        gator?.first_name || question.poster_first_name,
+        gator?.last_name || question.poster_last_name,
+        gator?.email || question.created_by
+      );
   
   // Get student info
   const year = gator?.graduation_year || question.student_year || '';
