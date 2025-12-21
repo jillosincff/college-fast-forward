@@ -5,10 +5,17 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 
 const LEVEL_COLORS = {
-  bronze: { bg: '#FEF3C7', text: 'white', border: '#8B7355', gradient: 'linear-gradient(135deg, #8B7355 0%, #6B5A44 100%)' },
-  silver: { bg: '#F3F4F6', text: '#1F2937', border: '#B8B8B8', gradient: 'linear-gradient(135deg, #E8E8E8 0%, #B8B8B8 100%)' },
-  gold: { bg: '#FEF9C3', text: '#1F2937', border: '#FFD700', gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' },
+  bronze: { bg: '#E8EDFF', text: 'white', border: '#0021A5', gradient: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)' },
+  silver: { bg: '#F3F4F6', text: '#1F2937', border: '#B8B8B8', gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)' },
+  gold: { bg: '#FEF9C3', text: '#1F2937', border: '#FFD700', gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' },
   platinum: { bg: '#E0E7FF', text: 'white', border: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
+};
+
+const LEVEL_THRESHOLDS = {
+  bronze: { min: 0, max: 50 },
+  silver: { min: 50, max: 150 },
+  gold: { min: 150, max: 500 },
+  platinum: { min: 500, max: Infinity }
 };
 
 const LEVEL_ICONS = {
