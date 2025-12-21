@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
@@ -15,62 +15,43 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageAndHelpModal from '../components/connections/MessageAndHelpModal';
-import EnhancedGatorCard from '../components/connections/EnhancedGatorCard';
 import QuestionCard from '../components/connections/QuestionCard';
 import { useToast } from '@/components/ui/use-toast';
-import EmergingGatorsHero from '@/components/connections/EmergingGatorsHero';
 import { checkFullAccess } from '@/components/access/useAccessControl';
 
-export default function DiscoverEmergingGatorsPage() {
+export default function QuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [requests, setRequests] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userLikes, setUserLikes] = useState(new Map()); // Map of request_id -> boolean
-  const [likeCounts, setLikeCounts] = useState(new Map()); // Map of request_id -> count
+  const [userLikes, setUserLikes] = useState(new Map());
+  const [likeCounts, setLikeCounts] = useState(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     major: 'all',
     graduationYear: 'all',
     location: 'all',
-    skills: [],
-    questionType: 'student' // New: 'student', 'parent', 'alumni', 'all'
+    questionType: 'student'
   });
   const [sortBy, setSortBy] = useState('relevance');
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-
-  useEffect(() => {
-    console.log('🔴 [Connections] showHelpModal changed to:', showHelpModal);
-  }, [showHelpModal]);
   const [visibleCount, setVisibleCount] = useState(20);
   const [showFilters, setShowFilters] = useState(false);
-  
-  const [liveStats, setLiveStats] = useState({
-    seekingHelp: 0,
-    responsesToday: 0
-  });
 
-  const skillSuggestions = [
-    'Software Engineering', 'Marketing', 'Finance', 'AI/ML', 
-    'Data Science', 'Consulting', 'Entrepreneurship', 'Design', 
-    'Product Management', 'Sales'
-  ];
+  const [stats, setStats] = useState({
+    totalQuestions: 0,
+    totalAnswers: 0,
+    urgentCount: 0
+  });
 
   const loadUserLikes = async () => {
     if (!user?.email) return;
-    
     try {
-      // Single API call to get all likes for current user
       const likes = await ProfileLike.filter({ liker_email: user.email });
-      
-      // Convert to Map for O(1) lookup
       const likesMap = new Map();
-      likes.forEach(like => {
-        likesMap.set(like.request_id, true);
-      });
-      
+      likes.forEach(like => likesMap.set(like.request_id, true));
       setUserLikes(likesMap);
     } catch (error) {
       console.log('Could not load user likes:', error);
@@ -80,16 +61,12 @@ export default function DiscoverEmergingGatorsPage() {
 
   const loadLikeCounts = async () => {
     try {
-      // Get ALL ProfileLikes to count them by request_id
       const allLikes = await ProfileLike.list();
-      
-      // Count likes per request
       const countsMap = new Map();
       allLikes.forEach(like => {
         const currentCount = countsMap.get(like.request_id) || 0;
         countsMap.set(like.request_id, currentCount + 1);
       });
-      
       setLikeCounts(countsMap);
     } catch (error) {
       console.log('Could not load like counts:', error);
@@ -103,19 +80,10 @@ export default function DiscoverEmergingGatorsPage() {
     try {
       const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
       const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
-      
-      const startOfDay = moment().startOf('day').toISOString();
-      
-      const messagesTodayPromise = Message.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
-      const connectionsTodayPromise = Connection.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
-      const helpOffersTodayPromise = HelpOffer.filter({ created_date: { $gte: startOfDay } }).catch(() => []);
 
-      const [jobRequests, directoryResponse, messagesToday, connectionsToday, helpOffersToday] = await Promise.all([
+      const [jobRequests, directoryResponse] = await Promise.all([
         jobRequestsPromise,
-        directoryUsersPromise,
-        messagesTodayPromise,
-        connectionsTodayPromise,
-        helpOffersTodayPromise
+        directoryUsersPromise
       ]);
       
       // Filter out test/demo requests
@@ -134,11 +102,14 @@ export default function DiscoverEmergingGatorsPage() {
       const users = directoryResponse?.data?.data || [];
       setAllUsers(users);
 
-      const totalResponsesToday = messagesToday.length + connectionsToday.length + helpOffersToday.length;
+      // Calculate stats
+      const totalAnswers = realRequests.reduce((sum, r) => sum + (r.answer_count || 0), 0);
+      const urgentCount = realRequests.filter(r => r.timeline === 'this_week').length;
       
-      setLiveStats({
-        seekingHelp: realRequests?.length || 0,
-        responsesToday: totalResponsesToday
+      setStats({
+        totalQuestions: realRequests.length,
+        totalAnswers,
+        urgentCount
       });
       
     } catch (error) {
@@ -148,7 +119,6 @@ export default function DiscoverEmergingGatorsPage() {
         description: "We couldn't load some information. Please try refreshing the page.",
         variant: "destructive"
       });
-      
       setRequests([]);
       setAllUsers([]);
     } finally {
@@ -160,31 +130,9 @@ export default function DiscoverEmergingGatorsPage() {
     loadData();
     loadUserLikes();
     loadLikeCounts();
-    
-    // Listen for message-sent events to reload cards (triggers HelpOffer count refresh)
-    const handleMessageSent = () => {
-      console.log('🔄 Message sent - cards will refresh their counts automatically');
-      // Cards will re-fetch HelpOffer counts via useEffect
-    };
-    
-    document.addEventListener('cff:message-sent', handleMessageSent);
-    return () => document.removeEventListener('cff:message-sent', handleMessageSent);
   }, [user?.email]);
 
-  const handleOfferHelp = (request) => {
-    setSelectedRequest(request);
-    setShowHelpModal(true);
-    trackEvent('help_offer_clicked', { requestId: request.id });
-  };
-
-  const handleBrowse = () => {
-    const listingsSection = document.getElementById('listings-section');
-    if (listingsSection) {
-      listingsSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Memoize profiles to prevent rebuilding on every render (which resets card state)
+  // Build profiles from requests
   const allProfiles = useMemo(() => {
     const profiles = [];
     const seenEmails = new Set();
@@ -195,8 +143,6 @@ export default function DiscoverEmergingGatorsPage() {
       
       seenEmails.add(requestCreatorEmail);
       const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
-      
-      // Deterministic "featured" based on index, not random
       const isFeatured = index % 5 === 0;
       
       if (userProfile) {
@@ -207,56 +153,18 @@ export default function DiscoverEmergingGatorsPage() {
           isFeatured
         });
       } else {
-        // User not in directory - parse name from email
-        // For ptrebil@ufl.edu -> "Paige Trebil" (if we can detect it)
-        const emailUsername = requestCreatorEmail.split('@')[0].toLowerCase();
-        
-        // Try to get a nice display name from the email
+        const emailUsername = requestCreatorEmail?.split('@')[0]?.toLowerCase() || '';
         let formattedName = getDisplayName({ email: requestCreatorEmail });
-        let firstName = '';
-        let lastName = '';
-        
-        // Special handling for known users or common patterns
-        if (emailUsername === 'ptrebil') {
-          firstName = 'Paige';
-          lastName = 'Trebil';
-          formattedName = 'Paige Trebil';
-        } else if (emailUsername === 'specora') {
-          firstName = 'Samantha';
-          lastName = 'Pecora';
-          formattedName = 'Samantha Pecora';
-        } else if (emailUsername === 'odesai') {
-          firstName = 'Om';
-          lastName = 'Desai';
-          formattedName = 'Om Desai';
-        } else if (emailUsername === 'rhiannon.thomas') {
-          firstName = 'Rhiannon';
-          lastName = 'Thomas';
-          formattedName = 'Rhiannon Thomas';
-        }
         
         profiles.push({
           id: request.id,
           email: requestCreatorEmail,
           full_name: formattedName,
-          first_name: firstName,
-          last_name: lastName,
           bio: request.description,
           major: request.target_industry,
           request: request,
           hasRequest: true,
           isFeatured
-        });
-      }
-    });
-
-    allUsers.forEach(u => {
-      if (u.includeInDirectory && !seenEmails.has(u.email)) {
-        seenEmails.add(u.email);
-        profiles.push({
-          ...u,
-          hasRequest: false,
-          isFeatured: false
         });
       }
     });
@@ -270,18 +178,17 @@ export default function DiscoverEmergingGatorsPage() {
       const matchesName = profile.full_name?.toLowerCase().includes(query);
       const matchesMajor = profile.major?.toLowerCase().includes(query);
       const matchesBio = profile.bio?.toLowerCase().includes(query);
-      if (!matchesName && !matchesMajor && !matchesBio) return false;
+      const matchesDescription = profile.request?.description?.toLowerCase().includes(query);
+      if (!matchesName && !matchesMajor && !matchesBio && !matchesDescription) return false;
     }
 
-    // Filter by question/poster type
     if (filters.questionType !== 'all' && profile.request) {
-      const posterType = profile.request.poster_type || 'student'; // Default to student for legacy data
+      const posterType = profile.request.poster_type || 'student';
       if (filters.questionType !== posterType) return false;
     }
 
     if (filters.major !== 'all' && profile.major !== filters.major) return false;
     if (filters.graduationYear !== 'all' && profile.graduation_year?.toString() !== filters.graduationYear) return false;
-    if (filters.location !== 'all' && !profile.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
 
     return true;
   });
@@ -290,7 +197,6 @@ export default function DiscoverEmergingGatorsPage() {
     if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
     if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
     
-    // Premium users always appear in top 10
     const aIsPremium = checkFullAccess(a);
     const bIsPremium = checkFullAccess(b);
     if (aIsPremium && !bIsPremium) return -1;
@@ -304,20 +210,37 @@ export default function DiscoverEmergingGatorsPage() {
   });
 
   const displayedProfiles = sortedProfiles.slice(0, visibleCount);
+  const questionsWithProfiles = displayedProfiles.filter(p => p.request);
+  const totalQuestionsFiltered = sortedProfiles.filter(p => p.request).length;
 
   return (
     <>
-      <div className="discover-gators-page">
-        {/* Page Header */}
-        <EmergingGatorsHero 
-          totalQuestions={requests.length}
-          totalAnswers={requests.reduce((sum, r) => sum + (r.answer_count || 0), 0)}
-          urgentCount={requests.filter(r => r.timeline === 'this_week').length}
-        />
+      <div className="questions-page">
+        {/* HEADER - Clean and simple */}
+        <div className="page-header">
+          <div className="header-inner">
+            <h1>Questions From UF Students</h1>
+            <p className="subtitle">
+              Browse questions and share your advice. Anyone can answer.
+            </p>
+            
+            <div className="header-stats">
+              <span>📊 {stats.totalQuestions} questions</span>
+              <span className="stat-dot">•</span>
+              <span>💬 {stats.totalAnswers} answers</span>
+              {stats.urgentCount > 0 && (
+                <>
+                  <span className="stat-dot">•</span>
+                  <span className="urgent-stat">🔥 {stats.urgentCount} need help ASAP</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* CTA Banner for Students */}
         {user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
-          <div className="cta-banner-students">
+          <div className="cta-banner">
             <div className="cta-content">
               <div className="cta-icon">💬</div>
               <div className="cta-text">
@@ -338,7 +261,7 @@ export default function DiscoverEmergingGatorsPage() {
 
         {/* CTA Banner for Parents */}
         {(user?.persona === 'parent' || user?.roles?.includes('parent')) && !requests.find(r => r.created_by === user.email) && (
-          <div className="cta-banner-parents">
+          <div className="cta-banner cta-banner-parents">
             <div className="cta-content">
               <div className="cta-icon">👨‍👩‍👧</div>
               <div className="cta-text">
@@ -357,9 +280,9 @@ export default function DiscoverEmergingGatorsPage() {
           </div>
         )}
 
-        {/* Search and Filters - Sticky */}
-        <div className="filters-section-sticky" id="listings-section">
-          <div className="filters-container-compact">
+        {/* Search and Filters */}
+        <div className="filters-section">
+          <div className="filters-container">
             {/* Quick Filter Pills */}
             <div className="quick-filter-pills">
               <button
@@ -388,40 +311,26 @@ export default function DiscoverEmergingGatorsPage() {
               </button>
             </div>
 
-            <div className="search-and-actions">
-              {/* Search Bar */}
-              <div className="search-wrapper-compact">
+            <div className="search-row">
+              <div className="search-wrapper">
                 <Search className="search-icon" />
                 <Input
                   type="text"
-                  placeholder="Search by name, skills, interests, or career goals..."
-                  className="search-input-compact"
+                  placeholder="Search questions..."
+                  className="search-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
-              {/* Filters Button & Student Count */}
-              <div className="filter-actions">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="filters-toggle-btn"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filters
-                  {(filters.major !== 'all' || filters.graduationYear !== 'all' || filters.location !== 'all' || sortBy !== 'relevance') && (
-                    <span className="filter-count-badge">
-                      {[filters.major !== 'all', filters.graduationYear !== 'all', filters.location !== 'all', sortBy !== 'relevance'].filter(Boolean).length}
-                    </span>
-                  )}
-                </Button>
-                
-                <span className="stat-badge-inline">
-                  <span className="pulse-dot"></span>
-                  {liveStats.seekingHelp} seeking help
-                </span>
-              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="filters-toggle-btn"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
             </div>
 
             {/* Collapsible Filter Panel */}
@@ -434,36 +343,25 @@ export default function DiscoverEmergingGatorsPage() {
                 transition={{ duration: 0.2 }}
               >
                 <div className="filter-grid">
-                  {/* Question Type Filter - Primary */}
                   <select
-                    className="filter-select-compact filter-select-primary"
-                    value={filters.questionType}
-                    onChange={(e) => setFilters({...filters, questionType: e.target.value})}
-                  >
-                    <option value="student">🎓 Student Questions</option>
-                    <option value="parent">👨‍👩‍👧 Parent Questions</option>
-                    <option value="alumni">🎯 Alumni Questions</option>
-                    <option value="all">🌟 All Questions</option>
-                  </select>
-
-                  <select
-                    className="filter-select-compact"
+                    className="filter-select"
                     value={filters.major}
                     onChange={(e) => setFilters({...filters, major: e.target.value})}
                   >
-                    <option value="all">All Majors</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Business">Business</option>
-                    <option value="Engineering">Engineering</option>
+                    <option value="all">All Industries</option>
+                    <option value="Technology & Software">Technology</option>
+                    <option value="Finance & Banking">Finance</option>
                     <option value="Marketing">Marketing</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Consulting">Consulting</option>
                   </select>
 
                   <select
-                    className="filter-select-compact"
+                    className="filter-select"
                     value={filters.graduationYear}
                     onChange={(e) => setFilters({...filters, graduationYear: e.target.value})}
                   >
-                    <option value="all">All Graduation Years</option>
+                    <option value="all">All Years</option>
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
@@ -471,13 +369,13 @@ export default function DiscoverEmergingGatorsPage() {
                   </select>
 
                   <select
-                    className="filter-select-compact"
+                    className="filter-select"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
                     <option value="relevance">Sort: Relevance</option>
                     <option value="newest">Sort: Newest</option>
-                    <option value="most_connected">Sort: Most Connected</option>
+                    <option value="most_connected">Sort: Most Engaged</option>
                   </select>
                 </div>
               </motion.div>
@@ -485,117 +383,85 @@ export default function DiscoverEmergingGatorsPage() {
           </div>
         </div>
 
-        {/* Main Content Area - Full Width, No Sidebar */}
-        <div className="main-content-area">
-          <div className="profile-grid-section">
-            {isLoading ? (
-              <div className="loading-state">
-                <div className="spinner"></div>
-                <p>Loading Gators...</p>
-              </div>
-            ) : (
-              <>
-                <motion.div 
-                  className="questions-list"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    visible: {
-                      transition: {
-                        staggerChildren: 0.05
-                      }
-                    }
-                  }}
-                >
-                  <AnimatePresence mode="sync">
-                    {displayedProfiles.filter(p => p.request).map((profile) => (
-                      <motion.div
-                        key={profile.request.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
-                        <QuestionCard
-                          question={profile.request}
-                          gator={profile}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </motion.div>
-
-                {sortedProfiles.filter(p => p.request).length > visibleCount && (
-                  <div className="load-more-section">
-                    <Button 
-                      onClick={() => setVisibleCount(prev => prev + 20)}
-                      className="load-more-btn"
-                    >
-                      Load More Questions
-                    </Button>
-                    <p className="results-count">
-                      Showing {displayedProfiles.filter(p => p.request).slice(0, visibleCount).length} of {sortedProfiles.filter(p => p.request).length} questions
-                    </p>
-                  </div>
-                )}
-
-                {filteredProfiles.filter(p => p.request).length === 0 && (
-                  <div className="empty-state">
-                    <div className="empty-icon">🐊</div>
-                    <h3>No questions yet in this category</h3>
-                    <p>
-                      {filters.questionType === 'parent' 
-                        ? "No parent questions yet. Be the first parent to ask a question!"
-                        : filters.questionType === 'alumni'
-                        ? "No alumni questions yet. Alumni, share what's on your mind!"
-                        : user?.persona === 'gator' 
-                        ? "Be among the first students to ask a question. Parents and alumni are waiting to share their advice!"
-                        : "No questions in this category yet. Ask your own or check another filter!"}
-                    </p>
-                    {(user?.persona === 'gator' || user?.persona === 'parent' || user?.persona === 'alumni') && (
-                      <Button 
-                        onClick={() => navigate(user?.persona === 'gator' ? 'StudentOnboarding' : 'PostRequest')} 
-                        size="lg" 
-                        className="mt-4 bg-[#FA4616] hover:bg-orange-600"
-                      >
-                        <Plus className="w-5 h-5 mr-2" />
-                        Ask a Question
-                      </Button>
-                    )}
-                  </div>
-                )}
-                
-                {filteredProfiles.filter(p => p.request).length > 0 && filteredProfiles.filter(p => p.request).length < 5 && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
-                  <div className="encourage-post-card">
-                    <div className="encourage-content">
-                      <h4>🌟 Get personalized advice!</h4>
-                      <p>Only {filteredProfiles.filter(p => p.request).length} questions so far. Ask your question and get advice from parents and alumni with real experience.</p>
-                      <Button onClick={() => navigate('StudentOnboarding')} className="mt-3" variant="outline">
-                        Ask a Question
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="page-footer">
-          <div className="footer-content">
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
-              alt="College Fast Forward"
-              className="footer-logo"
-            />
-            <div className="footer-links">
-              <a href="#/Privacy">Privacy</a>
-              <a href="#/Terms">Terms</a>
-              <a href="#/Contact">Contact Support</a>
+        {/* QUESTIONS LIST */}
+        <div className="questions-container">
+          {isLoading ? (
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <p>Loading questions...</p>
             </div>
-            <p className="footer-copyright">© 2025 College Fast Forward. Go Gators! 🐊</p>
-          </div>
-        </footer>
+          ) : (
+            <>
+              <motion.div 
+                className="questions-list"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: { staggerChildren: 0.05 }
+                  }
+                }}
+              >
+                <AnimatePresence mode="sync">
+                  {questionsWithProfiles.map((profile) => (
+                    <motion.div
+                      key={profile.request.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                    >
+                      <QuestionCard
+                        question={profile.request}
+                        gator={profile}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* LOAD MORE */}
+              {totalQuestionsFiltered > visibleCount && (
+                <button 
+                  className="load-more-btn"
+                  onClick={() => setVisibleCount(prev => prev + 20)}
+                >
+                  Load More Questions
+                </button>
+              )}
+
+              {totalQuestionsFiltered > 0 && (
+                <p className="results-count">
+                  Showing {questionsWithProfiles.length} of {totalQuestionsFiltered} questions
+                </p>
+              )}
+
+              {/* Empty State */}
+              {totalQuestionsFiltered === 0 && (
+                <div className="empty-state">
+                  <div className="empty-icon">🐊</div>
+                  <h3>No questions yet in this category</h3>
+                  <p>
+                    {filters.questionType === 'parent' 
+                      ? "No parent questions yet. Be the first parent to ask!"
+                      : filters.questionType === 'alumni'
+                      ? "No alumni questions yet."
+                      : "Be among the first to ask a question!"}
+                  </p>
+                  {user && (
+                    <Button 
+                      onClick={() => navigate(user?.persona === 'gator' ? 'StudentOnboarding' : 'PostRequest')} 
+                      size="lg" 
+                      className="mt-4"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Ask a Question
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {showHelpModal && (
@@ -607,25 +473,121 @@ export default function DiscoverEmergingGatorsPage() {
       )}
 
       <style jsx>{`
-        .discover-gators-page {
-          min-h-screen;
+        .questions-page {
+          min-height: 100vh;
           background: #F9FAFB;
         }
 
-        /* Filters Section - Sticky */
-        .filters-section-sticky {
-          position: sticky;
-          top: 96px;
-          z-index: 45;
-          background: white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-          padding: 12px 0;
+        /* HEADER */
+        .page-header {
+          background: #0021A5;
+          padding: 48px 20px 40px;
         }
 
-        .filters-container-compact {
-          max-width: 1400px;
+        .header-inner {
+          max-width: 900px;
           margin: 0 auto;
+        }
+
+        .page-header h1 {
+          font-size: 36px;
+          font-weight: 700;
+          color: white;
+          margin: 0 0 8px 0;
+        }
+
+        .subtitle {
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.85);
+          margin: 0 0 20px 0;
+        }
+
+        .header-stats {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          font-size: 15px;
+          color: rgba(255, 255, 255, 0.9);
+          flex-wrap: wrap;
+        }
+
+        .stat-dot {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .urgent-stat {
+          color: #FFD700;
+          font-weight: 600;
+        }
+
+        /* CTA BANNER */
+        .cta-banner {
+          max-width: 900px;
+          margin: -20px auto 24px;
           padding: 0 20px;
+        }
+
+        .cta-content {
+          background: linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%);
+          border-radius: 16px;
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          box-shadow: 0 8px 24px rgba(250, 70, 22, 0.25);
+        }
+
+        .cta-banner-parents .cta-content {
+          background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+          box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .cta-icon {
+          font-size: 48px;
+          flex-shrink: 0;
+        }
+
+        .cta-text {
+          flex: 1;
+          color: white;
+        }
+
+        .cta-text h3 {
+          font-size: 22px;
+          font-weight: 700;
+          margin: 0 0 6px 0;
+        }
+
+        .cta-text p {
+          font-size: 15px;
+          opacity: 0.95;
+          margin: 0;
+        }
+
+        .cta-button {
+          background: white !important;
+          color: #FA4616 !important;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+
+        .cta-banner-parents .cta-button {
+          color: #6366F1 !important;
+        }
+
+        /* FILTERS */
+        .filters-section {
+          background: white;
+          border-bottom: 1px solid #E5E7EB;
+          padding: 16px 20px;
+          position: sticky;
+          top: 96px;
+          z-index: 40;
+        }
+
+        .filters-container {
+          max-width: 900px;
+          margin: 0 auto;
         }
 
         .quick-filter-pills {
@@ -659,13 +621,13 @@ export default function DiscoverEmergingGatorsPage() {
           border-color: #0021A5;
         }
 
-        .search-and-actions {
+        .search-row {
           display: flex;
           gap: 12px;
           align-items: center;
         }
 
-        .search-wrapper-compact {
+        .search-wrapper {
           position: relative;
           flex: 1;
         }
@@ -675,155 +637,102 @@ export default function DiscoverEmergingGatorsPage() {
           left: 14px;
           top: 50%;
           transform: translateY(-50%);
-          color: #6b7280;
+          color: #9CA3AF;
           width: 18px;
           height: 18px;
         }
 
-        .search-input-compact {
+        .search-input {
           width: 100%;
-          height: 40px;
+          height: 44px;
           padding: 0 14px 0 44px;
-          border: 1.5px solid #e5e7eb;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: border-color 0.2s;
+          border: 1.5px solid #E5E7EB;
+          border-radius: 10px;
+          font-size: 15px;
         }
 
-        .search-input-compact:focus {
+        .search-input:focus {
           outline: none;
           border-color: #0021A5;
         }
 
-        .filter-actions {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          flex-shrink: 0;
-        }
-
         .filters-toggle-btn {
-          height: 40px;
-          padding: 0 16px;
-          font-size: 14px;
+          height: 44px;
+          padding: 0 20px;
           font-weight: 600;
-          white-space: nowrap;
-          position: relative;
-        }
-
-        .filter-count-badge {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: #0021A5;
-          color: white;
-          font-size: 11px;
-          font-weight: 700;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          margin-left: 6px;
-        }
-
-        .stat-badge-inline {
-          background: #FFF4ED;
-          color: #FA4616;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          white-space: nowrap;
         }
 
         .filter-panel {
           margin-top: 12px;
           padding: 16px;
           background: #F9FAFB;
-          border-radius: 8px;
+          border-radius: 10px;
           overflow: hidden;
         }
 
         .filter-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
         }
 
-        .filter-select-compact {
-          padding: 8px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 13px;
+        .filter-select {
+          padding: 10px 14px;
+          border: 1.5px solid #E5E7EB;
+          border-radius: 8px;
+          font-size: 14px;
           background: white;
-          color: #333;
           cursor: pointer;
-          transition: border-color 0.2s;
         }
 
-        .filter-select-compact:focus {
+        .filter-select:focus {
           outline: none;
           border-color: #0021A5;
         }
 
-        .filter-select-primary {
-          background: #FFF4ED;
-          border-color: #FA4616;
-          font-weight: 600;
-        }
-
-        .pulse-dot {
-          width: 8px;
-          height: 8px;
-          background: #FA4616;
-          border-radius: 50%;
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.5;
-            transform: scale(1.2);
-          }
-        }
-
-        .stat-divider {
-          color: #d1d5db;
-        }
-
-        .main-content-area {
+        /* QUESTIONS LIST */
+        .questions-container {
           max-width: 900px;
-          margin: 20px auto;
-          padding: 0 20px;
-        }
-
-        .profile-grid-section {
-          min-height: 600px;
+          margin: 0 auto;
+          padding: 24px 20px 60px;
         }
 
         .questions-list {
           display: flex;
           flex-direction: column;
-          gap: 0;
         }
 
-        .profile-grid-4col {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 16px;
+        .load-more-btn {
+          width: 100%;
+          padding: 16px;
+          background: white;
+          border: 2px solid #E5E7EB;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #6B7280;
+          cursor: pointer;
+          margin-top: 24px;
+          transition: all 0.2s;
+        }
+
+        .load-more-btn:hover {
+          border-color: #0021A5;
+          color: #0021A5;
+          background: #F9FAFB;
+        }
+
+        .results-count {
+          text-align: center;
+          margin-top: 16px;
+          font-size: 14px;
+          color: #6B7280;
         }
 
         .loading-state {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
           padding: 80px 20px;
         }
 
@@ -842,42 +751,17 @@ export default function DiscoverEmergingGatorsPage() {
 
         .loading-state p {
           margin-top: 16px;
-          font-size: 16px;
-          color: #64748b;
-        }
-
-        .load-more-section {
-          text-align: center;
-          padding: 32px 0;
-        }
-
-        .load-more-btn {
-          background: #0021A5;
-          color: white;
-          padding: 12px 32px;
-          border-radius: 8px;
-          font-weight: 600;
-        }
-
-        .load-more-btn:hover {
-          background: #001580;
-        }
-
-        .results-count {
-          margin-top: 12px;
-          font-size: 14px;
-          color: #6b7280;
+          color: #6B7280;
         }
 
         .empty-state {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
           padding: 80px 20px;
           background: white;
           border-radius: 16px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          text-align: center;
         }
 
         .empty-icon {
@@ -888,148 +772,36 @@ export default function DiscoverEmergingGatorsPage() {
         .empty-state h3 {
           font-size: 24px;
           font-weight: 700;
-          color: #0f172a;
+          color: #111827;
           margin-bottom: 8px;
         }
 
         .empty-state p {
           font-size: 16px;
-          color: #64748b;
-          margin-bottom: 24px;
-          text-align: center;
+          color: #6B7280;
           max-width: 400px;
         }
 
-
-
-        .page-footer {
-          background: #0021A5;
-          color: white;
-          padding: 32px 0;
-          margin-top: 64px;
-        }
-
-        .footer-content {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 20px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-          text-align: center;
-        }
-
-        .footer-logo {
-          height: 48px;
-          filter: brightness(0) invert(1);
-        }
-
-        .footer-links {
-          display: flex;
-          gap: 24px;
-        }
-
-        .footer-links a {
-          color: white;
-          text-decoration: none;
-          font-size: 14px;
-          transition: opacity 0.2s;
-        }
-
-        .footer-links a:hover {
-          opacity: 0.8;
-        }
-
-        .footer-copyright {
-          font-size: 14px;
-          opacity: 0.8;
-        }
-
-        .cta-banner-students,
-        .cta-banner-parents {
-          max-width: 1400px;
-          margin: -16px auto 32px;
-          padding: 0 20px;
-        }
-
-        .cta-banner-parents .cta-content {
-          background: linear-gradient(135deg, #0021A5 0%, #003865 100%);
-        }
-
-        .cta-content {
-          background: linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%);
-          border-radius: 16px;
-          padding: 24px 32px;
-          display: flex;
-          align-items: center;
-          gap: 24px;
-          box-shadow: 0 8px 16px rgba(250, 70, 22, 0.2);
-        }
-
-        .cta-icon {
-          font-size: 48px;
-          flex-shrink: 0;
-        }
-
-        .cta-text {
-          flex: 1;
-          color: white;
-        }
-
-        .cta-text h3 {
-          font-size: 24px;
-          font-weight: 700;
-          margin-bottom: 8px;
-        }
-
-        .cta-text p {
-          font-size: 16px;
-          opacity: 0.95;
-        }
-
-        .cta-button {
-          background: white !important;
-          color: #FA4616 !important;
-          font-weight: 700;
-          padding: 12px 24px;
-          flex-shrink: 0;
-        }
-
-        .cta-button:hover {
-          background: #f8f9fa !important;
-          transform: scale(1.05);
-        }
-
-        .encourage-post-card {
-          grid-column: 1 / -1;
-          background: linear-gradient(135deg, #FFF4ED 0%, #FFE8D9 100%);
-          border: 2px dashed #FA4616;
-          border-radius: 12px;
-          padding: 24px;
-          text-align: center;
-        }
-
-        .encourage-content h4 {
-          font-size: 20px;
-          font-weight: 700;
-          color: #0f172a;
-          margin-bottom: 8px;
-        }
-
-        .encourage-content p {
-          font-size: 16px;
-          color: #64748b;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-
-
-
         @media (max-width: 768px) {
-          .cta-banner-students {
-            margin: -8px auto 16px;
+          .page-header {
+            padding: 32px 16px 28px;
+          }
+
+          .page-header h1 {
+            font-size: 28px;
+          }
+          
+          .subtitle {
+            font-size: 16px;
+          }
+
+          .header-stats {
+            font-size: 13px;
+          }
+
+          .cta-banner {
             padding: 0 12px;
+            margin: -16px auto 20px;
           }
 
           .cta-content {
@@ -1044,41 +816,19 @@ export default function DiscoverEmergingGatorsPage() {
           }
 
           .cta-text h3 {
-            font-size: 20px;
-          }
-
-          .cta-text p {
-            font-size: 14px;
+            font-size: 18px;
           }
 
           .cta-button {
             width: 100%;
           }
 
-          .encourage-post-card {
-            padding: 20px;
-          }
-
-          .encourage-content h4 {
-            font-size: 18px;
-          }
-
-          .encourage-content p {
-            font-size: 14px;
-          }
-
-          .filters-section-sticky {
-            top: 96px;
-            padding: 10px 0;
-          }
-
-          .filters-container-compact {
-            padding: 0 12px;
+          .filters-section {
+            padding: 12px 12px;
           }
 
           .quick-filter-pills {
             gap: 6px;
-            margin-bottom: 10px;
           }
 
           .quick-pill {
@@ -1086,73 +836,25 @@ export default function DiscoverEmergingGatorsPage() {
             font-size: 12px;
           }
 
-          .search-and-actions {
+          .search-row {
             flex-direction: column;
             gap: 8px;
           }
 
-          .search-wrapper-compact {
+          .search-wrapper {
             width: 100%;
-          }
-
-          .search-input-compact {
-            height: 38px;
-            padding: 0 12px 0 40px;
-            font-size: 13px;
-          }
-
-          .filter-actions {
-            width: 100%;
-            justify-content: space-between;
           }
 
           .filters-toggle-btn {
-            height: 38px;
-            padding: 0 14px;
-            font-size: 13px;
-          }
-
-          .stat-badge-inline {
-            font-size: 11px;
-            padding: 6px 10px;
+            width: 100%;
           }
 
           .filter-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-          }
-
-          .filter-select-compact {
-            padding: 8px 10px;
-            font-size: 12px;
-          }
-
-          .main-content-area {
-            margin: 16px auto;
-            padding: 0 12px;
-          }
-
-          .profile-grid-4col {
             grid-template-columns: 1fr;
-            gap: 16px;
           }
 
-          .load-more-section {
-            padding: 24px 0;
-          }
-
-          .page-footer {
-            margin-top: 32px;
-            padding: 24px 0;
-          }
-
-          .footer-logo {
-            height: 40px;
-          }
-
-          .footer-links {
-            flex-direction: column;
-            gap: 12px;
+          .questions-container {
+            padding: 16px 12px 40px;
           }
         }
       `}</style>
