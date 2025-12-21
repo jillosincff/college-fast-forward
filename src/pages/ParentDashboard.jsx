@@ -413,7 +413,7 @@ export default function ParentDashboard() {
           >
             <div className="text-5xl mb-4">💬</div>
             <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
-              Answer Questions & Make Intros
+              Answer Student Questions
             </h3>
             <p className="text-sm text-slate-600 mb-4">
               A student asks "How do I break into consulting?"<br />
@@ -424,7 +424,7 @@ export default function ParentDashboard() {
               className="rounded-full px-6 py-2 font-bold text-sm"
               style={{ backgroundColor: '#0021A5' }}
             >
-              See Requests & Help →
+              Browse Questions →
             </Button>
           </div>
 
@@ -467,14 +467,14 @@ export default function ParentDashboard() {
           <div className="text-center py-6">
             <div className="text-4xl mb-3">🌟</div>
             <p className="text-slate-600 mb-4">
-              Your help offers to students will show here
+              Your advice and messages to students will show here
             </p>
             <Button 
               onClick={() => navigate('Connections')} 
               className="rounded-full px-6"
               style={{ backgroundColor: '#FA4616' }}
             >
-              Start by answering a student's help request →
+              Start by answering a student question →
             </Button>
           </div>
         </div>

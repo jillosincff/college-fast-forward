@@ -115,43 +115,41 @@ Example: For "Software Engineer at Google", return:
 
     // Send notifications to matched parents
     const notificationPromises = topMatches.map(async ({ parent, matchSummary }) => {
-      const subject = `🐊 A Gator student needs help with ${request.role || 'their career'}`;
+      const subject = `💬 A UF student asked a question you can answer`;
       const body = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #0021A5;">🎯 You're a perfect match to help!</h2>
+          <h2 style="color: #0021A5;">💬 A student just asked a question that matches your expertise</h2>
           
           <p>Hi ${parent.full_name || 'there'},</p>
           
-          <p>A <strong>Gator student</strong> just posted a help request, and your background makes you an ideal person to reach out:</p>
+          <p>A <strong>UF student</strong> asked a question, and your experience makes you a great person to share advice:</p>
           
           <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0021A5;">
-            <h3 style="margin: 0 0 10px 0; color: #0021A5;">${request.role || request.title}</h3>
-            <p style="margin: 0; color: #334155;"><strong>Industry:</strong> ${request.target_industry}</p>
-            ${request.target_company ? `<p style="margin: 5px 0 0 0; color: #334155;"><strong>Target Company:</strong> ${request.target_company}</p>` : ''}
-            ${request.description ? `<p style="margin: 10px 0 0 0; color: #64748b;">${request.description.substring(0, 150)}${request.description.length > 150 ? '...' : ''}</p>` : ''}
+            <p style="margin: 0; color: #1f2937; font-size: 16px; font-style: italic;">"${request.description ? request.description.substring(0, 250) + (request.description.length > 250 ? '...' : '') : 'Career guidance needed'}"</p>
+            ${request.target_industry ? `<p style="margin: 15px 0 0 0; color: #64748b; font-size: 14px;">Looking for advice about: <strong>${request.target_industry}</strong></p>` : ''}
           </div>
           
           <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; color: #92400e;">
               <strong>🎯 Why you're a great match:</strong><br/>
-              Your background in <strong>${matchSummary}</strong> is perfect for helping this student!
+              Your experience in <strong>${matchSummary}</strong> is exactly what this student needs!
             </p>
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://collegefastforward.com/#Connections" 
                style="background-color: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-              Pay It Forward & Help a Gator Today 🐊
+              Share Your Advice 🐊
             </a>
           </div>
           
           <p style="color: #64748b; font-size: 14px;">
-            This is what the Gator network is all about - paying it forward and lifting each other up! 🧡💙
+            Your experience can make a real difference. Takes just a few minutes to share your perspective! 🧡💙
           </p>
           
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
           <p style="color: #94a3b8; font-size: 12px;">
-            You're receiving this because your profile matches this student's needs. 
+            You're receiving this because your profile matches this student's question. 
             <a href="https://collegefastforward.com/#Profile">Update your notification preferences</a>
           </p>
         </div>
@@ -167,8 +165,8 @@ Example: For "Software Engineer at Google", return:
       await base44.asServiceRole.entities.Notification.create({
         user_id: parent.id,
         type: 'matching_request',
-        title: `Perfect match: ${request.role}`,
-        message: `A Gator student needs help with ${request.role}. Your background in ${matchSummary} makes you ideal!`,
+        title: `A student asked a question you can answer`,
+        message: `"${request.description?.substring(0, 100) || 'Career question'}..." - Your experience in ${matchSummary} is a great match.`,
         link: `/#Connections`,
         is_read: false,
         metadata: {
