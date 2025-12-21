@@ -482,6 +482,18 @@ export default function GatorAuth() {
     }
   }, [user, currentUser, isLoading, processing]);
 
+  // Transitioning state - show loading to prevent flashes
+  if (isTransitioning) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0021A5] to-[#FA4616]">
+        <div className="text-center max-w-md px-4">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white text-lg font-semibold">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Error state
   if (errorDetails) {
     return (
