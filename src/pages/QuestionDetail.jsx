@@ -131,11 +131,18 @@ export default function QuestionDetailPage() {
   }, [sortBy]);
 
   const handleAnswerPosted = (newAnswer) => {
+    // Add new answer to the top of the list
     setAnswers(prev => [newAnswer, ...prev]);
-    setQuestion(prev => ({
-      ...prev,
-      answer_count: (prev.answer_count || 0) + 1
-    }));
+    
+    // Update question stats immediately (optimistic update)
+    setQuestion(prev => {
+      const newCount = (prev?.answer_count || 0) + 1;
+      console.log('Updating answer_count from', prev?.answer_count, 'to', newCount);
+      return {
+        ...prev,
+        answer_count: newCount
+      };
+    });
   };
 
   const handleUpvoteChange = (answerId, newCount) => {
