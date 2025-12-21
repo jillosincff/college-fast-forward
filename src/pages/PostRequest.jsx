@@ -12,6 +12,8 @@ export default function PostRequestPage() { // Renamed from PostRequest
   const { toast } = useToast();
   const params = useParams();
   const editId = params.edit || params.editId;
+  const postType = params.type; // 'parent' for parent questions
+  const isParentQuestion = postType === 'parent' || user?.persona === 'parent';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Removed showSuccess state as we're now navigating directly
@@ -382,11 +384,23 @@ export default function PostRequestPage() { // Renamed from PostRequest
           </button>
           
           <div className="hero-content">
-            <div className="hero-badge">🚀 Join 2,847+ students who found help</div>
-            <h1 className="hero-title">Get Help From Your Gator Network</h1>
-            <p className="hero-subtitle">
-              Tell us what you're looking for and let our community of parents, alumni, and fellow students connect you with the right opportunities.
-            </p>
+            {isParentQuestion ? (
+              <>
+                <div className="hero-badge">❓ Get advice from the Gator community</div>
+                <h1 className="hero-title">Ask Your Question</h1>
+                <p className="hero-subtitle">
+                  Have a question about careers, college, or helping your student? Ask the Gator Network! Other parents and alumni can share their experience and advice.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="hero-badge">🚀 Join 2,847+ students who found help</div>
+                <h1 className="hero-title">Get Help From Your Gator Network</h1>
+                <p className="hero-subtitle">
+                  Tell us what you're looking for and let our community of parents, alumni, and fellow students connect you with the right opportunities.
+                </p>
+              </>
+            )}
             
             <div className="hero-stats">
               <span className="stat-item">
@@ -409,9 +423,11 @@ export default function PostRequestPage() { // Renamed from PostRequest
         <div className="main-content">
           <div className="form-container">
             <div className="form-header">
-              <h2 className="form-title">{editId ? 'Edit Your Request' : 'Share Your Career Goals'}</h2>
+              <h2 className="form-title">{editId ? 'Edit Your Request' : (isParentQuestion ? 'What Would You Like to Know?' : 'Share Your Career Goals')}</h2>
               <p className="form-subtitle">
-                The more specific you are, the better we can match you with the right connections.
+                {isParentQuestion 
+                  ? 'Be specific about what advice you\'re looking for - other parents and alumni love to share their experience!'
+                  : 'The more specific you are, the better we can match you with the right connections.'}
               </p>
             </div>
 
@@ -419,14 +435,25 @@ export default function PostRequestPage() { // Renamed from PostRequest
             <div className="tips-section">
               <h3 className="tips-title">
                 <Heart className="w-5 h-5" />
-                Tips for a Great Request
+                {isParentQuestion ? 'Tips for Getting Great Advice' : 'Tips for a Great Request'}
               </h3>
               <ul className="tips-list">
-                <li>Be specific about your target role and industry</li>
-                <li>Mention any companies you're particularly interested in</li>
-                <li>Include your timeline (when you want to start)</li>
-                <li>Share what type of help would be most valuable (intro, advice, resume review, etc.)</li>
-                <li>Upload your resume to help connections understand your background</li>
+                {isParentQuestion ? (
+                  <>
+                    <li>Share relevant context (your student's situation, your own experience)</li>
+                    <li>Be specific about what advice would be most helpful</li>
+                    <li>Mention if you're looking for other parents with similar experiences</li>
+                    <li>Feel free to keep details anonymous if preferred</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Be specific about your target role and industry</li>
+                    <li>Mention any companies you're particularly interested in</li>
+                    <li>Include your timeline (when you want to start)</li>
+                    <li>Share what type of help would be most valuable (intro, advice, resume review, etc.)</li>
+                    <li>Upload your resume to help connections understand your background</li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -434,36 +461,63 @@ export default function PostRequestPage() { // Renamed from PostRequest
             <div className="examples-section">
               <h3 className="examples-title">
                 <Lightbulb className="w-5 h-5" />
-                Examples: What Makes a Strong Request?
+                {isParentQuestion ? 'Example Parent Questions' : 'Examples: What Makes a Strong Request?'}
               </h3>
               
-              <div className="example-card">
-                <span className="example-label">✅ Great Example</span>
-                <p className="example-text">
-                  "I'm a Computer Science junior looking for a software engineering internship at a fintech company (Stripe, Square, or similar). I have experience with React and Python, and I'm particularly interested in payment systems. I'm hoping for an intro to anyone in engineering at these companies, or advice on how to break into fintech. Available for Summer 2026."
-                </p>
-              </div>
+              {isParentQuestion ? (
+                <>
+                  <div className="example-card">
+                    <span className="example-label">✅ Great Example</span>
+                    <p className="example-text">
+                      "My daughter is a sophomore considering switching from pre-med to business. Any parents who've navigated a major change with their student? How did you support them through it?"
+                    </p>
+                  </div>
 
-              <div className="example-card">
-                <span className="example-label">✅ Great Example</span>
-                <p className="example-text">
-                  "Marketing major seeking advice from alumni working in brand management at CPG companies like P&G, Unilever, or Coca-Cola. I'm trying to understand what the interview process looks like and what skills I should focus on during my senior year. Also open to informational interviews or resume feedback."
-                </p>
-              </div>
+                  <div className="example-card">
+                    <span className="example-label">✅ Great Example</span>
+                    <p className="example-text">
+                      "Looking for advice on helping my son prepare for consulting recruiting. He's a junior in finance - what should he be doing now to be ready for fall recruiting?"
+                    </p>
+                  </div>
 
-              <div className="example-card bad-example">
-                <span className="example-label">❌ Too Vague</span>
-                <p className="example-text">
-                  "Looking for a job in business. Need help."
-                </p>
-              </div>
+                  <div className="example-card">
+                    <span className="example-label">✅ Great Example</span>
+                    <p className="example-text">
+                      "Any parents with connections to the entertainment industry? My student is interested in entertainment law but we don't know anyone in that world. Would love to connect."
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="example-card">
+                    <span className="example-label">✅ Great Example</span>
+                    <p className="example-text">
+                      "I'm a Computer Science junior looking for a software engineering internship at a fintech company (Stripe, Square, or similar). I have experience with React and Python, and I'm particularly interested in payment systems. I'm hoping for an intro to anyone in engineering at these companies, or advice on how to break into fintech. Available for Summer 2026."
+                    </p>
+                  </div>
 
-              <div className="example-card bad-example">
-                <span className="example-label">❌ Too Vague</span>
-                <p className="example-text">
-                  "Need an internship somewhere. Any company is fine."
-                </p>
-              </div>
+                  <div className="example-card">
+                    <span className="example-label">✅ Great Example</span>
+                    <p className="example-text">
+                      "Marketing major seeking advice from alumni working in brand management at CPG companies like P&G, Unilever, or Coca-Cola. I'm trying to understand what the interview process looks like and what skills I should focus on during my senior year. Also open to informational interviews or resume feedback."
+                    </p>
+                  </div>
+
+                  <div className="example-card bad-example">
+                    <span className="example-label">❌ Too Vague</span>
+                    <p className="example-text">
+                      "Looking for a job in business. Need help."
+                    </p>
+                  </div>
+
+                  <div className="example-card bad-example">
+                    <span className="example-label">❌ Too Vague</span>
+                    <p className="example-text">
+                      "Need an internship somewhere. Any company is fine."
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Form */}
