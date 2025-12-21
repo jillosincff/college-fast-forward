@@ -7,6 +7,7 @@ import { Message } from '@/entities/Message';
 import { Connection } from '@/entities/Connection';
 import { HelpOffer } from '@/entities/HelpOffer';
 import { ProfileLike } from '@/entities/ProfileLike';
+import { Answer } from '@/entities/Answer';
 import { base44 } from '@/api/base44Client';
 import { Search, Plus, Filter } from 'lucide-react';
 import moment from 'moment';
@@ -82,13 +83,22 @@ export default function QuestionsPage() {
     try {
       const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
       const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
+      const answersPromise = Answer.list('-created_date', 1000);
 
-      const [jobRequests, directoryResponse] = await Promise.all([
+      const [jobRequests, directoryResponse, allAnswers] = await Promise.all([
         jobRequestsPromise,
-        directoryUsersPromise
+        directoryUsersPromise,
+        answersPromise
       ]);
       
-      // Filter out test/demo requests
+      // Build answer counts map from actual Answer records
+      const answerCountsMap = new Map();
+      (allAnswers || []).forEach(answer => {
+        const qId = answer.question_id;
+        answerCountsMap.set(qId, (answerCountsMap.get(qId) || 0) + 1);
+      });
+      
+      // Filter out test/demo requests and add real answer counts
       const realRequests = (jobRequests || []).filter(req => {
         const description = req.description?.toLowerCase() || '';
         const role = req.role?.toLowerCase() || '';
@@ -97,14 +107,18 @@ export default function QuestionsPage() {
                             description.includes('demo') ||
                             role.includes('test');
         return !isTestRequest;
-      });
+      }).map(req => ({
+        ...req,
+        // Use actual answer count from Answer entity as source of truth
+        answer_count: answerCountsMap.get(req.id) || 0
+      }));
       
       setRequests(realRequests);
       
       const users = directoryResponse?.data?.data || [];
       setAllUsers(users);
 
-      // Calculate stats
+      // Calculate stats from actual answer counts
       const totalAnswers = realRequests.reduce((sum, r) => sum + (r.answer_count || 0), 0);
       const urgentCount = realRequests.filter(r => r.timeline === 'this_week').length;
       
