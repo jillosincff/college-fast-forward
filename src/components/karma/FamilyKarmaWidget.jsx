@@ -139,246 +139,138 @@ export default function FamilyKarmaWidget({ user, compact = false }) {
   const icon = LEVEL_ICONS[level];
   const totalKarma = karmaData.total_karma || 0;
   const nextLevel = karmaData.next_level;
+  const boostMultiplier = karmaData.boost_multiplier || 0;
   
   // Calculate progress to next level
   let progressPercent = 100;
-  if (nextLevel && nextLevel.points_needed > 0) {
-    const currentInLevel = totalKarma - (nextLevel.points_needed - nextLevel.points_remaining - totalKarma);
-    progressPercent = Math.min(100, ((nextLevel.points_needed - nextLevel.points_remaining) / nextLevel.points_needed) * 100);
+  if (nextLevel && nextLevel.name !== 'max' && nextLevel.points_needed > 0) {
+    const pointsEarned = nextLevel.points_needed - nextLevel.points_remaining;
+    progressPercent = Math.min(100, (pointsEarned / nextLevel.points_needed) * 100);
   }
 
   if (compact) {
     return (
-      <div className="karma-compact" style={{ background: colors.bg, borderColor: colors.border }}>
-        <span className="karma-icon">{icon}</span>
-        <span className="karma-value" style={{ color: colors.text }}>{totalKarma}</span>
-        <span className="karma-label">karma</span>
-        <style jsx>{`
-          .karma-compact {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 2px solid;
-            font-size: 14px;
-          }
-          .karma-icon { font-size: 16px; }
-          .karma-value { font-weight: 700; }
-          .karma-label { color: #6B7280; }
-        `}</style>
+      <div 
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-sm"
+        style={{ background: colors.bg, borderColor: colors.border }}
+      >
+        <span>{icon}</span>
+        <span className="font-bold" style={{ color: colors.text }}>{totalKarma}</span>
+        <span className="text-slate-500">karma</span>
       </div>
     );
   }
 
   return (
-    <div className="karma-widget" style={{ borderColor: colors.border }}>
+    <div 
+      className="rounded-2xl p-6 text-white shadow-lg"
+      style={{ background: colors.gradient }}
+    >
       {/* Header */}
-      <div className="karma-header">
-        <div className="karma-badge" style={{ background: colors.bg }}>
-          <span className="badge-icon">{icon}</span>
-          <span className="badge-level" style={{ color: colors.text }}>
-            {level.charAt(0).toUpperCase() + level.slice(1)}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold flex items-center gap-2">
+          <Sparkles className="w-5 h-5" />
+          Family Karma
+        </h3>
+        <span className="text-sm font-bold bg-white/20 px-3 py-1 rounded-full">
+          {icon} {level.toUpperCase()}
+        </span>
+      </div>
+
+      {/* Big Number */}
+      <div className="text-center py-5 bg-white/15 rounded-xl mb-4">
+        <div className="text-5xl font-bold mb-1">{totalKarma}</div>
+        <div className="text-sm opacity-90">Karma Points</div>
+      </div>
+
+      {/* Boost Badge */}
+      <div className="bg-white/20 rounded-xl p-4 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="bg-white/30 px-2 py-0.5 rounded-md text-sm font-bold">
+            ⚡ +{boostMultiplier} Boost
           </span>
         </div>
-        <div className="karma-total">
-          <span className="total-value">{totalKarma}</span>
-          <span className="total-label">Family Karma</span>
-        </div>
+        <p className="text-sm opacity-90">
+          {boostMultiplier === 0 
+            ? "Earn karma to boost your student's questions in the feed!"
+            : `Your student's questions appear ${boostMultiplier}x higher in the feed!`
+          }
+        </p>
       </div>
 
-      {/* Boost indicator */}
-      {karmaData.boost_multiplier > 0 && (
-        <div className="boost-indicator">
-          <TrendingUp className="w-4 h-4" />
-          <span>+{karmaData.boost_multiplier} boost active on student questions!</span>
-        </div>
-      )}
-
-      {/* Progress to next level */}
+      {/* Progress to Next Level */}
       {nextLevel && nextLevel.name !== 'max' && (
-        <div className="progress-section">
-          <div className="progress-header">
-            <span>Progress to {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
-            <span>{nextLevel.points_remaining} karma to go</span>
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-2 opacity-90">
+            <span>Next: {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
+            <span>{Math.round(progressPercent)}%</span>
           </div>
-          <Progress value={progressPercent} className="h-2" />
+          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-white transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <p className="text-xs opacity-75 mt-1">
+            {nextLevel.points_remaining} points to go!
+          </p>
         </div>
       )}
 
-      {/* Recent activity */}
+      {nextLevel && nextLevel.name === 'max' && (
+        <div className="bg-white/20 rounded-xl p-3 mb-4 text-center">
+          <span className="text-lg">🎉</span>
+          <span className="font-bold ml-2">MAX LEVEL REACHED!</span>
+        </div>
+      )}
+
+      {/* Recent Activity */}
       {karmaData.recent_transactions?.length > 0 && (
-        <div className="recent-activity">
-          <h5>Recent Karma</h5>
-          {karmaData.recent_transactions.slice(0, 3).map((tx, idx) => (
-            <div key={idx} className="activity-item">
-              <span className="activity-points">+{tx.points}</span>
-              <span className="activity-desc">{tx.description || tx.action_type}</span>
-            </div>
-          ))}
+        <div className="bg-white/15 rounded-xl p-4 mb-4">
+          <h4 className="font-bold text-sm mb-3 opacity-90">Recent Activity</h4>
+          <div className="space-y-2">
+            {karmaData.recent_transactions.slice(0, 3).map((tx, idx) => (
+              <div key={idx} className="flex justify-between items-center text-sm">
+                <span className="opacity-90">{getActivityLabel(tx.action_type)}</span>
+                <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+{tx.points}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* How to earn */}
-      <div className="earn-tips">
-        <h5>Earn More Karma</h5>
-        <div className="tip-item">
-          <span className="tip-points">+10</span>
-          <span>Answer a question</span>
-        </div>
-        <div className="tip-item">
-          <span className="tip-points">+5</span>
-          <span>Get an upvote</span>
-        </div>
-        <div className="tip-item">
-          <span className="tip-points">+50</span>
-          <span>Best answer selected</span>
-        </div>
-        <div className="tip-item">
-          <span className="tip-points">+25</span>
-          <span>Refer a parent</span>
+      {/* Ways to Earn */}
+      <div className="bg-white/15 rounded-xl p-4">
+        <h4 className="font-bold text-sm mb-3 opacity-90">Ways to Earn Karma:</h4>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between items-center">
+            <span>💬 Answer a question</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+10</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>⬆️ Get an upvote</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+5</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>✅ Best answer selected</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+50</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>👥 Refer a parent</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+25</span>
+          </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .karma-widget {
-          background: white;
-          border: 2px solid;
-          border-radius: 16px;
-          padding: 20px;
-        }
-
-        .karma-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-
-        .karma-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          border-radius: 24px;
-        }
-
-        .badge-icon {
-          font-size: 20px;
-        }
-
-        .badge-level {
-          font-size: 16px;
-          font-weight: 700;
-        }
-
-        .karma-total {
-          text-align: right;
-        }
-
-        .total-value {
-          font-size: 28px;
-          font-weight: 800;
-          color: #0F172A;
-          display: block;
-          line-height: 1;
-        }
-
-        .total-label {
-          font-size: 12px;
-          color: #6B7280;
-        }
-
-        .boost-indicator {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(90deg, #ECFDF5 0%, #D1FAE5 100%);
-          color: #047857;
-          padding: 10px 14px;
-          border-radius: 10px;
-          font-size: 13px;
-          font-weight: 600;
-          margin-bottom: 16px;
-        }
-
-        .progress-section {
-          margin-bottom: 16px;
-        }
-
-        .progress-header {
-          display: flex;
-          justify-content: space-between;
-          font-size: 12px;
-          color: #6B7280;
-          margin-bottom: 6px;
-        }
-
-        .recent-activity {
-          border-top: 1px solid #F3F4F6;
-          padding-top: 16px;
-          margin-bottom: 16px;
-        }
-
-        .recent-activity h5, .earn-tips h5 {
-          font-size: 12px;
-          font-weight: 700;
-          color: #9CA3AF;
-          text-transform: uppercase;
-          margin: 0 0 10px 0;
-        }
-
-        .activity-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 13px;
-          margin-bottom: 6px;
-        }
-
-        .activity-points {
-          color: #10B981;
-          font-weight: 700;
-        }
-
-        .activity-desc {
-          color: #6B7280;
-        }
-
-        .earn-tips {
-          border-top: 1px solid #F3F4F6;
-          padding-top: 16px;
-        }
-
-        .tip-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 13px;
-          margin-bottom: 6px;
-        }
-
-        .tip-points {
-          background: #F0FDF4;
-          color: #15803D;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-weight: 700;
-          font-size: 12px;
-        }
-
-        @media (max-width: 640px) {
-          .karma-header {
-            flex-direction: column;
-            gap: 12px;
-            align-items: flex-start;
-          }
-
-          .karma-total {
-            text-align: left;
-          }
-        }
-      `}</style>
     </div>
   );
+}
+
+function getActivityLabel(actionType) {
+  const labels = {
+    'answer': '💬 Answered question',
+    'upvote_received': '⬆️ Answer upvoted',
+    'best_answer': '✅ Best answer',
+    'referral': '👥 Referred parent'
+  };
+  return labels[actionType] || actionType;
 }
