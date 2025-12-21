@@ -51,64 +51,71 @@ export default function MessageComposer() {
 
   const loadConversation = async () => {
     setLoading(true);
+    console.log('🔍 MessageComposer: Loading conversation for recipientId:', recipientId);
+    
+    let recipientUser = null;
+    
+    // PRIORITY 1: Check Match records for cached parent info (most reliable - no RLS issues)
     try {
-      let recipientUser = null;
-      
-      // PRIORITY 1: Check Match records for cached parent info (most reliable - no RLS issues)
-      try {
-        const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
-        if (matches?.length > 0 && matches[0].parent_email) {
-          recipientUser = {
-            id: recipientId,
-            email: matches[0].parent_email,
-            full_name: matches[0].parent_name,
-            persona: 'parent',
-            job_title: matches[0].parent_role,
-            current_company: matches[0].parent_company
-          };
-          console.log('Found recipient from Match cache:', recipientUser.email);
-        }
-      } catch (e) {
-        console.log('Match lookup failed:', e);
-      }
-      
-      // PRIORITY 2: Look up from ParentExpertise (has open read RLS for gators)
-      if (!recipientUser) {
-        try {
-          const expertise = await base44.entities.ParentExpertise.filter({ parent_id: recipientId });
-          if (expertise?.length > 0 && expertise[0].parent_email) {
-            recipientUser = {
-              id: recipientId,
-              email: expertise[0].parent_email,
-              full_name: expertise[0].parent_name,
-              persona: 'parent',
-              job_title: expertise[0].current_role,
-              current_company: expertise[0].current_company
-            };
-            console.log('Found recipient from ParentExpertise:', recipientUser.email);
-          }
-        } catch (e) {
-          console.log('ParentExpertise lookup failed:', e);
-        }
-      }
-      
-      // PRIORITY 3: Check if recipientId is already an email
-      if (!recipientUser && recipientId.includes('@')) {
+      console.log('🔍 Trying Match lookup...');
+      const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
+      if (matches?.length > 0 && matches[0].parent_email) {
         recipientUser = {
           id: recipientId,
-          email: recipientId,
-          full_name: recipientId.split('@')[0],
-          persona: 'parent'
+          email: matches[0].parent_email,
+          full_name: matches[0].parent_name,
+          persona: 'parent',
+          job_title: matches[0].parent_role,
+          current_company: matches[0].parent_company
         };
-        console.log('Using recipientId as email:', recipientUser.email);
+        console.log('✅ Found recipient from Match cache:', recipientUser.email);
       }
-
-      if (recipientUser) {
-        setRecipient(recipientUser);
+    } catch (e) {
+      console.log('⚠️ Match lookup failed:', e.message);
+    }
+    
+    // PRIORITY 2: Look up from ParentExpertise (has open read RLS for gators)
+    if (!recipientUser) {
+      try {
+        console.log('🔍 Trying ParentExpertise lookup...');
+        const expertise = await base44.entities.ParentExpertise.filter({ parent_id: recipientId });
+        if (expertise?.length > 0 && expertise[0].parent_email) {
+          recipientUser = {
+            id: recipientId,
+            email: expertise[0].parent_email,
+            full_name: expertise[0].parent_name,
+            persona: 'parent',
+            job_title: expertise[0].current_role,
+            current_company: expertise[0].current_company
+          };
+          console.log('✅ Found recipient from ParentExpertise:', recipientUser.email);
+        }
+      } catch (e) {
+        console.log('⚠️ ParentExpertise lookup failed:', e.message);
       }
+    }
+    
+    // PRIORITY 3: Check if recipientId is already an email
+    if (!recipientUser && recipientId && recipientId.includes('@')) {
+      recipientUser = {
+        id: recipientId,
+        email: recipientId,
+        full_name: recipientId.split('@')[0],
+        persona: 'parent'
+      };
+      console.log('✅ Using recipientId as email:', recipientUser.email);
+    }
 
-      // Load existing messages between these users
-      if (recipientUser?.email) {
+    if (recipientUser) {
+      setRecipient(recipientUser);
+      console.log('✅ Recipient set:', recipientUser.full_name, recipientUser.email);
+    } else {
+      console.log('❌ No recipient found for id:', recipientId);
+    }
+
+    // Load existing messages between these users
+    if (recipientUser?.email) {
+      try {
         const sentMessages = await Message.filter({
           sender_email: user.email,
           recipient_email: recipientUser.email
@@ -129,15 +136,19 @@ export default function MessageComposer() {
         // Mark received messages as read
         for (const msg of receivedMessages || []) {
           if (!msg.is_read) {
-            await Message.update(msg.id, { is_read: true });
+            try {
+              await Message.update(msg.id, { is_read: true });
+            } catch (e) {
+              console.log('Could not mark message as read:', e.message);
+            }
           }
         }
+      } catch (e) {
+        console.log('⚠️ Failed to load messages:', e.message);
       }
-    } catch (error) {
-      console.error('Failed to load conversation:', error);
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const handleSend = async () => {
