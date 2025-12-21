@@ -1,125 +1,127 @@
-import Onboarding from './pages/Onboarding';
-import ProfileEdit from './pages/ProfileEdit';
-import WelcomeRole from './pages/WelcomeRole';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import CookiePolicy from './pages/CookiePolicy';
-import HelpCenter from './pages/HelpCenter';
-import FAQ from './pages/FAQ';
-import ParentResources from './pages/ParentResources';
 import About from './pages/About';
-import Contact from './pages/Contact';
-import BrandAmbassador from './pages/BrandAmbassador';
-import ParentCommunities from './pages/ParentCommunities';
-import Favorites from './pages/Favorites';
-import PreAuth from './pages/PreAuth';
-import PaymentSuccess from './pages/PaymentSuccess';
-import PaymentCancel from './pages/PaymentCancel';
-import ConnectHub from './pages/ConnectHub';
-import LandingPage from './pages/LandingPage';
-import MyReferrals from './pages/MyReferrals';
-import SuccessStories from './pages/SuccessStories';
-import StudentOnboarding from './pages/StudentOnboarding';
 import AdminDashboard from './pages/AdminDashboard';
-import AuthTest from './pages/AuthTest';
-import MagicLogin from './pages/MagicLogin';
-import RegistrationSuccess from './pages/RegistrationSuccess';
-import DebugVerification from './pages/DebugVerification';
 import AdminEmail from './pages/AdminEmail';
-import ParentDashboard from './pages/ParentDashboard';
+import AdminReferrals from './pages/AdminReferrals';
+import AdminSetup from './pages/AdminSetup';
+import AuthTest from './pages/AuthTest';
+import BrandAmbassador from './pages/BrandAmbassador';
+import CareerWishlist from './pages/CareerWishlist';
+import CompanyProfile from './pages/CompanyProfile';
+import ConnectHub from './pages/ConnectHub';
+import Connections from './pages/Connections';
+import Contact from './pages/Contact';
+import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
+import DebugVerification from './pages/DebugVerification';
+import FAQ from './pages/FAQ';
+import Favorites from './pages/Favorites';
+import GatorAuth from './pages/GatorAuth';
+import GatorDirectory from './pages/GatorDirectory';
+import GatorInviteCode from './pages/GatorInviteCode';
+import GatorParentInvite from './pages/GatorParentInvite';
+import GatorRoleSelection from './pages/GatorRoleSelection';
+import GatorWelcome from './pages/GatorWelcome';
+import HelpCenter from './pages/HelpCenter';
+import Home from './pages/Home';
+import InterviewPrep from './pages/InterviewPrep';
+import InviteRequired from './pages/InviteRequired';
+import JobSpotlightLibrary from './pages/JobSpotlightLibrary';
+import LandingPage from './pages/LandingPage';
+import MagicLogin from './pages/MagicLogin';
+import MessageComposer from './pages/MessageComposer';
+import MyApplications from './pages/MyApplications';
+import MyImpact from './pages/MyImpact';
+import MyMessages from './pages/MyMessages';
+import MyReferrals from './pages/MyReferrals';
+import MyRequests from './pages/MyRequests';
+import Notifications from './pages/Notifications';
+import Onboarding from './pages/Onboarding';
 import Opportunities from './pages/Opportunities';
+import ParentCommunities from './pages/ParentCommunities';
+import ParentDashboard from './pages/ParentDashboard';
+import ParentResources from './pages/ParentResources';
+import PaymentCancel from './pages/PaymentCancel';
+import PaymentSuccess from './pages/PaymentSuccess';
 import PostOpportunity from './pages/PostOpportunity';
 import PostRequest from './pages/PostRequest';
-import Connections from './pages/Connections';
-import GatorDirectory from './pages/GatorDirectory';
-import MyRequests from './pages/MyRequests';
-import MyImpact from './pages/MyImpact';
-import MyApplications from './pages/MyApplications';
-import TestingDashboard from './pages/TestingDashboard';
-import AdminSetup from './pages/AdminSetup';
-import JobSpotlightLibrary from './pages/JobSpotlightLibrary';
-import CareerWishlist from './pages/CareerWishlist';
-import InterviewPrep from './pages/InterviewPrep';
-import CompanyProfile from './pages/CompanyProfile';
-import MyMessages from './pages/MyMessages';
-import InviteRequired from './pages/InviteRequired';
-import RequestInvite from './pages/RequestInvite';
+import PreAuth from './pages/PreAuth';
+import Privacy from './pages/Privacy';
+import Profile from './pages/Profile';
+import ProfileEdit from './pages/ProfileEdit';
 import PublicProfile from './pages/PublicProfile';
-import ShareExpertise from './pages/ShareExpertise';
-import Notifications from './pages/Notifications';
-import GatorAuth from './pages/GatorAuth';
-import GatorRoleSelection from './pages/GatorRoleSelection';
-import GatorInviteCode from './pages/GatorInviteCode';
-import GatorWelcome from './pages/GatorWelcome';
-import GatorParentInvite from './pages/GatorParentInvite';
-import AdminReferrals from './pages/AdminReferrals';
-import MessageComposer from './pages/MessageComposer';
 import QuestionDetail from './pages/QuestionDetail';
+import RegistrationSuccess from './pages/RegistrationSuccess';
+import RequestInvite from './pages/RequestInvite';
+import ShareExpertise from './pages/ShareExpertise';
+import StudentOnboarding from './pages/StudentOnboarding';
+import SuccessStories from './pages/SuccessStories';
+import Terms from './pages/Terms';
+import TestingDashboard from './pages/TestingDashboard';
+import WelcomeRole from './pages/WelcomeRole';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Onboarding": Onboarding,
-    "ProfileEdit": ProfileEdit,
-    "WelcomeRole": WelcomeRole,
-    "Privacy": Privacy,
-    "Terms": Terms,
-    "CookiePolicy": CookiePolicy,
-    "HelpCenter": HelpCenter,
-    "FAQ": FAQ,
-    "ParentResources": ParentResources,
     "About": About,
-    "Contact": Contact,
-    "BrandAmbassador": BrandAmbassador,
-    "ParentCommunities": ParentCommunities,
-    "Favorites": Favorites,
-    "PreAuth": PreAuth,
-    "PaymentSuccess": PaymentSuccess,
-    "PaymentCancel": PaymentCancel,
-    "ConnectHub": ConnectHub,
-    "LandingPage": LandingPage,
-    "MyReferrals": MyReferrals,
-    "SuccessStories": SuccessStories,
-    "StudentOnboarding": StudentOnboarding,
     "AdminDashboard": AdminDashboard,
-    "AuthTest": AuthTest,
-    "MagicLogin": MagicLogin,
-    "RegistrationSuccess": RegistrationSuccess,
-    "DebugVerification": DebugVerification,
     "AdminEmail": AdminEmail,
-    "ParentDashboard": ParentDashboard,
+    "AdminReferrals": AdminReferrals,
+    "AdminSetup": AdminSetup,
+    "AuthTest": AuthTest,
+    "BrandAmbassador": BrandAmbassador,
+    "CareerWishlist": CareerWishlist,
+    "CompanyProfile": CompanyProfile,
+    "ConnectHub": ConnectHub,
+    "Connections": Connections,
+    "Contact": Contact,
+    "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
-    "Profile": Profile,
+    "DebugVerification": DebugVerification,
+    "FAQ": FAQ,
+    "Favorites": Favorites,
+    "GatorAuth": GatorAuth,
+    "GatorDirectory": GatorDirectory,
+    "GatorInviteCode": GatorInviteCode,
+    "GatorParentInvite": GatorParentInvite,
+    "GatorRoleSelection": GatorRoleSelection,
+    "GatorWelcome": GatorWelcome,
+    "HelpCenter": HelpCenter,
+    "Home": Home,
+    "InterviewPrep": InterviewPrep,
+    "InviteRequired": InviteRequired,
+    "JobSpotlightLibrary": JobSpotlightLibrary,
+    "LandingPage": LandingPage,
+    "MagicLogin": MagicLogin,
+    "MessageComposer": MessageComposer,
+    "MyApplications": MyApplications,
+    "MyImpact": MyImpact,
+    "MyMessages": MyMessages,
+    "MyReferrals": MyReferrals,
+    "MyRequests": MyRequests,
+    "Notifications": Notifications,
+    "Onboarding": Onboarding,
     "Opportunities": Opportunities,
+    "ParentCommunities": ParentCommunities,
+    "ParentDashboard": ParentDashboard,
+    "ParentResources": ParentResources,
+    "PaymentCancel": PaymentCancel,
+    "PaymentSuccess": PaymentSuccess,
     "PostOpportunity": PostOpportunity,
     "PostRequest": PostRequest,
-    "Connections": Connections,
-    "GatorDirectory": GatorDirectory,
-    "MyRequests": MyRequests,
-    "MyImpact": MyImpact,
-    "MyApplications": MyApplications,
-    "TestingDashboard": TestingDashboard,
-    "AdminSetup": AdminSetup,
-    "JobSpotlightLibrary": JobSpotlightLibrary,
-    "CareerWishlist": CareerWishlist,
-    "InterviewPrep": InterviewPrep,
-    "CompanyProfile": CompanyProfile,
-    "MyMessages": MyMessages,
-    "InviteRequired": InviteRequired,
-    "RequestInvite": RequestInvite,
+    "PreAuth": PreAuth,
+    "Privacy": Privacy,
+    "Profile": Profile,
+    "ProfileEdit": ProfileEdit,
     "PublicProfile": PublicProfile,
-    "ShareExpertise": ShareExpertise,
-    "Notifications": Notifications,
-    "GatorAuth": GatorAuth,
-    "GatorRoleSelection": GatorRoleSelection,
-    "GatorInviteCode": GatorInviteCode,
-    "GatorWelcome": GatorWelcome,
-    "GatorParentInvite": GatorParentInvite,
-    "AdminReferrals": AdminReferrals,
-    "MessageComposer": MessageComposer,
     "QuestionDetail": QuestionDetail,
+    "RegistrationSuccess": RegistrationSuccess,
+    "RequestInvite": RequestInvite,
+    "ShareExpertise": ShareExpertise,
+    "StudentOnboarding": StudentOnboarding,
+    "SuccessStories": SuccessStories,
+    "Terms": Terms,
+    "TestingDashboard": TestingDashboard,
+    "WelcomeRole": WelcomeRole,
 }
 
 export const pagesConfig = {

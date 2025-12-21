@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageAndHelpModal from '../components/connections/MessageAndHelpModal';
 import EnhancedGatorCard from '../components/connections/EnhancedGatorCard';
+import QuestionCard from '../components/connections/QuestionCard';
 import { useToast } from '@/components/ui/use-toast';
 import EmergingGatorsHero from '@/components/connections/EmergingGatorsHero';
 import { checkFullAccess } from '@/components/access/useAccessControl';
@@ -492,7 +493,7 @@ export default function DiscoverEmergingGatorsPage() {
             ) : (
               <>
                 <motion.div 
-                  className="profile-grid-4col"
+                  className="questions-list"
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -503,21 +504,19 @@ export default function DiscoverEmergingGatorsPage() {
                     }
                   }}
                 >
-                  {console.log('🟡 [Connections] Rendering cards with hideEngagement:', showHelpModal)}
                   <AnimatePresence mode="sync">
-                    {displayedProfiles.map((profile) => (
-                      <EnhancedGatorCard
-                        key={profile.request?.id || profile.id || profile.email}
-                        gator={profile}
-                        request={profile.request}
-                        onHelp={profile.request ? () => handleOfferHelp(profile.request) : null}
-                        isFeatured={profile.isFeatured}
-                        currentUser={user}
-                        isLikedByUser={profile.request ? userLikes.get(profile.request.id) : false}
-                        likeCount={profile.request ? (likeCounts.get(profile.request.id) || 0) : 0}
-                        onLikeChange={() => { loadUserLikes(); loadLikeCounts(); }}
-                        hideEngagement={showHelpModal}
-                      />
+                    {displayedProfiles.filter(p => p.request).map((profile) => (
+                      <motion.div
+                        key={profile.request.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                      >
+                        <QuestionCard
+                          question={profile.request}
+                          gator={profile}
+                        />
+                      </motion.div>
                     ))}
                   </AnimatePresence>
                 </motion.div>
@@ -850,6 +849,12 @@ export default function DiscoverEmergingGatorsPage() {
 
         .profile-grid-section {
           min-height: 600px;
+        }
+
+        .questions-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
         }
 
         .profile-grid-4col {
