@@ -25,8 +25,15 @@ export default function QuestionDetailPage() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedAnswerAuthor, setSelectedAnswerAuthor] = useState(null);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('QuestionDetail - params:', params);
+    console.log('QuestionDetail - questionId:', questionId);
+  }, [params, questionId]);
+
   useEffect(() => {
     if (questionId) {
+      console.log('Loading question with ID:', questionId);
       loadQuestion();
     }
   }, [questionId]);
