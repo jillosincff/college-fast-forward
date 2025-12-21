@@ -434,18 +434,6 @@ Or: My son wants to drop out and start a business. How worried should I be?"
 
           {/* Form */}
           <div className="space-y-6">
-            {/* Referral Code - At Top */}
-            <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4">
-              <Label className="text-sm font-medium text-slate-600">Have a referral code?</Label>
-              <p className="text-xs text-slate-500 mb-2">Drop it here to give your friend credit! 🎁</p>
-              <Input
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value.toUpperCase().slice(0, 20))}
-                placeholder="Enter code (optional)"
-                className="max-w-xs bg-white"
-              />
-            </div>
-
             {/* Full Name */}
             <div>
               <Label className="text-sm font-semibold text-slate-700">Full Name *</Label>
