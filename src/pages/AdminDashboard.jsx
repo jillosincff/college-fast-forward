@@ -630,6 +630,12 @@ const AdminDashboard = () => {
                 </span>
               )}
             </TabsTrigger>
+            <TabsTrigger 
+              value="referrals" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white"
+            >
+              🎁 Referrals
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
@@ -1017,6 +1023,18 @@ const AdminDashboard = () => {
             {/* Founding Circle Applications Tab */}
             <TabsContent value="founding-circle" className="space-y-6">
               <FoundingCircleApplicationsManager />
+            </TabsContent>
+
+            {/* Referrals Tab */}
+            <TabsContent value="referrals" className="space-y-6">
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <p className="text-slate-600 mb-4">View detailed referral tracking and analytics</p>
+                  <Button onClick={() => navigate('AdminReferrals')} className="bg-orange-500 hover:bg-orange-600">
+                    🎁 Open Referral Dashboard
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         )}
