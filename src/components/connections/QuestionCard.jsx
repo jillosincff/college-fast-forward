@@ -115,7 +115,7 @@ export default function QuestionCard({ question, gator }) {
 
       {/* Single action button */}
       <button className="card-action-button">
-        View Question & Answers →
+        {(question.answer_count || 0) === 0 ? 'Be the First to Answer →' : 'View Question & Answers →'}
       </button>
 
       <style jsx>{`
