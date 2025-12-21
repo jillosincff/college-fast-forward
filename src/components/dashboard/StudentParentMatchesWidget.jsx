@@ -82,16 +82,21 @@ function ParentMatchCard({ match, user, onMessageSent }) {
               ))}
             </div>
 
+            {/* Match reasons from algorithm */}
+            {match.match_reasons && match.match_reasons.length > 0 && (
+              <div className="mt-2 text-xs text-slate-600 space-y-0.5">
+                {match.match_reasons.slice(0, 3).map((reason, i) => (
+                  <p key={i}>{reason}</p>
+                ))}
+              </div>
+            )}
+
             <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-              {match.match_score && (
+              {match.match_percentage && (
                 <span className="flex items-center gap-1">
-                  Match: <span className="font-semibold text-purple-600">{match.match_score}%</span>
+                  Match: <span className="font-semibold text-purple-600">{match.match_percentage}%</span>
                 </span>
               )}
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                Responds: &lt;24h
-              </span>
             </div>
           </div>
 
