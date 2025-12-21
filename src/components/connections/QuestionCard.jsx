@@ -14,16 +14,61 @@ const HELP_TYPE_LABELS = {
 
 // Helper function to format student name (first name + last initial)
 function formatStudentName(fullName) {
-  if (!fullName) return 'Anonymous';
+  if (!fullName || fullName === 'A Gator') return 'A Gator';
   
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 0) return 'Anonymous';
+  let name = fullName.trim();
+  
+  // Check if it looks like an email username (no spaces, all lowercase, or contains numbers mixed with letters)
+  const looksLikeUsername = !name.includes(' ') && (
+    name === name.toLowerCase() || 
+    /^[a-z]+[0-9]+$/.test(name) ||
+    /^[a-z]{2,}[a-z]$/.test(name)
+  );
+  
+  if (looksLikeUsername) {
+    // Try to extract first name from username patterns like "lindseyosinoff", "gordonkatherine"
+    // Common pattern: firstname + lastname concatenated
+    // Use common first names to split, or just capitalize and show first part
+    
+    // Try to find a natural split point (where a capital might have been)
+    // For now, just take first 6-8 chars and capitalize as a first name
+    const possibleFirstName = name.slice(0, Math.min(name.length, 8));
+    const capitalized = possibleFirstName.charAt(0).toUpperCase() + possibleFirstName.slice(1);
+    
+    // If it's very short, might be initials like "ypatel" -> "Y."
+    if (name.length <= 6) {
+      return capitalized.charAt(0).toUpperCase() + '.';
+    }
+    
+    // Try to detect common name patterns
+    const commonFirstNames = ['lindsey', 'gordon', 'sarah', 'john', 'michael', 'david', 'james', 'robert', 'jennifer', 'jessica', 'ashley', 'emily', 'daniel', 'matthew', 'andrew', 'joshua', 'christopher', 'anthony', 'mark', 'steven', 'brian', 'kevin', 'jason', 'ryan', 'jacob', 'gary', 'nicholas', 'eric', 'stephen', 'jonathan', 'larry', 'scott', 'frank', 'raymond', 'gregory', 'samuel', 'patrick', 'alexander', 'jack', 'dennis', 'jerry', 'tyler', 'aaron', 'henry', 'douglas', 'peter', 'adam', 'nathan', 'zachary', 'walter', 'kyle', 'harold', 'carl', 'arthur', 'gerald', 'roger', 'keith', 'jeremy', 'lawrence', 'terry', 'sean', 'austin', 'christian', 'albert', 'joe', 'willie', 'billy', 'bruce', 'ralph', 'roy', 'eugene', 'randy', 'russell', 'bobby', 'harry', 'vincent', 'louis', 'philip', 'mary', 'patricia', 'elizabeth', 'barbara', 'susan', 'margaret', 'dorothy', 'lisa', 'nancy', 'karen', 'betty', 'helen', 'sandra', 'donna', 'carol', 'ruth', 'sharon', 'michelle', 'laura', 'kimberly', 'deborah', 'stephanie', 'cynthia', 'amy', 'angela', 'melissa', 'brenda', 'anna', 'rebecca', 'virginia', 'kathleen', 'pamela', 'martha', 'debra', 'amanda', 'catherine', 'christine', 'marie', 'janet', 'frances', 'ann', 'joyce', 'diane', 'alice', 'julie', 'heather', 'teresa', 'gloria', 'evelyn', 'jean', 'cheryl', 'mildred', 'katherine', 'joan', 'ashley', 'judith', 'rose', 'janice', 'kelly', 'nicole', 'judy', 'christina', 'rachel', 'victoria', 'lauren', 'samantha', 'emma', 'olivia', 'ava', 'sophia', 'isabella', 'mia', 'charlotte', 'amelia', 'harper', 'evelyn'];
+    
+    for (const firstName of commonFirstNames) {
+      if (name.toLowerCase().startsWith(firstName)) {
+        const rest = name.slice(firstName.length);
+        if (rest.length > 0) {
+          return firstName.charAt(0).toUpperCase() + firstName.slice(1) + ' ' + rest.charAt(0).toUpperCase() + '.';
+        }
+        return firstName.charAt(0).toUpperCase() + firstName.slice(1);
+      }
+    }
+    
+    // Fallback: just show "A Gator" for unrecognizable usernames
+    return 'A Gator';
+  }
+  
+  // Normal name with spaces
+  const parts = name.split(/\s+/);
+  if (parts.length === 0) return 'A Gator';
   
   const firstName = parts[0];
   const lastName = parts.length > 1 ? parts[parts.length - 1] : '';
   const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
   
-  return `${firstName} ${lastInitial}`.trim();
+  // Capitalize first name properly
+  const capitalizedFirst = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  
+  return `${capitalizedFirst} ${lastInitial}`.trim();
 }
 
 export default function QuestionCard({ question, gator }) {
