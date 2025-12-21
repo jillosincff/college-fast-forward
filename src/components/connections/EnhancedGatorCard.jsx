@@ -289,8 +289,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           />
         </div>
 
-        {/* Student Details */}
+        {/* User Details */}
         <div className="card-content">
+          {/* Poster Type Badge */}
+          {request?.poster_type && request.poster_type !== 'student' && (
+            <div className="poster-type-badge-container">
+              <span className={`poster-type-badge poster-type-${request.poster_type}`}>
+                {request.poster_type === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+              </span>
+            </div>
+          )}
+          
           {/* Name with LinkedIn */}
           <div className="name-section">
             <h3 className="student-name-enhanced">{fullName}</h3>
@@ -306,11 +315,23 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
             )}
           </div>
           
-          {/* Academic Info */}
+          {/* Academic Info - different display based on poster type */}
           <div className="academic-info">
-            <span className="graduation-year">{graduationYear}</span>
-            {major && <span className="major-separator">•</span>}
-            <span className="major-field">{major}</span>
+            {request?.poster_type === 'parent' ? (
+              <span className="graduation-year">UF Parent</span>
+            ) : request?.poster_type === 'alumni' ? (
+              <>
+                <span className="graduation-year">{gator.graduation_year ? `Class of ${gator.graduation_year}` : 'UF Alumni'}</span>
+                {major && major !== 'Undeclared' && <span className="major-separator">•</span>}
+                {major && major !== 'Undeclared' && <span className="major-field">{major}</span>}
+              </>
+            ) : (
+              <>
+                <span className="graduation-year">{graduationYear}</span>
+                {major && <span className="major-separator">•</span>}
+                <span className="major-field">{major}</span>
+              </>
+            )}
           </div>
 
           {/* Intent, Role, and Location Line */}
