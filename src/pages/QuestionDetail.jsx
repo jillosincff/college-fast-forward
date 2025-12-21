@@ -43,9 +43,11 @@ export default function QuestionDetailPage() {
       
       // Look for the question in both entities
       let q = helpRequests.find(question => question.id === questionId);
+      let questionSource = 'HelpRequest';
       
       if (!q) {
         q = jobRequests.find(question => question.id === questionId);
+        questionSource = 'JobRequest';
       }
       
       if (!q) {
@@ -57,7 +59,16 @@ export default function QuestionDetailPage() {
         return;
       }
       
-      setQuestion(q);
+      // Normalize the question object to have consistent field names
+      // JobRequest uses comments_count instead of answer_count
+      const normalizedQuestion = {
+        ...q,
+        _source: questionSource,
+        answer_count: q.answer_count ?? q.comments_count ?? 0,
+        view_count: q.view_count ?? q.views_count ?? 0
+      };
+      
+      setQuestion(normalizedQuestion);
 
       // Increment view count - try both entities since we don't know which one it came from
       try {
