@@ -13,7 +13,9 @@ import { getUserCount } from '@/functions/getUserCount';
 import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCard';
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 
+// CACHE BUSTER v2 - 2025-12-21
 export default function Dashboard() {
+  console.log('🟢🟢🟢 DASHBOARD COMPONENT MOUNTED v2');
   const { user, isLoading, refreshUser } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
   const [messages, setMessages] = useState([]);
