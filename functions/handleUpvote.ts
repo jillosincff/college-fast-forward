@@ -84,6 +84,23 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Award karma to the answer author's family
+      try {
+        const answerAuthor = await base44.asServiceRole.entities.User.filter({ id: answer.answerer_user_id });
+        if (answerAuthor.length > 0 && answerAuthor[0].family_group_id) {
+          await base44.functions.invoke('awardKarma', {
+            familyGroupId: answerAuthor[0].family_group_id,
+            parentUserId: answer.answerer_user_id,
+            parentEmail: answer.answerer_email,
+            actionType: 'upvote_received',
+            referenceId: answerId,
+            description: 'Answer upvoted'
+          });
+        }
+      } catch (karmaErr) {
+        console.log('Karma award failed (non-critical):', karmaErr.message);
+      }
+
       return Response.json({ 
         success: true, 
         upvote_count: newCount,
