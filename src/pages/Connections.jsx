@@ -334,6 +334,34 @@ export default function DiscoverEmergingGatorsPage() {
         {/* Search and Filters - Sticky */}
         <div className="filters-section-sticky" id="listings-section">
           <div className="filters-container-compact">
+            {/* Quick Filter Pills */}
+            <div className="quick-filter-pills">
+              <button
+                className={`quick-pill ${filters.questionType === 'student' ? 'active' : ''}`}
+                onClick={() => setFilters({...filters, questionType: 'student'})}
+              >
+                🎓 Student Questions
+              </button>
+              <button
+                className={`quick-pill ${filters.questionType === 'parent' ? 'active' : ''}`}
+                onClick={() => setFilters({...filters, questionType: 'parent'})}
+              >
+                👨‍👩‍👧 Parent Questions
+              </button>
+              <button
+                className={`quick-pill ${filters.questionType === 'alumni' ? 'active' : ''}`}
+                onClick={() => setFilters({...filters, questionType: 'alumni'})}
+              >
+                🎯 Alumni Questions
+              </button>
+              <button
+                className={`quick-pill ${filters.questionType === 'all' ? 'active' : ''}`}
+                onClick={() => setFilters({...filters, questionType: 'all'})}
+              >
+                🌟 All Questions
+              </button>
+            </div>
+
             <div className="search-and-actions">
               {/* Search Bar */}
               <div className="search-wrapper-compact">
