@@ -424,6 +424,7 @@ export default function GatorAuth() {
         }
         
         addLog('🎯 Navigating to GatorWelcome');
+        setIsTransitioning(true);
         navigate('GatorWelcome');
       })();
       return;
