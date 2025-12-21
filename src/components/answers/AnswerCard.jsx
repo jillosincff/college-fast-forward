@@ -27,11 +27,18 @@ export default function AnswerCard({
       if (!currentUser?.id || !answer?.id) return;
       
       try {
-        const existing = await Upvote.filter({
-          answer_id: answer.id,
-          user_id: currentUser.id
+        // Use backend function to check upvote status (bypasses RLS)
+        const response = await base44.functions.invoke('handleUpvote', {
+          answerId: answer.id,
+          action: 'check'
         });
-        setUpvoted(existing.length > 0);
+        
+        if (response?.data) {
+          setUpvoted(response.data.hasUpvoted || false);
+          if (typeof response.data.upvote_count === 'number') {
+            setUpvoteCount(response.data.upvote_count);
+          }
+        }
       } catch (err) {
         console.error('Failed to check upvote status:', err);
       }
