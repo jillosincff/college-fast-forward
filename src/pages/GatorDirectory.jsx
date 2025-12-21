@@ -91,10 +91,14 @@ export default function GatorDirectory() {
       const validUsers = responseData.data.filter(u => u && u.full_name && u.persona);
       setAllUsers(validUsers);
       
-      // Calculate persona breakdown
-      const studentCount = validUsers.filter(u => u.persona === 'student' || u.persona === 'gator').length;
-      const alumniCount = validUsers.filter(u => u.persona === 'alumni').length;
-      const parentCount = validUsers.filter(u => u.persona === 'parent').length;
+      // Calculate persona breakdown - handle both 'student' and 'gator' personas
+      const studentCount = validUsers.filter(u => 
+        u.persona === 'student' || 
+        u.persona === 'gator' || 
+        (u.roles && (u.roles.includes('student') || u.roles.includes('gator')))
+      ).length;
+      const alumniCount = validUsers.filter(u => u.persona === 'alumni' || (u.roles && u.roles.includes('alumni'))).length;
+      const parentCount = validUsers.filter(u => u.persona === 'parent' || (u.roles && u.roles.includes('parent'))).length;
       
       setStats(prev => ({ 
         ...prev, 
