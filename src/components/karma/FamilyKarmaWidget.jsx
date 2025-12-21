@@ -78,13 +78,14 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
   }
 
   if (!karmaData || !karmaData.family_group_id) {
-    // No family group - show starter widget with connect CTA
+    // No family group - show starter widget with connect CTA (COMPACT LAYOUT)
     const level = 'bronze';
     const colors = LEVEL_COLORS[level];
+    const threshold = LEVEL_THRESHOLDS[level];
     
     return (
       <div 
-        className="rounded-2xl p-8 shadow-xl relative overflow-hidden"
+        className="rounded-2xl p-6 shadow-xl relative overflow-hidden"
         style={{ background: colors.gradient, color: colors.text }}
       >
         {/* Pattern overlay */}
@@ -94,68 +95,81 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
         
         <div className="relative z-10">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold flex items-center gap-2">
-              <Sparkles className="w-6 h-6" />
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
               Family Karma
             </h3>
-            <span className="text-sm font-bold bg-white/25 backdrop-blur px-4 py-1.5 rounded-full">
+            <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full">
               {LEVEL_ICONS[level]} BRONZE
             </span>
           </div>
 
-          {/* Big Number */}
-          <div className="text-center py-8 bg-white/15 backdrop-blur rounded-xl mb-6">
-            <div className="text-6xl font-bold mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
-            <div className="text-lg opacity-90 font-semibold">Karma Points</div>
+          {/* COMPACT: Two-column layout - Points LEFT, Ways to Earn RIGHT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Left: Karma Points */}
+            <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
+              <div className="text-5xl font-bold mb-1 text-center" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
+              <div className="text-sm opacity-90 font-semibold text-center mb-3">Karma Points</div>
+              
+              {/* Progress to Silver */}
+              <div className="mt-2">
+                <div className="flex justify-between text-xs opacity-80 mb-1">
+                  <span>Progress to Silver</span>
+                  <span>0/{threshold.max}</span>
+                </div>
+                <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full" style={{ width: '0%' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Ways to Earn */}
+            <div className="bg-white/15 backdrop-blur rounded-xl p-4">
+              <h4 className="font-bold text-xs mb-2 opacity-90">Ways to Earn:</h4>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span>💬 Answer a question</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+10</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>⬆️ Get an upvote</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+5</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>✅ Best answer selected</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+50</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>👥 Refer a parent</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+25</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Connect CTA */}
-          <div className="bg-white/20 backdrop-blur border-2 border-white/30 rounded-xl p-5 mb-6">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-2xl">🔗</span>
-              <span className="font-bold text-lg">Connect with your Gator!</span>
+          {/* Connect CTA - More Compact */}
+          <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">🔗</span>
+              <span className="font-bold text-sm">Connect with your Gator!</span>
             </div>
-            <p className="text-sm opacity-90 mb-4">
-              Link your student account to start earning karma and boost their questions in the feed!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 onClick={onSearchStudent}
-                className="flex-1 bg-white/30 hover:bg-white/40 text-current border-2 border-white/40 font-bold"
+                size="sm"
+                className="flex-1 bg-white/30 hover:bg-white/40 text-current border border-white/40 font-bold text-xs"
               >
                 Search & Link Student
               </Button>
               <Button 
                 onClick={onInviteStudent}
+                size="sm"
                 variant="outline"
-                className="flex-1 bg-transparent hover:bg-white/20 text-current border-2 border-white/40 font-bold"
+                className="flex-1 bg-transparent hover:bg-white/20 text-current border border-white/40 font-bold text-xs"
               >
                 Send Invite
               </Button>
-            </div>
-          </div>
-
-          {/* Ways to Earn */}
-          <div className="bg-white/15 backdrop-blur rounded-xl p-5">
-            <h4 className="font-bold text-sm mb-4 opacity-90">Ways to Earn Karma:</h4>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center">
-                <span>💬 Answer a question</span>
-                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+10</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>⬆️ Get an upvote</span>
-                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+5</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>✅ Best answer selected</span>
-                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+50</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>👥 Refer a parent</span>
-                <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+25</span>
-              </div>
             </div>
           </div>
         </div>
