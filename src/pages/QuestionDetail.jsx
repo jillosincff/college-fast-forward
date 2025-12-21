@@ -110,15 +110,23 @@ export default function QuestionDetailPage() {
       
       setQuestion(normalizedQuestion);
 
-      // Increment view count silently
-      if (questionSource === 'HelpRequest') {
-        HelpRequest.update(questionId, { 
-          view_count: normalizedQuestion.view_count + 1 
-        }).catch(() => {});
-      } else {
-        JobRequest.update(questionId, { 
-          views_count: normalizedQuestion.view_count + 1 
-        }).catch(() => {});
+      // Track view in session storage to avoid counting multiple views from same user
+      const viewKey = `viewed_${questionId}`;
+      const hasViewed = sessionStorage.getItem(viewKey);
+      
+      if (!hasViewed) {
+        sessionStorage.setItem(viewKey, 'true');
+        
+        // Try to increment view count - will fail due to RLS but that's ok
+        if (questionSource === 'HelpRequest') {
+          HelpRequest.update(questionId, { 
+            view_count: normalizedQuestion.view_count + 1 
+          }).catch(() => console.log('View count update skipped (RLS)'));
+        } else {
+          JobRequest.update(questionId, { 
+            views_count: normalizedQuestion.view_count + 1 
+          }).catch(() => console.log('View count update skipped (RLS)'));
+        }
       }
 
     } catch (err) {
