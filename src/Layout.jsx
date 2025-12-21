@@ -842,9 +842,16 @@ function AppContent() {
       return;
     }
 
-    // Skip routing if OAuth redirect is in progress
+    // Skip routing if OAuth redirect is in progress or transitioning
     if (sessionStorage.getItem('oauth_redirect_in_progress') === 'true') {
       console.log('⏸️ [Layout Routing] OAuth redirect in progress, skipping routing');
+      return;
+    }
+
+    // Skip routing if on GatorAuth - let GatorAuth handle all routing decisions
+    if (currentPage === 'GatorAuth') {
+      console.log('⏸️ [Layout Routing] On GatorAuth, letting it handle routing');
+      setResolvedPage(currentPage);
       return;
     }
 
