@@ -183,12 +183,15 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
   const totalKarma = karmaData.total_karma || 0;
   const nextLevel = karmaData.next_level;
   const boostMultiplier = karmaData.boost_multiplier || 0;
+  const threshold = LEVEL_THRESHOLDS[level];
   
   // Calculate progress to next level
   let progressPercent = 100;
+  let pointsToNext = 0;
   if (nextLevel && nextLevel.name !== 'max' && nextLevel.points_needed > 0) {
     const pointsEarned = nextLevel.points_needed - nextLevel.points_remaining;
     progressPercent = Math.min(100, (pointsEarned / nextLevel.points_needed) * 100);
+    pointsToNext = nextLevel.points_remaining;
   }
 
   if (compact) {
@@ -206,7 +209,7 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
 
   return (
     <div 
-      className="rounded-2xl p-8 shadow-xl relative overflow-hidden"
+      className="rounded-2xl p-6 shadow-xl relative overflow-hidden"
       style={{ background: colors.gradient, color: colors.text }}
     >
       {/* Pattern overlay */}
@@ -216,98 +219,83 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
       
       <div className="relative z-10">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold flex items-center gap-2">
-            <Sparkles className="w-6 h-6" />
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
             Family Karma
           </h3>
-          <span className="text-sm font-bold bg-white/25 backdrop-blur px-4 py-1.5 rounded-full">
+          <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full">
             {icon} {level.toUpperCase()}
           </span>
         </div>
 
-        {/* Big Number */}
-        <div className="text-center py-8 bg-white/15 backdrop-blur rounded-xl mb-6">
-          <div className="text-6xl font-bold mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{totalKarma}</div>
-          <div className="text-lg opacity-90 font-semibold">Karma Points</div>
-        </div>
-
-        {/* Boost Badge */}
-        <div className="bg-white/20 backdrop-blur border-2 border-white/30 rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-white/35 backdrop-blur px-3 py-1 rounded-lg text-sm font-bold">
-              ⚡ +{boostMultiplier} Boost
-            </span>
-          </div>
-          <p className="text-sm opacity-90">
-            {boostMultiplier === 0 
-              ? "Earn karma to boost your student's questions in the feed!"
-              : `Your student's questions appear ${boostMultiplier}x higher in the feed!`
-            }
-          </p>
-        </div>
-
-        {/* Progress to Next Level */}
-        {nextLevel && nextLevel.name !== 'max' && (
-          <div className="mb-6">
-            <div className="flex justify-between text-sm mb-2 opacity-90 font-medium">
-              <span>Next: {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
-              <span>{Math.round(progressPercent)}%</span>
+        {/* COMPACT: Two-column layout - Points LEFT, Ways to Earn RIGHT */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Left: Karma Points + Progress */}
+          <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
+            <div className="text-5xl font-bold mb-1 text-center" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{totalKarma}</div>
+            <div className="text-sm opacity-90 font-semibold text-center mb-3">Karma Points</div>
+            
+            {/* Boost Badge - Inline */}
+            <div className="flex justify-center mb-3">
+              <span className="bg-white/25 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold">
+                ⚡ +{boostMultiplier} Boost
+              </span>
             </div>
-            <div className="h-3 bg-white/20 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white transition-all duration-500 rounded-full"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <p className="text-sm opacity-75 mt-2">
-              {nextLevel.points_remaining} points to go!
-            </p>
-          </div>
-        )}
-
-        {nextLevel && nextLevel.name === 'max' && (
-          <div className="bg-white/25 backdrop-blur rounded-xl p-4 mb-6 text-center">
-            <span className="text-2xl">🎉</span>
-            <span className="font-bold text-lg ml-2">MAX LEVEL REACHED!</span>
-          </div>
-        )}
-
-        {/* Recent Activity */}
-        {karmaData.recent_transactions?.length > 0 && (
-          <div className="bg-white/15 backdrop-blur rounded-xl p-5 mb-6">
-            <h4 className="font-bold text-sm mb-4 opacity-90">Recent Activity</h4>
-            <div className="space-y-3">
-              {karmaData.recent_transactions.slice(0, 3).map((tx, idx) => (
-                <div key={idx} className="flex justify-between items-center text-sm">
-                  <span className="opacity-90">{getActivityLabel(tx.action_type)}</span>
-                  <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+{tx.points}</span>
+            
+            {/* Progress to Next Level */}
+            {nextLevel && nextLevel.name !== 'max' ? (
+              <div>
+                <div className="flex justify-between text-xs opacity-80 mb-1">
+                  <span>Progress to {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
+                  <span>{totalKarma}/{threshold.max}</span>
                 </div>
-              ))}
-            </div>
+                <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                </div>
+                <p className="text-xs opacity-75 mt-1 text-center">{pointsToNext} points to go!</p>
+              </div>
+            ) : (
+              <div className="text-center text-xs">
+                <span>🎉</span> <span className="font-bold">MAX LEVEL!</span>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Ways to Earn */}
-        <div className="bg-white/15 backdrop-blur rounded-xl p-5">
-          <h4 className="font-bold text-sm mb-4 opacity-90">Ways to Earn Karma:</h4>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between items-center">
-              <span>💬 Answer a question</span>
-              <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+10</span>
+          {/* Right: Ways to Earn */}
+          <div className="bg-white/15 backdrop-blur rounded-xl p-4">
+            <h4 className="font-bold text-xs mb-2 opacity-90">Ways to Earn:</h4>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span>💬 Answer a question</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+10</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>⬆️ Get an upvote</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+5</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>✅ Best answer selected</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+50</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>👥 Refer a parent</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+25</span>
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span>⬆️ Get an upvote</span>
-              <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+5</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>✅ Best answer selected</span>
-              <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+50</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>👥 Refer a parent</span>
-              <span className="bg-white/25 px-3 py-1 rounded-full font-bold">+25</span>
-            </div>
+            
+            {/* Recent Activity - Compact */}
+            {karmaData.recent_transactions?.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-white/20">
+                <h4 className="font-bold text-xs mb-1.5 opacity-90">Recent:</h4>
+                {karmaData.recent_transactions.slice(0, 2).map((tx, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-xs mb-1">
+                    <span className="opacity-90 truncate">{getActivityLabel(tx.action_type)}</span>
+                    <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold ml-2">+{tx.points}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
