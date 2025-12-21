@@ -98,28 +98,40 @@ export default function Dashboard() {
       
       if (foundRequest) {
         // Primary: Get matches by help_request_id (most reliable)
+        console.log('📊 Fetching matches for help_request_id:', foundRequest.id);
         studentMatches = await base44.entities.Match.filter(
           { help_request_id: foundRequest.id },
           '-match_score',
           50
         );
-        console.log('📊 Matches by help_request_id:', studentMatches?.length || 0);
+        console.log('📊 Matches by help_request_id:', studentMatches?.length || 0, studentMatches);
       }
       
-      // Fallback: Try by user.id if no matches found
+      // Fallback: Try by student_id from the request (NOT user.id which may differ)
+      if ((!studentMatches || studentMatches.length === 0) && foundRequest?.student_id) {
+        console.log('📊 Trying student_id from request:', foundRequest.student_id);
+        studentMatches = await base44.entities.Match.filter(
+          { student_id: foundRequest.student_id },
+          '-match_score',
+          50
+        );
+        console.log('📊 Matches by request.student_id:', studentMatches?.length || 0);
+      }
+      
+      // Final fallback: Try by current user.id
       if ((!studentMatches || studentMatches.length === 0)) {
         studentMatches = await base44.entities.Match.filter(
           { student_id: user.id },
           '-match_score',
           50
         );
-        console.log('📊 Matches by student_id fallback:', studentMatches?.length || 0);
+        console.log('📊 Matches by user.id fallback:', studentMatches?.length || 0);
       }
       
       const activeMatches = (studentMatches || []).filter(m => 
         m.status === 'pending' || m.status === 'student_connected'
       );
-      console.log('📊 Dashboard matches found:', activeMatches.length, 'for user:', user.email);
+      console.log('📊 Dashboard final matches:', activeMatches.length, 'for user:', user.email);
       setMatches(activeMatches);
 
       // Count active requests for stats
