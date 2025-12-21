@@ -536,6 +536,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
               isSubmitting={isSubmitting}
               user={user}
               initialData={initialData}
+              isParentQuestion={isParentQuestion}
             />
           </div>
         </div>
