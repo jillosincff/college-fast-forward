@@ -359,97 +359,101 @@ export default function ParentDashboard() {
           onInviteStudent={() => setShowInviteModal(true)}
         />
 
-        {/* 4. Four Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 4. Four Action Cards - Compact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Complete Profile */}
           <div 
             ref={el => actionCardsRef.current[0] = el}
-            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
-            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
+            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
           >
-            <div className="text-5xl mb-4">🐊</div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
-              Complete Your Parent Profile
+            <div className="text-3xl mb-2">🐊</div>
+            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+              Complete Your Profile
             </h3>
-            <p className="text-sm text-slate-600 mb-4">
-              Add your company, industry, and LinkedIn.<br />
-              <span className="font-semibold">The stronger your profile → the more your kid's profile gets boosted</span>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              Add company & LinkedIn.<br />
+              <span className="font-semibold">Stronger profile = more boost</span>
             </p>
             <Button
               onClick={() => navigate('ProfileEdit')}
-              className="rounded-full px-6 py-2 font-bold text-sm"
+              size="sm"
+              className="rounded-full px-4 py-1.5 font-bold text-xs"
               style={{ backgroundColor: '#0021A5' }}
             >
-              Update Your Profile →
+              Update Profile →
             </Button>
           </div>
 
           {/* Card 2: Answer Questions */}
           <div 
             ref={el => actionCardsRef.current[1] = el}
-            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
-            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
+            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
           >
-            <div className="text-5xl mb-4">💬</div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
-              Answer Student Questions
+            <div className="text-3xl mb-2">💬</div>
+            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+              Answer Questions
             </h3>
-            <p className="text-sm text-slate-600 mb-4">
-              A student asks "How do I break into consulting?"<br />
-              You reply → <strong>your kid's profile gets boosted</strong>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              Help students with career advice.<br />
+              <span className="font-semibold">Your kid gets boosted!</span>
             </p>
             <Button
               onClick={() => navigate('Connections')}
-              className="rounded-full px-6 py-2 font-bold text-sm"
+              size="sm"
+              className="rounded-full px-4 py-1.5 font-bold text-xs"
               style={{ backgroundColor: '#0021A5' }}
             >
               Browse Questions →
             </Button>
           </div>
 
-          {/* Card 2.5: Ask Your Own Question */}
+          {/* Card 3: Ask Your Own Question */}
           <div 
             ref={el => actionCardsRef.current[3] = el}
-            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow border-2 border-orange-200"
-            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
+            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow border border-orange-200"
+            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
           >
-            <div className="text-5xl mb-4">❓</div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: '#FA4616' }}>
-              Ask Your Own Question
+            <div className="text-3xl mb-2">❓</div>
+            <h3 className="text-sm font-bold mb-1" style={{ color: '#FA4616' }}>
+              Ask a Question
             </h3>
-            <p className="text-sm text-slate-600 mb-4">
-              Wondering about something? Post a question for the community!<br />
-              <span className="font-semibold">Other parents & alumni can help you too</span>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              Post your own question.<br />
+              <span className="font-semibold">Parents & alumni can help</span>
             </p>
             <Button
               onClick={() => navigate('PostRequest?type=parent')}
-              className="rounded-full px-6 py-2 font-bold text-sm"
+              size="sm"
+              className="rounded-full px-4 py-1.5 font-bold text-xs"
               style={{ backgroundColor: '#FA4616' }}
             >
-              Ask a Question →
+              Ask Question →
             </Button>
           </div>
 
-          {/* Card 3: Post Jobs */}
+          {/* Card 4: Post Jobs */}
           <div 
             ref={el => actionCardsRef.current[2] = el}
-            className="bg-white rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow"
-            style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
+            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
           >
-            <div className="text-5xl mb-4">💼</div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: '#0021A5' }}>
-              Post Jobs & Internships
+            <div className="text-3xl mb-2">💼</div>
+            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+              Post Opportunities
             </h3>
-            <p className="text-sm text-slate-600 mb-4">
-              Have an opening or know someone hiring?<br />
-              Post it → <strong>your kid's profile gets boosted</strong>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              Know about job openings?<br />
+              <span className="font-semibold">Share them with Gators</span>
             </p>
             <Button
               onClick={() => navigate('PostOpportunity')}
-              className="rounded-full px-6 py-2 font-bold text-sm"
+              size="sm"
+              className="rounded-full px-4 py-1.5 font-bold text-xs"
               style={{ backgroundColor: '#0021A5' }}
             >
-              Post an Opportunity →
+              Post Opportunity →
             </Button>
           </div>
         </div>
