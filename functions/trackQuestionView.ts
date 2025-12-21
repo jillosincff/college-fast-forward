@@ -89,32 +89,20 @@ Deno.serve(async (req) => {
     updateData[viewField] = currentViews + 1;
     
     try {
-        // Use raw update method with explicit service role context
-        const Entity = isHelpRequest 
-            ? base44.asServiceRole.entities.HelpRequest 
-            : base44.asServiceRole.entities.JobRequest;
+        // Use the dedicated service role client for the update
+        console.log('trackQuestionView: About to update entity with service role client...');
         
-        console.log('trackQuestionView: About to update entity...');
-        const updateResult = await Entity.update(questionId, updateData);
-        console.log('trackQuestionView: Update result:', updateResult);
+        if (isHelpRequest) {
+            await base44ServiceRole.entities.HelpRequest.update(questionId, updateData);
+        } else {
+            await base44ServiceRole.entities.JobRequest.update(questionId, updateData);
+        }
+        
         console.log('trackQuestionView: Update successful');
     } catch (updateErr) {
         console.error('trackQuestionView: Update error:', updateErr);
-        console.error('trackQuestionView: Update error stack:', updateErr.stack);
-        
-        // Fallback: try without service role (in case user owns the record)
-        try {
-            console.log('trackQuestionView: Trying fallback update...');
-            if (isHelpRequest) {
-                await base44.entities.HelpRequest.update(questionId, updateData);
-            } else {
-                await base44.entities.JobRequest.update(questionId, updateData);
-            }
-            console.log('trackQuestionView: Fallback update successful');
-        } catch (fallbackErr) {
-            console.error('trackQuestionView: Fallback also failed:', fallbackErr.message);
-            return Response.json({ error: 'Update failed', details: updateErr.message }, { status: 500 });
-        }
+        console.error('trackQuestionView: Update error message:', updateErr.message);
+        return Response.json({ error: 'Update failed', details: updateErr.message }, { status: 500 });
     }
     
     return Response.json({ 
