@@ -64,14 +64,27 @@ export default function Dashboard() {
         console.error('Failed to fetch network stats:', error);
       }
 
-      // Fetch messages
-      const { data: messagesResponse } = await getUserMessages();
-      setMessages(messagesResponse?.messages || []);
+      // Fetch messages (wrapped in try-catch)
+      try {
+        const { data: messagesResponse } = await getUserMessages();
+        setMessages(messagesResponse?.messages || []);
+        console.log('✅ Messages loaded');
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+        setMessages([]);
+      }
 
-      // Fetch opportunities
-      const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
-      setOpportunities(opps || []);
-      console.log('✅ Opportunities loaded, now loading HelpRequest...');
+      // Fetch opportunities (wrapped in try-catch)
+      try {
+        const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
+        setOpportunities(opps || []);
+        console.log('✅ Opportunities loaded');
+      } catch (error) {
+        console.error('Failed to fetch opportunities:', error);
+        setOpportunities([]);
+      }
+      
+      console.log('✅ Now loading HelpRequest...');
 
       // Fetch user's help request (students have ONE active request)
       console.log('🔍🔍🔍 HELP REQUEST SECTION START');
