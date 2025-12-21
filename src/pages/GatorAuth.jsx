@@ -421,15 +421,12 @@ export default function GatorAuth() {
         }
         
         if (!polledUser?.email) {
-          addLog(`⏰ OAuth callback timed out after ${Math.round(maxAuthWait/1000)}s`);
+          addLog(`⏰ OAuth callback timed out after ${Math.round(maxAuthWait/1000)}s - but will retry with fresh token extraction`);
+          
+          // Don't show error immediately - let the next effect cycle try again
+          // The URL might still have a fresh token that we can extract
+          processingRef.current = false;
           if (isMountedRef.current) {
-            setErrorDetails({ 
-              type: 'auth_timeout', 
-              message: isMobile 
-                ? 'Mobile login timed out. Try: 1) Incognito mode, 2) Disable ad blocker, 3) Different browser'
-                : 'Login taking longer than expected. Please try again or use incognito mode.'
-            });
-            processingRef.current = false;
             setProcessing(false);
           }
           return;
