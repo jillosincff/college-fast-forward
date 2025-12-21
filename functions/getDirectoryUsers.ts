@@ -91,9 +91,15 @@ Deno.serve(async (req) => {
 
         // Use persona if available, otherwise infer from profile or use first role
         let displayPersona = u.persona;
+        
+        // Normalize 'gator' to 'student' for display consistency
+        if (displayPersona === 'gator') {
+          displayPersona = 'student';
+        }
+        
         if (!displayPersona) {
           if (u.roles && u.roles.length > 0) {
-            displayPersona = u.roles[0];
+            displayPersona = u.roles[0] === 'gator' ? 'student' : u.roles[0];
           } else if (u.major || (u.graduation_year && u.graduation_year > new Date().getFullYear() - 2)) {
             // Has major or recent grad year - probably student
             displayPersona = 'student';
