@@ -496,6 +496,32 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           letter-spacing: 0.5px;
         }
 
+        .poster-type-badge-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 4px;
+        }
+
+        .poster-type-badge {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .poster-type-parent {
+          background: #E0E7FF;
+          color: #4338CA;
+        }
+
+        .poster-type-alumni {
+          background: #FEF3C7;
+          color: #92400E;
+        }
+
         .card-header {
           display: flex;
           justify-content: center;
