@@ -1,50 +1,20 @@
-import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
     console.log('trackQuestionView: Starting...');
     
-    let base44;
-    let base44ServiceRole;
+    const base44 = createClientFromRequest(req);
     
-    try {
-        base44 = createClientFromRequest(req);
-        console.log('trackQuestionView: Client created from request');
-        
-        // Create a separate service role client for admin operations
-        const appId = Deno.env.get('BASE44_APP_ID');
-        const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
-        console.log('trackQuestionView: App ID exists:', !!appId, 'Service key exists:', !!serviceRoleKey);
-        
-        base44ServiceRole = createClient({
-            appId: appId,
-            serviceRoleKey: serviceRoleKey
-        });
-        console.log('trackQuestionView: Service role client created');
-    } catch (initErr) {
-        console.error('trackQuestionView: Client init error:', initErr);
-        return Response.json({ error: 'Client init failed', details: initErr.message }, { status: 500 });
-    }
+    // Authenticate user first
+    const user = await base44.auth.me();
+    console.log('trackQuestionView: User:', user?.email);
     
-    let user;
-    try {
-        user = await base44.auth.me();
-        console.log('trackQuestionView: User:', user?.email);
-        if (!user) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-    } catch (authErr) {
-        console.error('trackQuestionView: Auth error:', authErr);
-        return Response.json({ error: 'Auth failed', details: authErr.message }, { status: 500 });
+    if (!user) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let body;
-    try {
-        body = await req.json();
-        console.log('trackQuestionView: Body:', body);
-    } catch (parseErr) {
-        console.error('trackQuestionView: Parse error:', parseErr);
-        return Response.json({ error: 'Parse failed', details: parseErr.message }, { status: 500 });
-    }
+    const body = await req.json();
+    console.log('trackQuestionView: Body:', body);
     
     const { questionId, questionType } = body;
     
@@ -57,15 +27,15 @@ Deno.serve(async (req) => {
     
     console.log('trackQuestionView: Entity:', questionType, 'Field:', viewField);
     
-    // Get current question using service role
+    // Get current question - read is allowed for all per RLS
     let question = null;
     
     try {
         let questions;
         if (isHelpRequest) {
-            questions = await base44ServiceRole.entities.HelpRequest.filter({ id: questionId });
+            questions = await base44.entities.HelpRequest.filter({ id: questionId });
         } else {
-            questions = await base44ServiceRole.entities.JobRequest.filter({ id: questionId });
+            questions = await base44.entities.JobRequest.filter({ id: questionId });
         }
         console.log('trackQuestionView: Found', questions?.length, 'questions');
         
@@ -84,24 +54,22 @@ Deno.serve(async (req) => {
     const currentViews = Number(question[viewField]) || Number(question.view_count) || Number(question.views_count) || 0;
     console.log('trackQuestionView: Current views:', currentViews);
     
-    // Increment view count using service role
+    // Increment view count using asServiceRole - this bypasses RLS
     const updateData = {};
     updateData[viewField] = currentViews + 1;
     
     try {
-        // Use the dedicated service role client for the update
-        console.log('trackQuestionView: About to update entity with service role client...');
+        console.log('trackQuestionView: About to update with asServiceRole...');
         
         if (isHelpRequest) {
-            await base44ServiceRole.entities.HelpRequest.update(questionId, updateData);
+            await base44.asServiceRole.entities.HelpRequest.update(questionId, updateData);
         } else {
-            await base44ServiceRole.entities.JobRequest.update(questionId, updateData);
+            await base44.asServiceRole.entities.JobRequest.update(questionId, updateData);
         }
         
         console.log('trackQuestionView: Update successful');
     } catch (updateErr) {
         console.error('trackQuestionView: Update error:', updateErr);
-        console.error('trackQuestionView: Update error message:', updateErr.message);
         return Response.json({ error: 'Update failed', details: updateErr.message }, { status: 500 });
     }
     
