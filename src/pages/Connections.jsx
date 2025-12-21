@@ -8,7 +8,7 @@ import { Connection } from '@/entities/Connection';
 import { HelpOffer } from '@/entities/HelpOffer';
 import { ProfileLike } from '@/entities/ProfileLike';
 import { base44 } from '@/api/base44Client';
-import { Search, Plus, Filter, Sparkles, MessageSquare, UserPlus, TrendingUp } from 'lucide-react';
+import { Search, Plus, Filter } from 'lucide-react';
 import moment from 'moment';
 import { getDisplayName } from '@/components/utils/nameUtils';
 import { Input } from '@/components/ui/input';
