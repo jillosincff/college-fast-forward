@@ -39,13 +39,13 @@ export default function StudentHelpRequestCard({
       <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
         <CardContent className="pt-6 pb-6 text-center">
           <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-slate-700 mb-2">No Active Help Request</h3>
-          <p className="text-slate-500 mb-4">Create a help request to get matched with parents and alumni who can help your career.</p>
+          <h3 className="text-xl font-bold text-slate-700 mb-2">No Active Question</h3>
+          <p className="text-slate-500 mb-4">Ask a question to get matched with parents and alumni who can share their advice.</p>
           <Button 
             onClick={() => navigate('StudentOnboarding')}
             className="bg-[#FA4616] hover:bg-orange-600"
           >
-            Create Help Request
+            Ask a Question
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </CardContent>
@@ -117,8 +117,8 @@ export default function StudentHelpRequestCard({
               <FileText className={`w-6 h-6 ${isExpired ? 'text-red-600' : 'text-blue-600'}`} />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Your Help Request</h3>
-              <p className="text-slate-600 text-sm italic">"{helpRequest.description}"</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-1">📝 Your Question</h3>
+              <p className="text-slate-700 text-base leading-relaxed">"{helpRequest.description}"</p>
             </div>
           </div>
 
@@ -167,18 +167,27 @@ export default function StudentHelpRequestCard({
           {/* Action buttons */}
           <div className="flex flex-wrap gap-3 mb-4">
             <Button
-              onClick={() => navigate('Connections')}
+              onClick={() => navigate('Dashboard')}
               className="flex-1 bg-[#FA4616] hover:bg-orange-600"
             >
-              View Your Matches
+              View Matches
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate('Connections')}
+              onClick={() => navigate('StudentOnboarding')}
               className="text-blue-600 border-blue-300 hover:bg-blue-50"
             >
-              View on Emerging Gators
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Question
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowResolveModal(true)}
+              className="text-green-600 border-green-300 hover:bg-green-50"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Mark Resolved
             </Button>
           </div>
 
@@ -187,21 +196,21 @@ export default function StudentHelpRequestCard({
             <div className="bg-red-100 border border-red-200 rounded-lg p-4 mt-4">
               <div className="flex items-center gap-2 text-red-700 mb-3">
                 <AlertTriangle className="w-5 h-5" />
-                <span className="font-semibold">Your request expired {Math.abs(daysUntilExpiry)} days ago</span>
+                <span className="font-semibold">Your question expired {Math.abs(daysUntilExpiry)} days ago</span>
               </div>
               <div className="flex gap-2">
                 <Button
                   onClick={() => navigate('StudentOnboarding')}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  Post New Request
+                  Ask New Question
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setShowRenewModal(true)}
                   className="border-red-300 text-red-700 hover:bg-red-50"
                 >
-                  Renew Previous Request
+                  Renew Previous Question
                 </Button>
               </div>
             </div>
@@ -211,7 +220,7 @@ export default function StudentHelpRequestCard({
             <div className="bg-amber-100 border border-amber-200 rounded-lg p-4 mt-4">
               <div className="flex items-center gap-2 text-amber-700 mb-3">
                 <AlertTriangle className="w-5 h-5" />
-                <span className="font-semibold">Your request expires in {daysUntilExpiry} days</span>
+                <span className="font-semibold">Your question expires in {daysUntilExpiry} days</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -227,15 +236,7 @@ export default function StudentHelpRequestCard({
                   className="border-amber-300 text-amber-700 hover:bg-amber-50"
                 >
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit & Renew
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowResolveModal(true)}
-                  className="border-green-300 text-green-700 hover:bg-green-50"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Mark Resolved
+                  Edit Question
                 </Button>
               </div>
             </div>
@@ -247,13 +248,12 @@ export default function StudentHelpRequestCard({
       <Dialog open={showRenewModal} onOpenChange={setShowRenewModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Renew Your Help Request</DialogTitle>
+            <DialogTitle>Renew Your Question</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-slate-50 p-4 rounded-lg">
-              <p className="text-sm text-slate-600 mb-2">Your current request:</p>
+              <p className="text-sm text-slate-600 mb-2">Your current question:</p>
               <p className="font-medium">"{helpRequest.description}"</p>
-              <p className="text-sm text-slate-500 mt-1">Looking for: {helpTypesText}</p>
             </div>
 
             <div className="space-y-2">
@@ -275,7 +275,7 @@ export default function StudentHelpRequestCard({
                   checked={renewOption === 'edit'}
                   onChange={(e) => setRenewOption(e.target.value)}
                 />
-                <span>Update request (edit text and help types)</span>
+                <span>Edit my question first</span>
               </label>
             </div>
 
@@ -288,12 +288,12 @@ export default function StudentHelpRequestCard({
                 disabled={isSubmitting}
                 className="flex-1 bg-[#FA4616] hover:bg-orange-600"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Renew Request'}
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Renew Question'}
               </Button>
             </div>
 
             <p className="text-xs text-slate-500 text-center">
-              This will extend your request for 30 more days and keep you visible on Emerging Gators.
+              This will extend your question for 30 more days and keep you visible on Emerging Gators.
             </p>
           </div>
         </DialogContent>
@@ -303,10 +303,10 @@ export default function StudentHelpRequestCard({
       <Dialog open={showResolveModal} onOpenChange={setShowResolveModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Mark Request as Resolved</DialogTitle>
+            <DialogTitle>Mark Question as Answered</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-slate-600">Did you get the help you needed?</p>
+            <p className="text-slate-600">Did you get the advice you needed?</p>
 
             {parentMatches.length > 0 && (
               <div>
@@ -315,12 +315,12 @@ export default function StudentHelpRequestCard({
                 </label>
                 <Select value={selectedHelper} onValueChange={setSelectedHelper}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a helper..." />
+                    <SelectValue placeholder="Select someone..." />
                   </SelectTrigger>
                   <SelectContent>
                     {parentMatches.map(match => (
                       <SelectItem key={match.id} value={match.parent_id || match.id}>
-                        {match.parent_name || 'Unknown helper'}
+                        {match.parent_name || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -349,12 +349,12 @@ export default function StudentHelpRequestCard({
                 disabled={isSubmitting}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Mark as Resolved'}
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Mark as Answered'}
               </Button>
             </div>
 
             <p className="text-xs text-slate-500 text-center">
-              This will close your request and thank your helpers. You can post a new request anytime.
+              This will close your question. You can ask a new one anytime.
             </p>
           </div>
         </DialogContent>
