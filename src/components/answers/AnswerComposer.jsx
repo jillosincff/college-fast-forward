@@ -5,6 +5,7 @@ import { Send, Lightbulb } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Answer } from '@/entities/Answer';
 import { HelpRequest } from '@/entities/HelpRequest';
+import { JobRequest } from '@/entities/JobRequest';
 
 const MAX_CHARS = 5000;
 
@@ -60,9 +61,18 @@ export default function AnswerComposer({
         is_best_answer: false
       });
 
-      // Update question answer count
+      // Update question answer count - try both entities
       const newCount = (question.answer_count || 0) + 1;
-      await HelpRequest.update(question.id, { answer_count: newCount });
+      try {
+        await HelpRequest.update(question.id, { answer_count: newCount });
+      } catch {
+        // If HelpRequest fails, try JobRequest
+        try {
+          await JobRequest.update(question.id, { comments_count: newCount });
+        } catch {
+          // Silently ignore if update fails - UI will still update via callback
+        }
+      }
 
       // Clear form
       setAnswerText('');
