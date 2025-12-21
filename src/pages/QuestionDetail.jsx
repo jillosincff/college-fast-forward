@@ -35,19 +35,46 @@ export default function QuestionDetailPage() {
   const loadQuestion = async () => {
     setIsLoading(true);
     try {
-      // Load from both HelpRequest and JobRequest since questions can be in either
-      const [helpRequests, jobRequests] = await Promise.all([
-        HelpRequest.list('-created_date', 500),
-        JobRequest.list('-created_date', 500)
-      ]);
+      // Try to get from HelpRequest first, then JobRequest
+      let q = null;
+      let questionSource = null;
       
-      // Look for the question in both entities
-      let q = helpRequests.find(question => question.id === questionId);
-      let questionSource = 'HelpRequest';
+      try {
+        const helpRequests = await HelpRequest.filter({ id: questionId });
+        if (helpRequests && helpRequests.length > 0) {
+          q = helpRequests[0];
+          questionSource = 'HelpRequest';
+        }
+      } catch {
+        // Not found in HelpRequest, will try JobRequest
+      }
       
       if (!q) {
-        q = jobRequests.find(question => question.id === questionId);
-        questionSource = 'JobRequest';
+        try {
+          const jobRequests = await JobRequest.filter({ id: questionId });
+          if (jobRequests && jobRequests.length > 0) {
+            q = jobRequests[0];
+            questionSource = 'JobRequest';
+          }
+        } catch {
+          // Not found in JobRequest either
+        }
+      }
+      
+      // Fallback: search in full lists
+      if (!q) {
+        const [helpRequests, jobRequests] = await Promise.all([
+          HelpRequest.list('-created_date', 500),
+          JobRequest.list('-created_date', 500)
+        ]);
+        
+        q = helpRequests.find(item => item.id === questionId);
+        if (q) {
+          questionSource = 'HelpRequest';
+        } else {
+          q = jobRequests.find(item => item.id === questionId);
+          if (q) questionSource = 'JobRequest';
+        }
       }
       
       if (!q) {
@@ -59,31 +86,35 @@ export default function QuestionDetailPage() {
         return;
       }
       
-      // Normalize the question object to have consistent field names
-      // JobRequest uses comments_count instead of answer_count
+      // NORMALIZE: Ensure answer_count and view_count are always numbers
       const normalizedQuestion = {
         ...q,
         _source: questionSource,
-        answer_count: q.answer_count ?? q.comments_count ?? 0,
-        view_count: q.view_count ?? q.views_count ?? 0
+        answer_count: Number(q.answer_count) || Number(q.comments_count) || 0,
+        view_count: Number(q.view_count) || Number(q.views_count) || 0,
+        total_upvotes: Number(q.total_upvotes) || 0,
+        has_best_answer: Boolean(q.has_best_answer)
       };
+      
+      console.log('Question loaded and normalized:', {
+        id: normalizedQuestion.id,
+        source: questionSource,
+        answer_count: normalizedQuestion.answer_count,
+        raw_answer_count: q.answer_count,
+        raw_comments_count: q.comments_count
+      });
       
       setQuestion(normalizedQuestion);
 
-      // Increment view count - try both entities since we don't know which one it came from
-      try {
-        await HelpRequest.update(questionId, { 
-          view_count: (q.view_count || 0) + 1 
-        });
-      } catch {
-        // If HelpRequest update fails, try JobRequest
-        try {
-          await JobRequest.update(questionId, { 
-            views_count: (q.views_count || 0) + 1 
-          });
-        } catch {
-          // Silently ignore if view count update fails
-        }
+      // Increment view count silently
+      if (questionSource === 'HelpRequest') {
+        HelpRequest.update(questionId, { 
+          view_count: normalizedQuestion.view_count + 1 
+        }).catch(() => {});
+      } else {
+        JobRequest.update(questionId, { 
+          views_count: normalizedQuestion.view_count + 1 
+        }).catch(() => {});
       }
 
       // Load answers
@@ -142,13 +173,24 @@ export default function QuestionDetailPage() {
   }, [sortBy]);
 
   const handleAnswerPosted = (newAnswer) => {
+    console.log('handleAnswerPosted called with:', newAnswer);
+    
     // Add new answer to the top of the list
-    setAnswers(prev => [newAnswer, ...prev]);
+    setAnswers(prev => {
+      const updated = [newAnswer, ...prev];
+      console.log('Answers list updated, new length:', updated.length);
+      return updated;
+    });
     
     // Update question stats immediately (optimistic update)
     setQuestion(prev => {
-      const newCount = (prev?.answer_count || 0) + 1;
-      console.log('Updating answer_count from', prev?.answer_count, 'to', newCount);
+      if (!prev) {
+        console.error('No previous question state!');
+        return prev;
+      }
+      const currentCount = Number(prev.answer_count) || 0;
+      const newCount = currentCount + 1;
+      console.log('Updating answer_count:', currentCount, '→', newCount);
       return {
         ...prev,
         answer_count: newCount
