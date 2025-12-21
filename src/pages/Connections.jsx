@@ -539,14 +539,22 @@ export default function DiscoverEmergingGatorsPage() {
                 {filteredProfiles.length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🐊</div>
-                    <h3>{user?.persona === 'gator' ? 'Be the first!' : 'No questions yet'}</h3>
+                    <h3>No questions yet in this category</h3>
                     <p>
-                      {user?.persona === 'gator' 
+                      {filters.questionType === 'parent' 
+                        ? "No parent questions yet. Be the first parent to ask a question!"
+                        : filters.questionType === 'alumni'
+                        ? "No alumni questions yet. Alumni, share what's on your mind!"
+                        : user?.persona === 'gator' 
                         ? "Be among the first students to ask a question. Parents and alumni are waiting to share their advice!"
-                        : "Encourage students to ask their career questions. Once they do, you'll see them here and can share your advice!"}
+                        : "No questions in this category yet. Ask your own or check another filter!"}
                     </p>
-                    {user?.persona === 'gator' && (
-                      <Button onClick={() => navigate('StudentOnboarding')} size="lg" className="mt-4 bg-[#FA4616] hover:bg-orange-600">
+                    {(user?.persona === 'gator' || user?.persona === 'parent' || user?.persona === 'alumni') && (
+                      <Button 
+                        onClick={() => navigate(user?.persona === 'gator' ? 'StudentOnboarding' : 'PostRequest')} 
+                        size="lg" 
+                        className="mt-4 bg-[#FA4616] hover:bg-orange-600"
+                      >
                         <Plus className="w-5 h-5 mr-2" />
                         Ask a Question
                       </Button>
