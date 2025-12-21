@@ -722,6 +722,12 @@ export default function DiscoverEmergingGatorsPage() {
           border-color: #0021A5;
         }
 
+        .filter-select-primary {
+          background: #FFF4ED;
+          border-color: #FA4616;
+          font-weight: 600;
+        }
+
         .pulse-dot {
           width: 8px;
           height: 8px;
