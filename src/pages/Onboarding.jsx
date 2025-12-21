@@ -256,13 +256,16 @@ export default function Onboarding() {
   // Step 0: Connect with Gator (only for new users)
   if (currentStep === 0 && !user?.onboarding_completed) {
     return (
-      <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-lg">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-lg shadow-lg p-8"
+            className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 border border-slate-100 relative overflow-hidden"
           >
+            {/* Decorative gradient bar at top */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0021A5] via-[#FA4616] to-[#0021A5]" />
+            
             <ConnectGatorStep 
               onComplete={(student) => {
                 if (student?.email) {
