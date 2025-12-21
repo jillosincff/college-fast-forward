@@ -3,6 +3,7 @@ import React from 'react';
 export default function EmergingGatorsHero({ totalQuestions = 0, totalAnswers = 0, urgentCount = 0 }) {
   return (
     <div className="page-header">
+      <div className="page-header-inner">
       <h1>Questions From UF Students</h1>
       
       <p className="header-subtitle">
@@ -20,12 +21,16 @@ export default function EmergingGatorsHero({ totalQuestions = 0, totalAnswers = 
           </>
         )}
       </div>
+      </div>
 
       <style jsx>{`
         .page-header {
-          background: white;
+          background: #0021A5;
           padding: 40px 20px 24px;
-          border-bottom: 1px solid #E5E7EB;
+          border-bottom: none;
+        }
+
+        .page-header-inner {
           max-width: 1400px;
           margin: 0 auto;
         }
@@ -33,19 +38,19 @@ export default function EmergingGatorsHero({ totalQuestions = 0, totalAnswers = 
         h1 {
           font-size: 32px;
           font-weight: 700;
-          color: #111827;
+          color: white;
           margin: 0 0 8px 0;
         }
 
         .header-subtitle {
           font-size: 16px;
-          color: #6B7280;
+          color: rgba(255, 255, 255, 0.85);
           margin: 0 0 16px 0;
         }
 
         .header-stats {
           font-size: 14px;
-          color: #6B7280;
+          color: rgba(255, 255, 255, 0.8);
           display: flex;
           gap: 12px;
           align-items: center;
@@ -53,11 +58,11 @@ export default function EmergingGatorsHero({ totalQuestions = 0, totalAnswers = 
         }
 
         .stat-separator {
-          color: #D1D5DB;
+          color: rgba(255, 255, 255, 0.5);
         }
 
         .urgent-stat {
-          color: #DC2626;
+          color: #FCD34D;
           font-weight: 500;
         }
 
