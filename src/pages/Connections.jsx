@@ -98,6 +98,13 @@ export default function QuestionsPage() {
         answerCountsMap.set(qId, (answerCountsMap.get(qId) || 0) + 1);
       });
       
+      // Build upvote totals map from answers
+      const upvoteTotalsMap = new Map();
+      (allAnswers || []).forEach(answer => {
+        const qId = answer.question_id;
+        upvoteTotalsMap.set(qId, (upvoteTotalsMap.get(qId) || 0) + (answer.upvote_count || 0));
+      });
+      
       // Filter out test/demo requests and add real answer counts
       const realRequests = (jobRequests || []).filter(req => {
         const description = req.description?.toLowerCase() || '';
@@ -110,7 +117,11 @@ export default function QuestionsPage() {
       }).map(req => ({
         ...req,
         // Use actual answer count from Answer entity as source of truth
-        answer_count: answerCountsMap.get(req.id) || 0
+        answer_count: answerCountsMap.get(req.id) || 0,
+        // Calculate total_upvotes from actual answer upvotes
+        total_upvotes: upvoteTotalsMap.get(req.id) || req.total_upvotes || 0,
+        // Use view_count from DB
+        view_count: req.view_count || req.views_count || 0
       }));
       
       setRequests(realRequests);
