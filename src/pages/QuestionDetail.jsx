@@ -4,6 +4,7 @@ import { navigate, useParams } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, MessageSquare, Eye, ChevronUp, Award, Share2 } from 'lucide-react';
 import { HelpRequest } from '@/entities/HelpRequest';
+import { JobRequest } from '@/entities/JobRequest';
 import { Answer } from '@/entities/Answer';
 import UserAvatar from '@/components/common/UserAvatar';
 import AnswerCard from '@/components/answers/AnswerCard';
@@ -42,17 +43,23 @@ export default function QuestionDetailPage() {
     setIsLoading(true);
     console.log('loadQuestion called with questionId:', questionId);
     try {
-      // Load question - use list and find since filter by id doesn't work
-      const allQuestions = await HelpRequest.list('-created_date', 500);
-      console.log('Total questions loaded:', allQuestions.length);
-      console.log('Looking for ID:', questionId);
-      console.log('Sample question IDs:', allQuestions.slice(0, 3).map(q => q.id));
+      // Load from both HelpRequest and JobRequest since questions can be in either
+      const [helpRequests, jobRequests] = await Promise.all([
+        HelpRequest.list('-created_date', 500),
+        JobRequest.list('-created_date', 500)
+      ]);
       
-      const q = allQuestions.find(question => question.id === questionId);
+      // Look for the question in both entities
+      let q = helpRequests.find(question => question.id === questionId);
+      
+      if (!q) {
+        q = jobRequests.find(question => question.id === questionId);
+      }
+      
       console.log('Found question:', q);
       
       if (!q) {
-        console.error('Question not found! ID:', questionId);
+        console.error('Question not found in either HelpRequest or JobRequest! ID:', questionId);
         toast({
           title: "Question not found",
           variant: "destructive"
