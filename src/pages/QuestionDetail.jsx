@@ -138,7 +138,11 @@ export default function QuestionDetailPage() {
         } else {
           console.log('trackQuestionView failed:', response?.data);
         }
-      }).catch(err => console.error('View tracking error:', err));
+      }).catch(err => {
+        console.error('View tracking error:', err);
+        console.error('Error response data:', err?.response?.data);
+        console.error('Error details:', err?.response?.data?.error, err?.response?.data?.details);
+      });
 
     } catch (err) {
       console.error('Failed to load question:', err);
