@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2, Zap, Star } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import UserAvatar from '@/components/common/UserAvatar';
 
 const HELP_TYPE_LABELS = {
   'career_advice': 'Career advice',
@@ -57,77 +58,86 @@ function ParentMatchCard({ match, user, onMessageSent }) {
     }
   };
 
+  // Check for fast responder or high students helped
+  const isFastResponder = match.match_reasons?.some(r => r.includes('⚡') || r.includes('Fast') || r.includes('responds'));
+  const studentsHelpedMatch = match.match_reasons?.find(r => r.includes('Helped'));
+
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-4 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md transition-all"
+        className="bg-white rounded-xl p-5 border-2 border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all"
       >
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-            {match.parent_name?.charAt(0) || 'G'}
-          </div>
+          <UserAvatar 
+            user={{ full_name: match.parent_name, email: match.parent_email }}
+            className="w-14 h-14 rounded-full flex-shrink-0"
+            showFallback={true}
+          />
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-slate-900">{match.parent_name || 'Gator Parent'}</h4>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-slate-900 text-lg">{match.parent_name || 'Gator Parent'}</h4>
+              {isFastResponder && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                  <Zap className="w-3 h-3" /> Fast Responder
+                </span>
+              )}
+            </div>
             <p className="text-sm text-slate-600">
               {match.parent_role || 'Professional'} {match.parent_company && `at ${match.parent_company}`}
             </p>
             
-            <div className="flex flex-wrap gap-2 mt-2">
-              {match.help_types?.slice(0, 3).map(type => (
-                <Badge key={type} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                  ✓ {HELP_TYPE_LABELS[type] || type}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Match reasons from algorithm */}
-            {match.match_reasons && match.match_reasons.length > 0 && (
-              <div className="mt-2 text-xs text-slate-600 space-y-0.5">
-                {match.match_reasons.slice(0, 3).map((reason, i) => (
-                  <p key={i}>{reason}</p>
-                ))}
+            {/* Match percentage badge */}
+            {match.match_percentage && (
+              <div className="mt-2">
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+                  🎯 {match.match_percentage}% match
+                </span>
               </div>
             )}
 
-            <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-              {match.match_percentage && (
-                <span className="flex items-center gap-1">
-                  Match: <span className="font-semibold text-purple-600">{match.match_percentage}%</span>
-                </span>
-              )}
-            </div>
+            {/* Match reasons from algorithm - prominent display */}
+            {match.match_reasons && match.match_reasons.length > 0 && (
+              <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs font-medium text-slate-500 mb-1">Why this is a great match:</p>
+                <div className="space-y-1">
+                  {match.match_reasons.slice(0, 3).map((reason, i) => (
+                    <p key={i} className="text-sm text-slate-700">{reason}</p>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        </div>
 
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            <Button
-              size="sm"
-              onClick={openMessageModal}
-              disabled={match.status === 'student_connected'}
-              className={match.status === 'student_connected' 
+        {/* Large message button */}
+        <div className="mt-4 flex gap-2">
+          <Button
+            onClick={openMessageModal}
+            disabled={match.status === 'student_connected'}
+            className={`flex-1 h-12 text-base font-semibold ${
+              match.status === 'student_connected' 
                 ? 'bg-green-100 text-green-700 hover:bg-green-100'
                 : 'bg-[#FA4616] hover:bg-orange-600 text-white'
-              }
-            >
-              {match.status === 'student_connected' ? (
-                <>✓ Message Sent</>
-              ) : (
-                <>
-                  <MessageSquare className="w-4 h-4 mr-1" />
-                  Message
-                </>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`PublicProfile?id=${match.parent_id}`)}
-              className="text-xs text-slate-500"
-            >
-              View Profile
-            </Button>
-          </div>
+            }`}
+          >
+            {match.status === 'student_connected' ? (
+              <>✓ Message Sent</>
+            ) : (
+              <>
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Message {match.parent_name?.split(' ')[0] || 'them'}
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(`PublicProfile?id=${match.parent_id}`)}
+            className="text-slate-600"
+          >
+            Profile
+          </Button>
         </div>
       </motion.div>
 
@@ -195,13 +205,14 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">
-                💼 Parents & Alumni Matched to Your Request ({matches.length})
+                💬 People Who Can Answer Your Question ({matches.length})
               </h3>
+              <p className="text-sm text-slate-500">Message them directly to start a conversation</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <AnimatePresence>
             {displayMatches.map(match => (
               <ParentMatchCard 

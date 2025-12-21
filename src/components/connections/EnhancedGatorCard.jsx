@@ -395,7 +395,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
             className="message-btn-primary"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
-            Message
+            {currentUser?.persona === 'parent' || currentUser?.roles?.includes('parent') 
+              ? 'Share Your Advice' 
+              : 'Message'}
           </Button>
 
           {/* Quick-Win Engagement Signals */}
