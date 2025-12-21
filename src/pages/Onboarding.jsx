@@ -51,7 +51,7 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [startTime] = useState(Date.now());
-  const [currentStep, setCurrentStep] = useState(0); // 0 = connect gator, 1 = profile form
+  const [currentStep, setCurrentStep] = useState(0); // 0 = connect gator, 1 = question, 2 = profile form
   const [showReferralInput, setShowReferralInput] = useState(false);
   const [referralCode, setReferralCode] = useState('');
 
@@ -65,7 +65,8 @@ export default function Onboarding() {
     company_connections: user?.company_connections || '',
     bio: user?.bio || '',
     visible_in_directory: user?.visible_in_directory !== false,
-    student_emails: ''
+    student_emails: '',
+    question: '' // New: Parent's own question
   });
 
   const [errors, setErrors] = useState({});
