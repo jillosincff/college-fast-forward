@@ -56,6 +56,7 @@ import GatorWelcome from './pages/GatorWelcome';
 import GatorParentInvite from './pages/GatorParentInvite';
 import AdminReferrals from './pages/AdminReferrals';
 import MessageComposer from './pages/MessageComposer';
+import QuestionDetail from './pages/QuestionDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -118,6 +119,7 @@ export const PAGES = {
     "GatorParentInvite": GatorParentInvite,
     "AdminReferrals": AdminReferrals,
     "MessageComposer": MessageComposer,
+    "QuestionDetail": QuestionDetail,
 }
 
 export const pagesConfig = {
