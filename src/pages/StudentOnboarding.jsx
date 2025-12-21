@@ -239,6 +239,7 @@ export default function StudentOnboarding() {
         student_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
         student_major: formData.major.trim(),
         student_year: formData.year,
+        poster_type: 'student',
         help_types: mappedHelpTypes,
         industry: mappedIndustry,
         description: formData.question.trim(),
