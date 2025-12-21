@@ -118,16 +118,19 @@ export default function QuestionDetailPage() {
       if (!hasViewed) {
         sessionStorage.setItem(viewKey, 'true');
         
-        // Try to increment view count - will fail due to RLS but that's ok
-        if (questionSource === 'HelpRequest') {
-          HelpRequest.update(questionId, { 
-            view_count: normalizedQuestion.view_count + 1 
-          }).catch(() => console.log('View count update skipped (RLS)'));
-        } else {
-          JobRequest.update(questionId, { 
-            views_count: normalizedQuestion.view_count + 1 
-          }).catch(() => console.log('View count update skipped (RLS)'));
-        }
+        // Use backend function to increment view count (bypasses RLS)
+        base44.functions.invoke('trackQuestionView', {
+          questionId: questionId,
+          questionType: questionSource
+        }).then(response => {
+          if (response?.data?.success) {
+            // Update local view count
+            setQuestion(prev => prev ? {
+              ...prev,
+              view_count: response.data.newViewCount
+            } : prev);
+          }
+        }).catch(err => console.log('View tracking error:', err));
       }
 
     } catch (err) {
