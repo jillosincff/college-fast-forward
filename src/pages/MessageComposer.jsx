@@ -29,6 +29,7 @@ const MESSAGE_TEMPLATES = [
   }
 ];
 
+// CACHE BUSTER v3 - 2025-12-21
 export default function MessageComposer() {
   const { user } = useAuth();
   const params = useParams();
