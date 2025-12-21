@@ -33,7 +33,8 @@ export default function DiscoverEmergingGatorsPage() {
     major: 'all',
     graduationYear: 'all',
     location: 'all',
-    skills: []
+    skills: [],
+    questionType: 'student' // New: 'student', 'parent', 'alumni', 'all'
   });
   const [sortBy, setSortBy] = useState('relevance');
   const [showHelpModal, setShowHelpModal] = useState(false);
