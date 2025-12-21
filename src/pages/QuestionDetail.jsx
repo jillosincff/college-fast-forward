@@ -132,12 +132,17 @@ export default function QuestionDetailPage() {
       }).then(response => {
         console.log('trackQuestionView response:', response);
         if (response?.data?.success) {
-          // Update local view count
-          setQuestion(prev => prev ? {
-            ...prev,
-            view_count: response.data.newViewCount
-          } : prev);
-          console.log('View count updated to:', response.data.newViewCount);
+          const newViewCount = response.data.newViewCount;
+          console.log('View count updated to:', newViewCount);
+          // Update local view count - use functional update to ensure we get latest state
+          setQuestion(prevQuestion => {
+            if (!prevQuestion) return prevQuestion;
+            console.log('Updating question state with new view_count:', newViewCount);
+            return {
+              ...prevQuestion,
+              view_count: newViewCount
+            };
+          });
           // Set session storage after successful tracking
           sessionStorage.setItem(viewKey, 'true');
         } else {
