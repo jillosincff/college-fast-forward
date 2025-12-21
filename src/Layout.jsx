@@ -112,7 +112,6 @@ const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection'));
-const GatorStudentEmail = React.lazy(() => import('./pages/GatorStudentEmail'));
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
 const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
@@ -663,7 +662,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorStudentEmail', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
 const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
@@ -747,7 +746,6 @@ const getPageComponent = (pageName) => {
 
     case 'GatorAuth': return GatorAuth;
     case 'GatorRoleSelection': return GatorRoleSelection;
-    case 'GatorStudentEmail': return GatorStudentEmail;
     case 'GatorInviteCode': return GatorInviteCode;
     case 'GatorWelcome': return GatorWelcome;
     case 'GatorParentInvite': return GatorParentInvite;
