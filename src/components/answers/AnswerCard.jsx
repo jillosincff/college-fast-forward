@@ -4,8 +4,7 @@ import { ChevronUp, MessageSquare, Mail, Award, Clock } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
-import { Upvote } from '@/entities/Upvote';
-import { Answer } from '@/entities/Answer';
+// Upvote and Answer operations handled via backend function to bypass RLS
 import moment from 'moment';
 
 export default function AnswerCard({ 
