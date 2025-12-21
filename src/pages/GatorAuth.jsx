@@ -463,6 +463,7 @@ export default function GatorAuth() {
       const nextRoute = determineNextRoute(reliableUser, null);
       addLog(`🎯 Routing to: ${nextRoute}`);
 
+      setIsTransitioning(true);
       navigate(nextRoute);
     }
 
@@ -476,6 +477,7 @@ export default function GatorAuth() {
 
       const nextRoute = determineNextRoute(currentUser, null);
       addLog(`🎯 OAuth complete, routing to: ${nextRoute}`);
+      setIsTransitioning(true);
       navigate(nextRoute);
     }
   }, [user, currentUser, isLoading, processing]);
