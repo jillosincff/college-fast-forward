@@ -307,18 +307,18 @@ export default function DiscoverEmergingGatorsPage() {
         {user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
           <div className="cta-banner-students">
             <div className="cta-content">
-              <div className="cta-icon">🎯</div>
+              <div className="cta-icon">💬</div>
               <div className="cta-text">
-                <h3>Get noticed by parents and alumni!</h3>
-                <p>Post what you're looking for and let the network help you. Takes 2 minutes.</p>
+                <h3>Have a career question?</h3>
+                <p>Ask anything - parents and alumni with real experience will share their advice.</p>
               </div>
               <Button 
-                onClick={() => navigate('PostRequest')}
+                onClick={() => navigate('StudentOnboarding')}
                 className="cta-button"
                 size="lg"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Post Your Career Request
+                Ask a Question
               </Button>
             </div>
           </div>
@@ -482,16 +482,16 @@ export default function DiscoverEmergingGatorsPage() {
                 {filteredProfiles.length === 0 && (
                   <div className="empty-state">
                     <div className="empty-icon">🐊</div>
-                    <h3>{user?.persona === 'gator' ? 'Be the first!' : 'No students yet'}</h3>
+                    <h3>{user?.persona === 'gator' ? 'Be the first!' : 'No questions yet'}</h3>
                     <p>
                       {user?.persona === 'gator' 
-                        ? "Be among the first students to post what you're looking for. Parents and alumni are waiting to help!"
-                        : "Encourage students to post their career requests. Once they do, you'll see them here and can offer help!"}
+                        ? "Be among the first students to ask a question. Parents and alumni are waiting to share their advice!"
+                        : "Encourage students to ask their career questions. Once they do, you'll see them here and can share your advice!"}
                     </p>
                     {user?.persona === 'gator' && (
-                      <Button onClick={() => navigate('PostRequest')} size="lg" className="mt-4 bg-[#FA4616] hover:bg-orange-600">
+                      <Button onClick={() => navigate('StudentOnboarding')} size="lg" className="mt-4 bg-[#FA4616] hover:bg-orange-600">
                         <Plus className="w-5 h-5 mr-2" />
-                        Post Your Career Request Now
+                        Ask a Question
                       </Button>
                     )}
                   </div>
@@ -500,10 +500,10 @@ export default function DiscoverEmergingGatorsPage() {
                 {filteredProfiles.length > 0 && filteredProfiles.length < 5 && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
                   <div className="encourage-post-card">
                     <div className="encourage-content">
-                      <h4>🌟 Stand out to the network!</h4>
-                      <p>Only {filteredProfiles.length} students have posted so far. Post your career goals and get personalized help from parents and alumni.</p>
-                      <Button onClick={() => navigate('PostRequest')} className="mt-3" variant="outline">
-                        Post What You're Looking For
+                      <h4>🌟 Get personalized advice!</h4>
+                      <p>Only {filteredProfiles.length} students have asked so far. Ask your question and get advice from parents and alumni with real experience.</p>
+                      <Button onClick={() => navigate('StudentOnboarding')} className="mt-3" variant="outline">
+                        Ask a Question
                       </Button>
                     </div>
                   </div>
