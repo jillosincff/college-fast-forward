@@ -63,9 +63,9 @@ Deno.serve(async (req) => {
     try {
         let questions;
         if (isHelpRequest) {
-            questions = await base44.asServiceRole.entities.HelpRequest.filter({ id: questionId });
+            questions = await base44ServiceRole.entities.HelpRequest.filter({ id: questionId });
         } else {
-            questions = await base44.asServiceRole.entities.JobRequest.filter({ id: questionId });
+            questions = await base44ServiceRole.entities.JobRequest.filter({ id: questionId });
         }
         console.log('trackQuestionView: Found', questions?.length, 'questions');
         
