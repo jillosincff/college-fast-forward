@@ -234,7 +234,7 @@ export default function QuestionsPage() {
             <div className="header-left">
               <h1>Questions From The Swamp 🐊</h1>
               <p className="subtitle">
-                Browse questions and share your advice
+                Students, parents, and alumni helping each other
               </p>
             </div>
             
