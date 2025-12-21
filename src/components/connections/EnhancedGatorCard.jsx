@@ -352,18 +352,30 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
             </div>
           )}
 
-          {/* Bio */}
-          <p className="student-bio-enhanced">
-            {displayBio}
-            {shouldTruncate && (
-              <button 
-                onClick={() => setShowFullBio(!showFullBio)}
-                className="read-more-btn"
-              >
-                {showFullBio ? ' Show less' : ' Show more'}
-              </button>
-            )}
-          </p>
+          {/* Their Question - Prominently Displayed */}
+          {request?.description && (
+            <div className="question-section">
+              <span className="question-label">💬 Their Question:</span>
+              <p className="question-text">
+                "{request.description.length > 200 ? request.description.substring(0, 200) + '...' : request.description}"
+              </p>
+            </div>
+          )}
+
+          {/* Bio - Secondary */}
+          {bio && bio !== request?.description && (
+            <p className="student-bio-enhanced">
+              {displayBio}
+              {shouldTruncate && (
+                <button 
+                  onClick={() => setShowFullBio(!showFullBio)}
+                  className="read-more-btn"
+                >
+                  {showFullBio ? ' Show less' : ' Show more'}
+                </button>
+              )}
+            </p>
+          )}
 
           {/* Skills Tags */}
           {skills.length > 0 && (
@@ -635,10 +647,36 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           border-color: #86EFAC;
         }
 
-        .student-bio-enhanced {
-          font-size: 14px;
+        .question-section {
+          background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+          border: 2px solid #FA4616;
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin: 8px 0;
+        }
+
+        .question-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: #FA4616;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          display: block;
+          margin-bottom: 6px;
+        }
+
+        .question-text {
+          font-size: 15px;
           color: #1f2937;
-          line-height: 1.6;
+          line-height: 1.5;
+          font-style: italic;
+          margin: 0;
+        }
+
+        .student-bio-enhanced {
+          font-size: 13px;
+          color: #6b7280;
+          line-height: 1.5;
           text-align: center;
           margin: 0;
         }
