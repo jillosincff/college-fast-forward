@@ -54,70 +54,53 @@ export default function MessageComposer() {
     try {
       let recipientUser = null;
       
-      // Try multiple strategies to find the recipient
-      // Strategy 1: Check if recipientId is an email
-      if (recipientId.includes('@')) {
-        const usersByEmail = await base44.entities.User.filter({ email: recipientId });
-        if (usersByEmail?.length > 0) {
-          recipientUser = usersByEmail[0];
+      // PRIORITY 1: Check Match records for cached parent info (most reliable - no RLS issues)
+      try {
+        const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
+        if (matches?.length > 0 && matches[0].parent_email) {
+          recipientUser = {
+            id: recipientId,
+            email: matches[0].parent_email,
+            full_name: matches[0].parent_name,
+            persona: 'parent',
+            job_title: matches[0].parent_role,
+            current_company: matches[0].parent_company
+          };
+          console.log('Found recipient from Match cache:', recipientUser.email);
         }
+      } catch (e) {
+        console.log('Match lookup failed:', e);
       }
       
-      // Strategy 2: Try by user id
-      if (!recipientUser) {
-        try {
-          const usersById = await base44.entities.User.filter({ id: recipientId });
-          if (usersById?.length > 0) {
-            recipientUser = usersById[0];
-          }
-        } catch (e) {
-          console.log('User lookup by ID failed, trying ParentExpertise...');
-        }
-      }
-      
-      // Strategy 3: Look up from ParentExpertise (matches use parent_id which links here)
+      // PRIORITY 2: Look up from ParentExpertise (has open read RLS for gators)
       if (!recipientUser) {
         try {
           const expertise = await base44.entities.ParentExpertise.filter({ parent_id: recipientId });
           if (expertise?.length > 0 && expertise[0].parent_email) {
-            // Now get the actual user by email
-            const usersByEmail = await base44.entities.User.filter({ email: expertise[0].parent_email });
-            if (usersByEmail?.length > 0) {
-              recipientUser = usersByEmail[0];
-            } else {
-              // Create a minimal user object from ParentExpertise data
-              recipientUser = {
-                id: recipientId,
-                email: expertise[0].parent_email,
-                full_name: expertise[0].parent_name,
-                persona: 'parent',
-                job_title: expertise[0].current_role,
-                current_company: expertise[0].current_company
-              };
-            }
+            recipientUser = {
+              id: recipientId,
+              email: expertise[0].parent_email,
+              full_name: expertise[0].parent_name,
+              persona: 'parent',
+              job_title: expertise[0].current_role,
+              current_company: expertise[0].current_company
+            };
+            console.log('Found recipient from ParentExpertise:', recipientUser.email);
           }
         } catch (e) {
           console.log('ParentExpertise lookup failed:', e);
         }
       }
       
-      // Strategy 4: Check Match records for cached parent info
-      if (!recipientUser) {
-        try {
-          const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
-          if (matches?.length > 0 && matches[0].parent_email) {
-            recipientUser = {
-              id: recipientId,
-              email: matches[0].parent_email,
-              full_name: matches[0].parent_name,
-              persona: 'parent',
-              job_title: matches[0].parent_role,
-              current_company: matches[0].parent_company
-            };
-          }
-        } catch (e) {
-          console.log('Match lookup failed:', e);
-        }
+      // PRIORITY 3: Check if recipientId is already an email
+      if (!recipientUser && recipientId.includes('@')) {
+        recipientUser = {
+          id: recipientId,
+          email: recipientId,
+          full_name: recipientId.split('@')[0],
+          persona: 'parent'
+        };
+        console.log('Using recipientId as email:', recipientUser.email);
       }
 
       if (recipientUser) {
