@@ -6,6 +6,7 @@ import { ArrowLeft, MessageSquare, Eye, ChevronUp, Award, Share2 } from 'lucide-
 import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { Answer } from '@/entities/Answer';
+import { base44 } from '@/api/base44Client';
 import UserAvatar from '@/components/common/UserAvatar';
 import AnswerCard from '@/components/answers/AnswerCard';
 import AnswerComposer from '@/components/answers/AnswerComposer';
