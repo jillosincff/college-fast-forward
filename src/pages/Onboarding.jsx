@@ -67,7 +67,8 @@ export default function Onboarding() {
     bio: user?.bio || '',
     visible_in_directory: user?.visible_in_directory !== false,
     student_emails: '',
-    question: '' // New: Parent's own question
+    question: '', // New: Parent's own question
+    is_anonymous: false // Whether to post question anonymously
   });
 
   const [errors, setErrors] = useState({});
@@ -187,8 +188,9 @@ export default function Onboarding() {
           await HelpRequest.create({
             student_id: user.id,
             student_email: user.email,
-            student_name: formData.full_name,
+            student_name: formData.is_anonymous ? 'Anonymous Parent' : formData.full_name,
             poster_type: 'parent',
+            is_anonymous: formData.is_anonymous || false,
             help_types: ['career_advice'],
             industry: formData.industry || 'Other',
             description: formData.question,
@@ -196,7 +198,7 @@ export default function Onboarding() {
             status: 'active',
             expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
           });
-          console.log('✅ Created parent question');
+          console.log('✅ Created parent question (anonymous:', formData.is_anonymous, ')');
         } catch (questionError) {
           console.error('Failed to create parent question:', questionError);
         }
@@ -343,6 +345,29 @@ Or: My son wants to drop out and start a business. How worried should I be?"
                 <p className="text-xs text-slate-500">{formData.question?.length || 0}/500</p>
               </div>
             </div>
+
+            {/* Anonymous Posting Option */}
+            {formData.question?.trim() && (
+              <div className="mb-6">
+                <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_anonymous || false}
+                    onChange={(e) => setFormData(prev => ({ ...prev, is_anonymous: e.target.checked }))}
+                    className="w-5 h-5 text-[#0021A5] rounded mt-0.5"
+                  />
+                  <div>
+                    <p className="font-medium text-slate-900">Post anonymously</p>
+                    <p className="text-sm text-slate-600">
+                      Your question will show as "Anonymous Parent" instead of your name. Your identity stays private.
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                      💡 Recommended for sensitive family topics
+                    </p>
+                  </div>
+                </label>
+              </div>
+            )}
 
             {/* Example Questions */}
             <div className="bg-slate-50 rounded-xl p-4 mb-6">
