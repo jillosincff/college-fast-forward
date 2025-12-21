@@ -339,36 +339,7 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Connect With Your Gator Card */}
-        <Card className="border-2 border-slate-200 shadow-lg">
-          <CardContent className="p-8">
-            <h3 className="text-2xl font-bold text-center mb-2" style={{ color: '#0021A5' }}>
-              Connect With Your Gator
-            </h3>
-            <p className="text-center text-slate-600 mb-6">
-              Is your student already on College Fast Forward?
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => setShowSearchModal(true)}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-full px-8 py-3 shadow-lg"
-              >
-                Yes — Search & Link Them
-              </Button>
-              <Button
-                onClick={() => setShowInviteModal(true)}
-                className="font-bold rounded-full px-8 py-3 shadow-lg"
-                style={{ backgroundColor: '#0021A5' }}
-              >
-                No — Send Them an Invite
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Action Cards */}
-
-        {/* 3. Main Headline */}
+        {/* Main Headline */}
         <div ref={headlineRef} className="text-center">
           <h2 
             className="text-3xl md:text-4xl font-black leading-tight mb-3"
@@ -380,6 +351,13 @@ export default function ParentDashboard() {
             Every action you take unlocks more opportunities for your student — parents & alumni see boosted profiles first.
           </p>
         </div>
+
+        {/* FAMILY KARMA - HERO SECTION */}
+        <FamilyKarmaWidget 
+          user={user} 
+          onSearchStudent={() => setShowSearchModal(true)}
+          onInviteStudent={() => setShowInviteModal(true)}
+        />
 
         {/* 4. Four Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
