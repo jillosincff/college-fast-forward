@@ -216,25 +216,26 @@ export default function QuestionsPage() {
   return (
     <>
       <div className="questions-page">
-        {/* HEADER - Clean and simple */}
+        {/* HEADER - Minimal */}
         <div className="page-header">
-          <div className="header-inner">
-            <h1>Questions From UF Students</h1>
-            <p className="subtitle">
-              Browse questions and share your advice. Anyone can answer.
-            </p>
-            
-            <div className="header-stats">
-              <span>📊 {stats.totalQuestions} questions</span>
-              <span className="stat-dot">•</span>
-              <span>💬 {stats.totalAnswers} answers</span>
-              {stats.urgentCount > 0 && (
-                <>
-                  <span className="stat-dot">•</span>
-                  <span className="urgent-stat">🔥 {stats.urgentCount} need help ASAP</span>
-                </>
-              )}
+          <div className="header-content">
+            <div className="header-left">
+              <h1>Questions From UF Students</h1>
+              <p className="subtitle">
+                {stats.totalQuestions} questions • {stats.totalAnswers} answers
+                {stats.urgentCount > 0 && ` • ${stats.urgentCount} need urgent help`}
+              </p>
             </div>
+            
+            {user && (
+              <Button 
+                onClick={() => navigate(user?.persona === 'gator' ? 'StudentOnboarding' : 'PostRequest')}
+                className="ask-question-btn"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Ask a Question
+              </Button>
+            )}
           </div>
         </div>
 
@@ -478,46 +479,48 @@ export default function QuestionsPage() {
           background: #F9FAFB;
         }
 
-        /* HEADER */
+        /* HEADER - Minimal */
         .page-header {
-          background: #0021A5;
-          padding: 48px 20px 40px;
+          background: white;
+          border-bottom: 1px solid #E5E7EB;
+          padding: 20px 0;
         }
 
-        .header-inner {
+        .header-content {
           max-width: 900px;
           margin: 0 auto;
+          padding: 0 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
         }
 
-        .page-header h1 {
-          font-size: 36px;
+        .header-left h1 {
+          font-size: 26px;
           font-weight: 700;
-          color: white;
-          margin: 0 0 8px 0;
+          color: #111827;
+          margin: 0 0 4px 0;
         }
 
         .subtitle {
-          font-size: 18px;
-          color: rgba(255, 255, 255, 0.85);
-          margin: 0 0 20px 0;
+          font-size: 14px;
+          color: #6B7280;
+          margin: 0;
         }
 
-        .header-stats {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-          font-size: 15px;
-          color: rgba(255, 255, 255, 0.9);
-          flex-wrap: wrap;
-        }
-
-        .stat-dot {
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        .urgent-stat {
-          color: #FFD700;
+        .ask-question-btn {
+          background: #FA4616 !important;
+          color: white !important;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 8px;
           font-weight: 600;
+          flex-shrink: 0;
+        }
+
+        .ask-question-btn:hover {
+          background: #E03E10 !important;
         }
 
         /* CTA BANNER */
@@ -784,19 +787,26 @@ export default function QuestionsPage() {
 
         @media (max-width: 768px) {
           .page-header {
-            padding: 32px 16px 28px;
+            padding: 16px 0;
           }
 
-          .page-header h1 {
-            font-size: 28px;
+          .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
+          .header-left h1 {
+            font-size: 22px;
           }
           
           .subtitle {
-            font-size: 16px;
+            font-size: 13px;
           }
 
-          .header-stats {
-            font-size: 13px;
+          .ask-question-btn {
+            width: 100%;
+            justify-content: center;
           }
 
           .cta-banner {
