@@ -40,12 +40,19 @@ export default function QuestionDetailPage() {
 
   const loadQuestion = async () => {
     setIsLoading(true);
+    console.log('loadQuestion called with questionId:', questionId);
     try {
       // Load question - use list and find since filter by id doesn't work
       const allQuestions = await HelpRequest.list('-created_date', 500);
+      console.log('Total questions loaded:', allQuestions.length);
+      console.log('Looking for ID:', questionId);
+      console.log('Sample question IDs:', allQuestions.slice(0, 3).map(q => q.id));
+      
       const q = allQuestions.find(question => question.id === questionId);
+      console.log('Found question:', q);
       
       if (!q) {
+        console.error('Question not found! ID:', questionId);
         toast({
           title: "Question not found",
           variant: "destructive"
