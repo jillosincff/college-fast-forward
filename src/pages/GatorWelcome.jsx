@@ -370,8 +370,8 @@ export default function GatorWelcome() {
             }
           </p>
 
-          {/* Pricing Tier Display */}
-          {pricingInfo && (
+          {/* Pricing Tier Display - Only show after pricing is loaded */}
+          {pricingInfo && pricingInfo.tier && (
             <div className={`mb-6 p-4 rounded-xl border-2 ${
               pricingInfo.tier === 'founding' 
                 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300'
@@ -399,7 +399,6 @@ export default function GatorWelcome() {
                 pricingInfo.tier === 'early_adopter' ? 'text-blue-700' : 'text-slate-700'
               }`}>
                 {pricingInfo.locked_price_display}
-                {pricingInfo.tier !== 'founding' && ' • 7-day free trial'}
               </p>
               {pricingInfo.spots_remaining && pricingInfo.tier !== 'standard' && (
                 <p className="text-center text-sm mt-1 opacity-80">
@@ -429,7 +428,7 @@ export default function GatorWelcome() {
               </>
             ) : (
               <>
-                {pricingInfo?.tier === 'founding' 
+                {(!pricingInfo || pricingInfo.tier === 'founding') 
                   ? "Let's Get Started" 
                   : `Start ${pricingInfo?.trial_days || 7}-Day Free Trial`}
                 <ArrowRight className="w-6 h-6 ml-2" />
@@ -437,7 +436,7 @@ export default function GatorWelcome() {
             )}
           </Button>
           
-          {pricingInfo?.tier !== 'founding' && (
+          {pricingInfo && pricingInfo.tier && pricingInfo.tier !== 'founding' && (
             <p className="text-sm text-slate-500 mt-4">
               No charge today. Cancel anytime during your trial.
             </p>
