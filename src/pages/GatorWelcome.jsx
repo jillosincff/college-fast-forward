@@ -340,109 +340,73 @@ export default function GatorWelcome() {
 
   // Ready state
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-2xl shadow-2xl border-0 relative overflow-hidden">
-        <CardContent className="pt-16 pb-12 px-8 text-center">
-          {/* Progress bar */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-slate-200">
-            <div className="h-full bg-gradient-to-r from-orange-500 to-red-600 w-full" />
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4">
+      <div className="w-full max-w-lg">
+        <Card className="shadow-2xl border border-slate-100 relative overflow-hidden rounded-2xl">
+          <CardContent className="pt-10 pb-10 px-8 text-center">
+            {/* Decorative gradient bar at top */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0021A5] via-[#FA4616] to-[#0021A5]" />
 
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-8 flex items-center justify-center shadow-2xl">
-            <span className="text-6xl">🐊</span>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
-            Welcome to<br />College Fast Forward! 🎉
-          </h1>
-
-          <p className="text-lg text-slate-600 mb-3 max-w-xl mx-auto">
-            {role === 'gator'
-              ? "You're joining a vibrant network of Gators, parents, and alumni accelerating your college success."
-              : "You're joining a powerful network of parents helping Gators get hired."
-            }
-          </p>
-          
-          <p className="text-base text-slate-600 mb-8 max-w-lg mx-auto">
-            {role === 'gator'
-              ? "Let's set up your profile to unlock opportunities."
-              : "Let's set up your profile so you can start making an impact."
-            }
-          </p>
-
-          {/* Pricing Tier Display - Only show after pricing is loaded */}
-          {pricingInfo && pricingInfo.tier && (
-            <div className={`mb-6 p-4 rounded-xl border-2 ${
-              pricingInfo.tier === 'founding' 
-                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300'
-                : pricingInfo.tier === 'early_adopter'
-                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300'
-                : 'bg-slate-50 border-slate-300'
-            }`}>
-              <div className="flex items-center justify-center gap-3 mb-2">
-                {pricingInfo.tier === 'founding' ? (
-                  <Crown className="w-6 h-6 text-yellow-600" />
-                ) : pricingInfo.tier === 'early_adopter' ? (
-                  <Star className="w-6 h-6 text-blue-600" />
-                ) : (
-                  <Check className="w-6 h-6 text-slate-600" />
-                )}
-                <span className={`font-bold text-lg ${
-                  pricingInfo.tier === 'founding' ? 'text-yellow-800' :
-                  pricingInfo.tier === 'early_adopter' ? 'text-blue-800' : 'text-slate-800'
-                }`}>
-                  {pricingInfo.badge_type}
-                </span>
-              </div>
-              <p className={`text-center font-semibold ${
-                pricingInfo.tier === 'founding' ? 'text-yellow-700' :
-                pricingInfo.tier === 'early_adopter' ? 'text-blue-700' : 'text-slate-700'
-              }`}>
-                {pricingInfo.locked_price_display}
-              </p>
-              {pricingInfo.spots_remaining && pricingInfo.tier !== 'standard' && (
-                <p className="text-center text-sm mt-1 opacity-80">
-                  Only {pricingInfo.spots_remaining} {pricingInfo.tier === 'founding' ? 'free' : '$9'} spots left!
-                </p>
-              )}
+            {/* Logo/Icon */}
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FA4616] to-[#FF8A5B] mx-auto mb-6 flex items-center justify-center shadow-lg">
+              <span className="text-4xl">🐊</span>
             </div>
-          )}
 
-          <div className="inline-flex items-center gap-2 bg-orange-50 border-2 border-orange-200 rounded-full px-6 py-3 mb-10">
-            <span className="text-orange-800 font-semibold text-sm">
-              ✨ Takes just 2 minutes
-            </span>
-          </div>
+            {/* Welcome Text */}
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              <span className="text-slate-800">Welcome to</span><br />
+              <span className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] bg-clip-text text-transparent">College Fast Forward!</span>
+              <span className="ml-2">🎉</span>
+            </h1>
 
-          <Button
-            onClick={handleGetStarted}
-            size="lg"
-            disabled={isCreatingFamily}
-            className="h-14 px-12 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50"
-            style={{ backgroundColor: role === 'gator' ? '#0021A5' : '#FA4616' }}
-          >
-            {isCreatingFamily ? (
-              <>
-                <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-                Setting up...
-              </>
-            ) : (
-              <>
-                {(!pricingInfo || pricingInfo.tier === 'founding') 
-                  ? "Let's Get Started" 
-                  : `Start ${pricingInfo?.trial_days || 7}-Day Free Trial`}
-                <ArrowRight className="w-6 h-6 ml-2" />
-              </>
-            )}
-          </Button>
-          
-          {pricingInfo && pricingInfo.tier && pricingInfo.tier !== 'founding' && (
-            <p className="text-sm text-slate-500 mt-4">
-              No charge today. Cancel anytime during your trial.
+            <p className="text-slate-600 mt-4 mb-2">
+              {role === 'gator'
+                ? "You're joining a vibrant network of Gators, parents, and alumni accelerating your college success."
+                : "You're joining a powerful network helping Gators get hired."
+              }
             </p>
-          )}
-        </CardContent>
-      </Card>
+            
+            <p className="text-slate-500 text-sm mb-8">
+              {role === 'gator'
+                ? "Let's set up your profile to unlock opportunities."
+                : "Let's set up your profile so you can start making an impact."
+              }
+            </p>
+
+            {/* Single prominent CTA */}
+            <Button
+              onClick={handleGetStarted}
+              size="lg"
+              disabled={isCreatingFamily}
+              className="w-full max-w-sm h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all bg-[#0021A5] hover:bg-[#001580]"
+            >
+              {isCreatingFamily ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                <>
+                  {(!pricingInfo || pricingInfo.tier === 'founding') 
+                    ? "Let's Get Started" 
+                    : `Start ${pricingInfo?.trial_days || 7}-Day Free Trial`}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </Button>
+            
+            <p className="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1">
+              <span>✨</span> Takes just 2 minutes
+            </p>
+
+            {pricingInfo && pricingInfo.tier && pricingInfo.tier !== 'founding' && (
+              <p className="text-sm text-slate-500 mt-4">
+                No charge today. Cancel anytime during your trial.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
