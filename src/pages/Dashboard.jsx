@@ -93,21 +93,30 @@ export default function Dashboard() {
         setHelpRequest(foundRequest);
       }
 
-      // Fetch matches - ALWAYS use help_request_id if we have a request (most reliable)
+      // Fetch matches - try multiple strategies to handle user ID mismatches
       let studentMatches = [];
       
-      if (foundRequest) {
-        // Primary: Get matches by help_request_id (most reliable)
-        console.log('📊 Fetching matches for help_request_id:', foundRequest.id);
+      // Strategy 1: By student_email (most reliable - added to RLS)
+      console.log('📊 Fetching matches for student_email:', user.email);
+      studentMatches = await base44.entities.Match.filter(
+        { student_email: user.email },
+        '-match_score',
+        50
+      );
+      console.log('📊 Matches by student_email:', studentMatches?.length || 0);
+      
+      // Strategy 2: By help_request_id if we have a request
+      if ((!studentMatches || studentMatches.length === 0) && foundRequest) {
+        console.log('📊 Trying help_request_id:', foundRequest.id);
         studentMatches = await base44.entities.Match.filter(
           { help_request_id: foundRequest.id },
           '-match_score',
           50
         );
-        console.log('📊 Matches by help_request_id:', studentMatches?.length || 0, studentMatches);
+        console.log('📊 Matches by help_request_id:', studentMatches?.length || 0);
       }
       
-      // Fallback: Try by student_id from the request (NOT user.id which may differ)
+      // Strategy 3: Try by student_id from the request
       if ((!studentMatches || studentMatches.length === 0) && foundRequest?.student_id) {
         console.log('📊 Trying student_id from request:', foundRequest.student_id);
         studentMatches = await base44.entities.Match.filter(
@@ -118,7 +127,7 @@ export default function Dashboard() {
         console.log('📊 Matches by request.student_id:', studentMatches?.length || 0);
       }
       
-      // Final fallback: Try by current user.id
+      // Strategy 4: Try by current user.id
       if ((!studentMatches || studentMatches.length === 0)) {
         studentMatches = await base44.entities.Match.filter(
           { student_id: user.id },
