@@ -63,13 +63,25 @@ Deno.serve(async (req) => {
       const newCount = (answer.upvote_count || 0) + 1;
       await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
 
-      // Update question total upvotes
-      const questions = await base44.asServiceRole.entities.HelpRequest.filter({ id: answer.question_id });
-      if (questions.length > 0) {
-        const question = questions[0];
+      // Update question total upvotes - try HelpRequest first, then JobRequest
+      let questionUpdated = false;
+      const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({ id: answer.question_id });
+      if (helpRequests.length > 0) {
+        const question = helpRequests[0];
         await base44.asServiceRole.entities.HelpRequest.update(answer.question_id, {
           total_upvotes: (question.total_upvotes || 0) + 1
         });
+        questionUpdated = true;
+      }
+      
+      if (!questionUpdated) {
+        const jobRequests = await base44.asServiceRole.entities.JobRequest.filter({ id: answer.question_id });
+        if (jobRequests.length > 0) {
+          const question = jobRequests[0];
+          await base44.asServiceRole.entities.JobRequest.update(answer.question_id, {
+            total_upvotes: (question.total_upvotes || 0) + 1
+          });
+        }
       }
 
       return Response.json({ 
@@ -94,13 +106,25 @@ Deno.serve(async (req) => {
       const newCount = Math.max(0, (answer.upvote_count || 0) - 1);
       await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
 
-      // Update question total upvotes
-      const questions = await base44.asServiceRole.entities.HelpRequest.filter({ id: answer.question_id });
-      if (questions.length > 0) {
-        const question = questions[0];
+      // Update question total upvotes - try HelpRequest first, then JobRequest
+      let questionUpdated = false;
+      const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({ id: answer.question_id });
+      if (helpRequests.length > 0) {
+        const question = helpRequests[0];
         await base44.asServiceRole.entities.HelpRequest.update(answer.question_id, {
           total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
         });
+        questionUpdated = true;
+      }
+      
+      if (!questionUpdated) {
+        const jobRequests = await base44.asServiceRole.entities.JobRequest.filter({ id: answer.question_id });
+        if (jobRequests.length > 0) {
+          const question = jobRequests[0];
+          await base44.asServiceRole.entities.JobRequest.update(answer.question_id, {
+            total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
+          });
+        }
       }
 
       return Response.json({ 
