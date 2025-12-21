@@ -73,22 +73,50 @@ export default function Dashboard() {
 
       // Fetch user's help request (students have ONE active request)
       // CRITICAL: Query by email first since user IDs can change between sessions
-      let myHelpRequest = await base44.entities.HelpRequest.filter(
-        { student_email: user.email, status: 'active' },
-        '-created_date',
-        1
-      );
+      console.log('🔍 Dashboard: Loading help request for user:', user.email, 'user.id:', user.id);
       
-      // Fallback to user.id if email lookup fails
-      if (!myHelpRequest || myHelpRequest.length === 0) {
+      let myHelpRequest = [];
+      try {
         myHelpRequest = await base44.entities.HelpRequest.filter(
-          { student_id: user.id, status: 'active' },
+          { student_email: user.email, status: 'active' },
           '-created_date',
           1
         );
+        console.log('🔍 HelpRequest by email result:', myHelpRequest?.length || 0);
+      } catch (e) {
+        console.error('🔍 HelpRequest by email failed:', e);
+      }
+      
+      // Fallback to user.id if email lookup fails
+      if (!myHelpRequest || myHelpRequest.length === 0) {
+        try {
+          myHelpRequest = await base44.entities.HelpRequest.filter(
+            { student_id: user.id, status: 'active' },
+            '-created_date',
+            1
+          );
+          console.log('🔍 HelpRequest by user.id result:', myHelpRequest?.length || 0);
+        } catch (e) {
+          console.error('🔍 HelpRequest by user.id failed:', e);
+        }
+      }
+      
+      // Strategy 3: Try created_by email match
+      if (!myHelpRequest || myHelpRequest.length === 0) {
+        try {
+          myHelpRequest = await base44.entities.HelpRequest.filter(
+            { created_by: user.email, status: 'active' },
+            '-created_date',
+            1
+          );
+          console.log('🔍 HelpRequest by created_by result:', myHelpRequest?.length || 0);
+        } catch (e) {
+          console.error('🔍 HelpRequest by created_by failed:', e);
+        }
       }
       
       const foundRequest = myHelpRequest && myHelpRequest.length > 0 ? myHelpRequest[0] : null;
+      console.log('🔍 Final HelpRequest found:', foundRequest ? foundRequest.id : 'NONE');
       if (foundRequest) {
         setHelpRequest(foundRequest);
       }
