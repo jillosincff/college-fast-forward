@@ -118,13 +118,18 @@ export default function QuestionCard({ question, gator }) {
           border-radius: 12px;
           padding: 24px;
           margin-bottom: 20px;
-          transition: all 0.2s;
           cursor: pointer;
+          transition: all 0.2s ease;
         }
 
         .question-card:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          transform: translateY(-2px);
+          border-color: #0021A5;
+          box-shadow: 0 8px 24px rgba(0, 33, 165, 0.12);
+          transform: translateY(-4px);
+        }
+
+        .question-card:hover .question-text {
+          color: #0021A5;
         }
 
         .poster-type-badge {
