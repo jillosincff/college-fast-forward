@@ -221,16 +221,22 @@ export default function QuestionDetailPage() {
   };
 
   const handleUpvoteChange = (answerId, newCount) => {
+    console.log('handleUpvoteChange called:', { answerId, newCount });
+    
     setAnswers(prev => prev.map(a => 
       a.id === answerId ? { ...a, upvote_count: newCount } : a
     ));
 
-    // Recalculate total upvotes
-    const totalUpvotes = answers.reduce((sum, a) => 
-      sum + (a.id === answerId ? newCount : (a.upvote_count || 0)), 0
-    );
-    
-    HelpRequest.update(questionId, { total_upvotes: totalUpvotes }).catch(console.error);
+    // Recalculate total upvotes using the new count
+    setQuestion(prev => {
+      if (!prev) return prev;
+      const updatedAnswers = answers.map(a => 
+        a.id === answerId ? { ...a, upvote_count: newCount } : a
+      );
+      const totalUpvotes = updatedAnswers.reduce((sum, a) => sum + (a.upvote_count || 0), 0);
+      console.log('Updating question total_upvotes to:', totalUpvotes);
+      return { ...prev, total_upvotes: totalUpvotes };
+    });
   };
 
   const handleMarkBest = async (answerId) => {
