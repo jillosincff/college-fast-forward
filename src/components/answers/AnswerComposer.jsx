@@ -61,17 +61,19 @@ export default function AnswerComposer({
         is_best_answer: false
       });
 
-      // Update question answer count - try both entities
-      const newCount = (question.answer_count || 0) + 1;
-      try {
-        await HelpRequest.update(question.id, { answer_count: newCount });
-      } catch {
-        // If HelpRequest fails, try JobRequest
-        try {
-          await JobRequest.update(question.id, { comments_count: newCount });
-        } catch {
-          // Silently ignore if update fails - UI will still update via callback
-        }
+      // Update question answer count in database
+      // Use the _source field to know which entity to update
+      const newCount = (Number(question.answer_count) || 0) + 1;
+      console.log('Updating DB answer_count to:', newCount, 'source:', question._source);
+      
+      if (question._source === 'JobRequest') {
+        JobRequest.update(question.id, { comments_count: newCount }).catch(err => {
+          console.log('JobRequest update failed (expected if RLS):', err.message);
+        });
+      } else {
+        HelpRequest.update(question.id, { answer_count: newCount }).catch(err => {
+          console.log('HelpRequest update failed (expected if RLS):', err.message);
+        });
       }
 
       // Clear form
