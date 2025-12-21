@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Sparkles, TrendingUp, Award, ChevronRight } from 'lucide-react';
+import { Sparkles, TrendingUp, Award, ChevronRight, RefreshCw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 
 const LEVEL_COLORS = {
-  bronze: { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
-  silver: { bg: '#F3F4F6', text: '#374151', border: '#9CA3AF' },
-  gold: { bg: '#FEF9C3', text: '#854D0E', border: '#EAB308' },
-  platinum: { bg: '#E0E7FF', text: '#4338CA', border: '#6366F1' }
+  bronze: { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B', gradient: 'linear-gradient(135deg, #CD7F32 0%, #B87333 100%)' },
+  silver: { bg: '#F3F4F6', text: '#374151', border: '#9CA3AF', gradient: 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%)' },
+  gold: { bg: '#FEF9C3', text: '#854D0E', border: '#EAB308', gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' },
+  platinum: { bg: '#E0E7FF', text: '#4338CA', border: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
 };
 
 const LEVEL_ICONS = {
@@ -20,19 +21,26 @@ const LEVEL_ICONS = {
 export default function FamilyKarmaWidget({ user, compact = false }) {
   const [karmaData, setKarmaData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadKarmaData();
   }, [user?.id]);
 
   const loadKarmaData = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await base44.functions.invoke('getFamilyKarma', {});
+      console.log('Karma response:', response?.data);
       if (response?.data?.success) {
         setKarmaData(response.data);
+      } else {
+        setError('Failed to load karma data');
       }
     } catch (err) {
       console.log('Failed to load karma:', err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
