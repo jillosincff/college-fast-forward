@@ -175,7 +175,7 @@ export default function Dashboard() {
       <div className="bg-white border-b border-slate-200 py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
-            Welcome back, {user.first_name || user.full_name?.split(' ')[0] || 'Gator'}! 👋
+            Welcome back, {user.first_name || (user.full_name?.includes(',') ? user.full_name.split(',')[1]?.trim().split(' ')[0] : user.full_name?.split(' ')[0]) || 'Gator'}! 👋
           </h1>
         </div>
       </div>
