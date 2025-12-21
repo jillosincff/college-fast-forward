@@ -909,9 +909,17 @@ function AppContent() {
         return;
       }
 
-      // Otherwise redirect to GatorWelcome
-      console.log('🔄 [No Persona] Redirecting to GatorWelcome');
-      navigate('GatorWelcome');
+      // CRITICAL: Check for pending invite role - if present, go to GatorWelcome (skip role selection)
+      const pendingInviteRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      if (pendingInviteRole) {
+        console.log('🔄 [No Persona + Pending Role] Redirecting to GatorWelcome with role:', pendingInviteRole);
+        navigate('GatorWelcome');
+        return;
+      }
+
+      // No pending role - need role selection
+      console.log('🔄 [No Persona] Redirecting to GatorRoleSelection');
+      navigate('GatorRoleSelection');
       return;
     }
 
