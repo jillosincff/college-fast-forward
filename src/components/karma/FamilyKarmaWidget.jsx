@@ -18,7 +18,7 @@ const LEVEL_ICONS = {
   platinum: '💎'
 };
 
-export default function FamilyKarmaWidget({ user, compact = false }) {
+export default function FamilyKarmaWidget({ user, compact = false, onSearchStudent, onInviteStudent }) {
   const [karmaData, setKarmaData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
