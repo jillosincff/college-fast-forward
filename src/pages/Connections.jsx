@@ -272,6 +272,12 @@ export default function DiscoverEmergingGatorsPage() {
       if (!matchesName && !matchesMajor && !matchesBio) return false;
     }
 
+    // Filter by question/poster type
+    if (filters.questionType !== 'all' && profile.request) {
+      const posterType = profile.request.poster_type || 'student'; // Default to student for legacy data
+      if (filters.questionType !== posterType) return false;
+    }
+
     if (filters.major !== 'all' && profile.major !== filters.major) return false;
     if (filters.graduationYear !== 'all' && profile.graduation_year?.toString() !== filters.graduationYear) return false;
     if (filters.location !== 'all' && !profile.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
