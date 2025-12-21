@@ -49,7 +49,48 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     setLoadingData(true);
-    console.log('🚀 loadDashboardData STARTING for user:', user?.email);
+    console.log('🚀🚀🚀 loadDashboardData STARTING for:', user?.email);
+    
+    // LOAD HELP REQUEST FIRST - most important
+    let foundRequest = null;
+    console.log('🔍 Loading HelpRequest for:', user?.email);
+    try {
+      // Strategy 1: By student_email (most reliable)
+      const byEmail = await base44.entities.HelpRequest.filter(
+        { student_email: user.email, status: 'active' },
+        '-created_date',
+        1
+      );
+      console.log('🔍 HelpRequest by email:', byEmail?.length || 0);
+      if (byEmail?.length > 0) {
+        foundRequest = byEmail[0];
+      }
+    } catch (e) {
+      console.error('🔍 HelpRequest query failed:', e);
+    }
+    
+    // Strategy 2: Get all active and filter (fallback)
+    if (!foundRequest) {
+      try {
+        const allActive = await base44.entities.HelpRequest.filter(
+          { status: 'active' },
+          '-created_date',
+          100
+        );
+        console.log('🔍 All active HelpRequests:', allActive?.length || 0);
+        const mine = (allActive || []).filter(r => 
+          r.student_email === user.email || r.created_by === user.email
+        );
+        console.log('🔍 Filtered to mine:', mine?.length || 0);
+        if (mine.length > 0) foundRequest = mine[0];
+      } catch (e) {
+        console.error('🔍 HelpRequest fallback failed:', e);
+      }
+    }
+    
+    console.log('🔍 FINAL HelpRequest:', foundRequest ? foundRequest.id : 'NONE');
+    if (foundRequest) setHelpRequest(foundRequest);
+    
     try {
       // Fetch user counts
       try {
@@ -64,98 +105,22 @@ export default function Dashboard() {
         console.error('Failed to fetch network stats:', error);
       }
 
-      // Fetch messages (wrapped in try-catch)
+      // Fetch messages
       try {
         const { data: messagesResponse } = await getUserMessages();
         setMessages(messagesResponse?.messages || []);
-        console.log('✅ Messages loaded');
       } catch (error) {
         console.error('Failed to fetch messages:', error);
         setMessages([]);
       }
 
-      // Fetch opportunities (wrapped in try-catch)
+      // Fetch opportunities
       try {
         const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
         setOpportunities(opps || []);
-        console.log('✅ Opportunities loaded');
       } catch (error) {
         console.error('Failed to fetch opportunities:', error);
         setOpportunities([]);
-      }
-      
-      console.log('✅ Now loading HelpRequest...');
-
-      // Fetch user's help request (students have ONE active request)
-      console.log('🔍🔍🔍 HELP REQUEST SECTION START');
-      console.log('🔍 user.email:', user.email);
-      console.log('🔍 user.id:', user.id);
-      
-      let myHelpRequest = [];
-      let foundRequest = null;
-      
-      // Strategy 1: By student_email
-      console.log('🔍 Strategy 1: student_email query...');
-      try {
-        myHelpRequest = await base44.entities.HelpRequest.filter(
-          { student_email: user.email, status: 'active' },
-          '-created_date',
-          1
-        );
-        console.log('🔍 Strategy 1 result:', myHelpRequest?.length || 0);
-        if (myHelpRequest?.length > 0) {
-          foundRequest = myHelpRequest[0];
-          console.log('🔍 Found via Strategy 1:', foundRequest.id);
-        }
-      } catch (e) {
-        console.error('🔍 Strategy 1 FAILED:', e.message || e);
-      }
-      
-      // Strategy 2: By user.id
-      if (!foundRequest) {
-        console.log('🔍 Strategy 2: student_id query...');
-        try {
-          myHelpRequest = await base44.entities.HelpRequest.filter(
-            { student_id: user.id, status: 'active' },
-            '-created_date',
-            1
-          );
-          console.log('🔍 Strategy 2 result:', myHelpRequest?.length || 0);
-          if (myHelpRequest?.length > 0) {
-            foundRequest = myHelpRequest[0];
-            console.log('🔍 Found via Strategy 2:', foundRequest.id);
-          }
-        } catch (e) {
-          console.error('🔍 Strategy 2 FAILED:', e.message || e);
-        }
-      }
-      
-      // Strategy 3: Get ALL active and filter client-side
-      if (!foundRequest) {
-        console.log('🔍 Strategy 3: all active query...');
-        try {
-          const allActive = await base44.entities.HelpRequest.filter(
-            { status: 'active' },
-            '-created_date',
-            50
-          );
-          console.log('🔍 Strategy 3 total active:', allActive?.length || 0);
-          const filtered = (allActive || []).filter(r => 
-            r.student_email === user.email || r.created_by === user.email
-          );
-          console.log('🔍 Strategy 3 filtered:', filtered?.length || 0);
-          if (filtered?.length > 0) {
-            foundRequest = filtered[0];
-            console.log('🔍 Found via Strategy 3:', foundRequest.id);
-          }
-        } catch (e) {
-          console.error('🔍 Strategy 3 FAILED:', e.message || e);
-        }
-      }
-      
-      console.log('🔍🔍🔍 HELP REQUEST FINAL:', foundRequest ? `ID=${foundRequest.id}` : 'NONE');
-      if (foundRequest) {
-        setHelpRequest(foundRequest);
       }
 
       // Fetch matches - try multiple strategies to handle user ID mismatches
