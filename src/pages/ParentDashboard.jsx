@@ -456,14 +456,9 @@ export default function ParentDashboard() {
 
 
 
-        {/* Family Karma Widget */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <FamilyKarmaWidget user={user} />
-          </div>
-          <div className="lg:col-span-2 bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-            <ParentActivityWidget />
-          </div>
+        {/* Messages & Activity */}
+        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
+          <ParentActivityWidget />
         </div>
 
         {/* 6. Recent Activity Feed */}
