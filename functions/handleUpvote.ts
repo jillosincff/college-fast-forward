@@ -29,6 +29,15 @@ Deno.serve(async (req) => {
       user_id: user.id
     });
 
+    // Handle 'check' action - just return current state
+    if (action === 'check') {
+      return Response.json({
+        success: true,
+        hasUpvoted: existingUpvotes.length > 0,
+        upvote_count: answer.upvote_count || 0
+      });
+    }
+
     if (action === 'add') {
       // Can't upvote own answer
       if (answer.answerer_user_id === user.id) {
