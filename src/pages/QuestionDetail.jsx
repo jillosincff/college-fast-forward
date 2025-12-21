@@ -26,22 +26,14 @@ export default function QuestionDetailPage() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedAnswerAuthor, setSelectedAnswerAuthor] = useState(null);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('QuestionDetail - params:', params);
-    console.log('QuestionDetail - questionId:', questionId);
-  }, [params, questionId]);
-
   useEffect(() => {
     if (questionId) {
-      console.log('Loading question with ID:', questionId);
       loadQuestion();
     }
   }, [questionId]);
 
   const loadQuestion = async () => {
     setIsLoading(true);
-    console.log('loadQuestion called with questionId:', questionId);
     try {
       // Load from both HelpRequest and JobRequest since questions can be in either
       const [helpRequests, jobRequests] = await Promise.all([
@@ -56,10 +48,7 @@ export default function QuestionDetailPage() {
         q = jobRequests.find(question => question.id === questionId);
       }
       
-      console.log('Found question:', q);
-      
       if (!q) {
-        console.error('Question not found in either HelpRequest or JobRequest! ID:', questionId);
         toast({
           title: "Question not found",
           variant: "destructive"
