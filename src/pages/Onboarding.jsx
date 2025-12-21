@@ -57,19 +57,37 @@ export default function Onboarding() {
   const [referralCode, setReferralCode] = useState('');
 
   const [formData, setFormData] = useState({
-    full_name: user?.full_name || '',
-    current_company: user?.current_company || '',
-    current_position: user?.current_position || '',
-    industry: user?.industry || '',
-    years_experience: user?.years_experience || '',
-    help_types: user?.help_types || [],
-    company_connections: user?.company_connections || '',
-    bio: user?.bio || '',
-    visible_in_directory: user?.visible_in_directory !== false,
+    full_name: '',
+    current_company: '',
+    current_position: '',
+    industry: '',
+    years_experience: '',
+    help_types: [],
+    company_connections: '',
+    bio: '',
+    visible_in_directory: true,
     student_emails: '',
-    question: '', // New: Parent's own question
-    is_anonymous: false // Whether to post question anonymously
+    question: '',
+    is_anonymous: false
   });
+
+  // Initialize form data from user when available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        full_name: user.full_name || prev.full_name,
+        current_company: user.current_company || prev.current_company,
+        current_position: user.current_position || prev.current_position,
+        industry: user.industry || prev.industry,
+        years_experience: user.years_experience || prev.years_experience,
+        help_types: user.help_types || prev.help_types,
+        company_connections: user.company_connections || prev.company_connections,
+        bio: user.bio || prev.bio,
+        visible_in_directory: user.visible_in_directory !== false
+      }));
+    }
+  }, [user]);
 
   const [errors, setErrors] = useState({});
 
