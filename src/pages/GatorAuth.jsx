@@ -161,6 +161,46 @@ export default function GatorAuth() {
 
     addLog(`🔍 State: user=${user?.email || 'none'}, currentUser=${currentUser?.email || 'none'}, oauth=${wasOAuthCallback}, freshOAuth=${isFreshOAuthCallback}, isNewUser=${isNewUser}, token=${hasAccessToken}, role=${pendingRole}`);
 
+    // PRIORITY 0: If we have a token in the URL, extract and set it IMMEDIATELY before anything else
+    if (hasAccessToken && !currentUser && !user) {
+      addLog('🚀 PRIORITY: Token found in URL - extracting and setting immediately');
+      
+      // Extract token
+      const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
+      const urlToken = urlParams.get('access_token');
+      const extractedToken = tokenMatch?.[1] || urlToken;
+      
+      if (extractedToken && base44.auth.setToken) {
+        addLog(`🔑 Setting token: ${extractedToken.substring(0, 20)}...`);
+        base44.auth.setToken(extractedToken);
+        
+        // Clean URL immediately
+        window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
+        
+        // Mark callback as processed
+        sessionStorage.setItem('oauth_callback_detected', 'true');
+        
+        // Try to get user immediately
+        (async () => {
+          try {
+            const freshUser = await base44.auth.me();
+            if (freshUser?.email) {
+              addLog(`✅ User acquired immediately: ${freshUser.email}`);
+              if (isMountedRef.current) {
+                setCurrentUser(freshUser);
+                sessionStorage.removeItem('oauth_callback_detected');
+              }
+              if (refreshUser) await refreshUser();
+            }
+          } catch (e) {
+            addLog(`⚠️ Immediate user fetch failed: ${e.message} - will retry`);
+          }
+        })();
+        
+        return; // Let the next effect cycle handle routing
+      }
+    }
+
     // Handle OAuth errors
     if (hasError) {
       const errorMsg = hashParams.get('error') || urlParams.get('error');
