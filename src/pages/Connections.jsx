@@ -244,6 +244,11 @@ export default function QuestionsPage() {
     if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
     if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
     
+    // Sort by karma_boost first (family karma system)
+    const aKarmaBoost = a.request?.karma_boost || 0;
+    const bKarmaBoost = b.request?.karma_boost || 0;
+    if (aKarmaBoost !== bKarmaBoost) return bKarmaBoost - aKarmaBoost;
+    
     const aIsPremium = checkFullAccess(a);
     const bIsPremium = checkFullAccess(b);
     if (aIsPremium && !bIsPremium) return -1;
