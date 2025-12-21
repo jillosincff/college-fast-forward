@@ -29,7 +29,20 @@ const INDUSTRIES = [
   { value: 'insurance', label: 'Insurance', icon: '🛡️' }
 ];
 
-// Help types with descriptions
+// Topic tags for matching (optional)
+const TOPIC_TAGS = [
+  { value: 'career_paths', label: 'Career paths & major decisions' },
+  { value: 'entrepreneurship', label: 'Starting a business / Entrepreneurship' },
+  { value: 'grad_school', label: 'Grad school decisions (MBA, Med school, Law school, etc.)' },
+  { value: 'job_offers', label: 'Job offers & salary negotiation' },
+  { value: 'industry_insights', label: 'Industry insights & day-in-the-life' },
+  { value: 'work_life_balance', label: 'Work-life balance & career transitions' },
+  { value: 'internship_search', label: 'Internship & job search help' },
+  { value: 'career_switch', label: 'Switching careers or industries' },
+  { value: 'other', label: 'Other career advice' }
+];
+
+// Legacy help types mapping for database compatibility
 const HELP_TYPES = [
   { value: 'career_guidance', label: 'Career Guidance', description: 'Get advice on career paths and next steps', defaultChecked: true },
   { value: 'resume_review', label: 'Resume Review', description: 'Get feedback on your resume from professionals', defaultChecked: true },
@@ -67,18 +80,21 @@ export default function StudentOnboarding() {
   const [emailError, setEmailError] = useState('');
 
   const [formData, setFormData] = useState({
-    // Step 1
-    industries: [],
-    custom_industry: '',
-    help_types: ['career_guidance', 'resume_review', 'interview_prep'],
-    // Step 2
+    // Step 1 - Question first
+    question: '',
+    topic_tags: [],
+    industry: 'not_applicable',
+    // Step 2 - Details
     year: '',
     major: '',
     timeline: 'one_to_three_months',
-    description: '',
     referral_code: '',
     resume_url: '',
-    resume_name: ''
+    resume_name: '',
+    // Legacy fields for compatibility
+    industries: [],
+    custom_industry: '',
+    help_types: ['career_guidance', 'resume_review', 'interview_prep']
   });
 
   // Validate @ufl.edu email
@@ -136,14 +152,20 @@ export default function StudentOnboarding() {
 
   const validateStep1 = () => {
     const newErrors = {};
-    if (formData.industries.length === 0 && !formData.custom_industry?.trim()) {
-      newErrors.industries = 'Please select at least one industry';
-    }
-    if (formData.help_types.length === 0) {
-      newErrors.help_types = 'Please select at least one type of help';
+    if (!formData.question?.trim() || formData.question.trim().length < 20) {
+      newErrors.question = 'Please ask a question (at least 20 characters)';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+  
+  const toggleTopicTag = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      topic_tags: prev.topic_tags.includes(value)
+        ? prev.topic_tags.filter(v => v !== value)
+        : [...prev.topic_tags, value]
+    }));
   };
 
   const validateStep2 = () => {
@@ -173,7 +195,7 @@ export default function StudentOnboarding() {
     setShowLoading(true);
 
     try {
-      // Map internal values to HelpRequest schema values
+      // Map industry value to HelpRequest schema
       const industryMapping = {
         'technology': 'Technology & Software',
         'healthcare_biotech': 'Healthcare',
@@ -187,31 +209,30 @@ export default function StudentOnboarding() {
         'advertising_media': 'Media & Entertainment',
         'construction': 'Other',
         'insurance': 'Other',
+        'not_applicable': 'Other',
         'other': 'Other'
       };
 
-      // Get primary industry (first selected) for HelpRequest
-      const primaryIndustry = formData.industries[0] || 'other';
-      const mappedPrimaryIndustry = industryMapping[primaryIndustry] || 'Other';
+      const mappedIndustry = industryMapping[formData.industry] || 'Other';
 
-      // Map help types to schema values
-      const helpTypeMapping = {
-        'career_guidance': 'career_advice',
-        'resume_review': 'resume_review',
-        'interview_prep': 'interview_prep',
-        'job_referrals': 'networking_intros',
-        'networking_advice': 'industry_insights',
-        'salary_negotiation': 'career_advice'
+      // Map topic tags to help types for matching algorithm
+      const topicToHelpType = {
+        'career_paths': 'career_advice',
+        'entrepreneurship': 'industry_insights',
+        'grad_school': 'career_advice',
+        'job_offers': 'career_advice',
+        'industry_insights': 'industry_insights',
+        'work_life_balance': 'career_advice',
+        'internship_search': 'internship_leads',
+        'career_switch': 'career_advice',
+        'other': 'career_advice'
       };
 
-      const mappedHelpTypes = formData.help_types.map(t => helpTypeMapping[t] || t);
-
-      // Create HelpRequest
-      const allIndustries = formData.industries.map(i => industryMapping[i] || i);
-      if (formData.custom_industry?.trim()) {
-        allIndustries.push(formData.custom_industry.trim());
-      }
+      const mappedHelpTypes = formData.topic_tags.length > 0 
+        ? [...new Set(formData.topic_tags.map(t => topicToHelpType[t] || 'career_advice'))]
+        : ['career_advice'];
       
+      // Create HelpRequest with question as description
       const helpRequest = await HelpRequest.create({
         student_id: user.id,
         student_email: user.email,
@@ -219,8 +240,8 @@ export default function StudentOnboarding() {
         student_major: formData.major.trim(),
         student_year: formData.year,
         help_types: mappedHelpTypes,
-        industry: mappedPrimaryIndustry,
-        description: formData.description?.trim() || `Looking for help in ${allIndustries.join(', ') || 'various industries'}`,
+        industry: mappedIndustry,
+        description: formData.question.trim(),
         timeline: formData.timeline === 'asap' ? 'this_week' : 
                   formData.timeline === 'one_to_three_months' ? 'this_month' : 'no_rush',
         status: 'active'
@@ -336,8 +357,8 @@ export default function StudentOnboarding() {
           className="text-center"
         >
           <div className="text-6xl mb-6 animate-bounce">🐊</div>
-          <h2 className="text-2xl font-bold text-[#0021A5] mb-3">Finding your matches...</h2>
-          <p className="text-slate-600 mb-6">Searching 700+ parents and alumni who can help</p>
+          <h2 className="text-2xl font-bold text-[#0021A5] mb-3">Finding people who can answer...</h2>
+          <p className="text-slate-600 mb-6">Searching 700+ parents and alumni with real experience</p>
           <div className="w-64 mx-auto">
             <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
               <motion.div
@@ -369,12 +390,12 @@ export default function StudentOnboarding() {
             </h1>
             {matches.length > 0 ? (
               <p className="text-xl text-slate-600">
-                We found <span className="font-bold text-[#FA4616]">{matches.length}</span> parents who can help you!
+                We found <span className="font-bold text-[#FA4616]">{matches.length}</span> people who can answer your question!
               </p>
             ) : (
               <div>
-                <p className="text-lg text-slate-600 mb-2">Your request is live on Emerging Gators!</p>
-                <p className="text-slate-500">New parents join daily - we'll notify you when matches appear.</p>
+                <p className="text-lg text-slate-600 mb-2">Your question is live on Emerging Gators!</p>
+                <p className="text-slate-500">New parents join daily - we'll notify you when someone can help.</p>
               </div>
             )}
           </motion.div>
@@ -386,7 +407,7 @@ export default function StudentOnboarding() {
               transition={{ delay: 0.2 }}
               className="mb-8"
             >
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">Your top matches:</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">People who can answer your question:</h3>
               <div className="space-y-4">
                 {matches.slice(0, 3).map((match, idx) => (
                   <Card key={match.id} className="border-2 border-slate-200 hover:border-[#FA4616] transition-all">
@@ -399,14 +420,16 @@ export default function StudentOnboarding() {
                         </div>
                         <div className="text-right">
                           <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                            {Math.round(match.match_score)}% match
+                            {Math.round(match.match_percentage || match.match_score)}% match
                           </span>
                         </div>
                       </div>
                       {match.match_reasons?.length > 0 && (
-                        <p className="text-sm text-slate-500 mt-2">
-                          Can help with: {match.match_reasons.slice(0, 2).join(', ')}
-                        </p>
+                        <div className="mt-2 text-sm text-slate-600">
+                          {match.match_reasons.slice(0, 2).map((reason, i) => (
+                            <p key={i}>{reason}</p>
+                          ))}
+                        </div>
                       )}
                     </CardContent>
                   </Card>
