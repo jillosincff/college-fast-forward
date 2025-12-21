@@ -60,46 +60,50 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     setLoadingData(true);
-    console.log('🚀🚀🚀 loadDashboardData STARTING for:', user?.email);
+    console.log('🚀🚀🚀 loadDashboardData STARTING for:', user?.email, 'user.id:', user?.id);
     
     // LOAD HELP REQUEST FIRST - most important
     let foundRequest = null;
     console.log('🔍 Loading HelpRequest for:', user?.email);
+    
+    // Strategy 1: Use list() with no filters to get all accessible records (RLS will filter)
     try {
-      // Strategy 1: By student_email (most reliable)
-      const byEmail = await base44.entities.HelpRequest.filter(
-        { student_email: user.email, status: 'active' },
-        '-created_date',
-        1
+      const allAccessible = await base44.entities.HelpRequest.list('-created_date', 50);
+      console.log('🔍 All accessible HelpRequests via list():', allAccessible?.length || 0);
+      
+      // Filter to active ones for this user
+      const activeOnes = (allAccessible || []).filter(r => 
+        r.status === 'active' && 
+        (r.student_email === user.email || r.created_by === user.email || r.student_id === user.id)
       );
-      console.log('🔍 HelpRequest by email:', byEmail?.length || 0);
-      if (byEmail?.length > 0) {
-        foundRequest = byEmail[0];
+      console.log('🔍 Active requests for this user:', activeOnes?.length || 0);
+      
+      if (activeOnes.length > 0) {
+        // Get the most recent one
+        foundRequest = activeOnes[0];
       }
     } catch (e) {
-      console.error('🔍 HelpRequest query failed:', e);
+      console.error('🔍 HelpRequest list() failed:', e);
     }
     
-    // Strategy 2: Get all active and filter (fallback)
+    // Strategy 2: Try direct filter by student_email (backup)
     if (!foundRequest) {
       try {
-        const allActive = await base44.entities.HelpRequest.filter(
-          { status: 'active' },
+        const byEmail = await base44.entities.HelpRequest.filter(
+          { student_email: user.email, status: 'active' },
           '-created_date',
-          100
+          1
         );
-        console.log('🔍 All active HelpRequests:', allActive?.length || 0);
-        const mine = (allActive || []).filter(r => 
-          r.student_email === user.email || r.created_by === user.email
-        );
-        console.log('🔍 Filtered to mine:', mine?.length || 0);
-        if (mine.length > 0) foundRequest = mine[0];
+        console.log('🔍 HelpRequest by email filter:', byEmail?.length || 0);
+        if (byEmail?.length > 0) {
+          foundRequest = byEmail[0];
+        }
       } catch (e) {
-        console.error('🔍 HelpRequest fallback failed:', e);
+        console.error('🔍 HelpRequest email filter failed:', e);
       }
     }
     
-    console.log('🔍 FINAL HelpRequest:', foundRequest ? foundRequest.id : 'NONE');
+    console.log('🔍 FINAL HelpRequest:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
     if (foundRequest) setHelpRequest(foundRequest);
     
     try {
