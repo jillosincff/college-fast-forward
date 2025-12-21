@@ -123,51 +123,41 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
   };
 
   return (
-    <div className="text-center py-8">
-      <div className="w-24 h-24 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center mx-auto mb-6">
-        <span className="text-5xl">🐊</span>
+    <div className="text-center py-6">
+      {/* Logo/Icon */}
+      <div className="w-20 h-20 bg-gradient-to-br from-[#FA4616] to-[#FF8A5B] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <span className="text-4xl">🐊</span>
       </div>
       
-      <h2 className="text-3xl font-bold text-[#0021A5] mb-4">
-        Connect With Your Gator
+      {/* Welcome Text */}
+      <h2 className="text-3xl md:text-4xl font-bold mb-2">
+        <span className="text-slate-800">Welcome to</span><br />
+        <span className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] bg-clip-text text-transparent">College Fast Forward!</span>
+        <span className="ml-2">🎉</span>
       </h2>
       
-      <p className="text-lg text-slate-600 mb-2">
-        Is your student already on College Fast Forward?
+      <p className="text-slate-600 mt-4 mb-2">
+        You're joining a vibrant network of Gators, parents, and alumni<br className="hidden sm:block" />
+        accelerating your college success.
       </p>
       
-      <p className="text-sm text-slate-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-        Your action boosts your student's visibility by making their profile more prominent in the Gator network—helping them connect with potential mentors, internships, and opportunities—while respecting privacy and keeping their activity private.
+      <p className="text-slate-500 text-sm mb-8">
+        Let's set up your profile to unlock opportunities.
       </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-        <Button
-          onClick={() => setShowSearchModal(true)}
-          size="lg"
-          className="min-w-[220px] h-14 text-lg font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-          style={{ backgroundColor: '#0021A5' }}
-        >
-          <Search className="w-5 h-5 mr-2" />
-          Yes – Search & Link Them
-        </Button>
-        
-        <Button
-          onClick={() => setShowInviteModal(true)}
-          size="lg"
-          className="min-w-[220px] h-14 text-lg font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-          style={{ backgroundColor: '#FA4616' }}
-        >
-          <Mail className="w-5 h-5 mr-2" />
-          No – Send Them an Invite
-        </Button>
-      </div>
-
-      <button
-        onClick={onSkip}
-        className="text-slate-500 hover:text-slate-700 underline text-sm"
+      {/* Single prominent CTA */}
+      <Button
+        onClick={() => setShowSearchModal(true)}
+        size="lg"
+        className="w-full max-w-sm h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all bg-[#0021A5] hover:bg-[#001580]"
       >
-        Skip for now
-      </button>
+        Let's Get Started
+        <span className="ml-2">→</span>
+      </Button>
+      
+      <p className="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1">
+        <span>✨</span> Takes just 2 minutes
+      </p>
 
       {linkedStudent && (
         <div className="mt-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
@@ -178,24 +168,66 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
         </div>
       )}
 
-      {/* Search Modal */}
+      {/* Search Modal - Now serves as the main flow */}
       <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#0021A5]">Search for Your Gator</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900">Connect With Your Gator</DialogTitle>
           </DialogHeader>
           
+          <p className="text-slate-600 text-sm -mt-2 mb-4">
+            Is your student already on College Fast Forward?
+          </p>
+          
           <div className="space-y-4">
-            <div>
-              <Label>Student's Email or Name</Label>
+            {/* Two clear options */}
+            <div className="grid gap-3">
+              <div 
+                className="p-4 border-2 border-slate-200 rounded-xl hover:border-[#0021A5] hover:bg-blue-50/50 cursor-pointer transition-all group"
+                onClick={() => {/* Stay in search mode */}}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Search className="w-5 h-5 text-[#0021A5]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-slate-900">Yes – Find & Link Them</p>
+                    <p className="text-sm text-slate-500">Search by name or email</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div 
+                className="p-4 border-2 border-slate-200 rounded-xl hover:border-[#FA4616] hover:bg-orange-50/50 cursor-pointer transition-all group"
+                onClick={() => {
+                  setShowSearchModal(false);
+                  setShowInviteModal(true);
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-[#FA4616]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-slate-900">No – Send Them an Invite</p>
+                    <p className="text-sm text-slate-500">We'll email them to join</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search input (initially hidden, shows when user clicks first option) */}
+            <div className="pt-2 border-t border-slate-100">
+              <Label className="text-sm font-medium text-slate-700">Search for your student</Label>
               <div className="flex gap-2 mt-2">
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="john.doe@ufl.edu or John Doe"
+                  placeholder="Email or name..."
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className="flex-1"
                 />
-                <Button onClick={handleSearch} disabled={isSearching}>
+                <Button onClick={handleSearch} disabled={isSearching} className="bg-[#0021A5]">
                   {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
@@ -203,7 +235,7 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
 
             {searchResults.length > 0 && (
               <div className="space-y-2">
-                <Label>Results</Label>
+                <Label className="text-sm font-medium text-slate-700">Results</Label>
                 {searchResults.map((student) => (
                   <div
                     key={student.id}
@@ -213,7 +245,7 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
                       <p className="font-medium">{student.full_name || 'Unknown'}</p>
                       <p className="text-sm text-slate-500">{student.email}</p>
                     </div>
-                    <Button size="sm" onClick={() => handleLinkStudent(student)}>
+                    <Button size="sm" onClick={() => handleLinkStudent(student)} className="bg-[#0021A5]">
                       Link
                     </Button>
                   </div>
@@ -222,21 +254,30 @@ export default function ConnectGatorStep({ onComplete, onSkip }) {
             )}
 
             {searchResults.length === 0 && searchQuery && !isSearching && (
-              <div className="text-center py-4 text-slate-500">
-                <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                <p>No students found. Try a different search or send them an invite.</p>
+              <div className="text-center py-3 text-slate-500 bg-slate-50 rounded-lg">
+                <p className="text-sm">No students found with that name/email.</p>
                 <Button
-                  variant="outline"
-                  className="mt-3"
+                  variant="link"
+                  className="mt-1 text-[#FA4616]"
                   onClick={() => {
                     setShowSearchModal(false);
                     setShowInviteModal(true);
                   }}
                 >
-                  Send an Invite Instead
+                  Send them an invite instead →
                 </Button>
               </div>
             )}
+            
+            <button
+              onClick={() => {
+                setShowSearchModal(false);
+                onSkip();
+              }}
+              className="w-full text-slate-400 hover:text-slate-600 text-sm py-2"
+            >
+              Skip for now – I'll do this later
+            </button>
           </div>
         </DialogContent>
       </Dialog>
