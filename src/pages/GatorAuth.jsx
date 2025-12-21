@@ -360,93 +360,30 @@ export default function GatorAuth() {
       return;
     }
 
-    // CASE 3: OAuth callback - poll for session with timeout
-    // CRITICAL: Skip polling if we already have a user from AuthContext
-    if ((wasOAuthCallback || isFreshOAuthCallback) && !currentUser && !user) {
-      processingRef.current = true;
-      setProcessing(true);
+    // CASE 3: OAuth callback - short poll for session (token should already be set by PRIORITY 0)
+    if (wasOAuthCallback && !currentUser && !user) {
+      addLog(`🔐 OAuth callback flag set, checking for session...`);
       
-      // Clear session storage
-      sessionStorage.removeItem('oauth_callback_detected');
-      
-      addLog(`🔐 OAuth callback detected. Polling for session...`);
-      
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const initialWait = isMobile ? 2500 : 1000;
-      
-      setTimeout(async () => {
-        if (!isMountedRef.current) return;
-        
-        addLog('✅ SDK initialized, polling for authentication...');
-        
-        // Poll for authentication with extended timeout (60s for mobile)
-        const maxAuthWait = isMobile ? 60000 : 30000;
-        const pollInterval = 500;
-        let elapsed = 0;
-        let polledUser = null;
-        
-        // Try to force session recovery first
+      // Quick check - token should already be set
+      (async () => {
         try {
-          addLog('🔄 Attempting session recovery...');
-          
-          // Check if SDK has isAuthenticated method
-          const isAuth = await base44.auth.isAuthenticated?.();
-          addLog(`📋 isAuthenticated: ${isAuth}`);
-          
-          // Try getSession
-          const session = await base44.auth.getSession?.();
-          if (session) {
-            addLog(`📋 Session found: ${JSON.stringify(session).substring(0, 100)}...`);
-          }
-          
-          // Try refreshing the session
-          if (base44.auth.refreshSession) {
-            await base44.auth.refreshSession();
-            addLog('🔄 Attempted session refresh');
+          const polledUser = await base44.auth.me();
+          if (polledUser?.email) {
+            addLog(`✅ Session found: ${polledUser.email}`);
+            sessionStorage.removeItem('oauth_callback_detected');
+            if (isMountedRef.current) {
+              setCurrentUser(polledUser);
+            }
+            if (refreshUser) await refreshUser();
+          } else {
+            addLog(`⚠️ No session yet, clearing flag`);
+            sessionStorage.removeItem('oauth_callback_detected');
           }
         } catch (e) {
-          addLog(`⚠️ Session recovery attempt: ${e.message}`);
+          addLog(`⚠️ Session check failed: ${e.message}`);
+          sessionStorage.removeItem('oauth_callback_detected');
         }
-        
-        while (elapsed < maxAuthWait) {
-          try {
-            polledUser = await base44.auth.me();
-            if (polledUser?.email) {
-              addLog(`✅ Session acquired: ${polledUser.email} (${Math.round(elapsed/1000)}s)`);
-              break;
-            }
-          } catch (e) {
-            // Log every 10s for debugging
-            if (elapsed % 10000 === 0 && elapsed > 0) {
-              addLog(`⚠️ Polling error at ${Math.round(elapsed/1000)}s: ${e.message}`);
-            }
-          }
-          await new Promise(resolve => setTimeout(resolve, pollInterval));
-          elapsed += pollInterval;
-          
-          if (elapsed % 5000 === 0) {
-            addLog(`⏳ Still waiting... ${Math.round(elapsed/1000)}s / ${Math.round(maxAuthWait/1000)}s`);
-          }
-        }
-        
-        if (!polledUser?.email) {
-          addLog(`⏰ OAuth callback timed out after ${Math.round(maxAuthWait/1000)}s - but will retry with fresh token extraction`);
-          
-          // Don't show error immediately - let the next effect cycle try again
-          // The URL might still have a fresh token that we can extract
-          processingRef.current = false;
-          if (isMountedRef.current) {
-            setProcessing(false);
-          }
-          return;
-        }
-        
-        // Store polled user and let next effect cycle handle routing
-        if (isMountedRef.current) {
-          setCurrentUser(polledUser);
-          // Don't reset processing yet - let the routing logic handle it
-        }
-      }, initialWait);
+      })();
       return;
     }
 
