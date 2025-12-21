@@ -96,6 +96,7 @@ const MyRequests = React.lazy(() => import('./pages/MyRequests'));
 const MyImpact = React.lazy(() => import('./pages/MyImpact'));
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 const MyMessages = React.lazy(() => import('./pages/MyMessages'));
+const MessageComposer = React.lazy(() => import('./pages/MessageComposer'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 import TestingDashboard from './pages/TestingDashboard';
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
@@ -729,6 +730,7 @@ const getPageComponent = (pageName) => {
     case 'MyImpact': return MyImpact;
     case 'MyApplications': return MyApplications;
     case 'MyMessages': return MyMessages;
+    case 'MessageComposer': return MessageComposer;
     case 'TestingDashboard': return TestingDashboard;
     case 'AdminSetup': return AdminSetup;
     case 'Favorites': return Favorites;
