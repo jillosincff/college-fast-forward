@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,7 @@ import {
   MapPin, 
   Briefcase, 
   Heart, 
+  Building, 
   Code, 
   Stethoscope, 
   DollarSign, 
@@ -15,7 +15,9 @@ import {
   Megaphone, 
   BookOpen, 
   Cog, 
-  GraduationCap,
+  GraduationCap, 
+  User,
+  MessageSquare,
   UserPlus,
   Bookmark,
   Wifi
@@ -211,8 +213,8 @@ export default function CompactHelpRequestCard({
             data-testid={`offer-help-btn-${request.id}`}
             className="flex-grow bg-gradient-to-r from-[var(--uf-orange)] to-red-500 hover:from-[#E24B14] hover:to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm"
           >
-            <Heart className="w-4 h-4 mr-2" />
-            Offer Help
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Share Your Advice
           </Button>
           
           <Button
