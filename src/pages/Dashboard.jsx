@@ -49,6 +49,7 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     setLoadingData(true);
+    console.log('🚀 loadDashboardData STARTING for user:', user?.email);
     try {
       // Fetch user counts
       try {
