@@ -59,12 +59,18 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
     setDisplayCount(likeCount);
   }, [isLikedByUser, likeCount]);
   
+  // Check if request is anonymous (parents only)
+  const isAnonymous = request?.is_anonymous && request?.poster_type === 'parent';
+  
   // Priority: 1. gator.first_name + last_name, 2. request.poster_name, 3. gator.full_name, 4. nameUtils fallback
-  const fullName = (gator.first_name && gator.last_name) 
-    ? `${gator.first_name} ${gator.last_name}`
-    : request?.poster_name 
-      || gator.full_name 
-      || getDisplayName(gator);
+  // If anonymous, always show "Anonymous Parent"
+  const fullName = isAnonymous 
+    ? 'Anonymous Parent'
+    : (gator.first_name && gator.last_name) 
+      ? `${gator.first_name} ${gator.last_name}`
+      : request?.poster_name 
+        || gator.full_name 
+        || getDisplayName(gator);
   const graduationYear = gator.graduation_year ? `Class of ${gator.graduation_year}` : 'UF Student';
   const major = gator.major || 'Undeclared';
   const bio = gator.bio || request?.description || 'Connect with me to learn more!';
@@ -282,11 +288,17 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
 
         {/* Profile Photo */}
         <div className="card-header">
-          <UserAvatar 
-            user={gator} 
-            className="profile-photo-enhanced"
-            showFallback={true}
-          />
+          {isAnonymous ? (
+            <div className="profile-photo-enhanced anonymous-avatar">
+              <span className="text-3xl">👨‍👩‍👧</span>
+            </div>
+          ) : (
+            <UserAvatar 
+              user={gator} 
+              className="profile-photo-enhanced"
+              showFallback={true}
+            />
+          )}
         </div>
 
         {/* User Details */}
@@ -295,7 +307,9 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           {request?.poster_type && request.poster_type !== 'student' && (
             <div className="poster-type-badge-container">
               <span className={`poster-type-badge poster-type-${request.poster_type}`}>
-                {request.poster_type === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+                {request.poster_type === 'parent' 
+                  ? (isAnonymous ? '👨‍👩‍👧 Anonymous Parent' : '👨‍👩‍👧 Parent') 
+                  : '🎯 Alumni'}
               </span>
             </div>
           )}
@@ -303,7 +317,7 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           {/* Name with LinkedIn */}
           <div className="name-section">
             <h3 className="student-name-enhanced">{fullName}</h3>
-            {hasLinkedIn && (
+            {hasLinkedIn && !isAnonymous && (
               <button
                 onClick={handleLinkedInClick}
                 className="linkedin-icon"
@@ -533,6 +547,13 @@ export default function EnhancedGatorCard({ gator, request, onHelp, isFeatured, 
           height: 70px;
           border-radius: 50%;
           border: 3px solid #0021A5;
+        }
+
+        .anonymous-avatar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
         }
 
         .card-content {
