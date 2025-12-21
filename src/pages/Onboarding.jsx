@@ -282,6 +282,78 @@ export default function Onboarding() {
     );
   }
 
+  // Step 1: What's on your mind? (Parent's question - optional)
+  if (currentStep === 1 && !user?.onboarding_completed) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
+          >
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">💬</span>
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                What's on your mind?
+              </h1>
+              <p className="text-slate-600">
+                Ask a question about helping your student or your own career. Other parents and alumni will share their advice.
+              </p>
+            </div>
+
+            {/* Question Input */}
+            <div className="mb-6">
+              <Textarea
+                value={formData.question}
+                onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value.slice(0, 500) }))}
+                placeholder="E.g., My daughter is torn between two offers. How do I help her decide without being pushy?
+
+Or: My son wants to drop out and start a business. How worried should I be?"
+                rows={5}
+                className="min-h-[140px] text-base border-2 border-slate-200 focus:border-blue-500"
+              />
+              <div className="flex justify-between mt-2">
+                <p className="text-xs text-slate-500">Share any career or life question - it's optional but helps build community!</p>
+                <p className="text-xs text-slate-500">{formData.question?.length || 0}/500</p>
+              </div>
+            </div>
+
+            {/* Example Questions */}
+            <div className="bg-slate-50 rounded-xl p-4 mb-6">
+              <p className="font-medium text-sm text-slate-700 mb-3">💡 Example questions from parents:</p>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li className="italic">"My daughter is torn between two offers. How do I help her decide without being pushy?"</li>
+                <li className="italic">"My son wants to drop out and start a business. How worried should I be?"</li>
+                <li className="italic">"How do I support my daughter's job search without helicoptering?"</li>
+              </ul>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(0)}
+                className="flex-1 h-12"
+              >
+                ← Back
+              </Button>
+              <Button
+                onClick={() => setCurrentStep(2)}
+                className="flex-1 h-12 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-semibold"
+              >
+                {formData.question?.trim() ? 'Continue →' : 'Skip for now →'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
