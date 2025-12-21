@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     }
 
     const isHelpRequest = questionType === 'HelpRequest';
-    const viewField = isHelpRequest ? 'view_count' : 'views_count';
+    const viewField = 'view_count'; // Use view_count for both entity types now
     
     console.log('trackQuestionView: Entity:', questionType, 'Field:', viewField);
     
