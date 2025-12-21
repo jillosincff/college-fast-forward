@@ -308,6 +308,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'Emerging Gators', page: 'Connections', icon: Briefcase, roles: ['gator', 'parent'] },
         { name: 'Gator Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
         { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
+        { name: 'Messages', page: 'MyMessages', icon: MessageSquare, roles: ['gator', 'parent'] },
       ], []);
 
   const filteredNavItems = useMemo(() => {
