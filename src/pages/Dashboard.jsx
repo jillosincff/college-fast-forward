@@ -73,58 +73,73 @@ export default function Dashboard() {
       setOpportunities(opps || []);
 
       // Fetch user's help request (students have ONE active request)
-      // CRITICAL: Query by email first since user IDs can change between sessions
-      console.log('🔍🔍🔍 HELP REQUEST SECTION START - user:', user.email, 'user.id:', user.id);
+      console.log('🔍🔍🔍 HELP REQUEST SECTION START');
+      console.log('🔍 user.email:', user.email);
+      console.log('🔍 user.id:', user.id);
       
       let myHelpRequest = [];
+      let foundRequest = null;
       
       // Strategy 1: By student_email
+      console.log('🔍 Strategy 1: student_email query...');
       try {
         myHelpRequest = await base44.entities.HelpRequest.filter(
           { student_email: user.email, status: 'active' },
           '-created_date',
           1
         );
-        console.log('🔍 HelpRequest by student_email result:', myHelpRequest?.length || 0);
+        console.log('🔍 Strategy 1 result:', myHelpRequest?.length || 0);
+        if (myHelpRequest?.length > 0) {
+          foundRequest = myHelpRequest[0];
+          console.log('🔍 Found via Strategy 1:', foundRequest.id);
+        }
       } catch (e) {
-        console.error('🔍 HelpRequest by student_email failed:', e);
+        console.error('🔍 Strategy 1 FAILED:', e.message || e);
       }
       
       // Strategy 2: By user.id
-      if (!myHelpRequest || myHelpRequest.length === 0) {
+      if (!foundRequest) {
+        console.log('🔍 Strategy 2: student_id query...');
         try {
           myHelpRequest = await base44.entities.HelpRequest.filter(
             { student_id: user.id, status: 'active' },
             '-created_date',
             1
           );
-          console.log('🔍 HelpRequest by student_id result:', myHelpRequest?.length || 0);
+          console.log('🔍 Strategy 2 result:', myHelpRequest?.length || 0);
+          if (myHelpRequest?.length > 0) {
+            foundRequest = myHelpRequest[0];
+            console.log('🔍 Found via Strategy 2:', foundRequest.id);
+          }
         } catch (e) {
-          console.error('🔍 HelpRequest by student_id failed:', e);
+          console.error('🔍 Strategy 2 FAILED:', e.message || e);
         }
       }
       
-      // Strategy 3: Just get ALL active requests and filter client-side by email
-      if (!myHelpRequest || myHelpRequest.length === 0) {
+      // Strategy 3: Get ALL active and filter client-side
+      if (!foundRequest) {
+        console.log('🔍 Strategy 3: all active query...');
         try {
-          // Get recent active requests and check if any match our email
           const allActive = await base44.entities.HelpRequest.filter(
             { status: 'active' },
             '-created_date',
             50
           );
-          console.log('🔍 HelpRequest all active:', allActive?.length || 0);
-          myHelpRequest = (allActive || []).filter(r => 
+          console.log('🔍 Strategy 3 total active:', allActive?.length || 0);
+          const filtered = (allActive || []).filter(r => 
             r.student_email === user.email || r.created_by === user.email
           );
-          console.log('🔍 HelpRequest filtered by email:', myHelpRequest?.length || 0);
+          console.log('🔍 Strategy 3 filtered:', filtered?.length || 0);
+          if (filtered?.length > 0) {
+            foundRequest = filtered[0];
+            console.log('🔍 Found via Strategy 3:', foundRequest.id);
+          }
         } catch (e) {
-          console.error('🔍 HelpRequest all active failed:', e);
+          console.error('🔍 Strategy 3 FAILED:', e.message || e);
         }
       }
       
-      const foundRequest = myHelpRequest && myHelpRequest.length > 0 ? myHelpRequest[0] : null;
-      console.log('🔍 Final HelpRequest found:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
+      console.log('🔍🔍🔍 HELP REQUEST FINAL:', foundRequest ? `ID=${foundRequest.id}` : 'NONE');
       if (foundRequest) {
         setHelpRequest(foundRequest);
       }
