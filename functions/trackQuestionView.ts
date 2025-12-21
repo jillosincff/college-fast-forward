@@ -1,12 +1,25 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest, createClient } from 'npm:@base44/sdk@0.8.4';
 
 Deno.serve(async (req) => {
     console.log('trackQuestionView: Starting...');
     
     let base44;
+    let base44ServiceRole;
+    
     try {
         base44 = createClientFromRequest(req);
-        console.log('trackQuestionView: Client created');
+        console.log('trackQuestionView: Client created from request');
+        
+        // Create a separate service role client for admin operations
+        const appId = Deno.env.get('BASE44_APP_ID');
+        const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
+        console.log('trackQuestionView: App ID exists:', !!appId, 'Service key exists:', !!serviceRoleKey);
+        
+        base44ServiceRole = createClient({
+            appId: appId,
+            serviceRoleKey: serviceRoleKey
+        });
+        console.log('trackQuestionView: Service role client created');
     } catch (initErr) {
         console.error('trackQuestionView: Client init error:', initErr);
         return Response.json({ error: 'Client init failed', details: initErr.message }, { status: 500 });
