@@ -48,60 +48,88 @@ export default function FamilyKarmaWidget({ user, compact = false }) {
 
   if (isLoading) {
     return (
-      <div className="karma-widget loading">
-        <div className="skeleton-shimmer" />
-        <style jsx>{`
-          .karma-widget.loading {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            height: 120px;
-          }
-          .skeleton-shimmer {
-            height: 100%;
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
-          }
-          @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}</style>
+      <div className="bg-white rounded-2xl p-6 shadow-lg animate-pulse">
+        <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
+        <div className="h-16 bg-slate-200 rounded mb-4"></div>
+        <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-red-100">
+        <div className="text-center">
+          <p className="text-red-500 mb-3">Unable to load karma data</p>
+          <Button variant="outline" size="sm" onClick={loadKarmaData}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (!karmaData || !karmaData.family_group_id) {
-    // No family group - show CTA
+    // No family group - show starter widget with 0 karma
+    const level = 'bronze';
+    const colors = LEVEL_COLORS[level];
+    
     return (
-      <div className="karma-widget no-family">
-        <div className="no-family-content">
-          <Sparkles className="w-8 h-8 text-purple-500" />
-          <h4>Family Karma</h4>
-          <p>Connect with your family to earn karma and boost your student's questions!</p>
+      <div 
+        className="rounded-2xl p-6 text-white shadow-lg"
+        style={{ background: colors.gradient }}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
+            Family Karma
+          </h3>
+          <span className="text-sm font-bold bg-white/20 px-3 py-1 rounded-full">
+            {LEVEL_ICONS[level]} BRONZE
+          </span>
         </div>
-        <style jsx>{`
-          .karma-widget.no-family {
-            background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
-            border: 2px dashed #C4B5FD;
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-          }
-          .no-family-content h4 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #5B21B6;
-            margin: 12px 0 8px;
-          }
-          .no-family-content p {
-            font-size: 14px;
-            color: #7C3AED;
-            margin: 0;
-          }
-        `}</style>
+
+        {/* Big Number */}
+        <div className="text-center py-4 bg-white/15 rounded-xl mb-4">
+          <div className="text-5xl font-bold">0</div>
+          <div className="text-sm opacity-90">Karma Points</div>
+        </div>
+
+        {/* CTA */}
+        <div className="bg-white/20 rounded-xl p-4 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">🔗</span>
+            <span className="font-bold">Connect with your Gator!</span>
+          </div>
+          <p className="text-sm opacity-90">
+            Link your student account to start earning karma and boost their questions in the feed!
+          </p>
+        </div>
+
+        {/* Ways to Earn */}
+        <div className="bg-white/15 rounded-xl p-4">
+          <h4 className="font-bold text-sm mb-3">Ways to Earn Karma:</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center">
+              <span>💬 Answer a question</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+10</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>⬆️ Get an upvote</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+5</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>✅ Best answer selected</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+50</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>👥 Refer a parent</span>
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">+25</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
