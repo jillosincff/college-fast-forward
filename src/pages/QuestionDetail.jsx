@@ -115,22 +115,32 @@ export default function QuestionDetailPage() {
       const viewKey = `viewed_${questionId}`;
       const hasViewed = sessionStorage.getItem(viewKey);
       
+      console.log('View tracking check:', { viewKey, hasViewed, questionId, questionSource });
+      
       if (!hasViewed) {
         sessionStorage.setItem(viewKey, 'true');
+        
+        console.log('Calling trackQuestionView function...');
         
         // Use backend function to increment view count (bypasses RLS)
         base44.functions.invoke('trackQuestionView', {
           questionId: questionId,
           questionType: questionSource
         }).then(response => {
+          console.log('trackQuestionView response:', response);
           if (response?.data?.success) {
             // Update local view count
             setQuestion(prev => prev ? {
               ...prev,
               view_count: response.data.newViewCount
             } : prev);
+            console.log('View count updated to:', response.data.newViewCount);
+          } else {
+            console.log('trackQuestionView failed:', response?.data);
           }
-        }).catch(err => console.log('View tracking error:', err));
+        }).catch(err => console.error('View tracking error:', err));
+      } else {
+        console.log('Already viewed this question, skipping view count');
       }
 
     } catch (err) {
