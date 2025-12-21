@@ -1150,7 +1150,7 @@ export default function DiscoverEmergingGatorsPage() {
           }
 
           .filter-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
           }
 
