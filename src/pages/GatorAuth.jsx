@@ -103,6 +103,7 @@ export default function GatorAuth() {
 
     // If user is authenticated, handle routing
     if (user) {
+      setIsOAuthCallback(false); // Clear OAuth loading state once user is loaded
       console.log('🔍 Authenticated user:', user.email, 'persona:', user.persona);
       
       const pendingRole = localStorage.getItem('pending_invite_role');
