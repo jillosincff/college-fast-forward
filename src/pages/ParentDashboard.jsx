@@ -303,24 +303,24 @@ export default function ParentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
-      {/* 1. Welcome Header */}
-      <div className="bg-white border-b border-slate-200 py-5 mb-6">
+    <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
+      {/* 1. Welcome Header - Mobile Optimized */}
+      <div className="bg-[#0021A5] text-white py-5 md:py-6 mb-4 md:mb-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-3xl font-bold text-slate-900">
-                  Welcome, {firstName}! 🧡💙
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h1 className="text-xl md:text-3xl font-bold">
+                  Welcome, {firstName}! 👋
                 </h1>
                 {user?.is_founding_member && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold">
                     <Crown className="w-3 h-3" />
                     Founder
                   </span>
                 )}
               </div>
-              <p className="text-slate-600">
+              <p className="text-white/80 text-sm md:text-base">
                 Your network opens doors for Gators everywhere
               </p>
             </div>
@@ -328,7 +328,7 @@ export default function ParentDashboard() {
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="flex items-center gap-2"
+              className="hidden md:flex items-center gap-2 bg-white/10 border-white/30 text-white hover:bg-white/20"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -359,8 +359,18 @@ export default function ParentDashboard() {
           onInviteStudent={() => setShowInviteModal(true)}
         />
 
-        {/* 4. Four Action Cards - Compact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
+        <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
+          <div className="flex gap-3" style={{ width: 'max-content' }}>
+            <QuickActionCardMobile icon="🐊" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
+            <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
+            <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
+            <QuickActionCardMobile icon="💼" label="Post Job" onClick={() => navigate('PostOpportunity')} />
+          </div>
+        </div>
+        
+        {/* Desktop: Four Action Cards Grid */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Complete Profile */}
           <div 
             ref={el => actionCardsRef.current[0] = el}
