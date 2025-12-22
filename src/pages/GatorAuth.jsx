@@ -288,10 +288,10 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // ROLE SELECTION SCREEN
+  // UNIFIED WELCOME SCREEN - Single entry point for all users
   // ═══════════════════════════════════════════════════════════
   
-  if (step === 'role-select') {
+  if (step === 'welcome') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
@@ -300,11 +300,11 @@ export default function GatorAuth() {
           
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-white shadow-xl flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl flex items-center justify-center">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
                 alt="Gator Network"
-                className="w-16 h-16 object-contain rounded-full"
+                className="w-20 h-20 object-contain rounded-full"
               />
             </div>
           </div>
@@ -314,127 +314,20 @@ export default function GatorAuth() {
             Welcome to Gator Network 🐊
           </h1>
           <p className="text-white/85 text-lg mb-8">
-            Connect with UF students, parents, and alumni
+            Connect with UF students, parents, <em>and alumni</em> for<br />
+            career advice and opportunities
           </p>
 
-          {/* Role Selection */}
-          <p className="text-white/90 text-lg font-medium mb-6">
-            I am a...
-          </p>
-
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md mx-auto mb-8">
-            
-            {/* Student */}
-            <button
-              onClick={() => {
-                setSelectedRole('gator');
-                setStep('student-auth');
-              }}
-              className="flex flex-col items-center p-4 sm:p-6 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/60 rounded-xl transition-all"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🎓</span>
-              <span className="text-white font-semibold text-sm sm:text-base">Student</span>
-            </button>
-
-            {/* Parent */}
-            <button
-              onClick={() => {
-                setSelectedRole('parent');
-                setStep('invite-code');
-              }}
-              className="flex flex-col items-center p-4 sm:p-6 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/60 rounded-xl transition-all"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">👨‍👩‍👧</span>
-              <span className="text-white font-semibold text-sm sm:text-base">Parent</span>
-            </button>
-
-            {/* Alumni */}
-            <button
-              onClick={() => {
-                setSelectedRole('alumni');
-                setStep('invite-code');
-              }}
-              className="flex flex-col items-center p-4 sm:p-6 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/60 rounded-xl transition-all"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🎯</span>
-              <span className="text-white font-semibold text-sm sm:text-base">Alumni</span>
-            </button>
-
-          </div>
-
-          {/* Sign In Link */}
-          <div className="pt-6 border-t border-white/20">
-            <p className="text-white/80 text-sm">
-              Already have an account?{' '}
-              <button 
-                onClick={() => setStep('sign-in')}
-                className="text-[#FA4616] font-semibold hover:underline"
-              >
-                Sign in here
-              </button>
-            </p>
-          </div>
-
-          {/* Terms */}
-          <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
-            By continuing, you agree to our{' '}
-            <a href="#Terms" className="text-white/70 underline">Terms</a> and{' '}
-            <a href="#Privacy" className="text-white/70 underline">Privacy Policy</a>
-          </p>
-
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // STUDENT AUTH - Must use @ufl.edu
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'student-auth') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-md text-center">
-          
-          {/* Back Button */}
-          <button 
-            onClick={() => {
-              setStep('role-select');
-              setError(null);
-            }}
-            className="text-white/70 hover:text-white text-sm mb-8 flex items-center justify-center mx-auto gap-1"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-
-          <div className="text-5xl mb-4">🎓</div>
-          
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Student Sign Up
-          </h1>
-          <p className="text-white/80 mb-8">
-            Use your UF email to verify you're a Gator
-          </p>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Google Button */}
+          {/* Main Google Sign In Button */}
           <Button
-            onClick={handleStudentGoogleAuth}
+            onClick={() => handleGoogleSignIn()}
             disabled={loading}
-            className="w-full h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg mb-4"
+            className="w-full max-w-sm mx-auto h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg mb-4"
           >
             {loading ? (
               <>
                 <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Verifying...
+                Connecting...
               </>
             ) : (
               <>
@@ -444,118 +337,30 @@ export default function GatorAuth() {
             )}
           </Button>
 
-          {/* Warning */}
-          <div className="bg-amber-500/20 border border-amber-500/50 rounded-lg p-4 mb-6">
-            <p className="text-amber-200 text-sm font-medium">
-              ⚠️ You must use your <strong>@ufl.edu</strong> email address
-            </p>
-          </div>
-
-          {/* Info */}
-          <p className="text-white/60 text-xs">
-            Your UF email verifies your student status and gives you instant access
+          <p className="text-white/70 text-sm mb-6">
+            Works with any email — Gmail, UFL, Outlook, etc.
           </p>
 
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // INVITE CODE - For Parents & Alumni
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'invite-code') {
-    const roleLabel = selectedRole === 'parent' ? 'Parent' : 'Alumni';
-    const roleEmoji = selectedRole === 'parent' ? '👨‍👩‍👧' : '🎯';
-
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-md text-center">
-          
-          {/* Back Button */}
-          <button 
-            onClick={() => {
-              setStep('role-select');
-              setInviteCode('');
-              setError(null);
-            }}
-            className="text-white/70 hover:text-white text-sm mb-8 flex items-center justify-center mx-auto gap-1"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-
-          <div className="text-5xl mb-4">{roleEmoji}</div>
-          
-          <h1 className="text-2xl font-bold text-white mb-2">
-            {roleLabel} Sign Up
-          </h1>
-          <p className="text-white/80 mb-8">
-            Enter your invite code to join the Gator Network
+          {/* New Here Info */}
+          <p className="text-white/60 text-sm mb-2">New here?</p>
+          <p className="text-white/80 text-sm mb-8">
+            Just click above to get started! You'll choose your role<br />
+            (Student, Parent, or Alumni) after signing in.
           </p>
 
-          {/* Error */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Invite Code Input */}
-          <div className="space-y-4 mb-6">
-            <Input
-              type="text"
-              placeholder="Enter invite code"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              className="h-14 text-center text-xl font-mono tracking-widest uppercase bg-white"
-              maxLength={12}
-            />
-
-            <Button
-              onClick={handleInviteCode}
-              disabled={loading || inviteCode.length < 4}
-              className="w-full h-12 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                'Continue'
-              )}
-            </Button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center my-8">
-            <div className="flex-1 h-px bg-white/30"></div>
-            <span className="px-4 text-white/60 text-sm">or</span>
-            <div className="flex-1 h-px bg-white/30"></div>
-          </div>
-
-          {/* Request Access */}
-          <div className="bg-white/10 rounded-xl p-6">
-            <p className="text-white/90 font-medium mb-2">
-              Don't have an invite code?
+          {/* UF Students Highlight */}
+          <div className="bg-white/10 rounded-xl p-4 max-w-sm mx-auto">
+            <p className="text-amber-300 text-sm font-medium">
+              🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
             </p>
-            <p className="text-white/70 text-sm mb-4">
-              Request access and we'll review your application
-            </p>
-            <Button
-              onClick={() => {
-                setRequestForm({ ...requestForm, role: selectedRole });
-                setStep('request-access');
-              }}
-              variant="outline"
-              className="w-full border-white/40 text-white hover:bg-white/10 hover:text-white"
-            >
-              Request Access →
-            </Button>
           </div>
+
+          {/* Terms */}
+          <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
+            By continuing, you agree to our{' '}
+            <a href="#Terms" className="text-white/70 underline">Terms</a> and{' '}
+            <a href="#Privacy" className="text-white/70 underline">Privacy Policy</a>
+          </p>
 
         </div>
       </div>
