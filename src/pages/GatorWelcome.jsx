@@ -398,86 +398,18 @@ export default function GatorWelcome() {
     }
   };
 
-  // Loading state
-  if (isLoading || !user || status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-xl">
-            <span className="text-4xl">🐊</span>
-          </div>
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600 font-medium">Setting up your account...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (status === 'error') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-8 pb-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">❌</span>
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Setup Error</h2>
-            <p className="text-slate-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Generic welcome screen - same for all roles
+  // ALWAYS show loading - this page is now just a router
+  // All roles skip the welcome screen and go directly to onboarding
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-orange-50 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-lg w-full text-center"
-      >
-        <div className="bg-white rounded-3xl shadow-2xl p-10 border border-slate-100">
-          {/* Gator Logo */}
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#FA4616] via-[#FF6B35] to-[#0021A5] mx-auto mb-6 flex items-center justify-center shadow-xl">
-            <span className="text-5xl">🐊</span>
-          </div>
-          
-          {/* Welcome Message - Generic for all roles */}
-          <h1 className="text-3xl font-bold text-slate-900 mb-3">
-            Welcome to College Fast Forward!
-          </h1>
-          
-          <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-            You're joining a community of Gators helping Gators.
-          </p>
-          
-          <p className="text-slate-500 mb-8">
-            Let's set up your profile so you can start connecting.
-          </p>
-          
-          {/* CTA Button */}
-          <Button
-            onClick={handleGetStarted}
-            disabled={isCreatingFamily}
-            className="w-full h-14 bg-gradient-to-r from-[#FA4616] to-[#FF6B35] hover:from-[#E03D0F] hover:to-[#FA4616] text-white font-bold text-lg rounded-xl shadow-lg transition-all"
-          >
-            {isCreatingFamily ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Setting up...
-              </>
-            ) : (
-              <>
-                Let's Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </Button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="text-center">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-xl">
+          <span className="text-4xl">🐊</span>
         </div>
-      </motion.div>
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-600 font-medium">Setting up your experience...</p>
+      </div>
     </div>
   );
+
 }
