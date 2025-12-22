@@ -1074,8 +1074,8 @@ function AppContent() {
       }
       // Check role - even @ufl.edu students need to select a role
       else if (hasNoRole && !pendingRole) {
-        destination = 'GatorRoleSelection';
-        console.log('➡️ [NoRole] → GatorRoleSelection');
+        destination = 'GatorAuth';
+        console.log('➡️ [NoRole] → GatorAuth');
       } else if (hasNoRole && !isUFLStudent && !pendingRole) {
         // Non-UFL students without role need invite
         destination = 'GatorInviteCode';
