@@ -460,11 +460,8 @@ export default function ParentDashboard() {
 
 
 
-        {/* Combined Activity Section */}
+        {/* Activity Section - No duplicate header */}
         <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <h3 className="text-lg font-bold mb-4" style={{ color: '#0021A5' }}>
-            📊 Your Activity
-          </h3>
           <ParentActivityWidget />
         </div>
 

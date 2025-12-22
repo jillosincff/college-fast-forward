@@ -85,8 +85,8 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
     
     return (
       <div 
-        className="rounded-2xl p-6 shadow-xl relative overflow-hidden"
-        style={{ background: colors.gradient, color: colors.text }}
+        className="rounded-2xl p-6 shadow-xl relative overflow-hidden text-white"
+        style={{ background: colors.gradient }}
       >
         {/* Pattern overlay */}
         <div className="absolute inset-0 opacity-10" style={{
@@ -96,11 +96,11 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
         <div className="relative z-10">
           {/* Header */}
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
+            <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+              <Sparkles className="w-5 h-5 text-white" />
               Family Karma
             </h3>
-            <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full">
+            <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full text-white">
               {LEVEL_ICONS[level]} BRONZE
             </span>
           </div>
@@ -109,12 +109,12 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {/* Left: Karma Points */}
             <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
-              <div className="text-5xl font-bold mb-1 text-center" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
-              <div className="text-sm opacity-90 font-semibold text-center mb-3">Karma Points</div>
+              <div className="text-5xl font-bold mb-1 text-center text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
+              <div className="text-sm font-semibold text-center mb-3 text-white/90">Karma Points</div>
               
               {/* Progress to Silver */}
               <div className="mt-2">
-                <div className="flex justify-between text-xs opacity-80 mb-1">
+                <div className="flex justify-between text-xs mb-1 text-white/80">
                   <span>Progress to Silver</span>
                   <span>0/{threshold.max}</span>
                 </div>
@@ -126,23 +126,23 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
 
             {/* Right: Ways to Earn */}
             <div className="bg-white/15 backdrop-blur rounded-xl p-4">
-              <h4 className="font-bold text-xs mb-2 opacity-90">Ways to Earn:</h4>
-              <div className="space-y-1.5 text-xs">
+              <h4 className="font-bold text-xs mb-2 text-white/90">Ways to Earn:</h4>
+              <div className="space-y-1.5 text-xs text-white/95">
                 <div className="flex justify-between items-center">
                   <span>💬 Answer a question</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+10</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>⬆️ Get an upvote</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+5</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>✅ Best answer selected</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+50</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>👥 Refer a parent</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+25</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
                 </div>
               </div>
             </div>
@@ -152,13 +152,13 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
           <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🔗</span>
-              <span className="font-bold text-sm">Connect with your Gator!</span>
+              <span className="font-bold text-sm text-white">Connect with your Gator!</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 onClick={onSearchStudent}
                 size="sm"
-                className="flex-1 bg-white/30 hover:bg-white/40 text-current border border-white/40 font-bold text-xs"
+                className="flex-1 bg-white/30 hover:bg-white/40 text-white border border-white/40 font-bold text-xs"
               >
                 Search & Link Student
               </Button>
@@ -166,7 +166,7 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
                 onClick={onInviteStudent}
                 size="sm"
                 variant="outline"
-                className="flex-1 bg-transparent hover:bg-white/20 text-current border border-white/40 font-bold text-xs"
+                className="flex-1 bg-transparent hover:bg-white/20 text-white border border-white/40 font-bold text-xs"
               >
                 Send Invite
               </Button>
@@ -209,8 +209,8 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
 
   return (
     <div 
-      className="rounded-2xl p-6 shadow-xl relative overflow-hidden"
-      style={{ background: colors.gradient, color: colors.text }}
+      className="rounded-2xl p-6 shadow-xl relative overflow-hidden text-white"
+      style={{ background: colors.gradient }}
     >
       {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-10" style={{
@@ -220,11 +220,11 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
       <div className="relative z-10">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
+          <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+            <Sparkles className="w-5 h-5 text-white" />
             Family Karma
           </h3>
-          <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full">
+          <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full text-white">
             {icon} {level.toUpperCase()}
           </span>
         </div>
@@ -233,12 +233,12 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* Left: Karma Points + Progress */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
-            <div className="text-5xl font-bold mb-1 text-center" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{totalKarma}</div>
-            <div className="text-sm opacity-90 font-semibold text-center mb-3">Karma Points</div>
+            <div className="text-5xl font-bold mb-1 text-center text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{totalKarma}</div>
+            <div className="text-sm font-semibold text-center mb-3 text-white/90">Karma Points</div>
             
             {/* Boost Badge - Inline */}
             <div className="flex justify-center mb-3">
-              <span className="bg-white/25 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold">
+              <span className="bg-white/25 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-white">
                 ⚡ +{boostMultiplier} Boost
               </span>
             </div>
@@ -246,17 +246,17 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
             {/* Progress to Next Level */}
             {nextLevel && nextLevel.name !== 'max' ? (
               <div>
-                <div className="flex justify-between text-xs opacity-80 mb-1">
+                <div className="flex justify-between text-xs mb-1 text-white/80">
                   <span>Progress to {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
                   <span>{totalKarma}/{threshold.max}</span>
                 </div>
                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                   <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
                 </div>
-                <p className="text-xs opacity-75 mt-1 text-center">{pointsToNext} points to go!</p>
+                <p className="text-xs mt-1 text-center text-white/75">{pointsToNext} points to go!</p>
               </div>
             ) : (
-              <div className="text-center text-xs">
+              <div className="text-center text-xs text-white">
                 <span>🎉</span> <span className="font-bold">MAX LEVEL!</span>
               </div>
             )}
@@ -264,34 +264,34 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
 
           {/* Right: Ways to Earn */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-4">
-            <h4 className="font-bold text-xs mb-2 opacity-90">Ways to Earn:</h4>
-            <div className="space-y-1.5 text-xs">
+            <h4 className="font-bold text-xs mb-2 text-white/90">Ways to Earn:</h4>
+            <div className="space-y-1.5 text-xs text-white/95">
               <div className="flex justify-between items-center">
                 <span>💬 Answer a question</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+10</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>⬆️ Get an upvote</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+5</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>✅ Best answer selected</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+50</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>👥 Refer a parent</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold">+25</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
               </div>
             </div>
             
             {/* Recent Activity - Compact */}
             {karmaData.recent_transactions?.length > 0 && (
               <div className="mt-3 pt-3 border-t border-white/20">
-                <h4 className="font-bold text-xs mb-1.5 opacity-90">Recent:</h4>
+                <h4 className="font-bold text-xs mb-1.5 text-white/90">Recent:</h4>
                 {karmaData.recent_transactions.slice(0, 2).map((tx, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs mb-1">
-                    <span className="opacity-90 truncate">{getActivityLabel(tx.action_type)}</span>
-                    <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold ml-2">+{tx.points}</span>
+                  <div key={idx} className="flex justify-between items-center text-xs mb-1 text-white/90">
+                    <span className="truncate">{getActivityLabel(tx.action_type)}</span>
+                    <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold ml-2 text-white">+{tx.points}</span>
                   </div>
                 ))}
               </div>
