@@ -21,6 +21,7 @@ export default function StudentOnboarding() {
   // Step 1: About You
   const [major, setMajor] = useState('');
   const [gradYear, setGradYear] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   
   // Step 2: Interests
   const [industries, setIndustries] = useState([]);
