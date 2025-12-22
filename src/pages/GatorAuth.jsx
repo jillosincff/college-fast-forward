@@ -158,7 +158,23 @@ export default function GatorAuth() {
 
   const handleGoogleSignIn = () => {
     setLoading(true);
-    const callbackUrl = window.location.origin + '/#GatorAuth';
+    
+    // CRITICAL: Ensure we use the app's actual origin, not any redirect URL
+    // On mobile, window.location can sometimes get confused during OAuth
+    const appOrigin = window.location.origin;
+    const callbackUrl = appOrigin + '/#GatorAuth';
+    
+    console.log('🔐 [GatorAuth] Starting Google sign-in');
+    console.log('🔐 [GatorAuth] App origin:', appOrigin);
+    console.log('🔐 [GatorAuth] Callback URL:', callbackUrl);
+    
+    // Validate that the origin is our app, not an external site
+    if (appOrigin.includes('ufl.edu') || appOrigin.includes('google.com')) {
+      console.error('❌ [GatorAuth] Invalid origin detected:', appOrigin);
+      setLoading(false);
+      return;
+    }
+    
     base44.auth.redirectToLogin(callbackUrl);
   };
 
