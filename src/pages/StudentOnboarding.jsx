@@ -152,8 +152,9 @@ export default function StudentOnboarding() {
 
   const validateStep1 = () => {
     const newErrors = {};
-    if (!formData.question?.trim() || formData.question.trim().length < 20) {
-      newErrors.question = 'Please ask a question (at least 20 characters)';
+    // Only validate if they entered something - allow skipping entirely
+    if (formData.question?.trim() && formData.question.trim().length < 20) {
+      newErrors.question = 'Please ask a question (at least 20 characters) or leave blank to skip';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
