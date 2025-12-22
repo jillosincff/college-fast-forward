@@ -121,7 +121,7 @@ export default function GatorInviteCode() {
             <p className="text-sm text-gray-500">
               Don't have a code?{' '}
               <button
-                onClick={() => window.location.href = '/#RequestInvite'}
+                onClick={() => navigate('RequestInvite')}
                 className="text-[#FA4616] hover:underline font-medium"
               >
                 Request one
