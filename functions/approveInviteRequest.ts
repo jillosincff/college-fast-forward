@@ -65,27 +65,42 @@ Deno.serve(async (req) => {
             }
 
             // Create invite code with role field
-            console.log('Creating invite code with:', { code, inviteType, assignedRole });
-            await base44.asServiceRole.entities.InviteCode.create({
-                code: code,
-                inviter_id: user.id,
-                inviter_email: 'jill@uffastforward.com',
-                inviter_name: 'CFF Admin Team',
-                invite_type: inviteType,
-                role: assignedRole,
-                status: 'active',
-                expires_at: expiresAt.toISOString()
-            });
+            const inviterId = user.id || 'admin';
+            console.log('Creating invite code with:', { code, inviteType, assignedRole, inviterId, userEmail: user.email });
+            
+            try {
+                await base44.asServiceRole.entities.InviteCode.create({
+                    code: code,
+                    inviter_id: inviterId,
+                    inviter_email: 'jill@uffastforward.com',
+                    inviter_name: 'CFF Admin Team',
+                    invite_type: inviteType,
+                    role: assignedRole,
+                    status: 'active',
+                    expires_at: expiresAt.toISOString()
+                });
+            } catch (createError) {
+                console.error('Failed to create InviteCode:', createError.message, createError.stack);
+                return Response.json({ 
+                    error: 'Failed to create invite code', 
+                    details: createError.message 
+                }, { status: 500 });
+            }
 
             console.log('Invite code created successfully:', code);
             
             // Update request status
-            console.log('Updating invite request status to approved');
-            await base44.asServiceRole.entities.InviteRequest.update(request_id, {
-                status: 'approved',
-                approved_by: user.email,
-                invite_code_generated: code
-            });
+            console.log('Updating invite request status to approved for request_id:', request_id);
+            try {
+                await base44.asServiceRole.entities.InviteRequest.update(request_id, {
+                    status: 'approved',
+                    approved_by: user.email,
+                    invite_code_generated: code
+                });
+            } catch (updateError) {
+                console.error('Failed to update InviteRequest:', updateError.message, updateError.stack);
+                // Continue anyway - invite code was created
+            }
 
             // Send approval email
             const emailSubject = '🐊 Welcome to College Fast Forward!';
