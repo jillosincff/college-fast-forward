@@ -336,12 +336,7 @@ export default function GatorWelcome() {
     loadPricing();
   }, []);
 
-  // Auto-proceed to onboarding when ready (skip showing the welcome UI since we already showed it)
-  useEffect(() => {
-    if (status === 'ready' && role) {
-      // Don't auto-redirect - let user click the button
-    }
-  }, [status, role]);
+
 
   const handleGetStarted = async () => {
     console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
