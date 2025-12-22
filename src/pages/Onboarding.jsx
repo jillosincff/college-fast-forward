@@ -42,7 +42,7 @@ export default function Onboarding() {
   }, [user]);
 
   const handleNext = () => {
-    if (step < 3) {
+    if (step < totalSteps) {
       setStep(step + 1);
     } else {
       handleFinish();
