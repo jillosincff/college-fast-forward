@@ -90,25 +90,39 @@ Deno.serve(async (req) => {
             expiresAt.setDate(expiresAt.getDate() + 30); // 30 days for admin-approved codes
 
             // Create invite code with role field
-            const inviterId = user.id || 'admin';
-            console.log('Creating invite code with:', { code, inviteType, assignedRole, inviterId, userEmail: user.email });
+            // CRITICAL: user.id is required - use a fallback admin ID if not available
+            const inviterId = user.id || 'admin-system';
+            console.log('Creating invite code with:', { 
+                code, 
+                inviteType, 
+                assignedRole, 
+                inviterId, 
+                userEmail: user.email,
+                userId: user.id 
+            });
             
             try {
-                await base44.asServiceRole.entities.InviteCode.create({
+                const inviteCodeData = {
                     code: code,
                     inviter_id: inviterId,
-                    inviter_email: 'jill@uffastforward.com',
-                    inviter_name: 'CFF Admin Team',
+                    inviter_email: user.email || 'jill@uffastforward.com',
+                    inviter_name: user.full_name || 'CFF Admin Team',
                     invite_type: inviteType,
                     role: assignedRole,
                     status: 'active',
                     expires_at: expiresAt.toISOString()
-                });
+                };
+                console.log('InviteCode create payload:', JSON.stringify(inviteCodeData));
+                
+                await base44.asServiceRole.entities.InviteCode.create(inviteCodeData);
             } catch (createError) {
-                console.error('Failed to create InviteCode:', createError.message, createError.stack);
+                console.error('Failed to create InviteCode:', createError.message);
+                console.error('Create error stack:', createError.stack);
+                console.error('Create error full:', JSON.stringify(createError, Object.getOwnPropertyNames(createError)));
                 return Response.json({ 
                     error: 'Failed to create invite code', 
-                    details: createError.message 
+                    details: createError.message,
+                    stack: createError.stack
                 }, { status: 500 });
             }
 
