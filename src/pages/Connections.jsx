@@ -172,37 +172,56 @@ export default function QuestionsPage() {
   // Build profiles from requests
   const allProfiles = useMemo(() => {
     const profiles = [];
-    const seenEmails = new Set();
+    const seenRequestIds = new Set(); // Use request IDs to avoid duplicates, not emails
 
     requests.forEach((request, index) => {
-      const requestCreatorEmail = request.created_by;
-      if (seenEmails.has(requestCreatorEmail)) return;
+      // Skip if we've already processed this request
+      if (seenRequestIds.has(request.id)) return;
+      seenRequestIds.add(request.id);
       
-      seenEmails.add(requestCreatorEmail);
-      const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
+      const requestCreatorEmail = request.created_by;
       const isFeatured = index % 5 === 0;
       
-      if (userProfile) {
-        profiles.push({
-          ...userProfile,
-          request: request,
-          hasRequest: true,
-          isFeatured
-        });
-      } else {
-        const emailUsername = requestCreatorEmail?.split('@')[0]?.toLowerCase() || '';
-        let formattedName = getDisplayName({ email: requestCreatorEmail });
-        
+      // Handle anonymous questions - they have created_by: 'anonymous'
+      const isAnonymous = request.is_anonymous || requestCreatorEmail === 'anonymous';
+      
+      if (isAnonymous) {
+        // For anonymous questions, create a profile without linking to a real user
         profiles.push({
           id: request.id,
-          email: requestCreatorEmail,
-          full_name: formattedName,
+          email: 'anonymous',
+          full_name: 'Anonymous Parent',
           bio: request.description,
           major: request.target_industry,
           request: request,
           hasRequest: true,
-          isFeatured
+          isFeatured,
+          isAnonymous: true
         });
+      } else {
+        const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
+        
+        if (userProfile) {
+          profiles.push({
+            ...userProfile,
+            request: request,
+            hasRequest: true,
+            isFeatured
+          });
+        } else {
+          let formattedName = getDisplayName({ email: requestCreatorEmail });
+          
+          profiles.push({
+            id: request.id,
+            email: requestCreatorEmail,
+            full_name: formattedName,
+            bio: request.description,
+            major: request.target_industry,
+            request: request,
+            hasRequest: true,
+            isFeatured
+          });
+        }
       }
     });
 
