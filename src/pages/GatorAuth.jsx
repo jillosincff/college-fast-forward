@@ -95,14 +95,34 @@ export default function GatorAuth() {
         
         (async () => {
           try {
+            console.log('🎓 [GatorAuth] Auto-assigning gator role for UFL student:', user.email);
             await base44.auth.updateMe({
               persona: 'gator',
               roles: ['gator'],
               onboarding_completed: false,
               is_new_signup: true
             });
-            if (refreshUser) await refreshUser();
-            navigate('GatorWelcome');
+            
+            // Verify update with retry for mobile/slow connections
+            await new Promise(r => setTimeout(r, 400));
+            const updatedUser = await base44.auth.me();
+            
+            if (updatedUser?.persona === 'gator') {
+              console.log('✅ [GatorAuth] Gator role assigned successfully');
+              if (refreshUser) await refreshUser();
+              navigate('GatorWelcome');
+            } else {
+              console.warn('⚠️ [GatorAuth] Role not reflected, retrying...');
+              await base44.auth.updateMe({
+                persona: 'gator',
+                roles: ['gator'],
+                onboarding_completed: false,
+                is_new_signup: true
+              });
+              await new Promise(r => setTimeout(r, 500));
+              if (refreshUser) await refreshUser();
+              navigate('GatorWelcome');
+            }
           } catch (err) {
             console.error('Failed to set gator role:', err);
             setStep('role-select');
