@@ -222,7 +222,21 @@ const AdminDashboard = () => {
         action: action
       });
 
+      console.log('Approve result:', result.data);
+
       if (result.data.success) {
+        // Check if already processed
+        if (result.data.alreadyProcessed) {
+          toast({
+            title: "ℹ️ Already Approved",
+            description: `This request was already approved. Code: ${result.data.code}`,
+            duration: 5000,
+          });
+          // Still reload to refresh the list
+          loadInviteRequests();
+          return;
+        }
+
         if (result.data.warning || result.data.emailError) {
           // Email failed to send
           toast({
