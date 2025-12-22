@@ -200,23 +200,25 @@ export default function Onboarding() {
         }
       }
 
-      // Create parent's question as a HelpRequest if they provided one
+      // Create parent's question as a JobRequest if they provided one
       if (formData.question?.trim()) {
         try {
-          await HelpRequest.create({
-            student_id: user.id,
-            student_email: user.email,
-            student_name: formData.is_anonymous ? 'Anonymous Parent' : formData.full_name,
+          await JobRequest.create({
+            role: 'Parent Question',
+            title: 'Parent Question',
+            description: formData.question,
+            target_industry: formData.industry || 'Other',
             poster_type: 'parent',
             is_anonymous: formData.is_anonymous || false,
-            help_types: ['career_advice'],
-            industry: formData.industry || 'Other',
-            description: formData.question,
-            timeline: 'no_rush',
+            poster_name: formData.is_anonymous ? 'Anonymous Parent' : formData.full_name,
+            poster_first_name: formData.is_anonymous ? 'Anonymous' : (formData.full_name?.split(' ')[0] || 'Parent'),
+            poster_last_name: formData.is_anonymous ? 'Parent' : (formData.full_name?.split(' ').slice(1).join(' ') || ''),
             status: 'active',
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            role_type: 'full_time',
+            work_mode: 'on_site',
+            target_helpers: ['alumni', 'parents']
           });
-          console.log('✅ Created parent question (anonymous:', formData.is_anonymous, ')');
+          console.log('✅ Created parent question as JobRequest (anonymous:', formData.is_anonymous, ')');
         } catch (questionError) {
           console.error('Failed to create parent question:', questionError);
         }
