@@ -194,7 +194,12 @@ export default function GatorWelcome() {
     setRole(intendedRole);
 
     // STEP 2: Check if we need to update the database
-    const needsUpdate = user.persona !== intendedRole;
+    // Consider persona updated if EITHER persona OR roles array contains the intended role
+    const personaMatches = user.persona === intendedRole;
+    const rolesMatch = user.roles?.includes(intendedRole);
+    const needsUpdate = !personaMatches && !rolesMatch;
+    
+    console.log('🔍 [GatorWelcome] Needs update check:', { personaMatches, rolesMatch, needsUpdate });
 
     if (needsUpdate && !updateInProgressRef.current) {
       console.log('🔄 [GatorWelcome] Updating persona from', user.persona, 'to', intendedRole);
