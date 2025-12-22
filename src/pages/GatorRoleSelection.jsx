@@ -24,6 +24,18 @@ export default function GatorRoleSelection() {
     }
   }, [user]);
 
+  // Show loading while auth is being determined
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleContinue = async () => {
     if (!selectedRole) {
       console.log('⚠️ No role selected');
