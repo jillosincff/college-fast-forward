@@ -3,20 +3,15 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Loader2, GraduationCap, Heart, ArrowRight } from 'lucide-react';
 
 /**
- * BULLETPROOF AUTH FLOW
- * 
- * Flow:
- * 1. Role Selection (Student / Parent / Alumni)
- * 2. Student → Google Auth (must be @ufl.edu)
- * 3. Parent/Alumni → Invite Code → Google Auth
- * 4. After auth → Role-specific onboarding
+ * UNIFIED AUTH FLOW - Single page handles:
+ * 1. Welcome screen with Google sign-in (unauthenticated users)
+ * 2. Role selection (authenticated users without persona)
+ * 3. Auto-routing (authenticated users with persona)
  */
 
-// Google Icon Component
 function GoogleIcon() {
   return (
     <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -31,57 +26,21 @@ function GoogleIcon() {
 export default function GatorAuth() {
   const { user, isLoading, refreshUser } = useAuth();
   
-  // Step state: 'welcome' | 'request-access' | 'request-submitted' | 'processing'
-  const [step, setStep] = useState('welcome');
+  const [step, setStep] = useState(null); // null = determining, 'welcome', 'role-select', 'processing'
   const [selectedRole, setSelectedRole] = useState(null);
-  const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  
-  // Request access form
-  const [requestForm, setRequestForm] = useState({
-    name: '',
-    email: '',
-    role: 'parent',
-    studentName: '',
-    gradYear: '',
-    howHeard: ''
-  });
-
   const processingRef = useRef(false);
-  const isMountedRef = useRef(true);
-  const [isOAuthCallback, setIsOAuthCallback] = useState(false);
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    
-    // Check if this is an OAuth callback - show loading immediately
-    const hashFragment = window.location.hash.substring(1);
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasAccessToken = hashFragment.includes('access_token=') || urlParams.has('access_token');
-    const isNewUser = urlParams.has('is_new_user');
-    const oauthDetected = sessionStorage.getItem('oauth_callback_detected');
-    
-    if (hasAccessToken || isNewUser || oauthDetected) {
-      setIsOAuthCallback(true);
-    }
-    
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Handle OAuth callback and routing for authenticated users
+  // Main routing logic
   useEffect(() => {
     if (isLoading) return;
 
-    // Check for OAuth callback
+    // Handle OAuth callback token extraction
     const hashFragment = window.location.hash.substring(1);
     const urlParams = new URLSearchParams(window.location.search);
-    const isNewUser = urlParams.has('is_new_user');
     const hasAccessToken = hashFragment.includes('access_token=') || urlParams.has('access_token');
+    const isNewUser = urlParams.has('is_new_user');
 
-    // Extract token if present
     if (hasAccessToken && !user) {
       const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
       const urlToken = urlParams.get('access_token');
@@ -96,38 +55,33 @@ export default function GatorAuth() {
       }
     }
 
-    // Clean URL if is_new_user param present
-    if (isNewUser) {
+    // Clean URL
+    if (isNewUser || hasAccessToken) {
       window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
     }
 
-    // If user is authenticated, handle routing
+    // ROUTING LOGIC
     if (user) {
-      setIsOAuthCallback(false); // Clear OAuth loading state once user is loaded
-      console.log('🔍 Authenticated user:', user.email, 'persona:', user.persona);
+      console.log('🔍 User:', user.email, 'persona:', user.persona);
       
       const pendingRole = localStorage.getItem('pending_invite_role');
       const pendingCode = localStorage.getItem('pending_invite_code');
       const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
-      // CASE 1: User has persona and completed onboarding → Dashboard
+      // Already onboarded → Dashboard
       if (user.persona && user.onboarding_completed) {
-        console.log('✅ Fully onboarded user → Dashboard');
         navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
         return;
       }
 
-      // CASE 2: User has persona but not completed onboarding → Welcome
+      // Has persona → Continue onboarding
       if (user.persona) {
-        console.log('➡️ User with persona → GatorWelcome');
         navigate('GatorWelcome');
         return;
       }
 
-      // CASE 3: UFL student without persona → Auto-assign gator role
+      // UFL student → Auto-assign gator
       if (isUFLStudent && !user.persona) {
-        console.log('🎓 UFL student → Auto-assigning gator role');
-        
         if (processingRef.current) return;
         processingRef.current = true;
         setStep('processing');
@@ -144,18 +98,15 @@ export default function GatorAuth() {
             navigate('GatorWelcome');
           } catch (err) {
             console.error('Failed to set gator role:', err);
-            navigate('GatorRoleSelection');
-          } finally {
+            setStep('role-select');
             processingRef.current = false;
           }
         })();
         return;
       }
 
-      // CASE 4: Pending role from invite code → Apply it
+      // Has pending role → Apply it
       if (pendingRole && !user.persona) {
-        console.log('📝 Applying pending role:', pendingRole);
-        
         if (processingRef.current) return;
         processingRef.current = true;
         setStep('processing');
@@ -177,118 +128,52 @@ export default function GatorAuth() {
             console.error('Failed to apply pending role:', err);
             localStorage.removeItem('pending_invite_role');
             localStorage.removeItem('pending_invite_code');
-            navigate('GatorRoleSelection');
-          } finally {
+            setStep('role-select');
             processingRef.current = false;
           }
         })();
         return;
       }
 
-      // CASE 5: Non-UFL user without persona → Role selection
-      if (!user.persona) {
-        console.log('➡️ User without persona → GatorRoleSelection');
-        navigate('GatorRoleSelection');
-        return;
-      }
+      // No persona → Show role selection
+      setStep('role-select');
+    } else {
+      // Not authenticated → Show welcome
+      setStep('welcome');
     }
   }, [user, isLoading, refreshUser]);
 
-  // Handle Google sign in
-  const handleGoogleSignIn = (forRole = null) => {
-    // Store the role we're signing up for
-    if (forRole) {
-      localStorage.setItem('pending_invite_role', forRole);
-    }
-    
+  const handleGoogleSignIn = () => {
+    setLoading(true);
     const callbackUrl = window.location.origin + '/#GatorAuth';
-    console.log('🔐 Starting OAuth with callback:', callbackUrl);
     base44.auth.redirectToLogin(callbackUrl);
   };
 
-  // Handle student Google auth - validates @ufl.edu after
-  const handleStudentGoogleAuth = () => {
-    // For students, we'll validate the email AFTER OAuth completes
-    // The useEffect will handle routing based on email domain
-    localStorage.setItem('pending_invite_role', 'gator');
-    localStorage.setItem('require_ufl_email', 'true');
-    handleGoogleSignIn();
-  };
-
-  // Verify invite code
-  const handleInviteCode = async () => {
-    if (!inviteCode || inviteCode.length < 4) {
-      setError('Please enter a valid invite code');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await base44.functions.invoke('verifyInviteCode', { 
-        code: inviteCode.toUpperCase() 
-      });
-
-      if (result.data?.valid) {
-        // Store invite code and proceed to Google auth
-        localStorage.setItem('pending_invite_code', inviteCode.toUpperCase());
-        localStorage.setItem('pending_invite_role', selectedRole);
-        setStep('google-auth');
-      } else {
-        setError(result.data?.error || 'Invalid invite code. Please check and try again.');
-      }
-    } catch (err) {
-      console.error('Invite code verification error:', err);
-      setError('Unable to verify invite code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle request access form submit
-  const handleRequestAccess = async (e) => {
-    e.preventDefault();
+  const handleRoleSelect = async () => {
+    if (!selectedRole || !user) return;
     
-    if (!requestForm.name || !requestForm.email) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
     setLoading(true);
-    setError(null);
-
+    
     try {
-      // Create invite request
-      await base44.entities.InviteRequest.create({
-        name: requestForm.name,
-        email: requestForm.email,
-        role: requestForm.role,
-        student_name: requestForm.studentName,
-        grad_year: requestForm.gradYear,
-        how_heard: requestForm.howHeard,
-        status: 'pending'
+      await base44.auth.updateMe({
+        persona: selectedRole,
+        roles: [selectedRole],
+        onboarding_completed: false,
+        is_new_signup: true
       });
-
-      setStep('request-submitted');
+      if (refreshUser) await refreshUser();
+      navigate('GatorWelcome');
     } catch (err) {
-      console.error('Request access error:', err);
-      setError('Unable to submit request. Please try again.');
-    } finally {
+      console.error('Failed to set role:', err);
       setLoading(false);
     }
-  };
-
-  // Handle returning user sign in
-  const handleSignIn = () => {
-    handleGoogleSignIn();
   };
 
   // ═══════════════════════════════════════════════════════════
-  // PROCESSING STATE
+  // LOADING / PROCESSING STATE
   // ═══════════════════════════════════════════════════════════
   
-  if (step === 'processing' || isLoading || isOAuthCallback) {
+  if (step === null || step === 'processing' || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
@@ -302,7 +187,7 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // UNIFIED WELCOME SCREEN - Single entry point for all users
+  // WELCOME SCREEN (not authenticated)
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'welcome') {
@@ -312,7 +197,6 @@ export default function GatorAuth() {
       }}>
         <div className="w-full max-w-lg text-center">
           
-          {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl flex items-center justify-center">
               <img 
@@ -323,18 +207,15 @@ export default function GatorAuth() {
             </div>
           </div>
 
-          {/* Welcome Message */}
           <h1 className="text-3xl font-bold text-white mb-3">
             Welcome to Gator Network 🐊
           </h1>
           <p className="text-white/85 text-lg mb-8">
-            Connect with UF students, parents, <em>and alumni</em> for<br />
-            career advice and opportunities
+            Connect with UF students, parents, and alumni
           </p>
 
-          {/* Main Google Sign In Button */}
           <Button
-            onClick={() => handleGoogleSignIn()}
+            onClick={handleGoogleSignIn}
             disabled={loading}
             className="w-full max-w-sm mx-auto h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg mb-4"
           >
@@ -351,25 +232,16 @@ export default function GatorAuth() {
             )}
           </Button>
 
-          <p className="text-white/70 text-sm mb-6">
+          <p className="text-white/70 text-sm mb-8">
             Works with any email — Gmail, UFL, Outlook, etc.
           </p>
 
-          {/* New Here Info */}
-          <p className="text-white/60 text-sm mb-2">New here?</p>
-          <p className="text-white/80 text-sm mb-8">
-            Just click above to get started! You'll choose your role<br />
-            (Student, Parent, or Alumni) after signing in.
-          </p>
-
-          {/* UF Students Highlight */}
           <div className="bg-white/10 rounded-xl p-4 max-w-sm mx-auto">
             <p className="text-amber-300 text-sm font-medium">
               🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
             </p>
           </div>
 
-          {/* Terms */}
           <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
             By continuing, you agree to our{' '}
             <a href="#Terms" className="text-white/70 underline">Terms</a> and{' '}
@@ -382,154 +254,108 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // REQUEST ACCESS FORM (kept for future use if needed)
+  // ROLE SELECTION (authenticated but no persona)
   // ═══════════════════════════════════════════════════════════
   
-  if (step === 'request-access') {
+  if (step === 'role-select') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
       }}>
-        <div className="w-full max-w-md">
-          
-          {/* Back Button */}
-          <button 
-            onClick={() => {
-              setStep('welcome');
-              setError(null);
-            }}
-            className="text-white/70 hover:text-white text-sm mb-6 flex items-center gap-1"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div className="w-full max-w-lg">
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
             
-            <h1 className="text-2xl font-bold text-slate-800 mb-2 text-center">
-              Request Access
-            </h1>
-            <p className="text-slate-600 text-center mb-6 text-sm">
-              Tell us about yourself and we'll send you an invite
-            </p>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                One more step! 🎉
+              </h1>
+              <p className="text-slate-600">
+                Tell us who you are so we can personalize your experience
+              </p>
+            </div>
 
-            {/* Error */}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Form */}
-            <form onSubmit={handleRequestAccess} className="space-y-4">
+            <div className="space-y-4 mb-8">
               
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Your Name *
-                </label>
-                <Input
-                  type="text"
-                  value={requestForm.name}
-                  onChange={(e) => setRequestForm({...requestForm, name: e.target.value})}
-                  placeholder="Jane Smith"
-                  required
-                  className="h-12"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Email Address *
-                </label>
-                <Input
-                  type="email"
-                  value={requestForm.email}
-                  onChange={(e) => setRequestForm({...requestForm, email: e.target.value})}
-                  placeholder="jane@example.com"
-                  required
-                  className="h-12"
-                />
-              </div>
-
-              {/* Role */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  I am a *
-                </label>
-                <select
-                  value={requestForm.role}
-                  onChange={(e) => setRequestForm({...requestForm, role: e.target.value})}
-                  className="w-full h-12 px-3 border border-slate-300 rounded-xl bg-white"
-                >
-                  <option value="parent">Parent of a UF Student</option>
-                  <option value="alumni">UF Alumni</option>
-                </select>
-              </div>
-
-              {/* Student Name (if parent) */}
-              {requestForm.role === 'parent' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Your Student's Name
-                  </label>
-                  <Input
-                    type="text"
-                    value={requestForm.studentName}
-                    onChange={(e) => setRequestForm({...requestForm, studentName: e.target.value})}
-                    placeholder="Student's first and last name"
-                    className="h-12"
-                  />
-                </div>
-              )}
-
-              {/* Graduation Year (if alumni) */}
-              {requestForm.role === 'alumni' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Graduation Year
-                  </label>
-                  <Input
-                    type="text"
-                    value={requestForm.gradYear}
-                    onChange={(e) => setRequestForm({...requestForm, gradYear: e.target.value})}
-                    placeholder="2015"
-                    className="h-12"
-                  />
-                </div>
-              )}
-
-              {/* How did you hear about us */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  How did you hear about us?
-                </label>
-                <Input
-                  type="text"
-                  value={requestForm.howHeard}
-                  onChange={(e) => setRequestForm({...requestForm, howHeard: e.target.value})}
-                  placeholder="Friend, social media, etc."
-                  className="h-12"
-                />
-              </div>
-
-              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-[#0021A5] hover:bg-[#001580] text-white font-semibold mt-4"
+              {/* Student Option */}
+              <button
+                onClick={() => setSelectedRole('gator')}
+                className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
+                  selectedRole === 'gator'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  'Request Invite'
-                )}
-              </Button>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                    <GraduationCap className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-slate-900">I'm a UF Student</h3>
+                    <p className="text-sm text-slate-600">Find jobs, internships & roommates</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 ${
+                    selectedRole === 'gator' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
+                  }`}>
+                    {selectedRole === 'gator' && (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </button>
 
-            </form>
+              {/* Parent/Alumni Option */}
+              <button
+                onClick={() => setSelectedRole('parent')}
+                className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
+                  selectedRole === 'parent'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-slate-900">I'm a Parent or Alumni</h3>
+                    <p className="text-sm text-slate-600">Help Gators get hired</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 ${
+                    selectedRole === 'parent' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
+                  }`}>
+                    {selectedRole === 'parent' && (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </button>
+
+            </div>
+
+            <Button
+              onClick={handleRoleSelect}
+              disabled={!selectedRole || loading}
+              className="w-full h-12 text-base font-semibold"
+              style={{ 
+                backgroundColor: selectedRole ? '#0021A5' : undefined 
+              }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </Button>
 
           </div>
         </div>
@@ -537,48 +363,7 @@ export default function GatorAuth() {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // REQUEST SUBMITTED SUCCESS
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'request-submitted') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-md text-center">
-          
-          <div className="text-6xl mb-6">📬</div>
-          
-          <h1 className="text-2xl font-bold text-white mb-4">
-            Request Submitted!
-          </h1>
-          
-          <p className="text-white/80 mb-8 leading-relaxed">
-            Thanks for your interest in Gator Network! We'll review your request and send you an invite code within <strong className="text-white">24-48 hours</strong>.
-          </p>
-
-          <div className="bg-white/10 rounded-xl p-6 mb-8">
-            <p className="text-white/90 text-sm">
-              Check your email at:<br />
-              <strong className="text-white">{requestForm.email}</strong>
-            </p>
-          </div>
-
-          <Button
-            onClick={() => navigate('LandingPage')}
-            variant="outline"
-            className="border-white/40 text-white hover:bg-white/10 hover:text-white"
-          >
-            Return to Home
-          </Button>
-
-        </div>
-      </div>
-    );
-  }
-
-  // Default loading
+  // Fallback
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{
       background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
