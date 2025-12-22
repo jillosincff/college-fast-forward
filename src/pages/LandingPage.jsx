@@ -181,17 +181,10 @@ export default function LandingPage() {
             </a>
             <div className="flex items-center gap-3">
               <Button
-                variant="ghost"
-                onClick={() => navigate('GatorRoleSelection')}
-                className="text-white hover:bg-white/10 text-sm font-medium"
+                onClick={() => navigate('GatorAuth')}
+                className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2"
               >
-                Sign In
-              </Button>
-              <Button
-                onClick={handleMainCTA}
-                className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-4 py-2"
-              >
-                Join Now
+                Get Started
               </Button>
             </div>
           </div>
