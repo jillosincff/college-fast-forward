@@ -202,13 +202,15 @@ export default function Onboarding() {
 
   // STEP 2: How Can You Help
   if (step === 2) {
+    console.log('🔍 [Onboarding Step 2] expertise:', expertise, 'isStep2Valid:', isStep2Valid);
+    
     return (
       <OnboardingLayout
         currentStep={2}
         totalSteps={3}
         onNext={handleNext}
         onBack={handleBack}
-        nextDisabled={!isStep2Valid}
+        nextDisabled={expertise.length === 0}
       >
         <div className="max-w-lg mx-auto">
           <div className="text-center mb-6">
@@ -223,10 +225,18 @@ export default function Onboarding() {
           <ChipSelector
             options={EXPERTISE_AREAS}
             selected={expertise}
-            onChange={setExpertise}
+            onChange={(newExpertise) => {
+              console.log('🔄 [Onboarding] ChipSelector onChange:', newExpertise);
+              setExpertise(newExpertise);
+            }}
             multiple={true}
             columns={1}
           />
+          
+          {/* Debug info - remove after testing */}
+          <p className="text-xs text-slate-400 mt-4 text-center">
+            Selected: {expertise.length} items {expertise.length > 0 ? '✓' : '(select at least 1)'}
+          </p>
         </div>
       </OnboardingLayout>
     );
