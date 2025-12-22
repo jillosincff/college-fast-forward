@@ -168,6 +168,32 @@ export default function GatorWelcome() {
     // Also check user.roles array as fallback since persona might not be set but role was
     const intendedRole = pendingRole || user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
     
+    // GATE: If no role selected yet, redirect back to role selection
+    if (!intendedRole) {
+      console.log('🚫 [GatorWelcome] No role found - redirecting to role selection');
+      navigate('GatorAuth');
+      return;
+    }
+    
+    // GATE: Parents/Alumni need invite code (unless they already used one)
+    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+    const hasInviteCode = localStorage.getItem('pending_invite_code') || user.invite_code_used;
+    
+    if ((intendedRole === 'parent' || intendedRole === 'alumni') && !hasInviteCode) {
+      console.log('🚫 [GatorWelcome] Parent/Alumni without invite code - redirecting');
+      localStorage.setItem('pending_invite_role', intendedRole);
+      navigate('GatorInviteCode');
+      return;
+    }
+    
+    // Non-UFL students also need invite code
+    if (intendedRole === 'gator' && !isUFLStudent && !hasInviteCode) {
+      console.log('🚫 [GatorWelcome] Non-UFL student without invite code - redirecting');
+      localStorage.setItem('pending_invite_role', 'gator');
+      navigate('GatorInviteCode');
+      return;
+    }
+    
     console.log('🔍 [GatorWelcome] Role sources:', {
       pendingRole,
       userPersona: user.persona,
