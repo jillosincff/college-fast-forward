@@ -286,15 +286,17 @@ College Fast Forward Team`
       }
     }
 
-    // Increment global user count if user authenticated
-    let currentUser = null;
+    // Increment global user count if user authenticated (non-blocking)
     try {
-      currentUser = await base44.auth.me();
-      if (currentUser?.id) {
+      const authUserForCount = await base44.auth.me();
+      if (authUserForCount?.id) {
         console.log('🔢 Incrementing global user count for new signup');
-        await base44.functions.invoke('incrementUserCount', {
-          user_id: currentUser.id,
-          family_group_id: invite.family_group_id || currentUser.family_group_id
+        // Fire and forget - don't block the response
+        base44.functions.invoke('incrementUserCount', {
+          user_id: authUserForCount.id,
+          family_group_id: invite.family_group_id || authUserForCount.family_group_id
+        }).catch(err => {
+          console.log('User count increment failed (non-critical):', err.message);
         });
       }
     } catch (e) {
