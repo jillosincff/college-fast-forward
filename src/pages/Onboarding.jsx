@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
 import ConnectGatorStep from '@/components/onboarding/parent/ConnectGatorStep';
 import { ParentExpertise } from '@/entities/ParentExpertise';
-import { HelpRequest } from '@/entities/HelpRequest';
+import { JobRequest } from '@/entities/JobRequest';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const INDUSTRIES = [
