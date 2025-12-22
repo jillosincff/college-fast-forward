@@ -626,12 +626,45 @@ export default function StudentOnboarding() {
             </div>
           </div>
 
-              <Button
-                onClick={handleContinue}
-                className="w-full h-14 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-bold text-lg"
-              >
-                Continue →
-              </Button>
+              {/* Buttons */}
+              <div className="flex justify-between items-center mb-8">
+                <button
+                  onClick={() => navigate('Dashboard')}
+                  className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm font-medium"
+                >
+                  ← Back
+                </button>
+                
+                <Button
+                  onClick={formData.question?.trim().length >= 20 ? handleContinue : () => {
+                    // Skip question - go directly to step 2
+                    setCurrentStep(2);
+                    window.scrollTo(0, 0);
+                  }}
+                  className="px-6 py-3 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-semibold rounded-xl"
+                >
+                  {formData.question?.trim().length >= 20 ? 'Post & Continue →' : 'Skip for now →'}
+                </Button>
+              </div>
+
+              {/* Referral Code - Small, at bottom */}
+              <div className="pt-6 border-t border-slate-100 text-center">
+                <p className="text-xs text-slate-400">
+                  Have a referral code?{' '}
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const code = prompt('Enter your referral code:');
+                      if (code) {
+                        updateField('referral_code', code.toUpperCase().slice(0, 20));
+                      }
+                    }}
+                    className="text-[#0021A5] hover:underline"
+                  >
+                    Enter it here
+                  </button>
+                </p>
+              </div>
             </motion.div>
           )}
 
