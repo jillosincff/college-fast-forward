@@ -503,24 +503,24 @@ export default function StudentOnboarding() {
               <label className="block text-sm font-medium text-slate-700 mb-3">
                 What type of advice are you looking for?
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {TOPIC_TAGS.map(tag => (
                   <button
                     key={tag.value}
                     type="button"
                     onClick={() => toggleTopicTag(tag.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                       formData.topic_tags.includes(tag.value)
                         ? 'bg-[#0021A5] text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    {formData.topic_tags.includes(tag.value) && <Check className="w-3 h-3 inline mr-1" />}
+                    {formData.topic_tags.includes(tag.value) && <Check className="w-3 h-3 inline mr-0.5" />}
                     {tag.label}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 mt-2">Select any that apply - this helps us match you</p>
+              <p className="text-xs text-slate-400 mt-2">Select any that apply</p>
             </div>
 
             {/* Industry Dropdown */}
