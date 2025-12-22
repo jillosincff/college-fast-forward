@@ -33,6 +33,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { gsap } from 'gsap';
 import WelcomeModal from '@/components/WelcomeModal';
+import FirstTimeUserDashboard from '@/components/dashboard/parent/FirstTimeUserDashboard';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -69,6 +70,7 @@ export default function ParentDashboard() {
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [myStudents, setMyStudents] = useState([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [familyKarma, setFamilyKarma] = useState(0);
   const actionCardsRef = useRef([]);
   const headlineRef = useRef(null);
 
@@ -100,6 +102,16 @@ export default function ParentDashboard() {
         });
         const students = familyMembers.filter(m => m.persona === 'gator' || m.roles?.includes('gator'));
         setMyStudents(students);
+        
+        // Load family karma
+        try {
+          const karmaResult = await base44.functions.invoke('getFamilyKarma', {
+            family_group_id: user.family_group_id
+          });
+          setFamilyKarma(karmaResult.data?.total_karma || 0);
+        } catch (e) {
+          console.log('Could not load family karma:', e);
+        }
       } else if (user.student_emails && user.student_emails.length > 0) {
         // Legacy support
         const students = await Promise.all(
@@ -219,6 +231,10 @@ export default function ParentDashboard() {
   };
   
   const firstName = getCapitalizedFirstName(user?.full_name);
+  
+  // Determine if new user (0 karma)
+  const karmaPoints = user?.karma_points || familyKarma || 0;
+  const isNewUser = karmaPoints === 0;
 
   // Search for student
   const handleSearch = async () => {
@@ -375,141 +391,152 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Main Headline - Responsive */}
-        <div ref={headlineRef} className="text-center px-2">
-          <h2 
-            className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
-            style={{ color: '#0021A5' }}
-          >
-            Help More Gators, Boost Your Own ⚡
-          </h2>
-          <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
-            Every action unlocks more opportunities for your student
-          </p>
-        </div>
+        {isNewUser ? (
+          /* First-time user simplified dashboard */
+          <FirstTimeUserDashboard 
+            user={user}
+            onBrowseQuestions={() => navigate('Connections')}
+            onConnectStudent={() => setShowSearchModal(true)}
+            onCompleteProfile={() => navigate('ProfileEdit')}
+          />
+        ) : (
+          /* Returning user full dashboard */
+          <>
+            {/* Main Headline - Responsive */}
+            <div ref={headlineRef} className="text-center px-2">
+              <h2 
+                className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
+                style={{ color: '#0021A5' }}
+              >
+                Help More Gators, Boost Your Own ⚡
+              </h2>
+              <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
+                Every action unlocks more opportunities for your student
+              </p>
+            </div>
 
-        {/* FAMILY KARMA - HERO SECTION */}
-        <FamilyKarmaWidget 
-          user={user} 
-          onSearchStudent={() => setShowSearchModal(true)}
-          onInviteStudent={() => setShowInviteModal(true)}
-        />
+            {/* FAMILY KARMA - HERO SECTION */}
+            <FamilyKarmaWidget 
+              user={user} 
+              onSearchStudent={() => setShowSearchModal(true)}
+              onInviteStudent={() => setShowInviteModal(true)}
+            />
 
-        {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
-        <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
-          <div className="flex gap-3" style={{ width: 'max-content' }}>
-            <QuickActionCardMobile icon="🐊" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
-            <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
-            <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
-            <QuickActionCardMobile icon="💼" label="Post Job" onClick={() => navigate('PostOpportunity')} />
-          </div>
-        </div>
-        
-        {/* Desktop: Four Action Cards Grid */}
-        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Complete Profile */}
-          <div 
-            ref={el => actionCardsRef.current[0] = el}
-            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-          >
-            <div className="text-3xl mb-2">🐊</div>
-            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-              Complete Your Profile
-            </h3>
-            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-              Add company & LinkedIn.<br />
-              <span className="font-semibold">Stronger profile = more boost</span>
-            </p>
-            <Button
-              onClick={() => navigate('ProfileEdit')}
-              size="sm"
-              className="rounded-full px-4 py-1.5 font-bold text-xs"
-              style={{ backgroundColor: '#0021A5' }}
-            >
-              Update Profile →
-            </Button>
-          </div>
+            {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
+            <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
+              <div className="flex gap-3" style={{ width: 'max-content' }}>
+                <QuickActionCardMobile icon="🐊" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
+                <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
+                <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
+                <QuickActionCardMobile icon="💼" label="Post Job" onClick={() => navigate('PostOpportunity')} />
+              </div>
+            </div>
+            
+            {/* Desktop: Four Action Cards Grid */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Card 1: Complete Profile */}
+              <div 
+                ref={el => actionCardsRef.current[0] = el}
+                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
+              >
+                <div className="text-3xl mb-2">🐊</div>
+                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+                  Complete Your Profile
+                </h3>
+                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                  Add company & LinkedIn.<br />
+                  <span className="font-semibold">Stronger profile = more boost</span>
+                </p>
+                <Button
+                  onClick={() => navigate('ProfileEdit')}
+                  size="sm"
+                  className="rounded-full px-4 py-1.5 font-bold text-xs"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  Update Profile →
+                </Button>
+              </div>
 
-          {/* Card 2: Answer Questions */}
-          <div 
-            ref={el => actionCardsRef.current[1] = el}
-            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-          >
-            <div className="text-3xl mb-2">💬</div>
-            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-              Answer Questions
-            </h3>
-            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-              Help students with career advice.<br />
-              <span className="font-semibold">Your kid gets boosted!</span>
-            </p>
-            <Button
-              onClick={() => navigate('Connections')}
-              size="sm"
-              className="rounded-full px-4 py-1.5 font-bold text-xs"
-              style={{ backgroundColor: '#0021A5' }}
-            >
-              Browse Questions →
-            </Button>
-          </div>
+              {/* Card 2: Answer Questions */}
+              <div 
+                ref={el => actionCardsRef.current[1] = el}
+                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
+              >
+                <div className="text-3xl mb-2">💬</div>
+                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+                  Answer Questions
+                </h3>
+                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                  Help students with career advice.<br />
+                  <span className="font-semibold">Your kid gets boosted!</span>
+                </p>
+                <Button
+                  onClick={() => navigate('Connections')}
+                  size="sm"
+                  className="rounded-full px-4 py-1.5 font-bold text-xs"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  Browse Questions →
+                </Button>
+              </div>
 
-          {/* Card 3: Ask Your Own Question */}
-          <div 
-            ref={el => actionCardsRef.current[3] = el}
-            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow border border-orange-200"
-            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-          >
-            <div className="text-3xl mb-2">❓</div>
-            <h3 className="text-sm font-bold mb-1" style={{ color: '#FA4616' }}>
-              Ask a Question
-            </h3>
-            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-              Post your own question.<br />
-              <span className="font-semibold">Get support from the swamp.</span>
-            </p>
-            <Button
-              onClick={() => navigate('PostRequest?type=parent')}
-              size="sm"
-              className="rounded-full px-4 py-1.5 font-bold text-xs"
-              style={{ backgroundColor: '#FA4616' }}
-            >
-              Ask Question →
-            </Button>
-          </div>
+              {/* Card 3: Ask Your Own Question */}
+              <div 
+                ref={el => actionCardsRef.current[3] = el}
+                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow border border-orange-200"
+                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
+              >
+                <div className="text-3xl mb-2">❓</div>
+                <h3 className="text-sm font-bold mb-1" style={{ color: '#FA4616' }}>
+                  Ask a Question
+                </h3>
+                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                  Post your own question.<br />
+                  <span className="font-semibold">Get support from the swamp.</span>
+                </p>
+                <Button
+                  onClick={() => navigate('PostRequest?type=parent')}
+                  size="sm"
+                  className="rounded-full px-4 py-1.5 font-bold text-xs"
+                  style={{ backgroundColor: '#FA4616' }}
+                >
+                  Ask Question →
+                </Button>
+              </div>
 
-          {/* Card 4: Post Jobs */}
-          <div 
-            ref={el => actionCardsRef.current[2] = el}
-            className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-            style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-          >
-            <div className="text-3xl mb-2">💼</div>
-            <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-              Post Opportunities
-            </h3>
-            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-              Know about job openings?<br />
-              <span className="font-semibold">Share them with Gators</span>
-            </p>
-            <Button
-              onClick={() => navigate('PostOpportunity')}
-              size="sm"
-              className="rounded-full px-4 py-1.5 font-bold text-xs"
-              style={{ backgroundColor: '#0021A5' }}
-            >
-              Post Opportunity →
-            </Button>
-          </div>
-        </div>
+              {/* Card 4: Post Jobs */}
+              <div 
+                ref={el => actionCardsRef.current[2] = el}
+                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
+                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
+              >
+                <div className="text-3xl mb-2">💼</div>
+                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
+                  Post Opportunities
+                </h3>
+                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                  Know about job openings?<br />
+                  <span className="font-semibold">Share them with Gators</span>
+                </p>
+                <Button
+                  onClick={() => navigate('PostOpportunity')}
+                  size="sm"
+                  className="rounded-full px-4 py-1.5 font-bold text-xs"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  Post Opportunity →
+                </Button>
+              </div>
+            </div>
 
-
-
-        {/* Activity Section - No duplicate header */}
-        <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-          <ParentActivityWidget />
-        </div>
+            {/* Activity Section - No duplicate header */}
+            <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
+              <ParentActivityWidget />
+            </div>
+          </>
+        )}
 
       </div>
 
