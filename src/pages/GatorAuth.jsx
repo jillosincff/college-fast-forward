@@ -368,7 +368,7 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // REQUEST ACCESS FORM
+  // REQUEST ACCESS FORM (kept for future use if needed)
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'request-access') {
@@ -381,7 +381,7 @@ export default function GatorAuth() {
           {/* Back Button */}
           <button 
             onClick={() => {
-              setStep('invite-code');
+              setStep('welcome');
               setError(null);
             }}
             className="text-white/70 hover:text-white text-sm mb-6 flex items-center gap-1"
@@ -518,124 +518,6 @@ export default function GatorAuth() {
             </form>
 
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // GOOGLE AUTH (after invite code verified)
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'google-auth') {
-    const roleLabel = selectedRole === 'parent' ? 'Parent' : 'Alumni';
-    
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-md text-center">
-          
-          <div className="text-5xl mb-4">✅</div>
-          
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Invite Code Verified!
-          </h1>
-          <p className="text-white/80 mb-8">
-            Now sign in to complete your {roleLabel.toLowerCase()} account
-          </p>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Google Button */}
-          <Button
-            onClick={() => handleGoogleSignIn(selectedRole)}
-            disabled={loading}
-            className="w-full h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Connecting...
-              </>
-            ) : (
-              <>
-                <GoogleIcon />
-                Continue with Google
-              </>
-            )}
-          </Button>
-
-          <p className="text-white/60 text-sm mt-4">
-            Use any email — Gmail, Outlook, Yahoo, etc.
-          </p>
-
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // SIGN IN (returning users)
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'sign-in') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-md text-center">
-          
-          {/* Back Button */}
-          <button 
-            onClick={() => setStep('role-select')}
-            className="text-white/70 hover:text-white text-sm mb-8 flex items-center justify-center mx-auto gap-1"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Welcome Back! 🐊
-          </h1>
-          <p className="text-white/80 mb-8">
-            Sign in to your Gator Network account
-          </p>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Google Button */}
-          <Button
-            onClick={handleSignIn}
-            disabled={loading}
-            className="w-full h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                <GoogleIcon />
-                Sign in with Google
-              </>
-            )}
-          </Button>
-
-          <p className="text-white/60 text-sm mt-6">
-            Use the same email you signed up with
-          </p>
-
         </div>
       </div>
     );
