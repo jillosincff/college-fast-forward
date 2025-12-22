@@ -40,9 +40,8 @@ export default function GatorAuth() {
     console.log('🔍 [GatorAuth] Current hostname:', currentHost);
     
     if (currentHost.includes('ufl.edu') || currentHost.includes('google.com') || currentHost.includes('accounts.google')) {
-      console.error('❌ [GatorAuth] WRONG DOMAIN DETECTED! Redirecting back to app...');
-      // Try to redirect back to the app - use a hardcoded fallback
-      window.location.href = 'https://app.base44.com/preview/684474c5723dc90efce23588/#GatorAuth';
+      console.error('❌ [GatorAuth] WRONG DOMAIN DETECTED! This should not happen.');
+      // Can't redirect from wrong domain - just log the error
       return;
     }
 
