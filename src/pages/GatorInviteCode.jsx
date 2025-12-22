@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { navigate } from '@/components/utils/navigation';
 
 export default function GatorInviteCode() {
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  
+  // Get the pending role from localStorage (set by GatorAuth)
+  const pendingRole = localStorage.getItem('pending_invite_role') || 'parent';
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setError('');
     
     if (!inviteCode?.trim()) {
@@ -16,14 +21,32 @@ export default function GatorInviteCode() {
       return;
     }
     
-    console.log('📝 Storing invite code:', inviteCode.trim());
+    setIsVerifying(true);
+    console.log('📝 Verifying invite code:', inviteCode.trim());
     
-    // Store invite code
-    sessionStorage.setItem('pending_invite_code', inviteCode.trim());
-    sessionStorage.setItem('pending_invite_role', 'gator');
-    
-    // Redirect to Google OAuth
-    base44.auth.redirectToLogin(window.location.origin);
+    try {
+      // Verify the invite code first
+      const response = await base44.functions.invoke('verifyInviteCode', {
+        code: inviteCode.trim().toUpperCase()
+      });
+      
+      if (response.data?.success) {
+        // Store verified invite code and role
+        const role = response.data.role || pendingRole || 'parent';
+        localStorage.setItem('pending_invite_code', inviteCode.trim().toUpperCase());
+        localStorage.setItem('pending_invite_role', role);
+        
+        // Navigate to GatorWelcome to complete setup
+        navigate('GatorWelcome');
+      } else {
+        setError(response.data?.error || 'Invalid or expired invite code');
+        setIsVerifying(false);
+      }
+    } catch (err) {
+      console.error('Failed to verify invite code:', err);
+      setError('Failed to verify code. Please try again.');
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -48,7 +71,7 @@ export default function GatorInviteCode() {
               Enter Your Invite Code
             </h1>
             <p className="text-gray-600">
-              College Fast Forward is invite-only
+              {pendingRole === 'alumni' ? 'Alumni access' : 'Parent access'} requires an invite code
             </p>
           </div>
 
@@ -79,10 +102,17 @@ export default function GatorInviteCode() {
 
             <button
               onClick={handleContinue}
-              disabled={!inviteCode.trim()}
-              className="w-full bg-gradient-to-r from-[#0021A5] to-[#003865] text-white rounded-xl py-4 text-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!inviteCode.trim() || isVerifying}
+              className="w-full bg-gradient-to-r from-[#0021A5] to-[#003865] text-white rounded-xl py-4 text-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Continue →
+              {isVerifying ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                'Continue →'
+              )}
             </button>
           </div>
 
