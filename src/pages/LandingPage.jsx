@@ -179,7 +179,13 @@ export default function LandingPage() {
             <a href="#" className="flex items-center gap-2">
               <span className="text-white font-bold text-lg md:text-xl tracking-tight">College Fast Forward</span>
             </a>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('GatorAuth')}
+                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
+              >
+                Sign In
+              </button>
               <Button
                 onClick={() => navigate('GatorAuth')}
                 className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2"
