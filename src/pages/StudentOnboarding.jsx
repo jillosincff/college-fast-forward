@@ -490,58 +490,86 @@ export default function StudentOnboarding() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           >
-          {/* Referral Code - At Top */}
-          <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 mb-8">
-            <label className="block text-sm font-medium text-slate-600">Have a referral code?</label>
-            <p className="text-xs text-slate-500 mb-2">Drop it here to give your friend credit! 🎁</p>
-            <Input
-              value={formData.referral_code}
-              onChange={(e) => updateField('referral_code', e.target.value.toUpperCase().slice(0, 20))}
-              placeholder="Enter code (optional)"
-              className="max-w-xs bg-white"
-            />
-          </div>
-
-          {/* SECTION 1: THE QUESTION - Primary */}
-          <div className="mb-10">
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              What's on your mind?
+          {/* EMPATHY SECTION - Lead with support */}
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-6">🐊</div>
+            
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">
+              We've got your back.
             </h1>
-            <p className="text-slate-600 mb-6">
-              Ask any career or life question. Parents and alumni with real experience will share their advice.
+            
+            <p className="text-lg text-slate-600 mb-4">
+              Transitioning to "real life" is hard.<br />
+              <strong className="text-slate-800">But you're not doing it alone.</strong>
             </p>
             
-            <div className="bg-slate-50 rounded-xl p-1">
-              <Textarea
-                value={formData.question}
-                onChange={(e) => updateField('question', e.target.value.slice(0, 500))}
-                placeholder="E.g., I'm thinking about starting a business after graduation but not sure if I should get experience at a company first. Any entrepreneurs with advice?
+            <p className="text-slate-500 leading-relaxed max-w-lg mx-auto">
+              The job search, the rejections, the "what am I even doing?" moments — 
+              we've all been there. That's why thousands of Gator parents and alumni 
+              are here to help <strong className="text-[#0021A5]">YOU</strong> figure it out.
+            </p>
+          </div>
 
-Or: I got into med school but worried about the debt. Is it worth it financially? Any doctors willing to share?"
-                rows={6}
-                className={`min-h-[150px] text-base bg-white border-2 ${errors.question ? 'border-red-300' : 'border-slate-200 focus:border-blue-500'}`}
-              />
-            </div>
+          {/* Divider */}
+          <div className="border-t border-slate-200 my-8"></div>
+
+          {/* SECTION 1: THE QUESTION - Primary */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">
+              What do you need help with?
+            </h2>
+            
+            <Textarea
+              value={formData.question}
+              onChange={(e) => updateField('question', e.target.value.slice(0, 500))}
+              placeholder="Career advice, job search, interviews, salary negotiation — or just figuring out what's next. Nothing is off limits."
+              rows={5}
+              className={`min-h-[130px] text-base border-2 rounded-xl ${errors.question ? 'border-red-300' : 'border-slate-200 focus:border-[#0021A5]'}`}
+            />
             <div className="flex justify-between mt-2">
               {errors.question ? (
                 <p className="text-red-500 text-sm flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" /> {errors.question}
                 </p>
               ) : (
-                <p className="text-xs text-slate-500">Be specific! The more detail, the better advice you'll get.</p>
+                <span></span>
               )}
-              <p className="text-xs text-slate-500">{formData.question?.length || 0}/500</p>
+              <p className="text-xs text-slate-400">{formData.question?.length || 0}/500</p>
             </div>
+          </div>
 
-            {/* Example Questions */}
-            <div className="mt-4 text-sm text-slate-500">
-              <p className="font-medium mb-2">💡 Example questions:</p>
-              <ul className="space-y-2 text-slate-600">
-                <li className="italic">"Should I take the Big Tech job ($120K) or the startup ($80K + equity)? How do I decide?"</li>
-                <li className="italic">"I want to open a coffee shop after graduation. Any small business owners who can share what the first year is like?"</li>
-                <li className="italic">"Is consulting travel really 80% of the time? Trying to decide if the lifestyle is worth it."</li>
-              </ul>
-            </div>
+          {/* Example Questions - Clickable */}
+          <div className="bg-blue-50 rounded-xl p-4 mb-8">
+            <p className="text-sm text-slate-500 mb-3">💭 Other Gators are asking:</p>
+            <ul className="space-y-2">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => updateField('question', "How do I choose between two job offers?")}
+                  className="text-sm text-slate-600 italic hover:text-[#0021A5] transition-colors text-left w-full"
+                >
+                  "How do I choose between two job offers?"
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => updateField('question', "Is it okay to not have it all figured out yet? I'm graduating soon and feeling lost.")}
+                  className="text-sm text-slate-600 italic hover:text-[#0021A5] transition-colors text-left w-full"
+                >
+                  "Is it okay to not have it all figured out yet?"
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => updateField('question', "How do I network without feeling awkward or fake?")}
+                  className="text-sm text-slate-600 italic hover:text-[#0021A5] transition-colors text-left w-full"
+                >
+                  "How do I network without feeling awkward?"
+                </button>
+              </li>
+            </ul>
           </div>
 
           {/* SECTION 2: Helpful Details - Secondary */}
