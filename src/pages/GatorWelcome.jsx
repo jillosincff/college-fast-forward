@@ -210,12 +210,7 @@ export default function GatorWelcome() {
       isNewSignup: user.is_new_signup
     });
 
-    // No role anywhere - redirect to role selection
-    if (!intendedRole) {
-      console.log('⚠️ [GatorWelcome] No role found, redirecting to role selection');
-      navigate('GatorAuth');
-      return;
-    }
+    // (Role validation already done above - this is now redundant but kept for safety)
 
     // Set role for display immediately (optimistic UI)
     setRole(intendedRole);
