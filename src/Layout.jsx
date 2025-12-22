@@ -1090,9 +1090,9 @@ function AppContent() {
           destination = 'Onboarding';
           console.log('➡️ [NeedsOnboarding] Parent → Onboarding');
         } else {
-          // Fallback for unknown persona - go to role selection
-          destination = 'GatorRoleSelection';
-          console.log('➡️ [NeedsOnboarding] Unknown persona → GatorRoleSelection');
+          // Fallback for unknown persona - go to GatorAuth
+          destination = 'GatorAuth';
+          console.log('➡️ [NeedsOnboarding] Unknown persona → GatorAuth');
         }
       } else {
         // Fully onboarded - go to correct dashboard based on ACTUAL persona
