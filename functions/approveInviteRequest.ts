@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Request not found', request_id }, { status: 404 });
         }
 
-        const inviteRequest = requests[0];
+        const inviteRequestRaw = requests[0];
+        // Handle both direct properties and nested data object (SDK returns data nested)
+        const inviteRequest = inviteRequestRaw.data || inviteRequestRaw;
         console.log('Found invite request:', JSON.stringify(inviteRequest));
         
         // CRITICAL: Skip if already approved to prevent duplicate emails/codes
