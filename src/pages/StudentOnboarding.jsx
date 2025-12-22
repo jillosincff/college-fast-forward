@@ -74,7 +74,7 @@ export default function StudentOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+
   const [matches, setMatches] = useState([]);
   const [errors, setErrors] = useState({});
   const [emailError, setEmailError] = useState('');
