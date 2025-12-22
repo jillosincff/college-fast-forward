@@ -1134,8 +1134,8 @@ function AppContent() {
       console.log('🔄 [Incomplete] New user flow or UFL student → GatorWelcome');
       navigate('GatorWelcome');
     } else if (hasNoRole && !pendingRole) {
-      console.log('🔄 [Incomplete] No role → GatorRoleSelection');
-      navigate('GatorRoleSelection');
+      console.log('🔄 [Incomplete] No role → GatorAuth');
+      navigate('GatorAuth');
     } else if (needsOnboarding) {
       const onboardingPage = (user.persona === 'parent' || user.roles?.includes('parent')) ? 'Onboarding' : 'StudentOnboarding';
       console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage);
