@@ -384,15 +384,14 @@ export default function GatorWelcome() {
     );
   }
 
-  // Ready state - skip directly to onboarding (no redundant welcome screen)
+  // Ready state - auto-proceed to onboarding
   useEffect(() => {
     if (status === 'ready' && role) {
-      // Auto-proceed to onboarding
       proceedToOnboarding();
     }
   }, [status, role]);
 
-  // Show loading while auto-redirecting
+  // Show loading while auto-redirecting (for all states including 'ready')
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="text-center">
