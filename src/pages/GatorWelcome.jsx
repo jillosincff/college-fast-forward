@@ -111,24 +111,34 @@ export default function GatorWelcome() {
       
       // Poll for user session before giving up
       let attempts = 0;
+      const maxAttempts = 15; // Increase for slower connections (Edge/mobile)
+      const pollInterval = 600; // ms
+      
       const checkSession = async () => {
-        while (attempts < 10) {
+        while (attempts < maxAttempts) {
           attempts++;
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, pollInterval));
+          
+          // Check if component is still mounted
+          if (!isMountedRef.current) return;
+          
           try {
             const freshUser = await base44.auth.me();
             if (freshUser?.email) {
-              console.log('✅ [GatorWelcome] Session found after polling:', freshUser.email);
+              console.log('✅ [GatorWelcome] Session found after polling:', freshUser.email, 'attempt:', attempts);
               refreshUser(); // Trigger AuthContext update
               return; // Effect will re-run with user
             }
           } catch (e) {
+            console.log('⏳ [GatorWelcome] Polling attempt', attempts, 'failed:', e.message);
             // Keep polling
           }
         }
-        // After 5 seconds, redirect to auth
-        console.log('❌ [GatorWelcome] No session after polling, redirecting to GatorAuth');
-        navigate('GatorAuth');
+        // After max attempts, redirect to auth
+        if (isMountedRef.current) {
+          console.log('❌ [GatorWelcome] No session after', maxAttempts, 'polling attempts, redirecting to GatorAuth');
+          navigate('GatorAuth');
+        }
       };
       
       checkSession();
