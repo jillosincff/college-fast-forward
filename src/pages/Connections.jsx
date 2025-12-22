@@ -849,10 +849,12 @@ export default function QuestionsPage() {
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
+            padding: 0 16px;
           }
 
           .header-left h1 {
-            font-size: 22px;
+            font-size: 20px;
+            line-height: 1.2;
           }
           
           .subtitle {
@@ -862,6 +864,7 @@ export default function QuestionsPage() {
           .ask-question-btn {
             width: 100%;
             justify-content: center;
+            min-height: 48px;
           }
 
           .cta-banner {
@@ -886,10 +889,12 @@ export default function QuestionsPage() {
 
           .cta-button {
             width: 100%;
+            min-height: 48px;
           }
 
           .filters-section {
-            padding: 12px 12px;
+            padding: 12px 16px;
+            top: 56px; /* Account for mobile header height */
           }
 
           .filter-tabs-row {
@@ -901,11 +906,24 @@ export default function QuestionsPage() {
           .filter-tabs {
             width: 100%;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 4px;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+          }
+
+          .filter-tabs::-webkit-scrollbar {
+            display: none;
           }
 
           .filter-tab {
-            padding: 6px 12px;
+            padding: 10px 16px;
             font-size: 13px;
+            min-height: 44px;
+            flex-shrink: 0;
           }
 
           .search-row {
@@ -917,16 +935,61 @@ export default function QuestionsPage() {
             width: 100%;
           }
 
+          .search-input {
+            min-height: 48px;
+            font-size: 16px; /* Prevent iOS zoom */
+          }
+
           .filters-toggle-btn {
             width: 100%;
+            min-height: 48px;
           }
 
           .filter-grid {
             grid-template-columns: 1fr;
           }
 
+          .filter-select {
+            min-height: 48px;
+            font-size: 16px; /* Prevent iOS zoom */
+          }
+
           .questions-container {
-            padding: 16px 12px 40px;
+            padding: 16px 0 100px; /* Extra bottom padding for bottom nav */
+          }
+
+          .questions-list {
+            margin: 0; /* Full-width on mobile */
+          }
+
+          .load-more-btn {
+            margin: 16px;
+            min-height: 48px;
+          }
+
+          .empty-state {
+            margin: 0 16px;
+            padding: 60px 20px;
+          }
+
+          .empty-icon {
+            font-size: 48px;
+          }
+
+          .empty-state h3 {
+            font-size: 20px;
+          }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 375px) {
+          .header-left h1 {
+            font-size: 18px;
+          }
+          
+          .filter-tab {
+            padding: 8px 12px;
+            font-size: 12px;
           }
         }
       `}</style>
