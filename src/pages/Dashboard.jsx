@@ -222,7 +222,7 @@ export default function Dashboard() {
   const responseCount = matches.filter(m => m.status === 'student_connected').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8">
       
       {/* Founding Member Banner */}
       {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
@@ -247,12 +247,15 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Welcome Header */}
-      <div className="bg-white border-b border-slate-200 py-8 px-4">
+      {/* Welcome Header - Mobile Optimized */}
+      <div className="bg-[#0021A5] text-white py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+          <h1 className="text-xl md:text-3xl font-bold">
             Welcome back, {user.first_name || (user.full_name?.includes(',') ? user.full_name.split(',')[1]?.trim().split(' ')[0] : user.full_name?.split(' ')[0]) || 'Gator'}! 👋
           </h1>
+          <p className="text-white/80 text-sm mt-1 md:hidden">
+            Parents and alumni are ready to help
+          </p>
         </div>
       </div>
 
@@ -273,32 +276,29 @@ export default function Dashboard() {
           />
         </motion.div>
 
-        {/* Network Stats */}
+        {/* Network Stats - Compact on Mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-3 gap-2 md:gap-4"
         >
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
-            <CardContent className="pt-6 pb-6 text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-1">{networkStats.activeRequests}</div>
-              <p className="text-sm text-slate-600">Active Questions</p>
-              <p className="text-xs text-slate-500">(All students)</p>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 md:border-2">
+            <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-0.5">{networkStats.activeRequests}</div>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">Active Questions</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200">
-            <CardContent className="pt-6 pb-6 text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-1">{parentMatches.length}</div>
-              <p className="text-sm text-slate-600">People Matched</p>
-              <p className="text-xs text-slate-500">to Your Question</p>
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 md:border-2">
+            <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
+              <div className="text-2xl md:text-3xl font-bold text-orange-600 mb-0.5">{parentMatches.length}</div>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">Matched</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
-            <CardContent className="pt-6 pb-6 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-1">{responseCount}</div>
-              <p className="text-sm text-slate-600">Responses</p>
-              <p className="text-xs text-slate-500">Received</p>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 md:border-2">
+            <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
+              <div className="text-2xl md:text-3xl font-bold text-green-600 mb-0.5">{responseCount}</div>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">Responses</p>
             </CardContent>
           </Card>
         </motion.div>
