@@ -35,6 +35,17 @@ export default function GatorAuth() {
   useEffect(() => {
     if (isLoading) return;
 
+    // CRITICAL: Detect if we somehow ended up on wrong domain (mobile OAuth bug)
+    const currentHost = window.location.hostname;
+    console.log('🔍 [GatorAuth] Current hostname:', currentHost);
+    
+    if (currentHost.includes('ufl.edu') || currentHost.includes('google.com') || currentHost.includes('accounts.google')) {
+      console.error('❌ [GatorAuth] WRONG DOMAIN DETECTED! Redirecting back to app...');
+      // Try to redirect back to the app - use a hardcoded fallback
+      window.location.href = 'https://app.base44.com/preview/684474c5723dc90efce23588/#GatorAuth';
+      return;
+    }
+
     // Handle OAuth callback token extraction
     const hashFragment = window.location.hash.substring(1);
     const urlParams = new URLSearchParams(window.location.search);
