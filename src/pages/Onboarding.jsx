@@ -326,48 +326,68 @@ export default function Onboarding() {
     );
   }
 
+  const exampleQuestions = [
+    "My daughter got rejected from her dream job. How do I support her?",
+    "Is it normal to worry this much about their future?",
+    "How do I help without being a helicopter parent?"
+  ];
+
   // Step 1: What's on your mind? (Parent's question - optional)
   if (currentStep === 1 && !user?.onboarding_completed) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-xl p-8"
           >
-            {/* Header */}
+            {/* Empathy Section */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">💬</span>
-              </div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                What's on your mind?
+              <div className="text-4xl mb-6">💙</div>
+              
+              <h1 className="text-2xl font-bold text-slate-800 mb-4">
+                We know this time isn't easy.
               </h1>
-              <p className="text-slate-600">
-                Ask a question about helping your student or your own career. Other parents and alumni will share their advice.
+              
+              <p className="text-slate-600 leading-relaxed mb-4">
+                Watching your student navigate their future can be exciting, stressful, 
+                and everything in between. The job search, the uncertainty, the "what ifs" — 
+                it's a lot.
+              </p>
+              
+              <p className="text-slate-600 leading-relaxed">
+                <strong className="text-slate-800">For them AND for you.</strong>
+              </p>
+              
+              <p className="text-slate-500 mt-4 text-sm">
+                That's why we built this community. You're not alone.
               </p>
             </div>
 
-            {/* Question Input */}
+            {/* Divider */}
+            <div className="border-t border-slate-200 my-8"></div>
+
+            {/* Question Section */}
             <div className="mb-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">
+                What's on your mind lately?
+              </h2>
+              
               <Textarea
                 value={formData.question}
                 onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value.slice(0, 500) }))}
-                placeholder="E.g., My daughter is torn between two offers. How do I help her decide without being pushy?
-
-Or: My son wants to drop out and start a business. How worried should I be?"
+                placeholder="Share a concern, ask a question, or just vent. This community gets it."
                 rows={5}
-                className="min-h-[140px] text-base border-2 border-slate-200 focus:border-blue-500"
+                className="min-h-[130px] text-base border-2 border-slate-200 focus:border-[#0021A5] resize-none placeholder:text-slate-400"
               />
-              <div className="flex justify-between mt-2">
-                <p className="text-xs text-slate-500">Share any career or life question - it's optional but helps build community!</p>
-                <p className="text-xs text-slate-500">{formData.question?.length || 0}/500</p>
+              <div className="text-right text-xs text-slate-400 mt-1">
+                {formData.question?.length || 0}/500
               </div>
             </div>
 
             {/* Anonymous Posting Option */}
-            {formData.question?.trim() && (
+            {formData.question?.trim().length > 10 && (
               <div className="mb-6">
                 <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-blue-300 transition-colors">
                   <input
@@ -379,40 +399,43 @@ Or: My son wants to drop out and start a business. How worried should I be?"
                   <div>
                     <p className="font-medium text-slate-900">Post anonymously</p>
                     <p className="text-sm text-slate-600">
-                      Your question will show as "Anonymous Parent" instead of your name. Your identity stays private.
-                    </p>
-                    <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
-                      💡 Recommended for sensitive family topics
+                      Your question will show as "Anonymous Parent" instead of your name.
                     </p>
                   </div>
                 </label>
               </div>
             )}
 
-            {/* Example Questions */}
-            <div className="bg-slate-50 rounded-xl p-4 mb-6">
-              <p className="font-medium text-sm text-slate-700 mb-3">💡 Example questions from parents:</p>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li className="italic">"My daughter is torn between two offers. How do I help her decide without being pushy?"</li>
-                <li className="italic">"My son wants to drop out and start a business. How worried should I be?"</li>
-                <li className="italic">"How do I support my daughter's job search without helicoptering?"</li>
+            {/* Example Questions (clickable) */}
+            <div className="bg-slate-50 rounded-xl p-4 mb-8">
+              <p className="text-sm text-slate-500 mb-2">💭 Other parents are sharing:</p>
+              <ul className="text-sm text-slate-600 space-y-2">
+                {exampleQuestions.map((example, i) => (
+                  <li 
+                    key={i}
+                    onClick={() => setFormData(prev => ({ ...prev, question: example }))}
+                    className="italic cursor-pointer hover:text-[#0021A5] transition-colors"
+                  >
+                    "{example}"
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
+            {/* Buttons */}
+            <div className="flex justify-between items-center">
+              <button
                 onClick={() => setCurrentStep(0)}
-                className="flex-1 h-12"
+                className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm font-medium"
               >
                 ← Back
-              </Button>
+              </button>
+              
               <Button
                 onClick={() => setCurrentStep(2)}
-                className="flex-1 h-12 bg-[#FA4616] hover:bg-[#E03D0F] text-white font-semibold"
+                className="px-6 py-3 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold rounded-xl transition-colors"
               >
-                {formData.question?.trim() ? 'Continue →' : 'Skip for now →'}
+                {formData.question?.trim().length > 10 ? 'Share & Continue →' : 'Skip for now →'}
               </Button>
             </div>
           </motion.div>
