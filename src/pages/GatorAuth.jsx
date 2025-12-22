@@ -120,6 +120,7 @@ export default function GatorAuth() {
         
         (async () => {
           try {
+            console.log('🔄 [GatorAuth] Applying pending role:', pendingRole);
             await base44.auth.updateMe({
               persona: pendingRole,
               roles: [pendingRole],
@@ -127,10 +128,32 @@ export default function GatorAuth() {
               is_new_signup: true,
               invite_code_used: pendingCode || 'direct'
             });
-            localStorage.removeItem('pending_invite_role');
-            localStorage.removeItem('pending_invite_code');
-            if (refreshUser) await refreshUser();
-            navigate('GatorWelcome');
+            
+            // Verify update succeeded before navigating
+            await new Promise(r => setTimeout(r, 300));
+            const updatedUser = await base44.auth.me();
+            
+            if (updatedUser?.persona === pendingRole) {
+              console.log('✅ [GatorAuth] Pending role applied successfully');
+              localStorage.removeItem('pending_invite_role');
+              localStorage.removeItem('pending_invite_code');
+              if (refreshUser) await refreshUser();
+              navigate('GatorWelcome');
+            } else {
+              console.warn('⚠️ [GatorAuth] Role update not reflected, retrying...');
+              // One more attempt
+              await base44.auth.updateMe({
+                persona: pendingRole,
+                roles: [pendingRole],
+                onboarding_completed: false,
+                is_new_signup: true
+              });
+              await new Promise(r => setTimeout(r, 500));
+              localStorage.removeItem('pending_invite_role');
+              localStorage.removeItem('pending_invite_code');
+              if (refreshUser) await refreshUser();
+              navigate('GatorWelcome');
+            }
           } catch (err) {
             console.error('Failed to apply pending role:', err);
             localStorage.removeItem('pending_invite_role');
