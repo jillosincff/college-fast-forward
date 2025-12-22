@@ -709,8 +709,63 @@ export default function QuestionDetailPage() {
         }
 
         @media (max-width: 640px) {
+          .question-detail-page {
+            padding-bottom: 100px; /* Extra space for fixed answer input */
+          }
+
+          .nav-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 12px 16px;
+          }
+
+          .back-btn {
+            font-size: 14px;
+            padding: 0;
+          }
+
+          .content-container {
+            padding: 0;
+          }
+
+          .question-section {
+            border-radius: 0;
+            padding: 16px;
+            margin-bottom: 12px;
+          }
+
+          .poster-info {
+            gap: 10px;
+          }
+
+          .poster-avatar, .anonymous-avatar {
+            width: 40px;
+            height: 40px;
+          }
+
+          .poster-name {
+            font-size: 14px;
+          }
+
+          .poster-meta, .post-time {
+            font-size: 12px;
+          }
+
           .question-text {
-            font-size: 18px;
+            font-size: 16px;
+            line-height: 1.5;
+          }
+
+          .question-tags {
+            gap: 6px;
+          }
+
+          .tag {
+            font-size: 11px;
+            padding: 3px 10px;
           }
 
           .question-stats {
@@ -718,7 +773,33 @@ export default function QuestionDetailPage() {
           }
 
           .stat {
-            font-size: 13px;
+            font-size: 12px;
+          }
+
+          .answers-section {
+            border-radius: 0;
+            padding: 16px;
+          }
+
+          .answers-header {
+            margin-bottom: 16px;
+          }
+
+          .answers-header h2 {
+            font-size: 16px;
+          }
+
+          .sort-select {
+            min-height: 40px;
+            font-size: 14px;
+          }
+
+          .no-answers {
+            padding: 32px 16px;
+          }
+
+          .no-answers h3 {
+            font-size: 16px;
           }
         }
       `}</style>
