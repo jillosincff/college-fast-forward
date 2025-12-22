@@ -356,9 +356,9 @@ export default function StudentOnboarding() {
           </div>
 
           {/* Help Request - REQUIRED */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Tell us what you're looking for: <span className="text-red-500">*</span>
+          <div className="bg-gradient-to-r from-blue-50 to-orange-50 border-2 border-[#0021A5] rounded-2xl p-4 shadow-sm">
+            <label className="block text-sm font-bold text-[#0021A5] mb-2">
+              ⭐ Tell us what you're looking for: <span className="text-red-500">*</span>
             </label>
             <textarea
               value={helpRequest}
@@ -376,8 +376,8 @@ e.g., "I'm a junior marketing major looking for summer internships in tech. I'd 
               `}
               maxLength={500}
             />
-            <div className="flex justify-between items-center mt-1">
-              <p className={`text-xs ${helpRequest.trim().length < 20 ? 'text-amber-600' : 'text-green-600'}`}>
+            <div className="flex justify-between items-center mt-2">
+              <p className={`text-xs ${helpRequest.trim().length < 20 ? 'text-amber-600' : 'text-green-600 font-medium'}`}>
                 {helpRequest.trim().length < 20 
                   ? `Please write at least 20 characters (${helpRequest.trim().length}/20)` 
                   : '✓ Looks good!'
