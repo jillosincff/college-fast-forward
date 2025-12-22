@@ -26,7 +26,9 @@ function GoogleIcon() {
 export default function GatorAuth() {
   const { user, isLoading, refreshUser } = useAuth();
   
-  const [step, setStep] = useState(null); // null = determining, 'welcome', 'role-select', 'processing'
+  // NEW FLOW: Role selection FIRST, then OAuth
+  // Steps: null (determining) → 'role-select' (pick role) → 'oauth' (sign in) → 'processing' (applying role)
+  const [step, setStep] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
   const processingRef = useRef(false);
