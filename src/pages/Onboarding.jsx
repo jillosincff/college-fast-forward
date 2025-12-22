@@ -262,12 +262,12 @@ export default function Onboarding() {
     );
   }
 
-  // STEP 2: How Can You Help
-  if (step === 2) {
+  // STEP 2: How Can You Help (Step 3 for alumni)
+  if ((isAlumni && step === 3) || (!isAlumni && step === 2)) {
     return (
       <OnboardingLayout
-        currentStep={2}
-        totalSteps={3}
+        currentStep={isAlumni ? 3 : 2}
+        totalSteps={totalSteps}
         onNext={handleNext}
         onBack={handleBack}
         nextDisabled={expertise.length === 0}
