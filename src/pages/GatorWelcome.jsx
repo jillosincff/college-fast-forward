@@ -177,6 +177,7 @@ export default function GatorWelcome() {
     console.log('🔍 [GatorWelcome] Role determination:', {
       pendingRole,
       userPersona: user.persona,
+      userRoles: user.roles,
       intendedRole,
       updateInProgress: updateInProgressRef.current,
       isNewSignup: user.is_new_signup
