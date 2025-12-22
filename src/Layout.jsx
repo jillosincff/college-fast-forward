@@ -779,11 +779,20 @@ function AppContent() {
     
     console.log('🔐 [Layout] isNewUser:', isNewUser, 'accessToken:', !!accessToken, 'hashAccessToken:', !!hashAccessToken);
     
+    // CRITICAL: Detect if we somehow ended up on wrong domain (mobile OAuth bug with @ufl.edu accounts)
+    const currentHost = window.location.hostname;
+    if (currentHost.includes('ufl.edu') || currentHost.includes('google.com') || currentHost.includes('accounts.google')) {
+      console.error('❌ [Layout] WRONG DOMAIN DETECTED:', currentHost);
+      // This should never happen - but if it does, we can't do much from here
+      // The OAuth flow may have redirected to the wrong place
+      return;
+    }
+
     // PRIORITY 1: is_new_user param - mark OAuth callback but let routing logic decide destination
     if (isNewUser) {
       console.log('🔐 [Layout] OAuth callback: is_new_user param detected');
       sessionStorage.setItem('oauth_callback_detected', 'true');
-      
+
       // Clean URL but DON'T navigate yet - let routing logic decide based on user state
       window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
       return;
