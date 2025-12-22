@@ -294,11 +294,11 @@ export default function Onboarding() {
     );
   }
 
-  // STEP 3: Optional Question
+  // STEP 3: Optional Question (Step 4 for alumni)
   return (
     <OnboardingLayout
-      currentStep={3}
-      totalSteps={3}
+      currentStep={totalSteps}
+      totalSteps={totalSteps}
       onNext={handleFinish}
       onBack={handleBack}
       nextLabel={loading ? 'Setting up...' : (question.trim().length > 10 ? 'Post & Finish →' : 'Finish →')}
