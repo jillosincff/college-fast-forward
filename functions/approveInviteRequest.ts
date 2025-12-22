@@ -41,9 +41,44 @@ Deno.serve(async (req) => {
         }
 
         if (action === 'approve') {
-            // Generate invite code with role prefix for clarity
-            const requestRole = inviteRequest.role || 'parent';
-            const prefix = requestRole === 'alumni' ? 'ALUM' : 'PRNT';
+            // Determine role from either new 'role' field or legacy 'user_type' field
+            let assignedRole = 'parent'; // default
+            let inviteType = 'admin_to_parent';
+            
+            // Check legacy user_type field first (older requests like Carole Seago)
+            if (inviteRequest.user_type) {
+                if (inviteRequest.user_type === 'uf_alumni') {
+                    assignedRole = 'alumni';
+                    inviteType = 'admin_to_alumni';
+                } else if (inviteRequest.user_type === 'uf_parent') {
+                    assignedRole = 'parent';
+                    inviteType = 'admin_to_parent';
+                } else if (inviteRequest.user_type === 'uf_student') {
+                    assignedRole = 'gator';
+                    inviteType = 'admin_to_gator';
+                }
+            }
+            
+            // New role field overrides if present
+            if (inviteRequest.role) {
+                if (inviteRequest.role === 'alumni') {
+                    assignedRole = 'alumni';
+                    inviteType = 'admin_to_alumni';
+                } else if (inviteRequest.role === 'parent') {
+                    assignedRole = 'parent';
+                    inviteType = 'admin_to_parent';
+                }
+            }
+            
+            console.log('Role determination:', { 
+                legacyUserType: inviteRequest.user_type, 
+                newRole: inviteRequest.role, 
+                finalRole: assignedRole,
+                inviteType 
+            });
+
+            // Generate invite code with role prefix
+            const prefix = assignedRole === 'alumni' ? 'ALUM' : (assignedRole === 'gator' ? 'GATOR' : 'PRNT');
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let suffix = '';
             for (let i = 0; i < 6; i++) {
@@ -53,32 +88,6 @@ Deno.serve(async (req) => {
 
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + 30); // 30 days for admin-approved codes
-
-            // Determine invite type based on new role field (fallback to user_type for legacy)
-            let inviteType = 'admin_to_parent';
-            let assignedRole = 'parent';
-            
-            // First check legacy user_type field (older requests)
-            if (inviteRequest.user_type) {
-                const inviteTypeMap = {
-                    'uf_student': 'admin_to_gator',
-                    'uf_parent': 'admin_to_parent', 
-                    'uf_alumni': 'admin_to_alumni'
-                };
-                inviteType = inviteTypeMap[inviteRequest.user_type] || 'admin_to_parent';
-                assignedRole = inviteRequest.user_type === 'uf_alumni' ? 'alumni' : 'parent';
-            }
-            
-            // Then check new role field (overrides user_type if present)
-            if (requestRole === 'alumni') {
-                inviteType = 'admin_to_alumni';
-                assignedRole = 'alumni';
-            } else if (requestRole === 'parent') {
-                inviteType = 'admin_to_parent';
-                assignedRole = 'parent';
-            }
-            
-            console.log('Role determination:', { requestRole, userType: inviteRequest.user_type, inviteType, assignedRole });
 
             // Create invite code with role field
             const inviterId = user.id || 'admin';
