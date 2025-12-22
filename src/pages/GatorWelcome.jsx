@@ -187,7 +187,7 @@ export default function GatorWelcome() {
     // No role anywhere - redirect to role selection
     if (!intendedRole) {
       console.log('⚠️ [GatorWelcome] No role found, redirecting to role selection');
-      navigate('GatorRoleSelection');
+      navigate('GatorAuth');
       return;
     }
 
