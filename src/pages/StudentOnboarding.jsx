@@ -308,16 +308,20 @@ export default function StudentOnboarding() {
 
       await refreshUser();
 
-      // Show welcome page
+      // Go directly to dashboard (welcome was already shown on GatorWelcome page)
       setShowLoading(false);
-      setShowWelcome(true);
-
+      
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
         colors: ['#FA4616', '#0021A5', '#FF6B35']
       });
+
+      // Navigate to dashboard after a brief moment for confetti
+      setTimeout(() => {
+        navigate('Dashboard');
+      }, 1500);
 
     } catch (error) {
       console.error('❌ Onboarding failed:', error);
