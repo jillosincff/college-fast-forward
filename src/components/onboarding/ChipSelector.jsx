@@ -37,7 +37,7 @@ export default function ChipSelector({
       }`}
     >
       {options.map(option => {
-        const isSelected = selected.includes(option.id);
+        const isSelected = safeSelected.includes(option.id);
         return (
           <button
             key={option.id}
