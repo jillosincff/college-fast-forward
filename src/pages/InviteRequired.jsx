@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { User } from '@/entities/User';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Loader2, AlertCircle, Sparkles, ArrowRight, Lock, Info, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate } from '@/components/utils/navigation';
-import { verifyInviteCode } from '@/functions/verifyInviteCode';
+
 import { base44 } from '@/api/base44Client';
 
 export default function InviteRequired() {
@@ -53,7 +53,7 @@ export default function InviteRequired() {
       
       let result;
       try {
-        result = await verifyInviteCode({
+        result = await base44.functions.invoke('verifyInviteCode', {
           code: inviteCode.trim()
         });
         console.log('Verify result:', result);
@@ -73,7 +73,7 @@ export default function InviteRequired() {
       console.log('✅ Invite verified successfully!');
       
       // Update user with selected role
-      await User.updateMyUserData({
+      await base44.auth.updateMe({
         roles: [selectedRole],
         persona: selectedRole,
         onboarding_completed: false,
