@@ -408,29 +408,6 @@ export default function StudentOnboarding() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           >
-          {/* EMPATHY SECTION - Lead with support */}
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-6">🐊</div>
-            
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              We've got your back.
-            </h1>
-            
-            <p className="text-lg text-slate-600 mb-4">
-              Transitioning to "real life" is hard.<br />
-              <strong className="text-slate-800">But you're not doing it alone.</strong>
-            </p>
-            
-            <p className="text-slate-500 leading-relaxed max-w-lg mx-auto">
-              The job search, the rejections, the "what am I even doing?" moments — 
-              we've all been there. That's why thousands of Gator parents and alumni 
-              are here to help <strong className="text-[#0021A5]">YOU</strong> figure it out.
-            </p>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-slate-200 my-8"></div>
-
           {/* SECTION 1: THE QUESTION - Primary */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-slate-800 mb-4">
