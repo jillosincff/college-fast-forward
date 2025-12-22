@@ -47,14 +47,8 @@ Deno.serve(async (req) => {
             let inviteType = 'admin_to_parent';
             let assignedRole = 'parent';
             
-            if (requestRole === 'alumni') {
-                inviteType = 'admin_to_alumni';
-                assignedRole = 'alumni';
-            } else if (requestRole === 'parent') {
-                inviteType = 'admin_to_parent';
-                assignedRole = 'parent';
-            } else if (inviteRequest.user_type) {
-                // Legacy fallback
+            // First check legacy user_type field (older requests)
+            if (inviteRequest.user_type) {
                 const inviteTypeMap = {
                     'uf_student': 'admin_to_gator',
                     'uf_parent': 'admin_to_parent', 
@@ -63,6 +57,17 @@ Deno.serve(async (req) => {
                 inviteType = inviteTypeMap[inviteRequest.user_type] || 'admin_to_parent';
                 assignedRole = inviteRequest.user_type === 'uf_alumni' ? 'alumni' : 'parent';
             }
+            
+            // Then check new role field (overrides user_type if present)
+            if (requestRole === 'alumni') {
+                inviteType = 'admin_to_alumni';
+                assignedRole = 'alumni';
+            } else if (requestRole === 'parent') {
+                inviteType = 'admin_to_parent';
+                assignedRole = 'parent';
+            }
+            
+            console.log('Role determination:', { requestRole, userType: inviteRequest.user_type, inviteType, assignedRole });
 
             // Create invite code with role field
             const inviterId = user.id || 'admin';
