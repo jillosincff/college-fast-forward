@@ -204,9 +204,12 @@ export default function GatorAuth() {
     
     setLoading(true);
     
-    // Students can proceed directly
-    if (selectedRole === 'gator') {
+    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+    
+    // UFL Students can proceed directly (no invite code needed)
+    if (selectedRole === 'gator' && isUFLStudent) {
       try {
+        console.log('🎓 [GatorAuth] UFL student selecting gator role, proceeding directly');
         await base44.auth.updateMe({
           persona: 'gator',
           roles: ['gator'],
@@ -219,8 +222,14 @@ export default function GatorAuth() {
         console.error('Failed to set role:', err);
         setLoading(false);
       }
+    } else if (selectedRole === 'gator' && !isUFLStudent) {
+      // Non-UFL students also need invite code
+      console.log('📝 [GatorAuth] Non-UFL student needs invite code');
+      localStorage.setItem('pending_invite_role', 'gator');
+      navigate('GatorInviteCode');
     } else {
       // Parents and Alumni need an invite code - redirect to invite code page
+      console.log('📝 [GatorAuth] Parent/Alumni needs invite code');
       localStorage.setItem('pending_invite_role', selectedRole);
       navigate('GatorInviteCode');
     }
