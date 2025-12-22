@@ -141,15 +141,65 @@ export default function Onboarding() {
   const isStep1Valid = company.trim().length > 0 && industry.length > 0 && title.trim().length > 0;
   const isStep2Valid = expertise.length > 0;
 
-  // STEP 1: About You
-  if (step === 1) {
+  // STEP 0 (Alumni only): Invite Code
+  if (isAlumni && step === 1) {
     return (
       <OnboardingLayout
         currentStep={1}
-        totalSteps={3}
+        totalSteps={totalSteps}
+        onNext={handleNext}
+        nextDisabled={!referralCode.trim()}
+        showBack={false}
+      >
+        <div className="max-w-lg mx-auto">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">🐊</div>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">
+              Welcome back, Gator!
+            </h1>
+            <p className="text-slate-600">
+              Enter your invite code to join the network.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Invite Code
+              </label>
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="e.g., GATOR-JOHN"
+                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base text-center
+                         focus:border-[#0021A5] focus:outline-none uppercase tracking-widest"
+                maxLength={20}
+              />
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                Don't have a code? Ask a current member or <a href="#RequestInvite" className="text-[#0021A5] underline">request access</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </OnboardingLayout>
+    );
+  }
+
+  // Adjust step number for alumni (they have an extra step at the beginning)
+  const displayStep = isAlumni ? step : step;
+  const actualStep = isAlumni ? step - 1 : step;
+
+  // STEP 1: About You (Step 2 for alumni)
+  if ((isAlumni && step === 2) || (!isAlumni && step === 1)) {
+    return (
+      <OnboardingLayout
+        currentStep={displayStep}
+        totalSteps={totalSteps}
         onNext={handleNext}
         nextDisabled={!isStep1Valid}
-        showBack={false}
+        showBack={isAlumni}
+        onBack={isAlumni ? handleBack : undefined}
       >
         <div className="max-w-lg mx-auto">
           {/* Empathy Header */}
