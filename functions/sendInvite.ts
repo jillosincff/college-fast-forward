@@ -28,12 +28,24 @@ Deno.serve(async (req) => {
         }
 
         console.log('💾 Creating InviteRequest entity...');
+        
+        // Map user_type to role (entity requires 'role' field)
+        let mappedRole = 'parent'; // default
+        if (user_type === 'uf_alumni') {
+            mappedRole = 'alumni';
+        } else if (user_type === 'uf_parent') {
+            mappedRole = 'parent';
+        }
+        // Note: uf_student shouldn't normally hit this flow (they use @ufl.edu instant access)
+        
         // Create an InviteRequest entity
         let inviteRequest;
         try {
             inviteRequest = await base44.asServiceRole.entities.InviteRequest.create({
                 email,
+                name: full_name,
                 full_name,
+                role: mappedRole,
                 user_type,
                 reason: reason || 'No reason provided',
                 status: 'pending'
