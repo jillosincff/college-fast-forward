@@ -1077,7 +1077,7 @@ function AppContent() {
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, pendingRole, inNewUserFlow });
+    console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, pendingRole, inNewUserFlow, userPersona: user.persona, userRoles: user.roles });
 
     // Landing/Dashboard navigation logic - ALWAYS check routing for authenticated users
     if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard')) {
