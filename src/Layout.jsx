@@ -919,9 +919,9 @@ function AppContent() {
         return;
       }
 
-      // No pending role - need role selection
-      console.log('🔄 [No Persona] Redirecting to GatorRoleSelection');
-      navigate('GatorRoleSelection');
+      // No pending role - need role selection (GatorAuth handles this)
+      console.log('🔄 [No Persona] Redirecting to GatorAuth');
+      navigate('GatorAuth');
       return;
     }
 
