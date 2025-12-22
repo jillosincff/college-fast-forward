@@ -21,6 +21,8 @@ import { base44 } from '@/api/base44Client';
 const clearPendingInviteData = () => {
   localStorage.removeItem('pending_invite_role');
   localStorage.removeItem('pending_invite_code');
+  localStorage.removeItem('pending_invite_timestamp');
+  localStorage.removeItem('pending_invite_code_id');
   sessionStorage.removeItem('pending_invite_role');
   sessionStorage.removeItem('pending_invite_code');
 };
@@ -53,6 +55,50 @@ export default function GatorWelcome() {
     sessionStorage.removeItem('oauth_callback_detected');
     sessionStorage.removeItem('oauth_state_token');
     sessionStorage.removeItem('oauth_redirect_in_progress');
+  }, []);
+
+  // Re-verify invite code on mount (prevents localStorage manipulation)
+  useEffect(() => {
+    const storedCode = localStorage.getItem('pending_invite_code');
+    const storedTimestamp = localStorage.getItem('pending_invite_timestamp');
+    const pendingRole = localStorage.getItem('pending_invite_role');
+
+    // Only verify if we have a stored code and this is a parent/alumni flow
+    if (!storedCode || !pendingRole || pendingRole === 'gator') {
+      return;
+    }
+
+    // Check if code expired (30 min timeout)
+    if (storedTimestamp && Date.now() - parseInt(storedTimestamp) > 30 * 60 * 1000) {
+      console.log('⏰ [GatorWelcome] Invite code session expired');
+      clearPendingInviteData();
+      navigate('GatorInviteCode');
+      return;
+    }
+
+    // Re-verify code is still valid server-side
+    const verifyCodeAgain = async () => {
+      try {
+        console.log('🔄 [GatorWelcome] Re-verifying invite code:', storedCode);
+        const result = await base44.functions.invoke('verifyInviteCode', { 
+          code: storedCode,
+          skipUsageIncrement: true // Don't increment usage on re-verify
+        });
+        
+        if (!result.data?.success) {
+          console.log('❌ [GatorWelcome] Code no longer valid:', result.data?.error);
+          clearPendingInviteData();
+          navigate('GatorInviteCode');
+        } else {
+          console.log('✅ [GatorWelcome] Code re-verified successfully');
+        }
+      } catch (err) {
+        console.error('⚠️ [GatorWelcome] Re-verification error (allowing to continue):', err);
+        // On network error, allow to continue (don't lock out user)
+      }
+    };
+
+    verifyCodeAgain();
   }, []);
 
   // Main setup effect
