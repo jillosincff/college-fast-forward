@@ -154,18 +154,25 @@ export default function GatorAuth() {
     
     setLoading(true);
     
-    try {
-      await base44.auth.updateMe({
-        persona: selectedRole,
-        roles: [selectedRole],
-        onboarding_completed: false,
-        is_new_signup: true
-      });
-      if (refreshUser) await refreshUser();
-      navigate('GatorWelcome');
-    } catch (err) {
-      console.error('Failed to set role:', err);
-      setLoading(false);
+    // Students can proceed directly
+    if (selectedRole === 'gator') {
+      try {
+        await base44.auth.updateMe({
+          persona: 'gator',
+          roles: ['gator'],
+          onboarding_completed: false,
+          is_new_signup: true
+        });
+        if (refreshUser) await refreshUser();
+        navigate('GatorWelcome');
+      } catch (err) {
+        console.error('Failed to set role:', err);
+        setLoading(false);
+      }
+    } else {
+      // Parents and Alumni need an invite code - redirect to invite code page
+      localStorage.setItem('pending_invite_role', selectedRole);
+      navigate('GatorInviteCode');
     }
   };
 
