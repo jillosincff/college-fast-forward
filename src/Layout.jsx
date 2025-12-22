@@ -1151,7 +1151,7 @@ function AppContent() {
       setResolvedPage(currentPage);
       return;
     }
-    
+
     // CRITICAL: UFL students OR users with pending roles should ALWAYS go to GatorWelcome
     if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) {
       console.log('🔄 [Incomplete] New user flow or UFL student → GatorWelcome');
@@ -1160,8 +1160,11 @@ function AppContent() {
       console.log('🔄 [Incomplete] No role → GatorAuth');
       navigate('GatorAuth');
     } else if (needsOnboarding) {
-      const onboardingPage = (user.persona === 'parent' || user.roles?.includes('parent')) ? 'Onboarding' : 'StudentOnboarding';
-      console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage);
+      // CRITICAL: Check both persona AND roles array for accurate routing
+      const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+      const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
+      const onboardingPage = (isParent || isAlumni) ? 'Onboarding' : 'StudentOnboarding';
+      console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage, '(persona:', user.persona, 'roles:', user.roles, ')');
       navigate(onboardingPage);
     } else {
       console.log('✅ [FallThrough] Allowing access to:', currentPage);
