@@ -467,7 +467,7 @@ export default function ParentDashboard() {
             </h3>
             <p className="text-xs text-slate-600 mb-3 leading-relaxed">
               Post your own question.<br />
-              <span className="font-semibold">Parents & alumni can help</span>
+              <span className="font-semibold">Get support from the swamp.</span>
             </p>
             <Button
               onClick={() => navigate('PostRequest?type=parent')}
