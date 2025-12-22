@@ -663,9 +663,9 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired'];
 const adminPages = ['TestingDashboard'];
-const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile'];
+const publicPages = ['LandingPage', 'WelcomeRole', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth'];
 
 const isUserVerified = (user) => {
