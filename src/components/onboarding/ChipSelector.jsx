@@ -7,16 +7,25 @@ export default function ChipSelector({
   multiple = true,
   columns = 2 
 }) {
+  // Ensure selected is always an array
+  const safeSelected = Array.isArray(selected) ? selected : [];
+  
   const handleClick = (id) => {
+    console.log('🖱️ [ChipSelector] Click on:', id, 'currently selected:', safeSelected);
+    
+    let newSelected;
     if (multiple) {
-      if (selected.includes(id)) {
-        onChange(selected.filter(s => s !== id));
+      if (safeSelected.includes(id)) {
+        newSelected = safeSelected.filter(s => s !== id);
       } else {
-        onChange([...selected, id]);
+        newSelected = [...safeSelected, id];
       }
     } else {
-      onChange([id]);
+      newSelected = [id];
     }
+    
+    console.log('🔄 [ChipSelector] New selection:', newSelected);
+    onChange(newSelected);
   };
 
   return (
