@@ -11,8 +11,6 @@ export default function ChipSelector({
   const safeSelected = Array.isArray(selected) ? selected : [];
   
   const handleClick = (id) => {
-    console.log('🖱️ [ChipSelector] Click on:', id, 'currently selected:', safeSelected);
-    
     let newSelected;
     if (multiple) {
       if (safeSelected.includes(id)) {
@@ -23,8 +21,6 @@ export default function ChipSelector({
     } else {
       newSelected = [id];
     }
-    
-    console.log('🔄 [ChipSelector] New selection:', newSelected);
     onChange(newSelected);
   };
 
