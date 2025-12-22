@@ -321,6 +321,22 @@ export default function GatorWelcome() {
     loadPricing();
   }, []);
 
+  // CRITICAL: Auto-proceed to onboarding when ready
+  // This hook MUST be called unconditionally (before any returns) per React Rules of Hooks
+  useEffect(() => {
+    if (status === 'ready' && role) {
+      console.log('🚀 [GatorWelcome] Auto-proceeding to onboarding for role:', role);
+      if (role === 'gator') {
+        navigate('StudentOnboarding');
+      } else if (role === 'parent' || role === 'alumni') {
+        navigate('Onboarding');
+      } else {
+        console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
+        navigate('Dashboard');
+      }
+    }
+  }, [status, role]);
+
   const handleGetStarted = async () => {
     console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
     trackEvent('onboarding_started', { role, tier: pricingInfo?.tier });
@@ -365,49 +381,6 @@ export default function GatorWelcome() {
       navigate('Dashboard');
     }
   };
-
-  // Loading state
-  if (isLoading || !user || status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-xl">
-            <span className="text-4xl">🐊</span>
-          </div>
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600 font-medium">Setting up your account...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (status === 'error') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-8 pb-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">❌</span>
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Setup Error</h2>
-            <p className="text-slate-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Ready state - auto-proceed to onboarding
-  // CRITICAL: This hook must be called unconditionally (before any returns)
-  // but we handle the condition inside
-  useEffect(() => {
-    if (status === 'ready' && role) {
-      console.log('🚀 [GatorWelcome] Auto-proceeding to onboarding for role:', role);
-      proceedToOnboarding();
-    }
-  }, [status, role]);
 
   // Loading state
   if (isLoading || !user || status === 'loading') {
