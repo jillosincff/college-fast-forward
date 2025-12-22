@@ -124,27 +124,24 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
               </div>
             </div>
 
-            {/* Right: Ways to Earn */}
+            {/* Right: Ways to Earn Points */}
             <div className="bg-white/15 backdrop-blur rounded-xl p-4">
-              <h4 className="font-bold text-xs mb-2 text-white/90">Ways to Earn:</h4>
-              <div className="space-y-1.5 text-xs text-white/95">
-                <div className="flex justify-between items-center">
-                  <span>💬 Answer a question</span>
+              <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Points:</h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                  <span className="text-white">💬 Answer a student question</span>
                   <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>⬆️ Get an upvote</span>
+                <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                  <span className="text-white">⬆️ Get upvoted by community</span>
                   <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>✅ Best answer selected</span>
+                <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                  <span className="text-white">✅ Student marks your answer best</span>
                   <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>👥 Refer a parent</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
-                </div>
               </div>
+              <p className="text-[10px] text-white/70 text-center mt-2 italic">Start by browsing questions!</p>
             </div>
           </div>
 
@@ -262,40 +259,38 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
             )}
           </div>
 
-          {/* Right: Ways to Earn */}
+          {/* Right: Ways to Earn Points */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-4">
-            <h4 className="font-bold text-xs mb-2 text-white/90">Ways to Earn:</h4>
-            <div className="space-y-1.5 text-xs text-white/95">
-              <div className="flex justify-between items-center">
-                <span>💬 Answer a question</span>
+            <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Points:</h4>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                <span className="text-white">💬 Answer a student question</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span>⬆️ Get an upvote</span>
+              <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                <span className="text-white">⬆️ Get upvoted by community</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span>✅ Best answer selected</span>
+              <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
+                <span className="text-white">✅ Student marks your answer best</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>👥 Refer a parent</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
               </div>
             </div>
             
             {/* Recent Activity - Compact */}
             {karmaData.recent_transactions?.length > 0 && (
               <div className="mt-3 pt-3 border-t border-white/20">
-                <h4 className="font-bold text-xs mb-1.5 text-white/90">Recent:</h4>
+                <h4 className="font-bold text-xs mb-1.5 text-white">Recent:</h4>
                 {karmaData.recent_transactions.slice(0, 2).map((tx, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs mb-1 text-white/90">
-                    <span className="truncate">{getActivityLabel(tx.action_type)}</span>
+                  <div key={idx} className="flex justify-between items-center text-xs mb-1">
+                    <span className="truncate text-white">{getActivityLabel(tx.action_type)}</span>
                     <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold ml-2 text-white">+{tx.points}</span>
                   </div>
                 ))}
               </div>
             )}
+            
+            <p className="text-[10px] text-white/70 text-center mt-2 italic">Start by browsing questions!</p>
           </div>
         </div>
       </div>
