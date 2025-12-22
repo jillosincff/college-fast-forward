@@ -950,7 +950,7 @@ function AppContent() {
     // BUT: Only auto-redirect if they're on a page that would trigger the redirect (Dashboard, ParentDashboard, LandingPage)
     // Don't auto-redirect if they're browsing other pages or just landed on the site
     if (user && !user.onboarding_completed && user.persona) {
-      console.log('🎯 [Onboarding Flow] User needs to complete onboarding, persona:', user.persona);
+      console.log('🎯 [Onboarding Flow] User needs to complete onboarding, persona:', user.persona, 'roles:', user.roles);
 
       // Allow new user flow pages during signup
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) {
@@ -963,12 +963,15 @@ function AppContent() {
       // This prevents auto-redirect when user first visits the site
       const dashboardPages = ['Dashboard', 'ParentDashboard'];
       if (dashboardPages.includes(currentPage)) {
-        // Route to correct onboarding based on persona
-        if (user.persona === 'parent' || user.persona === 'alumni') {
-          console.log('🔄 [Parent Flow] -> Onboarding');
+        // Route to correct onboarding based on persona - check roles array too
+        const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+        const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
+
+        if (isParent || isAlumni) {
+          console.log('🔄 [Parent/Alumni Flow] -> Onboarding');
           navigate('Onboarding');
           return;
-        } else if (user.persona === 'gator') {
+        } else if (user.persona === 'gator' || user.roles?.includes('gator')) {
           console.log('🔄 [Student Flow] -> StudentOnboarding');
           navigate('StudentOnboarding');
           return;
