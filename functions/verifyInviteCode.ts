@@ -300,6 +300,7 @@ College Fast Forward Team`
 
     return Response.json({
       success: true,
+      valid: true,
       invite_type: invite.invite_type,
       role: assignedRole,
       inviter_name: invite.inviter_name,
