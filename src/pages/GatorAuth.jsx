@@ -87,48 +87,11 @@ export default function GatorAuth() {
         return;
       }
 
-      // UFL student → Auto-assign gator
+      // UFL student without persona → Show role selection (don't auto-assign)
+      // This allows UFL students to choose their role, then we auto-approve gator role
       if (isUFLStudent && !user.persona) {
-        if (processingRef.current) return;
-        processingRef.current = true;
-        setStep('processing');
-        
-        (async () => {
-          try {
-            console.log('🎓 [GatorAuth] Auto-assigning gator role for UFL student:', user.email);
-            await base44.auth.updateMe({
-              persona: 'gator',
-              roles: ['gator'],
-              onboarding_completed: false,
-              is_new_signup: true
-            });
-            
-            // Verify update with retry for mobile/slow connections
-            await new Promise(r => setTimeout(r, 400));
-            const updatedUser = await base44.auth.me();
-            
-            if (updatedUser?.persona === 'gator') {
-              console.log('✅ [GatorAuth] Gator role assigned successfully');
-              if (refreshUser) await refreshUser();
-              navigate('GatorWelcome');
-            } else {
-              console.warn('⚠️ [GatorAuth] Role not reflected, retrying...');
-              await base44.auth.updateMe({
-                persona: 'gator',
-                roles: ['gator'],
-                onboarding_completed: false,
-                is_new_signup: true
-              });
-              await new Promise(r => setTimeout(r, 500));
-              if (refreshUser) await refreshUser();
-              navigate('GatorWelcome');
-            }
-          } catch (err) {
-            console.error('Failed to set gator role:', err);
-            setStep('role-select');
-            processingRef.current = false;
-          }
-        })();
+        console.log('🎓 [GatorAuth] UFL student without persona, showing role selection');
+        setStep('role-select');
         return;
       }
 
