@@ -355,16 +355,16 @@ export default function ParentDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Main Headline */}
-        <div ref={headlineRef} className="text-center">
+        {/* Main Headline - Responsive */}
+        <div ref={headlineRef} className="text-center px-2">
           <h2 
-            className="text-3xl md:text-4xl font-black leading-tight mb-3"
+            className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
             style={{ color: '#0021A5' }}
           >
-            Help More Gators, Boost Your Own Higher ⚡
+            Help More Gators, Boost Your Own ⚡
           </h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-            Every action you take unlocks more opportunities for your student — parents & alumni see boosted profiles first.
+          <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
+            Every action unlocks more opportunities for your student
           </p>
         </div>
 
