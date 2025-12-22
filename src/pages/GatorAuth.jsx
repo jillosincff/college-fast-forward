@@ -93,21 +93,7 @@ export default function GatorAuth() {
         return;
       }
 
-      // Has persona → Continue onboarding
-      if (user.persona) {
-        navigate('GatorWelcome');
-        return;
-      }
-
-      // UFL student without persona → Show role selection (don't auto-assign)
-      // This allows UFL students to choose their role, then we auto-approve gator role
-      if (isUFLStudent && !user.persona) {
-        console.log('🎓 [GatorAuth] UFL student without persona, showing role selection');
-        setStep('role-select');
-        return;
-      }
-
-      // Has pending role → Apply it
+      // Has pending role from BEFORE OAuth → Apply it and continue
       if (pendingRole && !user.persona) {
         if (processingRef.current) return;
         processingRef.current = true;
@@ -116,6 +102,31 @@ export default function GatorAuth() {
         (async () => {
           try {
             console.log('🔄 [GatorAuth] Applying pending role:', pendingRole);
+            
+            // For UFL students with gator role, apply directly
+            // For others, they should have gone through invite code first
+            if (pendingRole === 'gator' && isUFLStudent) {
+              await base44.auth.updateMe({
+                persona: 'gator',
+                roles: ['gator'],
+                onboarding_completed: false,
+                is_new_signup: true,
+                invite_code_used: 'ufl_direct'
+              });
+              localStorage.removeItem('pending_invite_role');
+              if (refreshUser) await refreshUser();
+              navigate('StudentOnboarding');
+              return;
+            }
+            
+            // For non-UFL gators or parent/alumni, check for invite code
+            if (!pendingCode && !isUFLStudent) {
+              console.log('🚫 [GatorAuth] No invite code, redirecting to invite code page');
+              navigate('GatorInviteCode');
+              processingRef.current = false;
+              return;
+            }
+            
             await base44.auth.updateMe({
               persona: pendingRole,
               roles: [pendingRole],
@@ -133,10 +144,15 @@ export default function GatorAuth() {
               localStorage.removeItem('pending_invite_role');
               localStorage.removeItem('pending_invite_code');
               if (refreshUser) await refreshUser();
-              navigate('GatorWelcome');
+              
+              // Route to correct onboarding
+              if (pendingRole === 'gator') {
+                navigate('StudentOnboarding');
+              } else {
+                navigate('Onboarding');
+              }
             } else {
               console.warn('⚠️ [GatorAuth] Role update not reflected, retrying...');
-              // One more attempt
               await base44.auth.updateMe({
                 persona: pendingRole,
                 roles: [pendingRole],
@@ -147,7 +163,12 @@ export default function GatorAuth() {
               localStorage.removeItem('pending_invite_role');
               localStorage.removeItem('pending_invite_code');
               if (refreshUser) await refreshUser();
-              navigate('GatorWelcome');
+              
+              if (pendingRole === 'gator') {
+                navigate('StudentOnboarding');
+              } else {
+                navigate('Onboarding');
+              }
             }
           } catch (err) {
             console.error('Failed to apply pending role:', err);
@@ -160,11 +181,24 @@ export default function GatorAuth() {
         return;
       }
 
-      // No persona → Show role selection
+      // Has persona already (returning user mid-onboarding) → Continue onboarding
+      if (user.persona && !user.onboarding_completed) {
+        console.log('🔄 [GatorAuth] Returning user mid-onboarding, continuing...');
+        if (user.persona === 'gator') {
+          navigate('StudentOnboarding');
+        } else {
+          navigate('Onboarding');
+        }
+        return;
+      }
+
+      // No persona AND no pending role → Show role selection
+      console.log('🎯 [GatorAuth] No role found, showing role selection');
       setStep('role-select');
     } else {
-      // Not authenticated → Show welcome
-      setStep('welcome');
+      // Not authenticated → Show role selection FIRST (before OAuth)
+      // This ensures role is set in localStorage BEFORE OAuth redirect
+      setStep('role-select');
     }
   }, [user, isLoading, refreshUser]);
 
