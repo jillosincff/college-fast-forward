@@ -29,7 +29,9 @@ export default function StudentOnboarding() {
   
   // Step 3: Help Needed
   const [helpNeeded, setHelpNeeded] = useState([]);
-  const [question, setQuestion] = useState('');
+  const [helpRequest, setHelpRequest] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeUploading, setResumeUploading] = useState(false);
 
   // Pre-fill from user data if available
   useEffect(() => {
@@ -60,6 +62,20 @@ export default function StudentOnboarding() {
     setLoading(true);
     
     try {
+      // Upload resume if provided
+      let resumeUrl = null;
+      if (resumeFile) {
+        setResumeUploading(true);
+        try {
+          const uploadResult = await base44.integrations.Core.UploadFile({ file: resumeFile });
+          resumeUrl = uploadResult.file_url;
+        } catch (uploadError) {
+          console.error('Resume upload failed:', uploadError);
+          // Continue without resume - don't block onboarding
+        }
+        setResumeUploading(false);
+      }
+
       // Save student profile data
       const updateData = {
         major,
@@ -71,28 +87,25 @@ export default function StudentOnboarding() {
         onboarding_completed_at: new Date().toISOString()
       };
       
-      // Add referral code if provided
-      if (referralCode.trim()) {
-        updateData.referral_code = referralCode.trim();
-      }
+      if (resumeUrl) updateData.resume_url = resumeUrl;
+      if (referralCode.trim()) updateData.referral_code = referralCode.trim();
       
       await base44.auth.updateMe(updateData);
 
-      // If they wrote a question, post it
-      if (question.trim().length > 10) {
-        await JobRequest.create({
-          role: 'Student Question',
-          title: question.trim(),
-          description: question.trim(),
-          target_industry: industries[0] || 'Other',
-          poster_type: 'student',
-          poster_name: user?.full_name || 'Student',
-          poster_first_name: user?.full_name?.split(' ')[0] || 'Student',
-          status: 'active',
-          role_type: 'full_time',
-          target_helpers: ['alumni', 'parents']
-        });
-      }
+      // Post the help request to All Questions (REQUIRED now)
+      await JobRequest.create({
+        role: 'Student Question',
+        title: helpRequest.trim(),
+        description: helpRequest.trim(),
+        target_industry: industries[0] || 'Other',
+        poster_type: 'student',
+        poster_name: user?.full_name || 'Student',
+        poster_first_name: user?.full_name?.split(' ')[0] || 'Student',
+        status: 'active',
+        role_type: 'full_time',
+        target_helpers: ['alumni', 'parents'],
+        resume_url: resumeUrl
+      });
 
       await refreshUser();
 
@@ -115,10 +128,36 @@ export default function StudentOnboarding() {
     }
   };
 
+  // Resume handlers
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) validateAndSetResume(file);
+  };
+
+  const handleResumeDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files[0];
+    if (file) validateAndSetResume(file);
+  };
+
+  const validateAndSetResume = (file) => {
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a PDF, DOC, or DOCX file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File is too large. Maximum size is 5MB.');
+      return;
+    }
+    setResumeFile(file);
+  };
+
   // Validation for each step
   const isStep1Valid = major.trim().length > 0 && gradYear;
   const isStep2Valid = industries.length > 0 && seeking.length > 0;
-  const isStep3Valid = helpNeeded.length > 0;
+  const isStep3Valid = helpNeeded.length > 0 && helpRequest.trim().length >= 20;
 
   // STEP 1: About You
   if (step === 1) {
@@ -274,72 +313,183 @@ export default function StudentOnboarding() {
     );
   }
 
-  // STEP 3: Help Needed
+  // STEP 3: Help Request (REQUIRED) + Resume Upload
   return (
     <OnboardingLayout
       currentStep={3}
       totalSteps={3}
       onNext={handleFinish}
       onBack={handleBack}
-      nextLabel={loading ? 'Finding matches...' : 'Find My Matches →'}
+      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Posting...') : 'Post & Find My Matches →'}
       nextDisabled={!isStep3Valid || loading}
     >
       <div className="max-w-lg mx-auto">
+        
+        {/* Header */}
         <div className="text-center mb-6">
+          <div className="text-4xl mb-3">🎯</div>
           <h1 className="text-xl font-bold text-slate-800 mb-2">
             What do you need help with?
           </h1>
-          <p className="text-slate-500 text-sm">
-            Select all that apply
+          <p className="text-slate-600">
+            This is how parents and alumni find you!
+          </p>
+          <p className="text-slate-500 text-sm mt-1">
+            Your request will appear in the community feed where people can offer advice and connections.
           </p>
         </div>
 
         <div className="space-y-6">
-          {/* Help categories */}
-          <ChipSelector
-            options={STUDENT_HELP_NEEDED}
-            selected={helpNeeded}
-            onChange={setHelpNeeded}
-            multiple={true}
-            columns={1}
-          />
+          
+          {/* Help Categories */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-3">
+              What kind of help do you need? <span className="text-slate-400 font-normal">(select all that apply)</span>
+            </label>
+            <ChipSelector
+              options={STUDENT_HELP_NEEDED}
+              selected={helpNeeded}
+              onChange={setHelpNeeded}
+              multiple={true}
+              columns={1}
+            />
+          </div>
 
-          {/* Optional question */}
+          {/* Help Request - REQUIRED */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Anything specific on your mind? <span className="font-normal text-slate-400">(optional)</span>
+              Tell us what you're looking for: <span className="text-red-500">*</span>
             </label>
             <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="e.g., I have two job offers and can't decide which to take..."
-              className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
-                       resize-none h-24 focus:border-[#0021A5] focus:outline-none"
+              value={helpRequest}
+              onChange={(e) => setHelpRequest(e.target.value)}
+              placeholder={`Be specific! The more detail, the better help you'll get.
+
+e.g., "I'm a junior marketing major looking for summer internships in tech. I'd love advice on breaking into product marketing and help with my resume."`}
+              className={`
+                w-full px-4 py-4 border-2 rounded-xl text-base
+                resize-none h-36 focus:outline-none transition-colors
+                ${helpRequest.trim().length < 20 
+                  ? 'border-slate-200 focus:border-[#0021A5]' 
+                  : 'border-green-300 focus:border-green-500 bg-green-50/50'
+                }
+              `}
               maxLength={500}
             />
-            <p className="text-xs text-slate-400 text-right mt-1">
-              {question.length}/500
+            <div className="flex justify-between items-center mt-1">
+              <p className={`text-xs ${helpRequest.trim().length < 20 ? 'text-amber-600' : 'text-green-600'}`}>
+                {helpRequest.trim().length < 20 
+                  ? `Please write at least 20 characters (${helpRequest.trim().length}/20)` 
+                  : '✓ Looks good!'
+                }
+              </p>
+              <p className="text-xs text-slate-400">{helpRequest.length}/500</p>
+            </div>
+          </div>
+
+          {/* Clickable Examples */}
+          <div>
+            <p className="text-xs text-slate-500 mb-2">💡 Click an example to get started:</p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setHelpRequest("I'm a junior studying " + (major || "[major]") + " and looking for summer internships in " + (industries[0] || "[industry]") + ". I'd love advice on how to stand out and any connections in the field.")}
+                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
+              >
+                → "I'm looking for internships and want advice on how to stand out..."
+              </button>
+              <button
+                type="button"
+                onClick={() => setHelpRequest("I'm graduating in " + (gradYear || "[year]") + " and have two job offers - one pays more but the other has better growth potential. I could really use advice from someone who's been in this situation.")}
+                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
+              >
+                → "I have two job offers and need help deciding..."
+              </button>
+              <button
+                type="button"
+                onClick={() => setHelpRequest("I'm interested in " + (industries[0] || "[industry]") + " but not sure how to break in. I'd love to connect with someone who works in the field and learn about different career paths.")}
+                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
+              >
+                → "I want to break into [industry] and need guidance..."
+              </button>
+            </div>
+          </div>
+
+          {/* Info Box */}
+          <div className="bg-blue-50 rounded-xl p-4 space-y-2">
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">📄</span>
+              <p className="text-sm text-slate-600">
+                <strong className="text-slate-700">This will be posted</strong> to the community feed where parents & alumni can see it and help.
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">✏️</span>
+              <p className="text-sm text-slate-600">
+                <strong className="text-slate-700">You can edit this anytime</strong> from your dashboard.
+              </p>
+            </div>
+          </div>
+
+          {/* Resume Upload - OPTIONAL */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Upload your resume <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            
+            <div 
+              className={`
+                border-2 border-dashed rounded-xl p-6 text-center cursor-pointer
+                transition-colors
+                ${resumeFile 
+                  ? 'border-green-300 bg-green-50' 
+                  : 'border-slate-300 hover:border-[#0021A5] hover:bg-blue-50/50'
+                }
+              `}
+              onClick={() => document.getElementById('resume-upload').click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={handleResumeDrop}
+            >
+              <input
+                id="resume-upload"
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleResumeChange}
+                className="hidden"
+              />
+              
+              {resumeFile ? (
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">📄</span>
+                  <div className="text-left">
+                    <p className="font-medium text-slate-800">{resumeFile.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setResumeFile(null); }}
+                    className="ml-4 p-1 text-slate-400 hover:text-red-500"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="text-3xl mb-2">📄</div>
+                  <p className="font-medium text-slate-700">Drag & drop your resume here</p>
+                  <p className="text-sm text-slate-500">or click to browse</p>
+                  <p className="text-xs text-slate-400 mt-2">PDF, DOC, DOCX (max 5MB)</p>
+                </>
+              )}
+            </div>
+            
+            <p className="text-xs text-slate-500 mt-2">
+              💡 Adding your resume helps parents give you specific feedback on your experience.
             </p>
           </div>
 
-          {/* Example questions */}
-          <div className="bg-blue-50 rounded-xl p-4">
-            <p className="text-sm text-slate-500 mb-2">💭 Other Gators are asking:</p>
-            <ul className="text-sm text-slate-600 space-y-2">
-              <li 
-                className="italic cursor-pointer hover:text-[#0021A5]"
-                onClick={() => setQuestion("How do I choose between two job offers?")}
-              >
-                "How do I choose between two job offers?"
-              </li>
-              <li 
-                className="italic cursor-pointer hover:text-[#0021A5]"
-                onClick={() => setQuestion("Is it okay to not have it all figured out yet?")}
-              >
-                "Is it okay to not have it all figured out yet?"
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </OnboardingLayout>
