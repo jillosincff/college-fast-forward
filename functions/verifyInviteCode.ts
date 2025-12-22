@@ -3,15 +3,23 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { code } = await req.json();
+    const { code, skipUsageIncrement } = await req.json();
 
-    console.log('🔑 Verifying invite code:', code);
+    console.log('🔑 Verifying invite code:', code, skipUsageIncrement ? '(re-verify, skip increment)' : '');
 
     if (!code) {
       console.error('❌ No code provided');
       return Response.json({ 
         success: false, 
         error: 'Invite code is required' 
+      }, { status: 400 });
+    }
+
+    if (code.length < 4) {
+      console.error('❌ Code too short');
+      return Response.json({ 
+        success: false, 
+        error: 'Invalid invite code format' 
       }, { status: 400 });
     }
 
@@ -63,12 +71,16 @@ Deno.serve(async (req) => {
       
       console.log('✅ Usage limit OK:', invite.current_uses, '<', invite.max_uses);
 
-      // Increment usage count
-      console.log('📈 Incrementing usage count from', invite.current_uses, 'to', invite.current_uses + 1);
-      await base44.asServiceRole.entities.InviteCode.update(invite.id, {
-        current_uses: invite.current_uses + 1
-      });
-      console.log('✅ Usage count updated');
+      // Only increment usage count on first verification, not re-verification
+      if (!skipUsageIncrement) {
+        console.log('📈 Incrementing usage count from', invite.current_uses, 'to', invite.current_uses + 1);
+        await base44.asServiceRole.entities.InviteCode.update(invite.id, {
+          current_uses: invite.current_uses + 1
+        });
+        console.log('✅ Usage count updated');
+      } else {
+        console.log('⏭️ Skipping usage increment (re-verification)');
+      }
 
       // Get current user for notification (if authenticated)
       let currentUser = null;
@@ -143,19 +155,23 @@ College Fast Forward Team`;
         });
       }
 
-      // Mark as used
-      let currentUser = null;
-      try {
-        currentUser = await base44.auth.me();
-      } catch (e) {
-        console.log('User not authenticated during individual invite');
-      }
+      // Only mark as used on first verification, not re-verification
+      if (!skipUsageIncrement) {
+        let currentUser = null;
+        try {
+          currentUser = await base44.auth.me();
+        } catch (e) {
+          console.log('User not authenticated during individual invite');
+        }
 
-      await base44.asServiceRole.entities.InviteCode.update(invite.id, {
-        status: 'used',
-        used_by_email: currentUser?.email,
-        used_at: new Date().toISOString()
-      });
+        await base44.asServiceRole.entities.InviteCode.update(invite.id, {
+          status: 'used',
+          used_by_email: currentUser?.email,
+          used_at: new Date().toISOString()
+        });
+      } else {
+        console.log('⏭️ Skipping status update (re-verification)');
+      }
 
       // Award +100 points to inviter for individual invites
       if (currentUser) {
