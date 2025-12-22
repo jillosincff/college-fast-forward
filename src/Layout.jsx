@@ -1087,7 +1087,7 @@ function AppContent() {
     if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard')) {
       let destination = currentPage;
 
-      console.log('🔄 [Routing Check] User on:', currentPage, '| hasNoRole:', hasNoRole, '| needsOnboarding:', needsOnboarding, '| persona:', user.persona);
+      console.log('🔄 [Routing Check] User on:', currentPage, '| hasNoRole:', hasNoRole, '| needsOnboarding:', needsOnboarding, '| effectiveRole:', effectiveRole);
 
       // CRITICAL: If user is in new user flow (just came back from OAuth), send to GatorWelcome
       if (inNewUserFlow) {
@@ -1108,26 +1108,29 @@ function AppContent() {
         destination = 'GatorInviteCode';
         console.log('➡️ [NotVerified] → GatorInviteCode');
       } else if (needsOnboarding) {
-        // CRITICAL: Route based on ACTUAL persona, not assumptions
-        // This ensures students aren't sent to parent onboarding
-        if (user.persona === 'gator') {
+        // CRITICAL: Route based on effectiveRole (persona OR roles[0]), not just persona
+        // This ensures parents with only roles array set still go to parent onboarding
+        const isParentRole = effectiveRole === 'parent' || effectiveRole === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni');
+        const isGatorRole = effectiveRole === 'gator' || user.roles?.includes('gator');
+
+        if (isGatorRole && !isParentRole) {
           destination = 'StudentOnboarding';
           console.log('➡️ [NeedsOnboarding] Gator → StudentOnboarding');
-        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        } else if (isParentRole) {
           destination = 'Onboarding';
-          console.log('➡️ [NeedsOnboarding] Parent → Onboarding');
+          console.log('➡️ [NeedsOnboarding] Parent/Alumni → Onboarding');
         } else {
           // Fallback for unknown persona - go to GatorAuth
           destination = 'GatorAuth';
-          console.log('➡️ [NeedsOnboarding] Unknown persona → GatorAuth');
+          console.log('➡️ [NeedsOnboarding] Unknown role → GatorAuth');
         }
       } else {
-        // Fully onboarded - go to correct dashboard based on ACTUAL persona
+        // Fully onboarded - go to correct dashboard based on effectiveRole
         if (user.roles?.includes('admin')) {
           destination = 'AdminDashboard';
-        } else if (user.persona === 'gator') {
+        } else if (effectiveRole === 'gator') {
           destination = 'Dashboard';
-        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        } else if (effectiveRole === 'parent' || effectiveRole === 'alumni' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else {
           destination = 'Dashboard';
