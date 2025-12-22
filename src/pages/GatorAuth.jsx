@@ -237,13 +237,26 @@ export default function GatorAuth() {
   };
 
   const handleRoleSelect = async () => {
-    if (!selectedRole || !user) return;
+    if (!selectedRole) return;
     
+    // Save role FIRST (before anything else)
+    localStorage.setItem('pending_invite_role', selectedRole);
+    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+    console.log('💾 [GatorAuth] Role selected and saved:', selectedRole);
+    
+    // If user is NOT authenticated yet, show OAuth button
+    if (!user) {
+      console.log('🔐 [GatorAuth] User not authenticated, showing OAuth');
+      setStep('oauth');
+      return;
+    }
+    
+    // User IS authenticated - check if they need invite code
     setLoading(true);
-    
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+    const hasInviteCode = localStorage.getItem('pending_invite_code');
     
-    // UFL Students can proceed directly (no invite code needed)
+    // UFL Students selecting gator can proceed directly (no invite code needed)
     if (selectedRole === 'gator' && isUFLStudent) {
       try {
         console.log('🎓 [GatorAuth] UFL student selecting gator role, proceeding directly');
@@ -251,24 +264,54 @@ export default function GatorAuth() {
           persona: 'gator',
           roles: ['gator'],
           onboarding_completed: false,
-          is_new_signup: true
+          is_new_signup: true,
+          invite_code_used: 'ufl_direct'
         });
+        localStorage.removeItem('pending_invite_role');
         if (refreshUser) await refreshUser();
-        navigate('GatorWelcome');
+        navigate('StudentOnboarding');
       } catch (err) {
         console.error('Failed to set role:', err);
         setLoading(false);
       }
-    } else if (selectedRole === 'gator' && !isUFLStudent) {
-      // Non-UFL students also need invite code
+      return;
+    }
+    
+    // Non-UFL students need invite code
+    if (selectedRole === 'gator' && !isUFLStudent && !hasInviteCode) {
       console.log('📝 [GatorAuth] Non-UFL student needs invite code');
-      localStorage.setItem('pending_invite_role', 'gator');
       navigate('GatorInviteCode');
-    } else {
-      // Parents and Alumni need an invite code - redirect to invite code page
+      return;
+    }
+    
+    // Parents and Alumni need invite code
+    if ((selectedRole === 'parent' || selectedRole === 'alumni') && !hasInviteCode) {
       console.log('📝 [GatorAuth] Parent/Alumni needs invite code');
-      localStorage.setItem('pending_invite_role', selectedRole);
       navigate('GatorInviteCode');
+      return;
+    }
+    
+    // Has invite code - apply role and continue
+    try {
+      await base44.auth.updateMe({
+        persona: selectedRole,
+        roles: [selectedRole],
+        onboarding_completed: false,
+        is_new_signup: true,
+        invite_code_used: hasInviteCode || 'direct'
+      });
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      if (refreshUser) await refreshUser();
+      
+      if (selectedRole === 'gator') {
+        navigate('StudentOnboarding');
+      } else {
+        navigate('Onboarding');
+      }
+    } catch (err) {
+      console.error('Failed to set role:', err);
+      setLoading(false);
     }
   };
 
