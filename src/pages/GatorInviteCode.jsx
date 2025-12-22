@@ -55,13 +55,18 @@ export default function GatorInviteCode() {
     
     try {
       // Verify the invite code first
+      console.log('📞 Calling verifyInviteCode function...');
       const response = await base44.functions.invoke('verifyInviteCode', {
         code: trimmedCode
       });
       
+      console.log('📬 verifyInviteCode response:', response);
+      
       if (response.data?.success) {
         // Store verified invite code with timestamp
         const role = response.data.role || pendingRole || 'parent';
+        console.log('✅ Code verified, role:', role);
+        
         localStorage.setItem('pending_invite_code', trimmedCode);
         localStorage.setItem('pending_invite_role', role);
         localStorage.setItem('pending_invite_timestamp', Date.now().toString());
@@ -74,12 +79,24 @@ export default function GatorInviteCode() {
         // Navigate to GatorWelcome to complete setup
         navigate('GatorWelcome');
       } else {
-        setError(response.data?.error || 'Invalid invite code. Please check and try again.');
+        const errorMsg = response.data?.error || 'Invalid invite code. Please check and try again.';
+        console.error('❌ Code verification failed:', errorMsg);
+        setError(errorMsg);
         setIsVerifying(false);
       }
     } catch (err) {
       console.error('Failed to verify invite code:', err);
-      setError('Unable to verify code. Please check your connection and try again.');
+      console.error('Error details:', err.message, err.response?.data);
+      
+      // More specific error message based on error type
+      let errorMsg = 'Unable to verify code. Please check your connection and try again.';
+      if (err.message?.includes('500') || err.message?.includes('Internal')) {
+        errorMsg = 'Server error verifying code. Please try again in a moment.';
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMsg = 'Network error. Please check your connection and try again.';
+      }
+      
+      setError(errorMsg);
       setIsVerifying(false);
     }
   };
