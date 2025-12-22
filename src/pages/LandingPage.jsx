@@ -87,12 +87,12 @@ export default function LandingPage() {
 
   const handleStudentAlumniClick = () => {
     trackEvent('cta_student_alumni_clicked');
-    setShowJoinModal(true);
+    navigate('GatorAuth');
   };
 
   const handleParentClick = () => {
     trackEvent('cta_parent_clicked');
-    setShowJoinModal(true);
+    navigate('GatorAuth');
   };
 
   const spotsRemaining = foundingStats.spots_left;
@@ -126,7 +126,7 @@ export default function LandingPage() {
 
   const handleMainCTA = () => {
     trackEvent('cta_main_clicked');
-    setShowJoinModal(true);
+    navigate('GatorAuth');
   };
 
   // Animated stats card component
@@ -179,20 +179,12 @@ export default function LandingPage() {
             <a href="#" className="flex items-center gap-2">
               <span className="text-white font-bold text-lg md:text-xl tracking-tight">College Fast Forward</span>
             </a>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('GatorAuth')}
-                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
-              >
-                Sign In
-              </button>
-              <Button
-                onClick={() => navigate('GatorAuth')}
-                className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2"
-              >
-                Get Started
-              </Button>
-            </div>
+            <Button
+              onClick={() => navigate('GatorAuth')}
+              className="bg-[#FA4616] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2"
+            >
+              Get Started
+            </Button>
           </div>
         </nav>
 
