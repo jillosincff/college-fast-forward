@@ -1,378 +1,268 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
-import ChipSelector from '@/components/onboarding/ChipSelector';
-import { INDUSTRIES, EXPERTISE_AREAS } from '@/components/onboarding/onboardingOptions';
-import { ParentExpertise } from '@/entities/ParentExpertise';
-import { JobRequest } from '@/entities/JobRequest';
-import confetti from 'canvas-confetti';
+import { Loader2 } from 'lucide-react';
+
+// Industry options
+const INDUSTRIES = [
+  { id: 'tech', label: 'Tech', emoji: '💻' },
+  { id: 'finance', label: 'Finance', emoji: '💰' },
+  { id: 'consulting', label: 'Consulting', emoji: '📊' },
+  { id: 'healthcare', label: 'Healthcare', emoji: '🏥' },
+  { id: 'marketing', label: 'Marketing', emoji: '📱' },
+  { id: 'engineering', label: 'Engineering', emoji: '⚙️' },
+  { id: 'law', label: 'Law', emoji: '⚖️' },
+  { id: 'education', label: 'Education', emoji: '📚' },
+  { id: 'real_estate', label: 'Real Estate', emoji: '🏠' },
+  { id: 'nonprofit', label: 'Nonprofit', emoji: '❤️' },
+  { id: 'government', label: 'Government', emoji: '🏛️' },
+  { id: 'media', label: 'Media/Entertainment', emoji: '🎬' },
+  { id: 'startups', label: 'Startups', emoji: '🚀' },
+  { id: 'other', label: 'Other', emoji: '✨' },
+];
+
+// How they can help
+const EXPERTISE_AREAS = [
+  { id: 'career_advice', label: 'Career advice & guidance', emoji: '💼' },
+  { id: 'resume_review', label: 'Resume & LinkedIn review', emoji: '📝' },
+  { id: 'mock_interviews', label: 'Mock interviews', emoji: '🎤' },
+  { id: 'networking', label: 'Networking & introductions', emoji: '🤝' },
+  { id: 'salary_tips', label: 'Salary & negotiation tips', emoji: '💰' },
+  { id: 'job_referrals', label: 'Job/internship referrals', emoji: '🔍' },
+  { id: 'industry_insights', label: 'Industry insights', emoji: '🏢' },
+  { id: 'grad_school', label: 'Grad school advice', emoji: '🎓' },
+  { id: 'mentorship', label: 'General mentorship', emoji: '💡' },
+];
 
 export default function Onboarding() {
   const { user, refreshUser } = useAuth();
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
-  // Determine if user is alumni (they need invite code)
-  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
-  const totalSteps = isAlumni ? 4 : 3;
-  
-  // Step 1: About You
+  // Form fields (all optional except expertise)
   const [company, setCompany] = useState('');
-  const [industry, setIndustry] = useState([]);
-  const [title, setTitle] = useState('');
-  const [referralCode, setReferralCode] = useState('');
-  
-  // Step 2: How Can You Help
+  const [jobTitle, setJobTitle] = useState('');
+  const [industries, setIndustries] = useState([]);
+  const [bio, setBio] = useState('');
   const [expertise, setExpertise] = useState([]);
-  
-  // Step 3: Question
-  const [question, setQuestion] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
 
-  // Pre-fill from user data if available
-  useEffect(() => {
-    if (user) {
-      if (user.current_company) setCompany(user.current_company);
-      if (user.industry) setIndustry([user.industry]);
-      if (user.current_position) setTitle(user.current_position);
-      if (user.help_types) setExpertise(user.help_types);
-    }
-  }, [user]);
-
-  const handleNext = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
+  const toggleIndustry = (id) => {
+    if (industries.includes(id)) {
+      setIndustries(industries.filter(i => i !== id));
     } else {
-      handleFinish();
+      setIndustries([...industries, id]);
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
+  const toggleExpertise = (id) => {
+    if (expertise.includes(id)) {
+      setExpertise(expertise.filter(e => e !== id));
+    } else {
+      setExpertise([...expertise, id]);
     }
-  };
-
-  const handleSkip = () => {
-    handleFinish();
   };
 
   const handleFinish = async () => {
     setLoading(true);
     
     try {
-      // Save parent/alumni profile data
-      const updateData = {
-        current_company: company,
-        industry: industry[0] || '',
-        industries: industry,
-        current_position: title,
-        help_types: expertise,
+      // Save profile data
+      await base44.auth.updateMe({
+        current_company: company.trim() || null,
+        current_position: jobTitle.trim() || null,
+        industry: industries[0] || null,
+        industries: industries,
+        bio: bio.trim() || null,
         expertise_areas: expertise,
+        help_types: expertise,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         visible_in_directory: true
-      };
-      
-      // Add referral code if provided (alumni)
-      if (referralCode.trim()) {
-        updateData.referral_code = referralCode.trim();
-      }
-      
-      await base44.auth.updateMe(updateData);
-
-      // Create ParentExpertise for matching
-      try {
-        await ParentExpertise.create({
-          parent_id: user.id,
-          parent_email: user.email,
-          parent_name: user.full_name,
-          industry: industry[0] || '',
-          current_role: title,
-          current_company: company,
-          help_types: expertise,
-          available: true
-        });
-      } catch (expertiseError) {
-        console.log('ParentExpertise creation skipped:', expertiseError);
-      }
-
-      // If they wrote a question, post it
-      if (question.trim().length > 10) {
-        await JobRequest.create({
-          role: 'Parent Question',
-          title: 'Parent Question',
-          description: question.trim(),
-          target_industry: industry[0] || 'Other',
-          poster_type: 'parent',
-          is_anonymous: isAnonymous,
-          poster_name: isAnonymous ? 'Anonymous Parent' : (user?.full_name || 'Parent'),
-          poster_first_name: isAnonymous ? 'Anonymous' : (user?.full_name?.split(' ')[0] || 'Parent'),
-          status: 'active',
-          role_type: 'full_time',
-          target_helpers: ['alumni', 'parents']
-        });
-      }
-
-      await refreshUser();
-
-      // Celebration
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#0021A5', '#FA4616', '#FF6B35']
       });
 
-      // Navigate to dashboard
-      setTimeout(() => {
-        navigate('ParentDashboard');
-      }, 1500);
+      // Clear pending invite data
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_invite_timestamp');
+
+      // Refresh user and go to dashboard
+      if (refreshUser) await refreshUser();
+      
+      navigate('ParentDashboard');
       
     } catch (error) {
       console.error('Failed to save onboarding:', error);
+      alert('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
 
-  // Validation
-  const isStep1Valid = company.trim().length > 0 && industry.length > 0 && title.trim().length > 0;
-  const isStep2Valid = expertise.length > 0;
+  // Can finish if they selected at least one way to help
+  const canFinish = expertise.length > 0;
 
-  // STEP 0 (Alumni only): Invite Code
-  if (isAlumni && step === 1) {
-    return (
-      <OnboardingLayout
-        currentStep={1}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        nextDisabled={!referralCode.trim()}
-        showBack={false}
-      >
-        <div className="max-w-lg mx-auto">
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🐊</div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              Welcome back, Gator!
-            </h1>
-            <p className="text-slate-600">
-              Enter your invite code to join the network.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Invite Code
-              </label>
-              <input
-                type="text"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                placeholder="e.g., GATOR-JOHN"
-                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base text-center
-                         focus:border-[#0021A5] focus:outline-none uppercase tracking-widest"
-                maxLength={20}
-              />
-              <p className="text-xs text-slate-400 mt-2 text-center">
-                Don't have a code? Ask a current member or <a href="#RequestInvite" className="text-[#0021A5] underline">request access</a>.
-              </p>
-            </div>
-          </div>
-        </div>
-      </OnboardingLayout>
-    );
-  }
-
-  // Adjust step number for alumni (they have an extra step at the beginning)
-  const displayStep = isAlumni ? step : step;
-  const actualStep = isAlumni ? step - 1 : step;
-
-  // STEP 1: About You (Step 2 for alumni)
-  if ((isAlumni && step === 2) || (!isAlumni && step === 1)) {
-    return (
-      <OnboardingLayout
-        currentStep={displayStep}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        nextDisabled={!isStep1Valid}
-        showBack={isAlumni}
-        onBack={isAlumni ? handleBack : undefined}
-      >
-        <div className="max-w-lg mx-auto">
-          {/* Empathy Header */}
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-4">💙</div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              We know this time isn't easy.
-            </h1>
-            <p className="text-slate-600">
-              For them AND for you.<br />
-              <strong className="text-slate-800">You're not alone.</strong>
-            </p>
-          </div>
-
-          {/* Form */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Where do you work?
-              </label>
-              <input
-                type="text"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="Company name"
-                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                What industry?
-              </label>
-              <ChipSelector
-                options={INDUSTRIES}
-                selected={industry}
-                onChange={setIndustry}
-                multiple={true}
-                columns={2}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Your role/title?
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
-                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none"
-              />
-            </div>
-          </div>
-        </div>
-      </OnboardingLayout>
-    );
-  }
-
-  // STEP 2: How Can You Help (Step 3 for alumni)
-  if ((isAlumni && step === 3) || (!isAlumni && step === 2)) {
-    return (
-      <OnboardingLayout
-        currentStep={isAlumni ? 3 : 2}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onBack={handleBack}
-        nextDisabled={expertise.length === 0}
-      >
-        <div className="max-w-lg mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-slate-800 mb-2">
-              How would you like to help students?
-            </h1>
-            <p className="text-slate-500 text-sm">
-              Select all that apply
-            </p>
-          </div>
-
-          <ChipSelector
-            options={EXPERTISE_AREAS}
-            selected={expertise}
-            onChange={setExpertise}
-            multiple={true}
-            columns={1}
-          />
-        </div>
-      </OnboardingLayout>
-    );
-  }
-
-  // STEP 3: Optional Question (Step 4 for alumni)
   return (
-    <OnboardingLayout
-      currentStep={totalSteps}
-      totalSteps={totalSteps}
-      onNext={handleFinish}
-      onBack={handleBack}
-      nextLabel={loading ? 'Setting up...' : (question.trim().length > 10 ? 'Post & Finish →' : 'Finish →')}
-      nextDisabled={loading}
-      showSkip={true}
-      onSkip={handleSkip}
-    >
-      <div className="max-w-lg mx-auto">
-        <div className="text-center mb-6">
-          <div className="text-4xl mb-4">🎉</div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">
-            Almost done!
+    <div className="min-h-screen bg-slate-50">
+      {/* Progress Bar */}
+      <div className="h-1 bg-slate-200">
+        <div className="h-full bg-[#0021A5] w-full" />
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        
+        {/* Header - Warm Intro */}
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-4">💙</div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-3">
+            Thanks for stepping up to help UF students.
           </h1>
-          <p className="text-slate-600">
-            Thousands of Gator parents are going through this too.
+          <p className="text-slate-600 leading-relaxed">
+            It takes a village, and you're an important part of it.
+          </p>
+          <p className="text-slate-500 text-sm mt-2">
+            Share your background so we can match you with students who could use your expertise and wisdom.
           </p>
         </div>
 
-        <div className="space-y-6">
+        {/* Form */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+          
+          {/* Company */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              What's on your mind lately?
+              Where do you work? <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="Company name"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                       focus:border-[#0021A5] focus:outline-none transition-colors"
+            />
+          </div>
+
+          {/* Job Title */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              What's your job title? <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                       focus:border-[#0021A5] focus:outline-none transition-colors"
+            />
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-3">
+              What industry? <span className="font-normal text-slate-400">(optional - select all that apply)</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {INDUSTRIES.map(ind => (
+                <button
+                  key={ind.id}
+                  type="button"
+                  onClick={() => toggleIndustry(ind.id)}
+                  className={`
+                    flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
+                    transition-all duration-200 border-2
+                    ${industries.includes(ind.id)
+                      ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }
+                  `}
+                >
+                  <span>{ind.emoji}</span>
+                  <span className="font-medium">{ind.label}</span>
+                  {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bio / Expertise Description */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              In a few words, tell us about your expertise: <span className="font-normal text-slate-400">(optional)</span>
             </label>
             <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Share a concern, ask a question, or just vent. This community gets it."
-              className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
-                       resize-none h-32 focus:border-[#0021A5] focus:outline-none"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="e.g., I'm a CTO for an e-commerce company that sells luxury clothing. 20 years in tech, happy to help with career advice and mock interviews."
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                       resize-none h-24 focus:border-[#0021A5] focus:outline-none transition-colors"
               maxLength={500}
             />
-            <p className="text-xs text-slate-400 text-right mt-1">
-              {question.length}/500
-            </p>
+            <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
           </div>
 
-          {/* Anonymous option */}
-          {question.trim().length > 10 && (
-            <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isAnonymous}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-                className="w-5 h-5 text-[#0021A5] rounded mt-0.5"
-              />
-              <div>
-                <p className="font-medium text-slate-900 text-sm">Post anonymously</p>
-                <p className="text-xs text-slate-600">
-                  Your question will show as "Anonymous Parent"
-                </p>
-              </div>
+          {/* How they want to help - REQUIRED */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              How would you like to help students?
             </label>
-          )}
-
-          {/* Example questions */}
-          <div className="bg-blue-50 rounded-xl p-4">
-            <p className="text-sm text-slate-500 mb-2">💭 Other parents are asking:</p>
-            <ul className="text-sm text-slate-600 space-y-2">
-              <li 
-                className="italic cursor-pointer hover:text-[#0021A5]"
-                onClick={() => setQuestion("My daughter got rejected from her dream job. How do I support her without making it worse?")}
-              >
-                "My daughter got rejected from her dream job. How do I support her?"
-              </li>
-              <li 
-                className="italic cursor-pointer hover:text-[#0021A5]"
-                onClick={() => setQuestion("How do I help without being a helicopter parent?")}
-              >
-                "How do I help without being a helicopter parent?"
-              </li>
-            </ul>
+            <p className="text-xs text-slate-500 mb-3">Select all that apply — this helps us match you with the right students</p>
+            <div className="grid grid-cols-1 gap-2">
+              {EXPERTISE_AREAS.map(area => (
+                <button
+                  key={area.id}
+                  type="button"
+                  onClick={() => toggleExpertise(area.id)}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                    transition-all duration-200 border-2
+                    ${expertise.includes(area.id)
+                      ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }
+                  `}
+                >
+                  <span className="text-lg">{area.emoji}</span>
+                  <span className="font-medium">{area.label}</span>
+                  {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
+                </button>
+              ))}
+            </div>
+            {expertise.length === 0 && (
+              <p className="text-xs text-amber-600 mt-2">Please select at least one way you'd like to help</p>
+            )}
           </div>
+
         </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={handleFinish}
+            disabled={!canFinish || loading}
+            className={`
+              w-full max-w-md py-4 rounded-xl font-semibold text-lg transition-all
+              ${canFinish && !loading
+                ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }
+            `}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Setting up your account...
+              </span>
+            ) : (
+              'Go to Dashboard →'
+            )}
+          </button>
+          
+          <p className="mt-4 text-slate-500">
+            🙏 <strong className="text-slate-700">Thank you!</strong> We appreciate you!
+          </p>
+        </div>
+
       </div>
-    </OnboardingLayout>
+    </div>
   );
 }
