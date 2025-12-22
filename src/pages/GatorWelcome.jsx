@@ -262,13 +262,15 @@ export default function GatorWelcome() {
             refreshUser();
             updateInProgressRef.current = false;
             
-            // Skip welcome screen for gators - go directly to onboarding
+            // Skip welcome screen - go directly to role-specific onboarding
             if (intendedRole === 'gator') {
               navigate('StudentOnboarding');
-              return;
+            } else if (intendedRole === 'parent' || intendedRole === 'alumni') {
+              navigate('Onboarding');
+            } else {
+              navigate('StudentOnboarding'); // Fallback
             }
-            // Parents/alumni see welcome screen
-            setStatus('ready');
+            return;
             
             // Non-blocking notifications - fire and forget
             base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(e => {
@@ -313,13 +315,13 @@ export default function GatorWelcome() {
       clearPendingInviteData();
       
       if (user.onboarding_completed !== true) {
-        // New signup - skip welcome screen for gators, go directly to onboarding
+        // New signup - skip welcome screen, go directly to onboarding
         // Each onboarding page has its own empathy section
         console.log('📝 [GatorWelcome] New signup - routing to onboarding');
         if (intendedRole === 'gator') {
           navigate('StudentOnboarding');
         } else if (intendedRole === 'parent' || intendedRole === 'alumni') {
-          setStatus('ready'); // Parents/alumni see welcome screen
+          navigate('Onboarding'); // Go directly to parent onboarding (has empathy built in)
         } else {
           navigate('StudentOnboarding'); // Fallback
         }
