@@ -31,8 +31,8 @@ function GoogleIcon() {
 export default function GatorAuth() {
   const { user, isLoading, refreshUser } = useAuth();
   
-  // Step state: 'role-select' | 'student-auth' | 'invite-code' | 'request-access' | 'google-auth' | 'sign-in' | 'request-submitted' | 'processing'
-  const [step, setStep] = useState('role-select');
+  // Step state: 'welcome' | 'request-access' | 'request-submitted' | 'processing'
+  const [step, setStep] = useState('welcome');
   const [selectedRole, setSelectedRole] = useState(null);
   const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
