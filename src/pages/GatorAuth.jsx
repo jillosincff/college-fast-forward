@@ -50,9 +50,22 @@ export default function GatorAuth() {
 
   const processingRef = useRef(false);
   const isMountedRef = useRef(true);
+  const [isOAuthCallback, setIsOAuthCallback] = useState(false);
 
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // Check if this is an OAuth callback - show loading immediately
+    const hashFragment = window.location.hash.substring(1);
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAccessToken = hashFragment.includes('access_token=') || urlParams.has('access_token');
+    const isNewUser = urlParams.has('is_new_user');
+    const oauthDetected = sessionStorage.getItem('oauth_callback_detected');
+    
+    if (hasAccessToken || isNewUser || oauthDetected) {
+      setIsOAuthCallback(true);
+    }
+    
     return () => {
       isMountedRef.current = false;
     };
