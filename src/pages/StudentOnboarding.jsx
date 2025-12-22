@@ -258,7 +258,7 @@ export default function StudentOnboarding() {
         is_new_signup: false,
         major: formData.major.trim(),
         year: formData.year,
-        currently_seeking: formData.description?.trim() || null
+        currently_seeking: formData.question?.trim() || null
       };
       
       // Add referral code if provided
