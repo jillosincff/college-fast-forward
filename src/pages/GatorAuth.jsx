@@ -409,7 +409,7 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // ROLE SELECTION (authenticated but no persona)
+  // ROLE SELECTION (FIRST STEP - before OAuth)
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'role-select') {
@@ -420,12 +420,23 @@ export default function GatorAuth() {
         <div className="w-full max-w-lg">
           <div className="bg-white rounded-2xl shadow-2xl p-8">
             
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-lg flex items-center justify-center">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                  alt="Gator Network"
+                  className="w-16 h-16 object-contain rounded-full"
+                />
+              </div>
+            </div>
+            
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                One more step! 🎉
+                Welcome to Gator Network 🐊
               </h1>
               <p className="text-slate-600">
-                Tell us who you are so we can personalize your experience
+                Tell us who you are to get started
               </p>
             </div>
 
