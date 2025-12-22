@@ -333,10 +333,10 @@ export default function GatorAuth() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // WELCOME SCREEN (not authenticated)
+  // OAUTH SCREEN (role selected, need to sign in)
   // ═══════════════════════════════════════════════════════════
   
-  if (step === 'welcome') {
+  if (step === 'oauth') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
@@ -354,10 +354,10 @@ export default function GatorAuth() {
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-3">
-            Welcome to Gator Network 🐊
+            Almost there! 🐊
           </h1>
           <p className="text-white/85 text-lg mb-8">
-            Connect with UF students, parents, and alumni
+            Sign in to continue as {selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alumni'}
           </p>
 
           <Button
@@ -378,15 +378,24 @@ export default function GatorAuth() {
             )}
           </Button>
 
-          <p className="text-white/70 text-sm mb-8">
+          <p className="text-white/70 text-sm mb-6">
             Works with any email — Gmail, UFL, Outlook, etc.
           </p>
 
-          <div className="bg-white/10 rounded-xl p-4 max-w-sm mx-auto">
-            <p className="text-amber-300 text-sm font-medium">
-              🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
-            </p>
-          </div>
+          {selectedRole === 'gator' && (
+            <div className="bg-white/10 rounded-xl p-4 max-w-sm mx-auto mb-6">
+              <p className="text-amber-300 text-sm font-medium">
+                🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={() => setStep('role-select')}
+            className="text-white/60 text-sm hover:text-white/80 underline"
+          >
+            ← Back to role selection
+          </button>
 
           <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
             By continuing, you agree to our{' '}
