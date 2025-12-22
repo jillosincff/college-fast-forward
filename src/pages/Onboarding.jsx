@@ -63,8 +63,8 @@ export default function Onboarding() {
     setLoading(true);
     
     try {
-      // Save parent profile data
-      await base44.auth.updateMe({
+      // Save parent/alumni profile data
+      const updateData = {
         current_company: company,
         industry: industry[0] || '',
         industries: industry,
@@ -74,7 +74,14 @@ export default function Onboarding() {
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         visible_in_directory: true
-      });
+      };
+      
+      // Add referral code if provided (alumni)
+      if (referralCode.trim()) {
+        updateData.referral_code = referralCode.trim();
+      }
+      
+      await base44.auth.updateMe(updateData);
 
       // Create ParentExpertise for matching
       try {
