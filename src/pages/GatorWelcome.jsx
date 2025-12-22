@@ -336,21 +336,8 @@ export default function GatorWelcome() {
     loadPricing();
   }, []);
 
-  // CRITICAL: Auto-proceed to onboarding when ready
-  // This hook MUST be called unconditionally (before any returns) per React Rules of Hooks
-  useEffect(() => {
-    if (status === 'ready' && role) {
-      console.log('🚀 [GatorWelcome] Auto-proceeding to onboarding for role:', role);
-      if (role === 'gator') {
-        navigate('StudentOnboarding');
-      } else if (role === 'parent' || role === 'alumni') {
-        navigate('Onboarding');
-      } else {
-        console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
-        navigate('Dashboard');
-      }
-    }
-  }, [status, role]);
+  // NOTE: Auto-redirect removed - users now see the welcome screen and click "Let's Get Started"
+  // The proceedToOnboarding function handles navigation when user clicks the button
 
   const handleGetStarted = async () => {
     console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
