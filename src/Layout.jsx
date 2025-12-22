@@ -1069,7 +1069,11 @@ function AppContent() {
     }
 
     // STEP 6: User is authenticated - determine correct destination
+    // Check if user has ANY role indicator - persona OR roles array
     const hasNoRole = !user.persona && (!user.roles || user.roles.length === 0);
+
+    // CRITICAL: Determine effective role for routing - check roles array if persona is missing
+    const effectiveRole = user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
     const needsOnboarding = user.onboarding_completed !== true;
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
