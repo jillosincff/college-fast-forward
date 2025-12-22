@@ -66,19 +66,28 @@ export default function Onboarding() {
     setLoading(true);
     
     try {
-      // Save profile data
-      await base44.auth.updateMe({
-        current_company: company.trim() || null,
-        current_position: jobTitle.trim() || null,
-        industry: industries[0] || null,
-        industries: industries,
-        bio: bio.trim() || null,
+      // Build update data - only include non-null values
+      const updateData = {
         expertise_areas: expertise,
         help_types: expertise,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         visible_in_directory: true
-      });
+      };
+      
+      // Add optional fields only if they have values
+      if (company.trim()) updateData.current_company = company.trim();
+      if (jobTitle.trim()) updateData.current_position = jobTitle.trim();
+      if (industries.length > 0) {
+        updateData.industry = industries[0];
+        updateData.industries = industries;
+      }
+      if (bio.trim()) updateData.bio = bio.trim();
+
+      console.log('Saving onboarding data:', updateData);
+      
+      // Save profile data
+      await base44.auth.updateMe(updateData);
 
       // Clear pending invite data
       localStorage.removeItem('pending_invite_role');
@@ -92,6 +101,7 @@ export default function Onboarding() {
       
     } catch (error) {
       console.error('Failed to save onboarding:', error);
+      console.error('Error details:', error.message, error.status);
       alert('Something went wrong. Please try again.');
       setLoading(false);
     }
