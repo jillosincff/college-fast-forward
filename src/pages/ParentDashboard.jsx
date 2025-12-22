@@ -32,6 +32,7 @@ import FamilyKarmaWidget from '@/components/karma/FamilyKarmaWidget';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { gsap } from 'gsap';
+import WelcomeModal from '@/components/WelcomeModal';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -67,6 +68,7 @@ export default function ParentDashboard() {
   const [isSending, setIsSending] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [myStudents, setMyStudents] = useState([]);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const actionCardsRef = useRef([]);
   const headlineRef = useRef(null);
 
@@ -150,6 +152,15 @@ export default function ParentDashboard() {
       trackEvent('parent_dashboard_viewed', { userId: user.id });
     }
   }, [user?.id]);
+
+  // Show welcome modal for first-time users
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('welcome_modal_seen');
+    if (!hasSeenWelcome) {
+      const timer = setTimeout(() => setShowWelcomeModal(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // GSAP scroll animations
   useEffect(() => {
@@ -319,7 +330,16 @@ export default function ParentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
+    <>
+      {/* Welcome Modal - shows once for first-time users */}
+      {showWelcomeModal && (
+        <WelcomeModal 
+          userName={firstName}
+          onClose={() => setShowWelcomeModal(false)}
+        />
+      )}
+
+      <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
       {/* 1. Welcome Header - Mobile Optimized */}
       <div className="bg-[#0021A5] text-white py-5 md:py-6 mb-4 md:mb-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -623,6 +643,7 @@ export default function ParentDashboard() {
           await loadDashboardData(true);
         }}
       />
-    </div>
+      </div>
+    </>
   );
 }
