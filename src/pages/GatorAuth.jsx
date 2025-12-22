@@ -48,9 +48,16 @@ export default function GatorAuth() {
       
       if (extractedToken && base44.auth.setToken) {
         console.log('🔑 Setting token from OAuth callback');
-        base44.auth.setToken(extractedToken);
+        try {
+          base44.auth.setToken(extractedToken);
+        } catch (e) {
+          console.error('Failed to set token:', e);
+        }
         window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
-        if (refreshUser) refreshUser();
+        // Add small delay before refresh for Edge/slower browsers
+        setTimeout(() => {
+          if (refreshUser) refreshUser();
+        }, 100);
         return;
       }
     }
