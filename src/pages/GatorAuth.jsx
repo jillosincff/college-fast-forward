@@ -287,7 +287,7 @@ export default function GatorAuth() {
   // PROCESSING STATE
   // ═══════════════════════════════════════════════════════════
   
-  if (step === 'processing' || isLoading) {
+  if (step === 'processing' || isLoading || isOAuthCallback) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
