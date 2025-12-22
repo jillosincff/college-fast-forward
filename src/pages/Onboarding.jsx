@@ -14,10 +14,15 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
+  // Determine if user is alumni (they need invite code)
+  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
+  const totalSteps = isAlumni ? 4 : 3;
+  
   // Step 1: About You
   const [company, setCompany] = useState('');
   const [industry, setIndustry] = useState([]);
   const [title, setTitle] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   
   // Step 2: How Can You Help
   const [expertise, setExpertise] = useState([]);
