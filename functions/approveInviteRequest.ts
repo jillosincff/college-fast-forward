@@ -22,9 +22,21 @@ Deno.serve(async (req) => {
         const { request_id, action } = await req.json(); // action: 'approve' or 'reject'
 
         // Get the request
-        const requests = await base44.asServiceRole.entities.InviteRequest.filter({ id: request_id });
+        console.log('Fetching invite request with id:', request_id);
+        let requests;
+        try {
+            requests = await base44.asServiceRole.entities.InviteRequest.filter({ id: request_id });
+            console.log('Filter result:', requests?.length, 'requests found');
+        } catch (filterError) {
+            console.error('Error fetching invite request:', filterError.message, filterError.stack);
+            return Response.json({ 
+                error: 'Failed to fetch invite request', 
+                details: filterError.message 
+            }, { status: 500 });
+        }
+        
         if (!requests || requests.length === 0) {
-            return Response.json({ error: 'Request not found' }, { status: 404 });
+            return Response.json({ error: 'Request not found', request_id }, { status: 404 });
         }
 
         const inviteRequest = requests[0];
