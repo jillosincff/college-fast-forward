@@ -364,22 +364,62 @@ export default function QuestionCard({ question, gator }) {
         @media (max-width: 768px) {
           .question-card {
             padding: 16px;
+            margin-bottom: 0;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            border-top: none;
           }
           
           .question-text {
-            font-size: 16px;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            -webkit-line-clamp: 4;
           }
           
           .card-action-button {
             padding: 14px 20px;
+            min-height: 48px;
+            font-size: 15px;
           }
 
           .question-metadata {
-            font-size: 13px;
+            font-size: 12px;
+            margin-bottom: 8px;
           }
 
           .question-stats {
-            font-size: 13px;
+            font-size: 12px;
+            margin-bottom: 12px;
+          }
+
+          .poster-type-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            margin-bottom: 8px;
+          }
+
+          .topic-tags {
+            gap: 6px;
+            margin-bottom: 12px;
+          }
+
+          .tag {
+            font-size: 11px;
+            padding: 3px 10px;
+          }
+
+          .needs-help-badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+          }
+
+          .karma-boost-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            margin-bottom: 8px;
           }
         }
       `}</style>
