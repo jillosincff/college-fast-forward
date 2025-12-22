@@ -242,19 +242,24 @@ export default function GatorWelcome() {
           }
           
           if (verified) {
+            console.log('✅ [GatorWelcome] Persona verified, proceeding to ready state');
             clearPendingInviteData();
             refreshUser();
             setStatus('ready');
             updateInProgressRef.current = false;
             
-            // Non-blocking notifications
-            base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
+            // Non-blocking notifications - fire and forget
+            base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(e => {
+              console.log('incrementUserCount failed (non-critical):', e.message);
+            });
             base44.functions.invoke('notifyNewUserJoined', {
               user_email: user.email,
               user_name: user.full_name,
               user_persona: intendedRole,
               user_id: user.id
-            }).catch(() => {});
+            }).catch(e => {
+              console.log('notifyNewUserJoined failed (non-critical):', e.message);
+            });
           } else {
             console.error(`❌ [GatorWelcome] FINAL VERIFICATION FAILED after ${MAX_VERIFY_ATTEMPTS} attempts`);
             setError('Failed to save your role. Please refresh and try again.');
