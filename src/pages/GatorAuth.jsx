@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Loader2, GraduationCap, Heart, ArrowRight } from 'lucide-react';
+import { Loader2, GraduationCap, Heart, ArrowRight, Award } from 'lucide-react';
 
 /**
  * UNIFIED AUTH FLOW - Single page handles:
@@ -305,34 +305,63 @@ export default function GatorAuth() {
                 </div>
               </button>
 
-              {/* Parent/Alumni Option */}
-              <button
-                onClick={() => setSelectedRole('parent')}
-                className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                  selectedRole === 'parent'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                    <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+              {/* Parent Option */}
+                <button
+                  onClick={() => setSelectedRole('parent')}
+                  className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
+                    selectedRole === 'parent'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-slate-900">I'm a UF Parent</h3>
+                      <p className="text-sm text-slate-600">Support your Gator's career journey</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 ${
+                      selectedRole === 'parent' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
+                    }`}>
+                      {selectedRole === 'parent' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-white" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-slate-900">I'm a Parent or Alumni</h3>
-                    <p className="text-sm text-slate-600">Help Gators get hired</p>
+                </button>
+
+                {/* Alumni Option */}
+                <button
+                  onClick={() => setSelectedRole('alumni')}
+                  className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
+                    selectedRole === 'alumni'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Award className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-slate-900">I'm a UF Alumni</h3>
+                      <p className="text-sm text-slate-600">Give back & help Gators get hired</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 ${
+                      selectedRole === 'alumni' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
+                    }`}>
+                      {selectedRole === 'alumni' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-white" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 ${
-                    selectedRole === 'parent' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
-                  }`}>
-                    {selectedRole === 'parent' && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </button>
+                </button>
 
             </div>
 
