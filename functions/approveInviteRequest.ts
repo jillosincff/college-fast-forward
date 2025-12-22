@@ -105,17 +105,24 @@ Deno.serve(async (req) => {
 
             console.log('Invite code created successfully:', code);
             
-            // Update request status
+            // Update request status - CRITICAL: This MUST succeed or we'll have duplicates
             console.log('Updating invite request status to approved for request_id:', request_id);
             try {
-                await base44.asServiceRole.entities.InviteRequest.update(request_id, {
+                const updateResult = await base44.asServiceRole.entities.InviteRequest.update(request_id, {
                     status: 'approved',
                     approved_by: user.email,
                     invite_code_generated: code
                 });
+                console.log('InviteRequest update result:', JSON.stringify(updateResult));
             } catch (updateError) {
-                console.error('Failed to update InviteRequest:', updateError.message, updateError.stack);
-                // Continue anyway - invite code was created
+                console.error('CRITICAL: Failed to update InviteRequest status:', updateError.message, updateError.stack);
+                // This is a critical failure - return error so admin knows
+                return Response.json({
+                    success: false,
+                    error: 'Invite code created but failed to update request status. Please manually mark as approved.',
+                    code: code,
+                    details: updateError.message
+                }, { status: 500 });
             }
 
             // Send approval email
