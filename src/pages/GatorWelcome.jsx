@@ -257,11 +257,18 @@ export default function GatorWelcome() {
           }
           
           if (verified) {
-            console.log('✅ [GatorWelcome] Persona verified, proceeding to ready state');
+            console.log('✅ [GatorWelcome] Persona verified, routing based on role');
             clearPendingInviteData();
             refreshUser();
-            setStatus('ready');
             updateInProgressRef.current = false;
+            
+            // Skip welcome screen for gators - go directly to onboarding
+            if (intendedRole === 'gator') {
+              navigate('StudentOnboarding');
+              return;
+            }
+            // Parents/alumni see welcome screen
+            setStatus('ready');
             
             // Non-blocking notifications - fire and forget
             base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(e => {
@@ -301,15 +308,21 @@ export default function GatorWelcome() {
           updateInProgressRef.current = false;
         });
     } else if (!needsUpdate) {
-      // Persona already correct - but still show welcome if new signup
+      // Persona already correct - route appropriately
       console.log('✅ [GatorWelcome] Persona already correct:', intendedRole, 'onboarding_completed:', user.onboarding_completed);
       clearPendingInviteData();
       
-      // CRITICAL: Always show welcome for new signups (onboarding not completed)
-      // This ensures new users see the welcome screen before proceeding
       if (user.onboarding_completed !== true) {
-        console.log('📝 [GatorWelcome] New signup - showing welcome screen');
-        setStatus('ready');
+        // New signup - skip welcome screen for gators, go directly to onboarding
+        // Each onboarding page has its own empathy section
+        console.log('📝 [GatorWelcome] New signup - routing to onboarding');
+        if (intendedRole === 'gator') {
+          navigate('StudentOnboarding');
+        } else if (intendedRole === 'parent' || intendedRole === 'alumni') {
+          setStatus('ready'); // Parents/alumni see welcome screen
+        } else {
+          navigate('StudentOnboarding'); // Fallback
+        }
       } else {
         // Truly returning user - redirect to dashboard
         console.log('✅ [GatorWelcome] Returning user - redirecting to dashboard');
