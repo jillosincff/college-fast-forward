@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
 export default function GatorInviteCode() {
@@ -13,65 +13,114 @@ export default function GatorInviteCode() {
   // Get the pending role from localStorage (set by GatorAuth)
   const pendingRole = localStorage.getItem('pending_invite_role') || 'parent';
 
+  // Check for expired pending invite on mount
+  useEffect(() => {
+    const storedTimestamp = localStorage.getItem('pending_invite_timestamp');
+    
+    // Clear if older than 30 minutes
+    if (storedTimestamp && Date.now() - parseInt(storedTimestamp) > 30 * 60 * 1000) {
+      clearPendingInvite();
+    }
+  }, []);
+
+  function clearPendingInvite() {
+    localStorage.removeItem('pending_invite_code');
+    localStorage.removeItem('pending_invite_timestamp');
+    localStorage.removeItem('pending_invite_role');
+    localStorage.removeItem('pending_invite_code_id');
+  }
+
+  function handleBack() {
+    clearPendingInvite();
+    navigate('GatorAuth');
+  }
+
   const handleContinue = async () => {
     setError('');
     
-    if (!inviteCode?.trim()) {
+    const trimmedCode = inviteCode?.trim().toUpperCase();
+    
+    if (!trimmedCode) {
       setError('Please enter your invite code');
+      return;
+    }
+
+    if (trimmedCode.length < 4) {
+      setError('Invite codes are at least 4 characters');
       return;
     }
     
     setIsVerifying(true);
-    console.log('📝 Verifying invite code:', inviteCode.trim());
+    console.log('📝 Verifying invite code:', trimmedCode);
     
     try {
       // Verify the invite code first
       const response = await base44.functions.invoke('verifyInviteCode', {
-        code: inviteCode.trim().toUpperCase()
+        code: trimmedCode
       });
       
       if (response.data?.success) {
-        // Store verified invite code and role
+        // Store verified invite code with timestamp
         const role = response.data.role || pendingRole || 'parent';
-        localStorage.setItem('pending_invite_code', inviteCode.trim().toUpperCase());
+        localStorage.setItem('pending_invite_code', trimmedCode);
         localStorage.setItem('pending_invite_role', role);
+        localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+        
+        // Store code ID for later use
+        if (response.data.codeId) {
+          localStorage.setItem('pending_invite_code_id', response.data.codeId);
+        }
         
         // Navigate to GatorWelcome to complete setup
         navigate('GatorWelcome');
       } else {
-        setError(response.data?.error || 'Invalid or expired invite code');
+        setError(response.data?.error || 'Invalid invite code. Please check and try again.');
         setIsVerifying(false);
       }
     } catch (err) {
       console.error('Failed to verify invite code:', err);
-      setError('Failed to verify code. Please try again.');
+      setError('Unable to verify code. Please check your connection and try again.');
       setIsVerifying(false);
     }
   };
 
+  const roleLabel = pendingRole === 'alumni' ? 'Alumni' : 'Parent';
+  const roleEmoji = pendingRole === 'alumni' ? '🎓' : '👨‍👩‍👧';
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(135deg, #FDF8F3 0%, #FEFCFA 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ 
+      background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)' 
+    }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
-          {/* Lock Icon */}
+        {/* Back Button */}
+        <button 
+          onClick={handleBack}
+          className="mb-4 text-white/70 hover:text-white text-sm flex items-center gap-1 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to role selection
+        </button>
+
+        <div className="bg-white rounded-2xl p-8 shadow-xl">
+          {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-blue-100 rounded-2xl flex items-center justify-center">
-              <Lock className="w-8 h-8 text-[#0021A5]" />
+              <span className="text-3xl">{roleEmoji}</span>
             </div>
           </div>
 
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#0021A5' }}>
-              Enter Your Invite Code
+            <h1 className="text-2xl font-bold mb-2 text-slate-800">
+              {roleLabel} Invite Code
             </h1>
             <p className="text-gray-600">
-              {pendingRole === 'alumni' ? 'Alumni access' : 'Parent access'} requires an invite code
+              Enter your invite code to join Gator Network
             </p>
           </div>
 
@@ -83,27 +132,28 @@ export default function GatorInviteCode() {
                 setInviteCode(e.target.value.toUpperCase());
                 setError('');
               }}
-              placeholder="ENTER YOUR CODE"
+              placeholder="ENTER CODE"
               className="text-center text-xl font-mono tracking-wider border-2 border-gray-200 focus:border-[#0021A5] rounded-xl py-6 uppercase"
               autoFocus
-              onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
+              maxLength={20}
+              onKeyDown={(e) => e.key === 'Enter' && !isVerifying && handleContinue()}
             />
 
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+                className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
               >
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                <p className="text-sm text-red-700 font-medium">{error}</p>
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{error}</p>
               </motion.div>
             )}
 
             <button
               onClick={handleContinue}
               disabled={!inviteCode.trim() || isVerifying}
-              className="w-full bg-gradient-to-r from-[#0021A5] to-[#003865] text-white rounded-xl py-4 text-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-[#0021A5] hover:bg-[#001580] text-white rounded-xl py-4 text-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isVerifying ? (
                 <>
@@ -116,18 +166,30 @@ export default function GatorInviteCode() {
             </button>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Don't have a code?{' '}
-              <button
-                onClick={() => navigate('RequestInvite')}
-                className="text-[#FA4616] hover:underline font-medium"
-              >
-                Request one
-              </button>
-            </p>
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="px-3 text-gray-400 text-sm">or</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
           </div>
+
+          {/* Request Access */}
+          <div className="text-center">
+            <p className="text-sm text-gray-500 mb-3">
+              Don't have an invite code?
+            </p>
+            <button
+              onClick={() => navigate('RequestInvite')}
+              className="text-[#FA4616] hover:text-orange-700 font-semibold text-sm transition-colors"
+            >
+              Request Access →
+            </button>
+          </div>
+
+          {/* Help Text */}
+          <p className="text-xs text-gray-400 text-center mt-6">
+            Invite codes are sent by email when your access is approved
+          </p>
         </div>
       </motion.div>
     </div>
