@@ -911,11 +911,22 @@ function AppContent() {
         return;
       }
 
-      // CRITICAL: Check for pending invite role - if present, go to GatorWelcome (skip role selection)
+      // CRITICAL: Check for pending invite role
       const pendingInviteRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      if (pendingInviteRole) {
-        console.log('🔄 [No Persona + Pending Role] Redirecting to GatorWelcome with role:', pendingInviteRole);
+      const pendingInviteCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
+      
+      // If they have a pending role AND a verified invite code, go to GatorWelcome
+      // If they have a pending role but NO code (parent/alumni), they need to enter a code first
+      if (pendingInviteRole && pendingInviteCode) {
+        console.log('🔄 [No Persona + Pending Role + Code] Redirecting to GatorWelcome with role:', pendingInviteRole);
         navigate('GatorWelcome');
+        return;
+      }
+      
+      // If they have a pending role but no code, let them stay on invite code entry pages
+      if (pendingInviteRole && !pendingInviteCode && (currentPage === 'GatorInviteCode' || currentPage === 'RequestInvite' || currentPage === 'InviteRequired')) {
+        console.log('✅ [No Persona + Pending Role] Allowing invite flow page:', currentPage);
+        setResolvedPage(currentPage);
         return;
       }
 
