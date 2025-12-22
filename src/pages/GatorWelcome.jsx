@@ -446,11 +446,11 @@ export default function GatorWelcome() {
           
           {/* Welcome Message - Generic for all roles */}
           <h1 className="text-3xl font-bold text-slate-900 mb-3">
-            Welcome to Gator Network!
+            Welcome to College Fast Forward!
           </h1>
           
           <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-            You're joining a community of Gators helping Gators — students, parents, and alumni supporting each other.
+            You're joining a community of Gators helping Gators.
           </p>
           
           <p className="text-slate-500 mb-8">
