@@ -61,7 +61,7 @@ export default function StudentOnboarding() {
     
     try {
       // Save student profile data
-      await base44.auth.updateMe({
+      const updateData = {
         major,
         graduation_year: gradYear,
         industries_interested: industries,
@@ -69,7 +69,14 @@ export default function StudentOnboarding() {
         help_needed: helpNeeded,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString()
-      });
+      };
+      
+      // Add referral code if provided
+      if (referralCode.trim()) {
+        updateData.referral_code = referralCode.trim();
+      }
+      
+      await base44.auth.updateMe(updateData);
 
       // If they wrote a question, post it
       if (question.trim().length > 10) {
