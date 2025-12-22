@@ -28,6 +28,17 @@ Deno.serve(async (req) => {
         }
 
         const inviteRequest = requests[0];
+        
+        // CRITICAL: Skip if already approved to prevent duplicate emails/codes
+        if (inviteRequest.status === 'approved') {
+            console.log('Request already approved, skipping:', request_id);
+            return Response.json({
+                success: true,
+                message: 'Already approved',
+                code: inviteRequest.invite_code_generated,
+                alreadyProcessed: true
+            });
+        }
 
         if (action === 'approve') {
             // Generate invite code with role prefix for clarity
