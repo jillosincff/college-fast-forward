@@ -551,6 +551,12 @@ export default function GatorAuth() {
                 </>
               )}
             </Button>
+            
+            <p className="text-slate-400 text-xs mt-6 text-center">
+              By continuing, you agree to our{' '}
+              <a href="#Terms" className="text-slate-500 underline">Terms</a> and{' '}
+              <a href="#Privacy" className="text-slate-500 underline">Privacy Policy</a>
+            </p>
 
           </div>
         </div>
