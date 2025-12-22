@@ -468,7 +468,7 @@ export default function StudentOnboarding() {
   const progressPercent = currentStep === 1 ? 50 : 100;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-safe">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -526,6 +526,7 @@ export default function StudentOnboarding() {
               placeholder="Career advice, job search, interviews, salary negotiation — or just figuring out what's next. Nothing is off limits."
               rows={5}
               className={`min-h-[130px] text-base border-2 rounded-xl ${errors.question ? 'border-red-300' : 'border-slate-200 focus:border-[#0021A5]'}`}
+              style={{ fontSize: '16px' }}
             />
             <div className="flex justify-between mt-2">
               {errors.question ? (
