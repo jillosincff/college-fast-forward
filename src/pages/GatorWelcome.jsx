@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { ArrowRight, Crown, Star, Check, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
