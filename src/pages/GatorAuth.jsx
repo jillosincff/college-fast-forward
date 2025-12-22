@@ -203,16 +203,28 @@ export default function GatorAuth() {
   }, [user, isLoading, refreshUser]);
 
   const handleGoogleSignIn = () => {
+    // CRITICAL: Role must be selected BEFORE OAuth
+    if (!selectedRole) {
+      console.error('❌ [GatorAuth] No role selected before OAuth!');
+      return;
+    }
+    
     setLoading(true);
     
+    // Save role to localStorage BEFORE OAuth redirect
+    // This survives the OAuth redirect (mobile browsers may clear sessionStorage)
+    localStorage.setItem('pending_invite_role', selectedRole);
+    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+    console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
+    
     // CRITICAL: Ensure we use the app's actual origin, not any redirect URL
-    // On mobile, window.location can sometimes get confused during OAuth
     const appOrigin = window.location.origin;
     const callbackUrl = appOrigin + '/#GatorAuth';
     
     console.log('🔐 [GatorAuth] Starting Google sign-in');
     console.log('🔐 [GatorAuth] App origin:', appOrigin);
     console.log('🔐 [GatorAuth] Callback URL:', callbackUrl);
+    console.log('🔐 [GatorAuth] Selected role:', selectedRole);
     
     // Validate that the origin is our app, not an external site
     if (appOrigin.includes('ufl.edu') || appOrigin.includes('google.com')) {
