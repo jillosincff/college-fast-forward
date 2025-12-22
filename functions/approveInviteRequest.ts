@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
         }
 
         const inviteRequest = requests[0];
+        console.log('Found invite request:', JSON.stringify(inviteRequest));
         
         // CRITICAL: Skip if already approved to prevent duplicate emails/codes
         if (inviteRequest.status === 'approved') {
