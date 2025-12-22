@@ -188,6 +188,25 @@ export default function StudentOnboarding() {
                 </button>
               </div>
             </div>
+
+            {/* Optional Referral Code */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Referral code <span className="font-normal text-slate-400">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="e.g., GATOR-JOHN"
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                         focus:border-[#0021A5] focus:outline-none uppercase"
+                maxLength={20}
+              />
+              <p className="text-xs text-slate-400 mt-1">
+                Got a code from a friend or ambassador? Enter it here.
+              </p>
+            </div>
           </div>
         </div>
       </OnboardingLayout>
