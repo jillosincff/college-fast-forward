@@ -338,74 +338,23 @@ export default function GatorWelcome() {
     );
   }
 
-  // Ready state
+  // Ready state - skip directly to onboarding (no redundant welcome screen)
+  useEffect(() => {
+    if (status === 'ready' && role) {
+      // Auto-proceed to onboarding
+      proceedToOnboarding();
+    }
+  }, [status, role]);
+
+  // Show loading while auto-redirecting
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4">
-      <div className="w-full max-w-lg">
-        <Card className="shadow-2xl border border-slate-100 relative overflow-hidden rounded-2xl">
-          <CardContent className="pt-10 pb-10 px-8 text-center">
-            {/* Decorative gradient bar at top */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0021A5] via-[#FA4616] to-[#0021A5]" />
-
-            {/* Logo/Icon */}
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FA4616] to-[#FF8A5B] mx-auto mb-6 flex items-center justify-center shadow-lg">
-              <span className="text-4xl">🐊</span>
-            </div>
-
-            {/* Welcome Text */}
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              <span className="text-slate-800">Welcome to</span><br />
-              <span className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] bg-clip-text text-transparent">College Fast Forward!</span>
-              <span className="ml-2">🎉</span>
-            </h1>
-
-            <p className="text-slate-600 mt-4 mb-2">
-              {role === 'gator'
-                ? "You're joining a vibrant network of Gators, parents, and alumni accelerating your college success."
-                : "You're joining a powerful network helping Gators get hired."
-              }
-            </p>
-            
-            <p className="text-slate-500 text-sm mb-8">
-              {role === 'gator'
-                ? "Let's set up your profile to unlock opportunities."
-                : "Let's set up your profile so you can start making an impact."
-              }
-            </p>
-
-            {/* Single prominent CTA */}
-            <Button
-              onClick={handleGetStarted}
-              size="lg"
-              disabled={isCreatingFamily}
-              className="w-full max-w-sm h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all bg-[#0021A5] hover:bg-[#001580]"
-            >
-              {isCreatingFamily ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Setting up...
-                </>
-              ) : (
-                <>
-                  {(!pricingInfo || pricingInfo.tier === 'founding') 
-                    ? "Let's Get Started" 
-                    : `Start ${pricingInfo?.trial_days || 7}-Day Free Trial`}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
-            
-            <p className="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1">
-              <span>✨</span> Takes just 2 minutes
-            </p>
-
-            {pricingInfo && pricingInfo.tier && pricingInfo.tier !== 'founding' && (
-              <p className="text-sm text-slate-500 mt-4">
-                No charge today. Cancel anytime during your trial.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="text-center">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 mx-auto mb-6 flex items-center justify-center shadow-xl">
+          <span className="text-4xl">🐊</span>
+        </div>
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-600 font-medium">Setting up your account...</p>
       </div>
     </div>
   );
