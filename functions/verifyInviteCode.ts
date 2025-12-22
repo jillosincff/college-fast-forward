@@ -155,38 +155,40 @@ College Fast Forward Team`;
         });
       }
 
+      // Get current user for tracking (if authenticated)
+      let regularInviteUser = null;
+      try {
+        regularInviteUser = await base44.auth.me();
+      } catch (e) {
+        console.log('User not authenticated during individual invite verification');
+      }
+
       // Only mark as used on first verification, not re-verification
       if (!skipUsageIncrement) {
-        let currentUser = null;
-        try {
-          currentUser = await base44.auth.me();
-        } catch (e) {
-          console.log('User not authenticated during individual invite');
-        }
-
         await base44.asServiceRole.entities.InviteCode.update(invite.id, {
           status: 'used',
-          used_by_email: currentUser?.email,
+          used_by_email: regularInviteUser?.email || null,
           used_at: new Date().toISOString()
         });
       } else {
         console.log('⏭️ Skipping status update (re-verification)');
       }
 
-      // Award +100 points to inviter for individual invites
-      if (currentUser) {
+      // Award +100 points to inviter for individual invites (only if user authenticated)
+      if (regularInviteUser && invite.inviter_id) {
         try {
           const inviterUser = await base44.asServiceRole.entities.User.get(invite.inviter_id);
-          const currentPoints = inviterUser.gator_points || 0;
-          await base44.asServiceRole.entities.User.update(invite.inviter_id, {
-            gator_points: currentPoints + 100
-          });
+          if (inviterUser) {
+            const currentPoints = inviterUser.gator_points || 0;
+            await base44.asServiceRole.entities.User.update(invite.inviter_id, {
+              gator_points: currentPoints + 100
+            });
 
-          // Send notification email to inviter
-          const emailSubject = `Your Invite Was Used! 🎉`;
-          const emailBody = `Great news! Someone just joined College Fast Forward using your invite code!
+            // Send notification email to inviter
+            const emailSubject = `Your Invite Was Used! 🎉`;
+            const emailBody = `Great news! Someone just joined College Fast Forward using your invite code!
 
-New Member: ${currentUser.full_name || currentUser.email}
+New Member: ${regularInviteUser.full_name || regularInviteUser.email}
 
 Code Used: ${invite.code}
 
@@ -198,14 +200,14 @@ Go Gators! 🐊🧡💙
 
 College Fast Forward Team`;
 
-          base44.asServiceRole.integrations.Core.SendEmail({
-            to: inviterUser.email,
-            subject: emailSubject,
-            body: emailBody
-          }).catch(err => {
-            console.log('Email notification failed (non-critical):', err.message);
-          });
-
+            base44.asServiceRole.integrations.Core.SendEmail({
+              to: inviterUser.email,
+              subject: emailSubject,
+              body: emailBody
+            }).catch(err => {
+              console.log('Email notification failed (non-critical):', err.message);
+            });
+          }
         } catch (pointsError) {
           console.log('Failed to award points (non-critical):', pointsError.message);
         }
