@@ -577,7 +577,31 @@ export default function ParentDashboard() {
                   Post Opportunity →
                 </Button>
               </div>
-            </div>
+              </div>
+
+              {/* Standalone Post a Job Card */}
+              <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center">
+                      <Briefcase className="w-7 h-7 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
+                      <p className="text-sm text-purple-700">Share job openings from your company with UF students</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => navigate('PostOpportunity')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    Post Job
+                  </Button>
+                </div>
+              </CardContent>
+              </Card>
 
             {/* Activity Section - No duplicate header */}
             <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
