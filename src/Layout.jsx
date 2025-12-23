@@ -945,11 +945,12 @@ function AppContent() {
       return;
     }
 
-    // CRITICAL: Check if user is in active new signup flow (onboarding not completed)
+    // CRITICAL: Check if user is in active new signup flow (onboarding explicitly set to false)
     // This ensures users going through signup aren't redirected to dashboard prematurely
     // BUT: Only auto-redirect if they're on a page that would trigger the redirect (Dashboard, ParentDashboard, LandingPage)
     // Don't auto-redirect if they're browsing other pages or just landed on the site
-    if (user && !user.onboarding_completed && user.persona) {
+    // IMPORTANT: Existing users without onboarding_completed field are considered complete (grandfathered)
+    if (user && user.onboarding_completed === false && user.persona) {
       console.log('🎯 [Onboarding Flow] User needs to complete onboarding, persona:', user.persona, 'roles:', user.roles);
 
       // Allow new user flow pages during signup
