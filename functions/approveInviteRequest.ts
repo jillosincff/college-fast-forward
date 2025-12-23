@@ -215,7 +215,12 @@ Deno.serve(async (req) => {
 
             // Send email directly via SendGrid (Base44 Core.SendEmail only works for registered users)
             try {
-                console.log('Sending approval email to:', inviteRequest.email);
+                const recipientEmail = inviteRequest.email;
+                if (!recipientEmail) {
+                    console.error('No email found in invite request:', JSON.stringify(inviteRequest));
+                    throw new Error('No email address found in invite request');
+                }
+                console.log('Sending approval email to:', recipientEmail);
                 
                 const apiKey = Deno.env.get('SENDGRID_API_KEY');
                 if (!apiKey) {
