@@ -114,16 +114,18 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            // Update request status
+            // Update request status - include role field since it's required by the schema
             try {
                 await base44.asServiceRole.entities.InviteRequest.update(requestId, {
                     status: 'approved',
                     approved_by: user.email,
-                    invite_code_generated: code
+                    invite_code_generated: code,
+                    role: assignedRole  // Required field - backfill from determined role
                 });
                 console.log('InviteRequest updated successfully');
             } catch (updateError) {
                 console.error('Failed to update InviteRequest:', updateError.message);
+                console.error('Error data:', JSON.stringify(updateError));
                 return Response.json({
                     success: false,
                     error: 'Code created but failed to update request',
