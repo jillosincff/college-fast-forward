@@ -357,6 +357,21 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
+      {/* DEBUG: Show family link status */}
+      {user && (
+        <div className="bg-yellow-100 border border-yellow-400 p-4 mx-4 mt-4 rounded-lg text-sm">
+          <p className="font-bold text-yellow-800 mb-2">🔍 Debug: Family Link Status</p>
+          <p><strong>Your ID:</strong> {user.id}</p>
+          <p><strong>Your family_group_id:</strong> {user.family_group_id || 'NOT SET'}</p>
+          <p><strong>linked_students:</strong> {JSON.stringify(user.linked_students) || 'NOT SET'}</p>
+          <p><strong>student_emails:</strong> {JSON.stringify(user.student_emails) || 'NOT SET'}</p>
+          <p><strong>myStudents loaded:</strong> {myStudents.length} students</p>
+          {myStudents.map(s => (
+            <p key={s.id} className="ml-4">- {s.full_name} ({s.email}) | family_group_id: {s.family_group_id || 'NOT SET'}</p>
+          ))}
+        </div>
+      )}
+
       {/* 1. Welcome Header - Mobile Optimized */}
       <div className="bg-[#0021A5] text-white py-5 md:py-6 mb-4 md:mb-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
