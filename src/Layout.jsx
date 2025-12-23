@@ -1171,8 +1171,9 @@ function AppContent() {
     } else if (hasNoRole && !pendingRole) {
       console.log('🔄 [Incomplete] No role → GatorAuth');
       navigate('GatorAuth');
-    } else if (needsOnboarding) {
-      // CRITICAL: Check both persona AND roles array for accurate routing
+    } else if (needsOnboarding && user.onboarding_completed === false) {
+      // CRITICAL: Only redirect to onboarding if explicitly set to false (new users)
+      // Existing users without the field are grandfathered as complete
       const isParent = user.persona === 'parent' || user.roles?.includes('parent');
       const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
       const onboardingPage = (isParent || isAlumni) ? 'Onboarding' : 'StudentOnboarding';
