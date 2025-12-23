@@ -258,6 +258,23 @@ export default function Dashboard() {
         </motion.div>
       )}
 
+      {/* Family Link Success Banner */}
+      {linkedParents.length > 0 && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 mx-4 mt-4 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-green-800">
+                🎉 You're linked to {linkedParents.map(p => p.full_name || p.email).join(', ')}
+              </p>
+              <p className="text-sm text-green-600">Their support boosts your visibility in the network!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Header - Mobile Optimized */}
       <div className="bg-[#0021A5] text-white py-6 px-4">
         <div className="max-w-7xl mx-auto">
