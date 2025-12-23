@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Briefcase, Users, MessageSquare, Mail, ArrowRight, ChevronDown } from 'lucide-react';
+import { Loader2, Briefcase, Users, MessageSquare, Mail, ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import { base44 } from '@/api/base44Client';
