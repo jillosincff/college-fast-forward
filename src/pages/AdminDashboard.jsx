@@ -1286,54 +1286,14 @@ const SignUpDiagnostics = () => {
               Users Without Persona (Onboarding Incomplete)
             </CardTitle>
             <p className="text-sm text-slate-600">
-              These users created accounts but didn't complete onboarding. When they log in again, they'll be routed to role selection.
+              These users created accounts but didn't complete onboarding.
             </p>
           </CardHeader>
           <CardContent>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h4 className="font-semibold text-blue-900 mb-2">🧪 Test the login flow first:</h4>
-              <p className="text-sm text-blue-800 mb-3">
-                Before sending re-engagement emails, verify the flow works by having one of these users log in with Google. They should be automatically routed to role selection.
-              </p>
-              <div className="bg-white rounded p-3 text-sm">
-                <p className="font-medium text-slate-700 mb-1">Expected flow:</p>
-                <ol className="text-slate-600 ml-4 list-decimal space-y-1">
-                  <li>User clicks "Continue with Google" on landing page</li>
-                  <li>User authenticates with their existing Google account</li>
-                  <li>System detects no persona → routes to GatorAuth</li>
-                  <li>User selects role (Student/Parent/Alumni)</li>
-                  <li>User completes onboarding</li>
-                </ol>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {usersWithoutPersona.map((user) => (
-                <div key={user.id} className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{user.full_name || 'No name'}</p>
-                      <p className="text-sm text-slate-600">{user.email}</p>
-                      <p className="text-xs text-slate-500">
-                        Joined {new Date(user.created_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        navigator.clipboard.writeText(user.email);
-                        toast({
-                          title: "Email Copied",
-                          description: "Ask this user to log in and test the flow",
-                        });
-                      }}
-                    >
-                      Copy Email
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <FixMissingPersonasSection 
+              usersWithoutPersona={usersWithoutPersona} 
+              onComplete={loadDiagnostics}
+            />
           </CardContent>
         </Card>
       )}
