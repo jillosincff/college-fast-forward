@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
                     },
                     body: JSON.stringify({
                         personalizations: [{
-                            to: [{ email: inviteRequest.email }]
+                            to: [{ email: recipientEmail }]
                         }],
                         from: { 
                             email: 'jill@uffastforward.com',
