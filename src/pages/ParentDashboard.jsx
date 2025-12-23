@@ -95,51 +95,17 @@ export default function ParentDashboard() {
         Opportunity.filter({ created_by: user.email })
       ]);
       
-      // Load students in family - try multiple methods
-      let loadedStudents = [];
-      
-      // Method 1: Load by linked_students IDs (most reliable)
-      if (user.linked_students && user.linked_students.length > 0) {
-        console.log('📍 Loading students by linked_students IDs:', user.linked_students);
-        const studentPromises = user.linked_students.map(async (studentId) => {
-          try {
-            const students = await base44.entities.User.filter({ id: studentId });
-            return students[0];
-          } catch (e) {
-            console.log('Could not load student by ID:', studentId, e);
-            return null;
-          }
-        });
-        const results = await Promise.all(studentPromises);
-        loadedStudents = results.filter(Boolean);
-        console.log('📍 Loaded students by ID:', loadedStudents.length);
+      // Load students via backend function (handles RLS permissions)
+      try {
+        console.log('📍 Loading students via getFamilyStudents function...');
+        const result = await base44.functions.invoke('getFamilyStudents', {});
+        console.log('📍 getFamilyStudents result:', result.data);
+        if (result.data?.students) {
+          setMyStudents(result.data.students);
+        }
+      } catch (e) {
+        console.error('Failed to load family students:', e);
       }
-      
-      // Method 2: Load by family_group_id (backup)
-      if (loadedStudents.length === 0 && user.family_group_id) {
-        console.log('📍 Loading students by family_group_id:', user.family_group_id);
-        const familyMembers = await base44.entities.User.filter({
-          family_group_id: user.family_group_id
-        });
-        loadedStudents = familyMembers.filter(m => 
-          (m.persona === 'gator' || m.roles?.includes('gator')) && m.id !== user.id
-        );
-        console.log('📍 Loaded students by family_group_id:', loadedStudents.length);
-      }
-      
-      // Method 3: Legacy student_emails (fallback)
-      if (loadedStudents.length === 0 && user.student_emails && user.student_emails.length > 0) {
-        console.log('📍 Loading students by student_emails:', user.student_emails);
-        const students = await Promise.all(
-          user.student_emails.map(email => 
-            base44.entities.User.filter({ email }).then(r => r[0])
-          )
-        );
-        loadedStudents = students.filter(Boolean);
-        console.log('📍 Loaded students by email:', loadedStudents.length);
-      }
-      
-      setMyStudents(loadedStudents);
       
       // Load family karma
       if (user.family_group_id) {
