@@ -362,7 +362,7 @@ export default function ParentDashboard() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <h1 className="text-xl md:text-3xl font-bold text-white">
+                <h1 className="text-xl md:text-3xl font-bold" style={{ color: 'white' }}>
                   Welcome, {firstName}! 👋
                 </h1>
                 {user?.is_founding_member && (
