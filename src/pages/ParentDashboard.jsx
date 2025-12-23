@@ -354,18 +354,20 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
-      {/* DEBUG: Show family link status */}
-      {user && (
-        <div className="bg-yellow-100 border border-yellow-400 p-4 mx-4 mt-4 rounded-lg text-sm">
-          <p className="font-bold text-yellow-800 mb-2">🔍 Debug: Family Link Status</p>
-          <p><strong>Your ID:</strong> {user.id}</p>
-          <p><strong>Your family_group_id:</strong> {user.family_group_id || 'NOT SET'}</p>
-          <p><strong>linked_students:</strong> {JSON.stringify(user.linked_students) || 'NOT SET'}</p>
-          <p><strong>student_emails:</strong> {JSON.stringify(user.student_emails) || 'NOT SET'}</p>
-          <p><strong>myStudents loaded:</strong> {myStudents.length} students</p>
-          {myStudents.map(s => (
-            <p key={s.id} className="ml-4">- {s.full_name} ({s.email}) | family_group_id: {s.family_group_id || 'NOT SET'}</p>
-          ))}
+      {/* Family Link Success Banner */}
+      {myStudents.length > 0 && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 mx-4 mt-4 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-green-800">
+                🎉 You're linked to {myStudents.map(s => s.full_name || s.email).join(', ')}
+              </p>
+              <p className="text-sm text-green-600">Your actions now boost their visibility in the network!</p>
+            </div>
+          </div>
         </div>
       )}
 
