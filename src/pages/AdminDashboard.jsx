@@ -2032,6 +2032,212 @@ const ExportUsersSection = () => {
   );
 };
 
+// Fix Missing Personas Section Component
+const FixMissingPersonasSection = ({ usersWithoutPersona, onComplete }) => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [previewResult, setPreviewResult] = useState(null);
+
+  const handlePreview = async () => {
+    setLoading(true);
+    try {
+      const response = await fixMissingPersonas({ dryRun: true });
+      if (response.data?.success) {
+        setPreviewResult(response.data);
+      } else {
+        throw new Error(response.data?.error || 'Preview failed');
+      }
+    } catch (error) {
+      console.error('Preview error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to preview changes",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!confirm(`This will assign personas to ${previewResult?.summary?.total || 0} users:\n- ${previewResult?.summary?.students || 0} as Students (UFL emails)\n- ${previewResult?.summary?.parents || 0} as Parents (non-UFL emails)\n\nContinue?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fixMissingPersonas({ dryRun: false });
+      if (response.data?.success) {
+        toast({
+          title: "✅ Personas Assigned!",
+          description: `Updated ${response.data.summary.students} students and ${response.data.summary.parents} parents`,
+        });
+        setPreviewResult(null);
+        onComplete?.();
+      } else {
+        throw new Error(response.data?.error || 'Update failed');
+      }
+    } catch (error) {
+      console.error('Apply error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to apply changes",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="font-semibold text-blue-900 mb-2">🔧 Auto-Assign Personas</h4>
+        <p className="text-sm text-blue-800 mb-3">
+          Automatically categorize users based on their email:
+        </p>
+        <ul className="text-sm text-blue-700 ml-4 list-disc space-y-1">
+          <li><strong>@ufl.edu emails</strong> → Student (Gator)</li>
+          <li><strong>All other emails</strong> → Parent</li>
+        </ul>
+        <p className="text-xs text-blue-600 mt-2">
+          Users will still need to complete onboarding when they log in next.
+        </p>
+      </div>
+
+      {!previewResult ? (
+        <Button
+          onClick={handlePreview}
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Analyzing...
+            </>
+          ) : (
+            <>
+              <Eye className="w-4 h-4 mr-2" />
+              Preview Changes
+            </>
+          )}
+        </Button>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-slate-100 rounded-lg p-3">
+              <p className="text-2xl font-bold text-slate-900">{previewResult.summary.total}</p>
+              <p className="text-xs text-slate-600">Total Users</p>
+            </div>
+            <div className="bg-purple-100 rounded-lg p-3">
+              <p className="text-2xl font-bold text-purple-700">{previewResult.summary.students}</p>
+              <p className="text-xs text-purple-600">→ Students</p>
+            </div>
+            <div className="bg-orange-100 rounded-lg p-3">
+              <p className="text-2xl font-bold text-orange-700">{previewResult.summary.parents}</p>
+              <p className="text-xs text-orange-600">→ Parents</p>
+            </div>
+          </div>
+
+          {previewResult.students.length > 0 && (
+            <div>
+              <h5 className="font-medium text-sm text-purple-700 mb-2">Will become Students (@ufl.edu):</h5>
+              <div className="max-h-32 overflow-y-auto bg-purple-50 rounded border border-purple-200 p-2 space-y-1">
+                {previewResult.students.map((u, idx) => (
+                  <div key={idx} className="text-xs text-purple-800 py-1 border-b border-purple-100 last:border-0">
+                    {u.name || 'No name'} - {u.email}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewResult.parents.length > 0 && (
+            <div>
+              <h5 className="font-medium text-sm text-orange-700 mb-2">Will become Parents (non-UFL):</h5>
+              <div className="max-h-32 overflow-y-auto bg-orange-50 rounded border border-orange-200 p-2 space-y-1">
+                {previewResult.parents.map((u, idx) => (
+                  <div key={idx} className="text-xs text-orange-800 py-1 border-b border-orange-100 last:border-0">
+                    {u.name || 'No name'} - {u.email}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setPreviewResult(null)}
+              variant="outline"
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleApply}
+              disabled={loading}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Applying...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Apply Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="border-t pt-4 mt-4">
+        <h5 className="font-medium text-sm text-slate-700 mb-2">Individual Users:</h5>
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {usersWithoutPersona.map((user) => {
+            const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
+            return (
+              <div key={user.id} className={`p-3 rounded-lg border ${isUFL ? 'bg-purple-50 border-purple-200' : 'bg-orange-50 border-orange-200'}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-900">{user.full_name || 'No name'}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${isUFL ? 'bg-purple-200 text-purple-800' : 'bg-orange-200 text-orange-800'}`}>
+                        {isUFL ? '→ Student' : '→ Parent'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600">{user.email}</p>
+                    <p className="text-xs text-slate-500">
+                      Joined {new Date(user.created_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(user.email);
+                      toast({
+                        title: "Email Copied",
+                        description: "Email copied to clipboard",
+                      });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Cleanup Draft Names Component
 const CleanupDraftNames = () => {
   const { toast } = useToast();
