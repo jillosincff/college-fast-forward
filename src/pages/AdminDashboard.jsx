@@ -1171,12 +1171,29 @@ const SignUpDiagnostics = () => {
 
         <Card className={expiredAttempts.length > 0 ? 'border-red-300 bg-red-50' : ''}>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-8 h-8 text-red-600" />
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{expiredAttempts.length}</p>
-                <p className="text-sm text-slate-600">Expired (24h+)</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+                <div>
+                  <p className="text-2xl font-bold text-slate-900">{expiredAttempts.length}</p>
+                  <p className="text-sm text-slate-600">Expired (24h+)</p>
+                </div>
               </div>
+              {expiredAttempts.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={deleteExpiredAttempts}
+                  disabled={deletingExpired}
+                  className="ml-4"
+                >
+                  {deletingExpired ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    'Delete All'
+                  )}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
