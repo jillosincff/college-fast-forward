@@ -40,9 +40,15 @@ Deno.serve(async (req) => {
         }
 
         const inviteRequestRaw = requests[0];
-        // Handle both direct properties and nested data object (SDK returns data nested)
-        const inviteRequest = inviteRequestRaw.data || inviteRequestRaw;
-        console.log('Found invite request:', JSON.stringify(inviteRequest));
+        console.log('Raw invite request object:', JSON.stringify(inviteRequestRaw));
+        
+        // SDK filter returns objects with data nested inside - extract the actual data
+        // The structure is: { id, data: { email, status, ... }, ... }
+        const inviteRequest = {
+            id: inviteRequestRaw.id,
+            ...(inviteRequestRaw.data || inviteRequestRaw)
+        };
+        console.log('Processed invite request:', JSON.stringify(inviteRequest));
         
         // CRITICAL: Skip if already approved to prevent duplicate emails/codes
         if (inviteRequest.status === 'approved') {
