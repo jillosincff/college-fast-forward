@@ -28,6 +28,7 @@ export default function Dashboard() {
     activeRequests: 0,
     spotsLeft: 774
   });
+  const [linkedParents, setLinkedParents] = useState([]);
 
   useEffect(() => {
     console.log('🏠 Dashboard useEffect - isLoading:', isLoading, 'user:', user?.email);
