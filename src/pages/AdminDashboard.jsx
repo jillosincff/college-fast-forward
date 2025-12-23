@@ -1064,6 +1064,7 @@ const SignUpDiagnostics = () => {
   const [pendingAttempts, setPendingAttempts] = useState([]);
   const [expiredAttempts, setExpiredAttempts] = useState([]);
   const [usersWithoutPersona, setUsersWithoutPersona] = useState([]);
+  const [deletingExpired, setDeletingExpired] = useState(false);
 
   useEffect(() => {
     loadDiagnostics();
