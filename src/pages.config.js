@@ -58,6 +58,7 @@ import SuccessStories from './pages/SuccessStories';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
+import DebugFamilyLink from './pages/DebugFamilyLink';
 import __Layout from './Layout.jsx';
 
 
@@ -122,6 +123,7 @@ export const PAGES = {
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
+    "DebugFamilyLink": DebugFamilyLink,
 }
 
 export const pagesConfig = {
