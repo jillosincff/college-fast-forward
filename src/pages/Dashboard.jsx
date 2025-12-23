@@ -200,6 +200,16 @@ export default function Dashboard() {
         activeRequests: allActiveRequests?.length || 15
       }));
 
+      // Load linked parents
+      try {
+        const parentsResult = await base44.functions.invoke('getLinkedParents', {});
+        if (parentsResult.data?.parents) {
+          setLinkedParents(parentsResult.data.parents);
+        }
+      } catch (e) {
+        console.log('Could not load linked parents:', e);
+      }
+
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
