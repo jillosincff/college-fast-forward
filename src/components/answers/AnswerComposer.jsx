@@ -93,6 +93,22 @@ export default function AnswerComposer({
         });
       }
 
+      // Send email notification to the question poster
+      base44.functions.invoke('sendAnswerNotification', {
+        questionId: question.id,
+        questionTitle: question.title || question.role || 'Your question',
+        posterEmail: question.created_by,
+        posterName: question.poster_name || question.poster_first_name,
+        answererName: currentUser.full_name || currentUser.email.split('@')[0],
+        answererTitle: currentUser.current_position || currentUser.current_role,
+        answererCompany: currentUser.current_company,
+        answerPreview: answerText.trim()
+      }).then(res => {
+        console.log('Answer notification sent:', res?.data);
+      }).catch(err => {
+        console.log('Answer notification failed (non-critical):', err.message);
+      });
+
       // Clear form
       setAnswerText('');
 
