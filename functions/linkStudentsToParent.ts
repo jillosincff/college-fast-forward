@@ -23,6 +23,16 @@ Deno.serve(async (req) => {
     const linkedStudentIds = [];
     const results = [];
     
+    // Get or create family_group_id for parent FIRST
+    let familyGroupId = user.family_group_id;
+    if (!familyGroupId) {
+      familyGroupId = `family_${user.id}_${Date.now()}`;
+      // Update parent with family_group_id immediately
+      await base44.asServiceRole.entities.User.update(user.id, {
+        family_group_id: familyGroupId
+      });
+    }
+    
     // Search for each student
     for (const searchTerm of studentEmailsOrNames) {
       const trimmed = searchTerm.trim().toLowerCase();
@@ -46,16 +56,6 @@ Deno.serve(async (req) => {
         });
         
         if (matchedStudent) {
-          // Generate family_group_id if parent doesn't have one
-          let familyGroupId = user.family_group_id;
-          if (!familyGroupId) {
-            familyGroupId = `family_${user.id}_${Date.now()}`;
-            // Update parent with family_group_id
-            await base44.asServiceRole.entities.User.update(user.id, {
-              family_group_id: familyGroupId
-            });
-          }
-          
           // Link student to parent via family_group_id
           await base44.asServiceRole.entities.User.update(matchedStudent.id, {
             parent_id: user.id,

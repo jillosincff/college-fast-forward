@@ -266,7 +266,9 @@ export default function ParentDashboard() {
         description: `${student.full_name || student.email} is now connected to your account.`
       });
       
+      // Refresh user data and reload dashboard to show linked student
       await refreshUser();
+      await loadDashboardData(true);
     } catch (error) {
       console.error('Failed to link student:', error);
       toast({
