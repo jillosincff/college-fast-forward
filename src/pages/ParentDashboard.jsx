@@ -242,11 +242,10 @@ export default function ParentDashboard() {
     
     setIsSearching(true);
     try {
-      const results = await base44.functions.invoke('searchUserForDirectory', {
-        query: searchQuery,
-        persona: 'gator'
+      const results = await base44.functions.invoke('searchGatorStudents', {
+        query: searchQuery
       });
-      setSearchResults(results.data?.users || []);
+      setSearchResults(results.data?.students || []);
     } catch (error) {
       console.error('Search failed:', error);
       setSearchResults([]);
