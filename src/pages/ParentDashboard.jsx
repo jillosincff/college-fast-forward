@@ -95,15 +95,54 @@ export default function ParentDashboard() {
         Opportunity.filter({ created_by: user.email })
       ]);
       
-      // Load students in family
-      if (user.family_group_id) {
+      // Load students in family - try multiple methods
+      let loadedStudents = [];
+      
+      // Method 1: Load by linked_students IDs (most reliable)
+      if (user.linked_students && user.linked_students.length > 0) {
+        console.log('📍 Loading students by linked_students IDs:', user.linked_students);
+        const studentPromises = user.linked_students.map(async (studentId) => {
+          try {
+            const students = await base44.entities.User.filter({ id: studentId });
+            return students[0];
+          } catch (e) {
+            console.log('Could not load student by ID:', studentId, e);
+            return null;
+          }
+        });
+        const results = await Promise.all(studentPromises);
+        loadedStudents = results.filter(Boolean);
+        console.log('📍 Loaded students by ID:', loadedStudents.length);
+      }
+      
+      // Method 2: Load by family_group_id (backup)
+      if (loadedStudents.length === 0 && user.family_group_id) {
+        console.log('📍 Loading students by family_group_id:', user.family_group_id);
         const familyMembers = await base44.entities.User.filter({
           family_group_id: user.family_group_id
         });
-        const students = familyMembers.filter(m => m.persona === 'gator' || m.roles?.includes('gator'));
-        setMyStudents(students);
-        
-        // Load family karma
+        loadedStudents = familyMembers.filter(m => 
+          (m.persona === 'gator' || m.roles?.includes('gator')) && m.id !== user.id
+        );
+        console.log('📍 Loaded students by family_group_id:', loadedStudents.length);
+      }
+      
+      // Method 3: Legacy student_emails (fallback)
+      if (loadedStudents.length === 0 && user.student_emails && user.student_emails.length > 0) {
+        console.log('📍 Loading students by student_emails:', user.student_emails);
+        const students = await Promise.all(
+          user.student_emails.map(email => 
+            base44.entities.User.filter({ email }).then(r => r[0])
+          )
+        );
+        loadedStudents = students.filter(Boolean);
+        console.log('📍 Loaded students by email:', loadedStudents.length);
+      }
+      
+      setMyStudents(loadedStudents);
+      
+      // Load family karma
+      if (user.family_group_id) {
         try {
           const karmaResult = await base44.functions.invoke('getFamilyKarma', {
             family_group_id: user.family_group_id
@@ -112,14 +151,6 @@ export default function ParentDashboard() {
         } catch (e) {
           console.log('Could not load family karma:', e);
         }
-      } else if (user.student_emails && user.student_emails.length > 0) {
-        // Legacy support
-        const students = await Promise.all(
-          user.student_emails.map(email => 
-            base44.entities.User.filter({ email }).then(r => r[0])
-          )
-        );
-        setMyStudents(students.filter(Boolean));
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
