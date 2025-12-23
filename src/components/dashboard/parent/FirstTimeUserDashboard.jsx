@@ -33,7 +33,7 @@ export default function FirstTimeUserDashboard({
                 YOUR FIRST STEP
               </span>
             </div>
-            <h3 className="text-xl font-bold mb-2">Answer a Student Question</h3>
+            <h3 className="text-xl font-bold mb-2 text-white">Answer a Student Question</h3>
             <p className="text-white/80 mb-4">
               Students are asking for career advice right now. Share your wisdom 
               and earn karma to boost your student's profile.
