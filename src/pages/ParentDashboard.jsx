@@ -415,6 +415,39 @@ export default function ParentDashboard() {
               </p>
             </div>
 
+            {/* MY GATORS SECTION */}
+            {myStudents.length > 0 && (
+              <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
+                    🐊 My Gators
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {myStudents.map((student) => (
+                      <div 
+                        key={student.id} 
+                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white font-bold">
+                          {student.full_name?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{student.full_name || 'Unknown'}</p>
+                          <p className="text-xs text-slate-500 truncate">{student.email}</p>
+                          {student.major && (
+                            <p className="text-xs text-blue-600">{student.major}</p>
+                          )}
+                        </div>
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* FAMILY KARMA - HERO SECTION */}
             <FamilyKarmaWidget 
               user={user} 
