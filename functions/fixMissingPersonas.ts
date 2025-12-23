@@ -1,71 +1,79 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
-  try {
-    const base44 = createClientFromRequest(req);
-    
-    // Verify admin
-    const user = await base44.auth.me();
-    if (!user?.roles?.includes('admin')) {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
-
-    // Get all users without persona
-    const allUsers = await base44.asServiceRole.entities.User.list();
-    const usersWithoutPersona = allUsers.filter(u => !u.persona || u.persona === '');
-
-    console.log(`Found ${usersWithoutPersona.length} users without persona`);
-
-    const fixed = [];
-    const skipped = [];
-
-    for (const userToFix of usersWithoutPersona) {
-      let newPersona = null;
-      
-      // Check email domain first - @ufl.edu = gator
-      if (userToFix.email?.toLowerCase().endsWith('@ufl.edu')) {
-        newPersona = 'gator';
-      }
-      // Check invite code used
-      else if (userToFix.invite_code_used) {
-        const inviteCode = await base44.asServiceRole.entities.InviteCode.filter(
-          { code: userToFix.invite_code_used }
-        );
+    try {
+        const base44 = createClientFromRequest(req);
         
-        if (inviteCode.length > 0) {
-          const invite = inviteCode[0];
-          // Determine persona from invite type
-          if (invite.invite_type?.includes('parent')) {
-            newPersona = 'parent';
-          } else if (invite.invite_type?.includes('gator') || invite.invite_type?.includes('student')) {
-            newPersona = 'gator';
-          }
+        const user = await base44.auth.me();
+        if (!user || !user.roles?.includes('admin')) {
+            return Response.json({ error: 'Admin access required' }, { status: 403 });
         }
-      }
 
-      if (newPersona) {
-        await base44.asServiceRole.entities.User.update(userToFix.id, {
-          persona: newPersona,
-          roles: [newPersona]
+        const { dryRun = true } = await req.json().catch(() => ({}));
+
+        // Get all users without a persona
+        const allUsers = await base44.asServiceRole.entities.User.filter({}, '-created_date', 500);
+        const usersWithoutPersona = allUsers.filter(u => !u.persona && !u.roles?.includes('admin'));
+
+        const results = {
+            total: usersWithoutPersona.length,
+            students: [],
+            parents: [],
+            errors: [],
+            dryRun
+        };
+
+        for (const u of usersWithoutPersona) {
+            const email = u.email?.toLowerCase() || '';
+            const isUFLEmail = email.endsWith('@ufl.edu');
+            
+            const assignedPersona = isUFLEmail ? 'gator' : 'parent';
+            const assignedRoles = isUFLEmail ? ['gator'] : ['parent'];
+
+            if (dryRun) {
+                // Just categorize, don't update
+                if (isUFLEmail) {
+                    results.students.push({ id: u.id, email: u.email, name: u.full_name });
+                } else {
+                    results.parents.push({ id: u.id, email: u.email, name: u.full_name });
+                }
+            } else {
+                // Actually update the user
+                try {
+                    await base44.asServiceRole.entities.User.update(u.id, {
+                        persona: assignedPersona,
+                        roles: assignedRoles,
+                        onboarding_completed: false // They still need to complete onboarding
+                    });
+
+                    if (isUFLEmail) {
+                        results.students.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
+                    } else {
+                        results.parents.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
+                    }
+                } catch (err) {
+                    console.error('Failed to update user:', u.email, err.message);
+                    results.errors.push({ id: u.id, email: u.email, error: err.message });
+                }
+            }
+        }
+
+        return Response.json({
+            success: true,
+            summary: {
+                total: results.total,
+                students: results.students.length,
+                parents: results.parents.length,
+                errors: results.errors.length
+            },
+            students: results.students,
+            parents: results.parents,
+            errors: results.errors,
+            dryRun: results.dryRun
         });
-        fixed.push({ email: userToFix.email, persona: newPersona });
-        console.log(`✅ Fixed ${userToFix.email} -> ${newPersona}`);
-      } else {
-        skipped.push(userToFix.email);
-        console.log(`⚠️ Skipped ${userToFix.email} (no clear persona)`);
-      }
+
+    } catch (error) {
+        console.error('fixMissingPersonas error:', error);
+        return Response.json({ error: error.message }, { status: 500 });
     }
-
-    return Response.json({
-      success: true,
-      total: usersWithoutPersona.length,
-      fixed: fixed.length,
-      skipped: skipped.length,
-      details: { fixed, skipped }
-    });
-
-  } catch (error) {
-    console.error('Fix personas error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
 });

@@ -31,6 +31,7 @@ import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircle
 import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
+import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
