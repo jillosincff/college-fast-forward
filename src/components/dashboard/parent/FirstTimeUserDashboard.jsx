@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Link2, User, ArrowRight, Sparkles } from 'lucide-react';
+import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
 export default function FirstTimeUserDashboard({ 
