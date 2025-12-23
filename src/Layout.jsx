@@ -1074,7 +1074,11 @@ function AppContent() {
 
     // CRITICAL: Determine effective role for routing - check roles array if persona is missing
     const effectiveRole = user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
-    const needsOnboarding = user.onboarding_completed !== true;
+    
+    // CRITICAL FIX: Only require onboarding for users who explicitly have onboarding_completed === false
+    // Existing users who have a persona but no onboarding_completed field should NOT be forced through onboarding
+    // They are considered "grandfathered in" as completed
+    const needsOnboarding = user.onboarding_completed === false && !hasNoRole;
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
     // CRITICAL: Check if user is in the middle of new user flow (has pending role in session)
