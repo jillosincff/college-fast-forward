@@ -1105,6 +1105,45 @@ const SignUpDiagnostics = () => {
     }
   };
 
+  const deleteExpiredAttempts = async () => {
+    if (!confirm(`Are you sure you want to delete ${expiredAttempts.length} expired verification attempts? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingExpired(true);
+    let deleted = 0;
+    let errors = 0;
+
+    try {
+      for (const attempt of expiredAttempts) {
+        try {
+          await base44.entities.RegistrationAttempt.delete(attempt.id);
+          deleted++;
+        } catch (err) {
+          console.error('Failed to delete attempt:', attempt.id, err);
+          errors++;
+        }
+      }
+
+      toast({
+        title: "✅ Cleanup Complete",
+        description: `Deleted ${deleted} expired attempts${errors > 0 ? `, ${errors} errors` : ''}`,
+      });
+
+      // Reload diagnostics
+      loadDiagnostics();
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete expired attempts",
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingExpired(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
