@@ -46,9 +46,20 @@ Deno.serve(async (req) => {
         });
         
         if (matchedStudent) {
-          // Link student to parent
+          // Generate family_group_id if parent doesn't have one
+          let familyGroupId = user.family_group_id;
+          if (!familyGroupId) {
+            familyGroupId = `family_${user.id}_${Date.now()}`;
+            // Update parent with family_group_id
+            await base44.asServiceRole.entities.User.update(user.id, {
+              family_group_id: familyGroupId
+            });
+          }
+          
+          // Link student to parent via family_group_id
           await base44.asServiceRole.entities.User.update(matchedStudent.id, {
-            parent_id: user.id
+            parent_id: user.id,
+            family_group_id: familyGroupId
           });
           
           linkedStudentIds.push(matchedStudent.id);
