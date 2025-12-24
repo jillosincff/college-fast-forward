@@ -30,6 +30,7 @@ export default function StudentOnboarding() {
   // Step 3: Help Needed
   const [helpNeeded, setHelpNeeded] = useState([]);
   const [helpRequest, setHelpRequest] = useState('');
+  const [preferredLocation, setPreferredLocation] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeUploading, setResumeUploading] = useState(false);
 
@@ -93,7 +94,7 @@ export default function StudentOnboarding() {
       await base44.auth.updateMe(updateData);
 
       // Post the help request to All Questions (REQUIRED now)
-      await JobRequest.create({
+      const jobRequestData = {
         role: 'Student Question',
         title: helpRequest.trim(),
         description: helpRequest.trim(),
@@ -106,7 +107,13 @@ export default function StudentOnboarding() {
         target_helpers: ['alumni', 'parents'],
         resume_url: resumeUrl,
         help_types: helpNeeded
-      });
+      };
+      
+      if (preferredLocation.trim()) {
+        jobRequestData.location_preference = preferredLocation.trim();
+      }
+      
+      await JobRequest.create(jobRequestData);
 
       await refreshUser();
 
@@ -354,6 +361,25 @@ export default function StudentOnboarding() {
               multiple={true}
               columns={1}
             />
+          </div>
+
+          {/* Preferred Location */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Where are you looking to work? <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={preferredLocation}
+              onChange={(e) => setPreferredLocation(e.target.value)}
+              placeholder="e.g., Miami, New York City, Remote, Anywhere"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                       focus:border-[#0021A5] focus:outline-none"
+              maxLength={100}
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              This helps connect you with people in your target area.
+            </p>
           </div>
 
           {/* Help Request - REQUIRED */}
