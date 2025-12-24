@@ -278,7 +278,7 @@ export default function Dashboard() {
       {/* Welcome Header - Mobile Optimized */}
       <div className="bg-[#0021A5] text-white py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl md:text-3xl font-bold">
+          <h1 className="text-xl md:text-3xl font-bold text-white">
             Welcome back, {user.first_name || (user.full_name?.includes(',') ? user.full_name.split(',')[1]?.trim().split(' ')[0] : user.full_name?.split(' ')[0]) || 'Gator'}! 👋
           </h1>
           <p className="text-white/80 text-sm mt-1 md:hidden">

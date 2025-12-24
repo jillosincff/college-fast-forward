@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Users, MessageSquare, Clock, AlertTriangle, CheckCircle, Edit, RefreshCw, ArrowRight, Loader2, ChevronUp, Eye, Award } from 'lucide-react';
+import { FileText, Users, MessageSquare, Clock, AlertTriangle, CheckCircle, Edit, RefreshCw, ArrowRight, Loader2, ChevronUp, Eye, Award, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { formatDistanceToNow, differenceInDays, addDays } from 'date-fns';
@@ -29,6 +29,7 @@ export default function StudentHelpRequestCard({
 }) {
   const [showRenewModal, setShowRenewModal] = useState(false);
   const [showResolveModal, setShowResolveModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [renewOption, setRenewOption] = useState('keep');
   const [selectedHelper, setSelectedHelper] = useState('');
   const [thankYouNote, setThankYouNote] = useState('');
@@ -91,6 +92,19 @@ export default function StudentHelpRequestCard({
       if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Failed to resolve request:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsSubmitting(true);
+    try {
+      await base44.entities.HelpRequest.delete(helpRequest.id);
+      setShowDeleteModal(false);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Failed to delete request:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -203,6 +217,14 @@ export default function StudentHelpRequestCard({
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Mark Resolved
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(true)}
+              className="text-red-600 border-red-300 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
             </Button>
           </div>
 
@@ -371,6 +393,39 @@ export default function StudentHelpRequestCard({
             <p className="text-xs text-slate-500 text-center">
               This will close your question. You can ask a new one anytime.
             </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Question</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-700 font-medium">Are you sure you want to delete this question?</p>
+              <p className="text-red-600 text-sm mt-2">This action cannot be undone. All answers and engagement will be lost.</p>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <p className="text-sm text-slate-600 mb-2">Question to delete:</p>
+              <p className="font-medium text-slate-800">"{helpRequest.description}"</p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowDeleteModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete Question'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
