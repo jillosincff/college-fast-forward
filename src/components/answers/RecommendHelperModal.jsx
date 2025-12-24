@@ -23,7 +23,7 @@ export default function RecommendHelperModal({ isOpen, onClose, question, curren
     
     setIsSearching(true);
     try {
-      const result = await base44.functions.invoke('searchUserForDirectory', {
+      const result = await base44.functions.invoke('searchUsersForTagging', {
         query: searchQuery,
         limit: 10
       });
