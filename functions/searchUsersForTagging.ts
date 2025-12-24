@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
     console.log('Searching for:', searchTerm);
 
     // Get all users with service role (to bypass RLS)
-    const allUsers = await base44.asServiceRole.entities.User.filter({}, '-created_date', 500);
+    // Fetch more users to ensure comprehensive search
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
     
     console.log('Total users fetched:', allUsers.length);
 
