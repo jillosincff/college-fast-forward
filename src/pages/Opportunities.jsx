@@ -91,7 +91,25 @@ export default function OpportunitiesPage() {
     setIsLoading(true);
     try {
       const fetchedOpportunities = await Opportunity.filter({}, '-created_date', 200);
-      const validOpportunities = (fetchedOpportunities || []).filter(opp => opp.title && opp.opportunity_type);
+      
+      // Filter out expired/closed opportunities and those older than 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const validOpportunities = (fetchedOpportunities || []).filter(opp => {
+        // Must have title and type
+        if (!opp.title || !opp.opportunity_type) return false;
+        
+        // Exclude expired or closed status
+        if (opp.status === 'expired' || opp.status === 'closed') return false;
+        
+        // Exclude opportunities older than 30 days
+        const createdDate = new Date(opp.created_date);
+        if (createdDate < thirtyDaysAgo) return false;
+        
+        return true;
+      });
+      
       setOpportunities(validOpportunities);
     } catch (error) {
       console.error('Failed to load opportunities:', error);

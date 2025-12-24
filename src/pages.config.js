@@ -12,6 +12,7 @@ import Connections from './pages/Connections';
 import Contact from './pages/Contact';
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
+import DebugFamilyLink from './pages/DebugFamilyLink';
 import DebugVerification from './pages/DebugVerification';
 import FAQ from './pages/FAQ';
 import Favorites from './pages/Favorites';
@@ -58,7 +59,6 @@ import SuccessStories from './pages/SuccessStories';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
-import DebugFamilyLink from './pages/DebugFamilyLink';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +77,7 @@ export const PAGES = {
     "Contact": Contact,
     "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
+    "DebugFamilyLink": DebugFamilyLink,
     "DebugVerification": DebugVerification,
     "FAQ": FAQ,
     "Favorites": Favorites,
@@ -123,7 +124,6 @@ export const PAGES = {
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
-    "DebugFamilyLink": DebugFamilyLink,
 }
 
 export const pagesConfig = {
