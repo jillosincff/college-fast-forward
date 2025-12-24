@@ -104,7 +104,8 @@ export default function StudentOnboarding() {
         status: 'active',
         role_type: 'full_time',
         target_helpers: ['alumni', 'parents'],
-        resume_url: resumeUrl
+        resume_url: resumeUrl,
+        help_types: helpNeeded
       });
 
       await refreshUser();
