@@ -1,20 +1,14 @@
-import About from './pages/About';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
 import AdminReferrals from './pages/AdminReferrals';
 import AdminSetup from './pages/AdminSetup';
 import AuthTest from './pages/AuthTest';
-import BrandAmbassador from './pages/BrandAmbassador';
-import CareerWishlist from './pages/CareerWishlist';
 import CompanyProfile from './pages/CompanyProfile';
-import ConnectHub from './pages/ConnectHub';
 import Connections from './pages/Connections';
-import Contact from './pages/Contact';
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
 import DebugFamilyLink from './pages/DebugFamilyLink';
 import DebugVerification from './pages/DebugVerification';
-import FAQ from './pages/FAQ';
 import Favorites from './pages/Favorites';
 import GatorAuth from './pages/GatorAuth';
 import GatorDirectory from './pages/GatorDirectory';
@@ -23,7 +17,6 @@ import GatorParentInvite from './pages/GatorParentInvite';
 import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorWelcome from './pages/GatorWelcome';
 import HelpCenter from './pages/HelpCenter';
-import Home from './pages/Home';
 import InterviewPrep from './pages/InterviewPrep';
 import InviteRequired from './pages/InviteRequired';
 import JobSpotlightLibrary from './pages/JobSpotlightLibrary';
@@ -63,23 +56,17 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "About": About,
     "AdminDashboard": AdminDashboard,
     "AdminEmail": AdminEmail,
     "AdminReferrals": AdminReferrals,
     "AdminSetup": AdminSetup,
     "AuthTest": AuthTest,
-    "BrandAmbassador": BrandAmbassador,
-    "CareerWishlist": CareerWishlist,
     "CompanyProfile": CompanyProfile,
-    "ConnectHub": ConnectHub,
     "Connections": Connections,
-    "Contact": Contact,
     "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
     "DebugFamilyLink": DebugFamilyLink,
     "DebugVerification": DebugVerification,
-    "FAQ": FAQ,
     "Favorites": Favorites,
     "GatorAuth": GatorAuth,
     "GatorDirectory": GatorDirectory,
@@ -88,7 +75,6 @@ export const PAGES = {
     "GatorRoleSelection": GatorRoleSelection,
     "GatorWelcome": GatorWelcome,
     "HelpCenter": HelpCenter,
-    "Home": Home,
     "InterviewPrep": InterviewPrep,
     "InviteRequired": InviteRequired,
     "JobSpotlightLibrary": JobSpotlightLibrary,
