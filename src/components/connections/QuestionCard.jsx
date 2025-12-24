@@ -129,15 +129,23 @@ export default function QuestionCard({ question, gator }) {
         </div>
       )}
 
-      {/* Topic tags */}
-      <div className="topic-tags">
-        {question.help_types?.slice(0, 3).map((type, idx) => (
-          <span key={idx} className="tag">{HELP_TYPE_LABELS[type] || type}</span>
-        ))}
-        {question.timeline === 'this_week' && (
-          <span className="tag tag-urgent">ASAP</span>
-        )}
-      </div>
+      {/* "What they're looking for" pills */}
+      {question.help_types?.length > 0 && (
+        <div className="help-types-pills">
+          <span className="label">Looking for:</span>
+          {question.help_types.map((type, idx) => (
+            <span key={idx} className="type-pill">{HELP_TYPE_LABELS[type] || type}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Preferred work location */}
+      {question.location_preference && (
+        <div className="location-preference">
+          <span className="location-icon">📍</span>
+          <span className="location-text">Wants to work in: <strong>{question.location_preference}</strong></span>
+        </div>
+      )}
 
       {/* Karma Boost Badge */}
       {question.karma_boost > 0 && (
@@ -273,25 +281,47 @@ export default function QuestionCard({ question, gator }) {
           display: inline-block;
         }
 
-        .topic-tags {
+        .help-types-pills {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+          align-items: center;
         }
 
-        .tag {
-          background: #FEF3C7;
-          color: #D97706;
-          padding: 4px 12px;
-          border-radius: 16px;
-          font-size: 12px;
+        .help-types-pills .label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #4B5563;
+          margin-right: 4px;
+        }
+
+        .type-pill {
+          background: #E0F2FE;
+          color: #0077B6;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 13px;
           font-weight: 500;
+          white-space: nowrap;
         }
 
-        .tag-urgent {
-          background: #FEE2E2;
-          color: #DC2626;
+        .location-preference {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 12px;
+          font-size: 13px;
+          color: #4B5563;
+        }
+
+        .location-icon {
+          font-size: 14px;
+        }
+
+        .location-text strong {
+          color: #111827;
+          font-weight: 600;
         }
 
         .question-stats {
