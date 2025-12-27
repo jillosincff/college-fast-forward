@@ -3,6 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Loader2 } from 'lucide-react';
+import PushNotificationPrompt from '@/components/notifications/PushNotificationPrompt';
 
 // Industry options
 const INDUSTRIES = [
@@ -38,6 +39,8 @@ const EXPERTISE_AREAS = [
 export default function Onboarding() {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   
   // Form fields (all optional except expertise)
   const [company, setCompany] = useState('');
@@ -94,10 +97,13 @@ export default function Onboarding() {
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
 
-      // Refresh user and go to dashboard
+      // Refresh user
       if (refreshUser) await refreshUser();
       
-      navigate('ParentDashboard');
+      // Show push notification prompt before going to dashboard
+      setOnboardingComplete(true);
+      setShowPushPrompt(true);
+      setLoading(false);
       
     } catch (error) {
       console.error('Failed to save onboarding:', error);
@@ -107,8 +113,37 @@ export default function Onboarding() {
     }
   };
 
+  const goToDashboard = () => {
+    navigate('ParentDashboard');
+  };
+
   // Can finish if they selected at least one way to help
   const canFinish = expertise.length > 0;
+
+  // Show push notification prompt after onboarding is complete
+  if (showPushPrompt && onboardingComplete) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full">
+          <div className="text-center mb-6">
+            <div className="text-5xl mb-4">🎉</div>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">
+              You're all set!
+            </h1>
+            <p className="text-slate-600">
+              One more thing before you go...
+            </p>
+          </div>
+          
+          <PushNotificationPrompt
+            user={user}
+            onComplete={goToDashboard}
+            onSkip={goToDashboard}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
