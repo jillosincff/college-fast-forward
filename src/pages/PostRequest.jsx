@@ -6,6 +6,7 @@ import { navigate, useParams } from '@/components/utils/navigation';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Zap, TrendingUp, Heart, Lightbulb } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function PostRequestPage() { // Renamed from PostRequest
   const { user } = useAuth();
@@ -84,15 +85,25 @@ export default function PostRequestPage() { // Renamed from PostRequest
           description: "This request will be live for 30 days. Your help request is now visible to the community.",
         });
 
-        // Notify matching parents (async, don't block UI)
+        // Send push notifications to matching parents/alumni (async, don't block UI)
         if (createdRequest?.id) {
           try {
-            const { notifyMatchingParents } = await import('@/functions/notifyMatchingParents');
-            notifyMatchingParents({ request_id: createdRequest.id }).catch(err => {
-              console.error('Failed to notify matching parents:', err);
+            // Send push notifications to matched helpers
+            base44.functions.invoke('sendStudentRequestPush', { 
+              request_id: createdRequest.id,
+              request_data: createdRequest
+            }).catch(err => {
+              console.error('Failed to send push notifications:', err);
+            });
+            
+            // Also send email notifications (existing flow)
+            base44.functions.invoke('notifyMatchingParents', { 
+              request_id: createdRequest.id 
+            }).catch(err => {
+              console.error('Failed to notify matching parents via email:', err);
             });
           } catch (err) {
-            console.error('Failed to import notifyMatchingParents:', err);
+            console.error('Failed to trigger notifications:', err);
           }
         }
       }
