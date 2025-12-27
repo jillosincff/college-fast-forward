@@ -91,9 +91,9 @@ Deno.serve(async (req) => {
 
     // Build notification content
     const requestSummary = buildRequestSummary(request);
-    const notificationTitle = "A Gator student needs your help";
+    const notificationTitle = "🆘 Student needs your help!";
     const notificationBody = requestSummary + " — tap to respond";
-    const deepLink = `/#QuestionDetail?id=${request.id}`;
+    const deepLink = `/#QuestionDetail?id=${request.id}&action=help`;
 
     // Send push to each matched user
     const results = [];
@@ -178,6 +178,16 @@ Deno.serve(async (req) => {
 function buildRequestSummary(request) {
   const parts = [];
   
+  // Add job type context
+  const jobTypeEmoji = {
+    'internship': '🎓',
+    'full_time': '💼',
+    'part_time': '⏰',
+    'contract': '📋'
+  };
+  
+  const emoji = jobTypeEmoji[request.job_type] || '🔥';
+  
   if (request.role) {
     parts.push(request.role);
   }
@@ -189,10 +199,11 @@ function buildRequestSummary(request) {
   }
   
   if (parts.length === 0 && request.description) {
-    return request.description.substring(0, 60) + (request.description.length > 60 ? '...' : '');
+    return emoji + ' ' + request.description.substring(0, 55) + (request.description.length > 55 ? '...' : '');
   }
   
-  return parts.join(' ') || 'Career help needed';
+  const summary = parts.join(' ') || 'Career advice needed';
+  return emoji + ' ' + summary;
 }
 
 async function checkRateLimit(base44, userEmail) {

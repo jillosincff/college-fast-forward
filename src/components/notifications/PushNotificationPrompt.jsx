@@ -81,12 +81,12 @@ export default function PushNotificationPrompt({ user, onComplete, onSkip }) {
         </div>
         
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-slate-900 mb-1">
-            Get instant alerts when students need your help
+          <h3 className="text-xl font-bold text-slate-900 mb-2">
+            🔔 Help students instantly
           </h3>
           <p className="text-slate-600 text-sm mb-4">
-            Respond in one tap when a student asks a question that matches your expertise. 
-            We'll only send 2-3 notifications per week max.
+            Get notified when a student needs your expertise — respond in one tap and make a real impact. 
+            <span className="font-medium text-slate-700">Max 2-3 alerts per week.</span>
           </p>
 
           {error && (
@@ -99,7 +99,7 @@ export default function PushNotificationPrompt({ user, onComplete, onSkip }) {
             <Button
               onClick={requestPermission}
               disabled={loading}
-              className="bg-[#0021A5] hover:bg-[#001580] text-white font-semibold"
+              className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] hover:from-[#001580] hover:to-[#d93d12] text-white font-semibold px-6 py-2.5 shadow-lg"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

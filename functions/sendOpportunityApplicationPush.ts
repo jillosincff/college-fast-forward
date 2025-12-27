@@ -43,9 +43,9 @@ Deno.serve(async (req) => {
     const company = company_name || opportunity.org_name || '';
     const studentName = applicant_name || 'A student';
 
-    const notificationTitle = "Student applied to your opportunity";
-    const notificationBody = `${studentName} applied to ${title}${company ? ` at ${company}` : ''} — tap to make intro`;
-    const deepLink = `/#MyApplications?opportunity_id=${opportunity_id}`;
+    const notificationTitle = "🎉 New application!";
+    const notificationBody = `${studentName} applied to ${title}${company ? ` at ${company}` : ''} — tap to connect`;
+    const deepLink = `/#MyApplications?opportunity_id=${opportunity_id}&action=intro`;
 
     // Create in-app notification
     await base44.asServiceRole.entities.Notification.create({
