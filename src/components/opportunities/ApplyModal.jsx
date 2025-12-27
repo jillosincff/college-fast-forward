@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -234,14 +233,14 @@ export default function ApplyModal({ isOpen, onClose, opportunity, onSuccess }) 
       
       // FIXED: Send notification to the correct recipient (application_email or created_by)
       if (applicationRecipientEmail) {
-        try {
-          const applicantName = user.first_name && user.last_name 
-            ? `${user.first_name} ${user.last_name}` 
-            : user.full_name || user.email;
+        const applicantName = user.first_name && user.last_name 
+          ? `${user.first_name} ${user.last_name}` 
+          : user.full_name || user.email;
 
+        try {
           const response = await base44.functions.invoke('sendApplicationNotification', {
             applicationId: application.id,
-            posterEmail: applicationRecipientEmail, // FIXED: Now uses application_email if available
+            posterEmail: applicationRecipientEmail,
             opportunityTitle: opportunity.title,
             opportunityId: opportunity.id,
             applicantName: applicantName,
@@ -255,6 +254,21 @@ export default function ApplyModal({ isOpen, onClose, opportunity, onSuccess }) 
           }
         } catch (notificationError) {
           console.error('⚠️ Notification failed (silent):', notificationError);
+        }
+
+        // Send push notification to poster (async, don't block)
+        try {
+          base44.functions.invoke('sendOpportunityApplicationPush', {
+            opportunity_id: opportunity.id,
+            applicant_id: user.id,
+            applicant_name: applicantName,
+            opportunity_title: opportunity.title,
+            company_name: opportunity.org_name
+          }).catch(err => {
+            console.error('Push notification failed (silent):', err);
+          });
+        } catch (pushError) {
+          console.error('⚠️ Push notification failed:', pushError);
         }
       }
       
