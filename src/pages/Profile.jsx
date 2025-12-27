@@ -8,6 +8,7 @@ import { Mail, Briefcase, GraduationCap, MapPin, Linkedin, Loader2, AlertTriangl
 import { navigate } from '@/components/utils/navigation';
 import { useParams } from '@/components/utils/navigation';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
+import NotificationSettings from '@/components/notifications/NotificationSettings';
 
 export default function Profile() {
   const { user: currentUser, isLoading: authIsLoading } = useAuth();
@@ -196,6 +197,13 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Notification Settings - only show for own profile and parents/alumni */}
+        {isMyProfile && (profileUser.persona === 'parent' || profileUser.persona === 'alumni' || profileUser.roles?.includes('parent') || profileUser.roles?.includes('alumni')) && (
+          <div className="mt-6">
+            <NotificationSettings user={profileUser} />
+          </div>
+        )}
       </div>
     </div>
   );
