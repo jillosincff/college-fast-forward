@@ -12,6 +12,7 @@ import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
 import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCard';
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
+import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 
 // CACHE BUSTER v2 - 2025-12-21
 export default function Dashboard() {
@@ -289,6 +290,16 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* 30-Day Intro Challenge Widget */}
+        <ChallengeWidget
+          user={user}
+          matches={parentMatches}
+          onIntroLogged={async () => {
+            await refreshUser();
+            await loadDashboardData();
+          }}
+        />
         
         {/* Your Active Help Request */}
         <motion.div
