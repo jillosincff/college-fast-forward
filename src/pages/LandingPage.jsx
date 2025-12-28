@@ -87,10 +87,10 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen" style={{ backgroundColor: '#0A1628' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#0021A5' }}>
         
         {/* TOP BAR */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A1628]/95 backdrop-blur-sm border-b border-white/10">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0021A5]/95 backdrop-blur-sm border-b border-white/10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <span className="text-white font-bold text-lg md:text-xl tracking-tight">
               College Fast Forward
@@ -107,7 +107,7 @@ export default function LandingPage() {
 
         {/* HERO SECTION */}
         <section className="pt-28 pb-16 px-4" style={{ 
-          background: 'linear-gradient(180deg, #0A1628 0%, #0D1F3C 50%, #0A1628 100%)'
+          background: 'linear-gradient(180deg, #0021A5 0%, #001a84 50%, #0021A5 100%)'
         }}>
           <div className="max-w-5xl mx-auto text-center">
             
@@ -172,7 +172,7 @@ export default function LandingPage() {
         </section>
 
         {/* ROLE SELECTION */}
-        <section className="py-16 px-4" style={{ backgroundColor: '#0A1628' }}>
+        <section className="py-16 px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-5xl mx-auto">
             
             <motion.h2 
@@ -268,7 +268,7 @@ export default function LandingPage() {
         </section>
 
         {/* MATCHING EXPLAINER */}
-        <section className="py-12 px-4" style={{ backgroundColor: 'rgba(0, 33, 165, 0.3)' }}>
+        <section className="py-12 px-4" style={{ backgroundColor: '#FA4616' }}>
           <div className="max-w-4xl mx-auto text-center">
             <motion.p 
               variants={fadeInUp}
@@ -283,7 +283,7 @@ export default function LandingPage() {
         </section>
 
         {/* TRUST ELEMENTS */}
-        <section className="py-12 px-4" style={{ backgroundColor: '#0A1628' }}>
+        <section className="py-12 px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-4xl mx-auto">
             <motion.div 
               variants={staggerChildren}
@@ -309,7 +309,7 @@ export default function LandingPage() {
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="py-16 px-4" style={{ backgroundColor: '#0D1F3C' }}>
+        <section className="py-16 px-4" style={{ backgroundColor: '#001a84' }}>
           <div className="max-w-6xl mx-auto">
             <motion.h2 
               variants={fadeInUp}
@@ -386,7 +386,7 @@ export default function LandingPage() {
         </section>
 
         {/* SIGN IN LINK */}
-        <section className="py-8 px-4 text-center" style={{ backgroundColor: '#0A1628' }}>
+        <section className="py-8 px-4 text-center" style={{ backgroundColor: '#0021A5' }}>
           <p className="text-white/70">
             Already have an account?{' '}
             <button 
@@ -450,7 +450,7 @@ export default function LandingPage() {
         </section>
 
         {/* FOOTER */}
-        <footer className="py-8 text-center" style={{ backgroundColor: '#0A1628' }}>
+        <footer className="py-8 text-center" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-6xl mx-auto px-4">
             <p className="text-white/60 text-sm mb-4">
               Powered by College Fast Forward
