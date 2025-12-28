@@ -117,7 +117,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-[#FA4616] font-semibold text-sm md:text-base tracking-wide uppercase mb-4"
             >
-              The UF Gators Network
+              College Fast Forward
             </motion.p>
 
             {/* HEADLINE */}
@@ -127,7 +127,7 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight"
             >
-              Your Network Is the Career Advantage Your Gator Doesn't Have.
+              The private career network for UF students, parents & alumni.
             </motion.h1>
 
             {/* SUBHEAD */}
@@ -318,7 +318,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-2xl md:text-3xl font-bold text-white text-center mb-10"
             >
-              Real Gators. Real Results.
+              Real Results from Real Families.
             </motion.h2>
 
             <motion.div 
@@ -418,7 +418,7 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-white/90 text-lg md:text-xl mb-8"
             >
-              Join {totalFamilies} Gator families already inside.
+              Join {totalFamilies} UF families already inside.
             </motion.p>
             <motion.div
               variants={fadeInUp}
@@ -432,7 +432,7 @@ export default function LandingPage() {
                 size="lg"
                 className="bg-white text-[#0021A5] hover:bg-slate-100 px-10 py-7 text-xl font-bold shadow-2xl"
               >
-                Join the Gator Network
+                Get Started
                 <ArrowRight className="w-6 h-6 ml-2" />
               </Button>
             </motion.div>
@@ -457,6 +457,9 @@ export default function LandingPage() {
             </p>
             <p className="text-white/40 text-sm mb-4">
               © {new Date().getFullYear()} College Fast Forward. All Rights Reserved.
+            </p>
+            <p className="text-white/40 text-xs mb-4">
+              College Fast Forward is not affiliated with or endorsed by the University of Florida.
             </p>
             <div className="flex justify-center gap-6 text-sm">
               <a href="#Terms" className="text-white/50 hover:text-white transition-colors">Terms of Service</a>
