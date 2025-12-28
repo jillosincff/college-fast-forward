@@ -85,7 +85,12 @@ export default function StudentOnboarding() {
         seeking_type: seeking,
         help_needed: helpNeeded,
         onboarding_completed: true,
-        onboarding_completed_at: new Date().toISOString()
+        onboarding_completed_at: new Date().toISOString(),
+        // Start the 30-day intro challenge
+        challenge_start_date: new Date().toISOString(),
+        challenge_intros_count: 0,
+        challenge_completed: false,
+        challenge_intros: []
       };
       
       if (resumeUrl) updateData.resume_url = resumeUrl;
