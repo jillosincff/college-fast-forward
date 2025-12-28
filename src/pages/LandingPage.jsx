@@ -758,9 +758,6 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            <p className="text-center text-slate-500 mt-8 text-sm">
-              Students & alumni pay. Parents are always FREE.
-            </p>
           </div>
         </section>
 
