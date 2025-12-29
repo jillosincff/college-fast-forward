@@ -433,7 +433,7 @@ export default function GatorAuth() {
             
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                Welcome to Gator Network 🐊
+                Welcome to College Fast Forward
               </h1>
               <p className="text-slate-600">
                 Tell us who you are to get started
