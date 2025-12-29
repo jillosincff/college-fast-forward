@@ -87,13 +87,14 @@ export default function GatorAuth() {
       const pendingRole = localStorage.getItem('pending_invite_role') || user.pending_role;
       const pendingCode = localStorage.getItem('pending_invite_code') || user.pending_code;
 
-      // Already onboarded → Dashboard (returning user)
+      // Already onboarded → Dashboard (returning user - prevent duplicate registration)
       if (user.persona && user.onboarding_completed === true) {
-        console.log('✅ [GatorAuth] Returning user detected, redirecting to dashboard');
+        console.log('✅ [GatorAuth] Returning user detected (already registered), redirecting to dashboard');
         // Clear any stale pending data
         localStorage.removeItem('pending_invite_role');
         localStorage.removeItem('pending_invite_code');
-        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+        // Show welcome back message before redirecting
+        setStep('welcome-back');
         return;
       }
       
@@ -102,7 +103,17 @@ export default function GatorAuth() {
         console.log('✅ [GatorAuth] Legacy user detected (no onboarding_completed field), redirecting to dashboard');
         localStorage.removeItem('pending_invite_role');
         localStorage.removeItem('pending_invite_code');
-        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+        // Show welcome back message before redirecting
+        setStep('welcome-back');
+        return;
+      }
+      
+      // Handle null onboarding_completed (bad data) - treat as complete
+      if (user.persona && user.onboarding_completed === null) {
+        console.log('⚠️ [GatorAuth] User with null onboarding_completed, treating as complete');
+        localStorage.removeItem('pending_invite_role');
+        localStorage.removeItem('pending_invite_code');
+        setStep('welcome-back');
         return;
       }
       
