@@ -4,7 +4,51 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { MessageSquare, Eye, GraduationCap, MapPin, Building2, Handshake, Award, Briefcase, Crown, Lock } from 'lucide-react';
-import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
+import { getDisplayName } from '@/components/utils/nameUtils';
+
+/**
+ * Get initials from user - first name initial + last name initial
+ * e.g., "Lindsey M. Osinoff" -> "LO", not "OM"
+ */
+function getInitials(user) {
+  if (!user) return 'GU';
+  
+  // Priority 1: Use first_name and last_name fields directly
+  if (user.first_name && user.last_name) {
+    return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+  }
+  
+  // Priority 2: Parse full_name or name - take FIRST word and LAST word (skip middle names/initials)
+  const fullName = user.full_name || user.name || '';
+  if (fullName && typeof fullName === 'string') {
+    const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
+    
+    if (nameParts.length >= 2) {
+      // Always use first word and last word (skip middle names/initials)
+      const firstInitial = nameParts[0][0];
+      const lastInitial = nameParts[nameParts.length - 1][0];
+      return `${firstInitial}${lastInitial}`.toUpperCase();
+    }
+    
+    if (nameParts.length === 1 && nameParts[0].length >= 2) {
+      return nameParts[0].slice(0, 2).toUpperCase();
+    }
+  }
+  
+  // Fallback: try email
+  if (user.email) {
+    const emailName = user.email.split('@')[0];
+    if (emailName.includes('.')) {
+      const parts = emailName.split('.');
+      if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
+        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+      }
+    }
+    return emailName.slice(0, 2).toUpperCase();
+  }
+  
+  return 'GU';
+}
 import { formatLabel } from '@/components/utils/format';
 import FoundingGatorBadge from '@/components/common/FoundingGatorBadge';
 
