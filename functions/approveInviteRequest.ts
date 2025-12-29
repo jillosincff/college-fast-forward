@@ -162,6 +162,11 @@ Deno.serve(async (req) => {
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="https://www.collegefastforward.com" style="background: #FA4616; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">Join Now →</a>
                         </div>
+                        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                            <p style="margin: 0; color: #0369a1; font-size: 14px;">
+                                <strong>💡 Tip:</strong> Just click "Join Now" and sign in with Google using this email (${email}). We'll automatically detect your approved status — no need to type the code!
+                            </p>
+                        </div>
                         <p style="color: #94a3b8; font-size: 13px;">Code expires in 30 days. Go Gators! 🐊</p>
                     </div>
                 `;
