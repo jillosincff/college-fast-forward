@@ -31,7 +31,18 @@ export default function GatorAuth() {
   const [step, setStep] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const processingRef = useRef(false);
+  
+  // Auto-redirect timer for welcome-back screen
+  useEffect(() => {
+    if (step === 'welcome-back' && user) {
+      const timer = setTimeout(() => {
+        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, user]);
 
   // Main routing logic
   useEffect(() => {
@@ -206,7 +217,9 @@ export default function GatorAuth() {
             console.error('Failed to apply pending role:', err);
             localStorage.removeItem('pending_invite_role');
             localStorage.removeItem('pending_invite_code');
+            setError('Something went wrong. Please try again.');
             setStep('role-select');
+          } finally {
             processingRef.current = false;
           }
         })();
@@ -344,10 +357,7 @@ export default function GatorAuth() {
   if (step === 'welcome-back') {
     const dashboardUrl = user?.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
     
-    // Auto-redirect after 3 seconds
-    setTimeout(() => {
-      navigate(dashboardUrl);
-    }, 3000);
+    // Auto-redirect handled by useEffect above (prevents memory leak)
     
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
@@ -360,7 +370,7 @@ export default function GatorAuth() {
             </div>
             
             <h1 className="text-2xl font-bold text-slate-900 mb-3">
-              Welcome back, {user?.first_name || user?.full_name?.split(' ')[0] || 'Gator'}!
+              Welcome back, {user?.first_name || user?.full_name?.split(' ')[0] || 'there'}!
             </h1>
             <p className="text-slate-600 mb-6">
               You're already registered. Taking you to your dashboard...
@@ -417,14 +427,14 @@ export default function GatorAuth() {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl flex items-center justify-center">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-                alt="Gator Network"
+                alt="College Fast Forward"
                 className="w-20 h-20 object-contain rounded-full"
               />
             </div>
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-3">
-            Almost there! 🐊
+            Almost there!
           </h1>
           <p className="text-white/85 text-lg mb-8">
             Sign in to continue as {selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alumni'}
@@ -495,11 +505,17 @@ export default function GatorAuth() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-lg flex items-center justify-center">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-                  alt="Gator Network"
+                  alt="College Fast Forward"
                   className="w-16 h-16 object-contain rounded-full"
                 />
               </div>
             </div>
+            
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                {error}
+              </div>
+            )}
             
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
@@ -624,8 +640,8 @@ export default function GatorAuth() {
             
             <p className="text-slate-400 text-xs mt-6 text-center">
               By continuing, you agree to our{' '}
-              <a href="#Terms" className="text-slate-500 underline">Terms</a> and{' '}
-              <a href="#Privacy" className="text-slate-500 underline">Privacy Policy</a>
+              <button onClick={() => navigate('Terms')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Terms</button> and{' '}
+              <button onClick={() => navigate('Privacy')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Privacy Policy</button>
             </p>
 
           </div>
