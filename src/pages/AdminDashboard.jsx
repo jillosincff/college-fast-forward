@@ -400,7 +400,14 @@ const AdminDashboard = () => {
               </p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              onClick={() => navigate('GatorAuth')} 
+              variant="outline"
+              className="w-full sm:w-auto bg-green-50 hover:bg-green-100 border-green-300"
+            >
+              🔐 Test Login Flow
+            </Button>
             <Button 
               onClick={() => navigate('TestingDashboard')} 
               variant="outline"
