@@ -101,19 +101,22 @@ export default function StudentHelpRequestCard({
     setIsSubmitting(true);
     try {
       console.log('🗑️ Attempting to delete HelpRequest:', helpRequest.id);
-      console.log('🗑️ Request details:', { 
-        student_id: helpRequest.student_id, 
-        student_email: helpRequest.student_email,
-        created_by: helpRequest.created_by 
-      });
       
       await base44.entities.HelpRequest.delete(helpRequest.id);
       console.log('✅ HelpRequest deleted successfully');
       setShowDeleteModal(false);
-      if (onRefresh) onRefresh();
+      // Pass true to signal deletion so Dashboard clears state immediately
+      if (onRefresh) onRefresh(true);
     } catch (error) {
       console.error('❌ Failed to delete request:', error);
-      alert('Failed to delete question. Please try again or contact support.');
+      // Check if it's a 404 - means already deleted
+      if (error.message?.includes('not found') || error.status === 404) {
+        console.log('✅ Request already deleted, clearing state');
+        setShowDeleteModal(false);
+        if (onRefresh) onRefresh(true);
+      } else {
+        alert('Failed to delete question. Please try again or contact support.');
+      }
     } finally {
       setIsSubmitting(false);
     }
