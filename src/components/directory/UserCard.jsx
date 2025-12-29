@@ -31,7 +31,7 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
       case 'student': return 'Gator';
       case 'gator': return 'Gator';
       case 'alumni': return 'Gator';
-      case 'parent': return 'Gator Parent';
+      case 'parent': return 'UF Parent';
       default: return 'Member';
     }
   };
