@@ -28,9 +28,9 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
 
   const getRoleDisplay = () => {
     switch (user.persona) {
-      case 'student': return 'Gator';
-      case 'gator': return 'Gator';
-      case 'alumni': return 'Gator';
+      case 'student': return 'UF Student';
+      case 'gator': return 'UF Student';
+      case 'alumni': return 'UF Alumni';
       case 'parent': return 'UF Parent';
       default: return 'Member';
     }
