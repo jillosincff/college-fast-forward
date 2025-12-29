@@ -13,7 +13,19 @@ function getUserInitials(user) {
     return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
   }
   
-  // Priority 2: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
+  // Priority 2: Try email first if it has firstname.lastname format (more reliable)
+  if (user.email) {
+    const emailName = user.email.split('@')[0];
+    if (emailName.includes('.')) {
+      const parts = emailName.split('.').filter(p => p && p.length > 0);
+      if (parts.length >= 2) {
+        // Use first and last parts of email (e.g., lindsey.osinoff -> LO)
+        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+      }
+    }
+  }
+  
+  // Priority 3: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
   const fullName = user.full_name || user.name || '';
   if (fullName && typeof fullName === 'string') {
     const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
@@ -30,24 +42,13 @@ function getUserInitials(user) {
     }
   }
   
-  // Fallback: try email
+  // Fallback: use email username
   if (user.email) {
     const emailName = user.email.split('@')[0];
-    if (emailName.includes('.')) {
-      const parts = emailName.split('.');
-      if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
-        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-      }
-    }
     return emailName.slice(0, 2).toUpperCase();
   }
   
   return 'GU';
-}
-
-// Debug: log what we're getting
-if (typeof window !== 'undefined') {
-  window._debugUserInitials = getUserInitials;
 }
 
 export default function UserAvatar({ 
