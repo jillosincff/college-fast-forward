@@ -343,7 +343,7 @@ export default function QuestionsPage() {
           <div className="helper-prompt">
             <div className="helper-prompt-content">
               <span className="helper-icon">💡</span>
-              <p>See a question you can help with? Click <strong>"Send First Answer"</strong> to share your advice with a UF student.</p>
+              <p>See a question you can help with? Click <strong>"Offer Help"</strong> to share your advice with a UF student.</p>
             </div>
           </div>
         )}
