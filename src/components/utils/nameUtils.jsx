@@ -104,19 +104,21 @@ export function getInitials(user) {
     return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
   }
   
-  // Priority 2: Parse full_name - take FIRST and LAST parts (skip middle names/initials)
-  const nameSource = user.full_name || '';
-  const nameParts = nameSource.trim().split(/\s+/).filter(part => part && part.length > 0);
-  
-  if (nameParts.length >= 2) {
-    // Always use first part and last part (skip middle names/initials)
-    const firstInitial = nameParts[0][0];
-    const lastInitial = nameParts[nameParts.length - 1][0];
-    return `${firstInitial}${lastInitial}`.toUpperCase();
-  }
-  
-  if (nameParts.length === 1 && nameParts[0].length >= 2) {
-    return nameParts[0].slice(0, 2).toUpperCase();
+  // Priority 2: Parse full_name or name - take FIRST and LAST parts (skip middle names/initials)
+  const nameSource = user.full_name || user.name || '';
+  if (nameSource && typeof nameSource === 'string') {
+    const nameParts = nameSource.trim().split(/\s+/).filter(part => part && part.length > 0);
+    
+    if (nameParts.length >= 2) {
+      // Always use first part and last part (skip middle names/initials)
+      const firstInitial = nameParts[0][0];
+      const lastInitial = nameParts[nameParts.length - 1][0];
+      return `${firstInitial}${lastInitial}`.toUpperCase();
+    }
+    
+    if (nameParts.length === 1 && nameParts[0].length >= 2) {
+      return nameParts[0].slice(0, 2).toUpperCase();
+    }
   }
   
   // Fallback: try email
