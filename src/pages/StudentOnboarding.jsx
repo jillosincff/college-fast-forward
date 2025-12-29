@@ -326,7 +326,7 @@ export default function StudentOnboarding() {
       totalSteps={3}
       onNext={handleFinish}
       onBack={handleBack}
-      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Posting...') : 'Post & Find My Matches →'}
+      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : 'Find My Matches →'}
       nextDisabled={!isStep3Valid || loading}
     >
       <div className="max-w-lg mx-auto">
@@ -432,10 +432,10 @@ e.g., "I'm a junior marketing major looking for summer internships in tech. I'd 
               </button>
               <button
                 type="button"
-                onClick={() => setHelpRequest("I'm interested in " + (industries[0] || "[industry]") + " but not sure how to break in. I'd love to connect with someone who works in the field and learn about different career paths.")}
+                onClick={() => setHelpRequest("I'm interested in " + (industries[0] || "consulting") + " but not sure how to break in. I'd love to connect with someone who works in the field and learn about different career paths.")}
                 className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
               >
-                → "I want to break into [industry] and need guidance..."
+                → "I want to break into consulting and need guidance..."
               </button>
             </div>
           </div>
