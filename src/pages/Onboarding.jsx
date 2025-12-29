@@ -47,7 +47,48 @@ export default function Onboarding() {
   const [jobTitle, setJobTitle] = useState('');
   const [industries, setIndustries] = useState([]);
   const [bio, setBio] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [linkedinError, setLinkedinError] = useState('');
   const [expertise, setExpertise] = useState([]);
+
+  // LinkedIn URL validation and formatting
+  const formatLinkedInUrl = (url) => {
+    if (!url.trim()) return '';
+    
+    // Remove whitespace
+    let cleaned = url.trim().toLowerCase();
+    
+    // Extract username from various formats
+    const patterns = [
+      /linkedin\.com\/in\/([a-zA-Z0-9\-_]+)/i,
+      /^([a-zA-Z0-9\-_]+)$/  // Just username
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return `https://linkedin.com/in/${match[1]}`;
+      }
+    }
+    
+    return null; // Invalid format
+  };
+
+  const handleLinkedInChange = (value) => {
+    setLinkedinUrl(value);
+    
+    if (!value.trim()) {
+      setLinkedinError('');
+      return;
+    }
+    
+    // Check if it contains linkedin.com/in/
+    if (!value.toLowerCase().includes('linkedin.com/in/')) {
+      setLinkedinError('Please enter a valid LinkedIn URL (e.g., linkedin.com/in/yourname)');
+    } else {
+      setLinkedinError('');
+    }
+  };
 
   const toggleIndustry = (id) => {
     if (industries.includes(id)) {
@@ -86,6 +127,14 @@ export default function Onboarding() {
         updateData.industries = industries;
       }
       if (bio.trim()) updateData.bio = bio.trim();
+      
+      // Format and save LinkedIn URL
+      if (linkedinUrl.trim()) {
+        const formattedLinkedIn = formatLinkedInUrl(linkedinUrl);
+        if (formattedLinkedIn) {
+          updateData.linkedin_url = formattedLinkedIn;
+        }
+      }
 
       console.log('Saving onboarding data:', updateData);
       
@@ -117,8 +166,8 @@ export default function Onboarding() {
     navigate('ParentDashboard');
   };
 
-  // Can finish if they selected at least one way to help
-  const canFinish = expertise.length > 0;
+  // Can finish if they selected at least one way to help and no LinkedIn error
+  const canFinish = expertise.length > 0 && !linkedinError;
 
   // Show push notification prompt after onboarding is complete
   if (showPushPrompt && onboardingComplete) {
@@ -243,6 +292,27 @@ export default function Onboarding() {
               maxLength={500}
             />
             <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
+          </div>
+
+          {/* LinkedIn URL */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={linkedinUrl}
+              onChange={(e) => handleLinkedInChange(e.target.value)}
+              placeholder="https://linkedin.com/in/yourname"
+              className={`w-full px-4 py-3 border-2 rounded-xl text-base
+                       focus:outline-none transition-colors
+                       ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
+            />
+            {linkedinError ? (
+              <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
+            ) : (
+              <p className="text-xs text-slate-400 mt-1">Helps students learn more about your background</p>
+            )}
           </div>
 
           {/* How they want to help - REQUIRED */}
