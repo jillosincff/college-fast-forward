@@ -338,6 +338,54 @@ export default function GatorAuth() {
   };
 
   // ═══════════════════════════════════════════════════════════
+  // WELCOME BACK (returning user trying to register again)
+  // ═══════════════════════════════════════════════════════════
+  
+  if (step === 'welcome-back') {
+    const dashboardUrl = user?.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+    
+    // Auto-redirect after 3 seconds
+    setTimeout(() => {
+      navigate(dashboardUrl);
+    }, 3000);
+    
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{
+        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
+      }}>
+        <div className="w-full max-w-lg text-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
+            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">👋</span>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-slate-900 mb-3">
+              Welcome back, {user?.first_name || user?.full_name?.split(' ')[0] || 'Gator'}!
+            </h1>
+            <p className="text-slate-600 mb-6">
+              You're already registered. Taking you to your dashboard...
+            </p>
+            
+            <div className="flex items-center justify-center gap-2 text-slate-500 mb-6">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Redirecting...</span>
+            </div>
+            
+            <Button
+              onClick={() => navigate(dashboardUrl)}
+              className="w-full h-12"
+              style={{ backgroundColor: '#0021A5' }}
+            >
+              Go to Dashboard Now
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // LOADING / PROCESSING STATE
   // ═══════════════════════════════════════════════════════════
   
