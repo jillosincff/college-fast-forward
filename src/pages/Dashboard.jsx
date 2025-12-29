@@ -435,7 +435,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <Briefcase className="w-5 h-5 text-purple-600" />
-                    💼 Latest Opportunities from Gator Parents
+                    💼 Latest Opportunities from UF Parents
                   </h3>
                   <Button
                     variant="ghost"
