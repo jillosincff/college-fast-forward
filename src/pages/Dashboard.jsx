@@ -305,15 +305,17 @@ export default function Dashboard() {
           </motion.div>
         )}
         
-        {/* 30-Day Intro Challenge Widget */}
-        <ChallengeWidget
-          user={user}
-          matches={parentMatches}
-          onIntroLogged={async () => {
-            await refreshUser();
-            await loadDashboardData();
-          }}
-        />
+        {/* 30-Day Intro Challenge Widget - only show after matches are loaded */}
+        {!loadingData && (
+          <ChallengeWidget
+            user={user}
+            matches={parentMatches}
+            onIntroLogged={async () => {
+              await refreshUser();
+              await loadDashboardData();
+            }}
+          />
+        )}
         
         {/* Your Active Help Request */}
         <motion.div
