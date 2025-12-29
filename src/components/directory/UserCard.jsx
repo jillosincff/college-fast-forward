@@ -46,20 +46,71 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
   const hasWaysToHelp = user.ways_to_help && user.ways_to_help.length > 0;
   const canProvideReferrals = user.can_provide_referrals === true;
 
-  // Map ways_to_help to color-coded chips
-  const getHelpChipColor = (help) => {
-    const helpLower = help.toLowerCase();
-    if (helpLower.includes('introduce') || helpLower.includes('introduction')) {
-      return 'bg-green-100 text-green-800 border-green-300';
+  // Normalize and format help tags with emojis
+  const getHelpTagDisplay = (help) => {
+    const helpLower = (help || '').toLowerCase().replace(/_/g, ' ');
+    
+    // Map to display format with emojis
+    if (helpLower.includes('introduction') || helpLower.includes('intro') || helpLower.includes('networking')) {
+      return { label: 'Intros', emoji: '🤝' };
+    }
+    if (helpLower.includes('resume') || helpLower.includes('linkedin')) {
+      return { label: 'Resume Review', emoji: '📝' };
     }
     if (helpLower.includes('career') || helpLower.includes('advice')) {
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return { label: 'Career Advice', emoji: '💬' };
     }
-    if (helpLower.includes('lead') || helpLower.includes('referral')) {
-      return 'bg-purple-100 text-purple-800 border-purple-300';
+    if (helpLower.includes('interview') || helpLower.includes('mock')) {
+      return { label: 'Mock Interviews', emoji: '📞' };
     }
-    return 'bg-slate-100 text-slate-700 border-slate-300';
+    if (helpLower.includes('job') && (helpLower.includes('lead') || helpLower.includes('referral'))) {
+      return { label: 'Job Referrals', emoji: '🎯' };
+    }
+    if (helpLower.includes('industry') || helpLower.includes('insight')) {
+      return { label: 'Industry Insights', emoji: '🏢' };
+    }
+    if (helpLower.includes('mentor')) {
+      return { label: 'Mentorship', emoji: '🎓' };
+    }
+    if (helpLower.includes('friendly') || helpLower.includes('ear')) {
+      return { label: 'Friendly Ear', emoji: '💬' };
+    }
+    if (helpLower.includes('all')) {
+      return { label: 'All Help Types', emoji: '🌟' };
+    }
+    // Default - capitalize first letter
+    return { label: help.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), emoji: '✨' };
   };
+
+  // Get all help tags from various fields
+  const getAllHelpTags = () => {
+    const tags = new Set();
+    
+    // From ways_to_help (alumni)
+    if (user.ways_to_help?.length > 0) {
+      user.ways_to_help.forEach(h => {
+        const tag = getHelpTagDisplay(h);
+        tags.add(JSON.stringify(tag));
+      });
+    }
+    
+    // From primary_goal (parents)
+    if (user.primary_goal?.length > 0) {
+      user.primary_goal.forEach(g => {
+        const tag = getHelpTagDisplay(g);
+        tags.add(JSON.stringify(tag));
+      });
+    }
+    
+    // Add referral tag if they can provide referrals
+    if (user.can_provide_referrals) {
+      tags.add(JSON.stringify({ label: 'Job Referrals', emoji: '🎯' }));
+    }
+    
+    return Array.from(tags).map(t => JSON.parse(t));
+  };
+
+  const helpTags = isParentOrAlumni ? getAllHelpTags() : [];
 
   // List view rendering
   if (viewMode === 'list') {
@@ -92,6 +143,19 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
             </p>
             {user.industry && (
               <p className="text-xs text-slate-500 mt-0.5">{user.industry}</p>
+            )}
+            {/* Help Tags - List View */}
+            {helpTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {helpTags.slice(0, 3).map((tag, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded-full">
+                    {tag.emoji} {tag.label}
+                  </span>
+                ))}
+                {helpTags.length > 3 && (
+                  <span className="text-xs text-slate-500">+{helpTags.length - 3}</span>
+                )}
+              </div>
             )}
           </div>
 
@@ -169,6 +233,26 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
             </div>
           </div>
         </div>
+
+        {/* Help Tags - Prominent display for parents/alumni */}
+        {isParentOrAlumni && helpTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {helpTags.slice(0, 4).map((tag, idx) => (
+              <span 
+                key={idx} 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-full transition-colors"
+              >
+                <span>{tag.emoji}</span>
+                <span className="font-medium">{tag.label}</span>
+              </span>
+            ))}
+            {helpTags.length > 4 && (
+              <span className="inline-flex items-center px-3 py-1.5 bg-slate-50 text-slate-500 text-sm rounded-full">
+                +{helpTags.length - 4} more
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Bio/Headline */}
         {user.bio && (
@@ -274,70 +358,18 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
           )}
         </div>
 
-        {/* Expertise Areas - Parents/Alumni Only */}
+        {/* Expertise Areas - Parents/Alumni Only (shown smaller, below help tags) */}
         {isParentOrAlumni && hasExpertise && (
-          <div className="mb-4 pb-4 border-b border-slate-100">
-            <div className="flex items-start gap-2 mb-2">
-              <Award className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
-              <span className="text-xs font-semibold text-purple-800">Expertise:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 ml-6">
-              {user.expertise_areas.slice(0, 2).map((expertise, idx) => (
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-1.5">
+              {user.expertise_areas.slice(0, 3).map((expertise, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                   {formatLabel(expertise)}
                 </Badge>
               ))}
-              {user.expertise_areas.length > 2 && (
+              {user.expertise_areas.length > 3 && (
                 <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
-                  +{user.expertise_areas.length - 2} more
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Primary Goal (from onboarding) - Parents Only */}
-        {isParent && user.primary_goal && user.primary_goal.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-start gap-2 mb-2">
-              <Handshake className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-              <span className="text-xs font-semibold text-green-800">Can help with:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 ml-6">
-              {user.primary_goal.slice(0, 3).map((goal, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs border bg-green-50 text-green-700 border-green-300">
-                  {goal === 'career_advice' && '💼 Career advice & mock interviews'}
-                  {goal === 'job_leads' && '🎯 Job leads at my network'}
-                  {goal === 'resume_reviews' && '📄 Resume & LinkedIn reviews'}
-                  {goal === 'friendly_ear' && '💬 Friendly Gator ear'}
-                  {goal === 'all_in' && '🌟 All of the above'}
-                </Badge>
-              ))}
-              {user.primary_goal.length > 3 && (
-                <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
-                  +{user.primary_goal.length - 3} more
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {/* Ways to Help - Color Coded - Alumni Only (legacy field) */}
-        {!isParent && isParentOrAlumni && hasWaysToHelp && (
-          <div className="mb-4">
-            <div className="flex items-start gap-2 mb-2">
-              <Handshake className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-              <span className="text-xs font-semibold text-green-800">Can help with:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 ml-6">
-              {user.ways_to_help.slice(0, 3).map((help, idx) => (
-                <Badge key={idx} variant="outline" className={`text-xs border ${getHelpChipColor(help)}`}>
-                  {formatLabel(help)}
-                </Badge>
-              ))}
-              {user.ways_to_help.length > 3 && (
-                <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
-                  +{user.ways_to_help.length - 3} more
+                  +{user.expertise_areas.length - 3} more
                 </Badge>
               )}
             </div>
