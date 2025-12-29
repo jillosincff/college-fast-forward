@@ -180,6 +180,27 @@ export default function GatorInviteCode() {
             </p>
           </div>
 
+          {/* Auto-detected approved invite banner */}
+          {approvedInvite && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl"
+            >
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-green-800">
+                    Good news! Your access was already approved 🎉
+                  </p>
+                  <p className="text-sm text-green-700 mt-1">
+                    We found your invite code. Just click "Continue" below!
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Code Input */}
           <div className="space-y-4">
             <Input
