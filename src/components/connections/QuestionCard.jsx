@@ -90,8 +90,11 @@ export default function QuestionCard({ question, gator }) {
   const year = gator?.graduation_year || question.student_year || '';
   const major = gator?.major || question.target_industry || question.student_major || '';
   
-  // Format time
-  const timeAgo = moment(question.created_date).fromNow();
+  // Format time - ensure it always shows "ago" (handles timezone edge cases)
+  const createdMoment = moment(question.created_date);
+  const timeAgo = createdMoment.isAfter(moment()) 
+    ? 'just now' 
+    : createdMoment.fromNow();
   
   // Truncate description
   const MAX_CHARS = 180;
