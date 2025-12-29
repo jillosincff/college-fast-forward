@@ -260,9 +260,17 @@ export default function QuestionsPage() {
   });
 
   const sortedProfiles = [...filteredProfiles].sort((a, b) => {
-    if (sortBy === 'newest') return new Date(b.created_date) - new Date(a.created_date);
-    if (sortBy === 'most_connected') return (b.connections_count || 0) - (a.connections_count || 0);
+    if (sortBy === 'newest') return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
+    if (sortBy === 'most_views') return (b.request?.view_count || 0) - (a.request?.view_count || 0);
+    if (sortBy === 'unanswered') {
+      const aUnanswered = (a.request?.answer_count || 0) === 0 ? 1 : 0;
+      const bUnanswered = (b.request?.answer_count || 0) === 0 ? 1 : 0;
+      if (aUnanswered !== bUnanswered) return bUnanswered - aUnanswered;
+      // Secondary sort by newest for unanswered
+      return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
+    }
     
+    // Default "relevance" sorting
     // Sort by karma_boost first (family karma system)
     const aKarmaBoost = a.request?.karma_boost || 0;
     const bKarmaBoost = b.request?.karma_boost || 0;
@@ -291,7 +299,7 @@ export default function QuestionsPage() {
         <div className="page-header">
           <div className="header-content">
             <div className="header-left">
-              <h1>Questions From The Swamp 🐊</h1>
+              <h1>Community Questions</h1>
               <p className="subtitle">
                 Students, parents, and alumni helping each other
               </p>
@@ -326,6 +334,16 @@ export default function QuestionsPage() {
                 <Plus className="w-5 h-5 mr-2" />
                 Ask a Question
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Helper Prompt for Parents/Alumni */}
+        {(user?.persona === 'parent' || user?.persona === 'alumni') && (
+          <div className="helper-prompt">
+            <div className="helper-prompt-content">
+              <span className="helper-icon">💡</span>
+              <p>See a question you can help with? Click <strong>"Send First Answer"</strong> to share your advice with a UF student.</p>
             </div>
           </div>
         )}
@@ -444,7 +462,8 @@ export default function QuestionsPage() {
                   >
                     <option value="relevance">Sort: Relevance</option>
                     <option value="newest">Sort: Newest</option>
-                    <option value="most_connected">Sort: Most Engaged</option>
+                    <option value="most_views">Sort: Most Views</option>
+                    <option value="unanswered">Sort: Unanswered First</option>
                   </select>
                 </div>
               </motion.div>
@@ -507,7 +526,7 @@ export default function QuestionsPage() {
               {/* Empty State */}
               {totalQuestionsFiltered === 0 && (
                 <div className="empty-state">
-                  <div className="empty-icon">🐊</div>
+                  <div className="empty-icon">📭</div>
                   <h3>No questions yet in this category</h3>
                   <p>
                     {filters.questionType === 'parent' 
@@ -639,7 +658,37 @@ export default function QuestionsPage() {
           flex-shrink: 0;
         }
 
+        /* Helper Prompt */
+        .helper-prompt {
+          max-width: 900px;
+          margin: 0 auto 20px;
+          padding: 0 20px;
+        }
 
+        .helper-prompt-content {
+          background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+          border: 1px solid #C7D2FE;
+          border-radius: 12px;
+          padding: 16px 20px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .helper-icon {
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+
+        .helper-prompt-content p {
+          margin: 0;
+          font-size: 15px;
+          color: #4338CA;
+        }
+
+        .helper-prompt-content strong {
+          color: #312E81;
+        }
 
         /* FILTERS */
         .filters-section {
@@ -909,6 +958,24 @@ export default function QuestionsPage() {
           .cta-button {
             width: 100%;
             min-height: 48px;
+          }
+
+          .helper-prompt {
+            padding: 0 16px;
+            margin-bottom: 16px;
+          }
+
+          .helper-prompt-content {
+            flex-direction: row;
+            padding: 14px 16px;
+          }
+
+          .helper-icon {
+            font-size: 20px;
+          }
+
+          .helper-prompt-content p {
+            font-size: 14px;
           }
 
           .filters-section {

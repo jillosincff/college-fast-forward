@@ -19,6 +19,7 @@ import LandingPage from './pages/LandingPage';
 import MessageComposer from './pages/MessageComposer';
 import MyApplications from './pages/MyApplications';
 import MyImpact from './pages/MyImpact';
+import MyMatches from './pages/MyMatches';
 import MyMessages from './pages/MyMessages';
 import MyRequests from './pages/MyRequests';
 import Notifications from './pages/Notifications';
@@ -40,7 +41,6 @@ import StudentOnboarding from './pages/StudentOnboarding';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
-import MyMatches from './pages/MyMatches';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +66,7 @@ export const PAGES = {
     "MessageComposer": MessageComposer,
     "MyApplications": MyApplications,
     "MyImpact": MyImpact,
+    "MyMatches": MyMatches,
     "MyMessages": MyMessages,
     "MyRequests": MyRequests,
     "Notifications": Notifications,
@@ -87,7 +88,6 @@ export const PAGES = {
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
-    "MyMatches": MyMatches,
 }
 
 export const pagesConfig = {
