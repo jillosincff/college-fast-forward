@@ -197,7 +197,7 @@ export default function QuestionCard({ question, gator }) {
 
       {/* Action button - different style based on answered status */}
       <button className={`card-action-button ${needsAttention ? 'primary' : 'secondary'}`}>
-        {needsAttention ? 'Send First Answer →' : 'View Answers →'}
+        {needsAttention ? 'Offer Help →' : 'View Answers →'}
       </button>
 
       <style jsx>{`
