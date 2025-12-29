@@ -202,20 +202,10 @@ export default function GatorAuth() {
         return;
       }
 
-      // Has persona already (returning user mid-onboarding) → Continue onboarding
-      if (user.persona && !user.onboarding_completed) {
-        console.log('🔄 [GatorAuth] Returning user mid-onboarding, continuing...');
-        if (user.persona === 'gator') {
-          navigate('StudentOnboarding');
-        } else {
-          navigate('Onboarding');
-        }
-        return;
-      }
-
       // No persona AND no pending role → Show role selection
       console.log('🎯 [GatorAuth] No role found, showing role selection');
       setStep('role-select');
+      return;
     } else {
       // Not authenticated → Show role selection FIRST (before OAuth)
       // This ensures role is set in localStorage BEFORE OAuth redirect
