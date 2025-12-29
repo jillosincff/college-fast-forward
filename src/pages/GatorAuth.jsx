@@ -486,7 +486,7 @@ export default function GatorAuth() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-slate-900">I'm a UF Parent</h3>
-                      <p className="text-sm text-slate-600">Support your Gator's career journey</p>
+                      <p className="text-sm text-slate-600">Support your student's career journey</p>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 ${
                       selectedRole === 'parent' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
@@ -515,7 +515,7 @@ export default function GatorAuth() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-slate-900">I'm a UF Alumni</h3>
-                      <p className="text-sm text-slate-600">Give back & help Gators get hired</p>
+                      <p className="text-sm text-slate-600">Give back & help UF students get hired</p>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 ${
                       selectedRole === 'alumni' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
