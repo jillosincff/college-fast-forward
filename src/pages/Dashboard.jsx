@@ -326,7 +326,13 @@ export default function Dashboard() {
             matchCount={parentMatches.length}
             responseCount={responseCount}
             parentMatches={parentMatches}
-            onRefresh={loadDashboardData}
+            onRefresh={(wasDeleted) => {
+              if (wasDeleted) {
+                // Clear helpRequest immediately on deletion
+                setHelpRequest(null);
+              }
+              loadDashboardData();
+            }}
           />
         </motion.div>
 
