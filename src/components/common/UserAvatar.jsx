@@ -14,8 +14,9 @@ function getUserInitials(user) {
   }
   
   // Priority 2: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
-  if (user.full_name && typeof user.full_name === 'string') {
-    const nameParts = user.full_name.trim().split(/\s+/).filter(part => part && part.length > 0);
+  const fullName = user.full_name || user.name || '';
+  if (fullName && typeof fullName === 'string') {
+    const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
     
     if (nameParts.length >= 2) {
       // Always use first word and last word (skip middle names/initials)
@@ -42,6 +43,11 @@ function getUserInitials(user) {
   }
   
   return 'GU';
+}
+
+// Debug: log what we're getting
+if (typeof window !== 'undefined') {
+  window._debugUserInitials = getUserInitials;
 }
 
 export default function UserAvatar({ 
