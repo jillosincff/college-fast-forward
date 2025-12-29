@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter, Crown } from 'lucide-react';
+import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter, Crown, LayoutGrid, List } from 'lucide-react';
 import UserCard from '@/components/directory/UserCard';
 import MessageUserModal from '@/components/directory/MessageUserModal';
 import ProfileModal from '@/components/directory/ProfileModal';
@@ -66,6 +66,9 @@ export default function GatorDirectory() {
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState('all'); // 'matches' or 'all'
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [myMatches, setMyMatches] = useState([]);
 
   // Scroll detection for sticky search bar
   useEffect(() => {
@@ -110,6 +113,16 @@ export default function GatorDirectory() {
         gators: studentCount + alumniCount
       }));
       logger.info(`[GatorDirectory] Loaded ${validUsers.length} users.`);
+
+      // Load user's matches if they're a student
+      if (user?.persona === 'gator' || user?.persona === 'student') {
+        try {
+          const matches = await base44.entities.Match.filter({ student_id: user.id });
+          setMyMatches(matches || []);
+        } catch (matchErr) {
+          console.log('Could not load matches:', matchErr);
+        }
+      }
 
     } catch (err) {
       logger.error("[GatorDirectory] Failed to load users", { error: err });
@@ -230,8 +243,14 @@ export default function GatorDirectory() {
       users = users.filter(user => user.can_provide_referrals === true);
     }
 
+    // If "My Matches" tab is active, filter to only show matched users
+    if (activeTab === 'matches' && myMatches.length > 0) {
+      const matchedParentIds = myMatches.map(m => m.parent_id);
+      users = users.filter(u => matchedParentIds.includes(u.id));
+    }
+
     setFilteredUsers(users);
-  }, [searchTerm, filters, allUsers]);
+  }, [searchTerm, filters, allUsers, activeTab, myMatches]);
 
   const handleMessageUser = (user) => {
     setSelectedUser(user);
@@ -284,7 +303,7 @@ export default function GatorDirectory() {
           <div className="text-center">
             {/* Title */}
             <h1 className="text-5xl md:text-6xl font-extrabold mb-3 leading-tight text-white tracking-tight">
-              Your Gator Network
+              UF Directory
             </h1>
             
             {/* Subtitle with emphasis */}
@@ -296,12 +315,12 @@ export default function GatorDirectory() {
             
             {/* Big Counter Pills */}
             <div className="mt-10 flex justify-center gap-4 flex-wrap">
-              {/* Gators Pill */}
+              {/* UF Members Pill */}
               <div className="group relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
                 <div className="relative px-8 py-4 bg-[#0021A5] rounded-full border-2 border-blue-400/50 shadow-xl">
                   <div className="text-4xl font-bold text-white mb-1">{loading ? '...' : stats.gators}</div>
-                  <div className="text-sm text-blue-200 font-medium uppercase tracking-wide">Gators</div>
+                  <div className="text-sm text-blue-200 font-medium uppercase tracking-wide">UF Members</div>
                 </div>
               </div>
               
@@ -318,16 +337,16 @@ export default function GatorDirectory() {
                     </div>
                     <div className="text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
                   </div>
-                  <div className="text-sm text-orange-100 font-medium uppercase tracking-wide">Parents</div>
+                  <div className="text-sm text-orange-100 font-medium uppercase tracking-wide">UF Parents</div>
                 </div>
               </div>
             </div>
 
-            {/* ALWAYS show Founding Gators banner */}
+            {/* ALWAYS show Founding Members banner */}
             {!loading && (
               <div className="mt-8 inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                 <p className="text-white/90 text-sm font-medium">
-                  Only <span className="text-[#FA4616] font-bold">{stats.members}</span> Founding Gators — be next
+                  Only <span className="text-[#FA4616] font-bold">{stats.members}</span> Founding Members — be next
                 </p>
               </div>
             )}
@@ -335,33 +354,60 @@ export default function GatorDirectory() {
         </div>
       </div>
 
-      {/* Sticky Search Bar */}
+      {/* Sticky Search Bar with Tabs */}
       <div className={`sticky top-0 z-100 transition-all duration-300 ${
         isScrolled ? 'shadow-lg' : 'shadow-none'
       }`} style={{ zIndex: 100 }}>
         <div className="bg-white px-4 sm:px-6 lg:px-8 transition-all duration-300" style={{
           padding: isScrolled ? '12px 2rem' : '1.5rem 2rem'
         }}>
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto space-y-4">
+            {/* Tabs: My Matches vs All Members */}
+            {(user?.persona === 'gator' || user?.persona === 'student') && myMatches.length > 0 && (
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setActiveTab('matches')}
+                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
+                    activeTab === 'matches'
+                      ? 'bg-[#FA4616] text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  My Matches ({myMatches.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
+                    activeTab === 'all'
+                      ? 'bg-[#0021A5] text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  All Members ({stats.members})
+                </button>
+              </div>
+            )}
+
+            {/* Search Bar */}
             <div className="relative">
-              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 ${
+              <Search className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 ${
                 isScrolled ? 'h-4 w-4' : 'h-5 w-5'
               }`} />
               <Input
                 id="search-directory"
-                placeholder="Search parents & alumni by name, company, industry, expertise..."
+                placeholder="Search by name, company, industry..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 transition-all duration-300 border-2 border-slate-300 focus:border-[#0021A5] ${
-                  isScrolled ? 'h-10 text-sm' : 'h-12 text-base'
+                className={`pl-12 transition-all duration-300 border-2 border-slate-300 focus:border-[#0021A5] rounded-xl ${
+                  isScrolled ? 'h-11 text-sm' : 'h-14 text-base'
                 }`}
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -373,15 +419,37 @@ export default function GatorDirectory() {
         <div className="px-4 sm:px-0">
           
           {/* Filters Bar - Scrolls Normally */}
-          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-8">
-            <div className="mb-4 text-center">
+          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg mb-8 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-slate-600 font-medium">
-                💡 <strong>Tip:</strong> Use search to find Gators by name, company, or skills. Filter by role to find parents/alumni. Click a profile to request an intro!
+                💡 <strong>Tip:</strong> Filter by role, industry, or help type to find the right connections!
               </p>
+              
+              {/* View Toggle */}
+              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'grid' ? 'bg-white shadow-sm text-[#0021A5]' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'list' ? 'bg-white shadow-sm text-[#0021A5]' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  title="List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             
             {/* Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div>
                 <label htmlFor="filter-persona" className="block text-sm font-medium text-slate-700 mb-1">
                   Role
@@ -414,21 +482,43 @@ export default function GatorDirectory() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="w-full h-11"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  {showAdvancedFilters ? 'Hide' : 'Show'} Advanced Filters
-                </Button>
-              </div>
+
+              {/* Help Type Filter - Moved to basic filters */}
+              {waysToHelpOptions.length > 0 && (
+                <div>
+                  <label htmlFor="filter-ways-to-help" className="block text-sm font-medium text-slate-700 mb-1">
+                    Help Type
+                  </label>
+                  <Select value={filters.waysToHelp} onValueChange={(value) => setFilters(f => ({ ...f, waysToHelp: value }))}>
+                    <SelectTrigger id="filter-ways-to-help" className="h-11">
+                      <SelectValue placeholder="Any type of help" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {waysToHelpOptions.map(way => (
+                        <SelectItem key={way} value={way}>{way}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Advanced Filters Toggle */}
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="text-slate-600 hover:text-slate-800"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                {showAdvancedFilters ? 'Hide' : 'More'} Filters
+              </Button>
             </div>
 
             {/* Advanced Filters - Collapsible */}
             {showAdvancedFilters && (
-              <div className="pt-4 border-t border-slate-200 space-y-4">
+              <div className="pt-4 mt-4 border-t border-slate-200 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {expertiseAreas.length > 0 && (
                     <div>
@@ -450,25 +540,21 @@ export default function GatorDirectory() {
                     </div>
                   )}
 
-                  {waysToHelpOptions.length > 0 && (
-                    <div>
-                      <label htmlFor="filter-ways-to-help" className="block text-sm font-medium text-slate-700 mb-1">
-                        <Heart className="w-4 h-4 inline mr-1" />
-                        Type of Help
-                      </label>
-                      <Select value={filters.waysToHelp} onValueChange={(value) => setFilters(f => ({ ...f, waysToHelp: value }))}>
-                        <SelectTrigger id="filter-ways-to-help" className="h-11">
-                          <SelectValue placeholder="Any type of help" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types of Help</SelectItem>
-                          {waysToHelpOptions.map(way => (
-                            <SelectItem key={way} value={way}>{way}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  {/* Location filter placeholder - for future */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Location (Coming Soon)
+                    </label>
+                    <Select disabled>
+                      <SelectTrigger className="h-11 opacity-50">
+                        <SelectValue placeholder="Any location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Locations</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Can Provide Referrals Checkbox */}
@@ -551,15 +637,25 @@ export default function GatorDirectory() {
             )}
           </div>
           
+          {/* Results Count */}
+          {!loading && !error && (
+            <div className="mb-6 flex items-center justify-between">
+              <p className="text-slate-600">
+                Showing <span className="font-semibold text-slate-900">{filteredUsers.length}</span> {filteredUsers.length === 1 ? 'member' : 'members'}
+                {activeTab === 'matches' && ' matched to your request'}
+              </p>
+            </div>
+          )}
+
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
+                <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 animate-pulse">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-slate-200 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 bg-slate-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-200 rounded w-1/2"></div>
                     </div>
                   </div>
                 </div>
@@ -568,7 +664,7 @@ export default function GatorDirectory() {
           ) : error ? (
             <ErrorState error={error} onRetry={loadDirectoryData} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
               {filteredUsers.length > 0 ? (
                 filteredUsers.map(directoryUser => (
                   <UserCard 
@@ -577,14 +673,15 @@ export default function GatorDirectory() {
                     onMessage={handleMessageUser} 
                     onViewProfile={handleViewProfile}
                     isLimitedMode={accessInfo.isLimitedMode}
+                    viewMode={viewMode}
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-2 border-[#FA4616]/30">
+                <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-[#FA4616]/30">
                   <div className="mb-4">
                     <div className="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full">
                       <p className="text-white font-bold text-lg">
-                        Only {stats.members} Founding Gators — be next
+                        Only {stats.members} Founding Members — be next
                       </p>
                     </div>
                   </div>
