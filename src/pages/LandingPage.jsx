@@ -254,13 +254,13 @@ export default function LandingPage() {
               className="text-center mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 max-w-md mx-auto"
             >
               <p className="text-slate-700 text-sm">
-                <strong>Already have an invite code?</strong>
+                <strong>Already a member?</strong>
               </p>
               <button
                 onClick={handleSignIn}
                 className="text-[#0021A5] font-semibold text-sm hover:underline mt-1"
               >
-                Sign in here to use your code →
+                Sign in here →
               </button>
             </motion.div>
           </div>
