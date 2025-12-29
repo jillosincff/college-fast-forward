@@ -66,6 +66,8 @@ function formatStudentName(fullName, firstName, lastName, email) {
 }
 
 export default function QuestionCard({ question, gator }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  
   const handleClick = () => {
     navigate('QuestionDetail', { id: question.id });
   };
@@ -90,15 +92,45 @@ export default function QuestionCard({ question, gator }) {
   
   // Format time
   const timeAgo = moment(question.created_date).fromNow();
+  
+  // Truncate description
+  const MAX_CHARS = 180;
+  const description = question.description || '';
+  const shouldTruncate = description.length > MAX_CHARS;
+  const displayText = shouldTruncate && !isExpanded 
+    ? description.slice(0, MAX_CHARS).trim() + '...'
+    : description;
+  
+  // Check if needs attention (no answers)
+  const needsAttention = (question.answer_count || 0) === 0;
 
   return (
-    <div className="question-card" onClick={handleClick}>
-      {/* Poster Type Badge - only for non-students */}
-      {posterType !== 'student' && (
-        <div className={`poster-type-badge ${posterType}`}>
-          {posterType === 'parent' ? '👨‍👩‍👧 Parent Question' : '🎯 Alumni Question'}
-        </div>
-      )}
+    <div className={`question-card ${needsAttention ? 'needs-attention' : ''}`} onClick={handleClick}>
+      {/* Tags Row - Above content */}
+      <div className="tags-row">
+        {/* Poster Type Badge */}
+        {posterType !== 'student' && (
+          <span className={`poster-badge ${posterType}`}>
+            {posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+          </span>
+        )}
+        {posterType === 'student' && (
+          <span className="poster-badge student">🎓 UF Student</span>
+        )}
+        
+        {/* Help type tags - smaller */}
+        {question.help_types?.slice(0, 2).map((type, idx) => (
+          <span key={idx} className="help-tag">{HELP_TYPE_LABELS[type] || type}</span>
+        ))}
+        {question.help_types?.length > 2 && (
+          <span className="help-tag more">+{question.help_types.length - 2}</span>
+        )}
+        
+        {/* Answered badge */}
+        {(question.answer_count || 0) > 0 && (
+          <span className="answered-badge">✓ Answered</span>
+        )}
+      </div>
 
       {/* Top metadata line */}
       <div className="question-metadata">
@@ -114,90 +146,67 @@ export default function QuestionCard({ question, gator }) {
           </>
         )}
         <span className="separator">•</span>
-        <span className="posted-time">Posted {timeAgo}</span>
+        <span className="posted-time">{timeAgo}</span>
       </div>
 
-      {/* Question text - THE HERO */}
+      {/* Question text - truncated */}
       <div className="question-text">
-        "{question.description}"
+        "{displayText}"
+        {shouldTruncate && !isExpanded && (
+          <button 
+            className="read-more-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(true);
+            }}
+          >
+            Read more
+          </button>
+        )}
       </div>
 
-      {/* Needs help badge */}
-      {(question.answer_count || 0) === 0 && (
-        <div className="needs-help-badge">
-          🆘 No answers yet - be the first to help!
-        </div>
-      )}
-
-      {/* "What they're looking for" pills */}
-      {question.help_types?.length > 0 && (
-        <div className="help-types-pills">
-          <span className="label">Looking for:</span>
-          {question.help_types.map((type, idx) => (
-            <span key={idx} className="type-pill">{HELP_TYPE_LABELS[type] || type}</span>
-          ))}
+      {/* Needs help indicator - more subtle */}
+      {needsAttention && (
+        <div className="needs-help-indicator">
+          <span className="pulse-dot"></span>
+          Needs first answer
         </div>
       )}
 
       {/* Preferred work location */}
       {question.location_preference && (
         <div className="location-preference">
-          <span className="location-icon">📍</span>
-          <span className="location-text">Wants to work in: <strong>{question.location_preference}</strong></span>
+          📍 {question.location_preference}
         </div>
       )}
 
       {/* Karma Boost Badge */}
       {question.karma_boost > 0 && (
         <div className="karma-boost-badge">
-          ⚡ Boosted by Family Karma (+{question.karma_boost})
+          ⚡ Family Karma Boost
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats - Compact with icons */}
       <div className="question-stats">
-        <span className="stat">
-          <span className="stat-icon">💬</span>
-          <span className="stat-number">{question.answer_count || 0}</span>
-          <span className="stat-label">{(question.answer_count || 0) === 1 ? 'answer' : 'answers'}</span>
-        </span>
-        
-        <span className="stat-separator">•</span>
-        
-        <span className="stat">
-          <span className="stat-icon">⬆️</span>
-          <span className="stat-number">{question.total_upvotes || 0}</span>
-          <span className="stat-label">upvotes</span>
-        </span>
-        
-        <span className="stat-separator">•</span>
-        
-        <span className="stat">
-          <span className="stat-icon">👁️</span>
-          <span className="stat-number">{question.view_count || 0}</span>
-          <span className="stat-label">views</span>
-        </span>
-        
-        {question.has_best_answer && (
-          <>
-            <span className="stat-separator">•</span>
-            <span className="best-answer-indicator">✅ Best answer</span>
-          </>
-        )}
+        <span className="stat">💬 {question.answer_count || 0}</span>
+        <span className="stat">⬆️ {question.total_upvotes || 0}</span>
+        <span className="stat">👁️ {question.view_count || 0}</span>
+        {question.has_best_answer && <span className="best-badge">✅ Best</span>}
       </div>
 
-      {/* Single action button */}
-      <button className="card-action-button">
-        {(question.answer_count || 0) === 0 ? 'Be the First to Answer →' : 'View Question & Answers →'}
+      {/* Action button - different style based on answered status */}
+      <button className={`card-action-button ${needsAttention ? 'primary' : 'secondary'}`}>
+        {needsAttention ? 'Send First Answer →' : 'View Answers →'}
       </button>
 
       <style jsx>{`
         .question-card {
           background: white;
           border: 1px solid #E5E7EB;
-          border-radius: 12px;
-          padding: 24px;
-          margin-bottom: 20px;
+          border-radius: 16px;
+          padding: 20px 24px;
+          margin-bottom: 16px;
           cursor: pointer;
           transition: all 0.2s ease;
         }
@@ -205,36 +214,74 @@ export default function QuestionCard({ question, gator }) {
         .question-card:hover {
           border-color: #0021A5;
           box-shadow: 0 8px 24px rgba(0, 33, 165, 0.12);
-          transform: translateY(-4px);
+          transform: translateY(-2px);
         }
 
-        .question-card:hover .question-text {
-          color: #0021A5;
+        .question-card.needs-attention {
+          border-left: 4px solid #F59E0B;
+          background: linear-gradient(to right, #FFFBEB 0%, white 8%);
         }
 
-        .poster-type-badge {
-          display: inline-block;
-          padding: 4px 12px;
-          border-radius: 16px;
-          font-size: 12px;
+        /* Tags Row */
+        .tags-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 10px;
+          align-items: center;
+        }
+
+        .poster-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 3px 10px;
+          border-radius: 12px;
+          font-size: 11px;
           font-weight: 600;
-          margin-bottom: 12px;
         }
 
-        .poster-type-badge.parent {
+        .poster-badge.student {
+          background: #DBEAFE;
+          color: #1E40AF;
+        }
+
+        .poster-badge.parent {
           background: #E0E7FF;
           color: #4338CA;
         }
 
-        .poster-type-badge.alumni {
+        .poster-badge.alumni {
           background: #FEF3C7;
           color: #92400E;
         }
 
-        .question-metadata {
-          font-size: 14px;
+        .help-tag {
+          background: #F3F4F6;
+          color: #4B5563;
+          padding: 3px 8px;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 500;
+        }
+
+        .help-tag.more {
+          background: #E5E7EB;
           color: #6B7280;
-          margin-bottom: 12px;
+        }
+
+        .answered-badge {
+          background: #D1FAE5;
+          color: #065F46;
+          padding: 3px 8px;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 600;
+        }
+
+        .question-metadata {
+          font-size: 13px;
+          color: #6B7280;
+          margin-bottom: 8px;
           display: flex;
           align-items: center;
           flex-wrap: wrap;
@@ -256,81 +303,85 @@ export default function QuestionCard({ question, gator }) {
 
         .posted-time {
           color: #9CA3AF;
+          font-size: 12px;
         }
 
         .question-text {
-          font-size: 20px;
-          font-weight: 700;
+          font-size: 16px;
+          font-weight: 600;
           line-height: 1.5;
           color: #111827;
-          margin-bottom: 16px;
-          display: -webkit-box;
-          -webkit-line-clamp: 5;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+          margin-bottom: 12px;
         }
 
-        .needs-help-badge {
-          background: #FEF3C7;
-          color: #D97706;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 13px;
+        .question-card:hover .question-text {
+          color: #0021A5;
+        }
+
+        .read-more-btn {
+          background: none;
+          border: none;
+          color: #0021A5;
+          font-size: 14px;
           font-weight: 600;
-          margin-bottom: 12px;
-          display: inline-block;
+          cursor: pointer;
+          padding: 0;
+          margin-left: 4px;
         }
 
-        .help-types-pills {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-bottom: 12px;
+        .read-more-btn:hover {
+          text-decoration: underline;
+        }
+
+        .needs-help-indicator {
+          display: inline-flex;
           align-items: center;
-        }
-
-        .help-types-pills .label {
-          font-size: 13px;
+          gap: 6px;
+          color: #D97706;
+          font-size: 12px;
           font-weight: 600;
-          color: #4B5563;
-          margin-right: 4px;
+          margin-bottom: 10px;
         }
 
-        .type-pill {
-          background: #E0F2FE;
-          color: #0077B6;
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 500;
-          white-space: nowrap;
+        .pulse-dot {
+          width: 8px;
+          height: 8px;
+          background: #F59E0B;
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.2); }
         }
 
         .location-preference {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 12px;
-          font-size: 13px;
-          color: #4B5563;
+          display: inline-block;
+          font-size: 12px;
+          color: #6B7280;
+          margin-bottom: 10px;
         }
 
-        .location-icon {
-          font-size: 14px;
-        }
-
-        .location-text strong {
-          color: #111827;
+        .karma-boost-badge {
+          display: inline-block;
+          background: linear-gradient(90deg, #FEFCE8 0%, #FEF9C3 100%);
+          color: #A16207;
+          font-size: 11px;
           font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 12px;
+          margin-bottom: 10px;
+          border: 1px solid #FDE047;
         }
 
         .question-stats {
           display: flex;
-          gap: 12px;
+          gap: 16px;
           align-items: center;
-          flex-wrap: wrap;
-          margin-bottom: 16px;
-          font-size: 14px;
+          margin-bottom: 14px;
+          font-size: 13px;
+          color: #6B7280;
         }
 
         .stat {
@@ -339,56 +390,40 @@ export default function QuestionCard({ question, gator }) {
           align-items: center;
         }
 
-        .stat-icon {
-          font-size: 16px;
-        }
-
-        .stat-number {
-          font-weight: 600;
-          color: #111827;
-        }
-
-        .stat-label {
-          color: #6B7280;
-        }
-
-        .stat-separator {
-          color: #D1D5DB;
-        }
-
-        .best-answer-indicator {
+        .best-badge {
           color: #10B981;
           font-weight: 500;
         }
 
-        .karma-boost-badge {
-          display: inline-block;
-          background: linear-gradient(90deg, #FEFCE8 0%, #FEF9C3 100%);
-          color: #A16207;
-          font-size: 12px;
-          font-weight: 600;
-          padding: 6px 12px;
-          border-radius: 16px;
-          margin-bottom: 12px;
-          border: 1px solid #FDE047;
-        }
-
         .card-action-button {
           width: 100%;
-          background: white;
-          color: #0021A5;
-          border: 2px solid #0021A5;
-          padding: 12px 24px;
-          border-radius: 8px;
+          padding: 12px 20px;
+          border-radius: 10px;
           font-weight: 600;
-          font-size: 16px;
+          font-size: 15px;
           cursor: pointer;
           transition: all 0.2s;
         }
 
-        .card-action-button:hover {
-          background: #0021A5;
+        .card-action-button.primary {
+          background: #10B981;
           color: white;
+          border: none;
+        }
+
+        .card-action-button.primary:hover {
+          background: #059669;
+        }
+
+        .card-action-button.secondary {
+          background: white;
+          color: #0021A5;
+          border: 2px solid #E5E7EB;
+        }
+
+        .card-action-button.secondary:hover {
+          border-color: #0021A5;
+          background: #F9FAFB;
         }
 
         @media (max-width: 768px) {
@@ -400,12 +435,25 @@ export default function QuestionCard({ question, gator }) {
             border-right: none;
             border-top: none;
           }
+
+          .question-card.needs-attention {
+            border-left: 3px solid #F59E0B;
+          }
+
+          .tags-row {
+            gap: 4px;
+            margin-bottom: 8px;
+          }
+
+          .poster-badge, .help-tag, .answered-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+          }
           
           .question-text {
             font-size: 15px;
             line-height: 1.4;
-            margin-bottom: 12px;
-            -webkit-line-clamp: 4;
+            margin-bottom: 10px;
           }
           
           .card-action-button {
@@ -416,40 +464,23 @@ export default function QuestionCard({ question, gator }) {
 
           .question-metadata {
             font-size: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
           }
 
           .question-stats {
             font-size: 12px;
             margin-bottom: 12px;
-          }
-
-          .poster-type-badge {
-            font-size: 11px;
-            padding: 3px 10px;
-            margin-bottom: 8px;
-          }
-
-          .topic-tags {
-            gap: 6px;
-            margin-bottom: 12px;
-          }
-
-          .tag {
-            font-size: 11px;
-            padding: 3px 10px;
-          }
-
-          .needs-help-badge {
-            font-size: 12px;
-            padding: 6px 10px;
-            margin-bottom: 10px;
+            gap: 12px;
           }
 
           .karma-boost-badge {
-            font-size: 11px;
-            padding: 4px 10px;
+            font-size: 10px;
+            padding: 3px 8px;
             margin-bottom: 8px;
+          }
+
+          .needs-help-indicator {
+            font-size: 11px;
           }
         }
       `}</style>
