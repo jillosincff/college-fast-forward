@@ -62,9 +62,6 @@ export default function UserAvatar({
 
   const initials = getUserInitials(user);
   
-  // Debug log
-  console.log('UserAvatar - user:', user?.full_name, user?.first_name, user?.last_name, '-> initials:', initials);
-  
   // Determine background color based on persona
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
   const bgColor = isParent ? 'bg-[#FA4616]' : 'bg-[#0021A5]';
