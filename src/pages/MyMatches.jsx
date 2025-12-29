@@ -268,7 +268,7 @@ export default function MyMatches() {
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Your Matches ({matches.length})</h1>
+              <h1 className="text-2xl font-bold text-white">Your Matches ({matches.length})</h1>
               <p className="text-white/80">Based on what you're looking for, these people can help.</p>
             </div>
           </div>
