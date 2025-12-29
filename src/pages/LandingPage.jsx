@@ -90,7 +90,7 @@ export default function LandingPage() {
               onClick={handleSignIn}
               className="bg-white text-[#0021A5] hover:bg-white/90 font-semibold"
             >
-              Sign In
+              Join Now / Sign In
             </Button>
           </div>
         </nav>

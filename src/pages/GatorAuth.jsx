@@ -643,6 +643,22 @@ export default function GatorAuth() {
               <button onClick={() => navigate('Terms')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Terms</button> and{' '}
               <button onClick={() => navigate('Privacy')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Privacy Policy</button>
             </p>
+            
+            <div className="text-center mt-6 pt-4 border-t border-slate-200">
+              <p className="text-slate-600 text-sm">
+                Already have an account?{' '}
+                <button
+                  onClick={() => {
+                    // Clear any pending role and go straight to OAuth
+                    localStorage.removeItem('pending_invite_role');
+                    setStep('oauth');
+                  }}
+                  className="text-[#0021A5] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
+                >
+                  Sign in here →
+                </button>
+              </p>
+            </div>
 
           </div>
         </div>
