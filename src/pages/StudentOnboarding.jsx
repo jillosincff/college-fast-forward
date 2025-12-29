@@ -185,13 +185,12 @@ export default function StudentOnboarding() {
         <div className="max-w-lg mx-auto">
           {/* Empathy Header */}
           <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🐊</div>
+            <div className="text-5xl mb-4">🎯</div>
             <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              We've got your back.
+              You're 2 minutes away from your first intro.
             </h1>
             <p className="text-slate-600">
-              Transitioning to "real life" is hard.<br />
-              <strong className="text-slate-800">But you're not doing it alone.</strong>
+              Tell us a bit about yourself so we can find the right matches.
             </p>
           </div>
 
@@ -232,19 +231,7 @@ export default function StudentOnboarding() {
                     {year}
                   </button>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => setGradYear('graduated')}
-                  className={`
-                    px-5 py-3 rounded-xl font-medium transition-all border-2
-                    ${gradYear === 'graduated'
-                      ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                    }
-                  `}
-                >
-                  Already graduated
-                </button>
+
               </div>
             </div>
 
@@ -257,7 +244,7 @@ export default function StudentOnboarding() {
                 type="text"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                placeholder="e.g., GATOR-JOHN"
+                placeholder="e.g., UF-JOHN"
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                          focus:border-[#0021A5] focus:outline-none uppercase"
                 maxLength={20}
