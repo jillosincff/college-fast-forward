@@ -291,6 +291,20 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
+        {/* Your Parent Matches - FIRST (user just clicked "Find My Matches") */}
+        {parentMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <StudentParentMatchesWidget
+              user={user}
+              matches={parentMatches}
+              onRefresh={loadDashboardData}
+            />
+          </motion.div>
+        )}
+        
         {/* 30-Day Intro Challenge Widget */}
         <ChallengeWidget
           user={user}
@@ -305,6 +319,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
         >
           <StudentHelpRequestCard
             helpRequest={helpRequest}
@@ -319,7 +334,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          transition={{ delay: 0.1 }}
           className="grid grid-cols-3 gap-2 md:gap-4"
         >
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 md:border-2">
@@ -341,21 +356,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Your Parent Matches */}
-        {parentMatches.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <StudentParentMatchesWidget
-              user={user}
-              matches={parentMatches}
-              onRefresh={loadDashboardData}
-            />
-          </motion.div>
-        )}
 
         {/* Recent Messages */}
         {messages.length > 0 && (
