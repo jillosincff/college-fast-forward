@@ -384,7 +384,7 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
           <div className="mt-4 text-center">
             <Button
               variant="outline"
-              onClick={() => navigate('GatorDirectory')}
+              onClick={() => navigate('MyMatches')}
               className="text-blue-600 border-blue-300 hover:bg-blue-50"
             >
               View All {filteredMatches.length} Matches

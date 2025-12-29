@@ -111,6 +111,7 @@ const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
 const QuestionDetail = React.lazy(() => import('./pages/QuestionDetail'));
 
 const Notifications = React.lazy(() => import('./pages/Notifications'));
+const MyMatches = React.lazy(() => import('./pages/MyMatches'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection'));
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
@@ -745,6 +746,7 @@ const getPageComponent = (pageName) => {
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
 
     case 'Notifications': return Notifications;
+    case 'MyMatches': return MyMatches;
 
     case 'GatorAuth': return GatorAuth;
     case 'GatorRoleSelection': return GatorRoleSelection;
