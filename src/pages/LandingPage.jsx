@@ -245,6 +245,24 @@ export default function LandingPage() {
             >
               🔥 First 1,000 members free forever. <span className="text-[#FA4616] font-semibold">{spotsRemaining} spots left.</span> Then $9-19/month per family.
             </motion.p>
+
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 max-w-md mx-auto"
+            >
+              <p className="text-slate-700 text-sm">
+                <strong>Already have an invite code?</strong>
+              </p>
+              <button
+                onClick={handleSignIn}
+                className="text-[#0021A5] font-semibold text-sm hover:underline mt-1"
+              >
+                Sign in here to use your code →
+              </button>
+            </motion.div>
           </div>
         </section>
 
