@@ -318,7 +318,7 @@ export default function QuestionsPage() {
         </div>
 
         {/* CTA Banner for Students */}
-        {user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
+        {!isLoading && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
           <div className="cta-banner">
             <div className="cta-content">
               <div className="cta-icon">💬</div>
