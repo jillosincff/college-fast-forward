@@ -8,7 +8,7 @@ import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import { formatLabel } from '@/components/utils/format';
 import FoundingGatorBadge from '@/components/common/FoundingGatorBadge';
 
-export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode = false }) {
+export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode = false, viewMode = 'grid' }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
@@ -61,20 +61,84 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
     return 'bg-slate-100 text-slate-700 border-slate-300';
   };
 
-  return (
-    <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 bg-white ${cardBorderClass} group`}>
-      <div className="p-6">
-        {/* Header with Avatar and Name */}
-        <div className="flex items-start gap-4 mb-4">
-          <Avatar className="w-16 h-16 flex-shrink-0">
+  // List view rendering
+  if (viewMode === 'list') {
+    return (
+      <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 bg-white ${cardBorderClass}`}>
+        <div className="p-5 flex items-center gap-6">
+          {/* Avatar */}
+          <Avatar className="w-14 h-14 flex-shrink-0">
             <AvatarImage src={user.profile_image} alt={displayName} />
             <AvatarFallback className="bg-[#0021A5] text-white text-lg font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
 
+          {/* Main Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-slate-900 truncate">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-lg font-bold text-slate-900">{displayName}</h3>
+              <Badge className={`${getRoleBadgeColor()} flex items-center gap-1`}>
+                {isParent && <Crown className="w-3 h-3 text-yellow-500" />}
+                {getRoleDisplay()}
+              </Badge>
+              {user.is_founding_member && <FoundingGatorBadge size="sm" />}
+            </div>
+            <p className="text-sm text-slate-600 mt-1">
+              {user.current_position || user.job_title}
+              {(user.current_position || user.job_title) && (user.current_company || user.company) && ' at '}
+              {user.current_company || user.company}
+              {!user.current_position && !user.job_title && user.major && user.major}
+            </p>
+            {user.industry && (
+              <p className="text-xs text-slate-500 mt-0.5">{user.industry}</p>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-shrink-0">
+            {isLimitedMode ? (
+              <Button disabled className="gap-2 bg-slate-300 text-slate-500 cursor-not-allowed">
+                <Lock className="w-4 h-4" />
+                Message
+              </Button>
+            ) : (
+              <Button
+                onClick={() => onMessage(user)}
+                className="gap-2 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Message
+              </Button>
+            )}
+            <Button
+              onClick={() => onViewProfile(user.id)}
+              variant="outline"
+              className="text-slate-600"
+            >
+              Profile
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // Grid view rendering (default)
+  return (
+    <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 bg-white ${cardBorderClass} group`}>
+      <div className="p-6">
+        {/* Header with Avatar and Name - Larger for better readability */}
+        <div className="flex items-start gap-5 mb-5">
+          <Avatar className="w-18 h-18 flex-shrink-0" style={{ width: '72px', height: '72px' }}>
+            <AvatarImage src={user.profile_image} alt={displayName} />
+            <AvatarFallback className="bg-[#0021A5] text-white text-xl font-semibold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-slate-900 truncate">
               {displayName}
             </h3>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -280,23 +344,13 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
           </div>
         )}
 
-        {/* Action Buttons with Pulse Animation on Message Button */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => onViewProfile(user.id)}
-            variant="outline"
-            size="sm"
-            className="flex-1 gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            View Profile
-          </Button>
+        {/* Action Buttons - Message is primary (orange), Profile is secondary */}
+        <div className="flex gap-3 mt-2">
           {isLimitedMode ? (
             <div className="relative group flex-1">
               <Button
                 disabled
-                size="sm"
-                className="w-full gap-2 bg-slate-300 text-slate-500 cursor-not-allowed"
+                className="w-full h-11 gap-2 bg-slate-300 text-slate-500 cursor-not-allowed"
               >
                 <Lock className="w-4 h-4" />
                 Message
@@ -309,13 +363,20 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
           ) : (
             <Button
               onClick={() => onMessage(user)}
-              size="sm"
-              className="flex-1 gap-2 bg-[#0021A5] hover:bg-[#001580] text-white relative group-hover:animate-pulse"
+              className="flex-1 h-11 gap-2 bg-[#FA4616] hover:bg-orange-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
             >
               <MessageSquare className="w-4 h-4" />
               Message
             </Button>
           )}
+          <Button
+            onClick={() => onViewProfile(user.id)}
+            variant="outline"
+            className="h-11 gap-2 text-slate-600 hover:text-slate-800 border-slate-300"
+          >
+            <Eye className="w-4 h-4" />
+            Profile
+          </Button>
         </div>
       </div>
     </Card>
