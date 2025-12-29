@@ -88,8 +88,7 @@ export default function LandingPage() {
             </span>
             <Button
               onClick={handleSignIn}
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+              className="bg-white text-[#0021A5] hover:bg-white/90 font-semibold"
             >
               Sign In
             </Button>
