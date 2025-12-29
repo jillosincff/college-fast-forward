@@ -100,11 +100,20 @@ export default function StudentHelpRequestCard({
   const handleDelete = async () => {
     setIsSubmitting(true);
     try {
+      console.log('🗑️ Attempting to delete HelpRequest:', helpRequest.id);
+      console.log('🗑️ Request details:', { 
+        student_id: helpRequest.student_id, 
+        student_email: helpRequest.student_email,
+        created_by: helpRequest.created_by 
+      });
+      
       await base44.entities.HelpRequest.delete(helpRequest.id);
+      console.log('✅ HelpRequest deleted successfully');
       setShowDeleteModal(false);
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error('Failed to delete request:', error);
+      console.error('❌ Failed to delete request:', error);
+      alert('Failed to delete question. Please try again or contact support.');
     } finally {
       setIsSubmitting(false);
     }
