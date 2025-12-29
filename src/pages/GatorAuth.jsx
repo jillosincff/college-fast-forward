@@ -479,8 +479,8 @@ export default function GatorAuth() {
 
           <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
             By continuing, you agree to our{' '}
-            <a href="#Terms" className="text-white/70 underline">Terms</a> and{' '}
-            <a href="#Privacy" className="text-white/70 underline">Privacy Policy</a>
+            <button onClick={() => navigate('Terms')} className="text-white/70 underline bg-transparent border-none p-0 cursor-pointer">Terms</button> and{' '}
+            <button onClick={() => navigate('Privacy')} className="text-white/70 underline bg-transparent border-none p-0 cursor-pointer">Privacy Policy</button>
           </p>
 
         </div>
