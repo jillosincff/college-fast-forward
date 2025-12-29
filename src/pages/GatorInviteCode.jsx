@@ -2,16 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Lock, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { Lock, AlertCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
+import { useAuth } from '@/components/auth/AuthContext';
 
 export default function GatorInviteCode() {
+  const { user } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isCheckingApproval, setIsCheckingApproval] = useState(true);
+  const [approvedInvite, setApprovedInvite] = useState(null);
   
   // Get the pending role from localStorage (set by GatorAuth)
   const pendingRole = localStorage.getItem('pending_invite_role') || 'parent';
+
+  // Check if user has an approved invite request (auto-fill their code)
+  useEffect(() => {
+    const checkApprovedInvite = async () => {
+      // Need user email to check
+      const emailToCheck = user?.email;
+      if (!emailToCheck) {
+        setIsCheckingApproval(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 Checking for approved invite for:', emailToCheck);
+        const response = await base44.functions.invoke('checkApprovedInvite', {
+          email: emailToCheck
+        });
+
+        if (response.data?.success && response.data?.has_approved_invite && response.data?.code_valid) {
+          console.log('✅ Found valid approved invite:', response.data.invite_code);
+          setApprovedInvite(response.data);
+          setInviteCode(response.data.invite_code);
+        } else if (response.data?.has_approved_invite && !response.data?.code_valid) {
+          console.log('⚠️ Approved invite but code invalid:', response.data.message);
+          // Don't set error - just let them request a new code
+        }
+      } catch (err) {
+        console.error('Failed to check approved invite:', err);
+        // Don't block - just let them enter code manually
+      } finally {
+        setIsCheckingApproval(false);
+      }
+    };
+
+    checkApprovedInvite();
+  }, [user?.email]);
 
   // Check for expired pending invite on mount
   useEffect(() => {
