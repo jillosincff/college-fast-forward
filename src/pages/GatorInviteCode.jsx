@@ -203,18 +203,29 @@ export default function GatorInviteCode() {
 
           {/* Code Input */}
           <div className="space-y-4">
-            <Input
-              value={inviteCode}
-              onChange={(e) => {
-                setInviteCode(e.target.value.toUpperCase());
-                setError('');
-              }}
-              placeholder="ENTER CODE"
-              className="text-center text-xl font-mono tracking-wider border-2 border-gray-200 focus:border-[#0021A5] rounded-xl py-6 uppercase"
-              autoFocus
-              maxLength={20}
-              onKeyDown={(e) => e.key === 'Enter' && !isVerifying && handleContinue()}
-            />
+            {isCheckingApproval ? (
+              <div className="flex items-center justify-center py-6 text-gray-500">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Checking your account...
+              </div>
+            ) : (
+              <Input
+                value={inviteCode}
+                onChange={(e) => {
+                  setInviteCode(e.target.value.toUpperCase());
+                  setError('');
+                }}
+                placeholder="ENTER CODE"
+                className={`text-center text-xl font-mono tracking-wider border-2 rounded-xl py-6 uppercase ${
+                  approvedInvite 
+                    ? 'border-green-300 bg-green-50 focus:border-green-500' 
+                    : 'border-gray-200 focus:border-[#0021A5]'
+                }`}
+                autoFocus={!approvedInvite}
+                maxLength={20}
+                onKeyDown={(e) => e.key === 'Enter' && !isVerifying && handleContinue()}
+              />
+            )}
 
             {error && (
               <motion.div
