@@ -240,13 +240,22 @@ export default function GatorInviteCode() {
 
             <button
               onClick={handleContinue}
-              disabled={!inviteCode.trim() || isVerifying}
-              className="w-full bg-[#0021A5] hover:bg-[#001580] text-white rounded-xl py-4 text-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={!inviteCode.trim() || isVerifying || isCheckingApproval}
+              className={`w-full rounded-xl py-4 text-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                approvedInvite 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-[#0021A5] hover:bg-[#001580] text-white'
+              }`}
             >
               {isVerifying ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Verifying...
+                </>
+              ) : approvedInvite ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  Continue to Setup →
                 </>
               ) : (
                 'Continue →'
