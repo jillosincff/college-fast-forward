@@ -237,20 +237,27 @@ export default function GatorAuth() {
     }
   }, [user, isLoading, refreshUser]);
 
-  const handleGoogleSignIn = () => {
-    // CRITICAL: Role must be selected BEFORE OAuth
-    if (!selectedRole) {
+  const handleGoogleSignIn = (isReturningUser = false) => {
+    // For new users, role must be selected BEFORE OAuth
+    // For returning users (sign in flow), skip role requirement
+    if (!selectedRole && !isReturningUser) {
       console.error('❌ [GatorAuth] No role selected before OAuth!');
       return;
     }
     
     setLoading(true);
     
-    // Save role to localStorage BEFORE OAuth redirect
+    // Save role to localStorage BEFORE OAuth redirect (only if role selected)
     // This survives the OAuth redirect (mobile browsers may clear sessionStorage)
-    localStorage.setItem('pending_invite_role', selectedRole);
-    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-    console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
+    if (selectedRole) {
+      localStorage.setItem('pending_invite_role', selectedRole);
+      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+      console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
+    } else {
+      // Returning user - clear any stale pending role
+      localStorage.removeItem('pending_invite_role');
+      console.log('🔐 [GatorAuth] Returning user sign-in (no role pre-selected)');
+    }
     
     // CRITICAL: Ensure we use the app's actual origin, not any redirect URL
     const appOrigin = window.location.origin;
@@ -259,7 +266,7 @@ export default function GatorAuth() {
     console.log('🔐 [GatorAuth] Starting Google sign-in');
     console.log('🔐 [GatorAuth] App origin:', appOrigin);
     console.log('🔐 [GatorAuth] Callback URL:', callbackUrl);
-    console.log('🔐 [GatorAuth] Selected role:', selectedRole);
+    console.log('🔐 [GatorAuth] Selected role:', selectedRole || '(returning user)');
     
     // Validate that the origin is our app, not an external site
     if (appOrigin.includes('ufl.edu') || appOrigin.includes('google.com')) {
@@ -441,7 +448,7 @@ export default function GatorAuth() {
           </p>
 
           <Button
-            onClick={handleGoogleSignIn}
+            onClick={() => handleGoogleSignIn(false)}
             disabled={loading}
             className="w-full max-w-sm mx-auto h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg mb-4"
           >
@@ -649,9 +656,9 @@ export default function GatorAuth() {
                 Already have an account?{' '}
                 <button
                   onClick={() => {
-                    // Clear any pending role and go straight to OAuth
+                    // Clear any pending role and go straight to Google sign-in
                     localStorage.removeItem('pending_invite_role');
-                    setStep('oauth');
+                    handleGoogleSignIn(true); // true = returning user
                   }}
                   className="text-[#0021A5] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
                 >
