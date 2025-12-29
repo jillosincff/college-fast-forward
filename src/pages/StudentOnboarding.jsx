@@ -270,16 +270,19 @@ export default function StudentOnboarding() {
         nextDisabled={!isStep2Valid}
       >
         <div className="max-w-lg mx-auto">
-          <div className="text-center mb-6">
+          <div className="text-center mb-8">
             <h1 className="text-xl font-bold text-slate-800 mb-2">
               What kind of work interests you?
             </h1>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-600">
+              We'll match you with parents and alumni who work in these fields.
+            </p>
+            <p className="text-slate-400 text-sm mt-1">
               Select all that apply
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Industries */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-3">
@@ -293,6 +296,9 @@ export default function StudentOnboarding() {
                 columns={2}
               />
             </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-200"></div>
 
             {/* What are you looking for */}
             <div>
