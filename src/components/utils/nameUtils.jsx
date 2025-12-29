@@ -94,24 +94,32 @@ export function getDisplayName(user) {
 
 /**
  * Get initials from user object
+ * Always returns first name initial + last name initial (e.g., "LO" for "Lindsey M. Osinoff")
  */
 export function getInitials(user) {
   if (!user) return 'GU';
   
-  // Priority 1: Use first and last name
+  // Priority 1: Use first and last name fields directly
   if (user.first_name && user.last_name) {
     return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
   }
   
-  // Priority 2: Parse display name
-  const displayName = getDisplayName(user);
-  const nameParts = displayName.split(' ').filter(Boolean);
+  // Priority 2: Parse full_name - take FIRST and LAST parts (skip middle names/initials)
+  const nameSource = user.full_name || getDisplayName(user);
+  const nameParts = nameSource.split(' ').filter(part => part && part.length > 0);
   
   if (nameParts.length >= 2) {
-    return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+    // Always use first part and last part (skip middle names/initials)
+    const firstInitial = nameParts[0][0];
+    const lastInitial = nameParts[nameParts.length - 1][0];
+    return `${firstInitial}${lastInitial}`.toUpperCase();
   }
   
-  return displayName.slice(0, 2).toUpperCase();
+  if (nameParts.length === 1) {
+    return nameParts[0].slice(0, 2).toUpperCase();
+  }
+  
+  return 'GU';
 }
 
 /**
