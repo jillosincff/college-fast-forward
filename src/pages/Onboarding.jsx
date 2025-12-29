@@ -232,12 +232,12 @@ export default function Onboarding() {
           {/* Bio / Expertise Description */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              In a few words, tell us about your expertise: <span className="font-normal text-slate-400">(optional)</span>
+              Anything else you'd like students to know about you? <span className="font-normal text-slate-400">(optional)</span>
             </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="e.g., I'm a CTO for an e-commerce company that sells luxury clothing. 20 years in tech, happy to help with career advice and mock interviews."
+              placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'&#10;or 'Retired engineer with a great network in aerospace'&#10;or '20 years in marketing, love reviewing resumes'"
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                        resize-none h-24 focus:border-[#0021A5] focus:outline-none transition-colors"
               maxLength={500}
@@ -248,9 +248,9 @@ export default function Onboarding() {
           {/* How they want to help - REQUIRED */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
-              How would you like to help students?
+              How would you like to help students? <span className="text-red-500">*</span>
             </label>
-            <p className="text-xs text-slate-500 mb-3">Select all that apply — this helps us match you with the right students</p>
+            <p className="text-xs text-slate-500 mb-3">Select at least one — this helps us match you with the right students</p>
             <div className="grid grid-cols-1 gap-2">
               {EXPERTISE_AREAS.map(area => (
                 <button
