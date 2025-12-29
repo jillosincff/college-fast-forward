@@ -87,8 +87,21 @@ export default function GatorAuth() {
       const pendingCode = localStorage.getItem('pending_invite_code');
       const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
 
-      // Already onboarded → Dashboard
+      // Already onboarded → Dashboard (returning user)
       if (user.persona && user.onboarding_completed) {
+        console.log('✅ [GatorAuth] Returning user detected, redirecting to dashboard');
+        // Clear any stale pending data
+        localStorage.removeItem('pending_invite_role');
+        localStorage.removeItem('pending_invite_code');
+        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+        return;
+      }
+      
+      // User has persona but onboarding_completed is undefined (legacy user) → treat as complete
+      if (user.persona && user.onboarding_completed === undefined) {
+        console.log('✅ [GatorAuth] Legacy user detected (no onboarding_completed field), redirecting to dashboard');
+        localStorage.removeItem('pending_invite_role');
+        localStorage.removeItem('pending_invite_code');
         navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
         return;
       }
