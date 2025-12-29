@@ -81,14 +81,14 @@ export default function GatorAuth() {
 
     // ROUTING LOGIC
     if (user) {
-      console.log('🔍 User:', user.email, 'persona:', user.persona);
+      console.log('🔍 User:', user.email, 'persona:', user.persona, 'onboarding_completed:', user.onboarding_completed);
       
-      const pendingRole = localStorage.getItem('pending_invite_role');
-      const pendingCode = localStorage.getItem('pending_invite_code');
-      const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+      // Get pending role from localStorage OR database (fallback for Safari/in-app browsers)
+      const pendingRole = localStorage.getItem('pending_invite_role') || user.pending_role;
+      const pendingCode = localStorage.getItem('pending_invite_code') || user.pending_code;
 
       // Already onboarded → Dashboard (returning user)
-      if (user.persona && user.onboarding_completed) {
+      if (user.persona && user.onboarding_completed === true) {
         console.log('✅ [GatorAuth] Returning user detected, redirecting to dashboard');
         // Clear any stale pending data
         localStorage.removeItem('pending_invite_role');
@@ -97,7 +97,7 @@ export default function GatorAuth() {
         return;
       }
       
-      // User has persona but onboarding_completed is undefined (legacy user) → treat as complete
+      // Legacy user (onboarding_completed field doesn't exist) → treat as complete
       if (user.persona && user.onboarding_completed === undefined) {
         console.log('✅ [GatorAuth] Legacy user detected (no onboarding_completed field), redirecting to dashboard');
         localStorage.removeItem('pending_invite_role');
@@ -105,9 +105,17 @@ export default function GatorAuth() {
         navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
         return;
       }
+      
+      // Mid-onboarding (explicitly false)
+      if (user.persona && user.onboarding_completed === false) {
+        console.log('🔄 [GatorAuth] Returning user mid-onboarding, continuing...');
+        navigate(user.persona === 'gator' ? 'StudentOnboarding' : 'Onboarding');
+        return;
+      }
 
       // Has pending role from BEFORE OAuth → Apply it and continue
       if (pendingRole && !user.persona) {
+        const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
         if (processingRef.current) return;
         processingRef.current = true;
         setStep('processing');
