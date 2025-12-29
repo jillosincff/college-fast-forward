@@ -254,14 +254,15 @@ export default function LandingPage() {
               className="text-center mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 max-w-md mx-auto"
             >
               <p className="text-slate-700 text-sm">
-                <strong>Already a member?</strong>
+                <strong>Already a member?</strong>{' '}
+                <button
+                  onClick={handleSignIn}
+                  className="text-[#0021A5] font-semibold hover:underline"
+                  type="button"
+                >
+                  Sign in here →
+                </button>
               </p>
-              <button
-                onClick={handleSignIn}
-                className="text-[#0021A5] font-semibold text-sm hover:underline mt-1"
-              >
-                Sign in here →
-              </button>
             </motion.div>
           </div>
         </section>
