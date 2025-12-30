@@ -580,19 +580,25 @@ export default function QuestionDetailPage() {
           align-items: center;
         }
 
-        .poster-avatar, .anonymous-avatar {
+        .poster-avatar, .anonymous-avatar, .poster-avatar-placeholder {
           width: 48px;
           height: 48px;
           border-radius: 50%;
           flex-shrink: 0;
         }
 
-        .anonymous-avatar {
+        .anonymous-avatar, .poster-avatar-placeholder {
           background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 24px;
+        }
+
+        .poster-avatar-placeholder {
+          font-size: 18px;
+          font-weight: 600;
+          color: #4338CA;
         }
 
         .poster-details {
