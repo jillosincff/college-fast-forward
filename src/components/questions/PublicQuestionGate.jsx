@@ -37,9 +37,17 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
 
   return (
     <div className="public-gate">
+      {/* Purpose line - why they're here */}
+      <div className="purpose-banner">
+        <span className="purpose-icon">💡</span>
+        <p>This question was shared with you because someone thought your perspective could help a student.</p>
+      </div>
+
       <div className="gate-content">
-        <h3>Want to help?</h3>
-        <p>Short, real-world perspectives are welcome — even 2–3 sentences helps.</p>
+        {/* Microcopy to reduce perfectionism */}
+        <p className="microcopy">
+          Short, real-world perspectives are welcome — even 2–3 sentences helps.
+        </p>
         
         <div className="gate-actions">
           <Button
@@ -56,7 +64,7 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
               onClick={handleSignIn}
               className="sign-in-btn"
             >
-              Sign in to see more
+              Sign in to view more responses
             </Button>
           )}
           
@@ -84,17 +92,34 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
           margin-top: 24px;
         }
 
-        .gate-content h3 {
-          font-size: 20px;
-          font-weight: 700;
-          color: #166534;
-          margin: 0 0 8px 0;
+        .purpose-banner {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          margin-bottom: 20px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #BBF7D0;
         }
 
-        .gate-content p {
+        .purpose-icon {
+          font-size: 20px;
+          flex-shrink: 0;
+          line-height: 1.4;
+        }
+
+        .purpose-banner p {
           font-size: 15px;
-          color: #374151;
-          margin: 0 0 20px 0;
+          font-weight: 500;
+          color: #166534;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .microcopy {
+          font-size: 14px;
+          color: #4B5563;
+          margin: 0 0 16px 0;
+          line-height: 1.5;
         }
 
         .gate-actions {
