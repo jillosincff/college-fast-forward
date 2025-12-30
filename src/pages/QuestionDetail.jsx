@@ -434,7 +434,8 @@ export default function QuestionDetailPage() {
           <div className="answers-header">
             <h2>Answers ({answers.length})</h2>
             
-            {answers.length > 0 && (
+            {/* Sort controls only for logged-in users */}
+            {!isPublicView && answers.length > 0 && (
               <div className="sort-controls">
                 <span>Sort by:</span>
                 <select 
@@ -450,35 +451,45 @@ export default function QuestionDetailPage() {
             )}
           </div>
 
-          {/* Answer List */}
-          <div className="answers-list">
-            {answers.map(answer => (
-              <AnswerCard
-                key={answer.id}
-                answer={answer}
-                currentUser={user}
-                isQuestionAsker={isQuestionAsker}
-                onUpvoteChange={handleUpvoteChange}
-                onMarkBest={handleMarkBest}
-                onMessage={handleMessageAuthor}
-              />
-            ))}
-          </div>
-          
-          {answers.length === 0 && !isLoading && (
-            <div className="no-answers">
-              <MessageSquare className="w-12 h-12 text-gray-300" />
-              <h3>No answers yet</h3>
-              <p>Be the first to share your advice!</p>
-            </div>
-          )}
+          {/* Public View: Limited answer list */}
+          {isPublicView ? (
+            <>
+              <PublicAnswerList answers={answers} questionId={questionId} />
+              <PublicQuestionGate questionId={questionId} />
+            </>
+          ) : (
+            <>
+              {/* Logged-in View: Full answer list */}
+              <div className="answers-list">
+                {answers.map(answer => (
+                  <AnswerCard
+                    key={answer.id}
+                    answer={answer}
+                    currentUser={user}
+                    isQuestionAsker={isQuestionAsker}
+                    onUpvoteChange={handleUpvoteChange}
+                    onMarkBest={handleMarkBest}
+                    onMessage={handleMessageAuthor}
+                  />
+                ))}
+              </div>
+              
+              {answers.length === 0 && !isLoading && (
+                <div className="no-answers">
+                  <MessageSquare className="w-12 h-12 text-gray-300" />
+                  <h3>No answers yet</h3>
+                  <p>Be the first to share your advice!</p>
+                </div>
+              )}
 
-          {/* Answer Composer */}
-          <AnswerComposer
-            question={question}
-            currentUser={user}
-            onAnswerPosted={handleAnswerPosted}
-          />
+              {/* Answer Composer - only for logged-in users */}
+              <AnswerComposer
+                question={question}
+                currentUser={user}
+                onAnswerPosted={handleAnswerPosted}
+              />
+            </>
+          )}
         </div>
       </div>
 
