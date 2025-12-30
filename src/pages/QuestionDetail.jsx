@@ -505,7 +505,20 @@ export default function QuestionDetailPage() {
           {isPublicView ? (
             <>
               <PublicAnswerList answers={answers} questionId={questionId} />
-              <PublicQuestionGate questionId={questionId} />
+              
+              {/* Show lightweight composer if verified, otherwise show gate */}
+              {showLightweightComposer ? (
+                <LightweightAnswerComposer
+                  question={question}
+                  responderInfo={lightweightResponder}
+                  onAnswerPosted={handleLightweightAnswerPosted}
+                />
+              ) : (
+                <PublicQuestionGate 
+                  questionId={questionId} 
+                  onLightweightRespond={() => setShowLightweightModal(true)}
+                />
+              )}
             </>
           ) : (
             <>
