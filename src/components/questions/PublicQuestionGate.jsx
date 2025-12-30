@@ -4,7 +4,7 @@ import { Lightbulb, MessageSquare, Users, Eye } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 
-export default function PublicQuestionGate({ questionId, onSharePerspective, onLightweightRespond }) {
+export default function PublicQuestionGate({ questionId, onSharePerspective, onLightweightRespond, hasMoreResponses = false }) {
   const handleSharePerspective = () => {
     // Store intent to redirect back after auth
     sessionStorage.setItem('pending_answer_question_id', questionId);
@@ -40,21 +40,19 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
             Share a quick perspective
           </Button>
           
-          <button 
-            className="read-only-link"
-            onClick={() => {/* Do nothing - just stay on page */}}
-          >
-            Just read for now
-          </button>
+          {hasMoreResponses && (
+            <Button
+              variant="outline"
+              onClick={handleJoin}
+              className="sign-in-btn"
+            >
+              Sign in to see more
+            </Button>
+          )}
           
-          <Button
-            variant="outline"
-            onClick={handleJoin}
-            className="join-btn"
-          >
-            <Users className="w-4 h-4 mr-2" />
-            Join College Fast Forward
-          </Button>
+          <p className="read-only-text">
+            Just here to read? No problem.
+          </p>
         </div>
       </div>
 
@@ -109,31 +107,23 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
           background: #15803D;
         }
 
-        .read-only-link {
-          background: transparent;
-          border: none;
-          color: #6B7280;
-          font-size: 14px;
-          cursor: pointer;
-          padding: 8px;
-          text-decoration: underline;
-          text-underline-offset: 2px;
-        }
-
-        .read-only-link:hover {
-          color: #374151;
-        }
-
-        .join-btn {
+        .sign-in-btn {
           width: 100%;
           justify-content: center;
           border-color: #D1D5DB;
           color: #374151;
         }
 
-        .join-btn:hover {
+        .sign-in-btn:hover {
           background: #F9FAFB;
           border-color: #9CA3AF;
+        }
+
+        .read-only-text {
+          text-align: center;
+          color: #9CA3AF;
+          font-size: 13px;
+          margin: 8px 0 0 0;
         }
 
         .community-norms {

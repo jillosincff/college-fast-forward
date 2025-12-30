@@ -543,6 +543,7 @@ export default function QuestionDetailPage() {
                 <PublicQuestionGate 
                   questionId={questionId} 
                   onLightweightRespond={handleLightweightRespondIntent}
+                  hasMoreResponses={answers.length > 2}
                 />
               )}
             </>
