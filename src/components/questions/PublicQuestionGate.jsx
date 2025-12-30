@@ -4,12 +4,15 @@ import { Lightbulb, MessageSquare, Users, Eye } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 
-export default function PublicQuestionGate({ questionId, onSharePerspective }) {
+export default function PublicQuestionGate({ questionId, onSharePerspective, onLightweightRespond }) {
   const handleSharePerspective = () => {
     // Store intent to redirect back after auth
     sessionStorage.setItem('pending_answer_question_id', questionId);
     
-    if (onSharePerspective) {
+    if (onLightweightRespond) {
+      // New lightweight flow - email verification only
+      onLightweightRespond();
+    } else if (onSharePerspective) {
       onSharePerspective();
     } else {
       // Default: trigger login with redirect back
