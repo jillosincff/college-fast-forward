@@ -529,7 +529,7 @@ export default function GatorAuth() {
                 Welcome to College Fast Forward
               </h1>
               <p className="text-slate-600">
-                Tell us who you are to get started
+                Which role best describes you for now?
               </p>
             </div>
 
