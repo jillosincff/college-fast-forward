@@ -112,20 +112,16 @@ export default function QuestionDetailPage() {
     }
   }, []);
 
-  // Extract share attribution params (src=share, ref=sharer_user_id)
-  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-  const shareSource = urlParams.get('src');
-  const sharerUserId = urlParams.get('ref');
-  const isFromShare = shareSource === 'share';
-
-  // Track shared question view (both logged-in and logged-out users)
+  // Track shared question view (Event 1) - only when src=share, dedupe per page load
   useEffect(() => {
-    if (questionId && isFromShare) {
+    if (questionId && isFromShare && !viewedEventSent.current) {
+      viewedEventSent.current = true;
       trackEvent('shared_question_viewed', { 
         question_id: questionId,
         ref_sharer_user_id: sharerUserId || null,
         viewer_user_id: user?.id || null,
-        is_logged_in: !!user
+        is_logged_in: !!user,
+        timestamp: new Date().toISOString()
       });
     }
   }, [questionId, isFromShare, sharerUserId]); // Note: only fire once on mount, not when user changes
