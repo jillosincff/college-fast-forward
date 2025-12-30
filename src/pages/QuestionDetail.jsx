@@ -31,6 +31,26 @@ export default function QuestionDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedAnswerAuthor, setSelectedAnswerAuthor] = useState(null);
+  
+  // Lightweight responder state
+  const [showLightweightModal, setShowLightweightModal] = useState(false);
+  const [lightweightResponder, setLightweightResponder] = useState(null);
+
+  // Check for existing lightweight session
+  useEffect(() => {
+    const storedResponder = sessionStorage.getItem('lightweight_responder');
+    if (storedResponder) {
+      try {
+        const parsed = JSON.parse(storedResponder);
+        if (parsed.verified) {
+          setLightweightResponder(parsed);
+        }
+      } catch (e) {
+        // Invalid stored data
+        sessionStorage.removeItem('lightweight_responder');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (questionId) {
