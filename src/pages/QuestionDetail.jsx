@@ -572,6 +572,14 @@ export default function QuestionDetailPage() {
         />
       )}
 
+      {/* Lightweight Respond Modal */}
+      <LightweightRespondModal
+        isOpen={showLightweightModal}
+        onClose={() => setShowLightweightModal(false)}
+        questionId={questionId}
+        onVerificationComplete={handleLightweightVerified}
+      />
+
       <style jsx>{`
         .question-detail-page {
           min-height: 100vh;
