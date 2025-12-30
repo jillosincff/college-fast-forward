@@ -331,19 +331,24 @@ export default function QuestionDetailPage() {
 
   return (
     <div className="question-detail-page">
-      {/* Back Navigation */}
-      <div className="nav-header">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('Connections')}
-          className="back-btn"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to All Questions
-        </Button>
-      </div>
+      {/* Back Navigation - only show for logged-in users */}
+      {!isPublicView && (
+        <div className="nav-header">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('Connections')}
+            className="back-btn"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to All Questions
+          </Button>
+        </div>
+      )}
 
       <div className="content-container">
+        {/* Purpose Banner for public view */}
+        {isPublicView && <PublicPurposeBanner />}
+
         {/* Question Section */}
         <div className="question-section">
           <div className="question-header">
