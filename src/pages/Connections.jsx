@@ -484,6 +484,13 @@ export default function QuestionsPage() {
 
         {/* QUESTIONS LIST */}
         <div className="questions-container">
+          {/* Quick perspectives nudge */}
+          {!isLoading && questionsWithProfiles.length > 0 && (user?.persona === 'parent' || user?.persona === 'alumni') && (
+            <p className="quick-perspectives-nudge">
+              💬 Quick perspectives welcome — short, imperfect answers are encouraged.
+            </p>
+          )}
+          
           {isLoading ? (
             <div className="loading-state">
               <div className="spinner"></div>
@@ -895,6 +902,14 @@ export default function QuestionsPage() {
           max-width: 900px;
           margin: 0 auto;
           padding: 24px 20px 60px;
+        }
+
+        .quick-perspectives-nudge {
+          text-align: center;
+          font-size: 14px;
+          color: #6B7280;
+          margin: 0 0 16px 0;
+          padding: 0;
         }
 
         .questions-list {
