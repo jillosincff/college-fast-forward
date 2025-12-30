@@ -359,22 +359,23 @@ export default function QuestionDetailPage() {
               </span>
             )}
             
-            {/* Poster Info */}
+            {/* Poster Info - simplified for public view */}
             <div className="poster-info">
               {isAnonymous ? (
                 <div className="anonymous-avatar">
                   <span>👨‍👩‍👧</span>
                 </div>
               ) : (
-                <UserAvatar 
-                  user={{ full_name: posterName }}
-                  className="poster-avatar"
-                  showFallback={true}
-                />
+                <div className="poster-avatar-placeholder">
+                  <span>{posterName?.charAt(0) || 'G'}</span>
+                </div>
               )}
               <div className="poster-details">
-                <span className="poster-name">{posterName}</span>
-                {posterType === 'student' && question.student_major && (
+                {/* For public view, show generic name to protect privacy */}
+                <span className="poster-name">
+                  {isPublicView ? (isAnonymous ? 'Anonymous Parent' : 'A UF Student') : posterName}
+                </span>
+                {!isPublicView && posterType === 'student' && question.student_major && (
                   <span className="poster-meta">
                     {question.student_year && `${question.student_year} • `}
                     {question.student_major}
