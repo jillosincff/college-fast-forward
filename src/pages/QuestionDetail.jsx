@@ -287,6 +287,9 @@ export default function QuestionDetailPage() {
                           question?.student_email === user?.email ||
                           question?.created_by === user?.email;
 
+  // Determine if this is a public (logged-out) view
+  const isPublicView = !user;
+
   if (isLoading) {
     return (
       <div className="loading-container">
