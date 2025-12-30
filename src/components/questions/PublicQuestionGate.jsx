@@ -29,7 +29,7 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
     <div className="public-gate">
       <div className="gate-content">
         <h3>Want to help?</h3>
-        <p>Share your perspective with this student.</p>
+        <p>Short, real-world perspectives are welcome — even 2–3 sentences helps.</p>
         
         <div className="gate-actions">
           <Button

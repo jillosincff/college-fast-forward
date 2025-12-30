@@ -17,6 +17,7 @@ import PublicQuestionGate from '@/components/questions/PublicQuestionGate';
 import LightweightRespondModal from '@/components/questions/LightweightRespondModal';
 import LightweightAnswerComposer from '@/components/answers/LightweightAnswerComposer';
 import { useToast } from '@/components/ui/use-toast';
+import { trackEvent } from '@/components/utils/analytics';
 import moment from 'moment';
 
 export default function QuestionDetailPage() {
@@ -51,6 +52,13 @@ export default function QuestionDetailPage() {
       }
     }
   }, []);
+
+  // Track shared question view for public (non-logged-in) users
+  useEffect(() => {
+    if (!user && questionId) {
+      trackEvent('shared_question_viewed', { question_id: questionId });
+    }
+  }, [user, questionId]);
 
   useEffect(() => {
     if (questionId) {
@@ -308,6 +316,12 @@ export default function QuestionDetailPage() {
   const handleLightweightVerified = (responderInfo) => {
     setLightweightResponder(responderInfo);
     setShowLightweightModal(false);
+    
+    // Track verification complete
+    trackEvent('shared_question_verified', { 
+      question_id: questionId,
+      responder_role: responderInfo.role
+    });
   };
 
   const handleLightweightAnswerPosted = (newAnswer) => {
@@ -322,6 +336,18 @@ export default function QuestionDetailPage() {
         answer_count: (prev.answer_count || 0) + 1
       };
     });
+    
+    // Track response posted
+    trackEvent('shared_question_response_posted', { 
+      question_id: questionId,
+      answer_id: newAnswer.id
+    });
+  };
+
+  const handleLightweightRespondIntent = () => {
+    // Track intent to respond
+    trackEvent('shared_question_respond_intent', { question_id: questionId });
+    setShowLightweightModal(true);
   };
 
   const isQuestionAsker = question?.student_id === user?.id || 
@@ -516,7 +542,7 @@ export default function QuestionDetailPage() {
               ) : (
                 <PublicQuestionGate 
                   questionId={questionId} 
-                  onLightweightRespond={() => setShowLightweightModal(true)}
+                  onLightweightRespond={handleLightweightRespondIntent}
                 />
               )}
             </>
