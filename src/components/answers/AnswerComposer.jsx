@@ -251,12 +251,12 @@ export default function AnswerComposer({
 
       {/* Tips */}
       <div className="tips-section">
-        <h4>💡 Tips for great answers:</h4>
+        <h4>💡 Tips for helpful responses (keep it short):</h4>
         <ul>
-          <li>Share your personal experience</li>
-          <li>Be specific with examples</li>
-          <li>Explain your reasoning</li>
-          <li>Offer to chat more if helpful</li>
+          <li>Share what you've seen</li>
+          <li>Be specific (one example is enough)</li>
+          <li>Suggest one next step</li>
+          <li>Optional: offer to connect them to someone</li>
         </ul>
       </div>
 
