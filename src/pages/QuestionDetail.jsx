@@ -38,6 +38,16 @@ export default function QuestionDetailPage() {
   const [lightweightResponder, setLightweightResponder] = useState(null);
   const [shouldOpenComposer, setShouldOpenComposer] = useState(false);
   const answerComposerRef = useRef(null);
+  
+  // Analytics deduplication flags (per page load)
+  const viewedEventSent = useRef(false);
+  const signedInEventSent = useRef(false);
+
+  // Extract share attribution params FIRST (before using them)
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const shareSource = urlParams.get('src');
+  const sharerUserId = urlParams.get('ref');
+  const isFromShare = shareSource === 'share';
 
   // Check if we should auto-open composer (returning from auth)
   useEffect(() => {
@@ -49,12 +59,14 @@ export default function QuestionDetailPage() {
     if ((openComposer || postAuthAction === 'open_answer_composer') && user) {
       setShouldOpenComposer(true);
       
-      // Track sign-in from shared question
-      if (storedSharerRef || isFromShare) {
+      // Track sign-in from shared question (Event 3) - dedupe
+      if ((storedSharerRef || isFromShare) && !signedInEventSent.current) {
+        signedInEventSent.current = true;
         trackEvent('shared_question_signed_in', {
           question_id: questionId,
           ref_sharer_user_id: storedSharerRef || sharerUserId || null,
-          viewer_user_id: user.id
+          viewer_user_id: user.id,
+          timestamp: new Date().toISOString()
         });
       }
       
