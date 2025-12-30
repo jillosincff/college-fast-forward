@@ -305,12 +305,34 @@ export default function QuestionDetailPage() {
     setShowMessageModal(true);
   };
 
+  const handleLightweightVerified = (responderInfo) => {
+    setLightweightResponder(responderInfo);
+    setShowLightweightModal(false);
+  };
+
+  const handleLightweightAnswerPosted = (newAnswer) => {
+    // Add new answer to list
+    setAnswers(prev => [newAnswer, ...prev]);
+    
+    // Update question stats
+    setQuestion(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        answer_count: (prev.answer_count || 0) + 1
+      };
+    });
+  };
+
   const isQuestionAsker = question?.student_id === user?.id || 
                           question?.student_email === user?.email ||
                           question?.created_by === user?.email;
 
   // Determine if this is a public (logged-out) view
   const isPublicView = !user;
+  
+  // Show lightweight composer if verified but not logged in
+  const showLightweightComposer = isPublicView && lightweightResponder?.verified;
 
   if (isLoading) {
     return (
