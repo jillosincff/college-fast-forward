@@ -62,12 +62,35 @@ export default function PostRequestPage() { // Renamed from PostRequest
         posterType = 'alumni';
       }
 
+      // Parse user name - handle "Last, First" format from university systems
+      let posterFirstName = user?.first_name || '';
+      let posterLastName = user?.last_name || '';
+      let posterName = user?.full_name || '';
+      
+      // If full_name contains a comma, it's likely "Last, First" format
+      if (posterName && posterName.includes(',')) {
+        const parts = posterName.split(',').map(p => p.trim());
+        if (parts.length >= 2) {
+          posterLastName = parts[0]; // Last name is before comma
+          posterFirstName = parts[1].split(' ')[0]; // First name is after comma (ignore middle initials)
+          posterName = `${posterFirstName} ${posterLastName}`; // Normalize to "First Last"
+        }
+      } else if (posterName && !posterFirstName) {
+        // Standard "First Last" format - extract first name
+        const nameParts = posterName.trim().split(' ');
+        posterFirstName = nameParts[0] || '';
+        posterLastName = nameParts.slice(1).join(' ') || '';
+      }
+
       const requestData = {
         ...values,
-        status: 'active', // Added status: 'active'
+        status: 'active',
         poster_type: posterType,
         is_anonymous: values.is_anonymous || false,
-        poster_profile_image: user?.profile_image_url || null, // Ensure this is included for new requests
+        poster_profile_image: user?.profile_image_url || null,
+        poster_name: posterName,
+        poster_first_name: posterFirstName,
+        poster_last_name: posterLastName,
       };
 
       let createdRequest;
