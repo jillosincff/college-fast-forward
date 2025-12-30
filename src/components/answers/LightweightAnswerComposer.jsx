@@ -187,7 +187,7 @@ export default function LightweightAnswerComposer({
           ref={textareaRef}
           value={text}
           onChange={handleTextChange}
-          placeholder="Share advice, insights, or encouragement based on your experience..."
+          placeholder="Short, real-world perspectives are welcome — even 2–3 sentences helps..."
           className="answer-input"
           rows={6}
         />
