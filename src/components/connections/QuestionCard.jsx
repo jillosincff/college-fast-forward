@@ -203,8 +203,11 @@ export default function QuestionCard({ question, gator }) {
         <p className="offer-help-hint">Even 2–3 sentences help — no need to have the "right" answer.</p>
       )}
       <button className={`card-action-button ${needsAttention ? 'primary' : 'secondary'}`}>
-        {needsAttention ? 'Offer Help →' : 'View Answers →'}
+        {needsAttention ? 'Share what you\'ve seen →' : 'View Answers →'}
       </button>
+      {needsAttention && (
+        <p className="no-expertise-hint">No expertise required</p>
+      )}
 
       <style jsx>{`
         .question-card {
@@ -437,6 +440,13 @@ export default function QuestionCard({ question, gator }) {
           font-size: 13px;
           color: #9CA3AF;
           margin: 0 0 10px 0;
+        }
+
+        .no-expertise-hint {
+          text-align: center;
+          font-size: 11px;
+          color: #9CA3AF;
+          margin: 6px 0 0 0;
         }
 
         @media (max-width: 768px) {
