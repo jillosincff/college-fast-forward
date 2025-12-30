@@ -775,7 +775,7 @@ export default function QuestionDetailPage() {
             gap: 10px;
           }
 
-          .poster-avatar, .anonymous-avatar {
+          .poster-avatar, .anonymous-avatar, .poster-avatar-placeholder {
             width: 40px;
             height: 40px;
           }
