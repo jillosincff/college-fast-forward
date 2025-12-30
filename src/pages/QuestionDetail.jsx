@@ -318,16 +318,17 @@ export default function QuestionDetailPage() {
       };
     });
     
-    // Track response posted from shared question (if came from share link)
+    // Track response posted from shared question (Event 4) - only if src=share was in URL
     const storedSharerRef = sessionStorage.getItem('share_ref_user_id');
     const effectiveSharerRef = storedSharerRef || sharerUserId;
     
-    if (effectiveSharerRef || isFromShare) {
+    if (isFromShare || effectiveSharerRef) {
       trackEvent('shared_question_response_posted', {
         question_id: questionId,
         ref_sharer_user_id: effectiveSharerRef || null,
         viewer_user_id: user?.id,
-        answer_id: newAnswer.id
+        response_id: newAnswer.id,
+        timestamp: new Date().toISOString()
       });
       
       // Notify the sharer that someone they looped in responded
