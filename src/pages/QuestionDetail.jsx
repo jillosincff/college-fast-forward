@@ -404,20 +404,25 @@ export default function QuestionDetailPage() {
             </div>
 
             {/* Stats - use answers.length as source of truth since DB may not update due to RLS */}
+            {/* Hide detailed stats for public view */}
             <div className="question-stats">
               <span className="stat">
                 <MessageSquare className="w-4 h-4" />
                 {answers.length} answers
               </span>
-              <span className="stat">
-                <Eye className="w-4 h-4" />
-                {question.view_count || 0} views
-              </span>
-              {question.total_upvotes > 0 && (
-                <span className="stat">
-                  <ChevronUp className="w-4 h-4" />
-                  {question.total_upvotes} upvotes
-                </span>
+              {!isPublicView && (
+                <>
+                  <span className="stat">
+                    <Eye className="w-4 h-4" />
+                    {question.view_count || 0} views
+                  </span>
+                  {question.total_upvotes > 0 && (
+                    <span className="stat">
+                      <ChevronUp className="w-4 h-4" />
+                      {question.total_upvotes} upvotes
+                    </span>
+                  )}
+                </>
               )}
               {question.has_best_answer && (
                 <span className="stat best">
