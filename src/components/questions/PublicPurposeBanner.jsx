@@ -6,7 +6,7 @@ export default function PublicPurposeBanner() {
     <div className="purpose-banner">
       <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0" />
       <p>
-        <strong>This question was shared with you</strong> because someone thought your perspective could help a student.
+        💡 This question was shared with you because someone thought your perspective could help a student.
       </p>
 
       <style jsx>{`
