@@ -2,16 +2,30 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { trackEvent } from '@/components/utils/analytics';
 
 export default function PublicQuestionGate({ questionId, onSharePerspective, onLightweightRespond, hasMoreResponses = false }) {
+  // Extract share attribution from URL
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const shareSource = urlParams.get('src');
+  const sharerRef = urlParams.get('ref');
+  const isFromShare = shareSource === 'share';
+
   const handleSharePerspective = async () => {
+    // Track gate click (only if from share link)
+    if (isFromShare) {
+      trackEvent('shared_question_gate_clicked', {
+        question_id: questionId,
+        ref_sharer_user_id: sharerRef || null,
+        cta_type: 'respond'
+      });
+    }
+
     // Store the question ID to return after auth
     sessionStorage.setItem('pending_answer_question_id', questionId);
     sessionStorage.setItem('post_auth_action', 'open_answer_composer');
     
     // Store sharer ref for attribution tracking after auth
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    const sharerRef = urlParams.get('ref');
     if (sharerRef) {
       sessionStorage.setItem('share_ref_user_id', sharerRef);
     }
@@ -22,11 +36,18 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
   };
 
   const handleSignIn = async () => {
+    // Track gate click (only if from share link)
+    if (isFromShare) {
+      trackEvent('shared_question_gate_clicked', {
+        question_id: questionId,
+        ref_sharer_user_id: sharerRef || null,
+        cta_type: 'view_more'
+      });
+    }
+
     sessionStorage.setItem('pending_answer_question_id', questionId);
     
     // Store sharer ref for attribution tracking after auth
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    const sharerRef = urlParams.get('ref');
     if (sharerRef) {
       sessionStorage.setItem('share_ref_user_id', sharerRef);
     }

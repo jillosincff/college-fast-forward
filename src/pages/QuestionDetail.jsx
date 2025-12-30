@@ -106,16 +106,17 @@ export default function QuestionDetailPage() {
   const sharerUserId = urlParams.get('ref');
   const isFromShare = shareSource === 'share';
 
-  // Track shared question view for public (non-logged-in) users
+  // Track shared question view (both logged-in and logged-out users)
   useEffect(() => {
-    if (!user && questionId && isFromShare) {
+    if (questionId && isFromShare) {
       trackEvent('shared_question_viewed', { 
         question_id: questionId,
         ref_sharer_user_id: sharerUserId || null,
-        is_logged_in: false
+        viewer_user_id: user?.id || null,
+        is_logged_in: !!user
       });
     }
-  }, [user, questionId, isFromShare, sharerUserId]);
+  }, [questionId, isFromShare, sharerUserId]); // Note: only fire once on mount, not when user changes
 
   useEffect(() => {
     if (questionId) {
