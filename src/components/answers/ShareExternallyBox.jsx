@@ -18,8 +18,9 @@ export default function ShareExternallyBox({ question, currentUser }) {
   const [copiedMessage, setCopiedMessage] = useState(false);
 
   // Generate the canonical question permalink - always use production domain
+  // Include share attribution: src=share and ref=sharer user id
   const questionLink = question?.id 
-    ? `https://collegefastforward.com/#QuestionDetail?id=${question.id}`
+    ? `https://collegefastforward.com/#QuestionDetail?id=${question.id}&src=share${currentUser?.id ? `&ref=${currentUser.id}` : ''}`
     : null;
 
   // Message template

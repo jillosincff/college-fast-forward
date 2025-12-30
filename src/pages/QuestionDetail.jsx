@@ -41,21 +41,33 @@ export default function QuestionDetailPage() {
 
   // Check if we should auto-open composer (returning from auth)
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    const openComposer = urlParams.get('open_composer') === 'true';
+    const currentUrlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const openComposer = currentUrlParams.get('open_composer') === 'true';
     const postAuthAction = sessionStorage.getItem('post_auth_action');
+    const storedSharerRef = sessionStorage.getItem('share_ref_user_id');
     
     if ((openComposer || postAuthAction === 'open_answer_composer') && user) {
       setShouldOpenComposer(true);
+      
+      // Track sign-in from shared question
+      if (storedSharerRef || isFromShare) {
+        trackEvent('shared_question_signed_in', {
+          question_id: questionId,
+          ref_sharer_user_id: storedSharerRef || sharerUserId || null,
+          viewer_user_id: user.id
+        });
+      }
+      
       // Clean up
       sessionStorage.removeItem('post_auth_action');
       sessionStorage.removeItem('pending_answer_question_id');
+      sessionStorage.removeItem('share_ref_user_id');
       
-      // Clean URL
+      // Clean URL - preserve only the question id
       const cleanUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}`;
       window.history.replaceState(null, '', cleanUrl);
     }
-  }, [user, questionId]);
+  }, [user, questionId, isFromShare, sharerUserId]);
 
   // Scroll to and focus answer composer when returning from auth
   useEffect(() => {
@@ -88,12 +100,22 @@ export default function QuestionDetailPage() {
     }
   }, []);
 
+  // Extract share attribution params (src=share, ref=sharer_user_id)
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const shareSource = urlParams.get('src');
+  const sharerUserId = urlParams.get('ref');
+  const isFromShare = shareSource === 'share';
+
   // Track shared question view for public (non-logged-in) users
   useEffect(() => {
-    if (!user && questionId) {
-      trackEvent('shared_question_viewed', { question_id: questionId });
+    if (!user && questionId && isFromShare) {
+      trackEvent('shared_question_viewed', { 
+        question_id: questionId,
+        ref_sharer_user_id: sharerUserId || null,
+        is_logged_in: false
+      });
     }
-  }, [user, questionId]);
+  }, [user, questionId, isFromShare, sharerUserId]);
 
   useEffect(() => {
     if (questionId) {
@@ -286,6 +308,17 @@ export default function QuestionDetailPage() {
         answer_count: newCount
       };
     });
+    
+    // Track response posted from shared question (if came from share link)
+    const storedSharerRef = sessionStorage.getItem('share_ref_user_id');
+    if (storedSharerRef || isFromShare) {
+      trackEvent('shared_question_response_posted', {
+        question_id: questionId,
+        ref_sharer_user_id: storedSharerRef || sharerUserId || null,
+        viewer_user_id: user?.id,
+        answer_id: newAnswer.id
+      });
+    }
   };
 
   const handleUpvoteChange = (answerId, newCount) => {

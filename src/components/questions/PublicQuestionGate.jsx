@@ -9,6 +9,13 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
     sessionStorage.setItem('pending_answer_question_id', questionId);
     sessionStorage.setItem('post_auth_action', 'open_answer_composer');
     
+    // Store sharer ref for attribution tracking after auth
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const sharerRef = urlParams.get('ref');
+    if (sharerRef) {
+      sessionStorage.setItem('share_ref_user_id', sharerRef);
+    }
+    
     // Trigger Google sign-in with redirect back to this question
     const returnUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}&open_composer=true`;
     base44.auth.redirectToLogin(returnUrl);
@@ -16,6 +23,14 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
 
   const handleSignIn = async () => {
     sessionStorage.setItem('pending_answer_question_id', questionId);
+    
+    // Store sharer ref for attribution tracking after auth
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const sharerRef = urlParams.get('ref');
+    if (sharerRef) {
+      sessionStorage.setItem('share_ref_user_id', sharerRef);
+    }
+    
     const returnUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}`;
     base44.auth.redirectToLogin(returnUrl);
   };
