@@ -11,6 +11,9 @@ import UserAvatar from '@/components/common/UserAvatar';
 import AnswerCard from '@/components/answers/AnswerCard';
 import AnswerComposer from '@/components/answers/AnswerComposer';
 import MessageAndHelpModal from '@/components/connections/MessageAndHelpModal';
+import PublicPurposeBanner from '@/components/questions/PublicPurposeBanner';
+import PublicAnswerList from '@/components/questions/PublicAnswerList';
+import PublicQuestionGate from '@/components/questions/PublicQuestionGate';
 import { useToast } from '@/components/ui/use-toast';
 import moment from 'moment';
 
