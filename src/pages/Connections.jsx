@@ -42,6 +42,7 @@ export default function QuestionsPage() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [visibleCount, setVisibleCount] = useState(20);
   const [showFilters, setShowFilters] = useState(false);
+  const [showParentBanner, setShowParentBanner] = useState(true);
 
   const [stats, setStats] = useState({
     totalQuestions: 0,
@@ -338,12 +339,22 @@ export default function QuestionsPage() {
           </div>
         )}
 
-        {/* Helper Prompt for Parents/Alumni */}
-        {(user?.persona === 'parent' || user?.persona === 'alumni') && (
-          <div className="helper-prompt">
-            <div className="helper-prompt-content">
-              <span className="helper-icon">💡</span>
-              <p>See a question you can help with? Click <strong>"Offer Help"</strong> to share your advice with a UF student.</p>
+        {/* Parent Callout Banner - Friendly encouragement */}
+        {(user?.persona === 'parent' || user?.persona === 'alumni') && showParentBanner && (
+          <div className="parent-callout-banner">
+            <div className="parent-callout-content">
+              <span className="parent-callout-icon">👋</span>
+              <div className="parent-callout-text">
+                <p><strong>Parents:</strong> You don't need to be an expert to help.</p>
+                <p className="parent-callout-subtext">Sharing how you've seen this work in the real world — even 2–3 sentences — can really help a student.</p>
+              </div>
+              <button 
+                className="parent-callout-dismiss"
+                onClick={() => setShowParentBanner(false)}
+                aria-label="Dismiss banner"
+              >
+                ×
+              </button>
             </div>
           </div>
         )}
@@ -690,6 +701,69 @@ export default function QuestionsPage() {
           color: #312E81;
         }
 
+        /* Parent Callout Banner */
+        .parent-callout-banner {
+          max-width: 900px;
+          margin: 0 auto 20px;
+          padding: 0 20px;
+        }
+
+        .parent-callout-content {
+          background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+          border: 1px solid #F59E0B;
+          border-radius: 12px;
+          padding: 16px 20px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          position: relative;
+        }
+
+        .parent-callout-icon {
+          font-size: 24px;
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .parent-callout-text {
+          flex: 1;
+        }
+
+        .parent-callout-text p {
+          margin: 0;
+          font-size: 15px;
+          color: #92400E;
+        }
+
+        .parent-callout-text strong {
+          color: #78350F;
+        }
+
+        .parent-callout-subtext {
+          margin-top: 4px !important;
+          font-size: 14px !important;
+          opacity: 0.9;
+        }
+
+        .parent-callout-dismiss {
+          position: absolute;
+          top: 8px;
+          right: 12px;
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: #92400E;
+          cursor: pointer;
+          opacity: 0.6;
+          transition: opacity 0.2s;
+          padding: 4px 8px;
+          line-height: 1;
+        }
+
+        .parent-callout-dismiss:hover {
+          opacity: 1;
+        }
+
         /* FILTERS */
         .filters-section {
           background: white;
@@ -976,6 +1050,27 @@ export default function QuestionsPage() {
 
           .helper-prompt-content p {
             font-size: 14px;
+          }
+
+          .parent-callout-banner {
+            padding: 0 16px;
+            margin-bottom: 16px;
+          }
+
+          .parent-callout-content {
+            padding: 14px 36px 14px 16px;
+          }
+
+          .parent-callout-icon {
+            font-size: 20px;
+          }
+
+          .parent-callout-text p {
+            font-size: 14px;
+          }
+
+          .parent-callout-subtext {
+            font-size: 13px !important;
           }
 
           .filters-section {
