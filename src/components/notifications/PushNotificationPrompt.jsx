@@ -7,8 +7,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function PushNotificationPrompt({ user, onComplete, onSkip }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  // Check initial permission state on mount
+  React.useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'denied') {
+      setIsBlocked(true);
+      setError('Notifications were blocked. You can enable them in browser settings.');
+    }
+  }, []);
 
   const requestPermission = async () => {
+    // If already blocked, show instructions instead
+    if (isBlocked) {
+      alert('To enable notifications:\n\n1. Click the lock/info icon in your browser\'s address bar\n2. Find "Notifications" in the permissions\n3. Change it from "Block" to "Allow"\n4. Refresh the page');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -16,6 +31,14 @@ export default function PushNotificationPrompt({ user, onComplete, onSkip }) {
       // Check if browser supports notifications
       if (!('Notification' in window)) {
         setError('Your browser does not support notifications');
+        setLoading(false);
+        return;
+      }
+
+      // Check if permission is already denied
+      if (Notification.permission === 'denied') {
+        setIsBlocked(true);
+        setError('Notifications were blocked. You can enable them in browser settings.');
         setLoading(false);
         return;
       }
@@ -58,6 +81,7 @@ export default function PushNotificationPrompt({ user, onComplete, onSkip }) {
           onComplete?.();
         }
       } else if (permission === 'denied') {
+        setIsBlocked(true);
         setError('Notifications were blocked. You can enable them in browser settings.');
       }
     } catch (err) {
