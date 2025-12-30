@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Lightbulb, UserPlus } from 'lucide-react';
@@ -15,8 +15,19 @@ const MAX_CHARS = 5000;
 export default function AnswerComposer({ 
   question, 
   currentUser, 
-  onAnswerPosted 
+  onAnswerPosted,
+  autoFocus = false
 }) {
+  const textareaRef = useRef(null);
+  
+  // Auto-focus textarea when returning from auth
+  useEffect(() => {
+    if (autoFocus && textareaRef.current) {
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+    }
+  }, [autoFocus]);
   const { toast } = useToast();
   const [answerText, setAnswerText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,6 +217,7 @@ export default function AnswerComposer({
       <h3 className="composer-title">Share what you've seen</h3>
       
       <Textarea
+        ref={textareaRef}
         value={answerText}
         onChange={(e) => setAnswerText(e.target.value.slice(0, MAX_CHARS))}
         placeholder="Short and real is perfect. What have you seen work in real life? (Even 2–3 sentences helps.)"
