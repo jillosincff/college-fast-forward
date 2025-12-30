@@ -203,12 +203,12 @@ export default function AnswerComposer({
 
   return (
     <div className="answer-composer">
-      <h3 className="composer-title">Share Your Advice</h3>
+      <h3 className="composer-title">Share what you've seen</h3>
       
       <Textarea
         value={answerText}
         onChange={(e) => setAnswerText(e.target.value.slice(0, MAX_CHARS))}
-        placeholder="Share your experience and advice. Be specific - what did you learn? What would you do differently?"
+        placeholder="Short and real is perfect. What have you seen work in real life? (Even 2–3 sentences helps.)"
         rows={6}
         className="composer-textarea"
       />
