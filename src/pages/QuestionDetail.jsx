@@ -14,6 +14,8 @@ import MessageAndHelpModal from '@/components/connections/MessageAndHelpModal';
 import PublicPurposeBanner from '@/components/questions/PublicPurposeBanner';
 import PublicAnswerList from '@/components/questions/PublicAnswerList';
 import PublicQuestionGate from '@/components/questions/PublicQuestionGate';
+import LightweightRespondModal from '@/components/questions/LightweightRespondModal';
+import LightweightAnswerComposer from '@/components/answers/LightweightAnswerComposer';
 import { useToast } from '@/components/ui/use-toast';
 import moment from 'moment';
 
