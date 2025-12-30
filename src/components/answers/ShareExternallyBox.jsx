@@ -17,9 +17,9 @@ export default function ShareExternallyBox({ question, currentUser }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedMessage, setCopiedMessage] = useState(false);
 
-  // Generate the canonical question permalink
+  // Generate the canonical question permalink - always use production domain
   const questionLink = question?.id 
-    ? `${window.location.origin}/#QuestionDetail?id=${question.id}`
+    ? `https://collegefastforward.com/#QuestionDetail?id=${question.id}`
     : null;
 
   // Message template
