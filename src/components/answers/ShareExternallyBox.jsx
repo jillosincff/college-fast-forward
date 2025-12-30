@@ -89,7 +89,7 @@ If not, totally fine — just wanted to pass it along.`
 
   const handleEmailClick = () => {
     trackShareEvent('question_share_external_email_clicked');
-    const subject = encodeURIComponent('A student could use your help');
+    const subject = encodeURIComponent('Quick question I thought you could help with');
     const body = encodeURIComponent(messageTemplate);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
