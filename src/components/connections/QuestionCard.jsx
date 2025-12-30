@@ -199,6 +199,9 @@ export default function QuestionCard({ question, gator }) {
       </div>
 
       {/* Action button - different style based on answered status */}
+      {needsAttention && (
+        <p className="offer-help-hint">Even 2–3 sentences help — no need to have the "right" answer.</p>
+      )}
       <button className={`card-action-button ${needsAttention ? 'primary' : 'secondary'}`}>
         {needsAttention ? 'Offer Help →' : 'View Answers →'}
       </button>
@@ -427,6 +430,13 @@ export default function QuestionCard({ question, gator }) {
         .card-action-button.secondary:hover {
           border-color: #0021A5;
           background: #F9FAFB;
+        }
+
+        .offer-help-hint {
+          text-align: center;
+          font-size: 13px;
+          color: #9CA3AF;
+          margin: 0 0 10px 0;
         }
 
         @media (max-width: 768px) {
