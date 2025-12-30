@@ -37,12 +37,13 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
   };
 
   const handleSignIn = async () => {
-    // Track gate click (only if from share link)
+    // Track gate click (Event 2) - only if from share link
     if (isFromShare) {
       trackEvent('shared_question_gate_clicked', {
         question_id: questionId,
         ref_sharer_user_id: sharerRef || null,
-        cta_type: 'view_more'
+        cta_type: 'view_more',
+        timestamp: new Date().toISOString()
       });
     }
 
