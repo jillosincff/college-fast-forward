@@ -312,13 +312,27 @@ export default function QuestionDetailPage() {
     
     // Track response posted from shared question (if came from share link)
     const storedSharerRef = sessionStorage.getItem('share_ref_user_id');
-    if (storedSharerRef || isFromShare) {
+    const effectiveSharerRef = storedSharerRef || sharerUserId;
+    
+    if (effectiveSharerRef || isFromShare) {
       trackEvent('shared_question_response_posted', {
         question_id: questionId,
-        ref_sharer_user_id: storedSharerRef || sharerUserId || null,
+        ref_sharer_user_id: effectiveSharerRef || null,
         viewer_user_id: user?.id,
         answer_id: newAnswer.id
       });
+      
+      // Notify the sharer that someone they looped in responded
+      if (effectiveSharerRef && effectiveSharerRef !== user?.id) {
+        base44.functions.invoke('notifySharerOfResponse', {
+          questionId: questionId,
+          sharerUserId: effectiveSharerRef,
+          responderUserId: user?.id,
+          responderName: user?.full_name || 'Someone'
+        }).catch(err => {
+          console.log('Failed to notify sharer (non-critical):', err.message);
+        });
+      }
     }
   };
 
