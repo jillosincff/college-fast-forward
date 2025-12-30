@@ -244,6 +244,9 @@ export default function AnswerComposer({
           <UserPlus className="w-4 h-4 mr-2" />
           Know someone who can help? Tag them!
         </Button>
+
+        {/* Share Externally Box */}
+        <ShareExternallyBox question={question} currentUser={currentUser} />
       </div>
 
       {/* Tips */}
