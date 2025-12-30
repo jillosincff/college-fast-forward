@@ -1,28 +1,23 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, MessageSquare, Users, Eye } from 'lucide-react';
-import { navigate } from '@/components/utils/navigation';
+import { MessageSquare, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function PublicQuestionGate({ questionId, onSharePerspective, onLightweightRespond, hasMoreResponses = false }) {
-  const handleSharePerspective = () => {
-    // Store intent to redirect back after auth
+  const handleSharePerspective = async () => {
+    // Store the question ID to return after auth
     sessionStorage.setItem('pending_answer_question_id', questionId);
+    sessionStorage.setItem('post_auth_action', 'open_answer_composer');
     
-    if (onLightweightRespond) {
-      // New lightweight flow - email verification only
-      onLightweightRespond();
-    } else if (onSharePerspective) {
-      onSharePerspective();
-    } else {
-      // Default: trigger login with redirect back
-      navigate('GatorAuth');
-    }
+    // Trigger Google sign-in with redirect back to this question
+    const returnUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}&open_composer=true`;
+    base44.auth.redirectToLogin(returnUrl);
   };
 
-  const handleJoin = () => {
+  const handleSignIn = async () => {
     sessionStorage.setItem('pending_answer_question_id', questionId);
-    navigate('GatorAuth');
+    const returnUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}`;
+    base44.auth.redirectToLogin(returnUrl);
   };
 
   return (
@@ -43,7 +38,7 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
           {hasMoreResponses && (
             <Button
               variant="outline"
-              onClick={handleJoin}
+              onClick={handleSignIn}
               className="sign-in-btn"
             >
               Sign in to see more

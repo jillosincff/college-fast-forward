@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate, useParams } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,41 @@ export default function QuestionDetailPage() {
   // Lightweight responder state
   const [showLightweightModal, setShowLightweightModal] = useState(false);
   const [lightweightResponder, setLightweightResponder] = useState(null);
+  const [shouldOpenComposer, setShouldOpenComposer] = useState(false);
+  const answerComposerRef = useRef(null);
+
+  // Check if we should auto-open composer (returning from auth)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const openComposer = urlParams.get('open_composer') === 'true';
+    const postAuthAction = sessionStorage.getItem('post_auth_action');
+    
+    if ((openComposer || postAuthAction === 'open_answer_composer') && user) {
+      setShouldOpenComposer(true);
+      // Clean up
+      sessionStorage.removeItem('post_auth_action');
+      sessionStorage.removeItem('pending_answer_question_id');
+      
+      // Clean URL
+      const cleanUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}`;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, [user, questionId]);
+
+  // Scroll to and focus answer composer when returning from auth
+  useEffect(() => {
+    if (shouldOpenComposer && answerComposerRef.current && !isLoading) {
+      setTimeout(() => {
+        answerComposerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Try to focus the textarea inside
+        const textarea = answerComposerRef.current?.querySelector('textarea');
+        if (textarea) {
+          setTimeout(() => textarea.focus(), 500);
+        }
+      }, 300);
+      setShouldOpenComposer(false);
+    }
+  }, [shouldOpenComposer, isLoading]);
 
   // Check for existing lightweight session
   useEffect(() => {
@@ -573,11 +608,14 @@ export default function QuestionDetailPage() {
               )}
 
               {/* Answer Composer - only for logged-in users */}
-              <AnswerComposer
-                question={question}
-                currentUser={user}
-                onAnswerPosted={handleAnswerPosted}
-              />
+              <div ref={answerComposerRef}>
+                <AnswerComposer
+                  question={question}
+                  currentUser={user}
+                  onAnswerPosted={handleAnswerPosted}
+                  autoFocus={shouldOpenComposer}
+                />
+              </div>
             </>
           )}
         </div>
