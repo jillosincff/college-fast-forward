@@ -8,6 +8,7 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { base44 } from '@/api/base44Client';
 import RecommendHelperModal from './RecommendHelperModal';
+import ShareExternallyBox from './ShareExternallyBox';
 
 const MAX_CHARS = 5000;
 
