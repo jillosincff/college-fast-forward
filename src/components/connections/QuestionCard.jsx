@@ -14,16 +14,31 @@ const HELP_TYPE_LABELS = {
 
 // Helper function to format student name as "First L." for privacy
 function formatStudentName(fullName, firstName, lastName, email) {
-  // Priority 1: Use first_name and last_name if available
-  if (firstName && lastName) {
-    const capitalizedFirst = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
-    const lastInitial = lastName.charAt(0).toUpperCase() + '.';
+  // Clean up malformed first names (e.g., "Sawmiller," -> use full name instead)
+  const cleanFirstName = firstName && !firstName.includes(',') ? firstName : null;
+  const cleanLastName = lastName && !lastName.includes(',') ? lastName : null;
+  
+  // Priority 1: Use first_name and last_name if available and clean
+  if (cleanFirstName && cleanLastName) {
+    const capitalizedFirst = cleanFirstName.charAt(0).toUpperCase() + cleanFirstName.slice(1).toLowerCase();
+    const lastInitial = cleanLastName.charAt(0).toUpperCase() + '.';
     return `${capitalizedFirst} ${lastInitial}`;
   }
   
-  // Priority 2: If we have a proper full name with space
+  // Priority 2: If we have a proper full name with space (and not an email)
   if (fullName && fullName.includes(' ') && !fullName.includes('@')) {
     const parts = fullName.trim().split(/\s+/);
+    // Handle "Last, First" format (e.g., "Sawmiller, Alyssa J.")
+    if (parts[0].endsWith(',')) {
+      const lastName = parts[0].replace(',', '');
+      const firstName = parts[1] || '';
+      if (firstName) {
+        const capitalizedFirst = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase().replace(/[^a-z]/gi, '');
+        const lastInitial = lastName.charAt(0).toUpperCase() + '.';
+        return `${capitalizedFirst} ${lastInitial}`;
+      }
+    }
+    // Handle "First Last" format
     const first = parts[0];
     const last = parts[parts.length - 1];
     const capitalizedFirst = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
@@ -31,8 +46,14 @@ function formatStudentName(fullName, firstName, lastName, email) {
     return `${capitalizedFirst} ${lastInitial}`;
   }
   
-  // Priority 3: Try to parse from email
-  if (email) {
+  // Priority 3: If we have just a full name without space but it's a real name
+  if (fullName && !fullName.includes('@') && fullName.length > 1) {
+    // Single word name - just return it capitalized
+    return fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
+  }
+  
+  // Priority 4: Try to parse from email (only if email is valid, not 'anonymous')
+  if (email && email !== 'anonymous' && email.includes('@')) {
     const emailName = email.split('@')[0];
     
     // If email has dot separator like "lindsey.smith@email.com"
@@ -40,7 +61,7 @@ function formatStudentName(fullName, firstName, lastName, email) {
       const parts = emailName.split('.');
       const first = parts[0].replace(/[0-9]/g, '');
       const last = parts[parts.length - 1].replace(/[0-9]/g, '');
-      if (first && last) {
+      if (first && last && first.length > 1) {
         const capitalizedFirst = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
         const lastInitial = last.charAt(0).toUpperCase() + '.';
         return `${capitalizedFirst} ${lastInitial}`;
@@ -61,8 +82,8 @@ function formatStudentName(fullName, firstName, lastName, email) {
     }
   }
   
-  // Fallback: "A Gator"
-  return 'A Gator';
+  // Fallback: "A UF Student" (better than "A Gator" for clarity)
+  return 'A UF Student';
 }
 
 export default function QuestionCard({ question, gator }) {
