@@ -183,11 +183,11 @@ export default function QuestionsPage() {
       const requestCreatorEmail = request.created_by;
       const isFeatured = index % 5 === 0;
       
-      // Handle anonymous questions - they have created_by: 'anonymous'
-      const isAnonymous = request.is_anonymous || requestCreatorEmail === 'anonymous';
+      // Handle truly anonymous questions (is_anonymous flag is true for parent questions)
+      const isTrulyAnonymous = request.is_anonymous && request.poster_type === 'parent';
       
-      if (isAnonymous) {
-        // For anonymous questions, create a profile without linking to a real user
+      if (isTrulyAnonymous) {
+        // For truly anonymous questions, create a profile without linking to a real user
         profiles.push({
           id: request.id,
           email: 'anonymous',
@@ -200,7 +200,10 @@ export default function QuestionsPage() {
           isAnonymous: true
         });
       } else {
-        const userProfile = allUsers.find(u => u.email === requestCreatorEmail);
+        // Not anonymous - try to find user profile or use poster_name from request
+        const userProfile = requestCreatorEmail !== 'anonymous' 
+          ? allUsers.find(u => u.email === requestCreatorEmail)
+          : null;
         
         if (userProfile) {
           profiles.push({
@@ -210,12 +213,26 @@ export default function QuestionsPage() {
             isFeatured
           });
         } else {
-          let formattedName = getDisplayName({ email: requestCreatorEmail });
+          // Use poster name data from request - these are valid questions with names stored
+          const posterName = request.poster_name || request.student_name;
+          const posterFirstName = request.poster_first_name;
+          const posterLastName = request.poster_last_name;
+          
+          // Build a display name from available data
+          let formattedName = posterName;
+          if (!formattedName && requestCreatorEmail && requestCreatorEmail !== 'anonymous') {
+            formattedName = getDisplayName({ email: requestCreatorEmail });
+          }
+          if (!formattedName) {
+            formattedName = 'A UF Student';
+          }
           
           profiles.push({
             id: request.id,
-            email: requestCreatorEmail,
+            email: requestCreatorEmail !== 'anonymous' ? requestCreatorEmail : null,
             full_name: formattedName,
+            first_name: posterFirstName,
+            last_name: posterLastName,
             bio: request.description,
             major: request.target_industry,
             request: request,
