@@ -8,24 +8,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 function getUserInitials(user) {
   if (!user) return 'GU';
   
-  // Priority 1: Use first_name and last_name fields directly
-  if (user.first_name && user.last_name) {
-    return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
-  }
-  
-  // Priority 2: Try email first if it has firstname.lastname format (more reliable)
-  if (user.email) {
-    const emailName = user.email.split('@')[0];
-    if (emailName.includes('.')) {
-      const parts = emailName.split('.').filter(p => p && p.length > 0);
-      if (parts.length >= 2) {
-        // Use first and last parts of email (e.g., lindsey.osinoff -> LO)
-        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-      }
-    }
-  }
-  
-  // Priority 3: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
+  // Priority 1: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
+  // This is most reliable since full_name is always "Lindsey M. Osinoff" format
   const fullName = user.full_name || user.name || '';
   if (fullName && typeof fullName === 'string') {
     const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
@@ -39,6 +23,23 @@ function getUserInitials(user) {
     
     if (nameParts.length === 1 && nameParts[0].length >= 2) {
       return nameParts[0].slice(0, 2).toUpperCase();
+    }
+  }
+  
+  // Priority 2: Use first_name and last_name fields directly
+  if (user.first_name && user.last_name) {
+    return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+  }
+  
+  // Priority 3: Try email if it has firstname.lastname format
+  if (user.email) {
+    const emailName = user.email.split('@')[0];
+    if (emailName.includes('.')) {
+      const parts = emailName.split('.').filter(p => p && p.length > 0);
+      if (parts.length >= 2) {
+        // Use first and last parts of email (e.g., lindsey.osinoff -> LO)
+        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+      }
     }
   }
   
