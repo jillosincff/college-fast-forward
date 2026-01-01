@@ -190,7 +190,8 @@ export default function JobRequestForm({
       resume_url: resumeUrl,
       title: data.role,
       target_helpers: ['alumni', 'parents'],
-      is_anonymous: isParent ? isAnonymous : false
+      // CRITICAL: Only parents can post anonymously - students always show their name
+      is_anonymous: isParent && isAnonymous ? true : false
     };
     
     // Submit the request first
