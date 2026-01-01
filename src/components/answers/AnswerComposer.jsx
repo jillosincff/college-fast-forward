@@ -114,16 +114,18 @@ export default function AnswerComposer({
       console.log('📧 currentUser.email:', currentUser.email);
       
       // Try multiple fallback fields for poster email
+      // Priority: poster_email (new field) > created_by (if valid) > student_email
       let posterEmail = null;
-      if (question.created_by && question.created_by !== 'anonymous' && question.created_by.includes('@')) {
+      if (question.poster_email && question.poster_email.includes('@')) {
+        // poster_email is always stored, even for anonymous posts
+        posterEmail = question.poster_email;
+      } else if (question.created_by && question.created_by !== 'anonymous' && question.created_by.includes('@')) {
         posterEmail = question.created_by;
       } else if (question._original_created_by && question._original_created_by.includes('@')) {
         // _original_created_by may be set during normalization for anonymous posts
         posterEmail = question._original_created_by;
       } else if (question.student_email && question.student_email.includes('@')) {
         posterEmail = question.student_email;
-      } else if (question.poster_email && question.poster_email.includes('@')) {
-        posterEmail = question.poster_email;
       }
       
       console.log('📧 Resolved posterEmail:', posterEmail);
