@@ -131,12 +131,12 @@ export default function AnswerComposer({
           answererCompany: currentUser.current_company,
           answerPreview: answerText.trim()
         }).then(res => {
-          console.log('Answer notification sent:', res?.data);
+          console.log('📧 ✅ Answer notification response:', JSON.stringify(res?.data));
         }).catch(err => {
-          console.log('Answer notification failed (non-critical):', err.message);
+          console.error('📧 ❌ Answer notification FAILED:', err.message, err);
         });
       } else {
-        console.log('No valid poster email found, skipping notification');
+        console.log('📧 ⚠️ Skipping notification - posterEmail:', posterEmail, 'currentUser:', currentUser.email);
       }
 
       // Clear form
