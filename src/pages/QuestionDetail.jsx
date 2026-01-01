@@ -192,9 +192,11 @@ export default function QuestionDetailPage() {
       setAnswers(sorted);
       
       // NORMALIZE: Use actual answers count from DB as source of truth
+      // CRITICAL: Preserve original created_by for notifications even if anonymous
       const normalizedQuestion = {
         ...q,
         _source: questionSource,
+        _original_created_by: q.created_by, // Store original for notifications
         answer_count: sorted.length, // Use actual count from answers
         view_count: Number(q.view_count) || Number(q.views_count) || 0,
         total_upvotes: Number(q.total_upvotes) || 0,
