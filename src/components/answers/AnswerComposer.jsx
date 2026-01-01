@@ -153,60 +153,9 @@ export default function AnswerComposer({
     }
   };
 
-  // Show message for students
+  // Show message if not logged in
   if (!canAnswer) {
-    return (
-      <div className="student-message-box">
-        <Lightbulb className="w-5 h-5 text-blue-500" />
-        <div>
-          <h4>💡 Want to add your perspective?</h4>
-          <p>
-            Students can't answer questions directly, but you can:
-          </p>
-          <ul>
-            <li>• Reply to existing answers with your thoughts</li>
-            <li>• Message parents to continue the conversation</li>
-            <li>• Share this question with friends who can help</li>
-          </ul>
-        </div>
-
-        <style jsx>{`
-          .student-message-box {
-            background: #EFF6FF;
-            border: 1px solid #BFDBFE;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            gap: 16px;
-          }
-
-          .student-message-box h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1E40AF;
-            margin: 0 0 8px 0;
-          }
-
-          .student-message-box p {
-            font-size: 14px;
-            color: #374151;
-            margin: 0 0 8px 0;
-          }
-
-          .student-message-box ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-          }
-
-          .student-message-box li {
-            font-size: 14px;
-            color: #6B7280;
-            margin-bottom: 4px;
-          }
-        `}</style>
-      </div>
-    );
+    return null;
   }
 
   return (
