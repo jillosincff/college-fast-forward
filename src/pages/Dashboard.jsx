@@ -64,31 +64,46 @@ export default function Dashboard() {
     setLoadingData(true);
     console.log('🚀🚀🚀 loadDashboardData STARTING for:', user?.email, 'user.id:', user?.id);
     
-    // LOAD HELP REQUEST FIRST - most important
+    // LOAD HELP REQUEST FIRST - most important (check both HelpRequest and JobRequest)
     let foundRequest = null;
-    console.log('🔍 Loading HelpRequest for:', user?.email);
+    console.log('🔍 Loading question for:', user?.email);
     
-    // Strategy 1: Use list() with no filters to get all accessible records (RLS will filter)
+    // Strategy 1: Check JobRequest first (newer entity type)
     try {
-      const allAccessible = await base44.entities.HelpRequest.list('-created_date', 50);
-      console.log('🔍 All accessible HelpRequests via list():', allAccessible?.length || 0);
-      
-      // Filter to active ones for this user
-      const activeOnes = (allAccessible || []).filter(r => 
-        r.status === 'active' && 
-        (r.student_email === user.email || r.created_by === user.email || r.student_id === user.id)
+      const jobRequests = await base44.entities.JobRequest.filter(
+        { created_by: user.email, status: 'active' },
+        '-created_date',
+        1
       );
-      console.log('🔍 Active requests for this user:', activeOnes?.length || 0);
-      
-      if (activeOnes.length > 0) {
-        // Get the most recent one
-        foundRequest = activeOnes[0];
+      console.log('🔍 JobRequest by created_by:', jobRequests?.length || 0);
+      if (jobRequests?.length > 0) {
+        foundRequest = jobRequests[0];
       }
     } catch (e) {
-      console.error('🔍 HelpRequest list() failed:', e);
+      console.error('🔍 JobRequest filter failed:', e);
     }
     
-    // Strategy 2: Try direct filter by student_email (backup)
+    // Strategy 2: Check HelpRequest if no JobRequest found
+    if (!foundRequest) {
+      try {
+        const allAccessible = await base44.entities.HelpRequest.list('-created_date', 50);
+        console.log('🔍 All accessible HelpRequests via list():', allAccessible?.length || 0);
+        
+        const activeOnes = (allAccessible || []).filter(r => 
+          r.status === 'active' && 
+          (r.student_email === user.email || r.created_by === user.email || r.student_id === user.id)
+        );
+        console.log('🔍 Active HelpRequests for this user:', activeOnes?.length || 0);
+        
+        if (activeOnes.length > 0) {
+          foundRequest = activeOnes[0];
+        }
+      } catch (e) {
+        console.error('🔍 HelpRequest list() failed:', e);
+      }
+    }
+    
+    // Strategy 3: Try direct filter by student_email (backup)
     if (!foundRequest) {
       try {
         const byEmail = await base44.entities.HelpRequest.filter(
@@ -105,7 +120,7 @@ export default function Dashboard() {
       }
     }
     
-    console.log('🔍 FINAL HelpRequest:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
+    console.log('🔍 FINAL question:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
     if (foundRequest) setHelpRequest(foundRequest);
     
     try {
