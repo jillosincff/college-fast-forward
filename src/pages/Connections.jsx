@@ -3,9 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { JobRequest } from '@/entities/JobRequest';
-import { Message } from '@/entities/Message';
-import { Connection } from '@/entities/Connection';
-import { HelpOffer } from '@/entities/HelpOffer';
+import { HelpRequest } from '@/entities/HelpRequest';
 import { ProfileLike } from '@/entities/ProfileLike';
 import { Answer } from '@/entities/Answer';
 import { base44 } from '@/api/base44Client';
@@ -82,12 +80,15 @@ export default function QuestionsPage() {
     if (!silent) setIsLoading(true);
     
     try {
+      // Fetch BOTH JobRequest AND HelpRequest entities
       const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
+      const helpRequestsPromise = HelpRequest.filter({ status: 'active' }, '-created_date', 200);
       const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
       const answersPromise = Answer.list('-created_date', 1000);
 
-      const [jobRequests, directoryResponse, allAnswers] = await Promise.all([
+      const [jobRequests, helpRequests, directoryResponse, allAnswers] = await Promise.all([
         jobRequestsPromise,
+        helpRequestsPromise,
         directoryUsersPromise,
         answersPromise
       ]);
@@ -106,8 +107,26 @@ export default function QuestionsPage() {
         upvoteTotalsMap.set(qId, (upvoteTotalsMap.get(qId) || 0) + (answer.upvote_count || 0));
       });
       
+      // Normalize HelpRequest to match JobRequest structure
+      const normalizedHelpRequests = (helpRequests || []).map(hr => ({
+        ...hr,
+        // Map HelpRequest fields to JobRequest equivalents
+        role: hr.help_types?.join(', ') || 'Career Help',
+        target_industry: hr.industry,
+        poster_name: hr.student_name,
+        poster_type: hr.poster_type || 'student',
+        created_by: hr.student_email || hr.created_by,
+        _source: 'HelpRequest'
+      }));
+      
+      // Merge both request types
+      const allRequests = [
+        ...(jobRequests || []).map(jr => ({ ...jr, _source: 'JobRequest' })),
+        ...normalizedHelpRequests
+      ];
+      
       // Filter out test/demo requests and add real answer counts
-      const realRequests = (jobRequests || []).filter(req => {
+      const realRequests = allRequests.filter(req => {
         const description = req.description?.toLowerCase() || '';
         const role = req.role?.toLowerCase() || '';
         const isTestRequest = description.includes('test request') || 
@@ -124,6 +143,9 @@ export default function QuestionsPage() {
         // Use view_count from DB
         view_count: req.view_count || req.views_count || 0
       }));
+      
+      // Sort merged results by created_date descending
+      realRequests.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
       
       setRequests(realRequests);
       
@@ -201,7 +223,9 @@ export default function QuestionsPage() {
         });
       } else {
         // Not anonymous - try to find user profile or use poster_name from request
-        const userProfile = requestCreatorEmail !== 'anonymous' 
+        // Handle 'anonymous' created_by but with poster_name available
+        const isCreatedByAnonymous = !requestCreatorEmail || requestCreatorEmail === 'anonymous';
+        const userProfile = !isCreatedByAnonymous 
           ? allUsers.find(u => u.email === requestCreatorEmail)
           : null;
         
@@ -214,22 +238,26 @@ export default function QuestionsPage() {
           });
         } else {
           // Use poster name data from request - these are valid questions with names stored
+          // This handles cases where created_by is 'anonymous' but poster_name exists
           const posterName = request.poster_name || request.student_name;
           const posterFirstName = request.poster_first_name;
           const posterLastName = request.poster_last_name;
           
           // Build a display name from available data
           let formattedName = posterName;
-          if (!formattedName && requestCreatorEmail && requestCreatorEmail !== 'anonymous') {
+          if (!formattedName && !isCreatedByAnonymous) {
             formattedName = getDisplayName({ email: requestCreatorEmail });
           }
           if (!formattedName) {
-            formattedName = 'A UF Student';
+            // Fallback based on poster_type
+            const posterType = request.poster_type || 'student';
+            formattedName = posterType === 'parent' ? 'A UF Parent' : 
+                           posterType === 'alumni' ? 'A UF Alum' : 'A UF Student';
           }
           
           profiles.push({
             id: request.id,
-            email: requestCreatorEmail !== 'anonymous' ? requestCreatorEmail : null,
+            email: !isCreatedByAnonymous ? requestCreatorEmail : null,
             full_name: formattedName,
             first_name: posterFirstName,
             last_name: posterLastName,
