@@ -32,6 +32,7 @@ import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
 import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
+import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
