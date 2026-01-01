@@ -1940,8 +1940,124 @@ const BackfillStudentRequests = () => {
 
         {/* Cleanup Section */}
         <CleanupDraftNames />
+
+        {/* Backfill Poster Emails Section */}
+        <BackfillPosterEmails />
       </CardContent>
     </Card>
+  );
+};
+
+// Backfill Poster Emails Component
+const BackfillPosterEmails = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleBackfill = async () => {
+    if (!confirm('This will attempt to backfill poster_email for anonymous JobRequests by matching poster_name to User records. Continue?')) {
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const response = await backfillPosterEmails({});
+      
+      if (response.data?.success) {
+        setResult(response.data);
+        toast({
+          title: "✅ Backfill Complete!",
+          description: response.data.message,
+        });
+      } else {
+        throw new Error(response.data?.error || 'Backfill failed');
+      }
+    } catch (error) {
+      console.error('Backfill error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Backfill failed",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="border-t pt-6 mt-6">
+      <h4 className="font-semibold text-slate-900 mb-2">📧 Backfill Poster Emails</h4>
+      <p className="text-sm text-slate-600 mb-4">
+        Fix legacy anonymous JobRequests by matching poster_name to User records and adding poster_email.
+        This enables email notifications for answers to those questions.
+      </p>
+
+      <Button
+        onClick={handleBackfill}
+        disabled={loading}
+        variant="outline"
+        className="w-full border-blue-300 bg-blue-50 hover:bg-blue-100"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Running Backfill...
+          </>
+        ) : (
+          <>
+            <Mail className="w-4 h-4 mr-2" />
+            Backfill Poster Emails
+          </>
+        )}
+      </Button>
+
+      {result && (
+        <div className="mt-4 bg-slate-50 border rounded-lg p-4">
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
+            <div>
+              <p className="text-xl font-bold text-slate-900">{result.totalChecked}</p>
+              <p className="text-xs text-slate-600">Checked</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-green-600">{result.updated}</p>
+              <p className="text-xs text-slate-600">Updated</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-orange-600">{result.notFound?.length || 0}</p>
+              <p className="text-xs text-slate-600">Not Matched</p>
+            </div>
+          </div>
+
+          {result.notFound?.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-orange-700 mb-2">Could not match:</p>
+              <div className="max-h-32 overflow-y-auto bg-white rounded border p-2 space-y-1">
+                {result.notFound.map((item, idx) => (
+                  <div key={idx} className="text-xs text-slate-600 py-1 border-b last:border-0">
+                    ⚠️ {item.posterName || 'No name'} (ID: {item.id})
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {result.errors?.length > 0 && (
+            <div className="mt-3">
+              <p className="text-sm font-medium text-red-700 mb-2">Errors:</p>
+              <div className="max-h-24 overflow-y-auto bg-red-50 rounded border border-red-200 p-2 space-y-1">
+                {result.errors.map((item, idx) => (
+                  <div key={idx} className="text-xs text-red-600 py-1 border-b last:border-0">
+                    ❌ ID {item.id}: {item.error}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
