@@ -106,12 +106,21 @@ export default function AnswerComposer({
 
       // Send email notification to the question poster
       // Handle cases where created_by is 'anonymous' - use student_email or other fallbacks
+      console.log('📧 Attempting to send answer notification');
+      console.log('📧 question.created_by:', question.created_by);
+      console.log('📧 question.student_email:', question.student_email);
+      console.log('📧 question.poster_email:', question.poster_email);
+      console.log('📧 currentUser.email:', currentUser.email);
+      
       const posterEmail = (question.created_by && question.created_by !== 'anonymous') 
         ? question.created_by 
         : question.student_email || question.poster_email;
       
+      console.log('📧 Resolved posterEmail:', posterEmail);
+      
       // Only send if valid email and not the same person answering their own question
       if (posterEmail && posterEmail.includes('@') && posterEmail !== currentUser.email) {
+        console.log('📧 Conditions met, invoking sendAnswerNotification...');
         base44.functions.invoke('sendAnswerNotification', {
           questionId: question.id,
           questionTitle: question.title || question.role || 'Your question',
