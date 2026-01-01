@@ -8,21 +8,30 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 function getUserInitials(user) {
   if (!user) return 'GU';
   
-  // Priority 1: Parse full_name - take FIRST word and LAST word (skip middle names/initials)
-  // This is most reliable since full_name is always "Lindsey M. Osinoff" format
+  // Priority 1: Parse full_name
   const fullName = user.full_name || user.name || '';
   if (fullName && typeof fullName === 'string') {
-    const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
+    let firstName = '';
+    let lastName = '';
     
-    if (nameParts.length >= 2) {
-      // Always use first word and last word (skip middle names/initials)
-      const firstInitial = nameParts[0][0];
-      const lastInitial = nameParts[nameParts.length - 1][0];
-      return `${firstInitial}${lastInitial}`.toUpperCase();
+    // Check for "LastName, FirstName MiddleName" format (e.g., "Osinoff, Lindsey M.")
+    if (fullName.includes(',')) {
+      const parts = fullName.split(',');
+      lastName = parts[0]?.trim() || '';
+      firstName = parts[1]?.trim().split(/\s+/)[0] || ''; // First word after comma
+    } else {
+      // Standard "FirstName MiddleName LastName" format
+      const nameParts = fullName.trim().split(/\s+/).filter(part => part && part.length > 0);
+      if (nameParts.length >= 2) {
+        firstName = nameParts[0];
+        lastName = nameParts[nameParts.length - 1];
+      } else if (nameParts.length === 1) {
+        return nameParts[0].slice(0, 2).toUpperCase();
+      }
     }
     
-    if (nameParts.length === 1 && nameParts[0].length >= 2) {
-      return nameParts[0].slice(0, 2).toUpperCase();
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
     }
   }
   
