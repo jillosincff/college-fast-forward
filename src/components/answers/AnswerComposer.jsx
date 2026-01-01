@@ -33,11 +33,8 @@ export default function AnswerComposer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRecommendModal, setShowRecommendModal] = useState(false);
 
-  // Only parents and alumni can answer
-  const canAnswer = currentUser?.persona === 'parent' || 
-                    currentUser?.persona === 'alumni' ||
-                    currentUser?.roles?.includes('parent') ||
-                    currentUser?.roles?.includes('alumni');
+  // Anyone who is logged in can answer
+  const canAnswer = !!currentUser;
 
   const handleSubmit = async () => {
     if (!answerText.trim()) {
