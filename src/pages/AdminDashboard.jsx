@@ -2043,52 +2043,74 @@ const ExportUsersSection = () => {
 const FixMissingPersonasSection = ({ usersWithoutPersona, onComplete }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [previewResult, setPreviewResult] = useState(null);
+  const [updating, setUpdating] = useState(null);
 
-  const handlePreview = async () => {
-    setLoading(true);
+  // Categorize users directly from the prop
+  const students = usersWithoutPersona.filter(u => u.email?.toLowerCase().endsWith('@ufl.edu'));
+  const parents = usersWithoutPersona.filter(u => !u.email?.toLowerCase().endsWith('@ufl.edu'));
+
+  const handleUpdateSingle = async (user, newPersona) => {
+    setUpdating(user.id);
     try {
-      const response = await fixMissingPersonas({ dryRun: true });
-      if (response.data?.success) {
-        setPreviewResult(response.data);
-      } else {
-        throw new Error(response.data?.error || 'Preview failed');
-      }
+      await base44.entities.User.update(user.id, {
+        persona: newPersona,
+        roles: [newPersona],
+        onboarding_completed: false
+      });
+      toast({
+        title: "✅ Updated!",
+        description: `${user.email} is now a ${newPersona}`,
+      });
+      onComplete?.();
     } catch (error) {
-      console.error('Preview error:', error);
+      console.error('Update error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to preview changes",
+        description: error.message || "Failed to update user",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setUpdating(null);
     }
   };
 
-  const handleApply = async () => {
-    if (!confirm(`This will assign personas to ${previewResult?.summary?.total || 0} users:\n- ${previewResult?.summary?.students || 0} as Students (UFL emails)\n- ${previewResult?.summary?.parents || 0} as Parents (non-UFL emails)\n\nContinue?`)) {
+  const handleUpdateAll = async () => {
+    if (!confirm(`This will assign personas to ${usersWithoutPersona.length} users:\n- ${students.length} as Students (UFL emails)\n- ${parents.length} as Parents (non-UFL emails)\n\nContinue?`)) {
       return;
     }
 
     setLoading(true);
+    let updated = 0;
+    let errors = 0;
+
     try {
-      const response = await fixMissingPersonas({ dryRun: false });
-      if (response.data?.success) {
-        toast({
-          title: "✅ Personas Assigned!",
-          description: `Updated ${response.data.summary.students} students and ${response.data.summary.parents} parents`,
-        });
-        setPreviewResult(null);
-        onComplete?.();
-      } else {
-        throw new Error(response.data?.error || 'Update failed');
+      for (const user of usersWithoutPersona) {
+        const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
+        const newPersona = isUFL ? 'gator' : 'parent';
+        
+        try {
+          await base44.entities.User.update(user.id, {
+            persona: newPersona,
+            roles: [newPersona],
+            onboarding_completed: false
+          });
+          updated++;
+        } catch (err) {
+          console.error('Failed to update user:', user.email, err);
+          errors++;
+        }
       }
+
+      toast({
+        title: "✅ Bulk Update Complete!",
+        description: `Updated ${updated} users${errors > 0 ? `, ${errors} errors` : ''}`,
+      });
+      onComplete?.();
     } catch (error) {
-      console.error('Apply error:', error);
+      console.error('Bulk update error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to apply changes",
+        description: error.message || "Bulk update failed",
         variant: "destructive"
       });
     } finally {
