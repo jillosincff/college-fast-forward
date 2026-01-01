@@ -222,7 +222,12 @@ export default function ParentDashboard() {
 
   const getCapitalizedFirstName = (fullName) => {
     if (!fullName?.trim()) return 'Gator Parent';
-    const namePart = fullName.trim().split(' ')[0];
+    // Handle "LastName, FirstName" format
+    if (fullName.includes(',')) {
+      const afterComma = fullName.split(',')[1]?.trim().split(/\s+/)[0];
+      if (afterComma) return afterComma.charAt(0).toUpperCase() + afterComma.slice(1).toLowerCase();
+    }
+    const namePart = fullName.trim().split(/\s+/)[0];
     if (!namePart) return 'Gator Parent';
     return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
   };
