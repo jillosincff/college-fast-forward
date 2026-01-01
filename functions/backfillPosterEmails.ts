@@ -76,8 +76,18 @@ Deno.serve(async (req) => {
       errors: []
     };
 
-    // Process each JobRequest
-    for (const jr of needsBackfill) {
+    // Helper function to add delay
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Process each JobRequest with rate limiting
+    for (let i = 0; i < needsBackfill.length; i++) {
+      const jr = needsBackfill[i];
+      
+      // Add delay every 5 records to avoid rate limits
+      if (i > 0 && i % 5 === 0) {
+        console.log(`Processed ${i}/${needsBackfill.length}, pausing to avoid rate limits...`);
+        await delay(1000); // 1 second pause every 5 records
+      }
       const posterName = jr.poster_name;
       
       if (!posterName) {
