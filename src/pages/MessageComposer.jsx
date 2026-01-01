@@ -168,16 +168,24 @@ export default function MessageComposer() {
       setNewMessage('');
       setIsFirstMessage(false);
 
-      // Send email notification
-      try {
-        await base44.functions.invoke('sendMessageNotification', {
-          recipientEmail: recipient.email,
-          senderName: user.full_name || user.email,
-          senderEmail: user.email,
-          messagePreview: newMessage.substring(0, 200)
-        });
-      } catch (emailError) {
-        console.log('Email notification may not have sent:', emailError);
+      // Send email notification - with safeguards
+      const recipientEmail = recipient.email;
+      const senderEmail = user.email;
+      
+      // Don't notify if sending to yourself or invalid email
+      if (recipientEmail && 
+          recipientEmail.includes('@') && 
+          recipientEmail !== senderEmail) {
+        try {
+          await base44.functions.invoke('sendMessageNotification', {
+            recipientEmail: recipientEmail,
+            senderName: user.full_name || user.email.split('@')[0],
+            senderEmail: senderEmail,
+            messagePreview: newMessage.substring(0, 200)
+          });
+        } catch (emailError) {
+          console.log('Email notification may not have sent:', emailError);
+        }
       }
     } catch (error) {
       console.error('Failed to send message:', error);
