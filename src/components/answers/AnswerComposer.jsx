@@ -105,20 +105,29 @@ export default function AnswerComposer({
       }
 
       // Send email notification to the question poster
-      base44.functions.invoke('sendAnswerNotification', {
-        questionId: question.id,
-        questionTitle: question.title || question.role || 'Your question',
-        posterEmail: question.created_by,
-        posterName: question.poster_name || question.poster_first_name,
-        answererName: currentUser.full_name || currentUser.email.split('@')[0],
-        answererTitle: currentUser.current_position || currentUser.current_role,
-        answererCompany: currentUser.current_company,
-        answerPreview: answerText.trim()
-      }).then(res => {
-        console.log('Answer notification sent:', res?.data);
-      }).catch(err => {
-        console.log('Answer notification failed (non-critical):', err.message);
-      });
+      // Handle cases where created_by is 'anonymous' - use student_email or other fallbacks
+      const posterEmail = (question.created_by && question.created_by !== 'anonymous') 
+        ? question.created_by 
+        : question.student_email || question.poster_email;
+      
+      if (posterEmail) {
+        base44.functions.invoke('sendAnswerNotification', {
+          questionId: question.id,
+          questionTitle: question.title || question.role || 'Your question',
+          posterEmail: posterEmail,
+          posterName: question.poster_name || question.poster_first_name || question.student_name,
+          answererName: currentUser.full_name || currentUser.email.split('@')[0],
+          answererTitle: currentUser.current_position || currentUser.current_role,
+          answererCompany: currentUser.current_company,
+          answerPreview: answerText.trim()
+        }).then(res => {
+          console.log('Answer notification sent:', res?.data);
+        }).catch(err => {
+          console.log('Answer notification failed (non-critical):', err.message);
+        });
+      } else {
+        console.log('No valid poster email found, skipping notification');
+      }
 
       // Clear form
       setAnswerText('');
