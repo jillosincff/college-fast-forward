@@ -110,7 +110,8 @@ export default function AnswerComposer({
         ? question.created_by 
         : question.student_email || question.poster_email;
       
-      if (posterEmail) {
+      // Only send if valid email and not the same person answering their own question
+      if (posterEmail && posterEmail.includes('@') && posterEmail !== currentUser.email) {
         base44.functions.invoke('sendAnswerNotification', {
           questionId: question.id,
           questionTitle: question.title || question.role || 'Your question',
