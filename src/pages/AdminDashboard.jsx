@@ -2134,135 +2134,90 @@ const FixMissingPersonasSection = ({ usersWithoutPersona, onComplete }) => {
         </p>
       </div>
 
-      {!previewResult ? (
-        <Button
-          onClick={handlePreview}
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Eye className="w-4 h-4 mr-2" />
-              Preview Changes
-            </>
-          )}
-        </Button>
-      ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-slate-100 rounded-lg p-3">
-              <p className="text-2xl font-bold text-slate-900">{previewResult.summary.total}</p>
-              <p className="text-xs text-slate-600">Total Users</p>
-            </div>
-            <div className="bg-purple-100 rounded-lg p-3">
-              <p className="text-2xl font-bold text-purple-700">{previewResult.summary.students}</p>
-              <p className="text-xs text-purple-600">→ Students</p>
-            </div>
-            <div className="bg-orange-100 rounded-lg p-3">
-              <p className="text-2xl font-bold text-orange-700">{previewResult.summary.parents}</p>
-              <p className="text-xs text-orange-600">→ Parents</p>
-            </div>
-          </div>
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="bg-slate-100 rounded-lg p-3">
+          <p className="text-2xl font-bold text-slate-900">{usersWithoutPersona.length}</p>
+          <p className="text-xs text-slate-600">Total Users</p>
+        </div>
+        <div className="bg-purple-100 rounded-lg p-3">
+          <p className="text-2xl font-bold text-purple-700">{students.length}</p>
+          <p className="text-xs text-purple-600">→ Students (@ufl.edu)</p>
+        </div>
+        <div className="bg-orange-100 rounded-lg p-3">
+          <p className="text-2xl font-bold text-orange-700">{parents.length}</p>
+          <p className="text-xs text-orange-600">→ Parents (other)</p>
+        </div>
+      </div>
 
-          {previewResult.students.length > 0 && (
-            <div>
-              <h5 className="font-medium text-sm text-purple-700 mb-2">Will become Students (@ufl.edu):</h5>
-              <div className="max-h-32 overflow-y-auto bg-purple-50 rounded border border-purple-200 p-2 space-y-1">
-                {previewResult.students.map((u, idx) => (
-                  <div key={idx} className="text-xs text-purple-800 py-1 border-b border-purple-100 last:border-0">
-                    {u.name || 'No name'} - {u.email}
-                  </div>
-                ))}
+      {/* Bulk Update Button */}
+      <Button
+        onClick={handleUpdateAll}
+        disabled={loading}
+        className="w-full bg-green-600 hover:bg-green-700"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Updating All...
+          </>
+        ) : (
+          <>
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Update All {usersWithoutPersona.length} Users
+          </>
+        )}
+      </Button>
+
+      {/* Students List */}
+      {students.length > 0 && (
+        <div>
+          <h5 className="font-medium text-sm text-purple-700 mb-2">Students (@ufl.edu) - {students.length}:</h5>
+          <div className="max-h-48 overflow-y-auto bg-purple-50 rounded border border-purple-200 p-2 space-y-2">
+            {students.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                <div>
+                  <p className="font-medium text-sm text-slate-900">{user.full_name || 'No name'}</p>
+                  <p className="text-xs text-slate-600">{user.email}</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => handleUpdateSingle(user, 'gator')}
+                  disabled={updating === user.id}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {updating === user.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Set Student'}
+                </Button>
               </div>
-            </div>
-          )}
-
-          {previewResult.parents.length > 0 && (
-            <div>
-              <h5 className="font-medium text-sm text-orange-700 mb-2">Will become Parents (non-UFL):</h5>
-              <div className="max-h-32 overflow-y-auto bg-orange-50 rounded border border-orange-200 p-2 space-y-1">
-                {previewResult.parents.map((u, idx) => (
-                  <div key={idx} className="text-xs text-orange-800 py-1 border-b border-orange-100 last:border-0">
-                    {u.name || 'No name'} - {u.email}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setPreviewResult(null)}
-              variant="outline"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleApply}
-              disabled={loading}
-              className="flex-1 bg-green-600 hover:bg-green-700"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Applying...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Apply Changes
-                </>
-              )}
-            </Button>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="border-t pt-4 mt-4">
-        <h5 className="font-medium text-sm text-slate-700 mb-2">Individual Users:</h5>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {usersWithoutPersona.map((user) => {
-            const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
-            return (
-              <div key={user.id} className={`p-3 rounded-lg border ${isUFL ? 'bg-purple-50 border-purple-200' : 'bg-orange-50 border-orange-200'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-slate-900">{user.full_name || 'No name'}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${isUFL ? 'bg-purple-200 text-purple-800' : 'bg-orange-200 text-orange-800'}`}>
-                        {isUFL ? '→ Student' : '→ Parent'}
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-600">{user.email}</p>
-                    <p className="text-xs text-slate-500">
-                      Joined {new Date(user.created_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(user.email);
-                      toast({
-                        title: "Email Copied",
-                        description: "Email copied to clipboard",
-                      });
-                    }}
-                  >
-                    Copy
-                  </Button>
+      {/* Parents List */}
+      {parents.length > 0 && (
+        <div>
+          <h5 className="font-medium text-sm text-orange-700 mb-2">Parents (non-UFL) - {parents.length}:</h5>
+          <div className="max-h-48 overflow-y-auto bg-orange-50 rounded border border-orange-200 p-2 space-y-2">
+            {parents.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                <div>
+                  <p className="font-medium text-sm text-slate-900">{user.full_name || 'No name'}</p>
+                  <p className="text-xs text-slate-600">{user.email}</p>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => handleUpdateSingle(user, 'parent')}
+                  disabled={updating === user.id}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  {updating === user.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Set Parent'}
+                </Button>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
