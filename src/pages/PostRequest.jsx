@@ -87,6 +87,8 @@ export default function PostRequestPage() { // Renamed from PostRequest
         status: 'active',
         poster_type: posterType,
         is_anonymous: values.is_anonymous || false,
+        // CRITICAL: Always store poster_email for notifications (even for anonymous posts)
+        poster_email: user?.email,
         poster_profile_image: user?.profile_image_url || null,
         poster_name: posterName,
         poster_first_name: posterFirstName,
