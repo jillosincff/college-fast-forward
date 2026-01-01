@@ -18,7 +18,8 @@ export default function JobRequestForm({
   user,
   isParentQuestion = false
 }) {
-  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent') || isParentQuestion;
+  // Only allow anonymous posting for actual parents (not students, even if isParentQuestion is passed)
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
   const [isAnonymous, setIsAnonymous] = useState(initialData?.is_anonymous || false);
   const { toast } = useToast();
   const [resumeUrl, setResumeUrl] = useState(initialData?.resume_url || '');
