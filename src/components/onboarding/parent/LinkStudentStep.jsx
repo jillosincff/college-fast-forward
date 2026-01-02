@@ -77,11 +77,14 @@ export default function LinkStudentStep({
         <h2 className="text-2xl font-black text-slate-800 mb-2">
           {linkedStudent?.pending ? 'Invite Sent!' : 'Student Linked!'}
         </h2>
-        <p className="text-slate-600">
+        <p className="text-slate-600 mb-4">
           {linkedStudent?.pending 
             ? `We sent an invite to ${inviteEmail}. Once they join, your accounts will link automatically.`
             : `${linkedStudent?.full_name || 'Your student'} is now connected. Your karma will boost their requests!`
           }
+        </p>
+        <p className="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 inline-block">
+          👨‍👩‍👧‍👦 Have another student? You can link them anytime from your dashboard.
         </p>
       </div>
     );

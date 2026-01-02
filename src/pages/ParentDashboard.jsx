@@ -419,9 +419,20 @@ export default function ParentDashboard() {
             {myStudents.length > 0 && (
               <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
-                    👨‍🎓 My Students
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
+                      👨‍🎓 My Students
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSearchModal(true)}
+                      className="text-[#0021A5] hover:text-[#FA4616] hover:bg-blue-50 text-sm font-semibold"
+                    >
+                      <Link2 className="w-4 h-4 mr-1" />
+                      Link Another Student
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
