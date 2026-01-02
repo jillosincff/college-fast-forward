@@ -310,22 +310,44 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         )}
       </div>
 
-      {/* Top metadata line */}
-      <div className="question-metadata">
-        <span className="student-name">{posterName}</span>
-        {(year || major) && (
-          <>
-            <span className="separator">•</span>
-            <span className="student-info">
-              {year && `${year}`}
-              {year && major && ', '}
-              {major}
-            </span>
-          </>
-        )}
-        <span className="separator">•</span>
-        <span className="posted-time">{timeAgo}</span>
+      {/* Student Info Header - Enhanced */}
+      <div className="student-header">
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <span className="student-name-link">{posterName}</span>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-72 p-0" side="top">
+            <div className="p-4">
+              <h4 className="font-bold text-slate-900 text-base mb-1">{posterName}</h4>
+              <p className="text-sm text-slate-600 mb-2">
+                {[classYear, major].filter(Boolean).join(' · ')}
+              </p>
+              {minor && <p className="text-xs text-slate-500 mb-1">Minor: {minor}</p>}
+              {preTrack && <p className="text-xs text-blue-600 font-medium mb-2">{preTrack}</p>}
+              {industries.length > 0 && (
+                <p className="text-xs text-slate-500">Interested in: {industries.slice(0, 3).join(', ')}</p>
+              )}
+              {locationPref && (
+                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {locationPref}
+                </p>
+              )}
+              {bio && <p className="text-xs text-slate-500 mt-2 italic line-clamp-2">"{bio}"</p>}
+            </div>
+          </HoverCardContent>
+        </HoverCard>
+        <span className="posted-time-inline">{timeAgo}</span>
       </div>
+      
+      {/* Student Details Line - High Contrast */}
+      {posterType === 'student' && (classYear || major || preTrack) && (
+        <div className="student-details-line">
+          {classYear && <span>{classYear}</span>}
+          {major && <><span className="detail-sep">·</span><span>{major}</span></>}
+          {minor && <><span className="detail-sep">·</span><span className="minor-text">Minor: {minor}</span></>}
+          {preTrack && <><span className="detail-sep">·</span><span className="pre-track">{preTrack}</span></>}
+        </div>
+      )}
 
       {/* Question text - truncated */}
       <div className="question-text">
