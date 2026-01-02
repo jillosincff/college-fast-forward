@@ -107,11 +107,47 @@ function formatStudentName(fullName, firstName, lastName, email) {
   return 'A UF Student';
 }
 
-export default function QuestionCard({ question, gator }) {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+export default function QuestionCard({ question, gator, onDeleted }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
+  
+  // Check if current user owns this question
+  const isOwner = user && (
+    question.created_by === user.email ||
+    question.poster_email === user.email ||
+    question.student_email === user.email
+  );
   
   const handleClick = () => {
     navigate('QuestionDetail', { id: question.id });
+  };
+  
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    setIsDeleting(true);
+    try {
+      // Try JobRequest first, then HelpRequest
+      if (question.entity_name === 'HelpRequest' || question.student_id) {
+        await HelpRequest.delete(question.id);
+      } else {
+        await JobRequest.delete(question.id);
+      }
+      toast.success('Question deleted successfully');
+      if (onDeleted) onDeleted(question.id);
+    } catch (error) {
+      console.error('Failed to delete question:', error);
+      toast.error('Failed to delete question');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+  
+  const handleEdit = (e) => {
+    e.stopPropagation();
+    navigate('PostRequest', { edit: question.id });
   };
 
   // Get poster info
