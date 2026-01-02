@@ -225,11 +225,27 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
   // Location and timeline
   const locationPref = question.location_preference || gator?.location || '';
   const timeline = question.start_timing || question.timeline || '';
-  const timelineLabel = timeline === 'immediate' ? 'ASAP' 
-    : timeline === 'this_semester' ? 'This Semester'
-    : timeline === 'next_semester' ? 'Next Semester'
-    : timeline === 'summer' ? 'Summer 2026'
-    : timeline;
+  
+  // Format timeline to human-readable label
+  const formatTimelineLabel = (t) => {
+    if (!t) return '';
+    const labels = {
+      'immediate': 'ASAP',
+      'this_semester': 'This Semester',
+      'next_semester': 'Next Semester',
+      'summer': 'Summer 2026',
+      'this_week': 'This Week',
+      'this_month': 'This Month',
+      'no_rush': 'No Rush'
+    };
+    if (labels[t]) return labels[t];
+    // Handle "after_grad_YYYY" pattern
+    const afterGradMatch = t.match(/^after_grad_(\d{4})$/);
+    if (afterGradMatch) return `After Grad ${afterGradMatch[1]}`;
+    // Fallback: title case
+    return t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+  const timelineLabel = formatTimelineLabel(timeline);
   
   // Seeking and help types
   const seekingTypes = gator?.seeking_type || [];
