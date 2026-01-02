@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { JobRequest } from '@/entities/JobRequest';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import EditQuestionModal from './EditQuestionModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
