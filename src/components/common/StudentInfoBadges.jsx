@@ -4,7 +4,7 @@ import { MapPin, Calendar, Briefcase, MessageSquare, Users, GraduationCap, FileT
 // Map help types to icons and labels
 const HELP_TYPE_CONFIG = {
   'job_search': { icon: Briefcase, label: 'Jobs', color: 'blue' },
-  'internship_leads': { icon: Briefcase, label: 'Internship', color: 'blue' },
+  'internship_leads': { icon: Briefcase, label: 'Internship', color: 'indigo' },
   'resume': { icon: FileText, label: 'Resume', color: 'purple' },
   'resume_review': { icon: FileText, label: 'Resume', color: 'purple' },
   'interviews': { icon: MessageSquare, label: 'Interview', color: 'green' },
@@ -17,6 +17,17 @@ const HELP_TYPE_CONFIG = {
   'direction': { icon: GraduationCap, label: 'Exploring', color: 'amber' },
   'salary': { icon: Briefcase, label: 'Salary', color: 'green' },
   'grad_school': { icon: GraduationCap, label: 'Grad School', color: 'purple' },
+};
+
+// Timeline display labels
+const TIMELINE_LABELS = {
+  'immediate': 'ASAP',
+  'this_semester': 'This Semester',
+  'next_semester': 'Next Semester',
+  'summer': 'Summer 2026',
+  'this_week': 'This Week',
+  'this_month': 'This Month',
+  'no_rush': 'No Rush',
 };
 
 // Map seeking types to badges
@@ -89,6 +100,9 @@ export function StudentContextBadges({
     ? 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium'
     : 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold';
 
+  // Normalize timeline to display label
+  const timelineDisplay = TIMELINE_LABELS[timeline] || timeline;
+
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`}>
       {/* Location */}
@@ -100,10 +114,10 @@ export function StudentContextBadges({
       )}
       
       {/* Timeline */}
-      {timeline && (
+      {timelineDisplay && (
         <span className={`${badgeClass} bg-amber-50 text-amber-700 border border-amber-200`}>
           <Calendar className="w-3 h-3" />
-          {timeline}
+          {timelineDisplay}
         </span>
       )}
       
@@ -125,6 +139,7 @@ export function StudentContextBadges({
         const Icon = config.icon;
         const colors = {
           blue: 'bg-blue-50 text-blue-700 border-blue-200',
+          indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
           purple: 'bg-purple-50 text-purple-700 border-purple-200',
           green: 'bg-green-50 text-green-700 border-green-200',
           orange: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -207,9 +222,66 @@ export function StudentQuickInfo({
   );
 }
 
+/**
+ * StudentProfileHeader - Full header section for student profiles
+ */
+export function StudentProfileHeader({
+  name,
+  gradYear,
+  major,
+  minor,
+  preTrack,
+  location,
+  preferredLocation,
+  timeline,
+  industries = [],
+  seekingTypes = [],
+  helpTypes = [],
+  bio,
+  className = ''
+}) {
+  const classYear = getClassYear(gradYear);
+  const timelineDisplay = TIMELINE_LABELS[timeline] || timeline;
+  
+  return (
+    <div className={`${className}`}>
+      {/* Academic Details - High contrast, scannable */}
+      <div className="mb-4">
+        <h3 className="font-bold text-slate-900 text-lg mb-1">{name}</h3>
+        <p className="text-sm font-semibold text-slate-700">
+          {[classYear, major].filter(Boolean).join(' · ')}
+          {minor && <span className="text-slate-500"> · Minor: {minor}</span>}
+        </p>
+        {preTrack && (
+          <p className="text-sm font-semibold text-blue-600 mt-0.5">{preTrack}</p>
+        )}
+      </div>
+      
+      {/* Context Badges */}
+      <StudentContextBadges
+        location={preferredLocation || location}
+        timeline={timelineDisplay}
+        helpTypes={helpTypes}
+        seekingTypes={seekingTypes}
+        className="mb-3"
+      />
+      
+      {/* Industries */}
+      {industries.length > 0 && (
+        <p className="text-sm text-slate-600 mb-2">
+          <span className="font-medium">Interested in:</span> {industries.slice(0, 4).join(', ')}
+          {industries.length > 4 && ` +${industries.length - 4} more`}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default {
   StudentInfoLine,
   StudentContextBadges,
   StudentQuickInfo,
-  getClassYear
+  StudentProfileHeader,
+  getClassYear,
+  TIMELINE_LABELS
 };
