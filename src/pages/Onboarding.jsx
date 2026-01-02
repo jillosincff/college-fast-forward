@@ -186,33 +186,40 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Now 4 steps
+  // Progress bar component - Now 5 steps
   const ProgressBar = () => (
-    <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
+    <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 1 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 1 ? <Check className="w-4 h-4 text-white" /> : '👤'}
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 1 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 1 ? <Check className="w-3.5 h-3.5 text-white" /> : '👤'}
         </span>
-        <span className="hidden sm:inline text-white/80">You</span>
+        <span className="hidden sm:inline text-white/80 text-xs">You</span>
       </div>
-      <div className={`w-6 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 2 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 2 ? <Check className="w-4 h-4 text-white" /> : '💼'}
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 2 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 2 ? <Check className="w-3.5 h-3.5 text-white" /> : '🏢'}
         </span>
-        <span className="hidden sm:inline text-white/80">Expertise</span>
+        <span className="hidden sm:inline text-white/80 text-xs">Industry</span>
       </div>
-      <div className={`w-6 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 3 ? <Check className="w-4 h-4 text-white" /> : '🔗'}
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 3 ? <Check className="w-3.5 h-3.5 text-white" /> : '💼'}
         </span>
-        <span className="hidden sm:inline text-white/80">Link</span>
+        <span className="hidden sm:inline text-white/80 text-xs">Help</span>
       </div>
-      <div className={`w-6 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
-        <span className="hidden sm:inline text-white/80">Ready</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
+        </span>
+        <span className="hidden sm:inline text-white/80 text-xs">Link</span>
+      </div>
+      <div className={`w-4 h-0.5 ${step >= 5 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className="flex items-center gap-1 text-sm">
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 5 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
       </div>
     </div>
   );
@@ -253,26 +260,22 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of 4</p>
-            <h1 className="text-3xl font-bold text-white">What's your superpower?</h1>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of 5</p>
+            <h1 className="text-3xl font-bold text-white">What's your industry?</h1>
           </div>
           
           <p className="text-xl text-white/90">
-            Students need guidance in many areas. Where can you help?
+            We'll match you with students interested in your field.
           </p>
           
           <div className="space-y-2 pt-4">
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">🚀</span>
-              <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
-            </div>
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">🎯</span>
               <span className="font-semibold text-sm">We match you with students in YOUR industry</span>
             </div>
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">💫</span>
-              <span className="font-semibold text-sm">Watch your impact grow in real-time</span>
+              <span className="font-semibold text-sm">Your network is their opportunity</span>
             </div>
           </div>
         </div>
@@ -283,7 +286,33 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 4</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 5</p>
+            <h1 className="text-3xl font-bold text-white">How can you help?</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Students need guidance in many areas. Pick what fits you best.
+          </p>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🚀</span>
+              <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">⏱️</span>
+              <span className="font-semibold text-sm">Most help takes just 5-10 minutes</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (step === 4) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 5</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
           </div>
           
@@ -312,7 +341,7 @@ export default function Onboarding() {
       );
     }
     
-    if (step === 4) {
+    if (step === 5) {
       return (
         <div className="space-y-5">
           <div>
@@ -364,11 +393,17 @@ export default function Onboarding() {
           )}
           {step === 3 && (
             <>
+              <h1 className="text-xl font-bold mb-2 text-white">How can you help?</h1>
+              <p className="text-sm text-white/90">Select your expertise areas</p>
+            </>
+          )}
+          {step === 4 && (
+            <>
               <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
               <p className="text-sm text-white/90">Unlock Family Karma boosts</p>
             </>
           )}
-          {step === 4 && (
+          {step === 5 && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
@@ -464,90 +499,39 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 2: Expertise */}
+          {/* STEP 2: Industry */}
           {step === 2 && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
-                  Your expertise
+                  What's your industry?
                 </h2>
                 <p className="text-slate-500">
-                  Help us match you with the right students.
+                  Select all that apply — this helps us match you with the right students.
                 </p>
               </div>
 
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    What industry? <span className="font-normal text-slate-400">(optional - select all that apply)</span>
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {INDUSTRIES.map(ind => (
-                      <button
-                        key={ind.id}
-                        type="button"
-                        onClick={() => toggleIndustry(ind.id)}
-                        className={`
-                          flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
-                          transition-all duration-200 border-2
-                          ${industries.includes(ind.id)
-                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                          }
-                        `}
-                      >
-                        <span>{ind.emoji}</span>
-                        <span className="font-medium">{ind.label}</span>
-                        {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    How would you like to help students? <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-slate-500 mb-3">Select at least one — this helps us match you with the right students</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {EXPERTISE_AREAS.map(area => (
-                      <button
-                        key={area.id}
-                        type="button"
-                        onClick={() => toggleExpertise(area.id)}
-                        className={`
-                          flex items-center gap-3 px-4 py-3 rounded-xl text-left
-                          transition-all duration-200 border-2
-                          ${expertise.includes(area.id)
-                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                          }
-                        `}
-                      >
-                        <span className="text-lg">{area.emoji}</span>
-                        <span className="font-medium">{area.label}</span>
-                        {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                  {expertise.length === 0 && (
-                    <p className="text-xs text-amber-600 mt-2">Please select at least one way you'd like to help</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Anything else you'd like students to know? <span className="font-normal text-slate-400">(optional)</span>
-                  </label>
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'&#10;or 'Retired engineer with a great network in aerospace'"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                             resize-none h-24 focus:border-[#0021A5] focus:outline-none transition-colors"
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {INDUSTRIES.map(ind => (
+                    <button
+                      key={ind.id}
+                      type="button"
+                      onClick={() => toggleIndustry(ind.id)}
+                      className={`
+                        flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
+                        transition-all duration-200 border-2
+                        ${industries.includes(ind.id)
+                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }
+                      `}
+                    >
+                      <span>{ind.emoji}</span>
+                      <span className="font-medium">{ind.label}</span>
+                      {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="flex gap-3">
@@ -559,6 +543,82 @@ export default function Onboarding() {
                   </button>
                   <button
                     onClick={() => setStep(3)}
+                    className="flex-1 py-4 rounded-xl font-bold text-lg transition-all bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl"
+                  >
+                    Continue →
+                  </button>
+                </div>
+
+                <p className="text-center text-sm text-slate-400">
+                  You can skip this if none apply
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* STEP 3: How to Help */}
+          {step === 3 && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  How would you like to help?
+                </h2>
+                <p className="text-slate-500">
+                  Select at least one — this helps us match you with students.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-2">
+                  {EXPERTISE_AREAS.map(area => (
+                    <button
+                      key={area.id}
+                      type="button"
+                      onClick={() => toggleExpertise(area.id)}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                        transition-all duration-200 border-2
+                        ${expertise.includes(area.id)
+                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }
+                      `}
+                    >
+                      <span className="text-lg">{area.emoji}</span>
+                      <span className="font-medium">{area.label}</span>
+                      {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
+                    </button>
+                  ))}
+                </div>
+
+                {expertise.length === 0 && (
+                  <p className="text-xs text-amber-600">Please select at least one way you'd like to help</p>
+                )}
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Anything else you'd like students to know? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             resize-none h-20 focus:border-[#0021A5] focus:outline-none transition-colors"
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(2)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(4)}
                     disabled={!canProceedStep2}
                     className={`
                       flex-1 py-4 rounded-xl font-bold text-lg transition-all
@@ -575,23 +635,23 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 3: Link Your Student */}
-          {step === 3 && (
+          {/* STEP 4: Link Your Student */}
+          {step === 4 && (
             <LinkStudentStep
               user={user}
               onComplete={(student) => {
                 setLinkedStudent(student);
-                setStep(4);
+                setStep(5);
               }}
               onSkip={() => {
                 setSkippedLinking(true);
-                setStep(4);
+                setStep(5);
               }}
             />
           )}
 
-          {/* STEP 4: Ready */}
-          {step === 4 && (
+          {/* STEP 5: Ready */}
+          {step === 5 && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -666,7 +726,7 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(3)}
+                    onClick={() => setStep(4)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
