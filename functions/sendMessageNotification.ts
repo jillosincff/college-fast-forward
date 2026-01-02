@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
             recipientEmail,
             recipientName,
             subject,
-            body: messageBody,
+            messageBody,
             messagePreview
         } = body;
         
