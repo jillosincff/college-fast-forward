@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { JobRequest } from '@/entities/JobRequest';
+import { HelpRequest } from '@/entities/HelpRequest';
 import { Button } from '@/components/ui/button';
 import { navigate } from '@/components/utils/navigation';
 import { ArrowLeft } from 'lucide-react';
