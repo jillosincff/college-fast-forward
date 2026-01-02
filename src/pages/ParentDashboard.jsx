@@ -21,7 +21,8 @@ import {
   Crown,
   RefreshCw,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Link2
 } from 'lucide-react';
 import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
 import { trackEvent } from '@/components/utils/analytics';
@@ -33,6 +34,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
 import FirstTimeUserDashboard from '@/components/dashboard/parent/FirstTimeUserDashboard';
+import StudentLinkBanner from '@/components/dashboard/parent/StudentLinkBanner';
 
 // Mobile Quick Action Card Component
 function QuickActionCardMobile({ icon, label, onClick, color = 'blue' }) {
@@ -308,22 +310,19 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
-      {/* Family Link Success Banner */}
-      {myStudents.length > 0 && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 mx-4 mt-4 rounded-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="font-semibold text-green-800">
-                🎉 You're linked to {myStudents.map(s => s.full_name || s.email).join(', ')}
-              </p>
-              <p className="text-sm text-green-600">Your actions now boost their visibility in the network!</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* PRIORITY #1: Student Link Banner - Always at top */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <StudentLinkBanner 
+          linkedStudents={myStudents}
+          onLinkStudent={() => setShowSearchModal(true)}
+          onRemindLater={() => {
+            toast({
+              title: "We'll remind you tomorrow",
+              description: "Link your student anytime from your dashboard to unlock karma boosts."
+            });
+          }}
+        />
+      </div>
 
       {/* 1. Welcome Header - Mobile Optimized */}
       <div className="bg-[#0021A5] text-white py-5 md:py-6 mb-4 md:mb-6">
@@ -380,8 +379,16 @@ export default function ParentDashboard() {
                 Help More Students, Boost Your Own ⚡
               </h2>
               <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
-                Every action unlocks more opportunities for your student
+                {myStudents.length > 0 
+                  ? `Every action you take earns karma — directly boosting ${myStudents[0]?.full_name?.split(' ')[0] || 'your student'}'s visibility.`
+                  : 'Every action you take earns karma — link your student to activate boosts.'
+                }
               </p>
+              {myStudents.length === 0 && (
+                <p className="text-sm text-amber-600 mt-2 font-medium">
+                  ⚠️ Link your student to see their name here and activate boosts.
+                </p>
+              )}
             </div>
 
             {/* MY STUDENTS SECTION */}
@@ -424,9 +431,40 @@ export default function ParentDashboard() {
               onInviteStudent={() => setShowInviteModal(true)}
             />
 
+            {/* Connect Student Card - Priority #1 if no student linked */}
+            {myStudents.length === 0 && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 relative overflow-hidden">
+                <div className="absolute top-2 right-2">
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                    REQUIRED FOR KARMA BOOSTS
+                  </span>
+                </div>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                  <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Link2 className="w-7 h-7 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-amber-900 mb-1">Connect Your Student</h3>
+                    <p className="text-sm text-amber-700">
+                      Link your student's account to boost their profile visibility. Your karma directly helps them get faster answers.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setShowSearchModal(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold whitespace-nowrap"
+                  >
+                    Search & Link Student →
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
             <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
               <div className="flex gap-3" style={{ width: 'max-content' }}>
+                {myStudents.length === 0 && (
+                  <QuickActionCardMobile icon="🔗" label="Link Student" onClick={() => setShowSearchModal(true)} color="orange" />
+                )}
                 <QuickActionCardMobile icon="👤" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
                 <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
                 <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
