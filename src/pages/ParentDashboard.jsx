@@ -31,12 +31,8 @@ import AddStudentModal from '@/components/dashboard/AddStudentModal';
 import FamilyKarmaWidget from '@/components/karma/FamilyKarmaWidget';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
-import { gsap } from 'gsap';
 import WelcomeModal from '@/components/WelcomeModal';
 import FirstTimeUserDashboard from '@/components/dashboard/parent/FirstTimeUserDashboard';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // Mobile Quick Action Card Component
 function QuickActionCardMobile({ icon, label, onClick, color = 'blue' }) {
