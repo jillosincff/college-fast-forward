@@ -567,6 +567,7 @@ export default function QuestionsPage() {
                         onDeleted={(deletedId) => {
                           setRequests(prev => prev.filter(r => r.id !== deletedId));
                         }}
+                        onUpdated={() => loadData(true)}
                       />
                     </motion.div>
                   ))}
