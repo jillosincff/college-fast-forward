@@ -710,12 +710,14 @@ export default function QuestionsPage() {
           font-size: 22px;
           font-weight: 700;
           margin: 0 0 6px 0;
+          color: white;
         }
 
         .cta-text p {
           font-size: 15px;
           opacity: 0.95;
           margin: 0;
+          color: white;
         }
 
         .cta-button {
