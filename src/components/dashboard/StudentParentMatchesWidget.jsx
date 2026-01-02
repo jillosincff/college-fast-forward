@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2, Zap, Star, CheckCircle, TrendingUp } from 'lucide-react';
+import { Users, MessageSquare, Building2, Clock, ArrowRight, Loader2, Zap, Star, CheckCircle, TrendingUp, Trash2, RefreshCw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserAvatar from '@/components/common/UserAvatar';
+import { toast } from 'sonner';
 
 const HELP_TYPE_LABELS = {
   'career_advice': 'Career advice',
