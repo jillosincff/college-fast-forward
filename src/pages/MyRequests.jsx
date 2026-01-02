@@ -15,8 +15,18 @@ export default function MyRequestsPage() {
     if (!user?.email) return;
     setLoading(true);
     try {
-      const requests = await JobRequest.filter({ created_by: user.email }, '-created_date');
-      setMyRequests(Array.isArray(requests) ? requests : []);
+      // Fetch requests by created_by OR poster_email (some requests have created_by='anonymous')
+      const [byCreator, byPosterEmail] = await Promise.all([
+        JobRequest.filter({ created_by: user.email }, '-created_date'),
+        JobRequest.filter({ poster_email: user.email }, '-created_date')
+      ]);
+      
+      // Merge and deduplicate by ID
+      const allRequests = [...(byCreator || []), ...(byPosterEmail || [])];
+      const uniqueRequests = Array.from(new Map(allRequests.map(r => [r.id, r])).values());
+      uniqueRequests.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      
+      setMyRequests(uniqueRequests);
     } catch (error) {
       console.error("Failed to load user's requests:", error);
       setMyRequests([]);
