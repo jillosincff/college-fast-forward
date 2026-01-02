@@ -107,16 +107,6 @@ Deno.serve(async (req) => {
             console.error('❌ Email error:', emailErr.message);
         }
 
-        // Fire and forget push notification (don't await to avoid blocking)
-        base44.asServiceRole.functions.invoke('sendPushNotification', {
-            recipient_email: posterEmail,
-            title: `🎉 New answer from ${answererName}`,
-            body: answerPreview.substring(0, 100) + (answerPreview.length > 100 ? '...' : ''),
-            type: 'new_answer',
-            action_url: `/#QuestionDetail?id=${questionId}`,
-            metadata: { questionId, answererName }
-        }).catch(err => console.log('⚠️ Push notification skipped:', err.message));
-
         return new Response(JSON.stringify({
             success: emailSent,
             emailSent,
