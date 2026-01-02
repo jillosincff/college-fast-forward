@@ -532,23 +532,41 @@ export default function StudentOnboarding() {
             />
           </div>
 
-          {/* Preferred Location */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Where are you looking to work? <span className="text-slate-400 font-normal">(optional)</span>
-            </label>
-            <input
-              type="text"
-              value={preferredLocation}
-              onChange={(e) => setPreferredLocation(e.target.value)}
-              placeholder="e.g., Miami, New York City, Remote, Anywhere"
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                       focus:border-[#0021A5] focus:outline-none"
-              maxLength={100}
-            />
-            <p className="text-xs text-slate-400 mt-1">
-              This helps connect you with people in your target area.
-            </p>
+          {/* Location and Timeline Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Preferred Location */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Where are you looking to work?
+              </label>
+              <input
+                type="text"
+                value={preferredLocation}
+                onChange={(e) => setPreferredLocation(e.target.value)}
+                placeholder="e.g., NYC, Remote, Anywhere"
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                         focus:border-[#0021A5] focus:outline-none"
+                maxLength={100}
+              />
+            </div>
+
+            {/* Timeline */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                When do you want to start?
+              </label>
+              <select
+                value={targetTimeline}
+                onChange={(e) => setTargetTimeline(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                         focus:border-[#0021A5] focus:outline-none bg-white"
+              >
+                <option value="">Select timeline</option>
+                {TIMELINE_OPTIONS.map(opt => (
+                  <option key={opt.id} value={opt.id}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Help Request - REQUIRED */}
