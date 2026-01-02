@@ -76,6 +76,9 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
       <DialogContent className="sm:max-w-[500px]" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Edit Your Question</DialogTitle>
+          <DialogDescription>
+            Update the details of your question below.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
