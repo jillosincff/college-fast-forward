@@ -116,8 +116,9 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
   const { user } = useAuth();
   
   // Check if current user owns this question
+  // Note: Some questions have created_by: 'anonymous' but store real email in poster_email
   const isOwner = user && (
-    question.created_by === user.email ||
+    (question.created_by && question.created_by !== 'anonymous' && question.created_by === user.email) ||
     question.poster_email === user.email ||
     question.student_email === user.email
   );
