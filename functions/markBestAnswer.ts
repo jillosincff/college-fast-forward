@@ -51,19 +51,25 @@ Deno.serve(async (req) => {
     if (answers.length > 0) {
       const bestAnswer = answers[0];
       
-      // Award karma for best answer (+50)
+      // Award karma for best answer (+50) - parents/alumni only
       try {
         const answerAuthor = await base44.asServiceRole.entities.User.filter({ id: bestAnswer.answerer_user_id });
-        if (answerAuthor.length > 0 && answerAuthor[0].family_group_id) {
-          await base44.functions.invoke('awardKarma', {
-            familyGroupId: answerAuthor[0].family_group_id,
-            parentUserId: bestAnswer.answerer_user_id,
-            parentEmail: bestAnswer.answerer_email,
-            actionType: 'best_answer',
-            referenceId: answerId,
-            description: 'Answer marked as best'
-          });
-          console.log('Awarded 50 karma for best answer');
+        if (answerAuthor.length > 0) {
+          const author = answerAuthor[0];
+          const isParentOrAlumni = author.persona === 'parent' || author.persona === 'alumni' || 
+                                   author.roles?.includes('parent') || author.roles?.includes('alumni');
+          
+          if (isParentOrAlumni) {
+            await base44.functions.invoke('awardKarma', {
+              familyGroupId: author.family_group_id || null,
+              parentUserId: bestAnswer.answerer_user_id,
+              parentEmail: bestAnswer.answerer_email,
+              actionType: 'best_answer',
+              referenceId: answerId,
+              description: 'Answer marked as best'
+            });
+            console.log('Awarded 50 karma for best answer');
+          }
         }
       } catch (karmaErr) {
         console.log('Karma award failed (non-critical):', karmaErr.message);
