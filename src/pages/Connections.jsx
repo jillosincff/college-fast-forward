@@ -317,21 +317,40 @@ export default function QuestionsPage() {
     }
     
     // Default "relevance" sorting
-    // Sort by karma_boost first (family karma system)
-    const aKarmaBoost = a.request?.karma_boost || 0;
-    const bKarmaBoost = b.request?.karma_boost || 0;
-    if (aKarmaBoost !== bKarmaBoost) return bKarmaBoost - aKarmaBoost;
+    // PRIORITY 1: Active karma boosts (check if boost hasn't expired)
+    const now = new Date();
+    const aBoostActive = a.request?.karma_boost > 0 && (!a.request?.boosted_until || new Date(a.request.boosted_until) > now);
+    const bBoostActive = b.request?.karma_boost > 0 && (!b.request?.boosted_until || new Date(b.request.boosted_until) > now);
     
+    // Boosted requests always come first
+    if (aBoostActive && !bBoostActive) return -1;
+    if (!aBoostActive && bBoostActive) return 1;
+    
+    // Within boosted: sort by boost level (higher = better), then by most recent karma earn
+    if (aBoostActive && bBoostActive) {
+      const aBoostLevel = a.request?.karma_boost || 0;
+      const bBoostLevel = b.request?.karma_boost || 0;
+      if (aBoostLevel !== bBoostLevel) return bBoostLevel - aBoostLevel;
+      // Same boost level - sort by newest
+      return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
+    }
+    
+    // PRIORITY 2: Premium users
     const aIsPremium = checkFullAccess(a);
     const bIsPremium = checkFullAccess(b);
     if (aIsPremium && !bIsPremium) return -1;
     if (!aIsPremium && bIsPremium) return 1;
     
+    // PRIORITY 3: Featured
     if (a.isFeatured && !b.isFeatured) return -1;
     if (!a.isFeatured && b.isFeatured) return 1;
+    
+    // PRIORITY 4: Has request
     if (a.hasRequest && !b.hasRequest) return -1;
     if (!a.hasRequest && b.hasRequest) return 1;
-    return 0;
+    
+    // Default: newest first
+    return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
   });
 
   const displayedProfiles = sortedProfiles.slice(0, visibleCount);
