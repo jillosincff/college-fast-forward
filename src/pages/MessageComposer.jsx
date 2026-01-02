@@ -178,13 +178,17 @@ export default function MessageComposer() {
           recipientEmail !== senderEmail) {
         try {
           await base44.functions.invoke('sendMessageNotification', {
+            messageId: message.id,
             recipientEmail: recipientEmail,
-            senderName: user.full_name || user.email.split('@')[0],
+            recipientName: recipient.full_name || recipientEmail.split('@')[0],
+            senderName: user.full_name || senderEmail.split('@')[0],
             senderEmail: senderEmail,
-            messagePreview: newMessage.substring(0, 200)
+            subject: isFirstMessage ? `Message from ${user.full_name || user.email}` : `Re: Message`,
+            body: newMessage.trim()
           });
+          console.log('✅ Email notification sent');
         } catch (emailError) {
-          console.log('Email notification may not have sent:', emailError);
+          console.log('⚠️ Email notification failed:', emailError.message);
         }
       }
     } catch (error) {
