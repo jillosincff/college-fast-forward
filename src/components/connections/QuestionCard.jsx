@@ -1,6 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import moment from 'moment';
+import { useAuth } from '@/components/auth/AuthContext';
+import { JobRequest } from '@/entities/JobRequest';
+import { HelpRequest } from '@/entities/HelpRequest';
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const HELP_TYPE_LABELS = {
   'career_advice': 'Career Advice',
