@@ -153,7 +153,7 @@ export default function FirstTimeUserDashboard({
             </div>
             <div>
               <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
-              <p className="text-sm text-purple-700">Share job openings from your company with UF students</p>
+              <p className="text-sm text-purple-700">Share job openings from your company with students</p>
             </div>
           </div>
           <button

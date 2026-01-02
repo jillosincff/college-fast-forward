@@ -242,7 +242,7 @@ export default function ParentDashboard() {
         emails: [inviteEmail],
         role: 'student',
         campus: 'UF',
-        note: inviteName ? `${inviteName}, join College Fast Forward!` : `Join College Fast Forward to connect with the Gator community!`
+        note: inviteName ? `${inviteName}, join College Fast Forward!` : `Join College Fast Forward to connect with students and parents!`
       });
       console.log('📧 Invite result:', result);
       
@@ -253,7 +253,7 @@ export default function ParentDashboard() {
       
       if (result.data?.sent?.length > 0) {
         toast({
-          title: "Invite Sent! 🐊",
+          title: "Invite Sent! 📧",
           description: `We sent an invitation to ${inviteEmail}`
         });
         setShowInviteModal(false);
@@ -535,7 +535,7 @@ export default function ParentDashboard() {
                 </h3>
                 <p className="text-xs text-slate-600 mb-3 leading-relaxed">
                   Post your own question.<br />
-                  <span className="font-semibold">Get support from the swamp.</span>
+                  <span className="font-semibold">Get support from the community.</span>
                 </p>
                 <Button
                   onClick={() => navigate('PostRequest?type=parent')}
@@ -582,7 +582,7 @@ export default function ParentDashboard() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
-                      <p className="text-sm text-purple-700">Share job openings from your company with UF students</p>
+                      <p className="text-sm text-purple-700">Share job openings from your company with students</p>
                     </div>
                   </div>
                   <Button
