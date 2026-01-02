@@ -213,9 +213,27 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         gator?.email || question.created_by
       );
   
-  // Get student info
-  const year = gator?.graduation_year || question.student_year || '';
+  // Get student info - enhanced with onboarding data
+  const gradYear = gator?.graduation_year || question.student_year || '';
+  const classYear = getClassYear(gradYear);
   const major = gator?.major || question.target_industry || question.student_major || '';
+  const minor = gator?.minor || '';
+  const preTrack = gator?.pre_professional_track || '';
+  const bio = gator?.bio || '';
+  
+  // Location and timeline
+  const locationPref = question.location_preference || gator?.location || '';
+  const timeline = question.start_timing || question.timeline || '';
+  const timelineLabel = timeline === 'immediate' ? 'ASAP' 
+    : timeline === 'this_semester' ? 'This Semester'
+    : timeline === 'next_semester' ? 'Next Semester'
+    : timeline === 'summer' ? 'Summer 2026'
+    : timeline;
+  
+  // Seeking and help types
+  const seekingTypes = gator?.seeking_type || [];
+  const helpTypes = question.help_types || gator?.help_needed || [];
+  const industries = gator?.industries_interested || [];
   
   // Format time - ensure it always shows "ago" (handles timezone edge cases)
   const createdMoment = moment(question.created_date);
