@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-console.log('🚀 sendMessageNotification loaded v2');
+console.log('🚀 sendMessageNotification loaded v3');
 
 Deno.serve(async (req) => {
     console.log('📨 sendMessageNotification called');
