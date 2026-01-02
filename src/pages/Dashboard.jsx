@@ -13,6 +13,7 @@ import { getUserCount } from '@/functions/getUserCount';
 import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCard';
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 import ChallengeWidget from '@/components/challenge/ChallengeWidget';
+import QuickTourCard from '@/components/dashboard/student/QuickTourCard';
 
 // CACHE BUSTER v4 - 2026-01-02 - Fixed layout flashing and JSX structure
 export default function Dashboard() {
@@ -31,6 +32,7 @@ export default function Dashboard() {
   });
   const [myActiveQuestions, setMyActiveQuestions] = useState(0);
   const [linkedParents, setLinkedParents] = useState([]);
+  const [showQuickTour, setShowQuickTour] = useState(true);
   
   // Track if we've already started loading to prevent duplicate calls
   const loadStartedRef = React.useRef(false);
@@ -337,6 +339,14 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        
+        {/* Quick Tour for New Users */}
+        {showQuickTour && !user?.quick_tour_dismissed && (
+          <QuickTourCard 
+            user={user} 
+            onDismiss={() => setShowQuickTour(false)} 
+          />
+        )}
         
         {/* 1. 30-Day Intro Challenge Widget - compact, motivational */}
         <ChallengeWidget
