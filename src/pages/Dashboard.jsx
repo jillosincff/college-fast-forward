@@ -282,11 +282,7 @@ export default function Dashboard() {
       
       {/* Founding Member Banner */}
       {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-4 px-4"
-        >
+        <div className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-4 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="text-3xl">🎉</span>
@@ -300,7 +296,7 @@ export default function Dashboard() {
               <span className="text-white/90 ml-2">founding spots remaining</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Family Link Success Banner */}
