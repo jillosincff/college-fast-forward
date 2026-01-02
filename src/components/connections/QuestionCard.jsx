@@ -214,11 +214,12 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
       );
   
   // Get student info - enhanced with onboarding data
-  const gradYear = gator?.graduation_year || question.student_year || '';
+  // Pull from question's stored student data first (most reliable), then fallback to gator profile
+  const gradYear = question.student_year || gator?.graduation_year || '';
   const classYear = getClassYear(gradYear);
-  const major = gator?.major || question.target_industry || question.student_major || '';
-  const minor = gator?.minor || '';
-  const preTrack = gator?.pre_professional_track || '';
+  const major = question.student_major || gator?.major || question.target_industry || '';
+  const minor = question.student_minor || gator?.minor || '';
+  const preTrack = question.student_pre_track || gator?.pre_professional_track || '';
   const bio = gator?.bio || '';
   
   // Location and timeline
