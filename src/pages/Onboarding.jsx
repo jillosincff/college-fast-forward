@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Link2 } from 'lucide-react';
 import PushNotificationPrompt from '@/components/notifications/PushNotificationPrompt';
 import { Switch } from '@/components/ui/switch';
+import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
 
 // Industry options
 const INDUSTRIES = [
@@ -43,6 +44,8 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [linkedStudent, setLinkedStudent] = useState(null);
+  const [skippedLinking, setSkippedLinking] = useState(false);
   
   // Step 1: Basic Info
   const [company, setCompany] = useState('');
@@ -57,6 +60,8 @@ export default function Onboarding() {
   
   // Step 3: Visibility
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
+  
+  // Step 4 is now Link Student (after step 3)
 
   // LinkedIn URL validation
   const handleLinkedInChange = (value) => {
@@ -181,7 +186,7 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component
+  // Progress bar component - Now 4 steps
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
       <div className="flex items-center gap-1 text-sm">
@@ -190,16 +195,23 @@ export default function Onboarding() {
         </span>
         <span className="hidden sm:inline text-white/80">You</span>
       </div>
-      <div className={`w-8 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-6 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 2 ? 'bg-white/30' : 'bg-white/10'}`}>
           {step > 2 ? <Check className="w-4 h-4 text-white" /> : '💼'}
         </span>
         <span className="hidden sm:inline text-white/80">Expertise</span>
       </div>
-      <div className={`w-8 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-6 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 3 ? <Check className="w-4 h-4 text-white" /> : '🔗'}
+        </span>
+        <span className="hidden sm:inline text-white/80">Link</span>
+      </div>
+      <div className={`w-6 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className="flex items-center gap-1 text-sm">
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
         <span className="hidden sm:inline text-white/80">Ready</span>
       </div>
     </div>
@@ -271,6 +283,39 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 4</p>
+            <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Unlock the most powerful feature: Family Karma.
+          </p>
+          
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              <strong>How it works:</strong><br />
+              When you help other students, YOUR student's questions get pinned to the top of the feed — answered faster.
+            </p>
+          </div>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">⚡</span>
+              <span className="font-semibold text-sm">Your karma = your student's boost</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">📌</span>
+              <span className="font-semibold text-sm">Their questions get priority visibility</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (step === 4) {
+      return (
+        <div className="space-y-5">
+          <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Final Step</p>
             <h1 className="text-3xl font-bold text-white">You're all set! 🎉</h1>
           </div>
@@ -287,7 +332,7 @@ export default function Onboarding() {
           </div>
           
           <p className="text-white font-medium pt-4">
-            Join <span className="font-bold">200+ UF parents & alumni</span> already opening doors
+            Join <span className="font-bold">200+ parents & alumni</span> already opening doors
           </p>
         </div>
       );
@@ -318,6 +363,12 @@ export default function Onboarding() {
             </>
           )}
           {step === 3 && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
+              <p className="text-sm text-white/90">Unlock Family Karma boosts</p>
+            </>
+          )}
+          {step === 4 && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
@@ -524,8 +575,23 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 3: Ready */}
+          {/* STEP 3: Link Your Student */}
           {step === 3 && (
+            <LinkStudentStep
+              user={user}
+              onComplete={(student) => {
+                setLinkedStudent(student);
+                setStep(4);
+              }}
+              onSkip={() => {
+                setSkippedLinking(true);
+                setStep(4);
+              }}
+            />
+          )}
+
+          {/* STEP 4: Ready */}
+          {step === 4 && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -537,6 +603,33 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-6">
+                {/* Show linked student status */}
+                {linkedStudent && (
+                  <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-green-800">
+                          ✅ {linkedStudent.pending ? 'Invite sent to' : 'Linked to'} {linkedStudent.full_name || linkedStudent.email}
+                        </p>
+                        <p className="text-sm text-green-600">
+                          {linkedStudent.pending ? 'They\'ll be linked when they sign up!' : 'Your karma will boost their visibility!'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {skippedLinking && (
+                  <div className="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">
+                    <p className="text-sm text-amber-800">
+                      ⚠️ <strong>No student linked.</strong> You can link them anytime from your dashboard to unlock karma boosts.
+                    </p>
+                  </div>
+                )}
+
                 <div className="bg-slate-50 rounded-xl p-6 border-2 border-slate-200">
                   <div className="flex items-center justify-between">
                     <div>
@@ -567,12 +660,13 @@ export default function Onboarding() {
                       <p>🏭 {industries.map(i => INDUSTRIES.find(ind => ind.id === i)?.label).join(', ')}</p>
                     )}
                     <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
+                    {linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(2)}
+                    onClick={() => setStep(3)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
