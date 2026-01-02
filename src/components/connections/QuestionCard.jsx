@@ -811,6 +811,26 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
             font-size: 15px;
           }
 
+          .student-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+          }
+
+          .student-details-line {
+            font-size: 12px;
+          }
+
+          .context-badges-row {
+            gap: 4px;
+            margin-bottom: 10px;
+          }
+
+          .context-badge {
+            padding: 3px 8px;
+            font-size: 10px;
+          }
+
           .question-metadata {
             font-size: 12px;
             margin-bottom: 6px;
