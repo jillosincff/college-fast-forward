@@ -10,25 +10,30 @@ export default function StudentLinkBanner({
   const [dismissed, setDismissed] = useState(false);
   const hasLinkedStudent = linkedStudents.length > 0;
   
-  // Fix name parsing - get first name properly
+  // Fix name parsing - get first name properly (handles "LastName, FirstName" format)
   const getStudentFirstName = (student) => {
     if (!student) return 'Your Student';
     
-    // Try full_name first, get first word
-    if (student.full_name) {
-      const firstName = student.full_name.trim().split(' ')[0];
-      // Make sure it's not empty or just punctuation
-      if (firstName && firstName.length > 1 && !/^[,.\-]+$/.test(firstName)) {
-        return firstName.replace(/[,.]$/, ''); // Remove trailing punctuation
+    const fullName = student.full_name;
+    if (!fullName?.trim()) {
+      return student.email?.split('@')[0] || 'Your Student';
+    }
+    
+    // Handle "LastName, FirstName" format
+    if (fullName.includes(',')) {
+      const afterComma = fullName.split(',')[1]?.trim().split(/\s+/)[0];
+      if (afterComma && afterComma.length > 1) {
+        return afterComma.charAt(0).toUpperCase() + afterComma.slice(1).toLowerCase();
       }
     }
     
-    // Fall back to email prefix
-    if (student.email) {
-      return student.email.split('@')[0];
+    // Standard "FirstName LastName" format
+    const firstName = fullName.trim().split(/\s+/)[0];
+    if (firstName && firstName.length > 1) {
+      return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
     }
     
-    return 'Your Student';
+    return student.email?.split('@')[0] || 'Your Student';
   };
   
   const studentName = getStudentFirstName(linkedStudents[0]);
