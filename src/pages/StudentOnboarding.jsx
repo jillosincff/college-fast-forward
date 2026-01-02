@@ -20,6 +20,8 @@ export default function StudentOnboarding() {
   
   // Step 1: About You
   const [major, setMajor] = useState('');
+  const [minor, setMinor] = useState('');
+  const [preTrack, setPreTrack] = useState('');
   const [gradYear, setGradYear] = useState('');
   const [referralCode, setReferralCode] = useState('');
   
@@ -31,8 +33,30 @@ export default function StudentOnboarding() {
   const [helpNeeded, setHelpNeeded] = useState([]);
   const [helpRequest, setHelpRequest] = useState('');
   const [preferredLocation, setPreferredLocation] = useState('');
+  const [targetTimeline, setTargetTimeline] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeUploading, setResumeUploading] = useState(false);
+  
+  // Pre-professional track options
+  const PRE_TRACKS = [
+    { id: '', label: 'None / Not applicable' },
+    { id: 'Pre-Law', label: 'Pre-Law' },
+    { id: 'Pre-Med', label: 'Pre-Med' },
+    { id: 'Pre-Dental', label: 'Pre-Dental' },
+    { id: 'Pre-Vet', label: 'Pre-Vet' },
+    { id: 'Pre-Pharmacy', label: 'Pre-Pharmacy' },
+    { id: 'Pre-PA', label: 'Pre-PA' },
+    { id: 'Pre-Nursing', label: 'Pre-Nursing' },
+    { id: 'Pre-Business', label: 'Pre-Business' },
+  ];
+  
+  // Timeline options
+  const TIMELINE_OPTIONS = [
+    { id: 'immediate', label: 'ASAP' },
+    { id: 'this_semester', label: 'This Semester' },
+    { id: 'next_semester', label: 'Next Semester' },
+    { id: 'summer', label: 'Summer 2026' },
+  ];
 
   // Pre-fill from user data if available
   useEffect(() => {
