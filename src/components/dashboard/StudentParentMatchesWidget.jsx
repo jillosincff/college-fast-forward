@@ -266,6 +266,26 @@ function ParentMatchCard({ match, user, onMessageSent }) {
 
 export default function StudentParentMatchesWidget({ user, matches = [], onRefresh }) {
   const [filter, setFilter] = useState('all');
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  
+  const handleClearAllMatches = async () => {
+    setIsClearing(true);
+    try {
+      // Delete all matches for this user
+      for (const match of matches) {
+        await base44.entities.Match.delete(match.id);
+      }
+      toast.success('All matches cleared. Post a new question to get fresh matches!');
+      setShowClearModal(false);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Failed to clear matches:', error);
+      toast.error('Failed to clear some matches. Please try again.');
+    } finally {
+      setIsClearing(false);
+    }
+  };
   
   if (matches.length === 0) {
     return null;
