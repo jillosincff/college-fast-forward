@@ -197,9 +197,9 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* LEFT SIDE - The Hook */}
-      <div className="lg:w-[45%] bg-gradient-to-br from-[#FA4616] via-[#E03E14] to-[#C73612] text-white p-6 lg:p-10 flex flex-col justify-center">
+      <div className="lg:w-[45%] bg-gradient-to-br from-[#FA4616] via-[#E03E14] to-[#C73612] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10">
         
-        {/* Progress Bar - Mobile & Desktop */}
+        {/* Progress Bar - Mobile & Desktop - At the very top */}
         <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
           <div className="flex items-center gap-1 text-sm">
             <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">👤</span>
@@ -219,70 +219,70 @@ export default function Onboarding() {
 
         {/* Mobile: Condensed Content */}
         <div className="lg:hidden text-center mb-6">
-          <h1 className="text-xl font-bold mb-2">Welcome to College Fast Forward</h1>
-          <p className="text-2xl font-black mb-3">
-            You have something students need: <span className="underline decoration-2">access</span>.
+          <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
+          <p className="text-2xl font-black mb-3 text-white">
+            You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.
           </p>
           <div className="flex flex-wrap justify-center gap-2 text-sm">
-            <span className="bg-white/10 px-3 py-1.5 rounded-full">🚀 One intro = months of applying</span>
-            <span className="bg-white/10 px-3 py-1.5 rounded-full">🎯 Matched to YOUR industry</span>
-            <span className="bg-white/10 px-3 py-1.5 rounded-full">💫 Real-time impact</span>
+            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">🚀 One intro = months of applying</span>
+            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">🎯 Matched to YOUR industry</span>
+            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">💫 Real-time impact</span>
           </div>
         </div>
 
         {/* Desktop: Full Content */}
-        <div className="hidden lg:block space-y-6">
+        <div className="hidden lg:block space-y-5">
           <div>
-            <p className="text-white/60 uppercase tracking-wider text-sm mb-2">Welcome to</p>
-            <h1 className="text-3xl font-bold">College Fast Forward</h1>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
+            <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
           </div>
           
           {/* The Big Statement */}
-          <div className="py-4">
-            <p className="text-3xl lg:text-4xl font-black leading-tight">
+          <div className="py-3">
+            <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
               You have something students desperately need:{' '}
-              <span className="underline decoration-4 decoration-white/50">access</span>.
+              <span className="underline decoration-4 decoration-white/70">access</span>.
             </p>
           </div>
           
           {/* The Reality Check */}
-          <div className="bg-white/10 rounded-xl p-4 border-l-4 border-white/50">
-            <p className="text-white/90">
-              <strong className="text-white">70-80% of jobs are filled through referrals.</strong>{' '}
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+            <p className="text-white">
+              <strong>70-80% of jobs are filled through referrals.</strong>{' '}
               But today's students are stuck in an "experience loop"—they can't get hired without experience, and can't get experience without being hired.
             </p>
           </div>
           
           {/* The Opportunity */}
-          <p className="text-lg text-white/90">
-            Your <strong className="text-white">single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
-            <strong className="text-white">And it takes you 5 minutes.</strong>
+          <p className="text-lg text-white">
+            Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
+            <strong>And it takes you 5 minutes.</strong>
           </p>
           
-          {/* Value Props */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-              <span className="text-2xl">🚀</span>
-              <span className="font-semibold">One intro from you = months of cold applying for them</span>
+          {/* Value Props - White background pills for readability */}
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🚀</span>
+              <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-              <span className="text-2xl">🎯</span>
-              <span className="font-semibold">We match you with students in YOUR industry</span>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🎯</span>
+              <span className="font-semibold text-sm">We match you with students in YOUR industry</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-              <span className="text-2xl">💫</span>
-              <span className="font-semibold">Watch your impact grow in real-time</span>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">💫</span>
+              <span className="font-semibold text-sm">Watch your impact grow in real-time</span>
             </div>
           </div>
           
           {/* Social Proof */}
-          <p className="text-white/80 font-medium pt-2">
-            Join <span className="text-white font-bold">200+ UF parents & alumni</span> already opening doors
+          <p className="text-white font-medium pt-2">
+            Join <span className="font-bold">200+ UF parents & alumni</span> already opening doors
           </p>
           
           {/* Quote */}
-          <div className="pt-4 border-t border-white/20">
-            <p className="text-sm text-white/70 italic leading-relaxed">
+          <div className="pt-3 border-t border-white/30">
+            <p className="text-sm text-white/90 italic leading-relaxed">
               "Remember when someone gave YOU a chance? A referral, an introduction, a 15-minute coffee chat that changed everything? This is your chance to be that person for the next generation."
             </p>
           </div>
@@ -290,7 +290,7 @@ export default function Onboarding() {
       </div>
 
       {/* RIGHT SIDE - The Form */}
-      <div className="lg:w-[55%] bg-white p-6 lg:p-10 overflow-y-auto">
+      <div className="lg:w-[55%] bg-white p-6 lg:p-10 lg:pt-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           
           {/* Form Header */}
