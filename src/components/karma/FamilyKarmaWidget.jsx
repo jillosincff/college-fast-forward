@@ -137,11 +137,15 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
                   <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
                 </div>
                 <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                  <span className="text-white">✅ Student marks your answer best</span>
+                  <span className="text-white">✅ Marked "Best" by student</span>
                   <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
                 </div>
               </div>
-              <p className="text-[10px] text-white/70 text-center mt-2 italic">Start by browsing questions!</p>
+              <div className="mt-3 pt-2 border-t border-white/20">
+                <p className="text-[11px] text-white font-semibold text-center">
+                  📌 Your karma pins your student's requests to the top for faster help.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -272,7 +276,7 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
               </div>
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">✅ Student marks your answer best</span>
+                <span className="text-white">✅ Marked "Best" by student</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
               </div>
             </div>
@@ -290,7 +294,11 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
               </div>
             )}
             
-            <p className="text-[10px] text-white/70 text-center mt-2 italic">Start by browsing questions!</p>
+            <div className="mt-3 pt-2 border-t border-white/20">
+              <p className="text-[11px] text-white font-semibold text-center">
+                📌 Your karma pins your student's requests to the top for faster help.
+              </p>
+            </div>
           </div>
         </div>
       </div>
