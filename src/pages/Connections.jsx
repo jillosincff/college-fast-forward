@@ -232,6 +232,14 @@ export default function QuestionsPage() {
         if (userProfile) {
           profiles.push({
             ...userProfile,
+            // Ensure student onboarding fields from user profile are available
+            minor: userProfile.minor || null,
+            pre_professional_track: userProfile.pre_professional_track || null,
+            preferred_work_location: userProfile.preferred_work_location || request.location_preference,
+            target_timeline: userProfile.target_timeline || request.start_timing || request.timeline,
+            seeking_type: userProfile.seeking_type || [],
+            help_needed: userProfile.help_needed || request.help_types || [],
+            industries_interested: userProfile.industries_interested || (request.target_industry ? [request.target_industry] : []),
             request: request,
             hasRequest: true,
             isFeatured
@@ -263,6 +271,15 @@ export default function QuestionsPage() {
             last_name: posterLastName,
             bio: request.description,
             major: request.target_industry,
+            // Pull student onboarding data from request if available (stored at creation)
+            minor: null,
+            pre_professional_track: null,
+            graduation_year: request.student_year,
+            preferred_work_location: request.location_preference,
+            target_timeline: request.start_timing || request.timeline,
+            seeking_type: [],
+            help_needed: request.help_types || [],
+            industries_interested: request.target_industry ? [request.target_industry] : [],
             request: request,
             hasRequest: true,
             isFeatured
