@@ -377,7 +377,7 @@ export default function GatorAuth() {
             </div>
             
             <h1 className="text-2xl font-bold text-slate-900 mb-3">
-              Welcome back, {user?.first_name || (user?.full_name ? user.full_name.split(' ')[0] : null) || 'there'}!
+              Welcome back, {user?.first_name || (user?.full_name && user.full_name.includes(' ') ? user.full_name.split(' ')[0] : null) || 'there'}!
             </h1>
             <p className="text-slate-600 mb-6">
               You're already registered. Taking you to your dashboard...
