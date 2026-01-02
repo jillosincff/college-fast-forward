@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase, AlertTriangle, CheckCircle2, Zap, Clock } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,23 @@ export default function FirstTimeUserDashboard({
   onCompleteProfile 
 }) {
   const hasLinkedStudent = linkedStudents.length > 0;
+  
+  // Get karma info from user
+  const karmaPoints = user?.karma_points || user?.karma_earned || 0;
+  const karmaLevel = user?.karma_level || 'bronze';
+  const lastKarmaEarnedAt = user?.last_karma_earned_at;
+  
+  // Calculate boost status for linked students
+  const boostExpiresAt = linkedStudents[0]?.boost_expires_at;
+  const boostLevel = linkedStudents[0]?.boost_level || 0;
+  const boostActive = boostLevel > 0 && (!boostExpiresAt || new Date(boostExpiresAt) > new Date());
+  
+  // Calculate time remaining on boost
+  let boostTimeRemaining = '';
+  if (boostActive && boostExpiresAt) {
+    const hoursLeft = Math.max(0, Math.floor((new Date(boostExpiresAt) - new Date()) / (1000 * 60 * 60)));
+    boostTimeRemaining = hoursLeft > 24 ? `${Math.floor(hoursLeft / 24)}d ${hoursLeft % 24}h` : `${hoursLeft}h`;
+  }
   
   // Fix name parsing - get first name properly (handles "LastName, FirstName" format)
   const getStudentFirstName = (student) => {
@@ -89,27 +106,58 @@ export default function FirstTimeUserDashboard({
           </div>
         </div>
         
-        {/* Karma Preview */}
+        {/* Karma Preview with Live Boost Status */}
         <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <Sparkles size={20} className="text-yellow-300" />
-              <span className="font-medium">Earn +10 karma for each answer</span>
+              <span className="font-medium">Your Karma: {karmaPoints} points</span>
             </div>
             <div className="flex items-center gap-2 group relative">
-              <span className="text-sm text-white font-semibold">0/50 to Silver 🥈</span>
+              <span className="text-sm text-white font-semibold">
+                {karmaPoints >= 300 ? '🏆 Platinum' : 
+                 karmaPoints >= 150 ? '🥇 Gold' : 
+                 karmaPoints >= 50 ? '🥈 Silver' : 
+                 `${karmaPoints}/50 to Silver 🥈`}
+              </span>
               <div className="absolute bottom-full right-0 mb-2 w-48 bg-slate-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                <p className="font-semibold mb-1">Silver Status Benefits:</p>
-                <p>• Priority matching with students</p>
-                <p>• Silver badge on your profile</p>
+                <p className="font-semibold mb-1">Karma Level Benefits:</p>
+                <p>• Silver (50+): 1x boost</p>
+                <p>• Gold (150+): 2x boost</p>
+                <p>• Platinum (300+): 3x boost</p>
               </div>
             </div>
           </div>
-          <div className="mt-2 h-2 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-yellow-400 rounded-full" style={{ width: '0%' }} />
+          <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-4">
+            <div 
+              className="h-full bg-yellow-400 rounded-full transition-all duration-500" 
+              style={{ width: `${Math.min(100, (karmaPoints / 50) * 100)}%` }} 
+            />
           </div>
+
+          {/* Live Boost Status */}
+          {hasLinkedStudent && (
+            <div className={`rounded-lg p-3 ${boostActive ? 'bg-yellow-400/20' : 'bg-white/10'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap size={16} className={boostActive ? 'text-yellow-300' : 'text-white/50'} />
+                  <span className="text-sm font-semibold">
+                    {boostActive 
+                      ? `${studentName}'s requests: BOOSTED to top of feed` 
+                      : `${studentName}'s boost: Inactive (earn karma to activate)`}
+                  </span>
+                </div>
+                {boostActive && boostTimeRemaining && (
+                  <div className="flex items-center gap-1 text-xs text-white/80">
+                    <Clock size={12} />
+                    {boostTimeRemaining} left
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+        </div>
 
       {/* Post a Job Card - Higher Priority */}
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg transition-shadow">
