@@ -35,23 +35,10 @@ export default function StudentHelpRequestCard({
   const [thankYouNote, setThankYouNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Don't show confusing "No Active Question" - students already asked during onboarding
+  // If they have no question AND no matches were passed, return null
   if (!helpRequest) {
-    return (
-      <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
-        <CardContent className="pt-6 pb-6 text-center">
-          <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-slate-700 mb-2">No Active Question</h3>
-          <p className="text-slate-500 mb-4">Ask a question to get matched with parents and alumni who can share their advice.</p>
-          <Button 
-            onClick={() => navigate('StudentOnboarding')}
-            className="bg-[#FA4616] hover:bg-orange-600"
-          >
-            Ask a Question
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   const now = new Date();
