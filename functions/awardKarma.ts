@@ -144,8 +144,8 @@ Deno.serve(async (req) => {
       });
     }
     
-    // Update boost on linked students
-    await updateLinkedStudentBoosts(base44, parentUser, effectiveFamilyGroupId, familyBoost, boostExpiresAt, parentEmail || parentUser?.email);
+    // Update boost on ALL linked students (supports multiple students)
+    const boostResult = await updateLinkedStudentBoosts(base44, parentUser, effectiveFamilyGroupId, familyBoost, boostExpiresAt, parentEmail || parentUser?.email);
     
     // Update boost on family's student questions
     if (effectiveFamilyGroupId) {
@@ -159,7 +159,9 @@ Deno.serve(async (req) => {
       new_family_total: newFamilyTotal,
       karma_level: familyLevel,
       boost_multiplier: familyBoost,
-      boost_expires_at: boostExpiresAt.toISOString()
+      boost_expires_at: boostExpiresAt.toISOString(),
+      boosted_students: boostResult.boostedStudents,
+      boosted_count: boostResult.count
     });
     
   } catch (error) {
@@ -170,8 +172,13 @@ Deno.serve(async (req) => {
 
 async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boost, boostExpiresAt, parentEmail) {
   try {
-    // Get student emails from parent's student_emails array
+    // Get student emails from parent's student_emails array (primary source for multi-student)
     const studentEmails = parentUser?.student_emails || [];
+    
+    // Also check legacy single student_email field
+    if (parentUser?.student_email && !studentEmails.includes(parentUser.student_email)) {
+      studentEmails.push(parentUser.student_email);
+    }
     
     // Also get students from family group
     let familyStudents = [];
@@ -184,15 +191,18 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
         .map(m => m.email);
     }
     
-    // Combine and dedupe
+    // Combine and dedupe all student emails
     const allStudentEmails = [...new Set([...studentEmails, ...familyStudents])];
     
     if (allStudentEmails.length === 0) {
       console.log('No linked students found for parent');
-      return;
+      return { boostedStudents: [], count: 0 };
     }
     
-    // Update each student's boost level
+    const parentName = parentUser?.full_name?.split(' ')[0] || parentUser?.first_name || 'Your parent';
+    const boostedStudents = [];
+    
+    // Update ALL linked students' boost level equally
     for (const email of allStudentEmails) {
       try {
         const students = await base44.asServiceRole.entities.User.filter({ email });
@@ -201,7 +211,13 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
           await base44.asServiceRole.entities.User.update(student.id, {
             boost_level: boost,
             boost_expires_at: boostExpiresAt.toISOString(),
-            boosted_by_parent_email: parentEmail || ''
+            boosted_by_parent_email: parentEmail || '',
+            boosted_by_parent_name: parentName
+          });
+          boostedStudents.push({
+            email,
+            name: student.full_name || student.first_name || email.split('@')[0],
+            major: student.major
           });
           console.log(`Updated student ${email} boost_level to ${boost}, expires ${boostExpiresAt.toISOString()}`);
         }
@@ -209,8 +225,12 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
         console.log(`Could not update student ${email}:`, e.message);
       }
     }
+    
+    console.log(`Boosted ${boostedStudents.length} students to level ${boost}`);
+    return { boostedStudents, count: boostedStudents.length };
   } catch (e) {
     console.log('Could not update linked student boosts:', e.message);
+    return { boostedStudents: [], count: 0 };
   }
 }
 
