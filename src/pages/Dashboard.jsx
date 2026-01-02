@@ -517,15 +517,9 @@ export default function Dashboard() {
               </Button>
             </div>
           </details>
-        </motion.div>
 
         {/* More Tools Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
+        <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
             <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
               <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
