@@ -23,6 +23,9 @@ export default function TestingDashboard() {
   const [isMarkingFounding, setIsMarkingFounding] = useState(false);
   const [auditResults, setAuditResults] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [emailTestResult, setEmailTestResult] = useState(null);
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
 
   useEffect(() => {
     loadCurrentCount();
