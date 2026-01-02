@@ -413,7 +413,59 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
             </Button>
           </div>
         )}
+        
+        {/* Clear All Matches Option */}
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowClearModal(true)}
+            className="text-slate-500 hover:text-red-600 hover:bg-red-50 w-full"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Clear All Matches & Start Fresh
+          </Button>
+        </div>
       </CardContent>
+      
+      {/* Clear Matches Confirmation Modal */}
+      <Dialog open={showClearModal} onOpenChange={setShowClearModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Clear All Matches?</DialogTitle>
+            <DialogDescription>
+              This will remove all your current matches so you can get a fresh set.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-amber-800 text-sm">
+                <strong>Note:</strong> To get new matches, you'll need to post a new question or edit your existing one after clearing.
+              </p>
+            </div>
+            
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <p className="text-sm text-slate-600">
+                You currently have <strong>{matches.length}</strong> matches that will be cleared.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowClearModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleClearAllMatches}
+                disabled={isClearing}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {isClearing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Clear All Matches
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
