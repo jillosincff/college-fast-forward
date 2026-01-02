@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { JobRequest } from '@/entities/JobRequest';
 import { HelpRequest } from '@/entities/HelpRequest';
+import { updateJobRequest } from '@/functions/updateJobRequest';
 import {
   Dialog,
   DialogContent,
