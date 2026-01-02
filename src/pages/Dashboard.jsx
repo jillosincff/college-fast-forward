@@ -121,7 +121,7 @@ export default function Dashboard() {
     }
     
     console.log('🔍 FINAL question:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
-    if (foundRequest) setHelpRequest(foundRequest);
+    setHelpRequest(foundRequest || null);
     
     try {
       // Fetch user counts
