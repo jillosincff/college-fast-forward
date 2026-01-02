@@ -186,6 +186,13 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
   const boostMultiplier = karmaData.boost_multiplier || 0;
   const threshold = LEVEL_THRESHOLDS[level];
   
+  // Check for expiring boost - show nudge if within 12 hours
+  const boostExpiresAt = karmaData.boost_expires_at ? new Date(karmaData.boost_expires_at) : null;
+  const now = new Date();
+  const hoursUntilExpiry = boostExpiresAt ? Math.max(0, Math.floor((boostExpiresAt - now) / (1000 * 60 * 60))) : null;
+  const isBoostExpiringSoon = hoursUntilExpiry !== null && hoursUntilExpiry > 0 && hoursUntilExpiry <= 12;
+  const studentName = karmaData.linked_student_name || 'Your student';
+  
   // Calculate progress to next level
   let progressPercent = 100;
   let pointsToNext = 0;
@@ -294,11 +301,20 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
               </div>
             )}
             
-            <div className="mt-3 pt-2 border-t border-white/20">
-              <p className="text-[11px] text-white font-semibold text-center">
-                📌 Your karma pins your student's requests to the top for faster help.
-              </p>
-            </div>
+            {/* Expiring boost nudge */}
+            {isBoostExpiringSoon ? (
+              <div className="mt-3 pt-2 border-t border-white/20">
+                <p className="text-[11px] text-white font-bold text-center animate-pulse">
+                  ⚠️ {studentName}'s boost expires in {hoursUntilExpiry}h — answer a question to extend!
+                </p>
+              </div>
+            ) : (
+              <div className="mt-3 pt-2 border-t border-white/20">
+                <p className="text-[11px] text-white font-semibold text-center">
+                  📌 Your karma pins your student's requests to the top for faster help.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
