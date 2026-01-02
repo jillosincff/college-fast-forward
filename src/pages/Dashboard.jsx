@@ -553,7 +553,6 @@ export default function Dashboard() {
               </div>
             </div>
           </details>
-        </motion.div>
       </div>
 
       <InviteParentModal
