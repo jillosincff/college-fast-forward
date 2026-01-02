@@ -57,9 +57,22 @@ Deno.serve(async (req) => {
         
         if (matchedStudent) {
           // Link student to parent via family_group_id
+          // Update student's linked_parent_emails and linked_parent_ids arrays
+          const studentParentEmails = matchedStudent.linked_parent_emails || [];
+          const studentParentIds = matchedStudent.linked_parent_ids || [];
+          
+          if (!studentParentEmails.includes(user.email)) {
+            studentParentEmails.push(user.email);
+          }
+          if (!studentParentIds.includes(user.id)) {
+            studentParentIds.push(user.id);
+          }
+          
           await base44.asServiceRole.entities.User.update(matchedStudent.id, {
             parent_id: user.id,
-            family_group_id: familyGroupId
+            family_group_id: familyGroupId,
+            linked_parent_emails: studentParentEmails,
+            linked_parent_ids: studentParentIds
           });
           
           linkedStudentIds.push(matchedStudent.id);
@@ -70,7 +83,8 @@ Deno.serve(async (req) => {
             student: {
               id: matchedStudent.id,
               name: matchedStudent.full_name,
-              email: matchedStudent.email
+              email: matchedStudent.email,
+              major: matchedStudent.major
             }
           });
         } else {
@@ -89,10 +103,25 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Update parent's linked_students array
+    // Update parent's student_emails and student_ids arrays (append, don't overwrite)
     if (linkedStudentIds.length > 0) {
+      const existingStudentEmails = user.student_emails || [];
+      const existingStudentIds = user.student_ids || [];
+      
+      // Get emails of newly linked students
+      const newStudentEmails = results
+        .filter(r => r.found && r.student?.email)
+        .map(r => r.student.email);
+      
+      // Merge and dedupe
+      const mergedEmails = [...new Set([...existingStudentEmails, ...newStudentEmails])];
+      const mergedIds = [...new Set([...existingStudentIds, ...linkedStudentIds])];
+      
       await base44.asServiceRole.entities.User.update(user.id, {
-        linked_students: linkedStudentIds
+        student_emails: mergedEmails,
+        student_ids: mergedIds,
+        // Keep legacy field in sync with first student
+        student_email: mergedEmails[0] || user.student_email
       });
     }
     
