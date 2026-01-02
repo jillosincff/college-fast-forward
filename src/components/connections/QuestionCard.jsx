@@ -614,7 +614,57 @@ export default function QuestionCard({ question, gator, onDeleted }) {
             font-size: 11px;
           }
         }
+
+        .owner-actions {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 10;
+        }
+
+        .menu-trigger {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: white;
+          border: 1px solid #E5E7EB;
+          color: #6B7280;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .menu-trigger:hover {
+          background: #F3F4F6;
+          color: #374151;
+          border-color: #D1D5DB;
+        }
       `}</style>
     </div>
+    
+    {/* Delete Confirmation Dialog */}
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Question?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete your question and all its answers. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
