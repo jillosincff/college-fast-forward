@@ -29,6 +29,7 @@ export default function Dashboard() {
     activeRequests: 0,
     spotsLeft: 774
   });
+  const [myActiveQuestions, setMyActiveQuestions] = useState(0);
   const [linkedParents, setLinkedParents] = useState([]);
 
   useEffect(() => {
