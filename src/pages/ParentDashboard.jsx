@@ -170,14 +170,14 @@ export default function ParentDashboard() {
 
 
   const getCapitalizedFirstName = (fullName) => {
-    if (!fullName?.trim()) return 'Gator Parent';
+    if (!fullName?.trim()) return 'Parent';
     // Handle "LastName, FirstName" format
     if (fullName.includes(',')) {
       const afterComma = fullName.split(',')[1]?.trim().split(/\s+/)[0];
       if (afterComma) return afterComma.charAt(0).toUpperCase() + afterComma.slice(1).toLowerCase();
     }
     const namePart = fullName.trim().split(/\s+/)[0];
-    if (!namePart) return 'Gator Parent';
+    if (!namePart) return 'Parent';
     return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
   };
   
@@ -342,7 +342,7 @@ export default function ParentDashboard() {
                 )}
               </div>
               <p className="text-white/80 text-sm md:text-base">
-                Your network opens doors for Gators everywhere
+                Your network opens doors for students everywhere
               </p>
             </div>
             <Button
@@ -377,19 +377,19 @@ export default function ParentDashboard() {
                 className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
                 style={{ color: '#0021A5' }}
               >
-                Help More Gators, Boost Your Own ⚡
+                Help More Students, Boost Your Own ⚡
               </h2>
               <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
                 Every action unlocks more opportunities for your student
               </p>
             </div>
 
-            {/* MY GATORS SECTION */}
+            {/* MY STUDENTS SECTION */}
             {myStudents.length > 0 && (
               <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
-                    🐊 My Gators
+                    👨‍🎓 My Students
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -427,7 +427,7 @@ export default function ParentDashboard() {
             {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
             <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
               <div className="flex gap-3" style={{ width: 'max-content' }}>
-                <QuickActionCardMobile icon="🐊" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
+                <QuickActionCardMobile icon="👤" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
                 <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
                 <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
                 <QuickActionCardMobile icon="💼" label="Post Job" onClick={() => navigate('PostOpportunity')} />
@@ -442,7 +442,7 @@ export default function ParentDashboard() {
                 className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
                 style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
               >
-                <div className="text-3xl mb-2">🐊</div>
+                <div className="text-3xl mb-2">👤</div>
                 <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
                   Complete Your Profile
                 </h3>
@@ -520,7 +520,7 @@ export default function ParentDashboard() {
                 </h3>
                 <p className="text-xs text-slate-600 mb-3 leading-relaxed">
                   Know about job openings?<br />
-                  <span className="font-semibold">Share them with Gators</span>
+                  <span className="font-semibold">Share them with students</span>
                 </p>
                 <Button
                   onClick={() => navigate('PostOpportunity')}
@@ -570,7 +570,7 @@ export default function ParentDashboard() {
       <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle style={{ color: '#0021A5' }}>Search for Your Gator</DialogTitle>
+            <DialogTitle style={{ color: '#0021A5' }}>Search for Your Student</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -660,7 +660,7 @@ export default function ParentDashboard() {
 
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <p className="text-sm text-orange-800">
-                🐊 We'll send them a secure invite to join the Gator Network. 
+                📧 We'll send them a secure invite to join the network. 
                 Once they sign up, your profiles link automatically and their profile gets boosted!
               </p>
             </div>

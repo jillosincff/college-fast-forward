@@ -94,7 +94,7 @@ export default function ParentWelcomeHero({ user, stats }) {
       `}</style>
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">Welcome, {user?.full_name.split(' ')[0] || 'Gator Parent'}!</h1>
+          <h1 className="hero-title">Welcome, {user?.full_name.split(' ')[0] || 'Parent'}!</h1>
           <p className="hero-subtitle">You are the bridge to opportunity. Tap into your network to help a student today.</p>
           
           <div className="hero-actions">

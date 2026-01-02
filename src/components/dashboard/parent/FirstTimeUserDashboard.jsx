@@ -14,7 +14,7 @@ export default function FirstTimeUserDashboard({
       {/* Motivational Header */}
       <div className="text-center py-4">
         <h2 className="text-2xl md:text-4xl font-black leading-tight mb-2" style={{ color: '#0021A5' }}>
-          Help More Gators, Boost Your Own ⚡
+          Help More Students, Boost Your Own ⚡
         </h2>
         <p className="text-sm md:text-lg text-slate-600">
           Every action unlocks more opportunities for your student
@@ -73,7 +73,7 @@ export default function FirstTimeUserDashboard({
               <Link2 size={24} />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-1">Connect Your Gator</h3>
+              <h3 className="font-semibold text-slate-800 mb-1">Connect Your Student</h3>
               <p className="text-sm text-slate-500 mb-3">
                 Link your student's account to boost their profile visibility
               </p>
