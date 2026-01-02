@@ -75,12 +75,7 @@ Deno.serve(async (req) => {
                         </div>
                         
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://www.collegefastforward.com/#QuestionDetail?id=${questionId}" 
-                               style="background-color: #FA4616; color: white; padding: 14px 28px; 
-                                      text-decoration: none; border-radius: 8px; display: inline-block; 
-                                      font-weight: 600; font-size: 16px;">
-                                View Full Answer →
-                            </a>
+                            <a href="https://www.collegefastforward.com/#QuestionDetail?id=${questionId}" style="background-color: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">View Full Answer →</a>
                         </div>
                         
                         <p style="font-size: 14px; color: #6b7280; text-align: center;">
