@@ -191,7 +191,11 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
   const now = new Date();
   const hoursUntilExpiry = boostExpiresAt ? Math.max(0, Math.floor((boostExpiresAt - now) / (1000 * 60 * 60))) : null;
   const isBoostExpiringSoon = hoursUntilExpiry !== null && hoursUntilExpiry > 0 && hoursUntilExpiry <= 12;
-  const studentName = karmaData.linked_student_name || 'Your student';
+  
+  // Multi-student support
+  const linkedStudents = karmaData.linked_students || [];
+  const linkedStudentsText = karmaData.linked_students_text || 'your students';
+  const studentCount = karmaData.linked_students_count || 0;
   
   // Calculate progress to next level
   let progressPercent = 100;
@@ -301,11 +305,17 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
               </div>
             )}
             
-            {/* Expiring boost nudge */}
+            {/* Boost status with multi-student support */}
             {isBoostExpiringSoon ? (
               <div className="mt-3 pt-2 border-t border-white/20">
                 <p className="text-[11px] text-white font-bold text-center animate-pulse">
-                  ⚠️ {studentName}'s boost expires in {hoursUntilExpiry}h — answer a question to extend!
+                  ⚠️ {linkedStudentsText}'s boost expires in {hoursUntilExpiry}h — answer a question to extend!
+                </p>
+              </div>
+            ) : familyBoost > 0 && studentCount > 0 ? (
+              <div className="mt-3 pt-2 border-t border-white/20">
+                <p className="text-[11px] text-white font-bold text-center">
+                  ⚡ Family Karma Active — boosting {linkedStudentsText}'s requests!
                 </p>
               </div>
             ) : (
