@@ -114,7 +114,12 @@ export default function PostRequestPage() { // Renamed from PostRequest
       let createdRequest;
       
       if (editId) {
-        await JobRequest.update(editId, requestData);
+        // Update the correct entity type
+        if (initialData?.entity_name === 'HelpRequest' || initialData?.student_id) {
+          await HelpRequest.update(editId, requestData);
+        } else {
+          await JobRequest.update(editId, requestData);
+        }
         toast({
           title: "✅ Request Updated",
           description: "Your request has been renewed for another 30 days and is now live.",
