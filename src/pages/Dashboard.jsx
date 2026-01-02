@@ -124,6 +124,35 @@ export default function Dashboard() {
     console.log('🔍 FINAL question:', foundRequest ? foundRequest.id : 'NONE', foundRequest?.description?.substring(0, 50));
     setHelpRequest(foundRequest || null);
     
+    // Count ALL active questions for this user (JobRequests + HelpRequests)
+    let totalActiveQuestions = 0;
+    try {
+      const myJobRequests = await base44.entities.JobRequest.filter(
+        { created_by: user.email, status: 'active' }
+      );
+      totalActiveQuestions += myJobRequests?.length || 0;
+      
+      // Also check poster_email for JobRequests (anonymous posts)
+      const myJobRequestsByPoster = await base44.entities.JobRequest.filter(
+        { poster_email: user.email, status: 'active' }
+      );
+      // Dedupe by ID
+      const jobRequestIds = new Set((myJobRequests || []).map(r => r.id));
+      (myJobRequestsByPoster || []).forEach(r => {
+        if (!jobRequestIds.has(r.id)) totalActiveQuestions++;
+      });
+      
+      const myHelpRequests = await base44.entities.HelpRequest.filter(
+        { student_email: user.email, status: 'active' }
+      );
+      totalActiveQuestions += myHelpRequests?.length || 0;
+      
+      console.log('📊 My active questions count:', totalActiveQuestions);
+    } catch (e) {
+      console.error('Failed to count active questions:', e);
+    }
+    setMyActiveQuestions(totalActiveQuestions);
+    
     try {
       // Fetch user counts
       try {
