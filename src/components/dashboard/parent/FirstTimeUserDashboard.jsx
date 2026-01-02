@@ -10,7 +10,29 @@ export default function FirstTimeUserDashboard({
   onCompleteProfile 
 }) {
   const hasLinkedStudent = linkedStudents.length > 0;
-  const studentName = linkedStudents[0]?.full_name?.split(' ')[0] || 'your student';
+  
+  // Fix name parsing - get first name properly
+  const getStudentFirstName = (student) => {
+    if (!student) return 'your student';
+    
+    // Try full_name first, get first word
+    if (student.full_name) {
+      const firstName = student.full_name.trim().split(' ')[0];
+      // Make sure it's not empty or just punctuation
+      if (firstName && firstName.length > 1 && !/^[,.\-]+$/.test(firstName)) {
+        return firstName.replace(/[,.]$/, ''); // Remove trailing punctuation
+      }
+    }
+    
+    // Fall back to email prefix
+    if (student.email) {
+      return student.email.split('@')[0];
+    }
+    
+    return 'your student';
+  };
+  
+  const studentName = getStudentFirstName(linkedStudents[0]);
 
   return (
     <div className="space-y-6">
@@ -52,7 +74,7 @@ export default function FirstTimeUserDashboard({
             </p>
             <button
               onClick={onBrowseQuestions}
-              className="inline-flex items-center gap-2 bg-white text-[#0021A5] px-6 py-3 rounded-xl font-semibold hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-2 bg-white text-[#0021A5] px-6 py-3 rounded-xl font-bold text-base hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
             >
               Browse Questions
               <ArrowRight size={18} />
@@ -67,7 +89,14 @@ export default function FirstTimeUserDashboard({
               <Sparkles size={20} className="text-yellow-300" />
               <span className="font-medium">Earn +10 karma for each answer</span>
             </div>
-            <span className="text-sm text-white/60">0/50 to Silver</span>
+            <div className="flex items-center gap-2 group relative">
+              <span className="text-sm text-white/80 font-semibold">0/50 to Silver 🥈</span>
+              <div className="absolute bottom-full right-0 mb-2 w-48 bg-slate-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <p className="font-semibold mb-1">Silver Status Benefits:</p>
+                <p>• Priority matching with students</p>
+                <p>• Silver badge on your profile</p>
+              </div>
+            </div>
           </div>
           <div className="mt-2 h-2 bg-white/20 rounded-full overflow-hidden">
             <div className="h-full bg-yellow-400 rounded-full" style={{ width: '0%' }} />
@@ -95,7 +124,15 @@ export default function FirstTimeUserDashboard({
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
               hasLinkedStudent ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
             }`}>
-              <Link2 size={24} />
+              {hasLinkedStudent && linkedStudents[0]?.profile_image ? (
+                <img 
+                  src={linkedStudents[0].profile_image} 
+                  alt={studentName}
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
+              ) : (
+                <Link2 size={24} />
+              )}
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-slate-800 mb-1">
@@ -153,7 +190,7 @@ export default function FirstTimeUserDashboard({
             </div>
             <div>
               <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
-              <p className="text-sm text-purple-700">Share job openings from your company with students</p>
+              <p className="text-sm text-purple-700">Know of openings at your company? Students are looking!</p>
             </div>
           </div>
           <button

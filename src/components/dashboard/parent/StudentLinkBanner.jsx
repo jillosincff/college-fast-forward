@@ -9,7 +9,29 @@ export default function StudentLinkBanner({
 }) {
   const [dismissed, setDismissed] = useState(false);
   const hasLinkedStudent = linkedStudents.length > 0;
-  const studentName = linkedStudents[0]?.full_name?.split(' ')[0] || linkedStudents[0]?.email?.split('@')[0] || 'Your Student';
+  
+  // Fix name parsing - get first name properly
+  const getStudentFirstName = (student) => {
+    if (!student) return 'Your Student';
+    
+    // Try full_name first, get first word
+    if (student.full_name) {
+      const firstName = student.full_name.trim().split(' ')[0];
+      // Make sure it's not empty or just punctuation
+      if (firstName && firstName.length > 1 && !/^[,.\-]+$/.test(firstName)) {
+        return firstName.replace(/[,.]$/, ''); // Remove trailing punctuation
+      }
+    }
+    
+    // Fall back to email prefix
+    if (student.email) {
+      return student.email.split('@')[0];
+    }
+    
+    return 'Your Student';
+  };
+  
+  const studentName = getStudentFirstName(linkedStudents[0]);
 
   // Check if "remind later" was clicked recently (within 24 hours)
   const remindLaterTime = localStorage.getItem('student_link_remind_later');
