@@ -95,7 +95,7 @@ export default function FirstTimeUserDashboard({
               <span className="font-medium">Earn +10 karma for each answer</span>
             </div>
             <div className="flex items-center gap-2 group relative">
-              <span className="text-sm text-white/80 font-semibold">0/50 to Silver 🥈</span>
+              <span className="text-sm text-white font-semibold">0/50 to Silver 🥈</span>
               <div className="absolute bottom-full right-0 mb-2 w-48 bg-slate-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                 <p className="font-semibold mb-1">Silver Status Benefits:</p>
                 <p>• Priority matching with students</p>
