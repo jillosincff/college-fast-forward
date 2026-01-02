@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { JobRequest } from '@/entities/JobRequest';
+import { HelpRequest } from '@/entities/HelpRequest';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate, useParams } from '@/components/utils/navigation';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
