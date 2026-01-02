@@ -48,14 +48,17 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
           industry: formData.target_industry,
         });
       } else {
-        // Only send fields that are allowed to be updated
+        // Use backend function to bypass RLS issues with anonymous created_by
         const updateData = {
           description: formData.description,
           role: formData.role,
           target_industry: formData.target_industry,
           target_company: formData.target_company,
         };
-        await JobRequest.update(question.id, updateData);
+        const result = await updateJobRequest({ id: question.id, updateData });
+        if (result.data?.error) {
+          throw new Error(result.data.error);
+        }
       }
 
       toast.success('Question updated successfully');
