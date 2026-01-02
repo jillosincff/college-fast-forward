@@ -93,7 +93,7 @@ export default function MyMessagesPage() {
 
     setSendingReply(true);
     try {
-      await base44.entities.Message.create({
+      const message = await base44.entities.Message.create({
         sender_email: user.email,
         recipient_email: selectedMessage.sender_email,
         subject: `Re: ${selectedMessage.subject}`,
@@ -102,6 +102,22 @@ export default function MyMessagesPage() {
         post_title: selectedMessage.post_title,
         is_read: false
       });
+
+      // Send email notification
+      try {
+        await base44.functions.invoke('sendMessageNotification', {
+          messageId: message.id,
+          recipientEmail: selectedMessage.sender_email,
+          recipientName: selectedMessage.sender_email.split('@')[0],
+          senderName: user.full_name || user.email.split('@')[0],
+          senderEmail: user.email,
+          subject: `Re: ${selectedMessage.subject}`,
+          body: replyText
+        });
+        console.log('✅ Email notification sent');
+      } catch (emailError) {
+        console.log('⚠️ Email notification failed:', emailError.message);
+      }
 
       trackEvent('message_replied');
       setShowReplyDialog(false);
