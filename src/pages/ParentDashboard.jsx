@@ -363,6 +363,7 @@ export default function ParentDashboard() {
           /* First-time user simplified dashboard */
           <FirstTimeUserDashboard 
             user={user}
+            linkedStudents={myStudents}
             onBrowseQuestions={() => navigate('Connections')}
             onConnectStudent={() => setShowSearchModal(true)}
             onCompleteProfile={() => navigate('ProfileEdit')}
