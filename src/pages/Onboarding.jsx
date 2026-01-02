@@ -197,7 +197,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* LEFT SIDE - The Hook */}
-      <div className="lg:w-[45%] bg-gradient-to-br from-[#FA4616] via-[#E03E14] to-[#C73612] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10">
+      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#FA4616] via-[#E03E14] to-[#C73612] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
         
         {/* Progress Bar - Mobile & Desktop - At the very top */}
         <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
@@ -440,8 +440,8 @@ export default function Onboarding() {
               className={`
                 w-full py-4 rounded-xl font-bold text-lg transition-all
                 ${canFinish && !loading
-                  ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  ? 'bg-[#FA4616] text-white hover:bg-[#E03E14] shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 }
               `}
             >
