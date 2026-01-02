@@ -41,20 +41,20 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
 
     setIsSubmitting(true);
     try {
-      const updateData = {
-        description: formData.description,
-        role: formData.role,
-        target_industry: formData.target_industry,
-        target_company: formData.target_company,
-      };
-
       // Update the correct entity type
-      if (question.entity_name === 'HelpRequest' || question.student_id) {
+      if (question.entity_name === 'HelpRequest' || question.student_id || question._source === 'HelpRequest') {
         await HelpRequest.update(question.id, {
           description: formData.description,
           industry: formData.target_industry,
         });
       } else {
+        // Only send fields that are allowed to be updated
+        const updateData = {
+          description: formData.description,
+          role: formData.role,
+          target_industry: formData.target_industry,
+          target_company: formData.target_company,
+        };
         await JobRequest.update(question.id, updateData);
       }
 
@@ -63,7 +63,12 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
       if (onUpdated) onUpdated();
     } catch (error) {
       console.error('Failed to update question:', error);
-      toast.error('Failed to update question');
+      // Provide more helpful error message
+      if (error.message?.includes('Permission denied')) {
+        toast.error('You can only edit your own questions');
+      } else {
+        toast.error('Failed to update question');
+      }
     } finally {
       setIsSubmitting(false);
     }
