@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import PushNotificationPrompt from '@/components/notifications/PushNotificationPrompt';
+import { Switch } from '@/components/ui/switch';
 
 // Industry options
 const INDUSTRIES = [
@@ -38,56 +39,52 @@ const EXPERTISE_AREAS = [
 
 export default function Onboarding() {
   const { user, refreshUser } = useAuth();
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
   
-  // Form fields (all optional except expertise)
+  // Step 1: Basic Info
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [industries, setIndustries] = useState([]);
-  const [bio, setBio] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [linkedinError, setLinkedinError] = useState('');
+  
+  // Step 2: Expertise
+  const [industries, setIndustries] = useState([]);
   const [expertise, setExpertise] = useState([]);
+  const [bio, setBio] = useState('');
+  
+  // Step 3: Visibility
+  const [visibleInDirectory, setVisibleInDirectory] = useState(true);
 
-  // LinkedIn URL validation and formatting
+  // LinkedIn URL validation
+  const handleLinkedInChange = (value) => {
+    setLinkedinUrl(value);
+    if (!value.trim()) {
+      setLinkedinError('');
+      return;
+    }
+    if (!value.toLowerCase().includes('linkedin.com/in/')) {
+      setLinkedinError('Please enter a valid LinkedIn URL (e.g., linkedin.com/in/yourname)');
+    } else {
+      setLinkedinError('');
+    }
+  };
+
   const formatLinkedInUrl = (url) => {
     if (!url.trim()) return '';
-    
-    // Remove whitespace
-    let cleaned = url.trim().toLowerCase();
-    
-    // Extract username from various formats
     const patterns = [
       /linkedin\.com\/in\/([a-zA-Z0-9\-_]+)/i,
-      /^([a-zA-Z0-9\-_]+)$/  // Just username
+      /^([a-zA-Z0-9\-_]+)$/
     ];
-    
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) {
         return `https://linkedin.com/in/${match[1]}`;
       }
     }
-    
-    return null; // Invalid format
-  };
-
-  const handleLinkedInChange = (value) => {
-    setLinkedinUrl(value);
-    
-    if (!value.trim()) {
-      setLinkedinError('');
-      return;
-    }
-    
-    // Check if it contains linkedin.com/in/
-    if (!value.toLowerCase().includes('linkedin.com/in/')) {
-      setLinkedinError('Please enter a valid LinkedIn URL (e.g., linkedin.com/in/yourname)');
-    } else {
-      setLinkedinError('');
-    }
+    return null;
   };
 
   const toggleIndustry = (id) => {
@@ -106,20 +103,21 @@ export default function Onboarding() {
     }
   };
 
+  const canProceedStep1 = !linkedinError;
+  const canProceedStep2 = expertise.length > 0;
+
   const handleFinish = async () => {
     setLoading(true);
     
     try {
-      // Build update data - only include non-null values
       const updateData = {
         expertise_areas: expertise,
         help_types: expertise,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
-        visible_in_directory: true
+        visible_in_directory: visibleInDirectory
       };
       
-      // Add optional fields only if they have values
       if (company.trim()) updateData.current_company = company.trim();
       if (jobTitle.trim()) updateData.current_position = jobTitle.trim();
       if (industries.length > 0) {
@@ -128,7 +126,6 @@ export default function Onboarding() {
       }
       if (bio.trim()) updateData.bio = bio.trim();
       
-      // Format and save LinkedIn URL
       if (linkedinUrl.trim()) {
         const formattedLinkedIn = formatLinkedInUrl(linkedinUrl);
         if (formattedLinkedIn) {
@@ -136,27 +133,20 @@ export default function Onboarding() {
         }
       }
 
-      console.log('Saving onboarding data:', updateData);
-      
-      // Save profile data
       await base44.auth.updateMe(updateData);
 
-      // Clear pending invite data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
 
-      // Refresh user
       if (refreshUser) await refreshUser();
       
-      // Show push notification prompt before going to dashboard
       setOnboardingComplete(true);
       setShowPushPrompt(true);
       setLoading(false);
       
     } catch (error) {
       console.error('Failed to save onboarding:', error);
-      console.error('Error details:', error.message, error.status);
       alert('Something went wrong. Please try again.');
       setLoading(false);
     }
@@ -165,9 +155,6 @@ export default function Onboarding() {
   const goToDashboard = () => {
     navigate('ParentDashboard');
   };
-
-  // Can finish if they selected at least one way to help and no LinkedIn error
-  const canFinish = expertise.length > 0 && !linkedinError;
 
   // Show push notification prompt after onboarding is complete
   if (showPushPrompt && onboardingComplete) {
@@ -194,50 +181,40 @@ export default function Onboarding() {
     );
   }
 
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* LEFT SIDE - The Hook */}
-      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#FA4616] via-[#E03E14] to-[#C73612] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
-        
-        {/* Progress Bar - Mobile & Desktop - At the very top */}
-        <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
-          <div className="flex items-center gap-1 text-sm">
-            <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">👤</span>
-            <span className="hidden sm:inline text-white/80">You</span>
-          </div>
-          <div className="w-8 h-0.5 bg-white/30"></div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">💼</span>
-            <span className="hidden sm:inline text-white/80">Expertise</span>
-          </div>
-          <div className="w-8 h-0.5 bg-white/30"></div>
-          <div className="flex items-center gap-1 text-sm opacity-50">
-            <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🤝</span>
-            <span className="hidden sm:inline text-white/60">Ready</span>
-          </div>
-        </div>
+  // Progress bar component
+  const ProgressBar = () => (
+    <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
+      <div className="flex items-center gap-1 text-sm">
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 1 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 1 ? <Check className="w-4 h-4 text-white" /> : '👤'}
+        </span>
+        <span className="hidden sm:inline text-white/80">You</span>
+      </div>
+      <div className={`w-8 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className="flex items-center gap-1 text-sm">
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 2 ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > 2 ? <Check className="w-4 h-4 text-white" /> : '💼'}
+        </span>
+        <span className="hidden sm:inline text-white/80">Expertise</span>
+      </div>
+      <div className={`w-8 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className="flex items-center gap-1 text-sm">
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className="hidden sm:inline text-white/80">Ready</span>
+      </div>
+    </div>
+  );
 
-        {/* Mobile: Condensed Content */}
-        <div className="lg:hidden text-center mb-6">
-          <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
-          <p className="text-2xl font-black mb-3 text-white">
-            You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 text-sm">
-            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">🚀 One intro = months of applying</span>
-            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">🎯 Matched to YOUR industry</span>
-            <span className="bg-white text-slate-800 px-3 py-1.5 rounded-full font-medium">💫 Real-time impact</span>
-          </div>
-        </div>
-
-        {/* Desktop: Full Content */}
-        <div className="hidden lg:block space-y-5">
+  // Left side content based on step
+  const LeftSideContent = () => {
+    if (step === 1) {
+      return (
+        <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
             <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
           </div>
           
-          {/* The Big Statement */}
           <div className="py-3">
             <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
               You have something students desperately need:{' '}
@@ -245,7 +222,6 @@ export default function Onboarding() {
             </p>
           </div>
           
-          {/* The Reality Check */}
           <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
             <p className="text-white">
               <strong>70-80% of jobs are filled through referrals.</strong>{' '}
@@ -253,14 +229,27 @@ export default function Onboarding() {
             </p>
           </div>
           
-          {/* The Opportunity */}
           <p className="text-lg text-white">
             Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
             <strong>And it takes you 5 minutes.</strong>
           </p>
+        </div>
+      );
+    }
+    
+    if (step === 2) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of 3</p>
+            <h1 className="text-3xl font-bold text-white">What's your superpower?</h1>
+          </div>
           
-          {/* Value Props - White background pills for readability */}
-          <div className="space-y-2 pt-2">
+          <p className="text-xl text-white/90">
+            Students need guidance in many areas. Where can you help?
+          </p>
+          
+          <div className="space-y-2 pt-4">
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">🚀</span>
               <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
@@ -274,193 +263,343 @@ export default function Onboarding() {
               <span className="font-semibold text-sm">Watch your impact grow in real-time</span>
             </div>
           </div>
+        </div>
+      );
+    }
+    
+    if (step === 3) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Final Step</p>
+            <h1 className="text-3xl font-bold text-white">You're all set! 🎉</h1>
+          </div>
           
-          {/* Social Proof */}
-          <p className="text-white font-medium pt-2">
-            Join <span className="font-bold">200+ UF parents & alumni</span> already opening doors
+          <p className="text-xl text-white/90">
+            Students are already looking for someone like you.
           </p>
           
-          {/* Quote */}
-          <div className="pt-3 border-t border-white/30">
-            <p className="text-sm text-white/90 italic leading-relaxed">
-              "Remember when someone gave YOU a chance? A referral, an introduction, a 15-minute coffee chat that changed everything? This is your chance to be that person for the next generation."
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              <strong>What happens next?</strong><br />
+              We'll match you with students who need your expertise. You'll get notified when someone wants to connect.
             </p>
           </div>
+          
+          <p className="text-white font-medium pt-4">
+            Join <span className="font-bold">200+ UF parents & alumni</span> already opening doors
+          </p>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* LEFT SIDE - UF Blue */}
+      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#000F5C] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
+        
+        <ProgressBar />
+
+        {/* Mobile: Condensed Content */}
+        <div className="lg:hidden text-center mb-6">
+          {step === 1 && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
+              <p className="text-lg font-black mb-3 text-white">
+                You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.
+              </p>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">What's your superpower?</h1>
+              <p className="text-sm text-white/90">Select your areas of expertise</p>
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
+              <p className="text-sm text-white/90">Just one more thing...</p>
+            </>
+          )}
+        </div>
+
+        {/* Desktop: Full Content */}
+        <div className="hidden lg:block">
+          <LeftSideContent />
         </div>
       </div>
 
-      {/* RIGHT SIDE - The Form */}
+      {/* RIGHT SIDE - Form */}
       <div className="lg:w-[55%] bg-white p-6 lg:p-10 lg:pt-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           
-          {/* Form Header */}
-          <div className="mb-6">
-            <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
-              Tell us about yourself
-            </h2>
-            <p className="text-slate-500">
-              So we can match you with students who need your expertise.
-            </p>
-          </div>
+          {/* STEP 1: Basic Info */}
+          {step === 1 && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Tell us about yourself
+                </h2>
+                <p className="text-slate-500">
+                  So we can match you with students who need your expertise.
+                </p>
+              </div>
 
-          {/* Form */}
-          <div className="space-y-6">
-            
-            {/* Company */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Where do you work? <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="Company name"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none transition-colors"
-              />
-            </div>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Where do you work? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="Company name"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
 
-            {/* Job Title */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                What's your job title? <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none transition-colors"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What's your job title? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
 
-            {/* Industry */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                What industry? <span className="font-normal text-slate-400">(optional - select all that apply)</span>
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {INDUSTRIES.map(ind => (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={linkedinUrl}
+                    onChange={(e) => handleLinkedInChange(e.target.value)}
+                    placeholder="https://linkedin.com/in/yourname"
+                    className={`w-full px-4 py-3 border-2 rounded-xl text-base
+                             focus:outline-none transition-colors
+                             ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
+                  />
+                  {linkedinError ? (
+                    <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
+                  ) : (
+                    <p className="text-xs text-slate-400 mt-1">Helps students learn more about your background</p>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={!canProceedStep1}
+                  className={`
+                    w-full py-4 rounded-xl font-bold text-lg transition-all
+                    ${canProceedStep1
+                      ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                      : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  Continue →
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* STEP 2: Expertise */}
+          {step === 2 && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Your expertise
+                </h2>
+                <p className="text-slate-500">
+                  Help us match you with the right students.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    What industry? <span className="font-normal text-slate-400">(optional - select all that apply)</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {INDUSTRIES.map(ind => (
+                      <button
+                        key={ind.id}
+                        type="button"
+                        onClick={() => toggleIndustry(ind.id)}
+                        className={`
+                          flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
+                          transition-all duration-200 border-2
+                          ${industries.includes(ind.id)
+                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                          }
+                        `}
+                      >
+                        <span>{ind.emoji}</span>
+                        <span className="font-medium">{ind.label}</span>
+                        {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    How would you like to help students? <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-slate-500 mb-3">Select at least one — this helps us match you with the right students</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {EXPERTISE_AREAS.map(area => (
+                      <button
+                        key={area.id}
+                        type="button"
+                        onClick={() => toggleExpertise(area.id)}
+                        className={`
+                          flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                          transition-all duration-200 border-2
+                          ${expertise.includes(area.id)
+                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                          }
+                        `}
+                      >
+                        <span className="text-lg">{area.emoji}</span>
+                        <span className="font-medium">{area.label}</span>
+                        {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                  {expertise.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-2">Please select at least one way you'd like to help</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Anything else you'd like students to know? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'&#10;or 'Retired engineer with a great network in aerospace'"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             resize-none h-24 focus:border-[#0021A5] focus:outline-none transition-colors"
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
+                </div>
+
+                <div className="flex gap-3">
                   <button
-                    key={ind.id}
-                    type="button"
-                    onClick={() => toggleIndustry(ind.id)}
+                    onClick={() => setStep(1)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(3)}
+                    disabled={!canProceedStep2}
                     className={`
-                      flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
-                      transition-all duration-200 border-2
-                      ${industries.includes(ind.id)
-                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                      flex-1 py-4 rounded-xl font-bold text-lg transition-all
+                      ${canProceedStep2
+                        ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                       }
                     `}
                   >
-                    <span>{ind.emoji}</span>
-                    <span className="font-medium">{ind.label}</span>
-                    {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                    Continue →
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Bio / Expertise Description */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Anything else you'd like students to know about you? <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'&#10;or 'Retired engineer with a great network in aerospace'&#10;or '20 years in marketing, love reviewing resumes'"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         resize-none h-24 focus:border-[#0021A5] focus:outline-none transition-colors"
-                maxLength={500}
-              />
-              <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
-            </div>
+          {/* STEP 3: Ready */}
+          {step === 3 && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Almost there!
+                </h2>
+                <p className="text-slate-500">
+                  Just confirm your visibility settings.
+                </p>
+              </div>
 
-            {/* LinkedIn URL */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={linkedinUrl}
-                onChange={(e) => handleLinkedInChange(e.target.value)}
-                placeholder="https://linkedin.com/in/yourname"
-                className={`w-full px-4 py-3 border-2 rounded-xl text-base
-                         focus:outline-none transition-colors
-                         ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
-              />
-              {linkedinError ? (
-                <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
-              ) : (
-                <p className="text-xs text-slate-400 mt-1">Helps students learn more about your background</p>
-              )}
-            </div>
+              <div className="space-y-6">
+                <div className="bg-slate-50 rounded-xl p-6 border-2 border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-slate-800">Show my profile in the directory</h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        Students can discover you and reach out for help
+                      </p>
+                    </div>
+                    <Switch
+                      checked={visibleInDirectory}
+                      onCheckedChange={setVisibleInDirectory}
+                    />
+                  </div>
+                </div>
 
-            {/* How they want to help - REQUIRED */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
-                How would you like to help students? <span className="text-red-500">*</span>
-              </label>
-              <p className="text-xs text-slate-500 mb-3">Select at least one — this helps us match you with the right students</p>
-              <div className="grid grid-cols-1 gap-2">
-                {EXPERTISE_AREAS.map(area => (
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Tip:</strong> Being visible in the directory means more students can find you based on your expertise. You can always change this later in your profile settings.
+                  </p>
+                </div>
+
+                <div className="border-t border-slate-200 pt-6">
+                  <h3 className="font-semibold text-slate-800 mb-3">Here's what you've shared:</h3>
+                  <div className="space-y-2 text-sm text-slate-600">
+                    {company && <p>🏢 {company}</p>}
+                    {jobTitle && <p>💼 {jobTitle}</p>}
+                    {industries.length > 0 && (
+                      <p>🏭 {industries.map(i => INDUSTRIES.find(ind => ind.id === i)?.label).join(', ')}</p>
+                    )}
+                    <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
                   <button
-                    key={area.id}
-                    type="button"
-                    onClick={() => toggleExpertise(area.id)}
-                    className={`
-                      flex items-center gap-3 px-4 py-3 rounded-xl text-left
-                      transition-all duration-200 border-2
-                      ${expertise.includes(area.id)
-                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                      }
-                    `}
+                    onClick={() => setStep(2)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
-                    <span className="text-lg">{area.emoji}</span>
-                    <span className="font-medium">{area.label}</span>
-                    {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
+                    ← Back
                   </button>
-                ))}
+                  <button
+                    onClick={handleFinish}
+                    disabled={loading}
+                    className="flex-1 py-4 rounded-xl font-bold text-lg transition-all bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Setting up your account...
+                      </span>
+                    ) : (
+                      'Complete Profile →'
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-center text-sm text-slate-500">
+                  No spam • You control who contacts you
+                </p>
               </div>
-              {expertise.length === 0 && (
-                <p className="text-xs text-amber-600 mt-2">Please select at least one way you'd like to help</p>
-              )}
-            </div>
+            </>
+          )}
 
-            {/* CTA Button */}
-            <button
-              onClick={handleFinish}
-              disabled={!canFinish || loading}
-              className={`
-                w-full py-4 rounded-xl font-bold text-lg transition-all
-                ${canFinish && !loading
-                  ? 'bg-[#FA4616] text-white hover:bg-[#E03E14] shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                }
-              `}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Setting up your account...
-                </span>
-              ) : (
-                'Complete Profile →'
-              )}
-            </button>
-
-            {/* Micro-copy */}
-            <p className="text-center text-sm text-slate-500">
-              No spam • You control who contacts you
-            </p>
-
-          </div>
         </div>
       </div>
     </div>
