@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useAuth } from '@/components/auth/AuthContext';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { deleteJobRequest } from '@/functions/deleteJobRequest';
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, MapPin, Calendar, Briefcase, MessageSquare, Users, FileText, BookOpen, GraduationCap } from 'lucide-react';
 import EditQuestionModal from './EditQuestionModal';
 import {
   DropdownMenu,
@@ -22,6 +22,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
 import { toast } from 'sonner';
 
 const HELP_TYPE_LABELS = {
