@@ -343,39 +343,31 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
         {/* 1. 30-Day Intro Challenge Widget - compact, motivational */}
-        {!loadingData && (
-          <ChallengeWidget
-            user={user}
-            matches={parentMatches}
-            onIntroLogged={async () => {
-              await refreshUser();
-              await loadDashboardData();
-            }}
-          />
-        )}
+        <ChallengeWidget
+          user={user}
+          matches={parentMatches}
+          onIntroLogged={async () => {
+            await refreshUser();
+            loadStartedRef.current = false;
+            await loadDashboardData();
+          }}
+        />
 
         {/* 2. People Who Can Help - THE STAR SECTION */}
-        {!loadingData && parentMatches.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <StudentParentMatchesWidget
-              user={user}
-              matches={parentMatches}
-              onRefresh={loadDashboardData}
-            />
-          </motion.div>
+        {parentMatches.length > 0 && (
+          <StudentParentMatchesWidget
+            user={user}
+            matches={parentMatches}
+            onRefresh={() => {
+              loadStartedRef.current = false;
+              loadDashboardData();
+            }}
+          />
         )}
         
         {/* 3. Stats Bar */}
         {/* Network Stats - Compact on Mobile */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-3 gap-2 md:gap-4"
-        >
+        <div className="grid grid-cols-3 gap-2 md:gap-4">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 md:border-2">
             <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
               <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-0.5">{myActiveQuestions}</div>
