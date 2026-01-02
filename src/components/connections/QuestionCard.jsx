@@ -514,6 +514,87 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
           font-weight: 600;
         }
 
+        .student-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 4px;
+        }
+
+        .student-name-link {
+          font-weight: 700;
+          font-size: 15px;
+          color: #111827;
+          cursor: pointer;
+          transition: color 0.15s;
+        }
+
+        .student-name-link:hover {
+          color: #0021A5;
+          text-decoration: underline;
+        }
+
+        .posted-time-inline {
+          font-size: 12px;
+          color: #9CA3AF;
+        }
+
+        .student-details-line {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #374151;
+          margin-bottom: 10px;
+        }
+
+        .detail-sep {
+          color: #9CA3AF;
+        }
+
+        .minor-text {
+          color: #6B7280;
+        }
+
+        .pre-track {
+          color: #0021A5;
+          font-weight: 600;
+        }
+
+        .context-badges-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+
+        .context-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          border-radius: 8px;
+          font-size: 11px;
+          font-weight: 600;
+        }
+
+        .context-badge.location {
+          background: #DBEAFE;
+          color: #1E40AF;
+        }
+
+        .context-badge.timeline {
+          background: #FEF3C7;
+          color: #92400E;
+        }
+
+        .context-badge.help-type {
+          background: #F3F4F6;
+          color: #374151;
+        }
+
         .question-metadata {
           font-size: 13px;
           color: #6B7280;
