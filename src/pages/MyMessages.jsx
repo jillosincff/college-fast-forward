@@ -112,7 +112,7 @@ export default function MyMessagesPage() {
           senderName: user.full_name || user.email.split('@')[0],
           senderEmail: user.email,
           subject: `Re: ${selectedMessage.subject}`,
-          body: replyText
+          messageBody: replyText
         });
         console.log('✅ Email notification sent');
       } catch (emailError) {
