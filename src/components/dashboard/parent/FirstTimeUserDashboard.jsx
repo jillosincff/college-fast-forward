@@ -1,6 +1,8 @@
 import React from 'react';
-import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase, AlertTriangle } from 'lucide-react';
+import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function FirstTimeUserDashboard({ 
   user, 
@@ -207,6 +209,50 @@ export default function FirstTimeUserDashboard({
           </button>
         </div>
       </div>
+
+      {/* MY STUDENTS SECTION */}
+      {hasLinkedStudent && (
+        <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
+                👨‍🎓 My Students
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onConnectStudent}
+                className="text-[#0021A5] hover:text-[#FA4616] hover:bg-blue-50 text-sm font-semibold"
+              >
+                <Link2 className="w-4 h-4 mr-1" />
+                Link Another Student
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {linkedStudents.map((student) => (
+                <div 
+                  key={student.id} 
+                  className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white font-bold">
+                    {student.full_name?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">{student.full_name || 'Unknown'}</p>
+                    <p className="text-xs text-slate-500 truncate">{student.email}</p>
+                    {student.major && (
+                      <p className="text-xs text-blue-600">{student.major}</p>
+                    )}
+                  </div>
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* How Karma Works - More Direct */}
       <details className="bg-slate-100 rounded-xl" open={!hasLinkedStudent}>
