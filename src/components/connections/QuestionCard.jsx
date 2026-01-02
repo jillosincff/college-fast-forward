@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import moment from 'moment';
 import { useAuth } from '@/components/auth/AuthContext';
-import { JobRequest } from '@/entities/JobRequest';
 import { HelpRequest } from '@/entities/HelpRequest';
+import { deleteJobRequest } from '@/functions/deleteJobRequest';
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import EditQuestionModal from './EditQuestionModal';
 import {
