@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f9fafb; padding: 20px;">
                     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                         <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; margin: -30px -30px 20px -30px;">
-                            <h1 style="margin: 0; font-size: 24px;">🎉 New Answer to Your Question!</h1>
+                            <h1 style="margin: 0; font-size: 24px;">New Answer to Your Question</h1>
                         </div>
                         
                         <p style="font-size: 16px;">Hi ${posterFirstName},</p>
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
                         </div>
                         
                         <p style="font-size: 14px; color: #6b7280; text-align: center;">
-                            💡 Tip: If this answer was helpful, mark it as "Best Answer" to thank the helper!
+                            Tip: If this answer was helpful, mark it as "Best Answer" to thank the helper!
                         </p>
                         
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
@@ -88,7 +88,10 @@ Deno.serve(async (req) => {
                             This notification was sent through College Fast Forward.
                         </p>
                         <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 5px 0 0 0;">
-                            Go Gators! 🧡💙
+                            Go Gators!
+                        </p>
+                        <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 20px;">
+                            <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Manage notification preferences</a>
                         </p>
                     </div>
                 </div>
@@ -96,7 +99,7 @@ Deno.serve(async (req) => {
 
             await base44.asServiceRole.integrations.Core.SendEmail({
                 to: posterEmail,
-                subject: `🎉 ${answererName} answered your question on College Fast Forward`,
+                subject: `${answererName} replied to your question - College Fast Forward`,
                 body: emailHtmlBody,
                 from_name: 'College Fast Forward'
             });
