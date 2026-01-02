@@ -36,11 +36,25 @@ export default function PostRequestPage() { // Renamed from PostRequest
       const fetchRequest = async () => {
         setIsLoadingInitial(true);
         try {
-          const requestData = await JobRequest.get(editId);
+          // Try to fetch from the appropriate entity type
+          let requestData;
+          if (entityType === 'HelpRequest') {
+            requestData = await HelpRequest.get(editId);
+          } else {
+            requestData = await JobRequest.get(editId);
+          }
           setInitialData(requestData);
         } catch (error) {
           console.error("Failed to fetch request for editing:", error);
-          toast({ title: "Error loading request", variant: "destructive" });
+          // Try the other entity type as fallback
+          try {
+            const fallbackData = entityType === 'HelpRequest' 
+              ? await JobRequest.get(editId)
+              : await HelpRequest.get(editId);
+            setInitialData(fallbackData);
+          } catch (fallbackError) {
+            toast({ title: "Error loading request", variant: "destructive" });
+          }
         } finally {
           setIsLoadingInitial(false);
         }
@@ -49,7 +63,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
     } else {
       setIsLoadingInitial(false);
     }
-  }, [editId, toast]);
+  }, [editId, entityType, toast]);
 
   const handleSubmit = async (values) => { // Changed requestData param to values for clarity with outline
     if (isSubmitting) return;
