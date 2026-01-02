@@ -100,23 +100,43 @@ export default function StudentHelpRequestCard({
   const handleDelete = async () => {
     setIsSubmitting(true);
     try {
-      console.log('🗑️ Attempting to delete HelpRequest:', helpRequest.id);
+      console.log('🗑️ Attempting to delete question:', helpRequest.id);
       
-      await base44.entities.HelpRequest.delete(helpRequest.id);
-      console.log('✅ HelpRequest deleted successfully');
-      setShowDeleteModal(false);
-      // Pass true to signal deletion so Dashboard clears state immediately
-      if (onRefresh) onRefresh(true);
-    } catch (error) {
-      console.error('❌ Failed to delete request:', error);
-      // Check if it's a 404 - means already deleted
-      if (error.message?.includes('not found') || error.status === 404) {
-        console.log('✅ Request already deleted, clearing state');
+      // Try JobRequest first (newer entity), then HelpRequest
+      let deleted = false;
+      
+      try {
+        await base44.entities.JobRequest.delete(helpRequest.id);
+        console.log('✅ JobRequest deleted successfully');
+        deleted = true;
+      } catch (jobErr) {
+        console.log('JobRequest delete failed, trying HelpRequest:', jobErr.message);
+      }
+      
+      if (!deleted) {
+        try {
+          await base44.entities.HelpRequest.delete(helpRequest.id);
+          console.log('✅ HelpRequest deleted successfully');
+          deleted = true;
+        } catch (helpErr) {
+          console.log('HelpRequest delete failed:', helpErr.message);
+          // Check if it's a 404 - means already deleted
+          if (helpErr.message?.includes('not found') || helpErr.status === 404) {
+            deleted = true;
+          }
+        }
+      }
+      
+      if (deleted) {
         setShowDeleteModal(false);
+        // Pass true to signal deletion so Dashboard clears state immediately
         if (onRefresh) onRefresh(true);
       } else {
         alert('Failed to delete question. Please try again or contact support.');
       }
+    } catch (error) {
+      console.error('❌ Failed to delete request:', error);
+      alert('Failed to delete question. Please try again or contact support.');
     } finally {
       setIsSubmitting(false);
     }
