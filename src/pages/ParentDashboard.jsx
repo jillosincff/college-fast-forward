@@ -183,6 +183,29 @@ export default function ParentDashboard() {
     return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
   };
   
+  // Helper to get student's first name (handles "LastName, FirstName" format)
+  const getStudentFirstName = (student) => {
+    if (!student) return 'your student';
+    const fullName = student.full_name;
+    if (!fullName?.trim()) return student.email?.split('@')[0] || 'your student';
+    
+    // Handle "LastName, FirstName" format
+    if (fullName.includes(',')) {
+      const afterComma = fullName.split(',')[1]?.trim().split(/\s+/)[0];
+      if (afterComma && afterComma.length > 1) {
+        return afterComma.charAt(0).toUpperCase() + afterComma.slice(1).toLowerCase();
+      }
+    }
+    
+    // Standard "FirstName LastName" format
+    const firstName = fullName.trim().split(/\s+/)[0];
+    if (firstName && firstName.length > 1) {
+      return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+    }
+    
+    return student.email?.split('@')[0] || 'your student';
+  };
+  
   const firstName = getCapitalizedFirstName(user?.full_name);
   
   // Determine if new user (0 karma)
@@ -381,7 +404,7 @@ export default function ParentDashboard() {
               </h2>
               <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
                 {myStudents.length > 0 
-                  ? `Every action you take earns karma — directly boosting ${myStudents[0]?.full_name?.split(' ')[0] || 'your student'}'s visibility.`
+                  ? `Every action you take earns karma — directly boosting ${getStudentFirstName(myStudents[0])}'s visibility.`
                   : 'Every action you take earns karma — link your student to activate boosts.'
                 }
               </p>
