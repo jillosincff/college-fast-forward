@@ -16,18 +16,26 @@ export default function MyRequestsPage() {
     if (!user?.email) return;
     setLoading(true);
     try {
-      // Fetch requests by created_by OR poster_email (some requests have created_by='anonymous')
-      const [byCreator, byPosterEmail] = await Promise.all([
+      // Fetch JobRequests by created_by OR poster_email (some requests have created_by='anonymous')
+      const [jobByCreator, jobByPosterEmail, helpByCreator, helpByStudentEmail] = await Promise.all([
         JobRequest.filter({ created_by: user.email }, '-created_date'),
-        JobRequest.filter({ poster_email: user.email }, '-created_date')
+        JobRequest.filter({ poster_email: user.email }, '-created_date'),
+        HelpRequest.filter({ created_by: user.email }, '-created_date'),
+        HelpRequest.filter({ student_email: user.email }, '-created_date')
       ]);
       
       // Merge and deduplicate by ID
-      const allRequests = [...(byCreator || []), ...(byPosterEmail || [])];
-      const uniqueRequests = Array.from(new Map(allRequests.map(r => [r.id, r])).values());
-      uniqueRequests.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      const allJobRequests = [...(jobByCreator || []), ...(jobByPosterEmail || [])];
+      const allHelpRequests = [...(helpByCreator || []), ...(helpByStudentEmail || [])];
       
-      setMyRequests(uniqueRequests);
+      const uniqueJobRequests = Array.from(new Map(allJobRequests.map(r => [r.id, r])).values());
+      const uniqueHelpRequests = Array.from(new Map(allHelpRequests.map(r => [r.id, r])).values());
+      
+      // Combine both types and sort by date
+      const allRequests = [...uniqueJobRequests, ...uniqueHelpRequests];
+      allRequests.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      
+      setMyRequests(allRequests);
     } catch (error) {
       console.error("Failed to load user's requests:", error);
       setMyRequests([]);
