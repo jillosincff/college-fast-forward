@@ -88,10 +88,11 @@ export default function AnswerComposer({
         });
       }
 
-      // Award karma for posting an answer
-      if (currentUser.family_group_id) {
+      // Award karma for posting an answer (parents and alumni)
+      // Award karma even without family_group_id - awardKarma will handle finding linked students
+      if (currentUser.persona === 'parent' || currentUser.persona === 'alumni' || currentUser.roles?.includes('parent') || currentUser.roles?.includes('alumni')) {
         base44.functions.invoke('awardKarma', {
-          familyGroupId: currentUser.family_group_id,
+          familyGroupId: currentUser.family_group_id || null,
           parentUserId: currentUser.id,
           parentEmail: currentUser.email,
           actionType: 'answer',
@@ -99,6 +100,12 @@ export default function AnswerComposer({
           description: 'Posted an answer'
         }).then(res => {
           console.log('Karma awarded for answer:', res?.data);
+          if (res?.data?.boost_multiplier > 0) {
+            toast({
+              title: "⚡ Karma Boost Active!",
+              description: `Your linked student's requests are now boosted for ${res.data.boost_multiplier >= 3 ? '48h (Platinum)' : res.data.boost_multiplier >= 2 ? '48h (Gold)' : '48h (Silver)'}`,
+            });
+          }
         }).catch(err => {
           console.log('Karma award failed (non-critical):', err.message);
         });
