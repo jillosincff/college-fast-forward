@@ -216,13 +216,13 @@ export default function StudentOnboarding() {
           {/* Desktop: Full Content */}
           <div className="hidden lg:block space-y-6">
             <div>
-              <p className="text-white/60 uppercase tracking-wider text-sm mb-2">Welcome to</p>
-              <h1 className="text-3xl font-bold">College Fast Forward</h1>
+              <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
+              <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
             </div>
             
             {/* The Big Statement */}
             <div className="py-4">
-              <p className="text-3xl lg:text-4xl font-black leading-tight">
+              <p className="text-3xl lg:text-4xl font-black leading-tight text-white">
                 You've discovered the secret:{' '}
                 <span className="text-[#FA4616] inline-block animate-pulse">access beats resumes.</span>
               </p>
@@ -260,7 +260,7 @@ export default function StudentOnboarding() {
             
             {/* Quote */}
             <div className="pt-4 border-t border-white/20">
-              <p className="text-sm text-white/70 italic leading-relaxed">
+              <p className="text-sm text-white/80 italic leading-relaxed">
                 "Think of CFF as a master key to a neighborhood of closed doors. Instead of standing on the sidewalk hoping someone notices your resume, you now have neighbors ready to walk you inside."
               </p>
             </div>
