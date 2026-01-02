@@ -445,17 +445,11 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
         )}
 
         {/* 5. Latest Opportunities */}
         {opportunities.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="border-2 border-slate-200 shadow-lg">
+          <Card className="border-2 border-slate-200 shadow-lg">
               <CardContent className="pt-6 pb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
