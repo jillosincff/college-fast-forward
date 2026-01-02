@@ -340,46 +340,9 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
-        {/* Your Active Help Request - FIRST */}
-        {!loadingData && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <StudentHelpRequestCard
-              helpRequest={helpRequest}
-              matchCount={parentMatches.length}
-              responseCount={responseCount}
-              parentMatches={parentMatches}
-              onRefresh={(wasDeleted) => {
-                if (wasDeleted) {
-                  // Clear helpRequest immediately on deletion
-                  setHelpRequest(null);
-                }
-                loadDashboardData();
-              }}
-            />
-          </motion.div>
-        )}
-
-        {/* Your Parent Matches */}
-        {!loadingData && parentMatches.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
-            <StudentParentMatchesWidget
-              user={user}
-              matches={parentMatches}
-              onRefresh={loadDashboardData}
-            />
-          </motion.div>
-        )}
-        
-        {/* 30-Day Intro Challenge Widget - only show after matches are loaded */}
+        {/* 1. 30-Day Intro Challenge Widget - compact, motivational */}
         {!loadingData && (
           <ChallengeWidget
             user={user}
@@ -391,6 +354,21 @@ export default function Dashboard() {
           />
         )}
 
+        {/* 2. People Who Can Help - THE STAR SECTION */}
+        {!loadingData && parentMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <StudentParentMatchesWidget
+              user={user}
+              matches={parentMatches}
+              onRefresh={loadDashboardData}
+            />
+          </motion.div>
+        )}
+        
+        {/* 3. Stats Bar */}
         {/* Network Stats - Compact on Mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -418,7 +396,7 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Recent Messages */}
+        {/* 4. Messages Section */}
         {messages.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -483,7 +461,7 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Opportunities */}
+        {/* 5. Latest Opportunities */}
         {opportunities.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -527,7 +505,25 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Your Family - Collapsed */}
+        {/* 6. Ask Another Question - small link if they have matches */}
+        {!loadingData && parentMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-center"
+          >
+            <Button
+              variant="outline"
+              onClick={() => navigate('PostRequest')}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+            >
+              Ask Another Question →
+            </Button>
+          </motion.div>
+        )}
+
+        {/* 7. Your Family - Collapsed */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
