@@ -314,24 +314,56 @@ export default function StudentOnboarding() {
             </div>
 
             {/* Form */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  What's your major?
+                  What's your major? <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={major}
                   onChange={(e) => setMajor(e.target.value)}
                   placeholder="e.g., Computer Science, Business, Psychology"
-                  className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                            focus:border-[#0021A5] focus:outline-none transition-colors"
                 />
               </div>
 
+              {/* Minor - Optional */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Minor <span className="font-normal text-slate-400">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={minor}
+                  onChange={(e) => setMinor(e.target.value)}
+                  placeholder="e.g., Economics, Spanish"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                           focus:border-[#0021A5] focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Pre-Professional Track */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Pre-professional track <span className="font-normal text-slate-400">(if applicable)</span>
+                </label>
+                <select
+                  value={preTrack}
+                  onChange={(e) => setPreTrack(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                           focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                >
+                  {PRE_TRACKS.map(track => (
+                    <option key={track.id} value={track.id}>{track.label}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-3">
-                  When do you graduate?
+                  When do you graduate? <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {GRAD_YEARS.map(year => (
@@ -340,7 +372,7 @@ export default function StudentOnboarding() {
                       type="button"
                       onClick={() => setGradYear(year)}
                       className={`
-                        px-5 py-3 rounded-xl font-medium transition-all border-2
+                        px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm
                         ${gradYear === year
                           ? 'bg-blue-50 border-[#0021A5] text-[#0021A5] shadow-md'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
