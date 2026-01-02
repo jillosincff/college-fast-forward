@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Briefcase, Users, MessageSquare, Mail, ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Loader2, Briefcase, Users, MessageSquare, Mail, ArrowRight, ChevronDown, CheckCircle2, Zap } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import { base44 } from '@/api/base44Client';
@@ -14,6 +14,7 @@ import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCar
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 import QuickTourCard from '@/components/dashboard/student/QuickTourCard';
+import FamilyBoostStatus from '@/components/dashboard/student/FamilyBoostStatus';
 
 // CACHE BUSTER v4 - 2026-01-02 - Fixed layout flashing and JSX structure
 export default function Dashboard() {
@@ -315,6 +316,17 @@ export default function Dashboard() {
               <p className="text-sm text-green-600">Their support boosts your visibility in the network!</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Family Karma Boost Status */}
+      {(user?.boost_level > 0 || linkedParents.length > 0) && (
+        <div className="mx-4 mt-4">
+          <FamilyBoostStatus 
+            boostLevel={user?.boost_level || 0}
+            boostExpiresAt={user?.boost_expires_at}
+            boostedByParentEmail={user?.boosted_by_parent_email}
+          />
         </div>
       )}
 
