@@ -131,6 +131,11 @@ export default function StudentOnboarding() {
       await base44.auth.updateMe(updateData);
 
       // Post the help request to All Questions (REQUIRED now)
+      // Include student academic info for rich display on QuestionCard
+      const nameParts = (user?.full_name || 'Student').trim().split(/\s+/);
+      const firstName = nameParts[0] || 'Student';
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+      
       const jobRequestData = {
         role: 'Student Question',
         title: helpRequest.trim(),
@@ -138,18 +143,21 @@ export default function StudentOnboarding() {
         target_industry: industries[0] || 'Other',
         poster_type: 'student',
         poster_name: user?.full_name || 'Student',
-        poster_first_name: user?.full_name?.split(' ')[0] || 'Student',
+        poster_first_name: firstName,
+        poster_last_name: lastName,
+        // Store student academic info for QuestionCard display
+        student_year: gradYear || '',
+        student_major: major || '',
+        student_minor: minor || '',
+        student_pre_track: preTrack || '',
         status: 'active',
         role_type: 'full_time',
         target_helpers: ['alumni', 'parents'],
         resume_url: resumeUrl,
         help_types: helpNeeded,
-        start_timing: targetTimeline || ''
+        start_timing: targetTimeline || '',
+        location_preference: preferredLocation.trim() || ''
       };
-      
-      if (preferredLocation.trim()) {
-        jobRequestData.location_preference = preferredLocation.trim();
-      }
       
       await JobRequest.create(jobRequestData);
 
