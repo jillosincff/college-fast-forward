@@ -149,7 +149,7 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
           <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🔗</span>
-              <span className="font-bold text-sm text-white">Connect with your Gator!</span>
+              <span className="font-bold text-sm text-white">Connect with your student!</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button 
