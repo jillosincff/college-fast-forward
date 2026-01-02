@@ -302,10 +302,10 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         </div>
       )}
 
-      {/* Karma Boost Badge */}
-      {question.karma_boost > 0 && (
-        <div className="karma-boost-badge">
-          ⚡ Family Karma Boost
+      {/* Karma Boost Badge - only show if not expired */}
+      {question.karma_boost > 0 && (!question.boosted_until || new Date(question.boosted_until) > new Date()) && (
+        <div className={`karma-boost-badge level-${question.karma_boost}`}>
+          ⚡ {question.karma_boost >= 3 ? 'Platinum' : question.karma_boost >= 2 ? 'Gold' : 'Silver'} Family Boost — Pinned to Top
         </div>
       )}
 
@@ -493,15 +493,38 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         }
 
         .karma-boost-badge {
-          display: inline-block;
-          background: linear-gradient(90deg, #FEFCE8 0%, #FEF9C3 100%);
-          color: #A16207;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           font-size: 11px;
-          font-weight: 600;
-          padding: 4px 10px;
+          font-weight: 700;
+          padding: 5px 12px;
           border-radius: 12px;
           margin-bottom: 10px;
-          border: 1px solid #FDE047;
+          animation: glow 2s ease-in-out infinite;
+        }
+
+        .karma-boost-badge.level-1 {
+          background: linear-gradient(90deg, #F3F4F6 0%, #E5E7EB 100%);
+          color: #374151;
+          border: 1px solid #9CA3AF;
+        }
+
+        .karma-boost-badge.level-2 {
+          background: linear-gradient(90deg, #FEF9C3 0%, #FDE047 100%);
+          color: #92400E;
+          border: 1px solid #F59E0B;
+        }
+
+        .karma-boost-badge.level-3 {
+          background: linear-gradient(90deg, #E9D5FF 0%, #C084FC 100%);
+          color: #581C87;
+          border: 1px solid #A855F7;
+        }
+
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 4px rgba(250, 204, 21, 0.4); }
+          50% { box-shadow: 0 0 8px rgba(250, 204, 21, 0.6); }
         }
 
         .question-stats {
