@@ -273,7 +273,7 @@ export default function StudentOnboarding() {
             {/* Form Header */}
             <div className="mb-8">
               <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
-                Let's find your matches
+                Let's get to know you
               </h2>
               <p className="text-slate-500">
                 Takes 2 minutes.
@@ -346,12 +346,12 @@ export default function StudentOnboarding() {
                 className={`
                   w-full py-4 rounded-xl font-bold text-lg transition-all
                   ${isStep1Valid
-                    ? 'bg-gradient-to-r from-[#FA4616] to-orange-500 text-white hover:from-orange-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                    ? 'bg-[#FA4616] text-white hover:bg-[#E03E14] shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   }
                 `}
               >
-                Find My Matches →
+                Continue →
               </button>
 
               {/* Social Proof */}
