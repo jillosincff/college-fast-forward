@@ -673,12 +673,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
           50% { opacity: 0.5; transform: scale(1.2); }
         }
 
-        .location-preference {
-          display: inline-block;
-          font-size: 12px;
-          color: #6B7280;
-          margin-bottom: 10px;
-        }
+        /* Removed old location-preference - now using context-badges-row */
 
         .karma-boost-badge {
           display: inline-flex;
