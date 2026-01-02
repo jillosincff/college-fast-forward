@@ -281,7 +281,7 @@ export function StudentProfileHeader({
       {/* Context Badges */}
       <StudentContextBadges
         location={preferredLocation || location}
-        timeline={timelineDisplay}
+        timeline={timeline}
         helpTypes={helpTypes}
         seekingTypes={seekingTypes}
         className="mb-3"
