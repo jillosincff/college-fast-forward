@@ -186,7 +186,37 @@ export default function QuestionCard({ question, gator, onDeleted }) {
   const needsAttention = (question.answer_count || 0) === 0;
 
   return (
+    <>
     <div className={`question-card ${needsAttention ? 'needs-attention' : ''}`} onClick={handleClick}>
+      {/* Owner Actions Menu */}
+      {isOwner && (
+        <div className="owner-actions" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="menu-trigger">
+                <MoreVertical className="w-5 h-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+      
       {/* Tags Row - Above content */}
       <div className="tags-row">
         {/* Poster Type Badge */}
