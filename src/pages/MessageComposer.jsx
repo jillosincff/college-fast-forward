@@ -280,7 +280,7 @@ export default function MessageComposer() {
                       ? 'bg-[#0021A5] rounded-br-sm' 
                       : 'bg-white border border-slate-200 rounded-bl-sm'
                   }`}>
-                    <p className={`text-sm leading-relaxed ${isMine ? 'text-white' : 'text-slate-900'}`}>{msg.body}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: isMine ? '#ffffff' : '#0f172a' }}>{msg.body}</p>
                   </div>
                   <p className={`text-xs text-slate-400 mt-1 ${isMine ? 'text-right' : 'text-left'}`}>
                     {new Date(msg.created_date).toLocaleString()}
