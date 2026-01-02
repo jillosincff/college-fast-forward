@@ -172,90 +172,196 @@ export default function StudentOnboarding() {
   const isStep2Valid = industries.length > 0 && seeking.length > 0;
   const isStep3Valid = helpNeeded.length > 0 && helpRequest.trim().length >= 20;
 
-  // STEP 1: About You
+  // STEP 1: About You - High-Energy Two-Column Layout
   if (step === 1) {
     return (
-      <OnboardingLayout
-        currentStep={1}
-        totalSteps={3}
-        onNext={handleNext}
-        nextDisabled={!isStep1Valid}
-        showBack={false}
-      >
-        <div className="max-w-lg mx-auto">
-          {/* Empathy Header */}
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🎯</div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              You're 2 minutes away from your first intro.
-            </h1>
-            <p className="text-slate-600">
-              Tell us a bit about yourself so we can find the right matches.
-            </p>
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* LEFT SIDE - The Hook (Hidden on mobile, shows condensed version) */}
+        <div className="lg:w-[45%] bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0021A5] text-white p-6 lg:p-10 flex flex-col justify-center">
+          
+          {/* Progress Bar - Mobile & Desktop */}
+          <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
+            <div className="flex items-center gap-1 text-sm">
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">👤</span>
+              <span className="hidden sm:inline text-white/80">You</span>
+            </div>
+            <div className="w-8 h-0.5 bg-white/30"></div>
+            <div className="flex items-center gap-1 text-sm opacity-50">
+              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🎯</span>
+              <span className="hidden sm:inline text-white/60">Goals</span>
+            </div>
+            <div className="w-8 h-0.5 bg-white/30"></div>
+            <div className="flex items-center gap-1 text-sm opacity-50">
+              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🎉</span>
+              <span className="hidden sm:inline text-white/60">Matches</span>
+            </div>
           </div>
 
-          {/* Form */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                What's your major?
-              </label>
-              <input
-                type="text"
-                value={major}
-                onChange={(e) => setMajor(e.target.value)}
-                placeholder="e.g., Computer Science, Business, Psychology"
-                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none"
-              />
+          {/* Mobile: Condensed Content */}
+          <div className="lg:hidden text-center mb-6">
+            <h1 className="text-xl font-bold mb-2">Welcome to College Fast Forward</h1>
+            <p className="text-2xl font-black text-[#FA4616] mb-3">
+              Access beats resumes.
+            </p>
+            <p className="text-white/80 text-sm mb-4">
+              70-80% of jobs are filled through referrals. CFF gives you direct access to 500+ parents & alumni.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 text-sm">
+              <span className="bg-white/10 px-3 py-1.5 rounded-full">🔑 Skip the black hole</span>
+              <span className="bg-white/10 px-3 py-1.5 rounded-full">🤝 Warm intros</span>
+              <span className="bg-white/10 px-3 py-1.5 rounded-full">🚀 500+ connections</span>
             </div>
+          </div>
 
+          {/* Desktop: Full Content */}
+          <div className="hidden lg:block space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                When do you graduate?
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {GRAD_YEARS.map(year => (
-                  <button
-                    key={year}
-                    type="button"
-                    onClick={() => setGradYear(year)}
-                    className={`
-                      px-5 py-3 rounded-xl font-medium transition-all border-2
-                      ${gradYear === year
-                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                      }
-                    `}
-                  >
-                    {year}
-                  </button>
-                ))}
-
+              <p className="text-white/60 uppercase tracking-wider text-sm mb-2">Welcome to</p>
+              <h1 className="text-3xl font-bold">College Fast Forward</h1>
+            </div>
+            
+            {/* The Big Statement */}
+            <div className="py-4">
+              <p className="text-3xl lg:text-4xl font-black leading-tight">
+                You've discovered the secret:{' '}
+                <span className="text-[#FA4616] inline-block animate-pulse">access beats resumes.</span>
+              </p>
+            </div>
+            
+            {/* The Problem */}
+            <div className="bg-white/10 rounded-xl p-4 border-l-4 border-[#FA4616]">
+              <p className="text-white/90">
+                <strong className="text-white">70-80% of jobs are filled through referrals.</strong>{' '}
+                But your network is full of people your own age—not hiring managers.
+              </p>
+            </div>
+            
+            {/* The Solution */}
+            <p className="text-lg text-white/90">
+              CFF gives you an <strong className="text-white">unfair advantage</strong>: a pooled community of parents and alumni{' '}
+              <strong className="text-white">ready to open doors for you.</strong>
+            </p>
+            
+            {/* Value Props - Animated */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
+                <span className="text-2xl">🔑</span>
+                <span className="font-semibold">Skip the resume black hole</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
+                <span className="text-2xl">🤝</span>
+                <span className="font-semibold">Get warm intros to decision-makers</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
+                <span className="text-2xl">🚀</span>
+                <span className="font-semibold">Access 500+ parents & alumni connections</span>
               </div>
             </div>
-
-            {/* Optional Referral Code */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Referral code <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                placeholder="e.g., UF-JOHN"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none uppercase"
-                maxLength={20}
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                Got a code from a friend or ambassador? Enter it here.
+            
+            {/* Quote */}
+            <div className="pt-4 border-t border-white/20">
+              <p className="text-sm text-white/70 italic leading-relaxed">
+                "Think of CFF as a master key to a neighborhood of closed doors. Instead of standing on the sidewalk hoping someone notices your resume, you now have neighbors ready to walk you inside."
               </p>
             </div>
           </div>
         </div>
-      </OnboardingLayout>
+
+        {/* RIGHT SIDE - The Form */}
+        <div className="lg:w-[55%] bg-white p-6 lg:p-10 flex flex-col justify-center">
+          <div className="max-w-md mx-auto w-full">
+            {/* Form Header */}
+            <div className="mb-8">
+              <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                Let's find your matches
+              </h2>
+              <p className="text-slate-500">
+                Takes 2 minutes. <span className="text-green-600 font-semibold">Free forever.</span>
+              </p>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  What's your major?
+                </label>
+                <input
+                  type="text"
+                  value={major}
+                  onChange={(e) => setMajor(e.target.value)}
+                  placeholder="e.g., Computer Science, Business, Psychology"
+                  className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-base
+                           focus:border-[#0021A5] focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                  When do you graduate?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {GRAD_YEARS.map(year => (
+                    <button
+                      key={year}
+                      type="button"
+                      onClick={() => setGradYear(year)}
+                      className={`
+                        px-5 py-3 rounded-xl font-medium transition-all border-2
+                        ${gradYear === year
+                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5] shadow-md'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }
+                      `}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Optional Referral Code */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Referral code <span className="font-normal text-slate-400">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  placeholder="e.g., UF-JOHN"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                           focus:border-[#0021A5] focus:outline-none uppercase transition-colors"
+                  maxLength={20}
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Got a code from a friend or ambassador? Enter it here.
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <button
+                onClick={handleNext}
+                disabled={!isStep1Valid}
+                className={`
+                  w-full py-4 rounded-xl font-bold text-lg transition-all
+                  ${isStep1Valid
+                    ? 'bg-gradient-to-r from-[#FA4616] to-orange-500 text-white hover:from-orange-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                Find My Matches →
+              </button>
+
+              {/* Social Proof */}
+              <p className="text-center text-sm text-slate-500">
+                Join <span className="font-semibold text-slate-700">500+</span> students already connecting
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
