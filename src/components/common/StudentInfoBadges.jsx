@@ -30,6 +30,27 @@ const TIMELINE_LABELS = {
   'no_rush': 'No Rush',
 };
 
+// Format dynamic timeline values like "after_grad_2027" to "After Grad 2027"
+function formatTimeline(timeline) {
+  if (!timeline) return null;
+  
+  // Check static labels first
+  if (TIMELINE_LABELS[timeline]) {
+    return TIMELINE_LABELS[timeline];
+  }
+  
+  // Handle "after_grad_YYYY" pattern
+  const afterGradMatch = timeline.match(/^after_grad_(\d{4})$/);
+  if (afterGradMatch) {
+    return `After Grad ${afterGradMatch[1]}`;
+  }
+  
+  // Fallback: replace underscores with spaces and title case
+  return timeline
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // Map seeking types to badges
 const SEEKING_CONFIG = {
   'fulltime': { label: 'Full-time', icon: '💼' },
