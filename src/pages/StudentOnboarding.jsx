@@ -276,7 +276,7 @@ export default function StudentOnboarding() {
                 Let's find your matches
               </h2>
               <p className="text-slate-500">
-                Takes 2 minutes. <span className="text-green-600 font-semibold">Free forever.</span>
+                Takes 2 minutes.
               </p>
             </div>
 
