@@ -131,17 +131,25 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
     e.stopPropagation();
     setIsDeleting(true);
     try {
-      // Try JobRequest first, then HelpRequest
-      if (question.entity_name === 'HelpRequest' || question.student_id) {
+      // Try HelpRequest first if it's a help request, otherwise use backend function for JobRequest
+      if (question.entity_name === 'HelpRequest' || question.student_id || question._source === 'HelpRequest') {
         await HelpRequest.delete(question.id);
       } else {
-        await JobRequest.delete(question.id);
+        // Use backend function to bypass RLS issues with anonymous created_by
+        const result = await deleteJobRequest({ id: question.id });
+        if (result.data?.error) {
+          throw new Error(result.data.error);
+        }
       }
       toast.success('Question deleted successfully');
       if (onDeleted) onDeleted(question.id);
     } catch (error) {
       console.error('Failed to delete question:', error);
-      toast.error('Failed to delete question');
+      if (error.message?.includes('Permission denied')) {
+        toast.error('You can only delete your own questions');
+      } else {
+        toast.error('Failed to delete question');
+      }
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
