@@ -255,10 +255,13 @@ export default function Dashboard() {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setLoadingData(false);
+      setInitialLoadComplete(true);
     }
   };
 
-  if (isLoading || !user) {
+  // Show loading state until BOTH auth is complete AND initial data load is done
+  // This prevents layout flashing by keeping a single loading screen
+  if (isLoading || !user || !initialLoadComplete) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50">
         <div className="text-center">
