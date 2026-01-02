@@ -668,6 +668,14 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    
+    {/* Edit Question Modal */}
+    <EditQuestionModal
+      question={question}
+      open={showEditModal}
+      onOpenChange={setShowEditModal}
+      onUpdated={onUpdated}
+    />
     </>
   );
 }
