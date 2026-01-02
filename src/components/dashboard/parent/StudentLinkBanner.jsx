@@ -70,14 +70,30 @@ export default function StudentLinkBanner({
             <h2 className="text-xl md:text-2xl font-black mb-1 text-white">
               ✅ Family Karma Active — {studentName}'s requests boosted!
             </h2>
-            <p className="text-white/90 text-sm md:text-base">
+            <p className="text-white/90 text-sm md:text-base mb-3">
               Every time you help a student, {studentName}'s profile rises to the top for faster answers.
             </p>
+            
+            {/* Visual Example */}
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-lg p-3 max-w-md">
+              <div className="flex flex-col gap-1 flex-1">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-bold text-[10px]">⚡ BOOSTED</span>
+                  <span className="text-white/90">{studentName}'s request</span>
+                  <span className="text-white/60">→ Top of feed</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-white/50">
+                  <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px]">Normal</span>
+                  <span>Other requests</span>
+                  <span className="text-white/40">→ Lower visibility</span>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-white/20 backdrop-blur px-4 py-2 rounded-xl text-center">
-            <div className="text-2xl font-black text-white">⚡</div>
-            <div className="text-xs font-semibold text-white/90">BOOST<br/>ACTIVE</div>
+          <div className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-xl text-center shadow-lg animate-pulse">
+            <div className="text-2xl font-black">⚡ ON</div>
+            <div className="text-xs font-bold">BOOST<br/>ACTIVE</div>
           </div>
         </div>
       </div>

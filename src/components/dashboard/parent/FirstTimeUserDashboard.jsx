@@ -111,7 +111,29 @@ export default function FirstTimeUserDashboard({
         </div>
       </div>
 
-      {/* Secondary Actions - Connect Student FIRST if not linked */}
+      {/* Post a Job Card - Higher Priority */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg transition-shadow">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <Briefcase size={28} className="text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
+              <p className="text-sm text-purple-700">Know of openings at your company? Students are looking!</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('PostOpportunity')}
+            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+          >
+            <Briefcase size={18} />
+            Post Job
+          </button>
+        </div>
+      </div>
+
+      {/* Secondary Actions - Connect Student & Profile */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Connect Your Student - Priority #1 */}
@@ -188,27 +210,7 @@ export default function FirstTimeUserDashboard({
 
       </div>
 
-      {/* Post a Job Card */}
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg transition-shadow">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-              <Briefcase size={28} className="text-purple-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
-              <p className="text-sm text-purple-700">Know of openings at your company? Students are looking!</p>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('PostOpportunity')}
-            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
-          >
-            <Briefcase size={18} />
-            Post Job
-          </button>
-        </div>
-      </div>
+
 
       {/* MY STUDENTS SECTION */}
       {hasLinkedStudent && (
