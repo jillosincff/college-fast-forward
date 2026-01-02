@@ -401,7 +401,7 @@ export default function Dashboard() {
         >
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 md:border-2">
             <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-0.5">{networkStats.activeRequests}</div>
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-0.5">{myActiveQuestions}</div>
               <p className="text-xs md:text-sm text-slate-600 leading-tight">Active Questions</p>
             </CardContent>
           </Card>
