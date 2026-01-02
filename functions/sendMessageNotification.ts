@@ -74,7 +74,10 @@ Deno.serve(async (req) => {
                         This message was sent through College Fast Forward.
                     </p>
                     <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 5px 0 0 0;">
-                        Go Gators! 🧡💙
+                        Go Gators!
+                    </p>
+                    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 20px;">
+                        <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Manage notification preferences</a>
                     </p>
                 </div>
             </div>
@@ -86,7 +89,7 @@ Deno.serve(async (req) => {
             
             await base44.asServiceRole.integrations.Core.SendEmail({
                 to: recipientEmail,
-                subject: `💬 New Message from ${senderName} on College Fast Forward`,
+                subject: `${senderName} sent you a message - College Fast Forward`,
                 body: emailHtmlBody,
                 from_name: 'College Fast Forward'
             });
