@@ -36,8 +36,41 @@ const HELP_TYPE_LABELS = {
   'interview_prep': 'Interview Prep',
   'industry_insights': 'Industry Insights',
   'networking_intros': 'Networking',
-  'informational_interview': 'Info Interviews'
+  'informational_interview': 'Info Interviews',
+  'job_search': 'Job Search',
+  'resume': 'Resume Help',
+  'interviews': 'Interview Prep',
+  'salary': 'Salary Tips',
+  'networking': 'Networking',
+  'direction': 'Career Exploration',
+  'grad_school': 'Grad School'
 };
+
+// Map seeking type to badge config
+const SEEKING_TYPE_CONFIG = {
+  'fulltime': { label: 'Full-time', icon: '💼', color: 'bg-blue-100 text-blue-800' },
+  'internship': { label: 'Internship', icon: '📋', color: 'bg-indigo-100 text-indigo-800' },
+  'coop': { label: 'Co-op', icon: '🔄', color: 'bg-purple-100 text-purple-800' },
+  'parttime': { label: 'Part-time', icon: '⏰', color: 'bg-slate-100 text-slate-700' },
+  'gradschool': { label: 'Grad School', icon: '🎓', color: 'bg-amber-100 text-amber-800' },
+  'exploring': { label: 'Exploring', icon: '🧭', color: 'bg-green-100 text-green-800' },
+};
+
+// Convert grad year to class year
+function getClassYear(gradYear) {
+  if (!gradYear) return null;
+  const year = typeof gradYear === 'string' ? parseInt(gradYear) : gradYear;
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const academicYear = currentMonth >= 7 ? currentYear + 1 : currentYear;
+  const yearsUntilGrad = year - academicYear;
+  
+  if (yearsUntilGrad <= 0) return 'Senior';
+  if (yearsUntilGrad === 1) return 'Junior';
+  if (yearsUntilGrad === 2) return 'Sophomore';
+  if (yearsUntilGrad === 3) return 'Freshman';
+  return `Class of ${year}`;
+}
 
 // Helper function to format student name as "First L." for privacy
 function formatStudentName(fullName, firstName, lastName, email) {
