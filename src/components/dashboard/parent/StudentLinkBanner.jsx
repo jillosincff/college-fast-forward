@@ -53,9 +53,9 @@ export default function StudentLinkBanner({
   };
 
   if (hasLinkedStudent) {
-    // SUCCESS STATE - Green banner
+    // SUCCESS STATE - Dark green banner for better text contrast
     return (
-      <div className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white rounded-2xl p-5 md:p-6 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#006B3C] via-[#007744] to-[#005C35] text-white rounded-2xl p-5 md:p-6 shadow-xl relative overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -63,37 +63,45 @@ export default function StudentLinkBanner({
         
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-full flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 className="w-8 h-8 text-white" />
+            <CheckCircle2 className="w-8 h-8 text-white drop-shadow-md" />
           </div>
           
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-black mb-1 text-white">
+            <h2 
+              className="text-xl md:text-2xl font-black mb-1 text-white"
+              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+            >
               ✅ Family Karma Active — {studentName}'s requests boosted!
             </h2>
-            <p className="text-white/90 text-sm md:text-base mb-3">
+            <p 
+              className="text-white text-sm md:text-base mb-3"
+              style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
+            >
               Every time you help a student, {studentName}'s profile rises to the top for faster answers.
             </p>
             
             {/* Visual Example */}
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-lg p-3 max-w-md">
-              <div className="flex flex-col gap-1 flex-1">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-bold text-[10px]">⚡ BOOSTED</span>
-                  <span className="text-white/90">{studentName}'s request</span>
-                  <span className="text-white/60">→ Top of feed</span>
+            <div className="flex items-center gap-3 bg-black/20 backdrop-blur rounded-lg p-3 max-w-md">
+              <div className="flex flex-col gap-1.5 flex-1">
+                <div className="flex items-center gap-2 text-xs flex-wrap">
+                  <span className="bg-[#FFD700] text-[#1a1a1a] px-2 py-0.5 rounded font-bold text-[10px] shadow-sm">⚡ BOOSTED</span>
+                  <span className="text-white font-medium" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{studentName}'s request</span>
+                  <span className="text-white" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>→ Top of feed</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-white/50">
-                  <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px]">Normal</span>
+                <div className="flex items-center gap-2 text-xs text-white/70">
+                  <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">Normal</span>
                   <span>Other requests</span>
-                  <span className="text-white/40">→ Lower visibility</span>
+                  <span>→ Lower visibility</span>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-xl text-center shadow-lg animate-pulse">
-            <div className="text-2xl font-black">⚡ ON</div>
-            <div className="text-xs font-bold">BOOST<br/>ACTIVE</div>
+          <div className="bg-[#FFD700] text-[#1a1a1a] px-4 py-3 rounded-xl text-center shadow-lg">
+            <div className="text-2xl font-black flex items-center justify-center gap-1">
+              <span className="text-white drop-shadow-md">⚡</span> ON
+            </div>
+            <div className="text-xs font-bold uppercase tracking-wide">Boost<br/>Active</div>
           </div>
         </div>
       </div>
