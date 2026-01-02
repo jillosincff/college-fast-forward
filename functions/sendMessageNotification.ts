@@ -87,11 +87,29 @@ Deno.serve(async (req) => {
                 from_name: 'College Fast Forward'
             });
             
-            console.log('✅ Message notification sent to:', recipientEmail);
+            console.log('✅ Email notification sent to:', recipientEmail);
+            
+            // Send push notification
+            let pushSent = false;
+            try {
+                const pushResult = await base44.asServiceRole.functions.invoke('sendPushNotification', {
+                    recipient_email: recipientEmail,
+                    title: `💬 New message from ${senderName}`,
+                    body: actualMessage.substring(0, 100) + (actualMessage.length > 100 ? '...' : ''),
+                    type: 'new_message',
+                    action_url: '/#MyMessages',
+                    metadata: { messageId, senderEmail }
+                });
+                pushSent = pushResult?.data?.success || false;
+                console.log('📱 Push notification result:', pushSent);
+            } catch (pushErr) {
+                console.log('⚠️ Push notification skipped:', pushErr.message);
+            }
             
             return new Response(JSON.stringify({
                 success: true,
                 emailSent: true,
+                pushSent,
                 recipientEmail,
                 messageId
             }), {
