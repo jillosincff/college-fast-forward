@@ -373,10 +373,39 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         </div>
       )}
 
-      {/* Preferred work location */}
-      {question.location_preference && (
-        <div className="location-preference">
-          📍 {question.location_preference}
+      {/* Context Badges Row - Location, Timeline, Help Types */}
+      {(locationPref || timelineLabel || seekingTypes.length > 0 || helpTypes.length > 0) && (
+        <div className="context-badges-row">
+          {locationPref && (
+            <span className="context-badge location">
+              <MapPin className="w-3 h-3" />
+              {locationPref}
+            </span>
+          )}
+          {timelineLabel && (
+            <span className="context-badge timeline">
+              <Calendar className="w-3 h-3" />
+              {timelineLabel}
+            </span>
+          )}
+          {seekingTypes.slice(0, 1).map((type, idx) => {
+            const config = SEEKING_TYPE_CONFIG[type];
+            if (!config) return null;
+            return (
+              <span key={idx} className={`context-badge ${config.color}`}>
+                {config.icon} {config.label}
+              </span>
+            );
+          })}
+          {helpTypes.slice(0, 2).map((type, idx) => (
+            <span key={idx} className="context-badge help-type">
+              {type === 'networking' || type === 'networking_intros' ? <Users className="w-3 h-3" /> :
+               type === 'resume' || type === 'resume_review' ? <FileText className="w-3 h-3" /> :
+               type === 'interviews' || type === 'interview_prep' ? <MessageSquare className="w-3 h-3" /> :
+               <Briefcase className="w-3 h-3" />}
+              {HELP_TYPE_LABELS[type] || type}
+            </span>
+          ))}
         </div>
       )}
 
