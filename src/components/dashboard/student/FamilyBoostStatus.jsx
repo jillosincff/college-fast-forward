@@ -7,7 +7,8 @@ import { Zap, Clock, TrendingUp, Star } from 'lucide-react';
 export default function FamilyBoostStatus({ 
   boostLevel = 0, 
   boostExpiresAt = null,
-  boostedByParentEmail = null
+  boostedByParentEmail = null,
+  boostedByParentName = null
 }) {
   const now = new Date();
   const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
@@ -95,8 +96,12 @@ export default function FamilyBoostStatus({
           </div>
           
           <p className="text-sm text-slate-600 mb-2">
-            Your parent's karma is boosting your requests to the <strong>top of the feed</strong> — 
-            you're more likely to get help faster!
+            {boostedByParentName ? (
+              <>Boosted by family karma from <strong>{boostedByParentName}</strong>! </>
+            ) : (
+              <>Your parent's karma is boosting your requests </>
+            )}
+            to the <strong>top of the feed</strong> — you're more likely to get help faster!
           </p>
           
           <div className="flex items-center gap-4 text-xs">
