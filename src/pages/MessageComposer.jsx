@@ -184,7 +184,7 @@ export default function MessageComposer() {
             senderName: user.full_name || senderEmail.split('@')[0],
             senderEmail: senderEmail,
             subject: isFirstMessage ? `Message from ${user.full_name || user.email}` : `Re: Message`,
-            body: newMessage.trim()
+            messageBody: newMessage.trim()
           });
           console.log('✅ Email notification sent');
         } catch (emailError) {
