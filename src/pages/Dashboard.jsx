@@ -14,7 +14,7 @@ import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCar
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 
-// CACHE BUSTER v3 - 2026-01-02 - Fixed layout flashing
+// CACHE BUSTER v4 - 2026-01-02 - Fixed layout flashing and JSX structure
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
