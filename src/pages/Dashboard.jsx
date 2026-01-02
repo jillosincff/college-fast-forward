@@ -229,11 +229,9 @@ export default function Dashboard() {
         console.log('📊 Matches by user.id fallback:', studentMatches?.length || 0);
       }
       
-      const activeMatches = (studentMatches || []).filter(m => 
-        m.status === 'pending' || m.status === 'student_connected'
-      );
-      console.log('📊 Dashboard final matches:', activeMatches.length, 'for user:', user.email);
-      setMatches(activeMatches);
+      // Don't filter by status - show ALL matches for this user so they see accurate count
+      console.log('📊 Dashboard final matches (all):', studentMatches?.length || 0, 'for user:', user.email);
+      setMatches(studentMatches || []);
 
       // Count active requests for stats
       const allActiveRequests = await base44.entities.HelpRequest.filter(
