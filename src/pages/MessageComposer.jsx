@@ -277,10 +277,10 @@ export default function MessageComposer() {
                 <div className={`max-w-[80%] ${isMine ? 'order-2' : 'order-1'}`}>
                   <div className={`rounded-2xl px-4 py-3 ${
                     isMine 
-                      ? 'bg-[#0021A5] text-white rounded-br-sm' 
-                      : 'bg-white border border-slate-200 text-slate-900 rounded-bl-sm'
+                      ? 'bg-[#0021A5] rounded-br-sm' 
+                      : 'bg-white border border-slate-200 rounded-bl-sm'
                   }`}>
-                    <p className="text-sm leading-relaxed">{msg.body}</p>
+                    <p className={`text-sm leading-relaxed ${isMine ? 'text-white' : 'text-slate-900'}`}>{msg.body}</p>
                   </div>
                   <p className={`text-xs text-slate-400 mt-1 ${isMine ? 'text-right' : 'text-left'}`}>
                     {new Date(msg.created_date).toLocaleString()}
