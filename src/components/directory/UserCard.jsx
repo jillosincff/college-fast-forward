@@ -51,6 +51,28 @@ function getInitials(user) {
 }
 import { formatLabel } from '@/components/utils/format';
 import FoundingGatorBadge from '@/components/common/FoundingGatorBadge';
+import { StudentInfoLine, StudentContextBadges } from '@/components/common/StudentInfoBadges';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
+
+// Convert grad year to class year
+function getClassYear(gradYear) {
+  if (!gradYear) return null;
+  const year = typeof gradYear === 'string' ? parseInt(gradYear) : gradYear;
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const academicYear = currentMonth >= 7 ? currentYear + 1 : currentYear;
+  const yearsUntilGrad = year - academicYear;
+  
+  if (yearsUntilGrad <= 0) return 'Senior';
+  if (yearsUntilGrad === 1) return 'Junior';
+  if (yearsUntilGrad === 2) return 'Sophomore';
+  if (yearsUntilGrad === 3) return 'Freshman';
+  return `Class of ${year}`;
+}
 
 export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode = false, viewMode = 'grid' }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -172,19 +194,65 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
           {/* Main Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-bold text-slate-900">{displayName}</h3>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <h3 className="text-lg font-bold text-slate-900 cursor-pointer hover:text-blue-700 transition-colors">{displayName}</h3>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-72 p-0" side="top">
+                  <div className="p-4">
+                    <h4 className="font-bold text-slate-900 text-base mb-1">{displayName}</h4>
+                    {isGator && (
+                      <>
+                        <p className="text-sm text-slate-600 mb-1">
+                          {[getClassYear(user.graduation_year), user.major].filter(Boolean).join(' · ')}
+                        </p>
+                        {user.minor && <p className="text-xs text-slate-500">Minor: {user.minor}</p>}
+                        {user.pre_professional_track && <p className="text-xs text-blue-600 font-medium">{user.pre_professional_track}</p>}
+                        {user.preferred_work_location && (
+                          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {user.preferred_work_location}
+                          </p>
+                        )}
+                      </>
+                    )}
+                    {isParent && (
+                      <>
+                        <p className="text-sm text-slate-600">
+                          {user.current_position || user.job_title}
+                          {(user.current_position || user.job_title) && (user.current_company || user.company) && ' at '}
+                          {user.current_company || user.company}
+                        </p>
+                        {user.industry && <p className="text-xs text-slate-500 mt-1">{user.industry}</p>}
+                      </>
+                    )}
+                    {user.bio && <p className="text-xs text-slate-500 mt-2 line-clamp-2 italic">"{user.bio}"</p>}
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
               <Badge className={`${getRoleBadgeColor()} flex items-center gap-1`}>
                 {isParent && <Crown className="w-3 h-3 text-yellow-500" />}
                 {getRoleDisplay()}
               </Badge>
               {user.is_founding_member && <FoundingGatorBadge size="sm" />}
             </div>
-            <p className="text-sm text-slate-600 mt-1">
-              {user.current_position || user.job_title}
-              {(user.current_position || user.job_title) && (user.current_company || user.company) && ' at '}
-              {user.current_company || user.company}
-              {!user.current_position && !user.job_title && user.major && user.major}
-            </p>
+            {/* Enhanced student details line */}
+            {isGator && (
+              <StudentInfoLine 
+                gradYear={user.graduation_year}
+                major={user.major}
+                minor={user.minor}
+                preTrack={user.pre_professional_track}
+                className="mt-1"
+              />
+            )}
+            {!isGator && (
+              <p className="text-sm text-slate-600 mt-1">
+                {user.current_position || user.job_title}
+                {(user.current_position || user.job_title) && (user.current_company || user.company) && ' at '}
+                {user.current_company || user.company}
+                {!user.current_position && !user.job_title && user.major && user.major}
+              </p>
+            )}
             {user.industry && (
               <p className="text-xs text-slate-500 mt-0.5">{user.industry}</p>
             )}
@@ -236,47 +304,115 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
   return (
     <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 bg-white ${cardBorderClass} group`}>
       <div className="p-6">
-        {/* Header with Avatar and Name - Larger for better readability */}
-        <div className="flex items-start gap-5 mb-5">
-          <Avatar className="w-18 h-18 flex-shrink-0" style={{ width: '72px', height: '72px' }}>
-            <AvatarImage src={user.profile_image} alt={displayName} />
-            <AvatarFallback className="bg-[#0021A5] text-white text-xl font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+      {/* Header with Avatar and Name - Larger for better readability */}
+      <div className="flex items-start gap-5 mb-4">
+        <Avatar className="w-18 h-18 flex-shrink-0" style={{ width: '72px', height: '72px' }}>
+          <AvatarImage src={user.profile_image} alt={displayName} />
+          <AvatarFallback className="bg-[#0021A5] text-white text-xl font-semibold">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-slate-900 truncate">
-              {displayName}
-            </h3>
-            <div className="flex flex-wrap gap-1 mt-1">
-              <Badge className={`${getRoleBadgeColor()} flex items-center gap-1.5`}>
-                {isParent && (
-                  <div className="relative">
-                    <div className="absolute inset-0 blur-sm">
-                      <Crown className="w-4 h-4 text-yellow-500" />
-                    </div>
-                    <Crown className="w-4 h-4 text-yellow-500 relative drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" />
-                  </div>
+        <div className="flex-1 min-w-0">
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <h3 className="text-xl font-bold text-slate-900 truncate cursor-pointer hover:text-blue-700 transition-colors">
+                {displayName}
+              </h3>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80 p-0" side="top">
+              <div className="p-4">
+                <h4 className="font-bold text-slate-900 text-base mb-2">{displayName}</h4>
+                {isGator && (
+                  <>
+                    <p className="text-sm font-semibold text-slate-700 mb-1">
+                      {[getClassYear(user.graduation_year), user.major].filter(Boolean).join(' · ')}
+                      {user.minor && <span className="text-slate-500 font-normal"> · Minor: {user.minor}</span>}
+                    </p>
+                    {user.pre_professional_track && <p className="text-sm text-blue-600 font-semibold mb-2">{user.pre_professional_track}</p>}
+                    {(user.preferred_work_location || user.target_timeline) && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {user.preferred_work_location && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                            <MapPin className="w-3 h-3" /> {user.preferred_work_location}
+                          </span>
+                        )}
+                        {user.target_timeline && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-xs font-medium">
+                            🗓️ {user.target_timeline === 'immediate' ? 'ASAP' : user.target_timeline === 'summer' ? 'Summer 2026' : user.target_timeline}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {user.industries_interested?.length > 0 && (
+                      <p className="text-xs text-slate-500">Interested in: {user.industries_interested.slice(0, 3).join(', ')}</p>
+                    )}
+                  </>
                 )}
-                {getRoleDisplay()}
+                {isParent && (
+                  <>
+                    <p className="text-sm text-slate-600">
+                      {user.current_position || user.job_title}
+                      {(user.current_position || user.job_title) && (user.current_company || user.company) && ' at '}
+                      {user.current_company || user.company}
+                    </p>
+                    {user.industry && <p className="text-xs text-slate-500 mt-1">{user.industry}</p>}
+                  </>
+                )}
+                {user.bio && <p className="text-xs text-slate-500 mt-2 line-clamp-2 italic">"{user.bio}"</p>}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+
+          {/* Student details line - high contrast */}
+          {isGator && (
+            <p className="text-sm font-semibold text-slate-700 mt-1">
+              {[getClassYear(user.graduation_year), user.major].filter(Boolean).join(' · ')}
+              {user.minor && <span className="text-slate-500 font-normal"> · {user.minor}</span>}
+              {user.pre_professional_track && <span className="text-blue-600"> · {user.pre_professional_track}</span>}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            <Badge className={`${getRoleBadgeColor()} flex items-center gap-1.5`}>
+              {isParent && (
+                <div className="relative">
+                  <div className="absolute inset-0 blur-sm">
+                    <Crown className="w-4 h-4 text-yellow-500" />
+                  </div>
+                  <Crown className="w-4 h-4 text-yellow-500 relative drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" />
+                </div>
+              )}
+              {getRoleDisplay()}
+            </Badge>
+            {user.is_founding_member && (
+              <FoundingGatorBadge size="sm" />
+            )}
+            {user.is_boosted && user.boost_expires_at && new Date(user.boost_expires_at) > new Date() && (
+              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold flex items-center gap-1 animate-pulse">
+                ⭐ Boosted
               </Badge>
-              {user.is_founding_member && (
-                <FoundingGatorBadge size="sm" />
-              )}
-              {user.is_boosted && user.boost_expires_at && new Date(user.boost_expires_at) > new Date() && (
-                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold flex items-center gap-1 animate-pulse">
-                  ⭐ Boosted
-                </Badge>
-              )}
-              {canProvideReferrals && (
-                <Badge className="bg-green-100 text-green-800 text-xs">
-                  Can Refer
-                </Badge>
-              )}
-            </div>
+            )}
+            {canProvideReferrals && (
+              <Badge className="bg-green-100 text-green-800 text-xs">
+                Can Refer
+              </Badge>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Student context badges - location, timeline, help types */}
+      {isGator && (user.preferred_work_location || user.target_timeline || user.seeking_type?.length > 0 || user.help_needed?.length > 0) && (
+        <StudentContextBadges
+          location={user.preferred_work_location}
+          timeline={user.target_timeline}
+          seekingTypes={user.seeking_type || []}
+          helpTypes={user.help_needed || []}
+          compact={true}
+          className="mb-4"
+        />
+      )}
 
         {/* Help Tags - Prominent display for parents/alumni */}
         {isParentOrAlumni && helpTags.length > 0 && (
