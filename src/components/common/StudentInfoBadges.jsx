@@ -122,7 +122,7 @@ export function StudentContextBadges({
     : 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold';
 
   // Normalize timeline to display label
-  const timelineDisplay = TIMELINE_LABELS[timeline] || timeline;
+  const timelineDisplay = formatTimeline(timeline);
 
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`}>
