@@ -678,6 +678,68 @@ export default function TestingDashboard() {
           </Card>
         )}
 
+        {/* Email Test Section */}
+        <Card className="mb-8 border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="text-green-900">📧 Test Email Notifications</CardTitle>
+            <CardDescription>Send a test email to verify email delivery is working</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                value={testEmailAddress}
+                onChange={(e) => setTestEmailAddress(e.target.value)}
+                placeholder="Enter your email address"
+                className="max-w-sm"
+              />
+              <Button
+                onClick={async () => {
+                  if (!testEmailAddress) {
+                    alert('Please enter an email address');
+                    return;
+                  }
+                  setIsSendingTestEmail(true);
+                  setEmailTestResult(null);
+                  try {
+                    const result = await base44.functions.invoke('testEmailNotification', {
+                      testEmail: testEmailAddress
+                    });
+                    setEmailTestResult(result.data);
+                  } catch (error) {
+                    setEmailTestResult({ success: false, error: error.message });
+                  }
+                  setIsSendingTestEmail(false);
+                }}
+                disabled={isSendingTestEmail}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isSendingTestEmail ? 'Sending...' : 'Send Test Email'}
+              </Button>
+            </div>
+            
+            {emailTestResult && (
+              <div className={`p-4 rounded-lg border ${
+                emailTestResult.success 
+                  ? 'bg-green-100 border-green-300' 
+                  : 'bg-red-100 border-red-300'
+              }`}>
+                {emailTestResult.success ? (
+                  <div className="text-green-800">
+                    <strong>✅ Email sent!</strong>
+                    <p className="text-sm mt-1">Check your inbox (and spam folder) for the test email.</p>
+                    <p className="text-xs text-gray-600 mt-1">Timestamp: {emailTestResult.timestamp}</p>
+                  </div>
+                ) : (
+                  <div className="text-red-800">
+                    <strong>❌ Failed to send email</strong>
+                    <p className="text-sm mt-1">{emailTestResult.error}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Manual Testing Instructions */}
         <Card className="mt-8 bg-blue-50 border-blue-200">
           <CardHeader>
