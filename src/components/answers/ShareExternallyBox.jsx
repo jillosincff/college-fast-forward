@@ -373,6 +373,7 @@ const styles = `
     font-size: 13px;
     color: #374151;
     white-space: pre-wrap;
+    word-break: break-all;
     line-height: 1.5;
     max-height: 150px;
     overflow-y: auto;
