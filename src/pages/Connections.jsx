@@ -564,6 +564,9 @@ export default function QuestionsPage() {
                       <QuestionCard
                         question={profile.request}
                         gator={profile}
+                        onDeleted={(deletedId) => {
+                          setRequests(prev => prev.filter(r => r.id !== deletedId));
+                        }}
                       />
                     </motion.div>
                   ))}
