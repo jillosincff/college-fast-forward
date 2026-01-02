@@ -14,13 +14,13 @@ import StudentHelpRequestCard from '@/components/dashboard/StudentHelpRequestCar
 import StudentParentMatchesWidget from '@/components/dashboard/StudentParentMatchesWidget';
 import ChallengeWidget from '@/components/challenge/ChallengeWidget';
 
-// CACHE BUSTER v2 - 2025-12-21
+// CACHE BUSTER v3 - 2026-01-02 - Fixed layout flashing
 export default function Dashboard() {
-  console.log('🟢🟢🟢 DASHBOARD COMPONENT MOUNTED v2');
   const { user, isLoading, refreshUser } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [helpRequest, setHelpRequest] = useState(null);
   const [matches, setMatches] = useState([]);
@@ -31,32 +31,29 @@ export default function Dashboard() {
   });
   const [myActiveQuestions, setMyActiveQuestions] = useState(0);
   const [linkedParents, setLinkedParents] = useState([]);
+  
+  // Track if we've already started loading to prevent duplicate calls
+  const loadStartedRef = React.useRef(false);
 
   useEffect(() => {
-    console.log('🏠 Dashboard useEffect - isLoading:', isLoading, 'user:', user?.email);
-    
-    if (isLoading) {
-      console.log('🏠 Dashboard: Still loading auth...');
-      return;
-    }
-    
+    if (isLoading) return;
     if (!user) {
-      console.log('🏠 Dashboard: No user, redirecting to LandingPage');
       navigate('LandingPage');
       return;
     }
 
     if (user.persona === 'parent') {
-      console.log('🏠 Dashboard: Parent user, redirecting to ParentDashboard');
       navigate('ParentDashboard');
       return;
     } else if (user.roles?.includes('admin')) {
-      console.log('🏠 Dashboard: Admin user, redirecting to AdminDashboard');
       navigate('AdminDashboard');
       return;
     }
 
-    console.log('🏠 Dashboard: Calling loadDashboardData for gator:', user.email);
+    // Prevent duplicate load calls
+    if (loadStartedRef.current) return;
+    loadStartedRef.current = true;
+    
     localStorage.setItem('cff:seenDashboard', 'true');
     loadDashboardData();
   }, [user, isLoading]);
