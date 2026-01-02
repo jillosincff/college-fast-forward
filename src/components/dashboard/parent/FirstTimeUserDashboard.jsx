@@ -1,13 +1,17 @@
 import React from 'react';
-import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase } from 'lucide-react';
+import { MessageCircle, Link2, User, ArrowRight, Sparkles, Briefcase, AlertTriangle } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
 export default function FirstTimeUserDashboard({ 
   user, 
+  linkedStudents = [],
   onBrowseQuestions, 
   onConnectStudent, 
   onCompleteProfile 
 }) {
+  const hasLinkedStudent = linkedStudents.length > 0;
+  const studentName = linkedStudents[0]?.full_name?.split(' ')[0] || 'your student';
+
   return (
     <div className="space-y-6">
       
@@ -17,8 +21,16 @@ export default function FirstTimeUserDashboard({
           Help More Students, Boost Your Own ⚡
         </h2>
         <p className="text-sm md:text-lg text-slate-600">
-          Every action unlocks more opportunities for your student
+          {hasLinkedStudent 
+            ? `Every action you take earns karma — directly boosting ${studentName}'s visibility.`
+            : 'Every action you take earns karma — link your student to activate boosts.'
+          }
         </p>
+        {!hasLinkedStudent && (
+          <p className="text-sm text-amber-600 mt-2 font-medium">
+            ⚠️ Link your student to see their name here and activate boosts.
+          </p>
+        )}
       </div>
 
       {/* PRIMARY CTA - Answer Questions */}
@@ -63,27 +75,47 @@ export default function FirstTimeUserDashboard({
         </div>
       </div>
 
-      {/* Secondary Actions - 2 Column Grid */}
+      {/* Secondary Actions - Connect Student FIRST if not linked */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
-        {/* Connect Your Student */}
-        <div className="bg-white rounded-xl border-2 border-slate-200 p-6 hover:border-[#0021A5] hover:shadow-md transition-all">
+        {/* Connect Your Student - Priority #1 */}
+        <div className={`rounded-xl border-2 p-6 transition-all ${
+          hasLinkedStudent 
+            ? 'bg-green-50 border-green-200' 
+            : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 hover:border-amber-400 hover:shadow-lg relative'
+        }`}>
+          {!hasLinkedStudent && (
+            <div className="absolute -top-2 -right-2">
+              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                REQUIRED
+              </span>
+            </div>
+          )}
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-blue-100 text-[#0021A5] rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              hasLinkedStudent ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
+            }`}>
               <Link2 size={24} />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-1">Connect Your Student</h3>
+              <h3 className="font-semibold text-slate-800 mb-1">
+                {hasLinkedStudent ? `✅ Linked to ${studentName}` : 'Connect Your Student'}
+              </h3>
               <p className="text-sm text-slate-500 mb-3">
-                Link your student's account to boost their profile visibility
+                {hasLinkedStudent 
+                  ? 'Your karma now boosts their visibility!'
+                  : 'Link your student\'s account to boost their profile visibility'
+                }
               </p>
-              <button
-                onClick={onConnectStudent}
-                className="text-sm font-semibold text-[#0021A5] hover:text-[#001580] inline-flex items-center gap-1"
-              >
-                Search & Link
-                <ArrowRight size={14} />
-              </button>
+              {!hasLinkedStudent && (
+                <button
+                  onClick={onConnectStudent}
+                  className="text-sm font-bold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 bg-amber-200 px-3 py-1.5 rounded-lg"
+                >
+                  Search & Link Student
+                  <ArrowRight size={14} />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -134,8 +166,8 @@ export default function FirstTimeUserDashboard({
         </div>
       </div>
 
-      {/* How Karma Works - Collapsed/Subtle */}
-      <details className="bg-slate-100 rounded-xl">
+      {/* How Karma Works - More Direct */}
+      <details className="bg-slate-100 rounded-xl" open={!hasLinkedStudent}>
         <summary className="px-6 py-4 cursor-pointer font-medium text-slate-700 hover:text-slate-900">
           💡 How does Family Karma work?
         </summary>
@@ -143,10 +175,17 @@ export default function FirstTimeUserDashboard({
           <p><strong>+10 points</strong> — Answer a student question</p>
           <p><strong>+5 points</strong> — Get upvoted by the community</p>
           <p><strong>+50 points</strong> — Student marks your answer as "Best"</p>
-          <p className="pt-2 text-slate-500">
-            Your karma boosts your student's questions to the top of the feed, 
-            getting them more visibility and better answers!
-          </p>
+          <div className="pt-3 mt-3 border-t border-slate-200">
+            <p className="font-semibold text-[#0021A5]">
+              📌 Your karma pins your student's requests to the top of the feed for faster help.
+            </p>
+            {!hasLinkedStudent && (
+              <p className="text-amber-600 mt-2 flex items-center gap-2">
+                <AlertTriangle size={14} />
+                <span>Link your student first to activate these boosts!</span>
+              </p>
+            )}
+          </div>
         </div>
       </details>
 
