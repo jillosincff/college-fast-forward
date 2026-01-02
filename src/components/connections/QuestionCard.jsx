@@ -319,6 +319,7 @@ export default function QuestionCard({ question, gator, onDeleted }) {
 
       <style jsx>{`
         .question-card {
+          position: relative;
           background: white;
           border: 1px solid #E5E7EB;
           border-radius: 16px;
