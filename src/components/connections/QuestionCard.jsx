@@ -112,6 +112,9 @@ export default function QuestionCard({ question, gator, onDeleted }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
   
   // Check if current user owns this question
   const isOwner = user && (
