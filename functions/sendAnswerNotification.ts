@@ -107,27 +107,19 @@ Deno.serve(async (req) => {
             console.error('❌ Email error:', emailErr.message);
         }
 
-        // Send push notification
-        let pushSent = false;
-        try {
-            const pushResult = await base44.asServiceRole.functions.invoke('sendPushNotification', {
-                recipient_email: posterEmail,
-                title: `🎉 New answer from ${answererName}`,
-                body: answerPreview.substring(0, 100) + (answerPreview.length > 100 ? '...' : ''),
-                type: 'new_answer',
-                action_url: `/#QuestionDetail?id=${questionId}`,
-                metadata: { questionId, answererName }
-            });
-            pushSent = pushResult?.data?.success || false;
-            console.log('📱 Push notification result:', pushSent);
-        } catch (pushErr) {
-            console.log('⚠️ Push notification skipped:', pushErr.message);
-        }
+        // Fire and forget push notification (don't await to avoid blocking)
+        base44.asServiceRole.functions.invoke('sendPushNotification', {
+            recipient_email: posterEmail,
+            title: `🎉 New answer from ${answererName}`,
+            body: answerPreview.substring(0, 100) + (answerPreview.length > 100 ? '...' : ''),
+            type: 'new_answer',
+            action_url: `/#QuestionDetail?id=${questionId}`,
+            metadata: { questionId, answererName }
+        }).catch(err => console.log('⚠️ Push notification skipped:', err.message));
 
         return new Response(JSON.stringify({
-            success: emailSent || pushSent,
+            success: emailSent,
             emailSent,
-            pushSent,
             questionId
         }), {
             status: 200,
