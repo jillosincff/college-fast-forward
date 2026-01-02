@@ -483,17 +483,11 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
         )}
 
         {/* 6. Ask Another Question - small link if they have matches */}
-        {!loadingData && parentMatches.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center"
-          >
+        {parentMatches.length > 0 && (
+          <div className="text-center">
             <Button
               variant="outline"
               onClick={() => navigate('PostRequest')}
@@ -501,16 +495,11 @@ export default function Dashboard() {
             >
               Ask Another Question →
             </Button>
-          </motion.div>
+          </div>
         )}
 
         {/* 7. Your Family - Collapsed */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-        >
-          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
+        <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
             <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 👨‍👩‍👧 Your Family
