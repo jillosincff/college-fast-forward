@@ -9,7 +9,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useParams } from '@/components/utils/navigation';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import NotificationSettings from '@/components/notifications/NotificationSettings';
-import { StudentContextBadges, TIMELINE_LABELS } from '@/components/common/StudentInfoBadges';
+import { StudentContextBadges } from '@/components/common/StudentInfoBadges';
 import { Badge } from '@/components/ui/badge';
 
 // Convert grad year to class year
