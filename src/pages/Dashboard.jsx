@@ -313,11 +313,34 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Your Parent Matches - FIRST (user just clicked "Find My Matches") */}
-        {parentMatches.length > 0 && (
+        {/* Your Active Help Request - FIRST */}
+        {!loadingData && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+          >
+            <StudentHelpRequestCard
+              helpRequest={helpRequest}
+              matchCount={parentMatches.length}
+              responseCount={responseCount}
+              parentMatches={parentMatches}
+              onRefresh={(wasDeleted) => {
+                if (wasDeleted) {
+                  // Clear helpRequest immediately on deletion
+                  setHelpRequest(null);
+                }
+                loadDashboardData();
+              }}
+            />
+          </motion.div>
+        )}
+
+        {/* Your Parent Matches */}
+        {!loadingData && parentMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
           >
             <StudentParentMatchesWidget
               user={user}
@@ -338,27 +361,6 @@ export default function Dashboard() {
             }}
           />
         )}
-        
-        {/* Your Active Help Request */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <StudentHelpRequestCard
-            helpRequest={helpRequest}
-            matchCount={parentMatches.length}
-            responseCount={responseCount}
-            parentMatches={parentMatches}
-            onRefresh={(wasDeleted) => {
-              if (wasDeleted) {
-                // Clear helpRequest immediately on deletion
-                setHelpRequest(null);
-              }
-              loadDashboardData();
-            }}
-          />
-        </motion.div>
 
         {/* Network Stats - Compact on Mobile */}
         <motion.div
