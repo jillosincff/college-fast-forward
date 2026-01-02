@@ -62,10 +62,14 @@ export default function StudentOnboarding() {
   useEffect(() => {
     if (user) {
       if (user.major) setMajor(user.major);
+      if (user.minor) setMinor(user.minor);
+      if (user.pre_professional_track) setPreTrack(user.pre_professional_track);
       if (user.graduation_year) setGradYear(user.graduation_year);
       if (user.industries_interested) setIndustries(user.industries_interested);
       if (user.seeking_type) setSeeking(user.seeking_type);
       if (user.help_needed) setHelpNeeded(user.help_needed);
+      if (user.preferred_work_location) setPreferredLocation(user.preferred_work_location);
+      if (user.target_timeline) setTargetTimeline(user.target_timeline);
     }
   }, [user]);
 
@@ -104,10 +108,14 @@ export default function StudentOnboarding() {
       // Save student profile data
       const updateData = {
         major,
+        minor: minor || '',
+        pre_professional_track: preTrack || '',
         graduation_year: gradYear,
         industries_interested: industries,
         seeking_type: seeking,
         help_needed: helpNeeded,
+        preferred_work_location: preferredLocation || '',
+        target_timeline: targetTimeline || '',
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         // Start the 30-day intro challenge
@@ -135,7 +143,8 @@ export default function StudentOnboarding() {
         role_type: 'full_time',
         target_helpers: ['alumni', 'parents'],
         resume_url: resumeUrl,
-        help_types: helpNeeded
+        help_types: helpNeeded,
+        start_timing: targetTimeline || ''
       };
       
       if (preferredLocation.trim()) {
