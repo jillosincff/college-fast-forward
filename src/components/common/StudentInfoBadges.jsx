@@ -262,7 +262,7 @@ export function StudentProfileHeader({
   className = ''
 }) {
   const classYear = getClassYear(gradYear);
-  const timelineDisplay = TIMELINE_LABELS[timeline] || timeline;
+  const timelineDisplay = formatTimeline(timeline);
   
   return (
     <div className={`${className}`}>
