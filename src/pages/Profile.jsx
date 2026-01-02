@@ -4,11 +4,29 @@ import { User } from '@/entities/User';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, Briefcase, GraduationCap, MapPin, Linkedin, Loader2, AlertTriangle } from 'lucide-react';
+import { Mail, Briefcase, GraduationCap, MapPin, Linkedin, Loader2, AlertTriangle, Calendar, Users, FileText, MessageSquare } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { useParams } from '@/components/utils/navigation';
 import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
 import NotificationSettings from '@/components/notifications/NotificationSettings';
+import { StudentContextBadges, TIMELINE_LABELS } from '@/components/common/StudentInfoBadges';
+import { Badge } from '@/components/ui/badge';
+
+// Convert grad year to class year
+function getClassYear(gradYear) {
+  if (!gradYear) return null;
+  const year = typeof gradYear === 'string' ? parseInt(gradYear) : gradYear;
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const academicYear = currentMonth >= 7 ? currentYear + 1 : currentYear;
+  const yearsUntilGrad = year - academicYear;
+  
+  if (yearsUntilGrad <= 0) return 'Senior';
+  if (yearsUntilGrad === 1) return 'Junior';
+  if (yearsUntilGrad === 2) return 'Sophomore';
+  if (yearsUntilGrad === 3) return 'Freshman';
+  return `Class of ${year}`;
+}
 
 export default function Profile() {
   const { user: currentUser, isLoading: authIsLoading } = useAuth();
@@ -130,6 +148,8 @@ export default function Profile() {
   };
 
   const headline = getUserHeadline(profileUser);
+  const isStudent = profileUser.persona === 'student' || profileUser.persona === 'gator';
+  const classYear = getClassYear(profileUser.graduation_year);
 
   return (
     <div className="bg-slate-50 min-h-screen p-4 sm:p-8">
@@ -145,12 +165,44 @@ export default function Profile() {
             </Avatar>
             <div className="flex-1 text-center sm:text-left">
               <h1 className="text-3xl font-bold text-slate-900">{displayName}</h1>
-              {headline && <p className="text-slate-600 mt-1">{headline}</p>}
+              {/* Enhanced student details header */}
+              {isStudent && (
+                <div className="mt-2">
+                  <p className="text-base font-semibold text-slate-700">
+                    {[classYear, profileUser.major].filter(Boolean).join(' · ')}
+                    {profileUser.minor && <span className="text-slate-500 font-normal"> · Minor: {profileUser.minor}</span>}
+                  </p>
+                  {profileUser.pre_professional_track && (
+                    <p className="text-sm font-semibold text-blue-600 mt-0.5">{profileUser.pre_professional_track}</p>
+                  )}
+                </div>
+              )}
+              {!isStudent && headline && <p className="text-slate-600 mt-1">{headline}</p>}
             </div>
             {isMyProfile && (
               <Button onClick={() => navigate('ProfileEdit')}>Edit Profile</Button>
             )}
           </CardHeader>
+          
+          {/* Student context badges - location, timeline, help types */}
+          {isStudent && (profileUser.preferred_work_location || profileUser.target_timeline || profileUser.seeking_type?.length > 0 || profileUser.help_needed?.length > 0) && (
+            <div className="px-6 py-4 bg-slate-50 border-b">
+              <StudentContextBadges
+                location={profileUser.preferred_work_location}
+                timeline={profileUser.target_timeline}
+                seekingTypes={profileUser.seeking_type || []}
+                helpTypes={profileUser.help_needed || []}
+                className="justify-center sm:justify-start"
+              />
+              {profileUser.industries_interested?.length > 0 && (
+                <p className="text-sm text-slate-600 mt-2 text-center sm:text-left">
+                  <span className="font-medium">Interested in:</span> {profileUser.industries_interested.slice(0, 5).join(', ')}
+                  {profileUser.industries_interested.length > 5 && ` +${profileUser.industries_interested.length - 5} more`}
+                </p>
+              )}
+            </div>
+          )}
+          
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2">Details</h2>
@@ -158,7 +210,7 @@ export default function Profile() {
                 <Mail className="w-5 h-5 text-slate-500 flex-shrink-0" />
                 <span className="break-all">{profileUser.email}</span>
               </div>
-              {headline && headline !== getDefaultHeadline(profileUser) && (
+              {!isStudent && headline && headline !== getDefaultHeadline(profileUser) && (
                 <div className="flex items-center gap-3">
                   <Briefcase className="w-5 h-5 text-slate-500 flex-shrink-0" />
                   <span>{headline}</span>
@@ -168,16 +220,22 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   <GraduationCap className="w-5 h-5 text-slate-500 flex-shrink-0" />
                   <span>
-                    {profileUser.graduation_year && `Graduated ${profileUser.graduation_year}`}
-                    {profileUser.graduation_year && profileUser.major && ' - '}
+                    {profileUser.graduation_year && (isStudent ? `Class of ${profileUser.graduation_year}` : `Graduated ${profileUser.graduation_year}`)}
+                    {profileUser.graduation_year && profileUser.major && ' · '}
                     {profileUser.major}
                   </span>
                 </div>
               )}
-              {profileUser.location && (
+              {profileUser.minor && (
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  <span className="text-slate-600">Minor: {profileUser.minor}</span>
+                </div>
+              )}
+              {(profileUser.location || profileUser.preferred_work_location) && (
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                  <span>{profileUser.location}</span>
+                  <span>{profileUser.preferred_work_location || profileUser.location}</span>
                 </div>
               )}
               {profileUser.linkedin_url && (
@@ -190,8 +248,8 @@ export default function Profile() {
               )}
             </div>
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold border-b pb-2">Bio</h2>
-              <p className="text-slate-700 italic whitespace-pre-wrap">
+              <h2 className="text-xl font-semibold border-b pb-2">About</h2>
+              <p className="text-slate-700 whitespace-pre-wrap">
                 {profileUser.bio || 'No bio provided.'}
               </p>
             </div>
