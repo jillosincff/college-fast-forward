@@ -407,7 +407,7 @@ export default function Dashboard() {
           <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 md:border-2">
             <CardContent className="pt-4 pb-4 md:pt-6 md:pb-6 text-center px-2">
               <div className="text-2xl md:text-3xl font-bold text-orange-600 mb-0.5">{parentMatches.length}</div>
-              <p className="text-xs md:text-sm text-slate-600 leading-tight">Matched</p>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">Matches</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 md:border-2">
@@ -432,8 +432,8 @@ export default function Dashboard() {
                     <MessageSquare className="w-5 h-5 text-blue-600" />
                     Messages
                     {unreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                        {unreadCount} unread
+                      <span className="bg-red-600 text-white text-sm font-bold rounded-full min-w-[24px] h-6 px-2 flex items-center justify-center animate-pulse">
+                        {unreadCount}
                       </span>
                     )}
                   </h3>
@@ -453,20 +453,27 @@ export default function Dashboard() {
                     <div
                       key={msg.id}
                       className={`p-3 rounded-lg border cursor-pointer hover:shadow-md transition-all ${
-                        !msg.is_read ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+                        !msg.is_read 
+                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 border-l-4 border-l-blue-500' 
+                          : 'bg-slate-50 border-slate-200'
                       }`}
                       onClick={() => navigate('MyMessages')}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         {!msg.is_read && (
-                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                          <span className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-pulse"></span>
                         )}
-                        <p className="font-semibold text-sm text-slate-900">{msg.sender_email?.split('@')[0]}</p>
+                        <p className={`font-semibold text-sm ${!msg.is_read ? 'text-blue-900' : 'text-slate-900'}`}>
+                          {msg.sender_email?.split('@')[0]}
+                        </p>
                         <span className="text-xs text-slate-400">
                           {new Date(msg.created_date).toLocaleDateString()}
                         </span>
+                        {!msg.is_read && (
+                          <span className="ml-auto text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">NEW</span>
+                        )}
                       </div>
-                      <p className="text-sm text-slate-700 font-medium line-clamp-1">{msg.subject}</p>
+                      <p className={`text-sm font-medium line-clamp-1 ${!msg.is_read ? 'text-blue-800' : 'text-slate-700'}`}>{msg.subject}</p>
                       <p className="text-xs text-slate-500 line-clamp-1">{msg.body}</p>
                     </div>
                   ))}

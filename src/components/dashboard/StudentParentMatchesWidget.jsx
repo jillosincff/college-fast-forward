@@ -64,6 +64,7 @@ function parseMatchStats(reasons = []) {
 
 function ParentMatchCard({ match, user, onMessageSent }) {
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showReasons, setShowReasons] = useState(false);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -102,120 +103,131 @@ function ParentMatchCard({ match, user, onMessageSent }) {
 
   // Parse match stats from reasons
   const stats = parseMatchStats(match.match_reasons || []);
+  const firstName = match.parent_name?.split(' ')[0] || 'them';
 
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-white rounded-xl p-5 border-2 transition-all ${
+        className={`bg-white rounded-xl p-4 border-2 transition-all ${
           stats.isSuperHelper 
             ? 'border-amber-300 hover:border-amber-400 bg-gradient-to-br from-white to-amber-50' 
             : 'border-slate-200 hover:border-blue-300'
         } hover:shadow-lg`}
       >
-        {/* Super Helper Banner */}
+        {/* Super Helper Banner - compact */}
         {stats.isSuperHelper && (
-          <div className="mb-3 -mx-5 -mt-5 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm font-semibold rounded-t-xl flex items-center gap-2">
-            <Star className="w-4 h-4 fill-white" /> Top-Rated Helper
+          <div className="mb-2 -mx-4 -mt-4 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-semibold rounded-t-xl flex items-center gap-1">
+            <Star className="w-3 h-3 fill-white" /> Top-Rated Helper
           </div>
         )}
 
-        <div className="flex items-start gap-4">
-          <div className="relative">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-shrink-0">
             <UserAvatar 
               user={{ full_name: match.parent_name, email: match.parent_email }}
-              className="w-14 h-14 rounded-full flex-shrink-0"
+              className="w-12 h-12 rounded-full"
               showFallback={true}
             />
             {stats.isRecentlyActive && (
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" title="Recently active" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" title="Recently active" />
             )}
           </div>
+          
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-bold text-slate-900 text-lg">{match.parent_name || 'Gator Parent'}</h4>
+              <h4 className="font-bold text-slate-900">{match.parent_name || 'Gator Parent'}</h4>
+              {match.match_percentage && (
+                <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                  {match.match_percentage}%
+                </span>
+              )}
             </div>
-            <p className="text-sm text-slate-600">
-              {match.parent_role || 'Professional'} {match.parent_company && `at ${match.parent_company}`}
+            <p className="text-sm text-slate-600 truncate">
+              {match.parent_role || 'Professional'} {match.parent_company && `@ ${match.parent_company}`}
             </p>
             
-            {/* Badges row */}
-            <div className="mt-2 flex flex-wrap gap-2">
-              {/* Match percentage */}
-              {match.match_percentage && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
-                  🎯 {match.match_percentage}% match
-                </span>
-              )}
-              
-              {/* Fast Responder Badge */}
+            {/* Compact badges row */}
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
               {stats.isFastResponder && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
-                  <Zap className="w-3 h-3" /> 
-                  {stats.responseTime === 'hours' ? 'Responds in hours' : 'Fast Responder'}
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                  <Zap className="w-3 h-3" /> Fast
                 </span>
               )}
-              
-              {/* Students Helped Badge */}
               {stats.studentsHelped && stats.studentsHelped >= 5 && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                  <CheckCircle className="w-3 h-3" /> Helped {stats.studentsHelped}+ students
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                  <CheckCircle className="w-3 h-3" /> {stats.studentsHelped}+ helped
                 </span>
               )}
-              
-              {/* Urgent Match Badge */}
-              {stats.isUrgentMatch && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold animate-pulse">
-                  🚨 Available for urgent help
-                </span>
-              )}
-              
-              {/* Experience Badge */}
               {stats.experience && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  <TrendingUp className="w-3 h-3" /> {stats.experience} years exp
+                <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  {stats.experience}y exp
+                </span>
+              )}
+              {stats.isUrgentMatch && (
+                <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium animate-pulse">
+                  🚨 Urgent
                 </span>
               )}
             </div>
-
-            {/* Match reasons - cleaner display */}
-            {match.match_reasons && match.match_reasons.length > 0 && (
-              <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                <p className="text-xs font-medium text-slate-500 mb-2">Why this is a great match:</p>
-                <ul className="space-y-1">
-                  {match.match_reasons
-                    .filter(r => !r.includes('🌟')) // Don't duplicate super helper
-                    .slice(0, 4)
-                    .map((reason, i) => (
-                      <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
-                        <span className="text-green-500 mt-0.5">✓</span>
-                        {reason}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
+          </div>
+          
+          {/* Action buttons - vertical on mobile, horizontal on desktop */}
+          <div className="flex flex-col gap-1.5 flex-shrink-0">
+            <Button
+              onClick={() => navigate(`MessageComposer?recipient=${match.parent_id}`)}
+              size="sm"
+              className="bg-[#FA4616] hover:bg-orange-600 text-white text-xs px-3"
+            >
+              <MessageSquare className="w-3 h-3 mr-1" />
+              Message {firstName}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`PublicProfile?id=${match.parent_id}`)}
+              className="text-slate-500 text-xs px-3"
+            >
+              View Profile
+            </Button>
           </div>
         </div>
 
-        {/* Large message button */}
-        <div className="mt-4 flex gap-2">
-          <Button
-            onClick={() => navigate(`MessageComposer?recipient=${match.parent_id}`)}
-            className="flex-1 h-12 text-base font-semibold bg-[#FA4616] hover:bg-orange-600 text-white"
-          >
-            <MessageSquare className="w-5 h-5 mr-2" />
-            Message {match.parent_name?.split(' ')[0] || 'them'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate(`PublicProfile?id=${match.parent_id}`)}
-            className="text-slate-600"
-          >
-            Profile
-          </Button>
-        </div>
+        {/* Collapsible match reasons */}
+        {match.match_reasons && match.match_reasons.length > 0 && (
+          <div className="mt-2">
+            <button
+              onClick={() => setShowReasons(!showReasons)}
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+            >
+              {showReasons ? 'Hide details' : 'See why this is a great match →'}
+            </button>
+            
+            <AnimatePresence>
+              {showReasons && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 p-2.5 bg-slate-50 rounded-lg overflow-hidden"
+                >
+                  <ul className="space-y-1">
+                    {match.match_reasons
+                      .filter(r => !r.includes('🌟'))
+                      .slice(0, 4)
+                      .map((reason, i) => (
+                        <li key={i} className="text-xs text-slate-700 flex items-start gap-1.5">
+                          <span className="text-green-500">✓</span>
+                          {reason}
+                        </li>
+                      ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </motion.div>
 
       {/* Message Modal */}
@@ -224,7 +236,7 @@ function ParentMatchCard({ match, user, onMessageSent }) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-blue-600" />
-              Message {match.parent_name?.split(' ')[0] || 'this parent'}
+              Message {firstName}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -320,8 +332,8 @@ export default function StudentParentMatchesWidget({ user, matches = [], onRefre
     m.match_reasons?.some(r => r.includes('⚡') || r.includes('💨'))
   ).length;
 
-  const displayMatches = filteredMatches.slice(0, 3);
-  const hasMore = filteredMatches.length > 3;
+  const displayMatches = filteredMatches.slice(0, 5);
+  const hasMore = filteredMatches.length > 5;
 
   return (
     <Card className="border-2 border-blue-200 shadow-lg bg-gradient-to-br from-white to-blue-50">
