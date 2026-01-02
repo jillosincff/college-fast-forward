@@ -273,7 +273,8 @@ export default function Dashboard() {
   }
 
   const unreadCount = messages.filter(m => !m.is_read).length;
-  const parentMatches = matches.filter(m => m.match_type === 'parent' || !m.match_type);
+  // Show all matches (not filtering by type since most don't have match_type set)
+  const parentMatches = matches;
   const responseCount = matches.filter(m => m.status === 'student_connected').length;
 
   return (
