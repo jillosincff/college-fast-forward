@@ -344,6 +344,16 @@ export default function QuestionDetailPage() {
           console.log('Failed to notify sharer (non-critical):', err.message);
         });
       }
+      
+      // Notify the student that someone external was looped in and responded
+      base44.functions.invoke('notifyStudentOfExternalHelp', {
+        questionId: questionId,
+        questionType: question?._source,
+        sharerUserId: effectiveSharerRef,
+        responderName: user?.full_name || 'Someone'
+      }).catch(err => {
+        console.log('Failed to notify student (non-critical):', err.message);
+      });
     }
   };
 
