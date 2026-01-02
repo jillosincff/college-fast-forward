@@ -108,9 +108,10 @@ function formatStudentName(fullName, firstName, lastName, email) {
   return 'A UF Student';
 }
 
-export default function QuestionCard({ question, gator, onDeleted }) {
+export default function QuestionCard({ question, gator, onDeleted, onUpdated }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
   
