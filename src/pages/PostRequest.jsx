@@ -14,7 +14,8 @@ export default function PostRequestPage() { // Renamed from PostRequest
   const { toast } = useToast();
   const params = useParams();
   const editId = params.edit || params.editId;
-  const postType = params.type; // 'parent' for parent questions
+  const postType = params.type; // 'parent' for parent questions, 'HelpRequest' or 'JobRequest' for entity type
+  const entityType = postType === 'HelpRequest' ? 'HelpRequest' : 'JobRequest';
   const isParentQuestion = postType === 'parent' || user?.persona === 'parent';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
