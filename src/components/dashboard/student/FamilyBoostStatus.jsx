@@ -32,17 +32,20 @@ export default function FamilyBoostStatus({
   const levelColor = boostLevel >= 3 ? 'purple' : boostLevel >= 2 ? 'amber' : boostLevel >= 1 ? 'gray' : 'slate';
   
   if (!isActive) {
-    // No active boost - show encouragement
+    // No active boost - show encouragement to ask parent
     return (
-      <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-            <Zap className="w-5 h-5 text-slate-400" />
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-blue-500" />
           </div>
           <div>
-            <h4 className="font-semibold text-slate-700 mb-1">No Active Boost</h4>
-            <p className="text-sm text-slate-500">
-              When your parent helps other students, your requests get boosted to the top of the feed!
+            <h4 className="font-semibold text-blue-800 mb-1">🚀 Unlock Family Boost!</h4>
+            <p className="text-sm text-blue-700 mb-2">
+              Ask your parent to help a student — it unlocks a <strong>Family Boost</strong> that pins your requests to the top of the feed!
+            </p>
+            <p className="text-xs text-blue-600 bg-blue-100 rounded-lg px-3 py-1.5 inline-block">
+              💡 <strong>Tell them:</strong> "Answer one question on Gator Network to boost my requests!"
             </p>
           </div>
         </div>
