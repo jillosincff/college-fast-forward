@@ -65,6 +65,26 @@ Deno.serve(async (req) => {
       nextLevel = { name: 'max', points_needed: 0, points_remaining: 0 };
     }
     
+    // Get linked student info for boost expiry display
+    let linkedStudentName = null;
+    let boostExpiresAt = null;
+    
+    try {
+      // Find linked student by family_group_id
+      const students = await base44.asServiceRole.entities.User.filter({
+        family_group_id: familyGroupId,
+        persona: 'gator'
+      });
+      
+      if (students.length > 0) {
+        const student = students[0];
+        linkedStudentName = student.full_name?.split(' ')[0] || 'Your student';
+        boostExpiresAt = student.boost_expires_at;
+      }
+    } catch (err) {
+      console.log('Failed to get linked student:', err.message);
+    }
+    
     return Response.json({
       success: true,
       family_group_id: familyGroupId,
@@ -73,7 +93,9 @@ Deno.serve(async (req) => {
       boost_multiplier: familyKarma.boost_multiplier,
       user_karma: user.karma_earned || 0,
       recent_transactions: transactions,
-      next_level: nextLevel
+      next_level: nextLevel,
+      linked_student_name: linkedStudentName,
+      boost_expires_at: boostExpiresAt
     });
     
   } catch (error) {
