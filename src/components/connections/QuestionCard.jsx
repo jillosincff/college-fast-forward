@@ -149,9 +149,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
   
   const handleEdit = (e) => {
     e.stopPropagation();
-    // Determine the entity type for proper editing
-    const entityType = question.entity_name === 'HelpRequest' || question.student_id ? 'HelpRequest' : 'JobRequest';
-    navigate('PostRequest', { edit: question.id, type: entityType });
+    setShowEditModal(true);
   };
 
   // Get poster info
