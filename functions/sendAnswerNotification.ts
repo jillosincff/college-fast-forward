@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-console.log('🚀 sendAnswerNotification loaded');
+console.log('🚀 sendAnswerNotification loaded v2');
 
 Deno.serve(async (req) => {
     console.log('📨 Answer notification request received');
