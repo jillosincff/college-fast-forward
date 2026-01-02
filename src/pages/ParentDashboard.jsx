@@ -167,54 +167,7 @@ export default function ParentDashboard() {
     }
   }, []);
 
-  // GSAP scroll animations
-  useEffect(() => {
-    if (!loading && headlineRef.current) {
-      // Animate headline
-      gsap.fromTo(
-        headlineRef.current,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: headlineRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
 
-      // Animate action cards with stagger
-      actionCardsRef.current.forEach((card, index) => {
-        if (card) {
-          gsap.fromTo(
-            card,
-            { opacity: 0, y: 80, scale: 0.9 },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.8,
-              delay: index * 0.15,
-              ease: 'back.out(1.4)',
-              scrollTrigger: {
-                trigger: card,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
-              }
-            }
-          );
-        }
-      });
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [loading]);
 
   const getCapitalizedFirstName = (fullName) => {
     if (!fullName?.trim()) return 'Gator Parent';
