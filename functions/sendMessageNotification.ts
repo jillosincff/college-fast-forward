@@ -19,11 +19,15 @@ Deno.serve(async (req) => {
             messagePreview
         } = body;
         
-        // Log key parameters
+        // Log ALL received parameters for debugging
+        console.log('📨 FULL BODY:', JSON.stringify(body, null, 2));
         console.log('📨 recipientEmail:', recipientEmail);
         console.log('📨 recipientName:', recipientName);
         console.log('📨 senderName:', senderName);
         console.log('📨 senderEmail:', senderEmail);
+        console.log('📨 subject:', subject);
+        console.log('📨 messageBody:', messageBody?.substring(0, 100));
+        console.log('📨 messagePreview:', messagePreview?.substring(0, 100));
         
         // Validate required fields - support both old and new format
         const actualMessage = messageBody || messagePreview;
