@@ -231,9 +231,24 @@ export default function GatorAuth() {
       setStep('role-select');
       return;
     } else {
-      // Not authenticated → Show role selection FIRST (before OAuth)
-      // This ensures role is set in localStorage BEFORE OAuth redirect
-      setStep('role-select');
+      // Not authenticated → Check if role was already selected (e.g., from GatorParentInvite)
+      const pendingRole = localStorage.getItem('pending_invite_role');
+      const pendingCode = localStorage.getItem('pending_invite_code');
+      
+      if (pendingRole && pendingCode) {
+        // Role AND code already set (from GatorParentInvite) → Go straight to OAuth
+        console.log('🔐 [GatorAuth] Found pending role+code, skipping role selection:', pendingRole);
+        setSelectedRole(pendingRole);
+        setStep('oauth');
+      } else if (pendingRole) {
+        // Role set but no code → Pre-select role and show selection (they might need a code)
+        console.log('🔐 [GatorAuth] Found pending role without code:', pendingRole);
+        setSelectedRole(pendingRole);
+        setStep('role-select');
+      } else {
+        // No role selected → Show role selection FIRST (before OAuth)
+        setStep('role-select');
+      }
     }
   }, [user, isLoading, refreshUser]);
 
