@@ -416,6 +416,7 @@ export default function ParentDashboard() {
             onBrowseQuestions={() => navigate('Connections')}
             onConnectStudent={() => setShowSearchModal(true)}
             onCompleteProfile={() => navigate('ProfileEdit')}
+            onPostCareerRequest={() => navigate('PostRequest?type=alumni_career')}
           />
         ) : (
           /* Returning user full dashboard */

@@ -9,8 +9,11 @@ export default function FirstTimeUserDashboard({
   linkedStudents = [],
   onBrowseQuestions, 
   onConnectStudent, 
-  onCompleteProfile 
+  onCompleteProfile,
+  onPostCareerRequest
 }) {
+  // Check if user is alumni
+  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
   const hasLinkedStudent = linkedStudents.length > 0;
   
   // Get karma info from user
@@ -158,6 +161,30 @@ export default function FirstTimeUserDashboard({
           )}
         </div>
         </div>
+
+      {/* Alumni Reciprocity Banner */}
+      {isAlumni && (
+        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 rounded-xl border-2 border-amber-300 p-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-3xl">🎯</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-amber-900">Help students and get help back</h3>
+                <p className="text-sm text-amber-700">Your responses boost your own career request visibility. Post your request discreetly — students won't see it.</p>
+              </div>
+            </div>
+            <button
+              onClick={onPostCareerRequest || (() => navigate('PostRequest?type=alumni_career'))}
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors whitespace-nowrap"
+            >
+              Post My Career Request
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Post a Job Card - Higher Priority */}
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg transition-shadow">
