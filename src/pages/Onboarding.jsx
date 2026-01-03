@@ -47,6 +47,9 @@ export default function Onboarding() {
   const [linkedStudent, setLinkedStudent] = useState(null);
   const [skippedLinking, setSkippedLinking] = useState(false);
   
+  // Check if user is alumni
+  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
+  
   // Step 1: Basic Info
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
@@ -234,24 +237,47 @@ export default function Onboarding() {
             <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
           </div>
           
-          <div className="py-3">
-            <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-              You have something students desperately need:{' '}
-              <span className="underline decoration-4 decoration-white/70">access</span>.
-            </p>
-          </div>
-          
-          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-            <p className="text-white">
-              <strong>70-80% of jobs are filled through referrals.</strong>{' '}
-              But today's students are stuck in an "experience loop"—they can't get hired without experience, and can't get experience without being hired.
-            </p>
-          </div>
-          
-          <p className="text-lg text-white">
-            Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
-            <strong>And it takes you 5 minutes.</strong>
-          </p>
+          {isAlumni ? (
+            <>
+              <div className="py-3">
+                <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
+                  Help students and get help back — post your own career needs privately.
+                </p>
+              </div>
+              
+              <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+                <p className="text-white">
+                  <strong>Your responses boost your request visibility.</strong>{' '}
+                  When you help students, your own career requests get priority placement in the network.
+                </p>
+              </div>
+              
+              <p className="text-lg text-white">
+                It's a <strong>two-way street</strong> — share your expertise with students, and tap into the parent & alumni network for your own career goals.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="py-3">
+                <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
+                  You have something students desperately need:{' '}
+                  <span className="underline decoration-4 decoration-white/70">access</span>.
+                </p>
+              </div>
+              
+              <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+                <p className="text-white">
+                  <strong>70-80% of jobs are filled through referrals.</strong>{' '}
+                  But today's students are stuck in an "experience loop"—they can't get hired without experience, and can't get experience without being hired.
+                </p>
+              </div>
+              
+              <p className="text-lg text-white">
+                Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
+                <strong>And it takes you 5 minutes.</strong>
+              </p>
+            </>
+          )}
         </div>
       );
     }
@@ -381,7 +407,10 @@ export default function Onboarding() {
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
               <p className="text-lg font-black mb-3 text-white">
-                You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.
+                {isAlumni 
+                  ? 'Help students and get help back.'
+                  : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
+                }
               </p>
             </>
           )}
