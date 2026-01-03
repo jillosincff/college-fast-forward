@@ -14,9 +14,10 @@ export default function PostRequestPage() { // Renamed from PostRequest
   const { toast } = useToast();
   const params = useParams();
   const editId = params.edit || params.editId;
-  const postType = params.type; // 'parent' for parent questions, 'HelpRequest' or 'JobRequest' for entity type
+  const postType = params.type; // 'parent' for parent questions, 'alumni_career' for alumni career requests
   const entityType = postType === 'HelpRequest' ? 'HelpRequest' : 'JobRequest';
-  const isParentQuestion = postType === 'parent' || user?.persona === 'parent';
+  const isParentQuestion = postType === 'parent' || (user?.persona === 'parent' && postType !== 'alumni_career');
+  const isAlumniCareerRequest = postType === 'alumni_career';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Removed showSuccess state as we're now navigating directly
@@ -451,7 +452,15 @@ export default function PostRequestPage() { // Renamed from PostRequest
           </button>
           
           <div className="hero-content">
-            {isParentQuestion ? (
+            {isAlumniCareerRequest ? (
+              <>
+                <div className="hero-badge">🎯 Alumni Career Request</div>
+                <h1 className="hero-title">Get Help With Your Career</h1>
+                <p className="hero-subtitle">
+                  Share your career goals and let fellow alumni and parents help you with executive roles, transitions, board positions, or industry networking.
+                </p>
+              </>
+            ) : isParentQuestion ? (
               <>
                 <div className="hero-badge">❓ Get advice from the Gator community</div>
                 <h1 className="hero-title">Ask Your Question</h1>
@@ -594,6 +603,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
               user={user}
               initialData={initialData}
               isParentQuestion={isParentQuestion}
+              isAlumniCareerRequest={isAlumniCareerRequest}
             />
           </div>
         </div>
