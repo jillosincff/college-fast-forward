@@ -152,6 +152,19 @@ Deno.serve(async (req) => {
       await updateFamilyQuestionBoosts(base44, effectiveFamilyGroupId, familyBoost, boostExpiresAt);
     }
     
+    // ALSO boost alumni career requests if this user is an alumni
+    // Alumni get the same karma boost benefits for their own career requests
+    let alumniCareerRequestsBoosted = 0;
+    if (parentUser?.persona === 'alumni' || parentUser?.roles?.includes('alumni')) {
+      alumniCareerRequestsBoosted = await updateAlumniCareerRequestBoosts(
+        base44, 
+        parentUserId, 
+        parentEmail || parentUser?.email, 
+        familyBoost, 
+        boostExpiresAt
+      );
+    }
+    
     return Response.json({
       success: true,
       points_awarded: points,
@@ -280,5 +293,49 @@ async function updateFamilyQuestionBoosts(base44, familyGroupId, boost, boostExp
     console.log(`Updated boost to ${boost} for ${studentEmails.length} students' questions`);
   } catch (e) {
     console.log('Could not update question boosts:', e.message);
+  }
+}
+
+// Also boost alumni career requests when alumni earns karma
+async function updateAlumniCareerRequestBoosts(base44, alumniUserId, alumniEmail, boost, boostExpiresAt) {
+  try {
+    // Find alumni career requests by this user
+    const alumniRequests = await base44.asServiceRole.entities.JobRequest.filter({
+      poster_email: alumniEmail,
+      is_alumni_career_request: true,
+      status: 'active'
+    });
+    
+    // Also check by created_by
+    const alumniRequestsByCreator = await base44.asServiceRole.entities.JobRequest.filter({
+      created_by: alumniEmail,
+      is_alumni_career_request: true,
+      status: 'active'
+    });
+    
+    // Dedupe by id
+    const seenIds = new Set();
+    const allRequests = [];
+    [...alumniRequests, ...alumniRequestsByCreator].forEach(r => {
+      if (!seenIds.has(r.id)) {
+        seenIds.add(r.id);
+        allRequests.push(r);
+      }
+    });
+    
+    for (const request of allRequests) {
+      await base44.asServiceRole.entities.JobRequest.update(request.id, {
+        karma_boost: boost,
+        boosted_until: boostExpiresAt.toISOString(),
+        priority_score: (request.is_boosted ? 999 : 0) + (boost * 100)
+      });
+      console.log(`Boosted alumni career request ${request.id} to level ${boost}`);
+    }
+    
+    console.log(`Updated boost to ${boost} for ${allRequests.length} alumni career requests`);
+    return allRequests.length;
+  } catch (e) {
+    console.log('Could not update alumni career request boosts:', e.message);
+    return 0;
   }
 }
