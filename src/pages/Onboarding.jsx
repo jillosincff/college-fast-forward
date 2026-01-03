@@ -962,6 +962,9 @@ export default function Onboarding() {
                     {industries.length > 0 && (
                       <p>🏭 {industries.map(i => INDUSTRIES.find(ind => ind.id === i)?.label).join(', ')}</p>
                     )}
+                    {isAlumni && alumniMajor && (
+                      <p>🎓 {alumniMajor}{alumniMinor ? ` / ${alumniMinor}` : ''} '{String(alumniGradYear).slice(-2)}{graduateDegrees ? `, ${graduateDegrees}` : ''}</p>
+                    )}
                     <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
                     {linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
@@ -969,7 +972,7 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(4)}
+                    onClick={() => setStep(isAlumni ? 5 : 4)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
