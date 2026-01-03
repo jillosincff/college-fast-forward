@@ -113,9 +113,9 @@ export default function GatorRoleSelection() {
             </button>
 
             <button
-              onClick={() => setSelectedRole('parent')}
+              onClick={() => setSelectedRole('helper')}
               className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
-                selectedRole === 'parent'
+                selectedRole === 'helper'
                   ? 'border-slate-300 bg-slate-50'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
@@ -133,11 +133,11 @@ export default function GatorRoleSelection() {
                   </p>
                 </div>
                 <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ${
-                  selectedRole === 'parent'
+                  selectedRole === 'helper'
                     ? 'border-blue-600 bg-blue-600'
                     : 'border-slate-300 bg-white'
                 }`}>
-                  {selectedRole === 'parent' && (
+                  {selectedRole === 'helper' && (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
