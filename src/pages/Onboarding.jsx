@@ -70,6 +70,11 @@ export default function Onboarding() {
   const [alumniMinor, setAlumniMinor] = useState('');
   const [graduateDegrees, setGraduateDegrees] = useState('');
   
+  // Step 5 (Alumni only): Story Sharing
+  const [storyOption, setStoryOption] = useState(''); // 'yes', 'maybe', 'no'
+  const [alumniStory, setAlumniStory] = useState('');
+  const [storyAnonymous, setStoryAnonymous] = useState(true);
+  
   // Step 4: Visibility (or step 3 for parents)
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
   
@@ -123,6 +128,7 @@ export default function Onboarding() {
   const canProceedStep1 = !linkedinError;
   const canProceedStep2 = expertise.length > 0;
   const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
+  const canProceedStep5Alumni = storyOption !== '';
   
   // Generate graduation year options (current year back to 1960)
   const currentYear = new Date().getFullYear();
@@ -164,6 +170,17 @@ export default function Onboarding() {
         if (alumniMajor.trim()) updateData.major = alumniMajor.trim();
         if (alumniMinor.trim()) updateData.minor = alumniMinor.trim();
         if (graduateDegrees.trim()) updateData.graduate_degrees = graduateDegrees.trim();
+        
+        // Story sharing
+        if (storyOption === 'yes' && alumniStory.trim()) {
+          updateData.alumni_story = alumniStory.trim();
+          updateData.willing_to_share_story = true;
+          updateData.story_anonymous = storyAnonymous;
+        } else if (storyOption === 'maybe') {
+          updateData.willing_to_share_story = null; // remind later
+        } else {
+          updateData.willing_to_share_story = false;
+        }
       }
 
       await base44.auth.updateMe(updateData);
@@ -214,8 +231,8 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 6 steps, Parents have 5
-  const totalSteps = isAlumni ? 6 : 5;
+  // Progress bar component - Alumni has 7 steps, Parents have 5
+  const totalSteps = isAlumni ? 7 : 5;
   
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
@@ -248,18 +265,25 @@ export default function Onboarding() {
             </span>
             <span className="hidden sm:inline text-white/80 text-xs">UF</span>
           </div>
+          <div className={`w-4 h-0.5 ${step >= 5 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+          <div className="flex items-center gap-1 text-sm">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 5 ? 'bg-white/30' : 'bg-white/10'}`}>
+              {step > 5 ? <Check className="w-3.5 h-3.5 text-white" /> : '📖'}
+            </span>
+            <span className="hidden sm:inline text-white/80 text-xs">Story</span>
+          </div>
         </>
       )}
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 5 : 4) ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 4) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 5 : 4) ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > (isAlumni ? 5 : 4) ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 4) ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > (isAlumni ? 6 : 4) ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
         </span>
         <span className="hidden sm:inline text-white/80 text-xs">Link</span>
       </div>
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 7 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 7 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
         <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
       </div>
     </div>
@@ -414,12 +438,45 @@ export default function Onboarding() {
       );
     }
     
-    // Link Student step (step 4 for parents, step 5 for alumni)
-    if ((step === 4 && !isAlumni) || (step === 5 && isAlumni)) {
+    // Alumni Step 5: Story Sharing
+    if (step === 5 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step {isAlumni ? '5 of 6' : '4 of 5'}</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of 7</p>
+            <h1 className="text-3xl font-bold text-white">One last thing — inspire the next generation? 📖</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Many students love hearing real stories from alumni who've been in their shoes. Would you be open to sharing yours?
+          </p>
+          
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              A short version of your journey (2–5 sentences) could motivate students facing similar paths.
+            </p>
+          </div>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">💡</span>
+              <span className="font-semibold text-sm">"From political science major to policy advisor — the one class that changed everything"</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🚀</span>
+              <span className="font-semibold text-sm">"Non-traditional student → tech founder — how I broke in without CS degree"</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Link Student step (step 4 for parents, step 6 for alumni)
+    if ((step === 4 && !isAlumni) || (step === 6 && isAlumni)) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step {isAlumni ? '6 of 7' : '4 of 5'}</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
           </div>
           
@@ -448,8 +505,8 @@ export default function Onboarding() {
       );
     }
     
-    // Ready step (step 5 for parents, step 6 for alumni)
-    if ((step === 5 && !isAlumni) || (step === 6 && isAlumni)) {
+    // Ready step (step 5 for parents, step 7 for alumni)
+    if ((step === 5 && !isAlumni) || (step === 7 && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
@@ -524,13 +581,19 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Tell us about your time at UF</p>
             </>
           )}
-          {((step === 4 && !isAlumni) || (step === 5 && isAlumni)) && (
+          {step === 5 && isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Inspire the next generation? 📖</h1>
+              <p className="text-sm text-white/90">Share your story with students</p>
+            </>
+          )}
+          {((step === 4 && !isAlumni) || (step === 6 && isAlumni)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
               <p className="text-sm text-white/90">Unlock Family Karma boosts</p>
             </>
           )}
-          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
@@ -878,23 +941,143 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 4 (Parents) / STEP 5 (Alumni): Link Your Student */}
-          {((step === 4 && !isAlumni) || (step === 5 && isAlumni)) && (
+          {/* STEP 5 (Alumni only): Story Sharing */}
+          {step === 5 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Share Your Story
+                </h2>
+                <p className="text-slate-500">
+                  Would you be open to inspiring the next generation of Gators?
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setStoryOption('yes')}
+                    className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                      storyOption === 'yes'
+                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-xl">✨</span>
+                    <span className="font-medium">Yes, I'd love to share my story!</span>
+                    {storyOption === 'yes' && <span className="ml-auto text-[#0021A5]">✓</span>}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setStoryOption('maybe')}
+                    className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                      storyOption === 'maybe'
+                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-xl">⏰</span>
+                    <span className="font-medium">Maybe later — remind me</span>
+                    {storyOption === 'maybe' && <span className="ml-auto text-[#0021A5]">✓</span>}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setStoryOption('no')}
+                    className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                      storyOption === 'no'
+                        ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-xl">🙅</span>
+                    <span className="font-medium">Not right now</span>
+                    {storyOption === 'no' && <span className="ml-auto text-[#0021A5]">✓</span>}
+                  </button>
+                </div>
+
+                {storyOption === 'yes' && (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Your Story
+                      </label>
+                      <textarea
+                        value={alumniStory}
+                        onChange={(e) => setAlumniStory(e.target.value.slice(0, 500))}
+                        placeholder="Keep it brief — what advice or moment from your path would you share with current students?"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                                 resize-none h-32 focus:border-[#0021A5] focus:outline-none transition-colors"
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-slate-400 text-right mt-1">{alumniStory.length}/500</p>
+                    </div>
+                    
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-slate-700 text-sm">Share anonymously?</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {storyAnonymous ? 'Your story will be shared without your name' : 'Your first name will be shown with your story'}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={storyAnonymous}
+                          onCheckedChange={setStoryAnonymous}
+                        />
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-slate-500 text-center">
+                      🔒 Your story will be shared {storyAnonymous ? 'anonymously' : 'with first name only'} (your choice).
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(4)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(6)}
+                    disabled={!canProceedStep5Alumni}
+                    className={`
+                      flex-1 py-4 rounded-xl font-bold text-lg transition-all
+                      ${canProceedStep5Alumni
+                        ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    Continue →
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* STEP 4 (Parents) / STEP 6 (Alumni): Link Your Student */}
+          {((step === 4 && !isAlumni) || (step === 6 && isAlumni)) && (
             <LinkStudentStep
               user={user}
               onComplete={(student) => {
                 setLinkedStudent(student);
-                setStep(isAlumni ? 6 : 5);
+                setStep(isAlumni ? 7 : 5);
               }}
               onSkip={() => {
                 setSkippedLinking(true);
-                setStep(isAlumni ? 6 : 5);
+                setStep(isAlumni ? 7 : 5);
               }}
             />
           )}
 
-          {/* STEP 5 (Parents) / STEP 6 (Alumni): Ready */}
-          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {/* STEP 5 (Parents) / STEP 7 (Alumni): Ready */}
+          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -965,6 +1148,9 @@ export default function Onboarding() {
                     {isAlumni && alumniMajor && (
                       <p>🎓 {alumniMajor}{alumniMinor ? ` / ${alumniMinor}` : ''} '{String(alumniGradYear).slice(-2)}{graduateDegrees ? `, ${graduateDegrees}` : ''}</p>
                     )}
+                    {isAlumni && storyOption === 'yes' && alumniStory && (
+                      <p>📖 Sharing your story {storyAnonymous ? '(anonymously)' : '(with first name)'}</p>
+                    )}
                     <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
                     {linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
@@ -972,7 +1158,7 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(isAlumni ? 5 : 4)}
+                    onClick={() => setStep(isAlumni ? 6 : 4)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
