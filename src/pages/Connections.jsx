@@ -33,7 +33,8 @@ export default function QuestionsPage() {
     location: 'all',
     questionType: 'all',
     noAnswers: false,
-    urgent: false
+    urgent: false,
+    includeAlumniCareer: false
   });
   const [sortBy, setSortBy] = useState('relevance');
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -292,6 +293,18 @@ export default function QuestionsPage() {
   }, [requests, allUsers]);
 
   const filteredProfiles = allProfiles.filter(profile => {
+    // CRITICAL: Hide alumni career requests from students
+    const isAlumniCareerRequest = profile.request?.is_alumni_career_request;
+    const isStudent = user?.persona === 'gator' || user?.roles?.includes('gator') || user?.email?.endsWith('@ufl.edu');
+    if (isAlumniCareerRequest && isStudent) {
+      return false; // Students cannot see alumni career requests
+    }
+
+    // Filter out alumni career requests unless showing alumni filter or includeAlumniCareer
+    if (isAlumniCareerRequest && filters.questionType !== 'alumni' && !filters.includeAlumniCareer) {
+      return false;
+    }
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesName = profile.full_name?.toLowerCase().includes(query);
@@ -484,6 +497,15 @@ export default function QuestionsPage() {
                 >
                   🔥 ASAP
                 </button>
+                {/* Alumni Career toggle - only show to parents and alumni */}
+                {(user?.persona === 'parent' || user?.persona === 'alumni' || user?.roles?.includes('parent') || user?.roles?.includes('alumni')) && (
+                  <button
+                    className={`filter-tab ${filters.includeAlumniCareer ? 'active' : ''}`}
+                    onClick={() => setFilters({...filters, includeAlumniCareer: !filters.includeAlumniCareer, questionType: 'all', noAnswers: false, urgent: false})}
+                  >
+                    🎯 Alumni Career
+                  </button>
+                )}
               </div>
               <div className="filter-stats">
                 {totalQuestionsFiltered} questions
