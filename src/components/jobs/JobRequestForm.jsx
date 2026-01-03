@@ -11,16 +11,27 @@ import { UploadFile } from '@/integrations/Core';
 import { useToast } from '@/components/ui/use-toast';
 import { useForm, Controller } from 'react-hook-form';
 
+// Alumni career help types
+const ALUMNI_HELP_TYPES = [
+  { value: 'senior_executive_search', label: 'Senior/Executive Role Search', icon: '👔' },
+  { value: 'career_transition', label: 'Career Transition Advice', icon: '🔄' },
+  { value: 'board_advisory', label: 'Board or Advisory Positions', icon: '🎯' },
+  { value: 'industry_shift', label: 'Industry Shift Networking', icon: '🌐' },
+];
+
 export default function JobRequestForm({
   onSubmit,
   isSubmitting = false,
   initialData = null,
   user,
-  isParentQuestion = false
+  isParentQuestion = false,
+  isAlumniCareerRequest = false
 }) {
   // Only allow anonymous posting for actual parents (not students, even if isParentQuestion is passed)
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
   const [isAnonymous, setIsAnonymous] = useState(initialData?.is_anonymous || false);
+  const [alumniHelpType, setAlumniHelpType] = useState(initialData?.alumni_help_type || '');
   const { toast } = useToast();
   const [resumeUrl, setResumeUrl] = useState(initialData?.resume_url || '');
   const [resumeUploading, setResumeUploading] = useState(false);
@@ -191,7 +202,10 @@ export default function JobRequestForm({
       title: data.role,
       target_helpers: ['alumni', 'parents'],
       // CRITICAL: Only parents can post anonymously - students always show their name
-      is_anonymous: isParent && isAnonymous ? true : false
+      is_anonymous: isParent && isAnonymous ? true : false,
+      // Alumni career request fields
+      is_alumni_career_request: isAlumniCareerRequest,
+      alumni_help_type: isAlumniCareerRequest ? alumniHelpType : null
     };
     
     // Submit the request first
@@ -212,13 +226,58 @@ export default function JobRequestForm({
   );
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
-      {/* Basic Information */}
-      <Card>
+  <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+    {/* Alumni Career Request Type Selection */}
+    {isAlumniCareerRequest && (
+      <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
         <CardHeader>
-          <CardTitle>What are you looking for?</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-amber-600">🎯</span>
+            What type of career help are you seeking?
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {ALUMNI_HELP_TYPES.map((type) => (
+              <label
+                key={type.value}
+                className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  alumniHelpType === type.value
+                    ? 'border-amber-500 bg-amber-100'
+                    : 'border-slate-200 hover:border-amber-300 bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="alumni_help_type"
+                  value={type.value}
+                  checked={alumniHelpType === type.value}
+                  onChange={(e) => setAlumniHelpType(e.target.value)}
+                  className="sr-only"
+                />
+                <span className="text-2xl">{type.icon}</span>
+                <span className={`font-medium ${alumniHelpType === type.value ? 'text-amber-900' : 'text-slate-700'}`}>
+                  {type.label}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 flex items-center gap-2">
+              <span>🔒</span>
+              <span><strong>Privacy note:</strong> Alumni career requests are only visible to other parents and alumni — students won't see them.</span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )}
+
+    {/* Basic Information */}
+    <Card>
+      <CardHeader>
+        <CardTitle>What are you looking for?</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Role/Position *" error={errors.role}>
               <Input
@@ -516,7 +575,11 @@ export default function JobRequestForm({
 
       {/* Helpful note */}
       <div className="text-center text-sm text-slate-600 max-w-md mx-auto">
-        <p>📢 Your request will be visible to all UF parents and alumni in our network to maximize your chances of getting help!</p>
+        {isAlumniCareerRequest ? (
+          <p>🔒 Your career request will only be visible to other parents and alumni in our network — not to students.</p>
+        ) : (
+          <p>📢 Your request will be visible to all UF parents and alumni in our network to maximize your chances of getting help!</p>
+        )}
       </div>
     </form>
   );
