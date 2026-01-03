@@ -55,8 +55,9 @@ export default function GatorRoleSelection() {
         console.log('🐊 [GatorRoleSelection] Student selected -> Google Auth');
         const callbackUrl = window.location.origin;
         base44.auth.redirectToLogin(callbackUrl);
-      } else if (selectedRole === 'parent') {
-        console.log('❤️ [GatorRoleSelection] Parent selected -> GatorParentInvite');
+      } else if (selectedRole === 'helper') {
+        // Parent or Alumni - go to invite code page where they'll specify which
+        console.log('❤️ [GatorRoleSelection] Parent/Alumni selected -> GatorParentInvite');
         navigate('GatorParentInvite');
       }
     } catch (error) {
