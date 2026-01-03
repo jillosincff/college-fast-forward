@@ -52,6 +52,19 @@ Deno.serve(async (req) => {
 
     const responder = responders[0];
 
+    // LIMIT: One answer per email per question
+    const existingAnswers = await base44.asServiceRole.entities.Answer.filter({
+      answerer_email: normalizedEmail,
+      question_id: questionId
+    });
+
+    if (existingAnswers && existingAnswers.length > 0) {
+      return Response.json({
+        success: false,
+        error: 'You\'ve already answered this question. Each person can only submit one answer per question.'
+      }, { status: 400 });
+    }
+
     // Rate limit: max 2 responses per minute
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
     const recentAnswers = await base44.asServiceRole.entities.Answer.filter({

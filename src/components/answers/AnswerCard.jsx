@@ -175,12 +175,13 @@ export default function AnswerCard({
             <div className="author-details">
               <div className="author-name-row">
                 <span className="author-name">{answer.answerer_name}</span>
-                {answer.answerer_persona === 'parent' && (
+                {answer.is_lightweight_responder ? (
+                  <span className="persona-badge guest">✓ Guest (verified)</span>
+                ) : answer.answerer_persona === 'parent' ? (
                   <span className="persona-badge parent">👨‍👩‍👧 Parent</span>
-                )}
-                {answer.answerer_persona === 'alumni' && (
+                ) : answer.answerer_persona === 'alumni' ? (
                   <span className="persona-badge alumni">🎯 Alumni</span>
-                )}
+                ) : null}
               </div>
               <div className="author-meta">
                 {answer.answerer_title && (
@@ -384,6 +385,12 @@ export default function AnswerCard({
         .persona-badge.alumni {
           background: #FEF3C7;
           color: #92400E;
+        }
+
+        .persona-badge.guest {
+          background: #F0FDF4;
+          color: #166534;
+          border: 1px solid #BBF7D0;
         }
 
         .author-meta {

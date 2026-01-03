@@ -407,6 +407,49 @@ export default function LightweightRespondModal({
             </div>
           </div>
         )}
+        
+        {/* ANSWERED SUCCESS STEP - Shown after answer submission */}
+        {step === 'answered' && (
+          <div className="py-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              Great answer! 🎉
+            </h2>
+            <p className="text-slate-600 mb-6">
+              Your response has been submitted and will help this student.
+            </p>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                Want to do more?
+              </p>
+              <p className="text-sm text-blue-700 mb-3">
+                Join the full network to see replies, earn karma, and help more students.
+              </p>
+              <Button
+                onClick={() => {
+                  // Pre-fill email in signup flow
+                  sessionStorage.setItem('prefill_email', email);
+                  window.location.href = '/#GatorAuth';
+                }}
+                className="w-full"
+                style={{ backgroundColor: '#0021A5' }}
+              >
+                Join College Fast Forward
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+            
+            <button
+              onClick={handleClose}
+              className="text-sm text-slate-500 hover:text-slate-700"
+            >
+              Maybe later
+            </button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
