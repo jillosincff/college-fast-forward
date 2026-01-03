@@ -187,6 +187,35 @@ export default function GatorParentInvite() {
               </p>
               
               <div className="space-y-4">
+                {/* User Type Selection for Have Code */}
+                <div>
+                  <Label className="text-sm font-semibold text-slate-700 mb-2 block">
+                    I am a: <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setCodeUserType('uf_alumni')}
+                      className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                        codeUserType === 'uf_alumni'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      UF Alumni
+                    </button>
+                    <button
+                      onClick={() => setCodeUserType('uf_parent')}
+                      className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                        codeUserType === 'uf_parent'
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      UF Parent
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <Label className="text-sm font-semibold text-slate-700 mb-2 block">
                     Invite Code
@@ -203,7 +232,7 @@ export default function GatorParentInvite() {
                 
                 <Button
                   onClick={handleJoinWithCode}
-                  disabled={!inviteCode.trim() || isVerifyingCode}
+                  disabled={!inviteCode.trim() || !codeUserType || isVerifyingCode}
                   className="w-full h-14 text-lg font-bold bg-[#0021A5] hover:bg-blue-800"
                 >
                   {isVerifyingCode ? (
