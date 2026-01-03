@@ -1095,18 +1095,14 @@ const SignUpDiagnostics = () => {
         new Date(att.created_date) < new Date(twentyFourHoursAgo)
       );
 
-      // Load users without persona - check for empty string AND null/undefined
-      const allUsers = await base44.entities.User.filter({}, '-created_date', 500);
+      // Load users without persona - fetch ALL users (same as analytics function)
+      const allUsers = await base44.entities.User.filter({}, '-created_date', 9999);
       console.log('SignUpDiagnostics: Total users fetched:', allUsers?.length);
       
       const noPersona = (allUsers || []).filter(u => {
         const personaValue = u.persona;
         const hasNoPersona = !personaValue || personaValue === '' || personaValue === null || personaValue === undefined || (typeof personaValue === 'string' && personaValue.trim() === '');
         const isNotAdmin = !u.roles?.includes('admin');
-        
-        if (hasNoPersona && isNotAdmin) {
-          console.log('User without persona:', u.email, 'persona:', JSON.stringify(u.persona), 'roles:', u.roles);
-        }
         
         return hasNoPersona && isNotAdmin;
       });
