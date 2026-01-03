@@ -64,10 +64,16 @@ export default function Onboarding() {
   const [expertise, setExpertise] = useState([]);
   const [bio, setBio] = useState('');
   
-  // Step 3: Visibility
+  // Step 3 (Alumni only): Alumni Details
+  const [alumniGradYear, setAlumniGradYear] = useState('');
+  const [alumniMajor, setAlumniMajor] = useState('');
+  const [alumniMinor, setAlumniMinor] = useState('');
+  const [graduateDegrees, setGraduateDegrees] = useState('');
+  
+  // Step 4: Visibility (or step 3 for parents)
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
   
-  // Step 4 is now Link Student (after step 3)
+  // Step 5 is now Link Student (or step 4 for parents)
 
   // LinkedIn URL validation
   const handleLinkedInChange = (value) => {
@@ -116,6 +122,14 @@ export default function Onboarding() {
 
   const canProceedStep1 = !linkedinError;
   const canProceedStep2 = expertise.length > 0;
+  const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
+  
+  // Generate graduation year options (current year back to 1960)
+  const currentYear = new Date().getFullYear();
+  const gradYearOptions = [];
+  for (let year = currentYear; year >= 1960; year--) {
+    gradYearOptions.push(year);
+  }
 
   const handleFinish = async () => {
     setLoading(true);
