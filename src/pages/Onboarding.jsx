@@ -776,23 +776,125 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 4: Link Your Student */}
-          {step === 4 && (
+          {/* STEP 4 (Alumni only): Alumni Details */}
+          {step === 4 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Your Alumni Details
+                </h2>
+                <p className="text-slate-500">
+                  A little more about your time at the University of Florida.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What year did you graduate? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={alumniGradYear}
+                    onChange={(e) => setAlumniGradYear(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                  >
+                    <option value="">Select year</option>
+                    {gradYearOptions.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What was your major? <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={alumniMajor}
+                    onChange={(e) => setAlumniMajor(e.target.value)}
+                    placeholder="e.g., Computer Science, Finance, Political Science"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Minor <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={alumniMinor}
+                    onChange={(e) => setAlumniMinor(e.target.value)}
+                    placeholder="e.g., Business Administration, Psychology"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Any graduate degrees? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={graduateDegrees}
+                    onChange={(e) => setGraduateDegrees(e.target.value)}
+                    placeholder="e.g., MBA Harvard 2015, JD Yale 2018"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">List any graduate degrees with school and year</p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(3)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(5)}
+                    disabled={!canProceedStep3Alumni}
+                    className={`
+                      flex-1 py-4 rounded-xl font-bold text-lg transition-all
+                      ${canProceedStep3Alumni
+                        ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    Continue →
+                  </button>
+                </div>
+
+                {!canProceedStep3Alumni && (
+                  <p className="text-xs text-amber-600 text-center">Please enter your graduation year and major</p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* STEP 4 (Parents) / STEP 5 (Alumni): Link Your Student */}
+          {((step === 4 && !isAlumni) || (step === 5 && isAlumni)) && (
             <LinkStudentStep
               user={user}
               onComplete={(student) => {
                 setLinkedStudent(student);
-                setStep(5);
+                setStep(isAlumni ? 6 : 5);
               }}
               onSkip={() => {
                 setSkippedLinking(true);
-                setStep(5);
+                setStep(isAlumni ? 6 : 5);
               }}
             />
           )}
 
-          {/* STEP 5: Ready */}
-          {step === 5 && (
+          {/* STEP 5 (Parents) / STEP 6 (Alumni): Ready */}
+          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
