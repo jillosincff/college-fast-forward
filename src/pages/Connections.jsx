@@ -348,11 +348,12 @@ export default function QuestionsPage() {
     
     // Default "relevance" sorting
     // PRIORITY 1: Active karma boosts (check if boost hasn't expired)
+    // Alumni career requests also get boosted by their karma_boost score
     const now = new Date();
     const aBoostActive = a.request?.karma_boost > 0 && (!a.request?.boosted_until || new Date(a.request.boosted_until) > now);
     const bBoostActive = b.request?.karma_boost > 0 && (!b.request?.boosted_until || new Date(b.request.boosted_until) > now);
     
-    // Boosted requests always come first
+    // Boosted requests always come first (including alumni career requests with karma boost)
     if (aBoostActive && !bBoostActive) return -1;
     if (!aBoostActive && bBoostActive) return 1;
     
