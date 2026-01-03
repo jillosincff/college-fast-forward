@@ -303,15 +303,19 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
       
       {/* Tags Row - Above content */}
       <div className="tags-row">
-        {/* Poster Type Badge */}
-        {posterType !== 'student' && (
-          <span className={`poster-badge ${posterType}`}>
-            {posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
-          </span>
-        )}
-        {posterType === 'student' && (
-          <span className="poster-badge student">🎓 UF Student</span>
-        )}
+      {/* Alumni Career Request Badge */}
+      {question.is_alumni_career_request && (
+        <span className="poster-badge alumni-career">🎯 Alumni Career Request</span>
+      )}
+      {/* Poster Type Badge */}
+      {!question.is_alumni_career_request && posterType !== 'student' && (
+        <span className={`poster-badge ${posterType}`}>
+          {posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+        </span>
+      )}
+      {!question.is_alumni_career_request && posterType === 'student' && (
+        <span className="poster-badge student">🎓 UF Student</span>
+      )}
         
         {/* Help type tags - smaller */}
         {question.help_types?.slice(0, 2).map((type, idx) => (
@@ -506,6 +510,13 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         .poster-badge.alumni {
           background: #FEF3C7;
           color: #92400E;
+        }
+
+        .poster-badge.alumni-career {
+          background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+          color: #92400E;
+          border: 1px solid #F59E0B;
+          font-weight: 700;
         }
 
         .help-tag {
