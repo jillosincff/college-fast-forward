@@ -381,11 +381,45 @@ export default function Onboarding() {
       );
     }
     
-    if (step === 4) {
+    // Alumni Step 4: UF Details
+    if (step === 4 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 5</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 6</p>
+            <h1 className="text-3xl font-bold text-white">Your Alumni Details 🎓</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            A little more about your time at the University of Florida.
+          </p>
+          
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              This helps us match you with the right students and adds credibility to your profile.
+            </p>
+          </div>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🔗</span>
+              <span className="font-semibold text-sm">Students connect with alumni who share their major</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">✨</span>
+              <span className="font-semibold text-sm">Your degree adds authority to your advice</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Link Student step (step 4 for parents, step 5 for alumni)
+    if ((step === 4 && !isAlumni) || (step === 5 && isAlumni)) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step {isAlumni ? '5 of 6' : '4 of 5'}</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
           </div>
           
@@ -414,7 +448,8 @@ export default function Onboarding() {
       );
     }
     
-    if (step === 5) {
+    // Ready step (step 5 for parents, step 6 for alumni)
+    if ((step === 5 && !isAlumni) || (step === 6 && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
