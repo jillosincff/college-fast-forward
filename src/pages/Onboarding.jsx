@@ -256,7 +256,7 @@ export default function Onboarding() {
                 <ul className="text-white text-sm mt-2 space-y-1 ml-4 list-disc">
                   <li>Answer student questions and share your wisdom</li>
                   <li>Post exclusive opportunities from your company</li>
-                  <li>Get discreet help with your own career transition</li>
+                  <li>Get discreet help with your own career transition, new role search, or industry shift</li>
                   <li>Earn karma that boosts visibility for your requests</li>
                 </ul>
               </div>
@@ -426,6 +426,11 @@ export default function Onboarding() {
                   : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
                 }
               </p>
+              {isAlumni && (
+                <p className="text-sm text-white/80">
+                  Your experience is invaluable to current students — and the network is here for your career moves too.
+                </p>
+              )}
             </>
           )}
           {step === 2 && (
@@ -536,8 +541,22 @@ export default function Onboarding() {
                     }
                   `}
                 >
-                  Continue →
+                  {isAlumni ? 'Complete Profile & Start Helping →' : 'Continue →'}
                 </button>
+                
+                {isAlumni && (
+                  <button
+                    onClick={() => {
+                      // Copy invite link or open invite modal
+                      const inviteUrl = `${window.location.origin}/#GatorAuth?role=alumni`;
+                      navigator.clipboard.writeText(inviteUrl);
+                      alert('Invite link copied! Share it with fellow alumni.');
+                    }}
+                    className="w-full py-3 rounded-xl font-semibold text-sm text-[#0021A5] border-2 border-[#0021A5]/30 hover:bg-[#0021A5]/5 transition-all mt-2"
+                  >
+                    Invite Fellow Alumni
+                  </button>
+                )}
               </div>
             </>
           )}
