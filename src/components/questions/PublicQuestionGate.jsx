@@ -22,18 +22,10 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
       });
     }
 
-    // Store the question ID to return after auth
-    sessionStorage.setItem('pending_answer_question_id', questionId);
-    sessionStorage.setItem('post_auth_action', 'open_answer_composer');
-    
-    // Store sharer ref for attribution tracking after auth
-    if (sharerRef) {
-      sessionStorage.setItem('share_ref_user_id', sharerRef);
+    // Use lightweight respond flow (email OTP, no account needed)
+    if (onLightweightRespond) {
+      onLightweightRespond();
     }
-    
-    // Trigger Google sign-in with redirect back to this question
-    const returnUrl = `${window.location.origin}/#QuestionDetail?id=${questionId}&open_composer=true`;
-    base44.auth.redirectToLogin(returnUrl);
   };
 
   const handleSignIn = async () => {
@@ -60,41 +52,47 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
 
   return (
     <div className="public-gate">
-      {/* Purpose line - why they're here */}
-      <div className="purpose-banner">
-        <span className="purpose-icon">💡</span>
-        <p>This question was shared with you because someone thought your perspective could help a student.</p>
-      </div>
-
-      <div className="gate-content">
-        {/* Microcopy to reduce perfectionism */}
+      {/* Main CTA - Make it super clear no account needed */}
+      <div className="main-cta-section">
+        <div className="no-account-badge">
+          <span>✉️</span>
+          <span>No account needed — just verify your email</span>
+        </div>
+        
+        <h3 className="cta-headline">Can you help this student?</h3>
+        
         <p className="microcopy">
-          Short, real-world perspectives are welcome — even 2–3 sentences helps.
+          Even 2–3 sentences of real-world perspective can make a difference.
         </p>
         
-        <div className="gate-actions">
+        <Button
+          onClick={handleSharePerspective}
+          className="share-perspective-btn"
+        >
+          <MessageSquare className="w-5 h-5 mr-2" />
+          Answer this question
+        </Button>
+        
+        <p className="how-it-works">
+          <strong>How it works:</strong> Enter your name & email → verify with a code → submit your answer. Takes ~1 minute.
+        </p>
+      </div>
+
+      {/* Secondary options */}
+      <div className="secondary-options">
+        {hasMoreResponses && (
           <Button
-            onClick={handleSharePerspective}
-            className="share-perspective-btn"
+            variant="outline"
+            onClick={handleSignIn}
+            className="sign-in-btn"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Share a quick perspective
+            Sign in to view all responses
           </Button>
-          
-          {hasMoreResponses && (
-            <Button
-              variant="outline"
-              onClick={handleSignIn}
-              className="sign-in-btn"
-            >
-              Sign in to view more responses
-            </Button>
-          )}
-          
-          <p className="read-only-text">
-            Just here to read? No problem.
-          </p>
-        </div>
+        )}
+        
+        <p className="read-only-text">
+          Just browsing? No problem — read as much as you'd like.
+        </p>
       </div>
 
       <div className="community-norms">
@@ -115,58 +113,80 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
           margin-top: 24px;
         }
 
-        .purpose-banner {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          margin-bottom: 20px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid #BBF7D0;
+        .main-cta-section {
+          text-align: center;
         }
 
-        .purpose-icon {
-          font-size: 20px;
-          flex-shrink: 0;
-          line-height: 1.4;
-        }
-
-        .purpose-banner p {
-          font-size: 15px;
-          font-weight: 500;
+        .no-account-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: white;
+          border: 1px solid #86EFAC;
+          border-radius: 20px;
+          padding: 6px 14px;
+          font-size: 13px;
+          font-weight: 600;
           color: #166534;
-          margin: 0;
-          line-height: 1.5;
+          margin-bottom: 16px;
+        }
+
+        .cta-headline {
+          font-size: 22px;
+          font-weight: 700;
+          color: #0F172A;
+          margin: 0 0 8px 0;
         }
 
         .microcopy {
-          font-size: 14px;
+          font-size: 15px;
           color: #4B5563;
-          margin: 0 0 16px 0;
+          margin: 0 0 20px 0;
           line-height: 1.5;
-        }
-
-        .gate-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
         }
 
         .share-perspective-btn {
           background: #16A34A;
           color: white;
-          font-weight: 600;
-          padding: 14px 24px;
-          border-radius: 10px;
+          font-weight: 700;
+          font-size: 16px;
+          padding: 16px 32px;
+          border-radius: 12px;
           width: 100%;
+          max-width: 320px;
           justify-content: center;
+          box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
 
         .share-perspective-btn:hover {
           background: #15803D;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+        }
+
+        .how-it-works {
+          font-size: 13px;
+          color: #6B7280;
+          margin: 16px 0 0 0;
+          line-height: 1.5;
+        }
+
+        .how-it-works strong {
+          color: #374151;
+        }
+
+        .secondary-options {
+          margin-top: 24px;
+          padding-top: 20px;
+          border-top: 1px solid #BBF7D0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
         }
 
         .sign-in-btn {
-          width: 100%;
+          max-width: 280px;
           justify-content: center;
           border-color: #D1D5DB;
           color: #374151;
@@ -181,7 +201,7 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
           text-align: center;
           color: #9CA3AF;
           font-size: 13px;
-          margin: 8px 0 0 0;
+          margin: 0;
         }
 
         .community-norms {
@@ -225,8 +245,13 @@ export default function PublicQuestionGate({ questionId, onSharePerspective, onL
             border-radius: 12px;
           }
 
-          .gate-content h3 {
+          .cta-headline {
             font-size: 18px;
+          }
+
+          .share-perspective-btn {
+            font-size: 15px;
+            padding: 14px 24px;
           }
 
           .community-norms ul {
