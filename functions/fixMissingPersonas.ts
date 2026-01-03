@@ -11,9 +11,19 @@ Deno.serve(async (req) => {
 
         const { dryRun = true } = await req.json().catch(() => ({}));
 
-        // Get all users without a persona
+        console.log('Starting fixMissingPersonas, dryRun:', dryRun);
+
+        // Get all users without a persona - check for empty string too
         const allUsers = await base44.asServiceRole.entities.User.filter({}, '-created_date', 500);
-        const usersWithoutPersona = allUsers.filter(u => !u.persona && !u.roles?.includes('admin'));
+        console.log('Total users fetched:', allUsers.length);
+        
+        const usersWithoutPersona = allUsers.filter(u => {
+            const hasNoPersona = !u.persona || u.persona === '' || u.persona === null;
+            const isNotAdmin = !u.roles?.includes('admin');
+            return hasNoPersona && isNotAdmin;
+        });
+        
+        console.log('Users without persona:', usersWithoutPersona.length);
 
         const results = {
             total: usersWithoutPersona.length,
