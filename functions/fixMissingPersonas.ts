@@ -40,6 +40,8 @@ Deno.serve(async (req) => {
             const assignedPersona = isUFLEmail ? 'gator' : 'parent';
             const assignedRoles = isUFLEmail ? ['gator'] : ['parent'];
 
+            console.log(`Processing user: ${u.email}, isUFL: ${isUFLEmail}, will assign: ${assignedPersona}`);
+
             if (dryRun) {
                 // Just categorize, don't update
                 if (isUFLEmail) {
@@ -50,11 +52,13 @@ Deno.serve(async (req) => {
             } else {
                 // Actually update the user
                 try {
+                    console.log(`Updating user ${u.email} with persona=${assignedPersona}`);
                     await base44.asServiceRole.entities.User.update(u.id, {
                         persona: assignedPersona,
                         roles: assignedRoles,
                         onboarding_completed: false // They still need to complete onboarding
                     });
+                    console.log(`Successfully updated user ${u.email}`);
 
                     if (isUFLEmail) {
                         results.students.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
@@ -62,7 +66,7 @@ Deno.serve(async (req) => {
                         results.parents.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
                     }
                 } catch (err) {
-                    console.error('Failed to update user:', u.email, err.message);
+                    console.error('Failed to update user:', u.email, err.message, err);
                     results.errors.push({ id: u.id, email: u.email, error: err.message });
                 }
             }
