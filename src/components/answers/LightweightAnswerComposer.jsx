@@ -16,7 +16,8 @@ import { useToast } from '@/components/ui/use-toast';
 export default function LightweightAnswerComposer({ 
   question, 
   responderInfo,
-  onAnswerPosted 
+  onAnswerPosted,
+  onShowConversionNudge
 }) {
   const { toast } = useToast();
   const [text, setText] = useState('');
@@ -96,6 +97,11 @@ export default function LightweightAnswerComposer({
         if (onAnswerPosted && response.data.answer) {
           onAnswerPosted(response.data.answer);
         }
+        
+        // Show conversion nudge modal
+        if (onShowConversionNudge) {
+          onShowConversionNudge();
+        }
       } else {
         throw new Error(response?.data?.error || 'Failed to submit answer');
       }
@@ -111,23 +117,28 @@ export default function LightweightAnswerComposer({
     }
   };
 
-  // Already submitted
+  // Already submitted - show inline success with conversion CTA
   if (submitted) {
     return (
       <div className="lightweight-composer submitted">
         <div className="success-message">
           <CheckCircle className="w-12 h-12 text-green-500" />
-          <h3>Thanks for helping!</h3>
+          <h3>Thanks for helping! 🎉</h3>
           <p>Your perspective has been shared with the student.</p>
-          <p className="cta">
-            Want to help more students?{' '}
+          
+          <div className="conversion-cta">
+            <p className="cta-headline">Great answer!</p>
+            <p className="cta-text">Join the full network to see replies, earn karma, and help more students.</p>
             <button 
-              onClick={() => window.location.href = '/#GatorAuth'}
-              className="join-link"
+              onClick={() => {
+                sessionStorage.setItem('prefill_email', responderInfo?.email || '');
+                window.location.href = '/#GatorAuth';
+              }}
+              className="join-btn"
             >
               Join College Fast Forward →
             </button>
-          </p>
+          </div>
         </div>
         
         <style jsx>{`
@@ -146,27 +157,46 @@ export default function LightweightAnswerComposer({
             margin: 16px 0 8px;
           }
           
-          .success-message p {
+          .success-message > p {
             color: #374151;
-            margin: 0 0 16px;
+            margin: 0 0 20px;
           }
           
-          .cta {
+          .conversion-cta {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+          }
+          
+          .cta-headline {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1E40AF;
+            margin: 0 0 4px !important;
+          }
+          
+          .cta-text {
             font-size: 14px;
-            color: #6B7280;
+            color: #3B82F6;
+            margin: 0 0 16px !important;
           }
           
-          .join-link {
-            background: none;
+          .join-btn {
+            background: #0021A5;
+            color: white;
             border: none;
-            color: #0021A5;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: underline;
+            transition: background 0.2s;
           }
           
-          .join-link:hover {
-            color: #001580;
+          .join-btn:hover {
+            background: #001580;
           }
         `}</style>
       </div>
