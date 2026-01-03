@@ -1095,9 +1095,13 @@ const SignUpDiagnostics = () => {
         new Date(att.created_date) < new Date(twentyFourHoursAgo)
       );
 
-      // Load users without persona
-      const allUsers = await base44.entities.User.filter({}, '-created_date', 100);
-      const noPersona = (allUsers || []).filter(u => !u.persona && !u.roles?.includes('admin'));
+      // Load users without persona - check for empty string AND null/undefined
+      const allUsers = await base44.entities.User.filter({}, '-created_date', 500);
+      const noPersona = (allUsers || []).filter(u => {
+        const hasNoPersona = !u.persona || u.persona === '' || u.persona === null || u.persona === undefined;
+        const isNotAdmin = !u.roles?.includes('admin');
+        return hasNoPersona && isNotAdmin;
+      });
 
       setPendingAttempts(pending || []);
       setExpiredAttempts(expired || []);
