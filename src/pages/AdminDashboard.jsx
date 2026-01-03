@@ -1097,11 +1097,21 @@ const SignUpDiagnostics = () => {
 
       // Load users without persona - check for empty string AND null/undefined
       const allUsers = await base44.entities.User.filter({}, '-created_date', 500);
+      console.log('SignUpDiagnostics: Total users fetched:', allUsers?.length);
+      
       const noPersona = (allUsers || []).filter(u => {
-        const hasNoPersona = !u.persona || u.persona === '' || u.persona === null || u.persona === undefined;
+        const personaValue = u.persona;
+        const hasNoPersona = !personaValue || personaValue === '' || personaValue === null || personaValue === undefined || (typeof personaValue === 'string' && personaValue.trim() === '');
         const isNotAdmin = !u.roles?.includes('admin');
+        
+        if (hasNoPersona && isNotAdmin) {
+          console.log('User without persona:', u.email, 'persona:', JSON.stringify(u.persona), 'roles:', u.roles);
+        }
+        
         return hasNoPersona && isNotAdmin;
       });
+      
+      console.log('SignUpDiagnostics: Users without persona:', noPersona.length);
 
       setPendingAttempts(pending || []);
       setExpiredAttempts(expired || []);
