@@ -241,19 +241,28 @@ export default function Onboarding() {
             <>
               <div className="py-3">
                 <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-                  Help students and get help back — post your own career needs privately.
+                  Pay it forward and stay connected.
                 </p>
               </div>
+              
+              <p className="text-lg text-white/90 mb-4">
+                Your experience is invaluable to current students — and the network is here for your career moves too.
+              </p>
               
               <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-                <p className="text-white">
-                  <strong>Your responses boost your request visibility.</strong>{' '}
-                  When you help students, your own career requests get priority placement in the network.
+                <p className="text-white text-sm">
+                  <strong>As an alum, you can:</strong>
                 </p>
+                <ul className="text-white text-sm mt-2 space-y-1 ml-4 list-disc">
+                  <li>Answer student questions and share your wisdom</li>
+                  <li>Post exclusive opportunities from your company</li>
+                  <li>Get discreet help with your own career transition</li>
+                  <li>Earn karma that boosts visibility for your requests</li>
+                </ul>
               </div>
               
-              <p className="text-lg text-white">
-                It's a <strong>two-way street</strong> — share your expertise with students, and tap into the parent & alumni network for your own career goals.
+              <p className="text-base text-white/90 mt-4">
+                Every time you help a student, you strengthen your legacy — and unlock priority for your own needs.
               </p>
             </>
           ) : (
@@ -405,10 +414,15 @@ export default function Onboarding() {
         <div className="lg:hidden text-center mb-6">
           {step === 1 && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
+              <h1 className="text-xl font-bold mb-2 text-white">
+                {isAlumni 
+                  ? 'Welcome to College Fast Forward — the private network for UF alumni.'
+                  : 'Welcome to College Fast Forward'
+                }
+              </h1>
               <p className="text-lg font-black mb-3 text-white">
                 {isAlumni 
-                  ? 'Help students and get help back.'
+                  ? 'Pay it forward and stay connected.'
                   : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
                 }
               </p>
