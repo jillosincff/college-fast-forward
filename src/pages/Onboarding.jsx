@@ -47,8 +47,11 @@ export default function Onboarding() {
   const [linkedStudent, setLinkedStudent] = useState(null);
   const [skippedLinking, setSkippedLinking] = useState(false);
   
-  // Check if user is alumni
-  const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
+  // Check if user is alumni - check multiple sources since role may be stored differently
+  const isAlumni = user?.persona === 'alumni' || 
+                   user?.roles?.includes('alumni') || 
+                   localStorage.getItem('pending_invite_role') === 'alumni' ||
+                   sessionStorage.getItem('pending_invite_role') === 'alumni';
   
   // Step 1: Basic Info
   const [company, setCompany] = useState('');
