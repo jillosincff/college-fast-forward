@@ -600,26 +600,7 @@ export default function ParentDashboard() {
 
               {/* Card 5: Alumni Career Request - Only for Alumni */}
               {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && (
-                <div 
-                  className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4 text-center hover:shadow-lg transition-shadow border-2 border-amber-300"
-                  style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-                >
-                  <div className="text-3xl mb-2">🎯</div>
-                  <h3 className="text-sm font-bold mb-1" style={{ color: '#92400E' }}>
-                    Post Career Request
-                  </h3>
-                  <p className="text-xs text-amber-700 mb-3 leading-relaxed">
-                    Get help from fellow alumni.<br />
-                    <span className="font-semibold">Discreet — students won't see it.</span>
-                  </p>
-                  <Button
-                    onClick={() => navigate('PostRequest?type=alumni_career')}
-                    size="sm"
-                    className="rounded-full px-4 py-1.5 font-bold text-xs bg-amber-500 hover:bg-amber-600"
-                  >
-                    Post Career Request →
-                  </Button>
-                </div>
+                <AlumniCareerRequestCard hasExistingRequest={false} />
               )}
 
               {/* Card 4: Post Jobs */}
