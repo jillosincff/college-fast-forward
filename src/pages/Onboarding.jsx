@@ -157,6 +157,14 @@ export default function Onboarding() {
           updateData.linkedin_url = formattedLinkedIn;
         }
       }
+      
+      // Alumni-specific fields
+      if (isAlumni) {
+        if (alumniGradYear) updateData.graduation_year = parseInt(alumniGradYear);
+        if (alumniMajor.trim()) updateData.major = alumniMajor.trim();
+        if (alumniMinor.trim()) updateData.minor = alumniMinor.trim();
+        if (graduateDegrees.trim()) updateData.graduate_degrees = graduateDegrees.trim();
+      }
 
       await base44.auth.updateMe(updateData);
 
