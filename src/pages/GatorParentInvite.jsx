@@ -85,10 +85,15 @@ export default function GatorParentInvite() {
     trackEvent('parent_invite_request_submitted', { userType });
 
     try {
+      // Map user type to role: uf_alumni -> alumni, uf_parent -> parent
+      const role = userType === 'uf_alumni' ? 'alumni' : 'parent';
+      
       await base44.entities.InviteRequest.create({
         email: email.trim(),
         full_name: fullName.trim(),
+        name: fullName.trim(),
         user_type: userType,
+        role: role, // Store the actual role for approval
         reason: `${userType === 'uf_alumni' && gradYear ? `Grad Year: ${gradYear}. ` : ''}${userType === 'uf_parent' && studentName ? `Student: ${studentName}. ` : ''}${reason.trim()}`,
         status: 'pending'
       });
