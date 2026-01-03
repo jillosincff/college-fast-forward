@@ -214,7 +214,9 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Now 5 steps
+  // Progress bar component - Alumni has 6 steps, Parents have 5
+  const totalSteps = isAlumni ? 6 : 5;
+  
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
       <div className="flex items-center gap-1 text-sm">
@@ -237,16 +239,27 @@ export default function Onboarding() {
         </span>
         <span className="hidden sm:inline text-white/80 text-xs">Help</span>
       </div>
-      <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      {isAlumni && (
+        <>
+          <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+          <div className="flex items-center gap-1 text-sm">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
+              {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🎓'}
+            </span>
+            <span className="hidden sm:inline text-white/80 text-xs">UF</span>
+          </div>
+        </>
+      )}
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 5 : 4) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 5 : 4) ? 'bg-white/30' : 'bg-white/10'}`}>
+          {step > (isAlumni ? 5 : 4) ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
         </span>
         <span className="hidden sm:inline text-white/80 text-xs">Link</span>
       </div>
-      <div className={`w-4 h-0.5 ${step >= 5 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 5 ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
         <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
       </div>
     </div>
