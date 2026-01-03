@@ -162,24 +162,50 @@ export default function FirstTimeUserDashboard({
         </div>
         </div>
 
-      {/* Alumni Reciprocity Banner */}
+      {/* Alumni Career Request Card - Prominent Placement */}
       {isAlumni && (
         <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 rounded-xl border-2 border-amber-300 p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-3xl">🎯</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🎯</span>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-amber-900">Help students and get help back</h3>
-                <p className="text-sm text-amber-700">Your responses boost your own career request visibility. Post your request discreetly — students won't see it.</p>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-amber-900 mb-1">Need help with your next move?</h3>
+                <p className="text-sm text-amber-800 mb-2">
+                  Post privately — visible only to fellow parents and alumni.
+                </p>
+                <p className="text-sm text-amber-700">
+                  Whether it's a new role search, industry shift, or business advice, the network has your back — just like you have theirs.
+                </p>
               </div>
             </div>
+            
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 bg-white/70 px-3 py-1.5 rounded-full text-xs font-medium text-amber-800 border border-amber-200">
+                💼 New job search
+              </span>
+              <span className="inline-flex items-center gap-1 bg-white/70 px-3 py-1.5 rounded-full text-xs font-medium text-amber-800 border border-amber-200">
+                🔄 Career transition
+              </span>
+              <span className="inline-flex items-center gap-1 bg-white/70 px-3 py-1.5 rounded-full text-xs font-medium text-amber-800 border border-amber-200">
+                🌐 Industry shift
+              </span>
+              <span className="inline-flex items-center gap-1 bg-white/70 px-3 py-1.5 rounded-full text-xs font-medium text-amber-800 border border-amber-200">
+                💡 Business advice
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-100/50 rounded-lg px-3 py-2">
+              <span>🔒</span>
+              <span><strong>Privacy:</strong> Alumni requests are private — seen only by other parents and alumni.</span>
+            </div>
+
             <button
               onClick={onPostCareerRequest || (() => navigate('PostRequest?type=alumni_career'))}
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-md"
             >
-              Post My Career Request
+              Post a Career Request
               <ArrowRight size={18} />
             </button>
           </div>

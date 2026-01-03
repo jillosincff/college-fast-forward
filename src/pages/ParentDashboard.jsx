@@ -35,6 +35,8 @@ import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
 import FirstTimeUserDashboard from '@/components/dashboard/parent/FirstTimeUserDashboard';
 import StudentLinkBanner from '@/components/dashboard/parent/StudentLinkBanner';
+import AlumniWelcomeHero from '@/components/dashboard/alumni/AlumniWelcomeHero';
+import AlumniCareerRequestCard from '@/components/dashboard/alumni/AlumniCareerRequestCard';
 
 // Mobile Quick Action Card Component
 function QuickActionCardMobile({ icon, label, onClick, color = 'blue' }) {
@@ -347,26 +349,14 @@ export default function ParentDashboard() {
         />
       </div>
 
-      {/* Alumni Reciprocity Banner - For alumni who have helped students */}
-      {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && karmaPoints > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">⚡</span>
-                <div>
-                  <p className="font-bold text-amber-900">Your help is being repaid!</p>
-                  <p className="text-sm text-amber-700">Your karma from helping students boosts your own career requests to the top.</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => navigate('PostRequest?type=alumni_career')}
-                className="bg-amber-500 hover:bg-amber-600 text-white font-bold whitespace-nowrap"
-              >
-                🎯 Post My Career Request
-              </Button>
-            </div>
-          </div>
+      {/* Alumni Welcome Hero - Different states for active vs inactive */}
+      {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && !isNewUser && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AlumniWelcomeHero 
+            user={user} 
+            stats={{ studentsHelped: user?.students_helped_count || 0 }}
+            hasActivity={karmaPoints > 0}
+          />
         </div>
       )}
 
