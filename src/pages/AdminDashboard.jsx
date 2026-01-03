@@ -2197,32 +2197,21 @@ const FixMissingPersonasSection = ({ usersWithoutPersona, onComplete }) => {
     }
 
     setLoading(true);
-    let updated = 0;
-    let errors = 0;
 
     try {
-      for (const user of usersWithoutPersona) {
-        const isUFL = user.email?.toLowerCase().endsWith('@ufl.edu');
-        const newPersona = isUFL ? 'gator' : 'parent';
-        
-        try {
-          await base44.entities.User.update(user.id, {
-            persona: newPersona,
-            roles: [newPersona],
-            onboarding_completed: false
-          });
-          updated++;
-        } catch (err) {
-          console.error('Failed to update user:', user.email, err);
-          errors++;
-        }
+      // Use backend function for bulk update (bypasses RLS)
+      const response = await fixMissingPersonas({ dryRun: false });
+      
+      if (response.data?.success) {
+        const { summary } = response.data;
+        toast({
+          title: "✅ Bulk Update Complete!",
+          description: `Updated ${summary.students + summary.parents} users (${summary.students} students, ${summary.parents} parents)${summary.errors > 0 ? `, ${summary.errors} errors` : ''}`,
+        });
+        onComplete?.();
+      } else {
+        throw new Error(response.data?.error || 'Bulk update failed');
       }
-
-      toast({
-        title: "✅ Bulk Update Complete!",
-        description: `Updated ${updated} users${errors > 0 ? `, ${errors} errors` : ''}`,
-      });
-      onComplete?.();
     } catch (error) {
       console.error('Bulk update error:', error);
       toast({
