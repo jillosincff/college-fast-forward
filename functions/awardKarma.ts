@@ -174,7 +174,8 @@ Deno.serve(async (req) => {
       boost_multiplier: familyBoost,
       boost_expires_at: boostExpiresAt.toISOString(),
       boosted_students: boostResult.boostedStudents,
-      boosted_count: boostResult.count
+      boosted_count: boostResult.count,
+      alumni_career_requests_boosted: alumniCareerRequestsBoosted
     });
     
   } catch (error) {
