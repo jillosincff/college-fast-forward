@@ -155,9 +155,10 @@ function calculateUserGrowth(users, oneWeekAgo, oneMonthAgo) {
     return created >= twoWeeksAgo && created < oneWeekAgo;
   }).length;
 
-  // User type breakdown
+  // User type breakdown - check for empty string, null, and undefined
   const byType = users.reduce((acc, user) => {
-    const type = user.persona || 'unknown';
+    const hasValidPersona = user.persona && user.persona.trim() !== '';
+    const type = hasValidPersona ? user.persona : 'unknown';
     acc[type] = (acc[type] || 0) + 1;
     return acc;
   }, {});
