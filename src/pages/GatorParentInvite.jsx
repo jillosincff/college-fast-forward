@@ -27,6 +27,9 @@ export default function GatorParentInvite() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestSubmitted, setRequestSubmitted] = useState(false);
 
+  // User type for "Have Code" section
+  const [codeUserType, setCodeUserType] = useState('');
+
   const handleJoinWithCode = async () => {
     if (!inviteCode.trim()) {
       toast({
@@ -36,13 +39,23 @@ export default function GatorParentInvite() {
       });
       return;
     }
+    
+    if (!codeUserType) {
+      toast({
+        title: "Please Select Role",
+        description: "Please select whether you're an alumni or parent",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsVerifyingCode(true);
     const code = inviteCode.trim().toUpperCase();
     
     try {
-      // Store role and code for after OAuth
-      localStorage.setItem('pending_invite_role', 'parent');
+      // Store role (alumni or parent) and code for after OAuth
+      const role = codeUserType === 'uf_alumni' ? 'alumni' : 'parent';
+      localStorage.setItem('pending_invite_role', role);
       localStorage.setItem('pending_invite_code', code);
       
       // Redirect to GatorAuth which will handle the OAuth flow
