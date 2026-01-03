@@ -13,10 +13,10 @@ import { useForm, Controller } from 'react-hook-form';
 
 // Alumni career help types
 const ALUMNI_HELP_TYPES = [
-  { value: 'senior_executive_search', label: 'Senior/Executive Role Search', icon: '👔' },
-  { value: 'career_transition', label: 'Career Transition Advice', icon: '🔄' },
-  { value: 'board_advisory', label: 'Board or Advisory Positions', icon: '🎯' },
-  { value: 'industry_shift', label: 'Industry Shift Networking', icon: '🌐' },
+  { value: 'new_job_search', label: 'New job search', icon: '💼' },
+  { value: 'career_transition', label: 'Career transition', icon: '🔄' },
+  { value: 'industry_shift', label: 'Industry shift', icon: '🌐' },
+  { value: 'business_advice', label: 'Business advice', icon: '💡' },
 ];
 
 export default function JobRequestForm({
@@ -265,7 +265,7 @@ export default function JobRequestForm({
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 flex items-center gap-2">
               <span>🔒</span>
-              <span><strong>Privacy note:</strong> Alumni career requests are only visible to other parents and alumni — students won't see them.</span>
+              <span><strong>Privacy note:</strong> Alumni requests are private — visible only to other parents and alumni in the network (not to students).</span>
             </p>
           </div>
         </CardContent>
