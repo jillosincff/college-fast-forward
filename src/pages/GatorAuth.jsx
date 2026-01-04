@@ -347,7 +347,9 @@ export default function GatorAuth() {
     
     // Parents and Alumni need invite code
     if ((selectedRole === 'parent' || selectedRole === 'alumni') && !hasInviteCode) {
-      console.log('📝 [GatorAuth] Parent/Alumni needs invite code');
+      console.log('📝 [GatorAuth] Parent/Alumni needs invite code, selectedRole:', selectedRole);
+      // Ensure role is saved before navigating
+      localStorage.setItem('pending_invite_role', selectedRole);
       navigate('GatorInviteCode');
       return;
     }
