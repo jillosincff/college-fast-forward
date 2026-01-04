@@ -225,14 +225,17 @@ export default function GatorWelcome() {
 
     if (needsUpdate && !updateInProgressRef.current) {
       console.log('🔄 [GatorWelcome] Updating persona from', user.persona, 'to', intendedRole);
+      console.log('🔄 [GatorWelcome] intendedRole value:', intendedRole, 'type:', typeof intendedRole);
       updateInProgressRef.current = true;
       
+      // CRITICAL: Ensure intendedRole is the actual value ('alumni', 'parent', 'gator')
       const updateData = {
         persona: intendedRole,
         roles: [intendedRole],
         onboarding_completed: false,
         is_new_signup: true
       };
+      console.log('🔄 [GatorWelcome] Update data:', JSON.stringify(updateData));
       
       const MAX_VERIFY_ATTEMPTS = 2;
       
