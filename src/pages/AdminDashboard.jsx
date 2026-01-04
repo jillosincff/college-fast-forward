@@ -659,6 +659,12 @@ const AdminDashboard = () => {
             >
               🎁 Referrals
             </TabsTrigger>
+            <TabsTrigger 
+              value="persona-audit" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+            >
+              🔍 Persona Audit
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
