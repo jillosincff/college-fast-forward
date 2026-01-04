@@ -169,13 +169,13 @@ export default function FirstTimeUserDashboard({
             </div>
           )}
           
-          {/* Alumni Karma Status */}
+          {/* Alumni Karma Status - no family/student language */}
           {isAlumni && (
             <div className="rounded-lg p-3 bg-white/10">
               <div className="flex items-center gap-2">
                 <Zap size={16} className="text-yellow-300" />
                 <span className="text-sm font-semibold">
-                  Higher karma = more visibility for your career requests
+                  Higher karma = more visibility for your requests
                 </span>
               </div>
             </div>
@@ -383,16 +383,16 @@ export default function FirstTimeUserDashboard({
       {/* How Karma Works - Different for Alumni vs Parents */}
       <details className="bg-slate-100 rounded-xl" open={!isAlumni && !hasLinkedStudent}>
         <summary className="px-6 py-4 cursor-pointer font-medium text-slate-700 hover:text-slate-900">
-          💡 How does {isAlumni ? 'Karma' : 'Family Karma'} work?
+          💡 How does {isAlumni ? 'karma' : 'Family Karma'} work?
         </summary>
         <div className="px-6 pb-4 text-sm text-slate-600 space-y-2">
-          <p><strong>+10 points</strong> — Answer a student question</p>
-          <p><strong>+5 points</strong> — Get upvoted by the community</p>
-          <p><strong>+50 points</strong> — Student marks your answer as "Best"</p>
+          <p><strong>+10 points</strong> — Answer a question</p>
+          <p><strong>+5 points</strong> — Get upvoted</p>
+          <p><strong>+50 points</strong> — Marked as "Best Answer"</p>
           <div className="pt-3 mt-3 border-t border-slate-200">
             {isAlumni ? (
               <p className="font-semibold text-[#0021A5]">
-                📌 Your karma boosts visibility for your own career requests when you need help.
+                📌 Higher karma = more visibility for your career requests.
               </p>
             ) : (
               <>

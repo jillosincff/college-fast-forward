@@ -144,24 +144,24 @@ export default function AlumniKarmaWidget({ user, compact = false }) {
 
           {/* Right: Ways to Earn Points */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-4">
-            <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Points:</h4>
+            <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Karma:</h4>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">💬 Answer a student question</span>
+                <span className="text-white">💬 Answer a question</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
               </div>
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">⬆️ Get upvoted by community</span>
+                <span className="text-white">⬆️ Get upvoted</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
               </div>
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">✅ Marked "Best" by student</span>
+                <span className="text-white">✅ Marked "Best Answer"</span>
                 <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
               </div>
             </div>
             <div className="mt-3 pt-2 border-t border-white/20">
               <p className="text-[11px] text-white font-semibold text-center">
-                📌 Higher karma = more visibility for YOUR career requests
+                📌 Higher karma = more visibility for your career requests
               </p>
             </div>
           </div>

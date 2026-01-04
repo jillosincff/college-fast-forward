@@ -75,10 +75,8 @@ export default function Onboarding() {
   const [alumniStory, setAlumniStory] = useState('');
   const [storyAnonymous, setStoryAnonymous] = useState(true);
   
-  // Step 4: Visibility (or step 3 for parents)
+  // Visibility setting
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
-  
-  // Step 5 is now Link Student (or step 4 for parents)
 
   // LinkedIn URL validation
   const handleLinkedInChange = (value) => {
@@ -231,7 +229,7 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 6 steps (no link student), Parents have 5
+  // Progress bar component - Alumni has 6 steps, Parents have 5 (with link student)
   const totalSteps = isAlumni ? 6 : 5;
   
   const ProgressBar = () => (
@@ -274,7 +272,7 @@ export default function Onboarding() {
           </div>
         </>
       )}
-      {/* Link step only for parents */}
+      {/* Link step only for parents - Alumni skip this entirely */}
       {!isAlumni && (
         <>
           <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
@@ -308,29 +306,21 @@ export default function Onboarding() {
             <>
               <div className="py-3">
                 <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-                  Pay it forward and stay connected.
+                  Pay it forward to current students — and get discreet help with your own career when you need it.
                 </p>
               </div>
-              
-              <p className="text-lg text-white/90 mb-4">
-                Your experience is invaluable to current students — and the network is here for your career moves too.
-              </p>
               
               <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
                 <p className="text-white text-sm">
                   <strong>As an alum, you can:</strong>
                 </p>
                 <ul className="text-white text-sm mt-2 space-y-1 ml-4 list-disc">
-                  <li>Answer student questions and share your wisdom</li>
-                  <li>Post exclusive opportunities from your company</li>
-                  <li>Get discreet help with your own career transition, new role search, or industry shift</li>
-                  <li>Earn karma that boosts visibility for your requests</li>
+                  <li>Answer student questions and share your experience</li>
+                  <li>Post exclusive opportunities</li>
+                  <li>Privately post career requests (new role, industry shift, business advice)</li>
+                  <li>Earn karma that boosts visibility for your own requests</li>
                 </ul>
               </div>
-              
-              <p className="text-base text-white/90 mt-4">
-                Every time you help a student, you strengthen your legacy — and unlock priority for your own needs.
-              </p>
             </>
           ) : (
             <>
@@ -557,15 +547,10 @@ export default function Onboarding() {
               </h1>
               <p className="text-lg font-black mb-3 text-white">
                 {isAlumni 
-                  ? 'Pay it forward and stay connected.'
+                  ? 'Pay it forward to current students — and get help with your own career.'
                   : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
                 }
               </p>
-              {isAlumni && (
-                <p className="text-sm text-white/80">
-                  Your experience is invaluable to current students — and the network is here for your career moves too.
-                </p>
-              )}
             </>
           )}
           {step === 2 && (
@@ -688,22 +673,10 @@ export default function Onboarding() {
                     }
                   `}
                 >
-                  {isAlumni ? 'Complete Profile & Start Helping →' : 'Continue →'}
+                  Continue →
                 </button>
                 
-                {isAlumni && (
-                  <button
-                    onClick={() => {
-                      // Copy invite link or open invite modal
-                      const inviteUrl = `${window.location.origin}/#GatorAuth?role=alumni`;
-                      navigator.clipboard.writeText(inviteUrl);
-                      alert('Invite link copied! Share it with fellow alumni.');
-                    }}
-                    className="w-full py-3 rounded-xl font-semibold text-sm text-[#0021A5] border-2 border-[#0021A5]/30 hover:bg-[#0021A5]/5 transition-all mt-2"
-                  >
-                    Invite Fellow Alumni
-                  </button>
-                )}
+
               </div>
             </>
           )}
@@ -1120,12 +1093,12 @@ export default function Onboarding() {
                     </p>
                   </div>
                 )}
-                
-                {/* Alumni karma info */}
+
+                {/* Alumni karma info - no family/student language */}
                 {isAlumni && (
                   <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
                     <p className="text-sm text-blue-800">
-                      <strong>💡 Your Karma:</strong> Points you earn from helping students will boost visibility for your own career requests when you need help.
+                      <strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.
                     </p>
                   </div>
                 )}
@@ -1166,6 +1139,7 @@ export default function Onboarding() {
                       <p>📖 Sharing your story {storyAnonymous ? '(anonymously)' : '(with first name)'}</p>
                     )}
                     <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
+                    {/* Only show linked student for parents */}
                     {!isAlumni && linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
                 </div>
