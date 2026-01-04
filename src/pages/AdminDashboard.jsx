@@ -1065,6 +1065,11 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Persona Audit Tab */}
+            <TabsContent value="persona-audit" className="space-y-6">
+              <PersonaAuditSection />
+            </TabsContent>
           </Tabs>
         )}
       </div>
