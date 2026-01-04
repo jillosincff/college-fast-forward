@@ -2680,9 +2680,9 @@ const PersonaAuditSection = () => {
                           {user.major && <p>Major: {user.major}</p>}
                           {user.company && <p>Company: {user.company}</p>}
                           {user.job_title && <p>Title: {user.job_title}</p>}
-                          {(user.student_emails?.length > 0 || user.student_email) && (
-                            <p>Linked students: {user.student_emails?.join(', ') || user.student_email}</p>
-                          )}
+                          {(Array.isArray(user.student_emails) && user.student_emails.length > 0) || user.student_email ? (
+                            <p>Linked students: {Array.isArray(user.student_emails) ? user.student_emails.join(', ') : user.student_email}</p>
+                          ) : null}
                           <p className="text-slate-400">Created: {new Date(user.created_date).toLocaleDateString()}</p>
                         </div>
 
