@@ -360,10 +360,11 @@ export default function RoleAwareOpportunityForm({ onSubmit, isSubmitting, userR
   const handleCancel = () => {
     // Navigate to the appropriate dashboard based on user persona
     let dashboardPage = 'Dashboard'; // Default
-    if (user?.persona === 'parent') dashboardPage = 'ParentDashboard';
-    else if (user?.persona === 'alumni') dashboardPage = 'AlumniDashboard';
-    else if (user?.persona === 'admin') dashboardPage = 'AdminDashboard';
-    // Assuming a student dashboard is just '/dashboard' or similar if not explicitly defined
+    if (user?.persona === 'parent' || user?.persona === 'alumni' || user?.roles?.includes('parent') || user?.roles?.includes('alumni')) {
+      dashboardPage = 'ParentDashboard';
+    } else if (user?.persona === 'admin' || user?.roles?.includes('admin')) {
+      dashboardPage = 'AdminDashboard';
+    }
 
     navigate(dashboardPage);
   };
