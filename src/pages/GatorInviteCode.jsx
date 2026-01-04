@@ -144,8 +144,8 @@ export default function GatorInviteCode() {
     }
   };
 
-  const roleLabel = pendingRole === 'alumni' ? 'Alumni' : 'Parent';
-  const roleEmoji = pendingRole === 'alumni' ? '🎓' : '👨‍👩‍👧';
+  const roleLabel = pendingRole === 'alumni' ? 'Alumni' : pendingRole === 'gator' ? 'Student' : 'Parent';
+  const roleEmoji = pendingRole === 'alumni' ? '🎓' : pendingRole === 'gator' ? '📚' : '👨‍👩‍👧';
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ 
