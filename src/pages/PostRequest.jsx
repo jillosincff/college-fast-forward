@@ -467,7 +467,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
               <div className="hero-content">
                 <div className="hero-badge">🎯 Alumni Career Request</div>
                 <h1 className="hero-title">Get Help With Your Career</h1>
-                <p className="hero-subtitle" style={{ opacity: 0.85 }}>
+                <p className="hero-subtitle" style={{ opacity: 0.85, color: 'white' }}>
                   Private — visible only to other parents and alumni in the network
                 </p>
                 
