@@ -433,7 +433,7 @@ export default function CommunityInviteManager() {
                             <div className="flex-1">
                               <p className="text-xs text-slate-600">Target Role</p>
                               <p className="font-semibold text-slate-900 capitalize">
-                                {invite.invite_type?.includes('alumni') ? 'Alumni' : invite.invite_type?.includes('parent') ? 'Parents' : 'Students'}
+                                {invite.role === 'alumni' ? 'Alumni' : invite.role === 'gator' ? 'Students' : invite.role === 'parent' ? 'Parents' : (invite.invite_type?.includes('alumni') ? 'Alumni' : invite.invite_type?.includes('parent') ? 'Parents' : 'Students')}
                               </p>
                             </div>
                           </div>
