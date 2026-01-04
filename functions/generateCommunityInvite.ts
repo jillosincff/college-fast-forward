@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
       inviter_email: user.email,
       inviter_name: user.full_name || user.email,
       invite_type,
+      role: target_role,
       status: 'active',
       expires_at: expiresAt.toISOString(),
       // Store metadata about community invite
