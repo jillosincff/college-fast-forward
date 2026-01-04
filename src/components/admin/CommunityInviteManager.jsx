@@ -13,8 +13,10 @@ import {
   ExternalLink, 
   Clock,
   Loader2,
-  BarChart3
+  BarChart3,
+  Trash2
 } from 'lucide-react';
+import { InviteCode } from '@/entities/InviteCode';
 
 export default function CommunityInviteManager() {
   const { toast } = useToast();
