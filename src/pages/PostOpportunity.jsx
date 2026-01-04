@@ -87,9 +87,11 @@ export default function PostOpportunityPage() {
       
       setTimeout(() => {
         let dashboardPage = 'Dashboard';
-        if (user.persona === 'parent') dashboardPage = 'ParentDashboard';
-        else if (user.persona === 'alumni') dashboardPage = 'AlumniDashboard';
-        else if (user.persona === 'admin') dashboardPage = 'AdminDashboard';
+        if (user.persona === 'parent' || user.persona === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+          dashboardPage = 'ParentDashboard';
+        } else if (user.persona === 'admin' || user.roles?.includes('admin')) {
+          dashboardPage = 'AdminDashboard';
+        }
         
         navigate(dashboardPage);
       }, 2000);
