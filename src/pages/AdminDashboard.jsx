@@ -33,6 +33,8 @@ import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
 import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
 import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
+import { Opportunity } from '@/entities/Opportunity';
+import { Trash2 } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
