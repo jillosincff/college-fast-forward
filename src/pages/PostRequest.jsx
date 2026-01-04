@@ -235,6 +235,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
           font-weight: 700;
           margin-bottom: 16px;
           line-height: 1.2;
+          color: white;
         }
 
         .hero-subtitle {
