@@ -15,7 +15,9 @@ export default function GatorInviteCode() {
   const [approvedInvite, setApprovedInvite] = useState(null);
   
   // Get the pending role from localStorage (set by GatorAuth)
-  const pendingRole = localStorage.getItem('pending_invite_role') || 'parent';
+  // CRITICAL: Don't default to 'parent' - user explicitly selected their role
+  const pendingRole = localStorage.getItem('pending_invite_role');
+  console.log('🔍 [GatorInviteCode] pendingRole from localStorage:', pendingRole);
 
   // Check if user has an approved invite request (auto-fill their code)
   useEffect(() => {
@@ -103,8 +105,10 @@ export default function GatorInviteCode() {
       
       if (response.data?.success) {
         // Store verified invite code with timestamp
-        const role = response.data.role || pendingRole || 'parent';
-        console.log('✅ Code verified, role:', role);
+        // CRITICAL: ALWAYS use pendingRole (user's selection) over response.data.role (code's default)
+        // The user explicitly chose alumni vs parent on the role selection screen
+        const role = pendingRole || response.data.role || 'parent';
+        console.log('✅ Code verified. Using role:', role, '(pendingRole:', pendingRole, ', response.role:', response.data.role, ')');
         
         localStorage.setItem('pending_invite_code', trimmedCode);
         localStorage.setItem('pending_invite_role', role);
