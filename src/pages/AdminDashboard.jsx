@@ -667,6 +667,13 @@ const AdminDashboard = () => {
             >
               🔍 Persona Audit
             </TabsTrigger>
+            <TabsTrigger 
+              value="opportunities" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+            >
+              <Briefcase className="w-4 h-4 mr-1" />
+              Opportunities
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
