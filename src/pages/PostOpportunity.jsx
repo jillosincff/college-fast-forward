@@ -36,7 +36,7 @@ export default function PostOpportunityPage() {
         ...formData,
         status: 'active',
         visibility: 'public',
-        created_by_role: user.persona || 'student',
+        created_by_role: user.persona || user.roles?.[0] || 'parent',
         org_name: formData.org_name || 'Organization',
         city: formData.city || '',
         state: formData.state || '',
