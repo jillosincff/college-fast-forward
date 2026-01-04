@@ -105,10 +105,11 @@ export default function GatorInviteCode() {
       
       if (response.data?.success) {
         // Store verified invite code with timestamp
-        // CRITICAL: ALWAYS use pendingRole (user's selection) over response.data.role (code's default)
-        // The user explicitly chose alumni vs parent on the role selection screen
-        const role = pendingRole || response.data.role || 'parent';
-        console.log('✅ Code verified. Using role:', role, '(pendingRole:', pendingRole, ', response.role:', response.data.role, ')');
+        // CRITICAL: ALWAYS use pendingRole (user's selection) - they explicitly chose alumni vs parent
+        // The invite code's role is just a default, user selection takes precedence
+        const userSelectedRole = localStorage.getItem('pending_invite_role');
+        const role = userSelectedRole || pendingRole || response.data.role || 'parent';
+        console.log('✅ Code verified. Using role:', role, '(userSelectedRole:', userSelectedRole, ', pendingRole:', pendingRole, ', response.role:', response.data.role, ')');
         
         localStorage.setItem('pending_invite_code', trimmedCode);
         localStorage.setItem('pending_invite_role', role);
