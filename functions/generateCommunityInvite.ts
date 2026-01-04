@@ -81,7 +81,13 @@ Deno.serve(async (req) => {
       invite_type = 'parent_to_parent';
     } else if (user.roles?.includes('admin')) {
       // Admins can create any type
-      invite_type = target_role === 'gator' ? 'admin_to_gator' : 'admin_to_parent';
+      if (target_role === 'gator') {
+        invite_type = 'admin_to_gator';
+      } else if (target_role === 'alumni') {
+        invite_type = 'admin_to_alumni';
+      } else {
+        invite_type = 'admin_to_parent';
+      }
     }
 
     const inviteCode = await base44.asServiceRole.entities.InviteCode.create({
