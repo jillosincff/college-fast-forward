@@ -41,6 +41,13 @@ export default function Profile() {
       setIsLoading(true);
       setError(null);
       
+      // If viewing own profile (no id param), just use currentUser directly
+      if (!id && currentUser) {
+        setProfileUser(currentUser);
+        setIsLoading(false);
+        return;
+      }
+      
       const profileId = id || currentUser?.id;
 
       if (!profileId) {
@@ -56,7 +63,12 @@ export default function Profile() {
         setProfileUser(userToDisplay);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-        setError("Could not load profile. The user may not exist.");
+        // If fetching by ID failed but we have currentUser and it matches, use it
+        if (currentUser && currentUser.id === profileId) {
+          setProfileUser(currentUser);
+        } else {
+          setError("Could not load profile. The user may not exist.");
+        }
       } finally {
         setIsLoading(false);
       }
