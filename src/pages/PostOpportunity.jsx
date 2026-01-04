@@ -10,17 +10,43 @@ import RoleAwareOpportunityForm from '@/components/opportunities/RoleAwareOpport
 import { boostStudentRequests } from '@/functions/boostStudentRequests';
 
 export default function PostOpportunityPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Show loading while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Please Sign In</h2>
+            <p className="text-slate-600 mb-4">You need to be signed in to post opportunities.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleSubmit = async (formData, e) => {
     if (e) {
       e.preventDefault();
     }
     
-    if (!user) {
+    if (!user || !user.email) {
       toast({
         title: "Please sign in",
         description: "You need to be signed in to post opportunities.",
