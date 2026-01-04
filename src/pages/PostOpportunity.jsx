@@ -114,15 +114,17 @@ export default function PostOpportunityPage() {
 
       setShowSuccess(true);
       
+      // Determine dashboard and redirect immediately with hash change
+      let dashboardPage = 'Dashboard';
+      if (user.persona === 'parent' || user.persona === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+        dashboardPage = 'ParentDashboard';
+      } else if (user.persona === 'admin' || user.roles?.includes('admin')) {
+        dashboardPage = 'AdminDashboard';
+      }
+      
+      // Use direct hash navigation to avoid routing interference
       setTimeout(() => {
-        let dashboardPage = 'Dashboard';
-        if (user.persona === 'parent' || user.persona === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
-          dashboardPage = 'ParentDashboard';
-        } else if (user.persona === 'admin' || user.roles?.includes('admin')) {
-          dashboardPage = 'AdminDashboard';
-        }
-        
-        navigate(dashboardPage);
+        window.location.hash = dashboardPage;
       }, 2000);
       
     } catch (error) {
