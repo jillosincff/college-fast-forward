@@ -15,10 +15,10 @@ export default function AlumniWelcomeHero({ user, stats, hasActivity = false }) 
             Alumni Network
           </div>
           <h1 className="hero-title">
-            Help Students. Stay Connected. Get Help When You Need It.
+            Help a student today — earn karma and keep your network active.
           </h1>
           <p className="hero-subtitle">
-            Answer a question or post an opportunity — earn karma and keep your network alive.
+            Answer questions, share opportunities, and build karma for your own career requests.
           </p>
           
           <div className="hero-actions">
@@ -129,13 +129,13 @@ export default function AlumniWelcomeHero({ user, stats, hasActivity = false }) 
       <div className="hero-content">
         <div className="karma-badge">
           <span className="karma-icon">⚡</span>
-          Family Karma Active
+          Karma Active
         </div>
         <h1 className="hero-title">
           Your impact: {stats?.studentsHelped || 0} student{(stats?.studentsHelped || 0) !== 1 ? 's' : ''} helped this month!
         </h1>
         <p className="hero-subtitle">
-          Your responses boost visibility for your career requests too.
+          Your karma boosts visibility for your own career requests.
         </p>
         
         <div className="hero-actions">
