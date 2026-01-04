@@ -2890,7 +2890,7 @@ const OpportunitiesManagement = () => {
                     </div>
                     <p className="text-sm text-slate-600">{opp.org_name || 'No organization'}</p>
                     <div className="mt-2 text-xs text-slate-500 space-y-1">
-                      <p>Created: {new Date(opp.created_date).toLocaleDateString()} by {opp.created_by || 'Unknown'}</p>
+                      <p>Created: {new Date(opp.created_date).toLocaleDateString()} by {opp.created_by === 'anonymous' ? (opp.contact_email || 'Unknown') : (opp.created_by || 'Unknown')}</p>
                       {opp.city && opp.state && <p>Location: {opp.city}, {opp.state}</p>}
                       {opp.location_type && <p>Type: {opp.location_type}</p>}
                     </div>
