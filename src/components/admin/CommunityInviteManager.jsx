@@ -437,6 +437,17 @@ export default function CommunityInviteManager() {
                               </p>
                             </div>
                           </div>
+
+                          {/* Delete Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteInvite(invite.id, invite.code)}
+                            className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Invite
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
