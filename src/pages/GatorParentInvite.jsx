@@ -54,9 +54,12 @@ export default function GatorParentInvite() {
     
     try {
       // Store role (alumni or parent) and code for after OAuth
+      // CRITICAL: uf_alumni -> 'alumni', uf_parent -> 'parent'
       const role = codeUserType === 'uf_alumni' ? 'alumni' : 'parent';
+      console.log('🔐 [GatorParentInvite] Storing role:', role, 'from selection:', codeUserType);
       localStorage.setItem('pending_invite_role', role);
       localStorage.setItem('pending_invite_code', code);
+      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
       
       // Redirect to GatorAuth which will handle the OAuth flow
       navigate('GatorAuth');
