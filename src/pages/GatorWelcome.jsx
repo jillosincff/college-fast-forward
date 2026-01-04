@@ -283,8 +283,15 @@ export default function GatorWelcome() {
           if (verified) {
             console.log('✅ [GatorWelcome] Persona verified, routing based on role');
             clearPendingInviteData();
-            refreshUser();
             updateInProgressRef.current = false;
+            
+            // CRITICAL: Wait for AuthContext to fully refresh BEFORE navigating
+            // Otherwise Layout will see stale user.persona = undefined and redirect to GatorAuth
+            await refreshUser();
+            // Small extra delay to ensure state propagation
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            console.log('✅ [GatorWelcome] AuthContext refreshed, now navigating to onboarding');
             
             // Skip welcome screen - go directly to role-specific onboarding
             if (intendedRole === 'gator') {
