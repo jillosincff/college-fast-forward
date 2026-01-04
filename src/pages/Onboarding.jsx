@@ -231,8 +231,8 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 7 steps, Parents have 5
-  const totalSteps = isAlumni ? 7 : 5;
+  // Progress bar component - Alumni has 6 steps (no link student), Parents have 5
+  const totalSteps = isAlumni ? 6 : 5;
   
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
@@ -274,16 +274,21 @@ export default function Onboarding() {
           </div>
         </>
       )}
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 4) ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      {/* Link step only for parents */}
+      {!isAlumni && (
+        <>
+          <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+          <div className="flex items-center gap-1 text-sm">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
+              {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
+            </span>
+            <span className="hidden sm:inline text-white/80 text-xs">Link</span>
+          </div>
+        </>
+      )}
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 4) ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > (isAlumni ? 6 : 4) ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
-        </span>
-        <span className="hidden sm:inline text-white/80 text-xs">Link</span>
-      </div>
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 7 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
-      <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 7 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
         <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
       </div>
     </div>
@@ -471,12 +476,12 @@ export default function Onboarding() {
       );
     }
     
-    // Link Student step (step 4 for parents, step 6 for alumni)
-    if ((step === 4 && !isAlumni) || (step === 6 && isAlumni)) {
+    // Link Student step (step 4 for parents ONLY - alumni skip this)
+    if (step === 4 && !isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step {isAlumni ? '6 of 7' : '4 of 5'}</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 5</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
           </div>
           
@@ -505,8 +510,8 @@ export default function Onboarding() {
       );
     }
     
-    // Ready step (step 5 for parents, step 7 for alumni)
-    if ((step === 5 && !isAlumni) || (step === 7 && isAlumni)) {
+    // Ready step (step 5 for parents, step 6 for alumni)
+    if ((step === 5 && !isAlumni) || (step === 6 && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
@@ -587,13 +592,13 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Share your story with students</p>
             </>
           )}
-          {((step === 4 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {step === 4 && !isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
               <p className="text-sm text-white/90">Unlock Family Karma boosts</p>
             </>
           )}
-          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
+          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
@@ -1061,23 +1066,23 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 4 (Parents) / STEP 6 (Alumni): Link Your Student */}
-          {((step === 4 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {/* STEP 4 (Parents ONLY): Link Your Student - Alumni skip this step */}
+          {step === 4 && !isAlumni && (
             <LinkStudentStep
               user={user}
               onComplete={(student) => {
                 setLinkedStudent(student);
-                setStep(isAlumni ? 7 : 5);
+                setStep(5);
               }}
               onSkip={() => {
                 setSkippedLinking(true);
-                setStep(isAlumni ? 7 : 5);
+                setStep(5);
               }}
             />
           )}
 
-          {/* STEP 5 (Parents) / STEP 7 (Alumni): Ready */}
-          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
+          {/* STEP 5 (Parents) / STEP 6 (Alumni): Ready */}
+          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -1089,8 +1094,8 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-6">
-                {/* Show linked student status */}
-                {linkedStudent && (
+                {/* Show linked student status - PARENTS ONLY */}
+                {!isAlumni && linkedStudent && (
                   <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -1108,10 +1113,19 @@ export default function Onboarding() {
                   </div>
                 )}
 
-                {skippedLinking && (
+                {!isAlumni && skippedLinking && (
                   <div className="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">
                     <p className="text-sm text-amber-800">
                       ⚠️ <strong>No student linked.</strong> You can link them anytime from your dashboard to unlock karma boosts.
+                    </p>
+                  </div>
+                )}
+                
+                {/* Alumni karma info */}
+                {isAlumni && (
+                  <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+                    <p className="text-sm text-blue-800">
+                      <strong>💡 Your Karma:</strong> Points you earn from helping students will boost visibility for your own career requests when you need help.
                     </p>
                   </div>
                 )}
@@ -1152,13 +1166,13 @@ export default function Onboarding() {
                       <p>📖 Sharing your story {storyAnonymous ? '(anonymously)' : '(with first name)'}</p>
                     )}
                     <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
-                    {linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
+                    {!isAlumni && linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(isAlumni ? 6 : 4)}
+                    onClick={() => setStep(isAlumni ? 5 : 4)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
