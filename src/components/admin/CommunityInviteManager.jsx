@@ -114,6 +114,28 @@ export default function CommunityInviteManager() {
     });
   };
 
+  const handleDeleteInvite = async (inviteId, code) => {
+    if (!confirm(`Are you sure you want to delete invite code "${code}"?`)) {
+      return;
+    }
+    
+    try {
+      await InviteCode.delete(inviteId);
+      toast({
+        title: "Deleted",
+        description: `Invite code ${code} has been deleted`,
+      });
+      loadCommunityInvites();
+    } catch (error) {
+      console.error('Failed to delete invite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete invite code",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getUsagePercentage = (invite) => {
     return Math.round((invite.current_uses / invite.max_uses) * 100);
   };
