@@ -38,7 +38,9 @@ export default function GatorAuth() {
   useEffect(() => {
     if (step === 'welcome-back' && user) {
       const timer = setTimeout(() => {
-        navigate(user.persona === 'parent' ? 'ParentDashboard' : 'Dashboard');
+        const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
+                                  user.roles?.includes('parent') || user.roles?.includes('alumni');
+        navigate(isParentOrAlumni ? 'ParentDashboard' : 'Dashboard');
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -397,7 +399,10 @@ export default function GatorAuth() {
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'welcome-back') {
-    const dashboardUrl = user?.persona === 'parent' ? 'ParentDashboard' : 'Dashboard';
+    // Both parents and alumni go to ParentDashboard
+    const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' || 
+                              user?.roles?.includes('parent') || user?.roles?.includes('alumni');
+    const dashboardUrl = isParentOrAlumni ? 'ParentDashboard' : 'Dashboard';
     
     // Auto-redirect handled by useEffect above (prevents memory leak)
     
