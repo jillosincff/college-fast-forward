@@ -112,14 +112,10 @@ export default function GatorInviteCode() {
         const codeRole = response.data.role;
         
         // Determine final role:
-        // 1. If code explicitly specifies 'alumni', use alumni (alumni-specific invite)
-        // 2. Otherwise use user's selection (they explicitly chose parent vs alumni)
-        // 3. Fallback to parent
-        let role = userSelectedRole || 'parent';
-        if (codeRole === 'alumni') {
-          // This is an alumni-specific code - use alumni role
-          role = 'alumni';
-        }
+        // CRITICAL: User's explicit selection ALWAYS takes precedence
+        // If user selected 'parent', they are a parent - even if using an alumni code
+        // The code type doesn't change who they ARE
+        const role = userSelectedRole || codeRole || 'parent';
         console.log('✅ Code verified. Using role:', role, '(userSelectedRole:', userSelectedRole, ', codeRole:', codeRole, ')');
         
         localStorage.setItem('pending_invite_code', trimmedCode);
