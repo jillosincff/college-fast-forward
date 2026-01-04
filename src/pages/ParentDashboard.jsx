@@ -420,15 +420,20 @@ export default function ParentDashboard() {
                 className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
                 style={{ color: '#0021A5' }}
               >
-                Help More Students, Boost Your Own ⚡
+                {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
+                  ? 'Help Students, Boost Your Requests ⚡'
+                  : 'Help More Students, Boost Your Own ⚡'
+                }
               </h2>
               <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
-                {myStudents.length > 0 
-                  ? `Every action you take earns karma — directly boosting ${getStudentFirstName(myStudents[0])}'s visibility.`
-                  : 'Every action you take earns karma — link your student to activate boosts.'
+                {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
+                  ? 'Every action you take earns karma — boosting visibility for your own career requests.'
+                  : myStudents.length > 0 
+                    ? `Every action you take earns karma — directly boosting ${getStudentFirstName(myStudents[0])}'s visibility.`
+                    : 'Every action you take earns karma — link your student to activate boosts.'
                 }
               </p>
-              {myStudents.length === 0 && (
+              {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
                 <p className="text-sm text-amber-600 mt-2 font-medium">
                   ⚠️ Link your student to see their name here and activate boosts.
                 </p>
