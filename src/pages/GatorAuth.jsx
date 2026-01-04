@@ -162,9 +162,20 @@ export default function GatorAuth() {
               return;
             }
             
-            // For non-UFL gators or parent/alumni, check for invite code
-            if (!pendingCode && !isUFLStudent) {
-              console.log('🚫 [GatorAuth] No invite code, redirecting to invite code page');
+            // CRITICAL: Students MUST use @ufl.edu email - no invite code workaround
+            if (pendingRole === 'gator' && !isUFLStudent) {
+              console.log('🚫 [GatorAuth] Non-UFL email trying to register as student - blocked');
+              localStorage.removeItem('pending_invite_role');
+              localStorage.removeItem('pending_invite_code');
+              setError('Students must use their @ufl.edu email address. Please sign out and register with your UFL email, or select Parent/Alumni if that\'s your role.');
+              setStep('role-select');
+              processingRef.current = false;
+              return;
+            }
+            
+            // For parent/alumni, check for invite code
+            if (!pendingCode && (pendingRole === 'parent' || pendingRole === 'alumni')) {
+              console.log('🚫 [GatorAuth] No invite code for parent/alumni, redirecting to invite code page');
               navigate('GatorInviteCode');
               processingRef.current = false;
               return;
