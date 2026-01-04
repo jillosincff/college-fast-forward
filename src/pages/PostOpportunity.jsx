@@ -42,9 +42,12 @@ export default function PostOpportunityPage() {
         state: formData.state || '',
         contact_name: formData.contact_name || user.full_name || '',
         contact_email: formData.contact_email || user.email || '',
+        poster_email: user.email, // Explicit tracking for ownership
       };
 
+      console.log('📝 Creating opportunity as user:', user.email, 'with data:', opportunityData);
       const result = await Opportunity.create(opportunityData);
+      console.log('✅ Opportunity created:', result);
       
       // PARENT POWER BOOST: If parent has linked students, boost their requests
       if ((user.persona === 'parent' || user.roles?.includes('parent')) && 
