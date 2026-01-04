@@ -126,7 +126,7 @@ export default function Onboarding() {
   const canProceedStep1 = !linkedinError;
   const canProceedStep2 = expertise.length > 0;
   const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
-  const canProceedStep5Alumni = storyOption !== '';
+  const canProceedStep5Alumni = storyOption !== '' && (storyOption !== 'yes' || alumniStory.trim().length > 0);
   
   // Generate graduation year options (current year back to 1960)
   const currentYear = new Date().getFullYear();
@@ -784,7 +784,7 @@ export default function Onboarding() {
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="e.g., 'Stay-at-home mom, my husband works in tech — happy to make intros'"
+                    placeholder=""
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                              resize-none h-20 focus:border-[#0021A5] focus:outline-none transition-colors"
                     maxLength={500}
@@ -980,17 +980,23 @@ export default function Onboarding() {
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Your Story
+                        Your Story <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         value={alumniStory}
                         onChange={(e) => setAlumniStory(e.target.value.slice(0, 500))}
                         placeholder="Keep it brief — what advice or moment from your path would you share with current students?"
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                                 resize-none h-32 focus:border-[#0021A5] focus:outline-none transition-colors"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-base
+                                 resize-none h-32 focus:outline-none transition-colors
+                                 ${alumniStory.trim().length === 0 ? 'border-amber-300 focus:border-amber-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
                         maxLength={500}
                       />
-                      <p className="text-xs text-slate-400 text-right mt-1">{alumniStory.length}/500</p>
+                      <div className="flex justify-between mt-1">
+                        {alumniStory.trim().length === 0 && (
+                          <p className="text-xs text-amber-600">Please share your story to continue</p>
+                        )}
+                        <p className="text-xs text-slate-400 ml-auto">{alumniStory.length}/500</p>
+                      </div>
                     </div>
                     
                     <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
