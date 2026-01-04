@@ -60,6 +60,9 @@ const SEEKING_TYPE_CONFIG = {
 function getClassYear(gradYear) {
   if (!gradYear) return null;
   const year = typeof gradYear === 'string' ? parseInt(gradYear) : gradYear;
+  // Validate year is a real number
+  if (isNaN(year) || year < 1900 || year > 2100) return null;
+  
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
   const academicYear = currentMonth >= 7 ? currentYear + 1 : currentYear;
