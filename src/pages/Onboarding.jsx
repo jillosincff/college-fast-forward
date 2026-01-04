@@ -201,6 +201,7 @@ export default function Onboarding() {
   };
 
   const goToDashboard = () => {
+    // Alumni go to ParentDashboard (same as parents) since they share the helper view
     navigate('ParentDashboard');
   };
 

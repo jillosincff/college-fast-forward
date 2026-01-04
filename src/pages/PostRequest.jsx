@@ -156,9 +156,9 @@ export default function PostRequestPage() { // Renamed from PostRequest
         }
       }
       
-      // Navigate with refresh parameter to trigger reload
+      // Navigate to connections page after short delay
       setTimeout(() => {
-        navigate('Connections', { refresh: 'true' });
+        navigate('Connections');
       }, 1500);
       
     } catch (error) {
