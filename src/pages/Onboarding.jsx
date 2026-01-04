@@ -476,7 +476,7 @@ export default function Onboarding() {
           </div>
           
           <p className="text-xl text-white/90">
-            Unlock the most powerful feature: Family Karma.
+            Connect your student to boost their visibility.
           </p>
           
           <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
@@ -489,7 +489,7 @@ export default function Onboarding() {
           <div className="space-y-2 pt-4">
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">⚡</span>
-              <span className="font-semibold text-sm">Your karma = your student's boost</span>
+              <span className="font-semibold text-sm">Help others = boost your student</span>
             </div>
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">📌</span>
@@ -580,7 +580,7 @@ export default function Onboarding() {
           {step === 4 && !isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
-              <p className="text-sm text-white/90">Unlock Family Karma boosts</p>
+              <p className="text-sm text-white/90">Boost your student's visibility</p>
             </>
           )}
           {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
