@@ -1072,6 +1072,11 @@ const AdminDashboard = () => {
             <TabsContent value="persona-audit" className="space-y-6">
               <PersonaAuditSection />
             </TabsContent>
+
+            {/* Opportunities Management Tab */}
+            <TabsContent value="opportunities" className="space-y-6">
+              <OpportunitiesManagement />
+            </TabsContent>
           </Tabs>
         )}
       </div>
