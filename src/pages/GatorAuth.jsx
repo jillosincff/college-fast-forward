@@ -586,6 +586,7 @@ export default function GatorAuth() {
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-slate-900">I'm a UF Student</h3>
                     <p className="text-sm text-slate-600">Find jobs, internships & roommates</p>
+                    <p className="text-xs text-orange-600 mt-1 font-medium">Requires @ufl.edu email</p>
                   </div>
                   <div className={`w-5 h-5 rounded-full border-2 ${
                     selectedRole === 'gator' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
