@@ -170,6 +170,8 @@ export default function GatorAuth() {
               return;
             }
             
+            // CRITICAL: Use the pendingRole directly - don't default to 'parent'
+            console.log('🔄 [GatorAuth] Applying role:', pendingRole, 'with code:', pendingCode);
             await base44.auth.updateMe({
               persona: pendingRole,
               roles: [pendingRole],
@@ -350,6 +352,8 @@ export default function GatorAuth() {
     
     // Has invite code - apply role and continue
     try {
+      // CRITICAL: Use selectedRole which is the ACTUAL role the user picked (alumni vs parent)
+      console.log('🔄 [GatorAuth] Applying selected role:', selectedRole, 'with code:', hasInviteCode);
       await base44.auth.updateMe({
         persona: selectedRole,
         roles: [selectedRole],
