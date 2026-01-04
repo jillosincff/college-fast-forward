@@ -2781,4 +2781,149 @@ const PersonaAuditSection = () => {
   );
 };
 
+// Opportunities Management Component
+const OpportunitiesManagement = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [opportunities, setOpportunities] = useState([]);
+  const [deleting, setDeleting] = useState(null);
+
+  useEffect(() => {
+    loadOpportunities();
+  }, []);
+
+  const loadOpportunities = async () => {
+    setLoading(true);
+    try {
+      const opps = await Opportunity.filter({}, '-created_date', 100);
+      setOpportunities(opps || []);
+    } catch (error) {
+      console.error('Failed to load opportunities:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load opportunities",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (opp) => {
+    if (!confirm(`Are you sure you want to delete "${opp.title}"? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeleting(opp.id);
+    try {
+      await Opportunity.delete(opp.id);
+      toast({
+        title: "✅ Deleted",
+        description: `"${opp.title}" has been deleted`,
+      });
+      loadOpportunities();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete opportunity",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+        <p className="text-slate-600">Loading opportunities...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-green-600" />
+            Manage Opportunities
+          </CardTitle>
+          <p className="text-sm text-slate-600 mt-1">
+            View and delete job postings ({opportunities.length} total)
+          </p>
+        </div>
+        <Button onClick={loadOpportunities} variant="outline" size="sm">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {opportunities.length === 0 ? (
+          <div className="text-center py-8 text-slate-500">
+            <Briefcase className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+            <p>No opportunities found</p>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            {opportunities.map((opp) => (
+              <div 
+                key={opp.id}
+                className="p-4 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-slate-900 truncate">{opp.title}</h3>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        opp.status === 'active' ? 'bg-green-100 text-green-700' :
+                        opp.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {opp.status || 'active'}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                        {opp.opportunity_type || 'job'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600">{opp.org_name || 'No organization'}</p>
+                    <div className="mt-2 text-xs text-slate-500 space-y-1">
+                      <p>Created: {new Date(opp.created_date).toLocaleDateString()} by {opp.created_by || 'Unknown'}</p>
+                      {opp.city && opp.state && <p>Location: {opp.city}, {opp.state}</p>}
+                      {opp.location_type && <p>Type: {opp.location_type}</p>}
+                    </div>
+                    {opp.description && (
+                      <p className="mt-2 text-xs text-slate-500 line-clamp-2">
+                        {opp.description.substring(0, 150)}...
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDelete(opp)}
+                    disabled={deleting === opp.id}
+                    className="flex-shrink-0"
+                  >
+                    {deleting === opp.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export default AdminDashboard;
