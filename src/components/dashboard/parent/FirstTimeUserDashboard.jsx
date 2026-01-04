@@ -14,7 +14,8 @@ export default function FirstTimeUserDashboard({
 }) {
   // Check if user is alumni
   const isAlumni = user?.persona === 'alumni' || user?.roles?.includes('alumni');
-  const hasLinkedStudent = linkedStudents.length > 0;
+  // Alumni don't have linked students - they earn karma for their own requests
+  const hasLinkedStudent = !isAlumni && linkedStudents.length > 0;
   
   // Get karma info from user
   const karmaPoints = user?.karma_points || user?.karma_earned || 0;
@@ -67,15 +68,20 @@ export default function FirstTimeUserDashboard({
       {/* Motivational Header */}
       <div className="text-center py-4">
         <h2 className="text-2xl md:text-4xl font-black leading-tight mb-2" style={{ color: '#0021A5' }}>
-          Help More Students, Boost Your Own ⚡
+          {isAlumni 
+            ? 'Help a Student Today — Earn Karma ⚡'
+            : 'Help More Students, Boost Your Own ⚡'
+          }
         </h2>
         <p className="text-sm md:text-lg text-slate-600">
-          {hasLinkedStudent 
-            ? `Every action you take earns karma — directly boosting ${studentName}'s visibility.`
-            : 'Every action you take earns karma — link your student to activate boosts.'
+          {isAlumni
+            ? 'Every action you take earns karma — boosting visibility for your own career requests.'
+            : hasLinkedStudent 
+              ? `Every action you take earns karma — directly boosting ${studentName}'s visibility.`
+              : 'Every action you take earns karma — link your student to activate boosts.'
           }
         </p>
-        {!hasLinkedStudent && (
+        {!isAlumni && !hasLinkedStudent && (
           <p className="text-sm text-amber-600 mt-2 font-medium">
             ⚠️ Link your student to see their name here and activate boosts.
           </p>
@@ -97,7 +103,10 @@ export default function FirstTimeUserDashboard({
             <h3 className="text-xl font-bold mb-2 text-white">Answer a Student Question</h3>
             <p className="text-white/80 mb-4">
               Students are asking for career advice right now. Share your wisdom 
-              and earn karma to boost your student's profile.
+              {isAlumni 
+                ? ' and earn karma to boost your own career requests.'
+                : ' and earn karma to boost your student\'s profile.'
+              }
             </p>
             <button
               onClick={onBrowseQuestions}
@@ -138,8 +147,8 @@ export default function FirstTimeUserDashboard({
             />
           </div>
 
-          {/* Live Boost Status */}
-          {hasLinkedStudent && (
+          {/* Live Boost Status - Parents only */}
+          {!isAlumni && hasLinkedStudent && (
             <div className={`rounded-lg p-3 ${boostActive ? 'bg-yellow-400/20' : 'bg-white/10'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -156,6 +165,18 @@ export default function FirstTimeUserDashboard({
                     {boostTimeRemaining} left
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+          
+          {/* Alumni Karma Status */}
+          {isAlumni && (
+            <div className="rounded-lg p-3 bg-white/10">
+              <div className="flex items-center gap-2">
+                <Zap size={16} className="text-yellow-300" />
+                <span className="text-sm font-semibold">
+                  Higher karma = more visibility for your career requests
+                </span>
               </div>
             </div>
           )}
@@ -234,58 +255,60 @@ export default function FirstTimeUserDashboard({
         </div>
       </div>
 
-      {/* Secondary Actions - Connect Student & Profile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Secondary Actions - Connect Student (Parents only) & Profile */}
+      <div className={`grid grid-cols-1 ${isAlumni ? '' : 'md:grid-cols-2'} gap-4`}>
         
-        {/* Connect Your Student - Priority #1 */}
-        <div className={`rounded-xl border-2 p-6 transition-all ${
-          hasLinkedStudent 
-            ? 'bg-green-50 border-green-200' 
-            : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 hover:border-amber-400 hover:shadow-lg relative'
-        }`}>
-          {!hasLinkedStudent && (
-            <div className="absolute -top-2 -right-2">
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                REQUIRED
-              </span>
-            </div>
-          )}
-          <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              hasLinkedStudent ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
-            }`}>
-              {hasLinkedStudent && linkedStudents[0]?.profile_image ? (
-                <img 
-                  src={linkedStudents[0].profile_image} 
-                  alt={studentName}
-                  className="w-12 h-12 rounded-xl object-cover"
-                />
-              ) : (
-                <Link2 size={24} />
-              )}
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-1">
-                {hasLinkedStudent ? `✅ Linked to ${studentName}` : 'Connect Your Student'}
-              </h3>
-              <p className="text-sm text-slate-500 mb-3">
-                {hasLinkedStudent 
-                  ? 'Your karma now boosts their visibility!'
-                  : 'Link your student\'s account to boost their profile visibility'
-                }
-              </p>
-              {!hasLinkedStudent && (
-                <button
-                  onClick={onConnectStudent}
-                  className="text-sm font-bold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 bg-amber-200 px-3 py-1.5 rounded-lg"
-                >
-                  Search & Link Student
-                  <ArrowRight size={14} />
-                </button>
-              )}
+        {/* Connect Your Student - Parents Only */}
+        {!isAlumni && (
+          <div className={`rounded-xl border-2 p-6 transition-all ${
+            hasLinkedStudent 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 hover:border-amber-400 hover:shadow-lg relative'
+          }`}>
+            {!hasLinkedStudent && (
+              <div className="absolute -top-2 -right-2">
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                  REQUIRED
+                </span>
+              </div>
+            )}
+            <div className="flex items-start gap-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                hasLinkedStudent ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
+              }`}>
+                {hasLinkedStudent && linkedStudents[0]?.profile_image ? (
+                  <img 
+                    src={linkedStudents[0].profile_image} 
+                    alt={studentName}
+                    className="w-12 h-12 rounded-xl object-cover"
+                  />
+                ) : (
+                  <Link2 size={24} />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-800 mb-1">
+                  {hasLinkedStudent ? `✅ Linked to ${studentName}` : 'Connect Your Student'}
+                </h3>
+                <p className="text-sm text-slate-500 mb-3">
+                  {hasLinkedStudent 
+                    ? 'Your karma now boosts their visibility!'
+                    : 'Link your student\'s account to boost their profile visibility'
+                  }
+                </p>
+                {!hasLinkedStudent && (
+                  <button
+                    onClick={onConnectStudent}
+                    className="text-sm font-bold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 bg-amber-200 px-3 py-1.5 rounded-lg"
+                  >
+                    Search & Link Student
+                    <ArrowRight size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Complete Your Profile */}
         <div className="bg-white rounded-xl border-2 border-slate-200 p-6 hover:border-[#0021A5] hover:shadow-md transition-all">
@@ -313,8 +336,8 @@ export default function FirstTimeUserDashboard({
 
 
 
-      {/* MY STUDENTS SECTION */}
-      {hasLinkedStudent && (
+      {/* MY STUDENTS SECTION - Parents Only */}
+      {!isAlumni && hasLinkedStudent && (
         <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -357,24 +380,32 @@ export default function FirstTimeUserDashboard({
         </Card>
       )}
 
-      {/* How Karma Works - More Direct */}
-      <details className="bg-slate-100 rounded-xl" open={!hasLinkedStudent}>
+      {/* How Karma Works - Different for Alumni vs Parents */}
+      <details className="bg-slate-100 rounded-xl" open={!isAlumni && !hasLinkedStudent}>
         <summary className="px-6 py-4 cursor-pointer font-medium text-slate-700 hover:text-slate-900">
-          💡 How does Family Karma work?
+          💡 How does {isAlumni ? 'Karma' : 'Family Karma'} work?
         </summary>
         <div className="px-6 pb-4 text-sm text-slate-600 space-y-2">
           <p><strong>+10 points</strong> — Answer a student question</p>
           <p><strong>+5 points</strong> — Get upvoted by the community</p>
           <p><strong>+50 points</strong> — Student marks your answer as "Best"</p>
           <div className="pt-3 mt-3 border-t border-slate-200">
-            <p className="font-semibold text-[#0021A5]">
-              📌 Your karma pins your student's requests to the top of the feed for faster help.
-            </p>
-            {!hasLinkedStudent && (
-              <p className="text-amber-600 mt-2 flex items-center gap-2">
-                <AlertTriangle size={14} />
-                <span>Link your student first to activate these boosts!</span>
+            {isAlumni ? (
+              <p className="font-semibold text-[#0021A5]">
+                📌 Your karma boosts visibility for your own career requests when you need help.
               </p>
+            ) : (
+              <>
+                <p className="font-semibold text-[#0021A5]">
+                  📌 Your karma pins your student's requests to the top of the feed for faster help.
+                </p>
+                {!hasLinkedStudent && (
+                  <p className="text-amber-600 mt-2 flex items-center gap-2">
+                    <AlertTriangle size={14} />
+                    <span>Link your student first to activate these boosts!</span>
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
