@@ -299,9 +299,11 @@ export default function GatorAuth() {
     if (!selectedRole) return;
     
     // Save role FIRST (before anything else)
+    // CRITICAL: selectedRole should be exactly 'alumni', 'parent', or 'gator'
+    console.log('💾 [GatorAuth] handleRoleSelect called with selectedRole:', selectedRole, 'type:', typeof selectedRole);
     localStorage.setItem('pending_invite_role', selectedRole);
     localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-    console.log('💾 [GatorAuth] Role selected and saved:', selectedRole);
+    console.log('💾 [GatorAuth] Verified localStorage pending_invite_role:', localStorage.getItem('pending_invite_role'));
     
     // If user is NOT authenticated yet, show OAuth button
     if (!user) {
