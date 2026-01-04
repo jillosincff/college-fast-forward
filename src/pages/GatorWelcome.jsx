@@ -186,11 +186,12 @@ export default function GatorWelcome() {
       return;
     }
     
-    // Non-UFL students also need invite code
-    if (intendedRole === 'gator' && !isUFLStudent && !hasInviteCode) {
-      console.log('🚫 [GatorWelcome] Non-UFL student without invite code - redirecting');
-      localStorage.setItem('pending_invite_role', 'gator');
-      navigate('GatorInviteCode');
+    // CRITICAL: Students MUST use @ufl.edu email - no exceptions
+    if (intendedRole === 'gator' && !isUFLStudent) {
+      console.log('🚫 [GatorWelcome] Non-UFL email trying to register as student - blocked');
+      clearPendingInviteData();
+      // Redirect back to role selection with error
+      navigate('GatorAuth');
       return;
     }
     
