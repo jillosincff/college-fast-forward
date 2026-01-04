@@ -5,6 +5,7 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate, useParams } from '@/components/utils/navigation';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
+import AlumniCareerRequestForm from '@/components/jobs/AlumniCareerRequestForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Zap, TrendingUp, Heart, Lightbulb } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -202,6 +203,15 @@ export default function PostRequestPage() { // Renamed from PostRequest
           position: relative;
           border-radius: 1.5rem;
           margin: 24px;
+        }
+
+        .hero-section-alumni {
+          background: #0021A5;
+          min-height: 200px;
+          padding: 48px 24px;
+          color: white;
+          text-align: center;
+          position: relative;
         }
 
         .hero-content {
@@ -444,7 +454,61 @@ export default function PostRequestPage() { // Renamed from PostRequest
       `}</style>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Hero Section */}
+        {/* Alumni Career Request - Cleaner Hero */}
+        {isAlumniCareerRequest ? (
+          <>
+            <div className="hero-section-alumni">
+              <button onClick={handleBackToDashboard} className="back-button">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </button>
+              
+              <div className="hero-content">
+                <div className="hero-badge">🎯 Alumni Career Request</div>
+                <h1 className="hero-title">Get Help With Your Career</h1>
+                <p className="hero-subtitle" style={{ opacity: 0.85 }}>
+                  Private — visible only to other parents and alumni in the network
+                </p>
+                
+                <div className="hero-stats">
+                  <span className="stat-item">
+                    <Users className="w-4 h-4" />
+                    {stats.activeHelpers.toLocaleString()} active helpers
+                  </span>
+                  <span className="stat-item">
+                    <Zap className="w-4 h-4" />
+                    {stats.avgResponseTime} avg response
+                  </span>
+                  <span className="stat-item">
+                    <TrendingUp className="w-4 h-4" />
+                    ~{stats.successRate}% success rate
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Alumni Form Card */}
+            <div className="main-content" style={{ marginTop: '-20px' }}>
+              <div className="form-container">
+                <div className="form-header">
+                  <h2 className="form-title">Share Your Career Goals</h2>
+                  <p className="form-subtitle">
+                    The more specific you are, the better we can match you with the right connections.
+                  </p>
+                </div>
+
+                <AlumniCareerRequestForm 
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                  user={user}
+                  initialData={initialData}
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+        {/* Hero Section - Standard */}
         <div className="hero-section">
           <button onClick={handleBackToDashboard} className="back-button">
             <ArrowLeft className="w-4 h-4" />
@@ -452,15 +516,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
           </button>
           
           <div className="hero-content">
-            {isAlumniCareerRequest ? (
-              <>
-                <div className="hero-badge">🎯 Alumni Career Request</div>
-                <h1 className="hero-title">Get Help With Your Career</h1>
-                <p className="hero-subtitle">
-                  Share your career goals and let fellow alumni and parents help you with executive roles, transitions, board positions, or industry networking.
-                </p>
-              </>
-            ) : isParentQuestion ? (
+            {isParentQuestion ? (
               <>
                 <div className="hero-badge">❓ Get advice from the Gator community</div>
                 <h1 className="hero-title">Ask Your Question</h1>
@@ -603,10 +659,12 @@ export default function PostRequestPage() { // Renamed from PostRequest
               user={user}
               initialData={initialData}
               isParentQuestion={isParentQuestion}
-              isAlumniCareerRequest={isAlumniCareerRequest}
+              isAlumniCareerRequest={false}
             />
           </div>
         </div>
+          </>
+        )}
       </div>
     </>
   );
