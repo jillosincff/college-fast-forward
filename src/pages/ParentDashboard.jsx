@@ -30,6 +30,7 @@ import { errorReporter } from '@/components/utils/errorReporter';
 import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
 import FamilyKarmaWidget from '@/components/karma/FamilyKarmaWidget';
+import AlumniKarmaWidget from '@/components/dashboard/alumni/AlumniKarmaWidget';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
@@ -335,19 +336,21 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
-      {/* PRIORITY #1: Student Link Banner - Always at top */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <StudentLinkBanner 
-          linkedStudents={myStudents}
-          onLinkStudent={() => setShowSearchModal(true)}
-          onRemindLater={() => {
-            toast({
-              title: "We'll remind you tomorrow",
-              description: "Link your student anytime from your dashboard to unlock karma boosts."
-            });
-          }}
-        />
-      </div>
+      {/* PRIORITY #1: Student Link Banner - Parents Only (not Alumni) */}
+      {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <StudentLinkBanner 
+            linkedStudents={myStudents}
+            onLinkStudent={() => setShowSearchModal(true)}
+            onRemindLater={() => {
+              toast({
+                title: "We'll remind you tomorrow",
+                description: "Link your student anytime from your dashboard to unlock karma boosts."
+              });
+            }}
+          />
+        </div>
+      )}
 
       {/* Alumni Welcome Hero - Different states for active vs inactive */}
       {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && !isNewUser && (
@@ -432,8 +435,8 @@ export default function ParentDashboard() {
               )}
             </div>
 
-            {/* MY STUDENTS SECTION */}
-            {myStudents.length > 0 && (
+            {/* MY STUDENTS SECTION - Parents Only */}
+            {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length > 0 && (
               <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -476,15 +479,19 @@ export default function ParentDashboard() {
               </Card>
             )}
 
-            {/* FAMILY KARMA - HERO SECTION */}
-            <FamilyKarmaWidget 
-              user={user} 
-              onSearchStudent={() => setShowSearchModal(true)}
-              onInviteStudent={() => setShowInviteModal(true)}
-            />
+            {/* KARMA WIDGET - Different for Alumni vs Parents */}
+            {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) ? (
+              <AlumniKarmaWidget user={user} />
+            ) : (
+              <FamilyKarmaWidget 
+                user={user} 
+                onSearchStudent={() => setShowSearchModal(true)}
+                onInviteStudent={() => setShowInviteModal(true)}
+              />
+            )}
 
-            {/* Connect Student Card - Priority #1 if no student linked */}
-            {myStudents.length === 0 && (
+            {/* Connect Student Card - Priority #1 if no student linked (Parents Only) */}
+            {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 relative overflow-hidden">
                 <div className="absolute top-2 right-2">
                   <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
@@ -514,7 +521,7 @@ export default function ParentDashboard() {
             {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
             <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
               <div className="flex gap-3" style={{ width: 'max-content' }}>
-                {myStudents.length === 0 && (
+                {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
                   <QuickActionCardMobile icon="🔗" label="Link Student" onClick={() => setShowSearchModal(true)} color="orange" />
                 )}
                 <QuickActionCardMobile icon="👤" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
@@ -562,7 +569,12 @@ export default function ParentDashboard() {
                 </h3>
                 <p className="text-xs text-slate-600 mb-3 leading-relaxed">
                   Help students with career advice.<br />
-                  <span className="font-semibold">Your kid gets boosted!</span>
+                  <span className="font-semibold">
+                    {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
+                      ? 'Earn karma for your requests!'
+                      : 'Your kid gets boosted!'
+                    }
+                  </span>
                 </p>
                 <Button
                   onClick={() => navigate('Connections')}
