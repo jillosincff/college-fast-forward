@@ -288,7 +288,7 @@ export default function RoleAwareOpportunityForm({ onSubmit, isSubmitting, userR
           contact_url: formData.job_url, // Retain contact_url for consistency if backend uses it
           status: 'active',
           visibility: 'public',
-          created_by_role: userRole || 'student', // Fallback to 'student'
+          created_by_role: userRole || 'parent', // Fallback to 'parent' for safety
         };
 
         if (existingData) {
@@ -333,7 +333,7 @@ export default function RoleAwareOpportunityForm({ onSubmit, isSubmitting, userR
           salary_max: formData.salary_max ? parseFloat(formData.salary_max) : null,
           salary_display: salaryDisplay,
           salary_period: formData.salary_period,
-          created_by_role: userRole || 'student', // Fallback to 'student'
+          created_by_role: userRole || 'parent', // Fallback to 'parent' for safety
           posting_type: 'manual_entry',
           contact_url: formData.contact_url || '',
           application_email: formData.application_email || '',
