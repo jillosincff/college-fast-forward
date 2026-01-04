@@ -187,6 +187,7 @@ export default function CommunityInviteManager() {
                   <SelectContent>
                     <SelectItem value="parent">Parents</SelectItem>
                     <SelectItem value="gator">Students</SelectItem>
+                    <SelectItem value="alumni">Alumni</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -408,7 +409,7 @@ export default function CommunityInviteManager() {
                             <div className="flex-1">
                               <p className="text-xs text-slate-600">Target Role</p>
                               <p className="font-semibold text-slate-900 capitalize">
-                                {invite.invite_type?.includes('parent') ? 'Parents' : 'Students'}
+                                {invite.invite_type?.includes('parent') ? 'Parents' : invite.invite_type?.includes('alumni') ? 'Alumni' : 'Students'}
                               </p>
                             </div>
                           </div>
