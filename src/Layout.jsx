@@ -1195,8 +1195,7 @@ function AppContent() {
   const showHeader = resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
                      !onboardingPages.includes(resolvedPage) && 
-                     !newUserFlowPages.includes(resolvedPage) &&
-                     !publicPages.includes(resolvedPage);
+                     !newUserFlowPages.includes(resolvedPage);
 
   return (
     <AppErrorBoundary name="MainApp">
