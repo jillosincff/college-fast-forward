@@ -1193,7 +1193,9 @@ function AppContent() {
   }
 
   const PageComponent = getPageComponent(resolvedPage);
-  const showHeader = resolvedPage !== 'LandingPage' && 
+  // Show header for all authenticated pages except onboarding/auth flows
+  const showHeader = user && 
+                     resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
                      !onboardingPages.includes(resolvedPage) && 
                      !newUserFlowPages.includes(resolvedPage);
