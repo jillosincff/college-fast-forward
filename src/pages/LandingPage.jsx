@@ -104,7 +104,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-[#FA4616] font-semibold text-sm md:text-base tracking-wide uppercase mb-4"
             >
-              College Fast Forward
+              For UF Families
             </motion.p>
 
             <motion.h1 
@@ -122,7 +122,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg md:text-xl text-white/80 mb-10 max-w-3xl mx-auto"
             >
-              Parents and alumni who will go out of their way to make warm introductions — the kind that change career trajectories.
+              UF parents and alumni who will go out of their way to make warm introductions — the kind that change career trajectories.
             </motion.p>
 
             <motion.div 
