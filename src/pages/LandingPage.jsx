@@ -113,7 +113,7 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight"
             >
-              The private career network for UF students, parents & alumni.
+              Shared networks of people who care. The ultimate unfair advantage for your student.
             </motion.h1>
 
             <motion.p 
@@ -122,7 +122,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg md:text-xl text-white/80 mb-10 max-w-3xl mx-auto"
             >
-              You've spent 20+ years building connections. They're starting from zero. Let's fix that.
+              Parents and alumni who will go out of their way to make warm introductions — the kind that change career trajectories.
             </motion.p>
 
             <motion.div 
