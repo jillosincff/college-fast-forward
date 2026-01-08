@@ -96,61 +96,78 @@ export default function LandingPage() {
         </nav>
 
         {/* SECTION 1: HERO */}
-        <section className="pt-28 pb-16 px-4" style={{ backgroundColor: '#0021A5' }}>
+        <section className="pt-28 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-5xl mx-auto text-center">
             
+            {/* Top line - brand name */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-[#FA4616] font-semibold text-sm md:text-base tracking-wide uppercase mb-4"
+              className="text-[#FA4616] font-semibold text-sm md:text-base tracking-widest uppercase mb-6"
             >
-              For UF Families
+              COLLEGE FAST FORWARD
             </motion.p>
 
+            {/* Main headline - two lines with different weights */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight"
+              className="text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight"
             >
-              Shared networks of people who care. The ultimate unfair advantage for your student.
+              <span className="font-normal block mb-2">Shared networks of people who care.</span>
+              <span className="font-extrabold block">The ultimate unfair advantage for your student.</span>
             </motion.h1>
 
+            {/* Subheadline */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-white/80 mb-10 max-w-3xl mx-auto"
+              className="text-lg md:text-xl text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               UF parents and alumni who go out of their way to make warm introductions — the kind that change career trajectories.
             </motion.p>
 
+            {/* Stat contrast */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8"
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 mb-10"
             >
               <div className="flex items-center gap-2 text-white/90">
-                <span className="text-red-400 text-xl">❌</span>
-                <span>Cold applications: <strong className="text-red-400">~0.4% success rate</strong></span>
+                <span className="text-xl" style={{ color: '#B71234' }}>❌</span>
+                <span>Cold applications: <strong style={{ color: '#B71234' }}>~0.4% success rate</strong></span>
               </div>
               <div className="flex items-center gap-2 text-white/90">
-                <span className="text-green-400 text-xl">✅</span>
-                <span>Warm introductions: <strong className="text-green-400">up to 50x better odds</strong></span>
+                <span className="text-xl" style={{ color: '#00843D' }}>✅</span>
+                <span>Warm introductions: <strong style={{ color: '#00843D' }}>up to 50x better odds</strong></span>
               </div>
             </motion.div>
 
+            {/* Urgency pill */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="inline-block bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/40 rounded-full px-6 py-3"
+              className="inline-block rounded-full px-8 py-4 mb-8"
+              style={{ backgroundColor: '#0A1628' }}
             >
-              <span className="text-white font-semibold">
-                🔥 <span className="text-yellow-400">{totalFamilies}</span> families inside. <span className="text-yellow-400">{spotsRemaining}</span> founding spots left.
+              <span className="font-semibold" style={{ color: '#FA4616' }}>
+                🔥 {totalFamilies} families inside. {spotsRemaining} founding spots left.
               </span>
             </motion.div>
+
+            {/* Footnote */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-xs text-white/40 max-w-2xl mx-auto"
+            >
+              *Business Insider 2025 (average ~242 applications per job). Referral data from LinkedIn & industry studies 2025.
+            </motion.p>
           </div>
         </section>
 
