@@ -124,7 +124,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto leading-relaxed"
             >
               UF parents and alumni who go out of their way to make warm introductions — the kind that change career trajectories.
             </motion.p>
@@ -151,10 +151,10 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="inline-block rounded-full px-8 py-4 mb-8"
-              style={{ backgroundColor: '#0A1628' }}
+              className="inline-block rounded-full px-8 py-4 mb-8 border-2"
+              style={{ backgroundColor: '#0A1628', borderColor: '#FA4616' }}
             >
-              <span className="font-semibold" style={{ color: '#FA4616' }}>
+              <span className="font-semibold text-white">
                 🔥 {totalFamilies} families inside. {spotsRemaining} founding spots left.
               </span>
             </motion.div>
