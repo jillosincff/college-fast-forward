@@ -122,7 +122,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg md:text-xl text-white/80 mb-10 max-w-3xl mx-auto"
             >
-              UF parents and alumni who will go out of their way to make warm introductions — the kind that change career trajectories.
+              UF parents and alumni who go out of their way to make warm introductions — the kind that change career trajectories.
             </motion.p>
 
             <motion.div 
