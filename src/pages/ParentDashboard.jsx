@@ -69,26 +69,36 @@ export default function ParentDashboard() {
       return;
     }
     
-    if (forceRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
+    setLoading(true);
     
     try {
-      // Basic data load - keeping it simple
-      await Promise.allSettled([
+      // Load all data in parallel
+      const [helpOffers, intros, messages, opportunities, jobRequests] = await Promise.allSettled([
         HelpOffer.filter({ offerer_email: user.email }),
         Intro.filter({ helper_user_id: user.id }),
         Message.filter({ recipient_email: user.email }),
-        Opportunity.filter({ created_by: user.email })
+        Opportunity.filter({ created_by: user.email }),
+        JobRequest.filter({ status: 'active' })
       ]);
+      
+      // Set questions count
+      if (jobRequests.status === 'fulfilled') {
+        setQuestionsCount(jobRequests.value?.length || 0);
+      }
+      
+      // Set activity items from messages
+      if (messages.status === 'fulfilled') {
+        setActivityItems(messages.value?.slice(0, 5) || []);
+      }
+      
+      // Calculate students helped
+      const helpedCount = (helpOffers.status === 'fulfilled' ? helpOffers.value?.length || 0 : 0) +
+                         (intros.status === 'fulfilled' ? intros.value?.length || 0 : 0);
+      setStudentsHelped(helpedCount);
       
       // Load students via backend function (handles RLS permissions)
       try {
-        console.log('📍 Loading students via getFamilyStudents function...');
         const result = await base44.functions.invoke('getFamilyStudents', {});
-        console.log('📍 getFamilyStudents result:', result.data);
         if (result.data?.students) {
           setMyStudents(result.data.students);
         }
@@ -115,13 +125,8 @@ export default function ParentDashboard() {
       });
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, [user]);
-
-  const handleRefresh = async () => {
-    await loadDashboardData(true);
-  };
 
   useEffect(() => {
     loadDashboardData();
