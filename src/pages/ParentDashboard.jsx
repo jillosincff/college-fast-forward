@@ -563,77 +563,9 @@ export default function ParentDashboard() {
             {searchResults.length === 0 && searchQuery && !isSearching && (
               <div className="text-center py-4 text-slate-500">
                 <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                <p>No students found. Try a different search or send them an invite.</p>
-                <Button
-                  variant="outline"
-                  className="mt-3"
-                  onClick={() => {
-                    setShowSearchModal(false);
-                    setShowInviteModal(true);
-                  }}
-                >
-                  Send an Invite Instead
-                </Button>
+                <p>No students found. Try a different search.</p>
               </div>
             )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Invite Modal */}
-      <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle style={{ color: '#FA4616' }}>Invite My Child to Join</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label>Student's Name (optional)</Label>
-              <Input
-                value={inviteName}
-                onChange={(e) => setInviteName(e.target.value)}
-                placeholder="John Doe"
-                className="mt-2"
-              />
-            </div>
-            
-            <div>
-              <Label>Student's Email *</Label>
-              <Input
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="john.doe@ufl.edu"
-                type="email"
-                className="mt-2"
-              />
-            </div>
-
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <p className="text-sm text-orange-800">
-                📧 We'll send them a secure invite to join the network. 
-                Once they sign up, your profiles link automatically and their profile gets boosted!
-              </p>
-            </div>
-
-            <Button
-              onClick={handleSendInvite}
-              disabled={!inviteEmail.trim() || isSending}
-              className="w-full"
-              style={{ backgroundColor: '#FA4616' }}
-            >
-              {isSending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send Invite
-                </>
-              )}
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
