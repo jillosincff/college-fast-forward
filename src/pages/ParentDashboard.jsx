@@ -32,21 +32,17 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
 
-// Mobile Quick Action Card Component
-function QuickActionCardMobile({ icon, label, onClick, color = 'blue' }) {
-  const bgColor = color === 'orange' ? 'bg-orange-50 border-orange-200' : 'bg-white';
-  const textColor = color === 'orange' ? 'text-[#FA4616]' : 'text-[#0021A5]';
-  
-  return (
-    <button 
-      onClick={onClick}
-      className={`flex-shrink-0 w-24 ${bgColor} rounded-xl p-3 text-center shadow-sm border border-slate-200 active:scale-95 transition-transform`}
-    >
-      <span className="text-2xl block mb-1">{icon}</span>
-      <span className={`text-xs font-semibold ${textColor} leading-tight block`}>{label}</span>
-    </button>
-  );
-}
+// School config for dynamic network names
+const schoolConfig = {
+  uf: { networkName: "UF Network", shortName: "UF" },
+  psu: { networkName: "PSU Network", shortName: "PSU" },
+  ucf: { networkName: "UCF Network", shortName: "UCF" },
+  fsu: { networkName: "FSU Network", shortName: "FSU" },
+  tulane: { networkName: "Tulane Network", shortName: "Tulane" },
+  osu: { networkName: "OSU Network", shortName: "OSU" },
+};
+
+const getSchoolConfig = () => schoolConfig.uf; // Default to UF for now
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
