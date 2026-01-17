@@ -26,11 +26,19 @@ Deno.serve(async (req) => {
     // Get all users with service role
     const allUsers = await base44.asServiceRole.entities.User.list();
     
-    // Filter for gators matching the search
+    // Filter for students/gators matching the search
     const results = allUsers.filter(u => {
-      // Must be a gator
-      const isGator = u.persona === 'gator' || u.roles?.includes('gator') || u.email?.toLowerCase().endsWith('@ufl.edu');
-      if (!isGator) return false;
+      // Must be a gator OR a student OR have no persona yet (new user) OR have @ufl.edu email
+      const isStudent = u.persona === 'gator' || u.persona === 'student' || 
+                        u.roles?.includes('gator') || u.roles?.includes('student') ||
+                        u.email?.toLowerCase().endsWith('@ufl.edu') ||
+                        (!u.persona && !u.roles?.includes('parent') && !u.roles?.includes('alumni'));
+      
+      // Exclude parents and alumni from student search
+      const isParentOrAlumni = u.persona === 'parent' || u.persona === 'alumni' || 
+                               u.roles?.includes('parent') || u.roles?.includes('alumni');
+      
+      if (!isStudent || isParentOrAlumni) return false;
       
       const email = u.email?.toLowerCase() || '';
       const fullName = u.full_name?.toLowerCase() || '';
