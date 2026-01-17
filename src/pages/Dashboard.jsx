@@ -17,6 +17,7 @@ import WaitingForResponses from '@/components/dashboard/student/WaitingForRespon
 import UnreadResponsesSection from '@/components/dashboard/student/UnreadResponsesSection';
 import MoreMatchesPrompt from '@/components/dashboard/student/MoreMatchesPrompt';
 import MatchesSection from '@/components/dashboard/student/MatchesSection';
+import AllCaughtUpSection from '@/components/dashboard/student/AllCaughtUpSection';
 import StudentStatsBar from '@/components/dashboard/student/StudentStatsBar';
 import CompactOpportunities from '@/components/dashboard/student/CompactOpportunities';
 import CompactChallenge from '@/components/dashboard/student/CompactChallenge';
@@ -443,40 +444,32 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* STATE 6: All Caught Up */}
+        {/* STATE 6: All Caught Up - Explore Mode */}
         {userState === 'all_caught_up' && (
           <>
-            {/* Show matches they can still message */}
-            {unmessagedMatches.length > 0 ? (
-              <MatchesSection 
-                matches={unmessagedMatches} 
-                user={user}
+            {/* All caught up + active conversations */}
+            <AllCaughtUpSection 
+              activeConversations={[]} 
+              messagedMatches={messagedMatches}
+            />
+
+            {/* More matches if available */}
+            {unmessagedMatches.length > 0 && (
+              <MoreMatchesPrompt 
+                unmessagedMatches={unmessagedMatches}
+                totalMatches={matches.length}
                 onMessageMatch={(match) => {
                   const name = match.helper_name || match.parent_name || 'Helper';
                   const email = match.helper_email || match.parent_email;
                   navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
                 }}
               />
-            ) : (
-              <div className="bg-white rounded-2xl shadow-xl border-2 border-green-200 p-8 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">🎉</span>
-                </div>
-                <h2 className="text-xl font-bold text-slate-900 mb-2">You're all caught up!</h2>
-                <p className="text-slate-600 mb-4">You've messaged all your matches. Great work!</p>
-                <Button
-                  onClick={() => navigate('PostRequest')}
-                  className="bg-[#0021A5] hover:bg-blue-800"
-                >
-                  Ask Another Question →
-                </Button>
-              </div>
             )}
 
             {/* Opportunities */}
             <CompactOpportunities 
               opportunities={opportunities} 
-              title="Explore Opportunities"
+              title="Latest Opportunities"
             />
 
             {/* Challenge */}
@@ -484,17 +477,6 @@ export default function Dashboard() {
               user={user} 
               onLogIntro={() => setShowLogIntroModal(true)}
             />
-
-            {/* Ask Another Question */}
-            <div className="text-center">
-              <Button
-                variant="outline"
-                onClick={() => navigate('PostRequest')}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
-              >
-                Ask Another Question →
-              </Button>
-            </div>
           </>
         )}
 
