@@ -10,8 +10,8 @@ export default function ConversationsSection({ conversations = [] }) {
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
       {/* Header */}
-      <div className="p-5 md:p-6 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+      <div className="p-4 md:p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 className="text-base md:text-lg font-bold text-slate-900 flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-blue-600" />
           💬 Your Active Conversations
         </h3>

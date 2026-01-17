@@ -2,6 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { navigate } from '@/components/utils/navigation';
 
+const UF_BUTTON_GRADIENT = 'linear-gradient(135deg, #0021A5 0%, #003DCE 100%)';
+
 function formatTimeAgo(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -18,15 +20,20 @@ function formatTimeAgo(dateString) {
 }
 
 export default function ConversationRow({ conversation }) {
-  // Handle both conversation objects and match objects
+  // Get display name - never show "Gator"
   const name = conversation.participant_names 
     ? Object.values(conversation.participant_names).find(n => n) 
-    : (conversation.helper_name || conversation.parent_name || conversation.professionalDisplayName || 'Contact');
+    : (conversation.helper_name || conversation.parent_name || conversation.professionalDisplayName || 'UF Professional');
   
   const lastMessage = conversation.last_message_at || conversation.lastMessageAt || 
                       conversation.updated_date || conversation.student_connected_at;
   
-  const initials = name?.split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase() || '??';
+  const initials = name
+    ?.split(/\s+/)
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'UF';
   
   const handleClick = () => {
     navigate(`MyMessages${conversation.id ? `?id=${conversation.id}` : ''}`);
@@ -35,17 +42,17 @@ export default function ConversationRow({ conversation }) {
   return (
     <div 
       onClick={handleClick}
-      className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors"
+      className="p-3 md:p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         <div 
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-          style={{ background: 'linear-gradient(135deg, #0021A5 0%, #003DCE 100%)' }}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+          style={{ background: UF_BUTTON_GRADIENT }}
         >
           {initials}
         </div>
-        <div>
-          <p className="font-medium text-slate-800">{name}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-slate-800 truncate">{name}</p>
           <p className="text-xs text-slate-500">
             Last message {formatTimeAgo(lastMessage)}
           </p>
@@ -54,7 +61,7 @@ export default function ConversationRow({ conversation }) {
       <Button
         variant="outline"
         size="sm"
-        className="border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
+        className="border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 flex-shrink-0"
         onClick={(e) => {
           e.stopPropagation();
           handleClick();
