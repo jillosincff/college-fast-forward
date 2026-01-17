@@ -47,22 +47,21 @@ const getSchoolConfig = () => schoolConfig.uf; // Default to UF for now
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
+  const school = getSchoolConfig();
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteName, setInviteName] = useState('');
-  const [isSending, setIsSending] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [myStudents, setMyStudents] = useState([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [familyKarma, setFamilyKarma] = useState(0);
-  const actionCardsRef = useRef([]);
-  const headlineRef = useRef(null);
+  const [karmaExpanded, setKarmaExpanded] = useState(false);
+  const [questionsCount, setQuestionsCount] = useState(0);
+  const [activityTab, setActivityTab] = useState('messages');
+  const [activityItems, setActivityItems] = useState([]);
+  const [studentsHelped, setStudentsHelped] = useState(0);
 
   const loadDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.email) {
