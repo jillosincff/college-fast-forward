@@ -29,11 +29,20 @@ Deno.serve(async (req) => {
     console.log(`[searchGatorStudents] Total users fetched: ${allUsers.length}`);
     console.log(`[searchGatorStudents] Search term: "${searchTerm}", words: ${JSON.stringify(searchWords)}`);
     
-    // Filter for students matching the search - SIMPLIFIED: just search all non-parent users
+    // DEBUG: Log first few users to see data structure
+    console.log(`[searchGatorStudents] Sample users:`, allUsers.slice(0, 3).map(u => ({
+      email: u.email,
+      full_name: u.full_name,
+      persona: u.persona,
+      roles: u.roles
+    })));
+    
+    // Filter for students matching the search - search ALL users, no persona filter
     const results = allUsers.filter(u => {
-      // Skip parents and alumni
-      if (u.persona === 'parent' || u.persona === 'alumni') return false;
-      if (u.roles?.includes('parent') || u.roles?.includes('alumni')) return false;
+      // Only skip if explicitly a parent or alumni
+      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      if (isParent || isAlumni) return false;
       
       const email = (u.email || '').toLowerCase();
       const fullName = (u.full_name || '').toLowerCase();
