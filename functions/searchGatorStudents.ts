@@ -11,13 +11,14 @@ Deno.serve(async (req) => {
     
     console.log(`[searchGatorStudents] User: ${user.email}, persona: ${user.persona}, roles: ${JSON.stringify(user.roles)}`);
     
-    // Only parents (or admins) can search for students
+    // Parents, alumni, or admins can search for students
     const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+    const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
     const isAdmin = user.role === 'admin' || user.roles?.includes('admin');
     
-    if (!isParent && !isAdmin) {
-      console.log(`[searchGatorStudents] Access denied - not a parent or admin`);
-      return Response.json({ error: 'Only parents can search for students' }, { status: 403 });
+    if (!isParent && !isAlumni && !isAdmin) {
+      console.log(`[searchGatorStudents] Access denied - not a parent, alumni, or admin`);
+      return Response.json({ error: 'Only parents and alumni can search for students' }, { status: 403 });
     }
     
     const { query } = await req.json();
