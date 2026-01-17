@@ -332,347 +332,190 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
-      {/* PRIORITY #1: Student Link Banner - Parents Only (not Alumni) */}
-      {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <StudentLinkBanner 
-            linkedStudents={myStudents}
-            onLinkStudent={() => setShowSearchModal(true)}
-            onRemindLater={() => {
-              toast({
-                title: "We'll remind you tomorrow",
-                description: "Link your student anytime from your dashboard to unlock karma boosts."
-              });
-            }}
-          />
-        </div>
-      )}
-
-      {/* Alumni Welcome Hero - Different states for active vs inactive */}
-      {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && !isNewUser && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AlumniWelcomeHero 
-            user={user} 
-            stats={{ studentsHelped: user?.students_helped_count || 0 }}
-            hasActivity={karmaPoints > 0}
-          />
-        </div>
-      )}
-
-      {/* 1. Welcome Header - Mobile Optimized */}
-      <div className="bg-[#0021A5] text-white py-5 md:py-6 mb-4 md:mb-6">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <h1 className="text-xl md:text-3xl font-bold" style={{ color: 'white' }}>
-                  Welcome, {firstName}! 👋
-                </h1>
-                {user?.is_founding_member && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold">
-                    <Crown className="w-3 h-3" />
-                    Founder
-                  </span>
-                )}
-              </div>
-              <p className="text-white/80 text-sm md:text-base">
-                {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
-                  ? 'Help students and get help back — your network works both ways'
-                  : 'Your network opens doors for students everywhere'
-                }
-              </p>
-            </div>
-            <Button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              variant="outline"
-              className="hidden md:flex items-center gap-2 bg-white/10 border-white/30 text-white hover:bg-white/20"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {isNewUser ? (
-          /* First-time user simplified dashboard */
-          <FirstTimeUserDashboard 
-            user={user}
-            linkedStudents={myStudents}
-            onBrowseQuestions={() => navigate('Connections')}
-            onConnectStudent={() => setShowSearchModal(true)}
-            onCompleteProfile={() => navigate('ProfileEdit')}
-            onPostCareerRequest={() => navigate('PostRequest?type=alumni_career')}
-          />
-        ) : (
-          /* Returning user full dashboard */
-          <>
-            {/* Main Headline - Responsive */}
-            <div ref={headlineRef} className="text-center px-2">
-              <h2 
-                className="text-2xl md:text-4xl font-black leading-tight mb-2 md:mb-3"
-                style={{ color: '#0021A5' }}
-              >
-                {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
-                  ? 'Help Students, Boost Your Requests ⚡'
-                  : 'Help More Students, Boost Your Own ⚡'
-                }
-              </h2>
-              <p className="text-sm md:text-lg text-slate-600 max-w-3xl mx-auto">
-                {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
-                  ? 'Every action you take earns karma — boosting visibility for your own career requests.'
-                  : myStudents.length > 0 
-                    ? `Every action you take earns karma — directly boosting ${getStudentFirstName(myStudents[0])}'s visibility.`
-                    : 'Every action you take earns karma — link your student to activate boosts.'
-                }
-              </p>
-              {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
-                <p className="text-sm text-amber-600 mt-2 font-medium">
-                  ⚠️ Link your student to see their name here and activate boosts.
+        {/* SECTION 1: Consolidated Header */}
+        <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 md:p-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-2xl md:text-3xl font-bold">Welcome, {firstName}! 👋</h1>
+                  {user?.is_founding_member && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold">
+                      <Crown className="w-3 h-3" />
+                      Founder
+                    </span>
+                  )}
+                </div>
+                <p className="text-blue-100 mt-1">
+                  Help students and get help back — your network works both ways
                 </p>
-              )}
+              </div>
+              <div className="flex items-center gap-3 md:gap-4">
+                {/* Karma badge - compact */}
+                <div className="bg-white/20 rounded-lg px-4 py-2 text-center">
+                  <span className="text-2xl font-bold">{karmaPoints}</span>
+                  <span className="text-sm block text-blue-100">Karma</span>
+                </div>
+                {/* Impact stat */}
+                <div className="bg-white/20 rounded-lg px-4 py-2 text-center">
+                  <span className="text-2xl font-bold">{studentsHelped}</span>
+                  <span className="text-sm block text-blue-100">Students Helped</span>
+                </div>
+              </div>
             </div>
+          </div>
+        </header>
 
-            {/* MY STUDENTS SECTION - Parents Only */}
-            {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length > 0 && (
-              <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: '#0021A5' }}>
-                      👨‍🎓 My Students
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowSearchModal(true)}
-                      className="text-[#0021A5] hover:text-[#FA4616] hover:bg-blue-50 text-sm font-semibold"
-                    >
-                      <Link2 className="w-4 h-4 mr-1" />
-                      Link Another Student
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {myStudents.map((student) => (
-                      <div 
-                        key={student.id} 
-                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors"
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white font-bold">
-                          {student.full_name?.charAt(0)?.toUpperCase() || '?'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-slate-900 truncate">{student.full_name || 'Unknown'}</p>
-                          <p className="text-xs text-slate-500 truncate">{student.email}</p>
-                          {student.major && (
-                            <p className="text-xs text-blue-600">{student.major}</p>
-                          )}
-                        </div>
-                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          
+          {/* SECTION 2: Primary Action - Students Need Help */}
+          <section className="bg-white rounded-xl shadow-sm border p-8 text-center">
+            <div className="max-w-xl mx-auto">
+              <span className="text-4xl mb-4 block">🎓</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Students Are Asking for Help
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {questionsCount} questions waiting for someone with your experience. 
+                Each answer earns karma and boosts your own requests.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => navigate('Connections')}
+              >
+                Browse Questions & Help Out →
+              </Button>
+            </div>
+          </section>
 
-            {/* KARMA WIDGET - Different for Alumni vs Parents */}
-            {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) ? (
-              <AlumniKarmaWidget user={user} />
-            ) : (
-              <FamilyKarmaWidget 
-                user={user} 
-                onSearchStudent={() => setShowSearchModal(true)}
-                onInviteStudent={() => setShowInviteModal(true)}
-              />
-            )}
+          {/* SECTION 3: Secondary Actions - Equal Weight Grid */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Card 1: Complete Profile */}
+            <Card className="p-6 text-center hover:shadow-md transition-shadow">
+              <CardContent className="p-0">
+                <UserIcon className="w-8 h-8 mx-auto text-blue-600 mb-3" />
+                <h3 className="font-semibold mb-1">Complete Your Profile</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Add your company & LinkedIn for stronger connections
+                </p>
+                <Button variant="outline" size="sm" onClick={() => navigate('ProfileEdit')}>
+                  Update Profile
+                </Button>
+              </CardContent>
+            </Card>
 
-            {/* Connect Student Card - Priority #1 if no student linked (Parents Only) */}
-            {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 relative overflow-hidden">
-                <div className="absolute top-2 right-2">
-                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                    REQUIRED FOR KARMA BOOSTS
-                  </span>
-                </div>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                  <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Link2 className="w-7 h-7 text-amber-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-amber-900 mb-1">Connect Your Student</h3>
-                    <p className="text-sm text-amber-700">
-                      Link your student's account to boost their profile visibility. Your karma directly helps them get faster answers.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => setShowSearchModal(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold whitespace-nowrap"
-                  >
-                    Search & Link Student →
-                  </Button>
-                </div>
+            {/* Card 2: Post a Job */}
+            <Card className="p-6 text-center hover:shadow-md transition-shadow">
+              <CardContent className="p-0">
+                <Briefcase className="w-8 h-8 mx-auto text-green-600 mb-3" />
+                <h3 className="font-semibold mb-1">Share a Job Opportunity</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Know about openings? Help students find their next role
+                </p>
+                <Button variant="outline" size="sm" onClick={() => navigate('PostOpportunity')}>
+                  Post Job
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Ask the Network */}
+            <Card className="p-6 text-center hover:shadow-md transition-shadow">
+              <CardContent className="p-0">
+                <MessageCircle className="w-8 h-8 mx-auto text-purple-600 mb-3" />
+                <h3 className="font-semibold mb-1">Need Help Yourself?</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Post privately to fellow parents and alumni
+                </p>
+                <Button variant="outline" size="sm" onClick={() => navigate('PostRequest?type=parent')}>
+                  Post Career Request
+                </Button>
+              </CardContent>
+            </Card>
+
+          </section>
+
+          {/* SECTION 4: Karma Details - Collapsible */}
+          <section className="bg-gray-50 rounded-xl p-4">
+            <button 
+              onClick={() => setKarmaExpanded(!karmaExpanded)}
+              className="w-full flex justify-between items-center"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-lg">✨</span>
+                <span className="font-medium">Your Karma: {karmaPoints} points</span>
+                <Badge variant="secondary">{karmaLevel}</Badge>
               </div>
-            )}
-
-            {/* 4. Quick Actions - Horizontal Scroll on Mobile */}
-            <div className="md:hidden overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
-              <div className="flex gap-3" style={{ width: 'max-content' }}>
-                {!(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && myStudents.length === 0 && (
-                  <QuickActionCardMobile icon="🔗" label="Link Student" onClick={() => setShowSearchModal(true)} color="orange" />
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                {pointsToNextLevel > 0 && (
+                  <span>{pointsToNextLevel} points to {nextLevelName}</span>
                 )}
-                <QuickActionCardMobile icon="👤" label="Update Profile" onClick={() => navigate('ProfileEdit')} />
-                <QuickActionCardMobile icon="💬" label="Answer Questions" onClick={() => navigate('Connections')} />
-                <QuickActionCardMobile icon="❓" label="Ask Question" onClick={() => navigate('PostRequest?type=parent')} color="orange" />
-                <QuickActionCardMobile icon="💼" label="Post Job" onClick={() => navigate('PostOpportunity')} />
+                <ChevronDown className={`w-4 h-4 transition-transform ${karmaExpanded ? 'rotate-180' : ''}`} />
               </div>
+            </button>
+            
+            {karmaExpanded && (
+              <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex justify-between">
+                  <span>Answer a question</span>
+                  <span className="text-green-600 font-medium">+10</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Get upvoted</span>
+                  <span className="text-green-600 font-medium">+5</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Marked "Best Answer"</span>
+                  <span className="text-green-600 font-medium">+50</span>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* SECTION 5: Activity Feed - Conditional Render */}
+          <section className="bg-white rounded-xl shadow-sm border">
+            <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                My Activity
+              </h3>
+              <Tabs value={activityTab} onValueChange={setActivityTab}>
+                <TabsList className="h-8">
+                  <TabsTrigger value="messages" className="text-xs">Messages</TabsTrigger>
+                  <TabsTrigger value="offers" className="text-xs">Help Offers</TabsTrigger>
+                  <TabsTrigger value="jobs" className="text-xs">My Jobs</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             
-            {/* Desktop: Four Action Cards Grid */}
-            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Card 1: Complete Profile */}
-              <div 
-                ref={el => actionCardsRef.current[0] = el}
-                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-              >
-                <div className="text-3xl mb-2">👤</div>
-                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-                  Complete Your Profile
-                </h3>
-                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Add company & LinkedIn.<br />
-                  <span className="font-semibold">Stronger profile = more boost</span>
-                </p>
-                <Button
-                  onClick={() => navigate('ProfileEdit')}
-                  size="sm"
-                  className="rounded-full px-4 py-1.5 font-bold text-xs"
-                  style={{ backgroundColor: '#0021A5' }}
-                >
-                  Update Profile →
-                </Button>
-              </div>
-
-              {/* Card 2: Answer Questions */}
-              <div 
-                ref={el => actionCardsRef.current[1] = el}
-                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-              >
-                <div className="text-3xl mb-2">💬</div>
-                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-                  Answer Questions
-                </h3>
-                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Help students with career advice.<br />
-                  <span className="font-semibold">
-                    {(user?.persona === 'alumni' || user?.roles?.includes('alumni'))
-                      ? 'Earn karma for your requests!'
-                      : 'Your kid gets boosted!'
-                    }
-                  </span>
-                </p>
-                <Button
-                  onClick={() => navigate('Connections')}
-                  size="sm"
-                  className="rounded-full px-4 py-1.5 font-bold text-xs"
-                  style={{ backgroundColor: '#0021A5' }}
-                >
-                  Browse Questions →
-                </Button>
-              </div>
-
-              {/* Card 3: Ask Your Own Question */}
-              <div 
-                ref={el => actionCardsRef.current[3] = el}
-                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow border border-orange-200"
-                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-              >
-                <div className="text-3xl mb-2">❓</div>
-                <h3 className="text-sm font-bold mb-1" style={{ color: '#FA4616' }}>
-                  Ask a Question
-                </h3>
-                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Post your own question.<br />
-                  <span className="font-semibold">Get support from the community.</span>
-                </p>
-                <Button
-                  onClick={() => navigate('PostRequest?type=parent')}
-                  size="sm"
-                  className="rounded-full px-4 py-1.5 font-bold text-xs"
-                  style={{ backgroundColor: '#FA4616' }}
-                >
-                  Ask Question →
-                </Button>
-              </div>
-
-              {/* Card 5: Alumni Career Request - Only for Alumni */}
-              {(user?.persona === 'alumni' || user?.roles?.includes('alumni')) && (
-                <AlumniCareerRequestCard hasExistingRequest={false} />
-              )}
-
-              {/* Card 4: Post Jobs */}
-              <div 
-                ref={el => actionCardsRef.current[2] = el}
-                className="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-shadow"
-                style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.06)' }}
-              >
-                <div className="text-3xl mb-2">💼</div>
-                <h3 className="text-sm font-bold mb-1" style={{ color: '#0021A5' }}>
-                  Post Opportunities
-                </h3>
-                <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Know about job openings?<br />
-                  <span className="font-semibold">Share them with students</span>
-                </p>
-                <Button
-                  onClick={() => navigate('PostOpportunity')}
-                  size="sm"
-                  className="rounded-full px-4 py-1.5 font-bold text-xs"
-                  style={{ backgroundColor: '#0021A5' }}
-                >
-                  Post Opportunity →
-                </Button>
-              </div>
-              </div>
-
-              {/* Standalone Post a Job Card */}
-              <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center">
-                      <Briefcase className="w-7 h-7 text-purple-600" />
+            <div className="p-6">
+              {hasActivity ? (
+                <div className="space-y-3">
+                  {activityItems.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Mail className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.subject || 'New message'}</p>
+                        <p className="text-xs text-gray-500">From: {item.sender_email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-purple-900">Post a Job</h3>
-                      <p className="text-sm text-purple-700">Share job openings from your company with students</p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => navigate('PostOpportunity')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    Post Job
-                  </Button>
+                  ))}
                 </div>
-              </CardContent>
-              </Card>
-
-            {/* Activity Section - No duplicate header */}
-            <div className="bg-white rounded-2xl p-6" style={{ boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}>
-              <ParentActivityWidget />
+              ) : (
+                // COMPACT empty state
+                <div className="text-center py-4 text-gray-500">
+                  <Mail className="w-6 h-6 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">No activity yet. Start by helping a student!</p>
+                </div>
+              )}
             </div>
-          </>
-        )}
+          </section>
 
-      </div>
+        </div>
 
       {/* Search Modal */}
       <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
