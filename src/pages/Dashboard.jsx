@@ -13,6 +13,9 @@ import { getUserCount } from '@/functions/getUserCount';
 // New focused components
 import NewUserWelcome from '@/components/dashboard/student/NewUserWelcome';
 import WaitingForMatches from '@/components/dashboard/student/WaitingForMatches';
+import WaitingForResponses from '@/components/dashboard/student/WaitingForResponses';
+import UnreadResponsesSection from '@/components/dashboard/student/UnreadResponsesSection';
+import MoreMatchesPrompt from '@/components/dashboard/student/MoreMatchesPrompt';
 import MatchesSection from '@/components/dashboard/student/MatchesSection';
 import StudentStatsBar from '@/components/dashboard/student/StudentStatsBar';
 import CompactOpportunities from '@/components/dashboard/student/CompactOpportunities';
@@ -51,6 +54,8 @@ export default function Dashboard() {
       if (messagedCount === 0) return 'has_matches_not_messaged';
       const unreadResponses = messages.filter(m => !m.is_read).length;
       if (unreadResponses > 0) return 'has_unread_responses';
+      // Has messaged but no responses yet
+      if (messagedCount > 0) return 'waiting_for_responses';
       return 'all_caught_up';
     }
     return 'new_user';
@@ -239,10 +244,15 @@ export default function Dashboard() {
   }
 
   const userState = getUserState();
-  const unreadCount = messages.filter(m => !m.is_read).length;
-  const messagesSentCount = matches.filter(m => 
+  const unreadMessages = messages.filter(m => !m.is_read);
+  const unreadCount = unreadMessages.length;
+  const messagedMatches = matches.filter(m => 
     m.status === 'student_connected' || m.status === 'intro_made'
-  ).length;
+  );
+  const messagesSentCount = messagedMatches.length;
+  const unmessagedMatches = matches.filter(m => 
+    m.status !== 'student_connected' && m.status !== 'intro_made'
+  );
 
   const firstName = user.first_name || (() => {
     const fn = user.full_name?.trim() || '';
@@ -350,10 +360,8 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* STATE 3: Has Matches (primary state) */}
-        {(userState === 'has_matches_not_messaged' || 
-          userState === 'has_unread_responses' || 
-          userState === 'all_caught_up') && (
+        {/* STATE 3: Has Matches - Hasn't Messaged (PRIMARY STATE) */}
+        {userState === 'has_matches_not_messaged' && (
           <>
             {/* MATCHES FIRST - The star of the show */}
             <MatchesSection 
@@ -366,34 +374,6 @@ export default function Dashboard() {
               }}
             />
 
-            {/* Unread Messages - Show prominently if any */}
-            {unreadCount > 0 && (
-              <Card className="border-2 border-blue-300 bg-blue-50 shadow-lg">
-                <CardContent className="pt-5 pb-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                        <MessageSquare className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-blue-900">
-                          {unreadCount} new {unreadCount === 1 ? 'response' : 'responses'}!
-                        </p>
-                        <p className="text-sm text-blue-700">Check your messages</p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => navigate('MyMessages')}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      View Messages
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Opportunities - Compact */}
             <CompactOpportunities 
               opportunities={opportunities} 
@@ -405,8 +385,107 @@ export default function Dashboard() {
               user={user} 
               onLogIntro={() => setShowLogIntroModal(true)}
             />
+          </>
+        )}
 
-            {/* Ask Another Question - Small link */}
+        {/* STATE 4: Has Messaged - Waiting for Responses */}
+        {userState === 'waiting_for_responses' && (
+          <>
+            {/* Waiting status */}
+            <WaitingForResponses messagedMatches={messagedMatches} />
+
+            {/* More matches to message */}
+            {unmessagedMatches.length > 0 && (
+              <MoreMatchesPrompt 
+                unmessagedMatches={unmessagedMatches}
+                totalMatches={matches.length}
+                isWaitingForResponses={true}
+                onMessageMatch={(match) => {
+                  const name = match.helper_name || match.parent_name || 'Helper';
+                  const email = match.helper_email || match.parent_email;
+                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+                }}
+              />
+            )}
+
+            {/* Opportunities - Compact */}
+            <CompactOpportunities 
+              opportunities={opportunities} 
+              title={opportunities.length > 1 ? `${opportunities.length} New Opportunities` : "Latest Opportunities"}
+            />
+          </>
+        )}
+
+        {/* STATE 5: Has Unread Responses (HIGHEST PRIORITY) */}
+        {userState === 'has_unread_responses' && (
+          <>
+            {/* UNREAD RESPONSES FIRST - Top priority */}
+            <UnreadResponsesSection unreadMessages={unreadMessages} />
+
+            {/* More matches available */}
+            {unmessagedMatches.length > 0 && (
+              <MoreMatchesPrompt 
+                unmessagedMatches={unmessagedMatches}
+                totalMatches={matches.length}
+                onMessageMatch={(match) => {
+                  const name = match.helper_name || match.parent_name || 'Helper';
+                  const email = match.helper_email || match.parent_email;
+                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+                }}
+              />
+            )}
+
+            {/* Opportunities - Compact */}
+            <CompactOpportunities 
+              opportunities={opportunities} 
+              title={opportunities.length > 1 ? `${opportunities.length} New Opportunities` : "Latest Opportunities"}
+            />
+          </>
+        )}
+
+        {/* STATE 6: All Caught Up */}
+        {userState === 'all_caught_up' && (
+          <>
+            {/* Show matches they can still message */}
+            {unmessagedMatches.length > 0 ? (
+              <MatchesSection 
+                matches={unmessagedMatches} 
+                user={user}
+                onMessageMatch={(match) => {
+                  const name = match.helper_name || match.parent_name || 'Helper';
+                  const email = match.helper_email || match.parent_email;
+                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+                }}
+              />
+            ) : (
+              <div className="bg-white rounded-2xl shadow-xl border-2 border-green-200 p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🎉</span>
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">You're all caught up!</h2>
+                <p className="text-slate-600 mb-4">You've messaged all your matches. Great work!</p>
+                <Button
+                  onClick={() => navigate('PostRequest')}
+                  className="bg-[#0021A5] hover:bg-blue-800"
+                >
+                  Ask Another Question →
+                </Button>
+              </div>
+            )}
+
+            {/* Opportunities */}
+            <CompactOpportunities 
+              opportunities={opportunities} 
+              title="Explore Opportunities"
+            />
+
+            {/* Challenge */}
+            <CompactChallenge 
+              user={user} 
+              onLogIntro={() => setShowLogIntroModal(true)}
+            />
+
+            {/* Ask Another Question */}
             <div className="text-center">
               <Button
                 variant="outline"
