@@ -16,7 +16,7 @@ export default function AlumniLeaderboardSection({ entries, currentUserId }) {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="font-bold text-xl flex items-center gap-2">
+            <h3 className="font-bold text-xl flex items-center gap-2 text-white">
               <span className="text-2xl">🏆</span>
               Top UF Helpers This Week
             </h3>
