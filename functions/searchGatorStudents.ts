@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -23,46 +23,58 @@ Deno.serve(async (req) => {
     const searchTerm = query.trim().toLowerCase();
     const searchWords = searchTerm.split(/\s+/).filter(w => w.length > 0);
     
-    // Get all users with service role
-    const allUsers = await base44.asServiceRole.entities.User.list();
+    // Get all users with service role - fetch more to ensure we get everyone
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
     
-    // Filter for students/gators matching the search
+    console.log(`[searchGatorStudents] Total users fetched: ${allUsers.length}`);
+    console.log(`[searchGatorStudents] Search term: "${searchTerm}", words: ${JSON.stringify(searchWords)}`);
+    
+    // Filter for students matching the search - SIMPLIFIED: just search all non-parent users
     const results = allUsers.filter(u => {
-      // Must be a gator OR a student OR have no persona yet (new user) OR have @ufl.edu email
-      const isStudent = u.persona === 'gator' || u.persona === 'student' || 
-                        u.roles?.includes('gator') || u.roles?.includes('student') ||
-                        u.email?.toLowerCase().endsWith('@ufl.edu') ||
-                        (!u.persona && !u.roles?.includes('parent') && !u.roles?.includes('alumni'));
+      // Skip parents and alumni
+      if (u.persona === 'parent' || u.persona === 'alumni') return false;
+      if (u.roles?.includes('parent') || u.roles?.includes('alumni')) return false;
       
-      // Exclude parents and alumni from student search
-      const isParentOrAlumni = u.persona === 'parent' || u.persona === 'alumni' || 
-                               u.roles?.includes('parent') || u.roles?.includes('alumni');
+      const email = (u.email || '').toLowerCase();
+      const fullName = (u.full_name || '').toLowerCase();
+      const firstName = (u.first_name || '').toLowerCase();
+      const lastName = (u.last_name || '').toLowerCase();
       
-      if (!isStudent || isParentOrAlumni) return false;
+      // Also try to extract name parts from full_name
+      const nameParts = fullName.split(/[\s,]+/).filter(p => p.length > 0);
       
-      const email = u.email?.toLowerCase() || '';
-      const fullName = u.full_name?.toLowerCase() || '';
-      const firstName = u.first_name?.toLowerCase() || '';
-      const lastName = u.last_name?.toLowerCase() || '';
-      
-      // Match exact phrase
+      // Match exact phrase anywhere
       if (email.includes(searchTerm)) return true;
       if (fullName.includes(searchTerm)) return true;
       if (firstName.includes(searchTerm)) return true;
       if (lastName.includes(searchTerm)) return true;
       
-      // Match all words (for "Lindsey Osinoff" to match "lindseyosinoff")
-      const allWordsMatch = searchWords.every(word => 
+      // Match any search word in any field
+      const anyWordMatch = searchWords.some(word => 
         email.includes(word) || 
         fullName.includes(word) || 
         firstName.includes(word) || 
-        lastName.includes(word)
+        lastName.includes(word) ||
+        nameParts.some(part => part.includes(word) || word.includes(part))
+      );
+      
+      if (anyWordMatch) return true;
+      
+      // Match all words across any fields (for multi-word names)
+      const allWordsMatch = searchWords.length > 1 && searchWords.every(word => 
+        email.includes(word) || 
+        fullName.includes(word) || 
+        firstName.includes(word) || 
+        lastName.includes(word) ||
+        nameParts.some(part => part.includes(word))
       );
       
       if (allWordsMatch) return true;
       
       return false;
     });
+    
+    console.log(`[searchGatorStudents] Found ${results.length} matches`);
     
     // Return only safe fields
     const safeResults = results.map(u => ({
