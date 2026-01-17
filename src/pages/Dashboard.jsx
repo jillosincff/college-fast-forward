@@ -299,7 +299,9 @@ export default function Dashboard() {
                 activeQuestions={myActiveQuestions}
                 matchCount={matches.length}
                 messagesSent={messagesSentCount}
+                activeConversations={messagedMatches.length}
                 isWaitingForMatches={userState === 'waiting_for_matches'}
+                isAllCaughtUp={userState === 'all_caught_up'}
               />
             </div>
           </div>
