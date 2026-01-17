@@ -1,43 +1,36 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Message } from '@/entities/Message';
 import { HelpOffer } from '@/entities/HelpOffer';
 import { Intro } from '@/entities/Intro';
 import { Opportunity } from '@/entities/Opportunity';
+import { JobRequest } from '@/entities/JobRequest';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, 
   Mail, 
   Loader2,
   User as UserIcon,
-  HelpCircle,
   Briefcase,
-  ArrowRight,
   Crown,
-  RefreshCw,
   AlertCircle,
-  CheckCircle2,
-  Link2
+  ChevronDown,
+  MessageCircle,
+  TrendingUp
 } from 'lucide-react';
-import ParentActivityWidget from '@/components/dashboard/parent/MyActivityWidget';
 import { trackEvent } from '@/components/utils/analytics';
 import { errorReporter } from '@/components/utils/errorReporter';
-import InviteGatorModal from '@/components/dashboard/InviteGatorModal';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
-import FamilyKarmaWidget from '@/components/karma/FamilyKarmaWidget';
-import AlumniKarmaWidget from '@/components/dashboard/alumni/AlumniKarmaWidget';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
-import FirstTimeUserDashboard from '@/components/dashboard/parent/FirstTimeUserDashboard';
-import StudentLinkBanner from '@/components/dashboard/parent/StudentLinkBanner';
-import AlumniWelcomeHero from '@/components/dashboard/alumni/AlumniWelcomeHero';
-import AlumniCareerRequestCard from '@/components/dashboard/alumni/AlumniCareerRequestCard';
 
 // Mobile Quick Action Card Component
 function QuickActionCardMobile({ icon, label, onClick, color = 'blue' }) {
