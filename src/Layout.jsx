@@ -1138,8 +1138,10 @@ function AppContent() {
           destination = 'AdminDashboard';
         } else if (effectiveRole === 'gator') {
           destination = 'Dashboard';
-        } else if (effectiveRole === 'parent' || effectiveRole === 'alumni' || user.roles?.includes('parent')) {
+        } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
+        } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
+          destination = 'Dashboard'; // Alumni go to regular dashboard, not parent dashboard
         } else {
           destination = 'Dashboard';
         }
