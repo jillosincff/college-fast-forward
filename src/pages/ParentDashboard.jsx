@@ -90,10 +90,15 @@ export default function ParentDashboard() {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
+      console.log('[ParentDashboard] Searching for:', searchQuery);
       const results = await base44.functions.invoke('searchGatorStudents', { query: searchQuery });
-      setSearchResults(results.data?.students || []);
+      console.log('[ParentDashboard] Search results:', results);
+      const students = results?.data?.students || results?.students || [];
+      console.log('[ParentDashboard] Parsed students:', students);
+      setSearchResults(students);
     } catch (error) {
       console.error('Search failed:', error);
+      toast({ title: "Search Error", description: error.message || "Failed to search", variant: "destructive" });
       setSearchResults([]);
     } finally {
       setIsSearching(false);
