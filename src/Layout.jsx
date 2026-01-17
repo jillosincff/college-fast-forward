@@ -91,6 +91,7 @@ const Opportunities = React.lazy(() => import('./pages/Opportunities'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
 const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
+const AlumniDashboard = React.lazy(() => import('./pages/AlumniDashboard'));
 const GatorDirectory = React.lazy(() => import('./pages/GatorDirectory'));
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
 const MyImpact = React.lazy(() => import('./pages/MyImpact'));
@@ -711,10 +712,11 @@ const isUserVerified = (user) => {
 };
 
 const getPageComponent = (pageName) => {
-  switch (pageName) {
-    case 'Dashboard': return Dashboard;
-    case 'ParentDashboard': return ParentDashboard;
-    case 'AdminDashboard': return AdminDashboard;
+    switch (pageName) {
+      case 'Dashboard': return Dashboard;
+      case 'ParentDashboard': return ParentDashboard;
+      case 'AlumniDashboard': return AlumniDashboard;
+      case 'AdminDashboard': return AdminDashboard;
     case 'Connections': return Connections;
 
     case 'CompanyProfile': return CompanyProfile;
@@ -1141,7 +1143,7 @@ function AppContent() {
         } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-          destination = 'Dashboard'; // Alumni go to regular dashboard, not parent dashboard
+          destination = 'AlumniDashboard';
         } else {
           destination = 'Dashboard';
         }
