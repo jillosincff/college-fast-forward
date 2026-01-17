@@ -46,15 +46,17 @@ export default function AlumniDashboard() {
       const [
         allJobRequests,
         myOpportunities,
-        allAnswers
+        myAnswers,
+        allRecentAnswers
       ] = await Promise.all([
         JobRequest.filter({ status: 'active' }, '-created_date', 100),
         Opportunity.filter({ created_by: user.email }, '-created_date', 10),
-        Answer.filter({ answerer_email: user.email }, '-created_date', 50)
+        Answer.filter({ answerer_email: user.email }, '-created_date', 50),
+        Answer.filter({}, '-created_date', 200) // Get recent answers for leaderboard
       ]);
 
       // Calculate karma based on answers
-      const karmaPoints = allAnswers.reduce((total, answer) => {
+      const karmaPoints = myAnswers.reduce((total, answer) => {
         let points = 10; // Base points per answer
         points += (answer.upvote_count || 0) * 5;
         if (answer.is_best_answer) points += 50;
@@ -63,13 +65,13 @@ export default function AlumniDashboard() {
       setKarma(karmaPoints + (user.karma_points || 0));
 
       // Count students helped (answers to student questions)
-      const studentAnswers = allAnswers.filter(a => 
+      const studentAnswers = myAnswers.filter(a => 
         a.question_type !== 'alumni_request'
       );
       setStudentsHelped(studentAnswers.length);
 
       // Count alumni helped
-      const alumniAnswers = allAnswers.filter(a => 
+      const alumniAnswers = myAnswers.filter(a => 
         a.question_type === 'alumni_request'
       );
       setAlumniHelped(alumniAnswers.length);
@@ -98,12 +100,12 @@ export default function AlumniDashboard() {
       );
       setAlumniRequests(otherAlumniRequests.slice(0, 5));
 
-      // Build leaderboard (mock for now - would need real data)
-      const mockLeaderboard = buildLeaderboard(user, karmaPoints);
-      setLeaderboard(mockLeaderboard);
+      // Build real leaderboard from actual answer data
+      const realLeaderboard = buildLeaderboard(user, karmaPoints, allRecentAnswers);
+      setLeaderboard(realLeaderboard);
 
-      // Recent activity
-      const activity = buildRecentActivity(allAnswers, allJobRequests);
+      // Recent activity from real answers
+      const activity = buildRecentActivity(allRecentAnswers);
       setRecentActivity(activity);
 
     } catch (error) {
@@ -145,36 +147,87 @@ export default function AlumniDashboard() {
     }).sort((a, b) => b.matchScore - a.matchScore);
   };
 
-  const buildLeaderboard = (currentUser, currentKarma) => {
-    // In production, this would come from an API
-    const karmaLevel = currentKarma >= 300 ? 'Platinum' : 
-                       currentKarma >= 150 ? 'Gold' : 
-                       currentKarma >= 50 ? 'Silver' : 'Bronze';
-    
-    return [
-      { id: '1', displayName: 'Sarah M.', weeklyHelpCount: 12, karmaLevel: 'Gold', rank: 1, isCurrentUser: false },
-      { id: '2', displayName: 'David R.', weeklyHelpCount: 9, karmaLevel: 'Silver', rank: 2, isCurrentUser: false },
-      { id: '3', displayName: 'Jennifer L.', weeklyHelpCount: 7, karmaLevel: 'Gold', rank: 3, isCurrentUser: false },
-      { id: currentUser.id, displayName: getDisplayName(currentUser.full_name), weeklyHelpCount: studentsHelped + alumniHelped, karmaLevel, rank: 4, isCurrentUser: true },
-      { id: '5', displayName: 'Michael T.', weeklyHelpCount: 4, karmaLevel: 'Bronze', rank: 5, isCurrentUser: false },
-    ];
-  };
+  const buildLeaderboard = (currentUser, currentKarma, allAnswers) => {
+    // Filter answers from the last 7 days
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const weeklyAnswers = allAnswers.filter(a => 
+      new Date(a.created_date).getTime() > oneWeekAgo
+    );
 
-  const buildRecentActivity = (answers, requests) => {
-    const events = [];
-    
-    // Recent answers become activity
-    answers.slice(0, 3).forEach(a => {
-      events.push({
-        id: a.id,
-        type: 'answered_student',
-        alumniDisplayName: a.answerer_name || 'An alumni',
-        detail: 'a student',
-        timestamp: new Date(a.created_date)
-      });
+    // Group answers by user email and count
+    const helpCountByUser = {};
+    weeklyAnswers.forEach(answer => {
+      const email = answer.answerer_email;
+      if (!email) return;
+      
+      if (!helpCountByUser[email]) {
+        helpCountByUser[email] = {
+          email,
+          name: answer.answerer_name || 'Unknown',
+          count: 0,
+          totalKarma: 0
+        };
+      }
+      helpCountByUser[email].count += 1;
+      helpCountByUser[email].totalKarma += 10 + (answer.upvote_count || 0) * 5 + (answer.is_best_answer ? 50 : 0);
     });
 
-    return events;
+    // Convert to array and sort by count
+    const sortedHelpers = Object.values(helpCountByUser)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Build leaderboard entries
+    const leaderboardEntries = sortedHelpers.map((helper, index) => {
+      const karmaLevel = helper.totalKarma >= 300 ? 'Platinum' : 
+                         helper.totalKarma >= 150 ? 'Gold' : 
+                         helper.totalKarma >= 50 ? 'Silver' : 'Bronze';
+      return {
+        id: helper.email,
+        displayName: getDisplayName(helper.name),
+        weeklyHelpCount: helper.count,
+        karmaLevel,
+        rank: index + 1,
+        isCurrentUser: helper.email === currentUser.email
+      };
+    });
+
+    // If current user isn't in top 10, add them
+    const currentUserInList = leaderboardEntries.find(e => e.isCurrentUser);
+    if (!currentUserInList) {
+      const myKarmaLevel = currentKarma >= 300 ? 'Platinum' : 
+                          currentKarma >= 150 ? 'Gold' : 
+                          currentKarma >= 50 ? 'Silver' : 'Bronze';
+      const myCount = helpCountByUser[currentUser.email]?.count || 0;
+      
+      // Find their actual rank
+      const allHelpers = Object.values(helpCountByUser).sort((a, b) => b.count - a.count);
+      const myRank = allHelpers.findIndex(h => h.email === currentUser.email) + 1 || allHelpers.length + 1;
+      
+      leaderboardEntries.push({
+        id: currentUser.id,
+        displayName: getDisplayName(currentUser.full_name),
+        weeklyHelpCount: myCount,
+        karmaLevel: myKarmaLevel,
+        rank: myRank,
+        isCurrentUser: true
+      });
+    }
+
+    return leaderboardEntries.slice(0, 5);
+  };
+
+  const buildRecentActivity = (allAnswers) => {
+    // Get recent unique answers for activity feed
+    const recentAnswers = allAnswers.slice(0, 10);
+    
+    return recentAnswers.map(a => ({
+      id: a.id,
+      type: a.question_type === 'alumni_request' ? 'answered_alumni' : 'answered_student',
+      alumniDisplayName: getDisplayName(a.answerer_name) || 'An alumni',
+      detail: a.question_type === 'alumni_request' ? 'a fellow alumni' : 'a student',
+      timestamp: new Date(a.created_date)
+    }));
   };
 
   const getDisplayName = (fullName) => {

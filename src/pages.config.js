@@ -2,6 +2,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
 import AdminReferrals from './pages/AdminReferrals';
 import AdminSetup from './pages/AdminSetup';
+import AlumniDashboard from './pages/AlumniDashboard';
 import AuthTest from './pages/AuthTest';
 import CompanyProfile from './pages/CompanyProfile';
 import Connections from './pages/Connections';
@@ -41,7 +42,6 @@ import StudentOnboarding from './pages/StudentOnboarding';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
-import AlumniDashboard from './pages/AlumniDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +50,7 @@ export const PAGES = {
     "AdminEmail": AdminEmail,
     "AdminReferrals": AdminReferrals,
     "AdminSetup": AdminSetup,
+    "AlumniDashboard": AlumniDashboard,
     "AuthTest": AuthTest,
     "CompanyProfile": CompanyProfile,
     "Connections": Connections,
@@ -89,7 +90,6 @@ export const PAGES = {
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
-    "AlumniDashboard": AlumniDashboard,
 }
 
 export const pagesConfig = {
