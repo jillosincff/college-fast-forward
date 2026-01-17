@@ -6,7 +6,9 @@ export default function StudentStatsBar({
   activeQuestions = 0, 
   matchCount = 0, 
   messagesSent = 0,
-  isWaitingForMatches = false 
+  activeConversations = 0,
+  isWaitingForMatches = false,
+  isAllCaughtUp = false
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 md:gap-4">
@@ -36,7 +38,7 @@ export default function StudentStatsBar({
                 {matchCount}
               </div>
               <p className="text-xs md:text-sm text-slate-600 leading-tight">
-                {matchCount === 1 ? 'Match' : 'Matches'}<br className="hidden md:inline" /> Ready
+                {matchCount === 1 ? 'Match' : 'Matches'}<br className="hidden md:inline" /> Total
               </p>
             </>
           )}
@@ -45,12 +47,25 @@ export default function StudentStatsBar({
       
       <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
         <CardContent className="pt-4 pb-4 text-center px-2">
-          <div className="text-2xl md:text-3xl font-bold text-green-600 mb-0.5">
-            {messagesSent}
-          </div>
-          <p className="text-xs md:text-sm text-slate-600 leading-tight">
-            Messages<br className="hidden md:inline" /> Sent
-          </p>
+          {isAllCaughtUp ? (
+            <>
+              <div className="text-2xl md:text-3xl font-bold text-green-600 mb-0.5">
+                {activeConversations}
+              </div>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">
+                {activeConversations === 1 ? 'Convo' : 'Convos'}<br className="hidden md:inline" /> Active
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="text-2xl md:text-3xl font-bold text-green-600 mb-0.5">
+                {messagesSent}
+              </div>
+              <p className="text-xs md:text-sm text-slate-600 leading-tight">
+                Messages<br className="hidden md:inline" /> Sent
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
