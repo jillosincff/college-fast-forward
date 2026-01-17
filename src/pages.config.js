@@ -41,6 +41,7 @@ import StudentOnboarding from './pages/StudentOnboarding';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
+import AlumniDashboard from './pages/AlumniDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -88,6 +89,7 @@ export const PAGES = {
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
+    "AlumniDashboard": AlumniDashboard,
 }
 
 export const pagesConfig = {
