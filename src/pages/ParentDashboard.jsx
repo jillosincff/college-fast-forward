@@ -204,9 +204,12 @@ export default function ParentDashboard() {
   
   const firstName = getCapitalizedFirstName(user?.full_name);
   
-  // Determine if new user (0 karma)
+  // Determine karma level
   const karmaPoints = user?.karma_points || familyKarma || 0;
-  const isNewUser = karmaPoints === 0;
+  const karmaLevel = karmaPoints >= 100 ? 'Gold' : karmaPoints >= 50 ? 'Silver' : 'Bronze';
+  const pointsToNextLevel = karmaPoints >= 100 ? 0 : karmaPoints >= 50 ? (100 - karmaPoints) : (50 - karmaPoints);
+  const nextLevelName = karmaPoints >= 100 ? 'Gold' : karmaPoints >= 50 ? 'Gold' : 'Silver';
+  const hasActivity = activityItems.length > 0;
 
   // Search for student
   const handleSearch = async () => {
