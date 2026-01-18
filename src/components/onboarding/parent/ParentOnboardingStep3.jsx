@@ -94,6 +94,7 @@ export default function ParentOnboardingStep3({
   const [skipCount, setSkipCount] = useState(0);
   const [answerText, setAnswerText] = useState('');
   const [showAnswerInput, setShowAnswerInput] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [noQuestions, setNoQuestions] = useState(false);
 
@@ -201,7 +202,11 @@ export default function ParentOnboardingStep3({
   };
 
   const handleReferral = () => {
-    // For now, skip to complete - referral flow can be added later
+    setShowReferralModal(true);
+  };
+
+  const handleReferralSuccess = () => {
+    setShowReferralModal(false);
     onComplete({ referredSomeone: true });
   };
 
@@ -409,6 +414,17 @@ export default function ParentOnboardingStep3({
       >
         ← Back to previous step
       </button>
+
+      {/* Referral Modal */}
+      {showReferralModal && currentQuestion && (
+        <ReferralModal
+          question={currentQuestion}
+          referrerName={user?.full_name}
+          referrerEmail={user?.email}
+          onClose={() => setShowReferralModal(false)}
+          onSuccess={handleReferralSuccess}
+        />
+      )}
     </div>
   );
 }

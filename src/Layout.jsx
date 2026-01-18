@@ -119,6 +119,7 @@ const GatorRoleSelection = React.lazy(() => import('./pages/GatorRoleSelection')
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
 const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
+const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -758,6 +759,7 @@ const getPageComponent = (pageName) => {
     case 'GatorInviteCode': return GatorInviteCode;
     case 'GatorWelcome': return GatorWelcome;
     case 'GatorParentInvite': return GatorParentInvite;
+    case 'ReferralAnswer': return ReferralAnswer;
     default: return LandingPage;
   }
 };
@@ -999,7 +1001,7 @@ function AppContent() {
     }
 
     // STEP 2: Public pages ALWAYS accessible (but redirect authenticated users from LandingPage)
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer'];
     if (trulyPublicPages.includes(currentPage)) {
       console.log('✅ [Public] Page accessible:', currentPage);
       setResolvedPage(currentPage);
