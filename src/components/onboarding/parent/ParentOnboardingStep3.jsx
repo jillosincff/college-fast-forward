@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { JobRequest } from '@/entities/JobRequest';
 import { Loader2, RefreshCw, Send, Users, ChevronRight } from 'lucide-react';
+import ReferralModal from './ReferralModal';
 
 // Map student help_types to parent ways_to_help
 const HELP_TYPE_MAPPING = {
