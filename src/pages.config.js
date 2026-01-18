@@ -43,6 +43,7 @@ import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
 import ParentOnboarding from './pages/ParentOnboarding';
+import ReferralAnswer from './pages/ReferralAnswer';
 import __Layout from './Layout.jsx';
 
 
@@ -92,6 +93,7 @@ export const PAGES = {
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
     "ParentOnboarding": ParentOnboarding,
+    "ReferralAnswer": ReferralAnswer,
 }
 
 export const pagesConfig = {
