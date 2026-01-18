@@ -1094,6 +1094,11 @@ const AdminDashboard = () => {
             <TabsContent value="opportunities" className="space-y-6">
               <OpportunitiesManagement />
             </TabsContent>
+
+            {/* Engagement Analytics Tab */}
+            <TabsContent value="engagement" className="space-y-6">
+              <EngagementAnalytics />
+            </TabsContent>
           </Tabs>
         )}
       </div>
