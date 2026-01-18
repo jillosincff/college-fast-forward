@@ -14,6 +14,9 @@ import AlumniLeaderboardSection from '@/components/alumni-dashboard/AlumniLeader
 import AlumniQuickActionsSection from '@/components/alumni-dashboard/AlumniQuickActionsSection';
 import AlumniYourRequestsCard from '@/components/alumni-dashboard/AlumniYourRequestsCard';
 import AlumniPostRequestModal from '@/components/alumni-dashboard/AlumniPostRequestModal';
+import AlumniCanHelpYouSection from '@/components/alumni-dashboard/AlumniCanHelpYouSection';
+import YourActiveRequestSection from '@/components/alumni-dashboard/YourActiveRequestSection';
+import { User } from '@/entities/User';
 
 export default function AlumniDashboard() {
   const { user, refreshUser } = useAuth();
@@ -32,6 +35,16 @@ export default function AlumniDashboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [myJobs, setMyJobs] = useState([]);
+  const [alumniWhoCanHelp, setAlumniWhoCanHelp] = useState([]);
+  
+  // Determine dashboard mode based on user's onboarding choices
+  const getDashboardMode = () => {
+    if (user?.is_good_for_now) return 'give_only';
+    if (!user?.needs_help_with || user.needs_help_with.length === 0) return 'give_only';
+    return 'give_and_get';
+  };
+  
+  const mode = getDashboardMode();
 
   useEffect(() => {
     if (user?.id) {
@@ -47,12 +60,14 @@ export default function AlumniDashboard() {
         allJobRequests,
         myOpportunities,
         myAnswers,
-        allRecentAnswers
+        allRecentAnswers,
+        allAlumni
       ] = await Promise.all([
         JobRequest.filter({ status: 'active' }, '-created_date', 100),
         Opportunity.filter({ created_by: user.email }, '-created_date', 10),
         Answer.filter({ answerer_email: user.email }, '-created_date', 50),
-        Answer.filter({}, '-created_date', 200) // Get recent answers for leaderboard
+        Answer.filter({}, '-created_date', 200), // Get recent answers for leaderboard
+        User.filter({ persona: 'alumni' }, '-created_date', 100) // Get alumni for matching
       ]);
 
       // Calculate karma based on answers
@@ -107,6 +122,12 @@ export default function AlumniDashboard() {
       // Recent activity from real answers
       const activity = buildRecentActivity(allRecentAnswers);
       setRecentActivity(activity);
+
+      // Build alumni who can help (for give_and_get mode)
+      if (user.needs_help_with && user.needs_help_with.length > 0) {
+        const matchedAlumni = findAlumniWhoCanHelp(allAlumni, user);
+        setAlumniWhoCanHelp(matchedAlumni);
+      }
 
     } catch (error) {
       console.error('Failed to load alumni dashboard data:', error);
@@ -230,6 +251,49 @@ export default function AlumniDashboard() {
     }));
   };
 
+  const findAlumniWhoCanHelp = (allAlumni, currentUser) => {
+    const myNeeds = currentUser.needs_help_with || [];
+    if (myNeeds.length === 0) return [];
+
+    // Filter alumni who can help with what user needs
+    const matches = allAlumni
+      .filter(a => a.email !== currentUser.email) // Exclude self
+      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help) // Has expertise
+      .map(alumni => {
+        const theirExpertise = [
+          ...(alumni.expertise_areas || []),
+          ...(alumni.help_types || []),
+          ...(alumni.ways_to_help || [])
+        ];
+        
+        // Find matching categories
+        const matchedCategories = myNeeds.filter(need => theirExpertise.includes(need));
+        
+        if (matchedCategories.length === 0) return null;
+        
+        return {
+          id: alumni.id,
+          email: alumni.email,
+          displayName: getDisplayName(alumni.full_name),
+          full_name: alumni.full_name,
+          jobTitle: alumni.current_position || alumni.job_title,
+          current_position: alumni.current_position,
+          company: alumni.current_company || alumni.company,
+          current_company: alumni.current_company,
+          graduationYear: alumni.graduation_year,
+          matchedCategories,
+          canHelpWith: theirExpertise,
+          isFastResponder: alumni.is_fast_responder || false,
+          karmaLevel: alumni.karma_level || 'bronze',
+          matchScore: matchedCategories.length
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    return matches;
+  };
+
   const getDisplayName = (fullName) => {
     if (!fullName) return 'Alumni';
     const parts = fullName.trim().split(/\s+/);
@@ -276,6 +340,7 @@ export default function AlumniDashboard() {
           alumniHelped={alumniHelped}
           myRequests={myRequests}
           onPostRequest={() => setShowPostRequestModal(true)}
+          mode={mode}
         />
 
         {/* Live Activity Bar */}
@@ -287,9 +352,19 @@ export default function AlumniDashboard() {
 
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
           
-          {/* Your Active Requests (if any) */}
-          {myRequests.length > 0 && (
-            <AlumniYourRequestsCard requests={myRequests} />
+          {/* GIVE + GET MODE: Show "Your Active Request" if exists */}
+          {mode === 'give_and_get' && myRequests.length > 0 && (
+            <YourActiveRequestSection request={myRequests[0]} />
+          )}
+
+          {/* GIVE + GET MODE: Show "Alumni Can Help You" if no active request */}
+          {mode === 'give_and_get' && myRequests.length === 0 && alumniWhoCanHelp.length > 0 && (
+            <AlumniCanHelpYouSection
+              matches={alumniWhoCanHelp}
+              total={alumniWhoCanHelp.length}
+              matchedCategories={user.needs_help_with || []}
+              onPostRequest={() => setShowPostRequestModal(true)}
+            />
           )}
 
           {/* Help Students */}
@@ -327,6 +402,8 @@ export default function AlumniDashboard() {
             profilePercent={profilePercent}
             activeJobCount={myJobs.length}
             onPostRequest={() => setShowPostRequestModal(true)}
+            mode={mode}
+            hasActiveRequest={myRequests.length > 0}
           />
 
           {/* Pioneer Badge */}
