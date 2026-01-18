@@ -5,12 +5,16 @@ export default function AlumniQuickActionsSection({
   user, 
   profilePercent, 
   activeJobCount, 
-  onPostRequest 
+  onPostRequest,
+  mode = 'give_and_get', // 'give_only' or 'give_and_get'
+  hasActiveRequest = false
 }) {
   const profileComplete = profilePercent >= 100;
+  const showNeedHelpCard = mode === 'give_and_get' && !hasActiveRequest;
+  const gridCols = showNeedHelpCard ? 'md:grid-cols-3' : 'md:grid-cols-2';
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <section className={`grid grid-cols-1 ${gridCols} gap-4`}>
       
       {/* Profile Card */}
       <div 
@@ -129,35 +133,37 @@ export default function AlumniQuickActionsSection({
         )}
       </div>
 
-      {/* Need Help Card */}
-      <div 
-        className="rounded-3xl p-6 border bg-white border-gray-200 hover:shadow-lg transition cursor-pointer"
-        onClick={onPostRequest}
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div 
-            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+      {/* Need Help Card - Only in give_and_get mode and no active request */}
+      {showNeedHelpCard && (
+        <div 
+          className="rounded-3xl p-6 border bg-white border-gray-200 hover:shadow-lg transition cursor-pointer"
+          onClick={onPostRequest}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div 
+              className="w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(0, 33, 165, 0.2) 0%, rgba(250, 70, 22, 0.2) 100%)'
+              }}
+            >
+              <span className="text-xl">🙋</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900">Need Help?</h3>
+              <p className="text-gray-500 text-sm">Ask the UF network</p>
+            </div>
+          </div>
+          <button 
+            className="w-full font-semibold py-2.5 rounded-xl transition text-sm border-2"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(0, 33, 165, 0.2) 0%, rgba(250, 70, 22, 0.2) 100%)'
+              borderColor: '#0021A5',
+              color: '#0021A5'
             }}
           >
-            <span className="text-xl">🙋</span>
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900">Need Help?</h3>
-            <p className="text-gray-500 text-sm">Ask the network</p>
-          </div>
+            Post a Request
+          </button>
         </div>
-        <button 
-          className="w-full font-semibold py-2.5 rounded-xl transition text-sm border-2"
-          style={{ 
-            borderColor: '#0021A5',
-            color: '#0021A5'
-          }}
-        >
-          Post a Request
-        </button>
-      </div>
+      )}
       
     </section>
   );
