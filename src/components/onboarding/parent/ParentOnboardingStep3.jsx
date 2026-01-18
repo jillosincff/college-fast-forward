@@ -230,7 +230,8 @@ export default function ParentOnboardingStep3({
       onComplete({ 
         answeredQuestion: true, 
         questionId: currentQuestion.id,
-        studentName: parseStudentName(currentQuestion.poster_name)
+        studentName: parseStudentName(currentQuestion.poster_name),
+        flowType
       });
     } catch (error) {
       console.error('Failed to submit answer:', error);
