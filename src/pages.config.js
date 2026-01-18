@@ -27,6 +27,7 @@ import Notifications from './pages/Notifications';
 import Onboarding from './pages/Onboarding';
 import Opportunities from './pages/Opportunities';
 import ParentDashboard from './pages/ParentDashboard';
+import ParentOnboarding from './pages/ParentOnboarding';
 import PaymentCancel from './pages/PaymentCancel';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PostOpportunity from './pages/PostOpportunity';
@@ -36,14 +37,13 @@ import Profile from './pages/Profile';
 import ProfileEdit from './pages/ProfileEdit';
 import PublicProfile from './pages/PublicProfile';
 import QuestionDetail from './pages/QuestionDetail';
+import ReferralAnswer from './pages/ReferralAnswer';
 import RequestInvite from './pages/RequestInvite';
 import ShareExpertise from './pages/ShareExpertise';
 import StudentOnboarding from './pages/StudentOnboarding';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import WelcomeRole from './pages/WelcomeRole';
-import ParentOnboarding from './pages/ParentOnboarding';
-import ReferralAnswer from './pages/ReferralAnswer';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +77,7 @@ export const PAGES = {
     "Onboarding": Onboarding,
     "Opportunities": Opportunities,
     "ParentDashboard": ParentDashboard,
+    "ParentOnboarding": ParentOnboarding,
     "PaymentCancel": PaymentCancel,
     "PaymentSuccess": PaymentSuccess,
     "PostOpportunity": PostOpportunity,
@@ -86,14 +87,13 @@ export const PAGES = {
     "ProfileEdit": ProfileEdit,
     "PublicProfile": PublicProfile,
     "QuestionDetail": QuestionDetail,
+    "ReferralAnswer": ReferralAnswer,
     "RequestInvite": RequestInvite,
     "ShareExpertise": ShareExpertise,
     "StudentOnboarding": StudentOnboarding,
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "WelcomeRole": WelcomeRole,
-    "ParentOnboarding": ParentOnboarding,
-    "ReferralAnswer": ReferralAnswer,
 }
 
 export const pagesConfig = {

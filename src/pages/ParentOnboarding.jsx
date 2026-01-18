@@ -50,6 +50,8 @@ export default function ParentOnboarding() {
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         onboarding_question_answered: result.answeredQuestion || false,
+        onboarding_flow_type: result.flowType || 'unknown',
+        onboarding_referral_submitted: result.referredSomeone || false,
         visible_in_directory: true
       };
 
