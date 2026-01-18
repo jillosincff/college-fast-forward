@@ -104,8 +104,13 @@ export default function ParentOnboardingStep3({
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [noQuestions, setNoQuestions] = useState(false);
+  const [flowType, setFlowType] = useState(null); // 'matched' | 'noMatch' | 'empty'
+  const [showReferralSuccess, setShowReferralSuccess] = useState(false);
+  const [referralName, setReferralName] = useState('');
 
-  const MAX_SKIPS = 4;
+  // Different limits based on flow type
+  const MAX_SKIPS_MATCHED = 4;
+  const MAX_SKIPS_NO_MATCH = 3;
 
   useEffect(() => {
     loadMatchingQuestions();
