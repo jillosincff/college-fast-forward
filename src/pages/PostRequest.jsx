@@ -72,6 +72,30 @@ export default function PostRequestPage() { // Renamed from PostRequest
     
     setIsSubmitting(true);
     try {
+      // CRITICAL: Validate email exists before submission
+      let userEmail = user?.email;
+      
+      // If email not in session, try to get from current user
+      if (!userEmail) {
+        try {
+          const freshUser = await base44.auth.me();
+          userEmail = freshUser?.email;
+        } catch (e) {
+          console.error('Failed to fetch user email:', e);
+        }
+      }
+      
+      // Block submission if we can't get the email
+      if (!userEmail) {
+        toast({
+          title: "Something went wrong",
+          description: "Please refresh the page and try again.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Determine poster type based on user persona
       let posterType = 'student';
       if (user?.persona === 'parent' || user?.roles?.includes('parent')) {
@@ -106,7 +130,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
         poster_type: posterType,
         is_anonymous: values.is_anonymous || false,
         // CRITICAL: Always store poster_email for notifications (even for anonymous posts)
-        poster_email: user?.email,
+        poster_email: userEmail,
         poster_profile_image: user?.profile_image_url || null,
         poster_name: posterName,
         poster_first_name: posterFirstName,
