@@ -10,6 +10,7 @@ import { Loader2, Upload, X, AlertCircle, Sparkles } from 'lucide-react';
 import { UploadFile } from '@/integrations/Core';
 import { useToast } from '@/components/ui/use-toast';
 import { useForm, Controller } from 'react-hook-form';
+import IndustrySelector from './IndustrySelector';
 
 // Alumni career help types (consolidated 5 categories)
 const ALUMNI_HELP_TYPES = [
@@ -37,6 +38,8 @@ export default function JobRequestForm({
   const [resumeUrl, setResumeUrl] = useState(initialData?.resume_url || '');
   const [resumeUploading, setResumeUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [targetIndustries, setTargetIndustries] = useState(initialData?.target_industries || []);
+  const [industryOtherText, setIndustryOtherText] = useState(initialData?.industry_other_text || '');
 
   const {
     control,
@@ -197,11 +200,18 @@ export default function JobRequestForm({
   };
 
   const handleFormSubmit = async (data) => {
+    // For legacy compatibility, use first industry as target_industry
+    const primaryIndustry = targetIndustries.length > 0 ? targetIndustries[0] : '';
+    
     const submitData = {
       ...data,
       resume_url: resumeUrl,
       title: data.role,
       target_helpers: ['alumni', 'parents'],
+      // Industry fields - both legacy single and new multi-select
+      target_industry: primaryIndustry,
+      target_industries: targetIndustries,
+      industry_other_text: targetIndustries.includes('other') ? industryOtherText : null,
       // CRITICAL: Only parents can post anonymously - students always show their name
       is_anonymous: isParent && isAnonymous ? true : false,
       // Alumni career request fields
@@ -284,29 +294,24 @@ export default function JobRequestForm({
         <CardTitle>What are you looking for?</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField label="Role/Position *" error={errors.role}>
-              <Input
-                {...register("role", {
-                  required: "Role is required",
-                  minLength: { value: 3, message: "Role must be at least 3 characters" }
-                })}
-                placeholder="e.g., Software Engineer, Marketing Intern"
-              />
-              <p className="text-xs text-slate-500 mt-1">✨ Be specific: "Product Manager" not just "Business job"</p>
-            </FormField>
-            
-            <FormField label="Industry *" error={errors.target_industry}>
-              <Input
-                {...register("target_industry", {
-                  required: "Industry is required",
-                  minLength: { value: 3, message: "Industry must be at least 3 characters" }
-                })}
-                placeholder="e.g., Technology, Finance, Healthcare"
-              />
-              <p className="text-xs text-slate-500 mt-1">✨ Be specific: "FinTech" or "Med-Tech" not just "Tech"</p>
-            </FormField>
-          </div>
+          <FormField label="Role/Position *" error={errors.role}>
+            <Input
+              {...register("role", {
+                required: "Role is required",
+                minLength: { value: 3, message: "Role must be at least 3 characters" }
+              })}
+              placeholder="e.g., Software Engineer, Marketing Intern"
+            />
+            <p className="text-xs text-slate-500 mt-1">✨ Be specific: "Product Manager" not just "Business job"</p>
+          </FormField>
+
+          <IndustrySelector
+            value={targetIndustries}
+            onChange={setTargetIndustries}
+            otherText={industryOtherText}
+            onOtherTextChange={setIndustryOtherText}
+            maxSelections={3}
+          />
 
           <FormField label="Target Company (Optional)" error={errors.target_company}>
             <Input

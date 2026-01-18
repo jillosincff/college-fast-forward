@@ -16,7 +16,7 @@ const HELP_TYPE_MAPPING = {
   grad_school: 'grad_school'
 };
 
-// Scoring function
+// Scoring function - supports both legacy target_industry and new target_industries array
 function scoreQuestion(question, parentIndustries, parentWaysToHelp) {
   let score = 0;
   
@@ -29,13 +29,19 @@ function scoreQuestion(question, parentIndustries, parentWaysToHelp) {
   const helpOverlap = mappedHelpTypes.some(ht => parentWaysToHelp.includes(ht));
   if (helpOverlap) score += 50;
   
-  // Industry match
-  if (question.target_industry) {
-    if (parentIndustries.includes(question.target_industry)) {
+  // Industry match - support both array and legacy string
+  const studentIndustries = question.target_industries?.length > 0 
+    ? question.target_industries 
+    : (question.target_industry ? [question.target_industry] : []);
+  
+  if (studentIndustries.length > 0) {
+    // Student specified industries - check for overlap
+    const industryOverlap = studentIndustries.some(ind => parentIndustries.includes(ind));
+    if (industryOverlap) {
       score += 40;
     }
   } else {
-    // No industry specified = partial credit
+    // "Anyone" selected or no industry = partial credit
     score += 10;
   }
   
