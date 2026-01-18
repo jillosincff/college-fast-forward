@@ -86,6 +86,7 @@ const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
+const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
 const Opportunities = React.lazy(() => import('./pages/Opportunities'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
@@ -664,7 +665,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ShareExpertise'];
+const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired'];
 const adminPages = ['TestingDashboard'];
 // publicPages only used for routing logic, NOT for hiding header
@@ -729,6 +730,7 @@ const getPageComponent = (pageName) => {
     case 'WelcomeRole': return WelcomeRole;
     case 'StudentOnboarding': return StudentOnboarding;
     case 'Onboarding': return Onboarding;
+    case 'ParentOnboarding': return ParentOnboarding;
     case 'ShareExpertise': return ShareExpertise;
     case 'GatorDirectory': return GatorDirectory;
     case 'MyRequests': return MyRequests;
@@ -1124,12 +1126,15 @@ function AppContent() {
         const isGatorRole = effectiveRole === 'gator' || user.roles?.includes('gator');
 
         if (isGatorRole && !isParentRole) {
-          destination = 'StudentOnboarding';
-          console.log('➡️ [NeedsOnboarding] Gator → StudentOnboarding');
-        } else if (isParentRole) {
-          destination = 'Onboarding';
-          console.log('➡️ [NeedsOnboarding] Parent/Alumni → Onboarding');
-        } else {
+            destination = 'StudentOnboarding';
+            console.log('➡️ [NeedsOnboarding] Gator → StudentOnboarding');
+          } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
+            destination = 'ParentOnboarding';
+            console.log('➡️ [NeedsOnboarding] Parent → ParentOnboarding');
+          } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
+            destination = 'Onboarding';
+            console.log('➡️ [NeedsOnboarding] Alumni → Onboarding');
+          } else {
           // Fallback for unknown persona - go to GatorAuth
           destination = 'GatorAuth';
           console.log('➡️ [NeedsOnboarding] Unknown role → GatorAuth');
