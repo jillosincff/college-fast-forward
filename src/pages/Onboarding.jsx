@@ -71,6 +71,10 @@ export default function Onboarding() {
   const [alumniStory, setAlumniStory] = useState('');
   const [storyAnonymous, setStoryAnonymous] = useState(true);
   
+  // Alumni "Get Help" - what they need help with (Step 3)
+  const [needsHelpWith, setNeedsHelpWith] = useState([]);
+  const [isGoodForNow, setIsGoodForNow] = useState(false);
+  
   // Visibility setting
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
 
@@ -119,6 +123,22 @@ export default function Onboarding() {
     }
   };
 
+  const toggleNeedsHelp = (id) => {
+    if (isGoodForNow) setIsGoodForNow(false);
+    if (needsHelpWith.includes(id)) {
+      setNeedsHelpWith(needsHelpWith.filter(e => e !== id));
+    } else {
+      setNeedsHelpWith([...needsHelpWith, id]);
+    }
+  };
+
+  const handleGoodForNow = () => {
+    setIsGoodForNow(!isGoodForNow);
+    if (!isGoodForNow) {
+      setNeedsHelpWith([]);
+    }
+  };
+
   const canProceedStep1 = !linkedinError;
   const canProceedStep2 = expertise.length > 0;
   const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
@@ -164,6 +184,10 @@ export default function Onboarding() {
         if (alumniMajor.trim()) updateData.major = alumniMajor.trim();
         if (alumniMinor.trim()) updateData.minor = alumniMinor.trim();
         if (graduateDegrees.trim()) updateData.graduate_degrees = graduateDegrees.trim();
+        
+        // Alumni "Get Help" preferences
+        updateData.needs_help_with = isGoodForNow ? [] : needsHelpWith;
+        updateData.is_good_for_now = isGoodForNow;
         
         // Story sharing
         if (storyOption === 'yes' && alumniStory.trim()) {
@@ -375,12 +399,15 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 5</p>
-            <h1 className="text-3xl font-bold text-white">How can you help?</h1>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of {totalSteps}</p>
+            <h1 className="text-3xl font-bold text-white">{isAlumni ? 'Give & Get' : 'How can you help?'}</h1>
           </div>
           
           <p className="text-xl text-white/90">
-            Students need guidance in many areas. Pick what fits you best.
+            {isAlumni 
+              ? 'Help students. Get help when YOU need it. That\'s the deal.'
+              : 'Students need guidance in many areas. Pick what fits you best.'
+            }
           </p>
           
           <div className="space-y-2 pt-4">
@@ -389,8 +416,8 @@ export default function Onboarding() {
               <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
             </div>
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">⏱️</span>
-              <span className="font-semibold text-sm">Most help takes just 5-10 minutes</span>
+              <span className="text-xl">{isAlumni ? '🤝' : '⏱️'}</span>
+              <span className="font-semibold text-sm">{isAlumni ? 'When you need a career pivot, alumni have your back' : 'Most help takes just 5-10 minutes'}</span>
             </div>
           </div>
         </div>
@@ -735,7 +762,7 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 3: How to Help */}
+          {/* STEP 3: How to Help (with "Get Help" for Alumni) */}
           {step === 3 && (
             <>
               <div className="mb-6">
@@ -743,11 +770,12 @@ export default function Onboarding() {
                   How would you like to help?
                 </h2>
                 <p className="text-slate-500">
-                  Select at least one — this helps us match you with students.
+                  Select at least one
                 </p>
               </div>
 
               <div className="space-y-6">
+                {/* GIVE Section */}
                 <div className="grid grid-cols-1 gap-2">
                   {EXPERTISE_AREAS.map(area => (
                     <button
@@ -779,14 +807,88 @@ export default function Onboarding() {
                   <p className="text-xs text-amber-600">Please select at least one way you'd like to help</p>
                 )}
 
+                {/* GET Section - Alumni only */}
+                {isAlumni && (
+                  <>
+                    <div className="border-t border-slate-200 my-6" />
+                    
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-800 mb-1">
+                        What might YOU need help with?
+                      </h2>
+                      <p className="text-slate-500 text-sm mb-4">
+                        Optional — alumni help each other too
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        {EXPERTISE_AREAS.map(area => {
+                          const isSelected = needsHelpWith.includes(area.id);
+                          const isDisabled = isGoodForNow;
+                          return (
+                            <button
+                              key={`need-${area.id}`}
+                              type="button"
+                              onClick={() => toggleNeedsHelp(area.id)}
+                              disabled={isDisabled}
+                              className={`
+                                flex items-center gap-4 px-4 py-3 rounded-xl text-left
+                                transition-all duration-200 border-2
+                                ${isDisabled
+                                  ? 'border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed'
+                                  : isSelected
+                                  ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                                }
+                              `}
+                            >
+                              <span className="text-xl">{area.emoji}</span>
+                              <span className="font-medium flex-1">{area.label}</span>
+                              {isSelected && !isDisabled && <span className="text-[#0021A5] font-bold">✓</span>}
+                            </button>
+                          );
+                        })}
+
+                        {/* Good for now checkbox */}
+                        <button
+                          type="button"
+                          onClick={handleGoodForNow}
+                          className={`
+                            flex items-center gap-4 px-4 py-3 rounded-xl text-left
+                            transition-all duration-200 border-2
+                            ${isGoodForNow
+                              ? 'border-slate-400 bg-slate-100'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                            }
+                          `}
+                        >
+                          <div 
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                              isGoodForNow 
+                                ? 'border-slate-500 bg-slate-500' 
+                                : 'border-slate-300'
+                            }`}
+                          >
+                            {isGoodForNow && <span className="text-white text-xs">✓</span>}
+                          </div>
+                          <span className="font-medium text-slate-700">
+                            I'm good for now — just here to help
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-200 my-6" />
+                  </>
+                )}
+
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Anything else you'd like students to know? <span className="font-normal text-slate-400">(optional)</span>
+                    Anything else you'd like {isAlumni ? 'others' : 'students'} to know? <span className="font-normal text-slate-400">(optional)</span>
                   </label>
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder=""
+                    placeholder={isAlumni ? "E.g., specific industries you know well, companies you've worked at, topics you're passionate about..." : ""}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                              resize-none h-20 focus:border-[#0021A5] focus:outline-none transition-colors"
                     maxLength={500}
