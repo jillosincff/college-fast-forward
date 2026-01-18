@@ -495,21 +495,19 @@ export default function ParentOnboardingStep3({
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleSkip}
-              className="flex-1 py-3 rounded-xl font-medium text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Not My Area - Show Another
-            </button>
-          </div>
-
           <button
             onClick={handleReferral}
-            className="w-full py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-50 transition-all text-sm"
+            className="w-full py-3 rounded-xl font-medium text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
           >
-            I Know Someone Who Can Help →
+            I Know Someone Who Can Help
+          </button>
+
+          <button
+            onClick={handleSkip}
+            className="w-full py-3 rounded-xl font-medium text-slate-500 hover:bg-slate-50 transition-all text-sm flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Skip → Show Another
           </button>
         </div>
       )}
