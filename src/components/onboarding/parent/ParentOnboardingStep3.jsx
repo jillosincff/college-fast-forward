@@ -349,21 +349,36 @@ export default function ParentOnboardingStep3({
 
   // Question display
   const studentName = parseStudentName(currentQuestion?.poster_name);
+  const maxQuestions = flowType === 'matched' ? MAX_SKIPS_MATCHED + 1 : MAX_SKIPS_NO_MATCH;
+
+  // Header copy based on flow type
+  const headerText = flowType === 'matched' 
+    ? "One more thing: a UF student needs your help right now."
+    : "We don't have a perfect match for your expertise right now—but maybe you can still help?";
+  
+  const subheaderText = flowType === 'matched'
+    ? "Based on what you just told us, you might be the perfect person to answer this."
+    : null;
 
   return (
     <div className="space-y-6">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl lg:text-2xl font-bold text-slate-800">
-            One more thing
+            {flowType === 'matched' ? 'One more thing' : 'Help a Gator?'}
           </h2>
           <span className="text-sm text-slate-500">
-            Question {currentIndex + 1} of {Math.min(MAX_SKIPS + 1, questions.length)}
+            Question {currentIndex + 1} of {Math.min(maxQuestions, questions.length)}
           </span>
         </div>
         <p className="text-slate-600">
-          A student needs your help right now. Based on what you just told us, you might be the perfect person to answer this.
+          {headerText}
         </p>
+        {subheaderText && (
+          <p className="text-slate-500 text-sm mt-1">
+            {subheaderText}
+          </p>
+        )}
       </div>
 
       {/* Question Card */}
