@@ -17,12 +17,19 @@ import WaitingForResponses from '@/components/dashboard/student/WaitingForRespon
 import UnreadResponsesSection from '@/components/dashboard/student/UnreadResponsesSection';
 import MoreMatchesPrompt from '@/components/dashboard/student/MoreMatchesPrompt';
 import MatchesSection from '@/components/dashboard/student/MatchesSection';
-import AllCaughtUpSection from '@/components/dashboard/student/AllCaughtUpSection';
-import StudentStatsBar from '@/components/dashboard/student/StudentStatsBar';
 import CompactOpportunities from '@/components/dashboard/student/CompactOpportunities';
 import CompactChallenge from '@/components/dashboard/student/CompactChallenge';
 import FamilyBoostStatus from '@/components/dashboard/student/FamilyBoostStatus';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
+// New UF-branded components
+import FoundingMemberBanner from '@/components/dashboard/student/FoundingMemberBanner';
+import DashboardHeader from '@/components/dashboard/student/DashboardHeader';
+import StatsCards from '@/components/dashboard/student/StatsCards';
+import AllCaughtUpState from '@/components/dashboard/student/states/AllCaughtUpState';
+import ChallengeCard from '@/components/dashboard/student/ChallengeCard';
+import FamilyCard from '@/components/dashboard/student/FamilyCard';
+import ConversationsSection from '@/components/dashboard/student/ConversationsSection';
+import ResponsesSection from '@/components/dashboard/student/ResponsesSection';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -266,46 +273,23 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8">
       
-      {/* Founding Member Banner - Always show for founding members */}
-      {networkStats.spotsLeft > 0 && networkStats.spotsLeft <= 800 && (
-        <div className="bg-gradient-to-r from-[#FA4616] via-orange-500 to-orange-600 text-white py-4 px-4">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">🎉</span>
-              <div>
-                <span className="font-bold">You're a Founding Member!</span>
-                <span className="text-white/90 ml-2">FREE FOREVER</span>
-              </div>
-            </div>
-            <div className="text-center md:text-right">
-              <span className="text-2xl font-bold text-yellow-300">{networkStats.spotsLeft}</span>
-              <span className="text-white/90 ml-2">founding spots remaining</span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Founding Member Banner */}
+      <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
 
-      {/* Welcome Header - Only show when NOT new user */}
+      {/* Welcome Header with Stats - Only show when NOT new user */}
       {userState !== 'new_user' && (
-        <div className="bg-[#0021A5] text-white py-6 px-4">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-xl md:text-3xl font-bold text-white">
-              Welcome back, {firstName}! 👋
-            </h1>
-            
-            {/* Stats Bar inline for returning users */}
-            <div className="mt-4">
-              <StudentStatsBar
-                activeQuestions={myActiveQuestions}
-                matchCount={matches.length}
-                messagesSent={messagesSentCount}
-                activeConversations={messagedMatches.length}
-                isWaitingForMatches={userState === 'waiting_for_matches'}
-                isAllCaughtUp={userState === 'all_caught_up'}
-              />
-            </div>
-          </div>
-        </div>
+        <DashboardHeader 
+          firstName={firstName}
+          stats={{
+            activeQuestions: myActiveQuestions,
+            totalMatches: matches.length,
+            messagesSent: messagesSentCount,
+            unreadResponses: unreadCount,
+            activeConversations: messagedMatches.length,
+          }}
+          state={userState === 'waiting_for_matches' ? 'waiting_matches' : 
+                 userState === 'all_caught_up' ? 'all_caught_up' : 'default'}
+        />
       )}
 
       {/* Main Content */}
@@ -423,7 +407,16 @@ export default function Dashboard() {
         {userState === 'has_unread_responses' && (
           <>
             {/* UNREAD RESPONSES FIRST - Top priority */}
-            <UnreadResponsesSection unreadMessages={unreadMessages} />
+            <ResponsesSection 
+              responses={unreadMessages} 
+              onReadResponse={(msg) => {
+                if (msg.conversation_id) {
+                  navigate(`MyMessages?id=${msg.conversation_id}`);
+                } else {
+                  navigate('MyMessages');
+                }
+              }}
+            />
 
             {/* More matches available */}
             {unmessagedMatches.length > 0 && (
@@ -448,38 +441,26 @@ export default function Dashboard() {
 
         {/* STATE 6: All Caught Up - Explore Mode */}
         {userState === 'all_caught_up' && (
-          <>
-            {/* All caught up + active conversations */}
-            <AllCaughtUpSection 
-              activeConversations={[]} 
-              messagedMatches={messagedMatches}
-            />
-
-            {/* More matches if available */}
-            {unmessagedMatches.length > 0 && (
-              <MoreMatchesPrompt 
-                unmessagedMatches={unmessagedMatches}
-                totalMatches={matches.length}
-                onMessageMatch={(match) => {
-                  const name = match.helper_name || match.parent_name || 'Helper';
-                  const email = match.helper_email || match.parent_email;
-                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-                }}
-              />
-            )}
-
-            {/* Opportunities */}
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title="Latest Opportunities"
-            />
-
-            {/* Challenge */}
-            <CompactChallenge 
-              user={user} 
-              onLogIntro={() => setShowLogIntroModal(true)}
-            />
-          </>
+          <AllCaughtUpState 
+            conversations={messagedMatches}
+            opportunities={opportunities}
+            challenge={{
+              introsLogged: user?.challenge_intros_logged || 0,
+              goal: 3,
+              daysRemaining: 30,
+            }}
+            student={user}
+            unmessagedMatches={unmessagedMatches}
+            totalMatches={matches.length}
+            linkedParents={linkedParents}
+            onMessageMatch={(match) => {
+              const name = match.helper_name || match.parent_name || 'Helper';
+              const email = match.helper_email || match.parent_email;
+              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+            }}
+            onLogIntro={() => setShowLogIntroModal(true)}
+            onInviteParent={() => setShowInviteModal(true)}
+          />
         )}
 
         {/* ═══════════════════════════════════════════════════════════════ */}
