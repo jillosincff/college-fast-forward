@@ -27,6 +27,9 @@ Deno.serve(async (req) => {
     const details = [];
 
     for (const question of questions) {
+      // Rate limit delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       try {
         let email = null;
         
