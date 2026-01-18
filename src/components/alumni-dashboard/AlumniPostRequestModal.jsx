@@ -7,11 +7,13 @@ import { useToast } from '@/components/ui/use-toast';
 import { JobRequest } from '@/entities/JobRequest';
 import { useAuth } from '@/components/auth/AuthContext';
 
+// Consolidated 5 categories (same as giving help)
 const REQUEST_TYPES = [
-  { value: 'new_job_search', label: 'Job Search', icon: '🔍', description: 'Looking for opportunities' },
-  { value: 'career_transition', label: 'Career Transition', icon: '🔄', description: 'Moving to a new role or company' },
-  { value: 'industry_shift', label: 'Industry Shift', icon: '🏢', description: 'Breaking into a new industry' },
-  { value: 'business_advice', label: 'Business Advice', icon: '💡', description: 'Entrepreneurship or strategy questions' },
+  { value: 'career_guidance', label: 'Career guidance', icon: '💼', description: 'Career paths, transitions, mentorship, salary advice' },
+  { value: 'jobs_referrals', label: 'Jobs & referrals', icon: '🔍', description: 'Job search help, referrals, opportunities' },
+  { value: 'resume_interviews', label: 'Resume & interviews', icon: '📄', description: 'Resume review, interview prep' },
+  { value: 'industry_insights', label: 'Industry insights', icon: '🏢', description: 'Learn about a field, career paths' },
+  { value: 'introductions', label: 'Introductions', icon: '🤝', description: 'Connect with specific people or companies' },
 ];
 
 export default function AlumniPostRequestModal({ onClose, onSuccess }) {

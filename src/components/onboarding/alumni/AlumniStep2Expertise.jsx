@@ -1,18 +1,17 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, ArrowLeft, Clock, Users, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// Consolidated 5 categories for alumni help
 const HELP_OPTIONS = [
-  { id: 'introductions', label: 'Make introductions to my network', icon: '🤝' },
-  { id: 'resume_feedback', label: 'Provide resume feedback', icon: '📄' },
-  { id: 'career_advice', label: 'Offer career advice and mentoring', icon: '💡' },
-  { id: 'interview_prep', label: 'Help with interview preparation', icon: '🎯' },
-  { id: 'job_leads', label: 'Share job and internship leads', icon: '💼' },
-  { id: 'industry_insights', label: 'Share industry insights and trends', icon: '📊' }
+  { id: 'career_guidance', label: 'Career guidance', icon: '💼', description: 'Career paths, transitions, mentorship, salary advice' },
+  { id: 'jobs_referrals', label: 'Jobs & referrals', icon: '🔍', description: 'Job search help, referrals, sharing opportunities' },
+  { id: 'resume_interviews', label: 'Resume & interviews', icon: '📄', description: 'Resume review, LinkedIn optimization, mock interviews' },
+  { id: 'industry_insights', label: 'Industry insights', icon: '🏢', description: 'Day-to-day work, breaking into a field, career paths' },
+  { id: 'introductions', label: 'Introductions', icon: '🤝', description: 'Connecting with specific people or companies' },
 ];
 
 export default function AlumniStep2Expertise({ formData, onUpdate, onNext, onBack }) {
@@ -55,7 +54,7 @@ export default function AlumniStep2Expertise({ formData, onUpdate, onNext, onBac
             How would you like to help?
           </h2>
           <p className="text-lg text-slate-600 mb-6 max-w-2xl mx-auto">
-            Choose the ways you'd like to support fellow Gators. You can always update these later.
+            Select all that apply. Students will be matched based on your expertise.
           </p>
         </motion.div>
       </div>
@@ -70,24 +69,32 @@ export default function AlumniStep2Expertise({ formData, onUpdate, onNext, onBac
         <div>
           <Label className="text-base font-medium mb-4 block">Ways I Can Help Students</Label>
           <div className="space-y-4">
-            {HELP_OPTIONS.map(option => (
-              <div key={option.id} className="flex items-center space-x-3 p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-                <Checkbox 
-                  id={option.id} 
-                  checked={(formData.ways_to_help || []).includes(option.id)} 
-                  onCheckedChange={() => handleHelpToggle(option.id)}
-                />
-                <div className="flex-grow">
-                  <Label 
-                    htmlFor={option.id} 
-                    className="font-medium text-slate-800 cursor-pointer flex items-center gap-3"
-                  >
-                    <span className="text-lg">{option.icon}</span>
-                    <span>{option.label}</span>
-                  </Label>
-                </div>
-              </div>
-            ))}
+            {HELP_OPTIONS.map(option => {
+              const isSelected = (formData.ways_to_help || []).includes(option.id);
+              return (
+                <button
+                  type="button"
+                  key={option.id}
+                  onClick={() => handleHelpToggle(option.id)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition text-left ${
+                    isSelected
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <span className="text-2xl">{option.icon}</span>
+                  <div className="flex-1">
+                    <span className="font-medium text-slate-900">{option.label}</span>
+                    {option.description && (
+                      <p className="text-sm text-slate-500 mt-0.5">{option.description}</p>
+                    )}
+                  </div>
+                  {isSelected && (
+                    <span className="text-blue-500 font-bold">✓</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

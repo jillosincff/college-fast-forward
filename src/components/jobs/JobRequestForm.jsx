@@ -11,12 +11,13 @@ import { UploadFile } from '@/integrations/Core';
 import { useToast } from '@/components/ui/use-toast';
 import { useForm, Controller } from 'react-hook-form';
 
-// Alumni career help types
+// Alumni career help types (consolidated 5 categories)
 const ALUMNI_HELP_TYPES = [
-  { value: 'new_job_search', label: 'New job search', icon: '💼' },
-  { value: 'career_transition', label: 'Career transition', icon: '🔄' },
-  { value: 'industry_shift', label: 'Industry shift', icon: '🌐' },
-  { value: 'business_advice', label: 'Business advice', icon: '💡' },
+  { value: 'career_guidance', label: 'Career guidance', icon: '💼', description: 'Career paths, transitions, mentorship, salary advice' },
+  { value: 'jobs_referrals', label: 'Jobs & referrals', icon: '🔍', description: 'Job search help, referrals, opportunities' },
+  { value: 'resume_interviews', label: 'Resume & interviews', icon: '📄', description: 'Resume review, interview prep' },
+  { value: 'industry_insights', label: 'Industry insights', icon: '🏢', description: 'Learn about a field, career paths' },
+  { value: 'introductions', label: 'Introductions', icon: '🤝', description: 'Connect with specific people or companies' },
 ];
 
 export default function JobRequestForm({
@@ -241,7 +242,7 @@ export default function JobRequestForm({
             {ALUMNI_HELP_TYPES.map((type) => (
               <label
                 key={type.value}
-                className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                   alumniHelpType === type.value
                     ? 'border-amber-500 bg-amber-100'
                     : 'border-slate-200 hover:border-amber-300 bg-white'
@@ -256,9 +257,14 @@ export default function JobRequestForm({
                   className="sr-only"
                 />
                 <span className="text-2xl">{type.icon}</span>
-                <span className={`font-medium ${alumniHelpType === type.value ? 'text-amber-900' : 'text-slate-700'}`}>
-                  {type.label}
-                </span>
+                <div className="flex-1">
+                  <span className={`font-medium block ${alumniHelpType === type.value ? 'text-amber-900' : 'text-slate-700'}`}>
+                    {type.label}
+                  </span>
+                  {type.description && (
+                    <span className="text-xs text-slate-500">{type.description}</span>
+                  )}
+                </div>
               </label>
             ))}
           </div>

@@ -38,17 +38,13 @@ export const STUDENT_HELP_NEEDED = [
   { id: 'grad_school', label: 'Grad school advice', emoji: '🎓' },
 ];
 
-// How parents/alumni can help
+// How parents/alumni can help (consolidated 5 categories)
 export const EXPERTISE_AREAS = [
-  { id: 'career_advice', label: 'Career advice & guidance', emoji: '💼' },
-  { id: 'resume_review', label: 'Resume & LinkedIn review', emoji: '📝' },
-  { id: 'mock_interviews', label: 'Mock interviews', emoji: '🎤' },
-  { id: 'networking', label: 'Networking & introductions', emoji: '🤝' },
-  { id: 'salary_tips', label: 'Salary & negotiation tips', emoji: '💰' },
-  { id: 'industry_insights', label: 'Industry insights', emoji: '🏢' },
-  { id: 'job_referrals', label: 'Job/internship referrals', emoji: '🔍' },
-  { id: 'grad_school', label: 'Grad school advice', emoji: '🎓' },
-  { id: 'mentorship', label: 'General mentorship', emoji: '💡' },
+  { id: 'career_guidance', label: 'Career guidance', emoji: '💼', description: 'Career paths, transitions, mentorship, salary advice' },
+  { id: 'jobs_referrals', label: 'Jobs & referrals', emoji: '🔍', description: 'Job search help, referrals, sharing opportunities' },
+  { id: 'resume_interviews', label: 'Resume & interviews', emoji: '📄', description: 'Resume review, LinkedIn optimization, mock interviews' },
+  { id: 'industry_insights', label: 'Industry insights', emoji: '🏢', description: 'Day-to-day work, breaking into a field, career paths' },
+  { id: 'introductions', label: 'Introductions', emoji: '🤝', description: 'Connecting with specific people or companies' },
 ];
 
 // Graduation years
