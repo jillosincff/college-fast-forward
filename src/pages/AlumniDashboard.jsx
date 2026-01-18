@@ -16,7 +16,7 @@ import AlumniYourRequestsCard from '@/components/alumni-dashboard/AlumniYourRequ
 import AlumniPostRequestModal from '@/components/alumni-dashboard/AlumniPostRequestModal';
 import AlumniCanHelpYouSection from '@/components/alumni-dashboard/AlumniCanHelpYouSection';
 import YourActiveRequestSection from '@/components/alumni-dashboard/YourActiveRequestSection';
-import { User } from '@/entities/User';
+
 
 export default function AlumniDashboard() {
   const { user, refreshUser } = useAuth();
