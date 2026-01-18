@@ -270,20 +270,19 @@ export default function ParentOnboardingStep3({
     );
   }
 
-  // No matching questions
-  if (noQuestions) {
+  // No questions at all - everything answered
+  if (noQuestions && flowType === 'empty') {
     return (
       <div className="space-y-6">
         <div className="text-center py-8">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-[#0021A5]" />
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">🎉</span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">
-            No worries!
+            Great news—all student questions have been answered!
           </h2>
           <p className="text-slate-600 mb-6">
-            We don't have any questions matching your expertise right now. 
-            We'll notify you when one comes in!
+            We'll notify you when new questions come in.
           </p>
         </div>
 
@@ -295,8 +294,51 @@ export default function ParentOnboardingStep3({
             ← Back
           </button>
           <button
-            onClick={() => onComplete({ noQuestions: true })}
+            onClick={() => onComplete({ noQuestions: true, flowType: 'empty' })}
             className="flex-1 py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
+          >
+            Go to My Dashboard →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Referral success screen
+  if (showReferralSuccess) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">🙏</span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">
+            Thanks for the referral!
+          </h2>
+          <p className="text-slate-600 mb-6">
+            We'll reach out to {referralName} and let you know if they're able to help.
+          </p>
+          <p className="text-slate-500 text-sm">
+            Want to see another question, or continue to your dashboard?
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {currentIndex < questions.length - 1 && (
+            <button
+              onClick={handleContinueAfterReferral}
+              className="w-full py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
+            >
+              Show Another Question
+            </button>
+          )}
+          <button
+            onClick={() => onComplete({ referredSomeone: true, flowType })}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+              currentIndex < questions.length - 1
+                ? 'border-2 border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+            }`}
           >
             Go to My Dashboard →
           </button>
