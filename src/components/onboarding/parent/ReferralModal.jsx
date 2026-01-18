@@ -41,7 +41,7 @@ export default function ReferralModal({
           title: "Referral sent!",
           description: `We've emailed ${friendName} with the question.`
         });
-        onSuccess?.();
+        onSuccess?.(friendName.trim());
       } else {
         throw new Error(response.data?.error || 'Failed to send referral');
       }
