@@ -975,8 +975,12 @@ function AppContent() {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
         const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
 
-        if (isParent || isAlumni) {
-          console.log('🔄 [Parent/Alumni Flow] -> Onboarding');
+        if (isParent) {
+          console.log('🔄 [Parent Flow] -> ParentOnboarding');
+          navigate('ParentOnboarding');
+          return;
+        } else if (isAlumni) {
+          console.log('🔄 [Alumni Flow] -> Onboarding');
           navigate('Onboarding');
           return;
         } else if (user.persona === 'gator' || user.roles?.includes('gator')) {
@@ -1188,7 +1192,12 @@ function AppContent() {
       // Existing users without the field are grandfathered as complete
       const isParent = user.persona === 'parent' || user.roles?.includes('parent');
       const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
-      const onboardingPage = (isParent || isAlumni) ? 'Onboarding' : 'StudentOnboarding';
+      let onboardingPage = 'StudentOnboarding';
+      if (isParent) {
+        onboardingPage = 'ParentOnboarding';
+      } else if (isAlumni) {
+        onboardingPage = 'Onboarding';
+      }
       console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage, '(persona:', user.persona, 'roles:', user.roles, ')');
       navigate(onboardingPage);
     } else {
