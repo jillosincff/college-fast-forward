@@ -188,9 +188,11 @@ export default function ParentOnboardingStep3({
     setShowAnswerInput(false);
     setAnswerText('');
 
-    if (newSkipCount >= MAX_SKIPS || currentIndex >= questions.length - 1) {
+    const maxSkips = flowType === 'matched' ? MAX_SKIPS_MATCHED : MAX_SKIPS_NO_MATCH;
+
+    if (newSkipCount >= maxSkips || currentIndex >= questions.length - 1) {
       // Graceful exit
-      onComplete({ skippedAll: true });
+      onComplete({ skippedAll: true, flowType });
     } else {
       setCurrentIndex(currentIndex + 1);
     }
