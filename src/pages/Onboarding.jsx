@@ -25,17 +25,13 @@ const INDUSTRIES = [
   { id: 'other', label: 'Other', emoji: '✨' },
 ];
 
-// How they can help
+// How they can help (consolidated 5 categories)
 const EXPERTISE_AREAS = [
-  { id: 'career_advice', label: 'Career advice & guidance', emoji: '💼' },
-  { id: 'resume_review', label: 'Resume & LinkedIn review', emoji: '📝' },
-  { id: 'mock_interviews', label: 'Mock interviews', emoji: '🎤' },
-  { id: 'networking', label: 'Networking & introductions', emoji: '🤝' },
-  { id: 'salary_tips', label: 'Salary & negotiation tips', emoji: '💰' },
-  { id: 'job_referrals', label: 'Job/internship referrals', emoji: '🔍' },
-  { id: 'industry_insights', label: 'Industry insights', emoji: '🏢' },
-  { id: 'grad_school', label: 'Grad school advice', emoji: '🎓' },
-  { id: 'mentorship', label: 'General mentorship', emoji: '💡' },
+  { id: 'career_guidance', label: 'Career guidance', emoji: '💼', description: 'Career paths, transitions, mentorship, salary advice' },
+  { id: 'jobs_referrals', label: 'Jobs & referrals', emoji: '🔍', description: 'Job search help, referrals, sharing opportunities' },
+  { id: 'resume_interviews', label: 'Resume & interviews', emoji: '📄', description: 'Resume review, LinkedIn optimization, mock interviews' },
+  { id: 'industry_insights', label: 'Industry insights', emoji: '🏢', description: 'Day-to-day work, breaking into a field, career paths' },
+  { id: 'introductions', label: 'Introductions', emoji: '🤝', description: 'Connecting with specific people or companies' },
 ];
 
 export default function Onboarding() {
@@ -759,7 +755,7 @@ export default function Onboarding() {
                       type="button"
                       onClick={() => toggleExpertise(area.id)}
                       className={`
-                        flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                        flex items-start gap-4 px-4 py-4 rounded-xl text-left
                         transition-all duration-200 border-2
                         ${expertise.includes(area.id)
                           ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
@@ -767,9 +763,14 @@ export default function Onboarding() {
                         }
                       `}
                     >
-                      <span className="text-lg">{area.emoji}</span>
-                      <span className="font-medium">{area.label}</span>
-                      {expertise.includes(area.id) && <span className="ml-auto text-[#0021A5]">✓</span>}
+                      <span className="text-2xl">{area.emoji}</span>
+                      <div className="flex-1">
+                        <span className="font-semibold block">{area.label}</span>
+                        {area.description && (
+                          <span className="text-sm text-slate-500 mt-0.5 block">{area.description}</span>
+                        )}
+                      </div>
+                      {expertise.includes(area.id) && <span className="text-[#0021A5] font-bold">✓</span>}
                     </button>
                   ))}
                 </div>
