@@ -56,19 +56,26 @@ export default function AlumniDashboard() {
     setLoading(true);
     try {
       // Fetch all data in parallel
+      // Fetch core data first (these should always succeed)
       const [
         allJobRequests,
         myOpportunities,
         myAnswers,
-        allRecentAnswers,
-        allAlumni
+        allRecentAnswers
       ] = await Promise.all([
         JobRequest.filter({ status: 'active' }, '-created_date', 100),
         Opportunity.filter({ created_by: user.email }, '-created_date', 10),
         Answer.filter({ answerer_email: user.email }, '-created_date', 50),
-        Answer.filter({}, '-created_date', 200), // Get recent answers for leaderboard
-        User.filter({ persona: 'alumni' }, '-created_date', 100) // Get alumni for matching
+        Answer.filter({}, '-created_date', 200) // Get recent answers for leaderboard
       ]);
+      
+      // Try to fetch alumni for matching (may fail due to RLS)
+      let allAlumni = [];
+      try {
+        allAlumni = await base44.entities.User.filter({ persona: 'alumni' }, '-created_date', 100);
+      } catch (e) {
+        console.log('Could not load alumni for matching (expected if RLS restricts)');
+      }
 
       // Calculate karma based on answers
       const karmaPoints = myAnswers.reduce((total, answer) => {
