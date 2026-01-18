@@ -126,6 +126,13 @@ export default function ParentOnboardingStep3({
         200
       );
 
+      if (allQuestions.length === 0) {
+        setFlowType('empty');
+        setNoQuestions(true);
+        setLoading(false);
+        return;
+      }
+
       // Score and filter questions
       const parentIndustries = formData.industries || [];
       const parentWaysToHelp = formData.waysToHelp || [];
@@ -135,20 +142,38 @@ export default function ParentOnboardingStep3({
           ...q,
           matchScore: scoreQuestion(q, parentIndustries, parentWaysToHelp)
         }))
-        .filter(q => q.matchScore >= 50) // Minimum score threshold
         .sort((a, b) => {
           // Sort by score descending, then by age (older first) for tiebreaker
           if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
           return new Date(a.created_date) - new Date(b.created_date);
         });
 
-      if (scoredQuestions.length === 0) {
-        setNoQuestions(true);
+      // Check if we have good matches (score >= 50)
+      const goodMatches = scoredQuestions.filter(q => q.matchScore >= 50);
+      
+      if (goodMatches.length > 0) {
+        // Matched flow - show up to 5 best matches
+        setFlowType('matched');
+        setQuestions(goodMatches.slice(0, 5));
       } else {
-        setQuestions(scoredQuestions);
+        // No match flow - show oldest unanswered questions (up to 3)
+        setFlowType('noMatch');
+        const oldestUnanswered = allQuestions
+          .filter(q => (q.answer_count || 0) === 0)
+          .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
+          .slice(0, 3);
+        
+        if (oldestUnanswered.length > 0) {
+          setQuestions(oldestUnanswered.map(q => ({ ...q, matchScore: 0 })));
+        } else {
+          // All questions have been answered
+          setFlowType('empty');
+          setNoQuestions(true);
+        }
       }
     } catch (error) {
       console.error('Failed to load questions:', error);
+      setFlowType('empty');
       setNoQuestions(true);
     } finally {
       setLoading(false);
