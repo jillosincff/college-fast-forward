@@ -34,7 +34,10 @@ import { exportUsers } from '@/functions/exportUsers';
 import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
 import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
 import { Opportunity } from '@/entities/Opportunity';
-import { Trash2 } from 'lucide-react';
+import { JobRequest } from '@/entities/JobRequest';
+import { Answer } from '@/entities/Answer';
+import { Message } from '@/entities/Message';
+import { Trash2, BarChart3 } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
