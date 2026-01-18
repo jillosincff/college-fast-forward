@@ -2941,4 +2941,312 @@ const OpportunitiesManagement = () => {
   );
 };
 
+// Engagement Analytics Component
+const EngagementAnalytics = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    loadEngagementStats();
+  }, []);
+
+  const loadEngagementStats = async () => {
+    setLoading(true);
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Fetch all data in parallel
+      const [allUsers, allJobRequests, allAnswers, allMessages] = await Promise.all([
+        base44.entities.User.filter({}, '-updated_date', 9999),
+        JobRequest.filter({}, '-created_date', 500),
+        Answer.filter({}, '-created_date', 500),
+        Message.filter({}, '-created_date', 500)
+      ]);
+
+      // 1. Parents logged in last 30 days (updated_date is updated on login)
+      const activeParents = (allUsers || []).filter(u => 
+        (u.persona === 'parent' || u.roles?.includes('parent')) &&
+        u.updated_date && new Date(u.updated_date) >= new Date(thirtyDaysAgo)
+      );
+
+      // 2. Unanswered student questions
+      const studentQuestions = (allJobRequests || []).filter(r => 
+        r.poster_type === 'student' && !r.is_alumni_career_request
+      );
+      const unansweredQuestions = studentQuestions.filter(q => 
+        (q.answer_count || 0) === 0
+      );
+
+      // 3. Student response rate after getting an answer
+      // Find questions that have answers
+      const answeredQuestionIds = new Set(
+        (allAnswers || []).map(a => a.question_id).filter(Boolean)
+      );
+      
+      const questionsWithAnswers = studentQuestions.filter(q => 
+        answeredQuestionIds.has(q.id)
+      );
+
+      // Check if poster replied in messages after getting an answer
+      let studentsWhoReplied = 0;
+      let studentsWithAnswersChecked = 0;
+
+      for (const question of questionsWithAnswers.slice(0, 100)) { // Check up to 100 for performance
+        const posterEmail = question.poster_email || question.created_by;
+        if (!posterEmail) continue;
+        
+        studentsWithAnswersChecked++;
+        
+        // Check if student sent any message after receiving an answer
+        const studentMessages = (allMessages || []).filter(m => 
+          m.sender_email === posterEmail &&
+          (m.post_id === question.id || m.subject?.includes(question.role) || m.subject?.includes(question.title))
+        );
+        
+        if (studentMessages.length > 0) {
+          studentsWhoReplied++;
+        }
+      }
+
+      // Also count by conversation participation
+      const questionPostersWithAnswers = questionsWithAnswers
+        .map(q => q.poster_email || q.created_by)
+        .filter(Boolean);
+      
+      const uniquePostersWithAnswers = [...new Set(questionPostersWithAnswers)];
+      
+      // Count posters who sent at least one message
+      const postersWhoSentMessages = uniquePostersWithAnswers.filter(email => 
+        (allMessages || []).some(m => m.sender_email === email)
+      );
+
+      setStats({
+        activeParentsLast30Days: activeParents.length,
+        totalParents: (allUsers || []).filter(u => u.persona === 'parent' || u.roles?.includes('parent')).length,
+        unansweredStudentQuestions: unansweredQuestions.length,
+        totalStudentQuestions: studentQuestions.length,
+        questionsWithAnswers: questionsWithAnswers.length,
+        studentsWhoReplied,
+        studentsWithAnswersChecked,
+        responseRate: studentsWithAnswersChecked > 0 
+          ? Math.round((studentsWhoReplied / studentsWithAnswersChecked) * 100) 
+          : 0,
+        // Alternative calculation using unique posters
+        uniquePostersWithAnswers: uniquePostersWithAnswers.length,
+        postersWhoSentMessages: postersWhoSentMessages.length,
+        alternativeResponseRate: uniquePostersWithAnswers.length > 0
+          ? Math.round((postersWhoSentMessages.length / uniquePostersWithAnswers.length) * 100)
+          : 0,
+        // Additional context
+        totalAnswers: (allAnswers || []).length,
+        totalMessages: (allMessages || []).length,
+        recentUnanswered: unansweredQuestions.slice(0, 10)
+      });
+
+    } catch (error) {
+      console.error('Failed to load engagement stats:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load engagement statistics",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-teal-600" />
+        <p className="text-slate-600">Calculating engagement metrics...</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="text-center py-12 text-slate-500">
+        <AlertTriangle className="w-12 h-12 mx-auto mb-2" />
+        <p>Could not load engagement data</p>
+        <Button onClick={loadEngagementStats} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Key Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Parents Active Last 30 Days */}
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-orange-700 font-medium">Parents Active (Last 30 Days)</p>
+                <p className="text-4xl font-bold text-orange-900 mt-2">{stats.activeParentsLast30Days}</p>
+                <p className="text-sm text-orange-600 mt-1">
+                  of {stats.totalParents} total parents ({stats.totalParents > 0 ? Math.round((stats.activeParentsLast30Days / stats.totalParents) * 100) : 0}%)
+                </p>
+              </div>
+              <div className="p-3 bg-orange-200 rounded-lg">
+                <Users className="w-6 h-6 text-orange-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Unanswered Questions */}
+        <Card className={`border-red-200 ${stats.unansweredStudentQuestions > 10 ? 'bg-red-50' : 'bg-yellow-50 border-yellow-200'}`}>
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-red-700 font-medium">Unanswered Student Questions</p>
+                <p className="text-4xl font-bold text-red-900 mt-2">{stats.unansweredStudentQuestions}</p>
+                <p className="text-sm text-red-600 mt-1">
+                  of {stats.totalStudentQuestions} total questions ({stats.totalStudentQuestions > 0 ? Math.round((stats.unansweredStudentQuestions / stats.totalStudentQuestions) * 100) : 0}% unanswered)
+                </p>
+              </div>
+              <div className="p-3 bg-red-200 rounded-lg">
+                <MessageCircle className="w-6 h-6 text-red-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Student Response Rate */}
+        <Card className="border-teal-200 bg-teal-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-teal-700 font-medium">Students Who Reply After Getting Help</p>
+                <p className="text-4xl font-bold text-teal-900 mt-2">{stats.alternativeResponseRate}%</p>
+                <p className="text-sm text-teal-600 mt-1">
+                  {stats.postersWhoSentMessages} of {stats.uniquePostersWithAnswers} students sent messages
+                </p>
+              </div>
+              <div className="p-3 bg-teal-200 rounded-lg">
+                <Activity className="w-6 h-6 text-teal-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Engagement Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-100 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{stats.totalAnswers}</p>
+              <p className="text-xs text-slate-600">Total Answers Posted</p>
+            </div>
+            <div className="bg-slate-100 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{stats.totalMessages}</p>
+              <p className="text-xs text-slate-600">Total Messages Sent</p>
+            </div>
+            <div className="bg-slate-100 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{stats.questionsWithAnswers}</p>
+              <p className="text-xs text-slate-600">Questions with Answers</p>
+            </div>
+            <div className="bg-slate-100 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-green-600">
+                {stats.totalStudentQuestions > 0 
+                  ? Math.round(((stats.totalStudentQuestions - stats.unansweredStudentQuestions) / stats.totalStudentQuestions) * 100) 
+                  : 0}%
+              </p>
+              <p className="text-xs text-slate-600">Questions Answered</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Unanswered Questions */}
+      {stats.recentUnanswered.length > 0 && (
+        <Card className="border-red-200">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              Recent Unanswered Questions
+            </CardTitle>
+            <p className="text-sm text-slate-600">
+              These student questions have no answers yet
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {stats.recentUnanswered.map((q) => {
+                const daysOld = Math.floor((Date.now() - new Date(q.created_date).getTime()) / (1000 * 60 * 60 * 24));
+                return (
+                  <div key={q.id} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">{q.role || q.title || 'Untitled'}</p>
+                        <p className="text-sm text-slate-600 mt-1 line-clamp-2">{q.description?.substring(0, 150)}...</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                          <span>Posted by: {q.poster_name || q.poster_first_name || 'Student'}</span>
+                          <span>•</span>
+                          <span className={daysOld > 7 ? 'text-red-600 font-semibold' : ''}>
+                            {daysOld === 0 ? 'Today' : `${daysOld} days ago`}
+                          </span>
+                          {q.target_industry && (
+                            <>
+                              <span>•</span>
+                              <span>{q.target_industry}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`QuestionDetail?id=${q.id}`)}
+                        className="flex-shrink-0"
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Methodology Note */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="text-lg">📊 How These Metrics Are Calculated</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-blue-800">
+          <div>
+            <p className="font-semibold">Parents Active (Last 30 Days):</p>
+            <p className="ml-4">Users with persona "parent" whose profile was updated in the last 30 days (updated_date changes on login and profile edits)</p>
+          </div>
+          <div>
+            <p className="font-semibold">Unanswered Questions:</p>
+            <p className="ml-4">Student questions (poster_type="student") where answer_count is 0</p>
+          </div>
+          <div>
+            <p className="font-semibold">Student Response Rate:</p>
+            <p className="ml-4">Percentage of students who posted a question, received an answer, and then sent at least one message (indicating they engaged with the response)</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button onClick={loadEngagementStats} variant="outline" className="w-full">
+        <RefreshCw className="w-4 h-4 mr-2" />
+        Refresh Engagement Data
+      </Button>
+    </div>
+  );
+};
+
 export default AdminDashboard;
