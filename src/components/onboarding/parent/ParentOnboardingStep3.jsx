@@ -245,9 +245,19 @@ export default function ParentOnboardingStep3({
     setShowReferralModal(true);
   };
 
-  const handleReferralSuccess = () => {
+  const handleReferralSuccess = (referredName) => {
     setShowReferralModal(false);
-    onComplete({ referredSomeone: true });
+    setReferralName(referredName || 'your contact');
+    setShowReferralSuccess(true);
+  };
+
+  const handleContinueAfterReferral = () => {
+    setShowReferralSuccess(false);
+    if (currentIndex >= questions.length - 1) {
+      onComplete({ referredSomeone: true, flowType });
+    } else {
+      setCurrentIndex(currentIndex + 1);
+    }
   };
 
   // Loading state
