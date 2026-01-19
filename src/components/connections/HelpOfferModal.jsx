@@ -33,10 +33,19 @@ export default function HelpOfferModal({ isOpen, onClose, request, user, onSucce
 
     setIsSending(true);
     try {
-      // Track the help offer
+      // Track the help offer - pass all required data
       const result = await base44.functions.invoke('trackHelpOffer', {
         requestId: request.id,
-        message: message.trim()
+        message: message.trim(),
+        // Helper info
+        helperEmail: user.email,
+        helperName: user.full_name || user.email?.split('@')[0],
+        helperPersona: user.persona,
+        // Request info
+        requestCreatorEmail: request.poster_email || request.created_by,
+        requestTitle: request.role || request.title,
+        requestDescription: request.description,
+        studentName: request.poster_name || request.poster?.full_name || request.poster_first_name
       });
 
       console.log('✅ Help offer tracked:', result);
