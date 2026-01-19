@@ -151,24 +151,40 @@ export default function ParentOnboardingStep3({
       // Check if we have good matches (score >= 50)
       const goodMatches = scoredQuestions.filter(q => q.matchScore >= 50);
       
+      console.log('[ParentOnboardingStep3] Scoring results:', {
+        totalQuestions: allQuestions.length,
+        goodMatchesCount: goodMatches.length,
+        topScores: scoredQuestions.slice(0, 5).map(q => ({ id: q.id, score: q.matchScore, title: q.title?.slice(0, 30) }))
+      });
+      
       if (goodMatches.length > 0) {
         // Matched flow - show up to 5 best matches
+        console.log('[ParentOnboardingStep3] Setting MATCHED flow with', goodMatches.length, 'questions');
         setFlowType('matched');
         setQuestions(goodMatches.slice(0, 5));
       } else {
         // No match flow - show oldest unanswered questions (up to 3)
-        setFlowType('noMatch');
+        console.log('[ParentOnboardingStep3] No good matches, trying NO_MATCH flow');
         const oldestUnanswered = allQuestions
           .filter(q => (q.answer_count || 0) === 0)
           .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
           .slice(0, 3);
         
+        console.log('[ParentOnboardingStep3] Oldest unanswered count:', oldestUnanswered.length);
+        
         if (oldestUnanswered.length > 0) {
+          setFlowType('noMatch');
           setQuestions(oldestUnanswered.map(q => ({ ...q, matchScore: 0 })));
         } else {
-          // All questions have been answered
-          setFlowType('empty');
-          setNoQuestions(true);
+          // All questions have been answered - but we still have questions, just show some
+          console.log('[ParentOnboardingStep3] All questions answered, showing top scored anyway');
+          if (scoredQuestions.length > 0) {
+            setFlowType('noMatch');
+            setQuestions(scoredQuestions.slice(0, 3));
+          } else {
+            setFlowType('empty');
+            setNoQuestions(true);
+          }
         }
       }
     } catch (error) {
