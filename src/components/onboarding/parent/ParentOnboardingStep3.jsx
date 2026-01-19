@@ -347,6 +347,44 @@ export default function ParentOnboardingStep3({
     );
   }
 
+  // If no current question but we have questions array, something's wrong
+  if (!currentQuestion && questions.length > 0) {
+    console.error('No current question but questions exist', { currentIndex, questionsLength: questions.length });
+  }
+
+  // If we somehow have no questions to show (but didn't hit noQuestions state), show empty
+  if (!currentQuestion) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-[#0021A5]" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">
+            No questions available right now
+          </h2>
+          <p className="text-slate-600 mb-6">
+            We'll notify you when students need your help!
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onBack}
+            className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+          >
+            ← Back
+          </button>
+          <button
+            onClick={() => onComplete({ noQuestions: true, flowType: flowType || 'empty' })}
+            className="flex-1 py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
+          >
+            Go to My Dashboard →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Question display
   const studentName = parseStudentName(currentQuestion?.poster_name);
   const maxQuestions = flowType === 'matched' ? MAX_SKIPS_MATCHED + 1 : MAX_SKIPS_NO_MATCH;
