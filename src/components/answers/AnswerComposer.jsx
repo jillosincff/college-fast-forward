@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Lightbulb } from 'lucide-react';
+import { Send, Lightbulb, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Answer } from '@/entities/Answer';
 import { HelpRequest } from '@/entities/HelpRequest';
@@ -11,11 +11,25 @@ import ReferralSection from './ReferralSection';
 
 const MAX_CHARS = 5000;
 
+// Helper to extract student first name
+const getStudentFirstName = (question) => {
+  if (question?.poster_first_name) return question.poster_first_name;
+  if (question?.poster_name) {
+    // Handle "Last, First" format
+    const parts = question.poster_name.split(',').map(p => p.trim());
+    if (parts.length >= 2) return parts[1].split(' ')[0];
+    return question.poster_name.split(' ')[0];
+  }
+  if (question?.student_name) return question.student_name.split(' ')[0];
+  return 'this student';
+};
+
 export default function AnswerComposer({ 
   question, 
   currentUser, 
   onAnswerPosted,
-  autoFocus = false
+  autoFocus = false,
+  answerCount = 0
 }) {
   const textareaRef = useRef(null);
   
