@@ -61,6 +61,13 @@ export default function MatchCard({ match, onMessage }) {
             </p>
           )}
 
+          {/* Match Reasons - Why you matched */}
+          {(match.match_reasons || match.matchReasons)?.length > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              ✨ {(match.match_reasons || match.matchReasons).slice(0, 3).join(' · ')}
+            </p>
+          )}
+
           {/* Badges */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {isFastResponder && (

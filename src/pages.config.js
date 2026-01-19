@@ -43,8 +43,8 @@ import ShareExpertise from './pages/ShareExpertise';
 import StudentOnboarding from './pages/StudentOnboarding';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
-import WelcomeRole from './pages/WelcomeRole';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
+import WelcomeRole from './pages/WelcomeRole';
 import __Layout from './Layout.jsx';
 
 
@@ -94,8 +94,8 @@ export const PAGES = {
     "StudentOnboarding": StudentOnboarding,
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
-    "WelcomeRole": WelcomeRole,
     "UnsubscribeReengagement": UnsubscribeReengagement,
+    "WelcomeRole": WelcomeRole,
 }
 
 export const pagesConfig = {

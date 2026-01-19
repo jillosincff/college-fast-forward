@@ -1,0 +1,205 @@
+import React, { useEffect, useState } from 'react';
+import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
+import confetti from 'canvas-confetti';
+import { trackEvent } from '@/components/utils/analytics';
+
+const UF_BLUE = '#0021A5';
+const UF_ORANGE = '#FA4616';
+
+export default function CelebrationScreen({ user, onContinue }) {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  const firstName = user?.full_name?.split(/[\s,]+/)[0] || 'Gator';
+
+  useEffect(() => {
+    // Fire confetti
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.5 },
+      colors: [UF_BLUE, UF_ORANGE, '#FF6B35', '#FFD700']
+    });
+
+    // Load matches
+    loadMatches();
+    
+    trackEvent('celebration_screen_viewed', { user_id: user?.id });
+  }, []);
+
+  const loadMatches = async () => {
+    try {
+      // Get recent matches for this student
+      const studentMatches = await base44.entities.Match.filter(
+        { student_email: user?.email },
+        '-match_score',
+        50
+      );
+      setMatches(studentMatches || []);
+    } catch (e) {
+      console.error('Failed to load matches:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDashboard = () => {
+    trackEvent('celebration_path_chosen', { user_id: user?.id, path: 'dashboard' });
+    navigate('Dashboard');
+  };
+
+  const handleDirectory = () => {
+    trackEvent('celebration_path_chosen', { user_id: user?.id, path: 'directory' });
+    navigate('GatorDirectory');
+  };
+
+  // Get top 4 matches for avatar display
+  const topMatches = matches.slice(0, 4);
+  const remainingCount = Math.max(0, matches.length - 4);
+
+  // Get notable companies
+  const companies = [...new Set(
+    matches
+      .map(m => m.helper_company || m.parent_company || m.company)
+      .filter(Boolean)
+      .filter(c => !c.toLowerCase().includes('self-employed') && !c.toLowerCase().includes('retired'))
+  )].slice(0, 3);
+
+  // Get initials
+  const getInitials = (name) => {
+    if (!name) return 'UF';
+    return name
+      .split(/\s+/)
+      .map(n => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  // Get short title
+  const getShortTitle = (match) => {
+    const title = match.helper_title || match.parent_title || match.title || '';
+    if (!title) return '';
+    // Shorten common titles
+    return title
+      .replace('Director', 'Dir')
+      .replace('Manager', 'Mgr')
+      .replace('Vice President', 'VP')
+      .split(' ')
+      .slice(0, 2)
+      .join(' ');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-orange-50/30 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full text-center">
+        
+        {/* Celebration header */}
+        <div className="text-6xl mb-4 animate-bounce">🎉</div>
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          You're all set, {firstName}!
+        </h1>
+        
+        {loading ? (
+          <p className="text-lg text-gray-600 mb-8">
+            Finding people who can help you...
+          </p>
+        ) : (
+          <p className="text-lg text-gray-600 mb-8">
+            Your question is live and <span className="font-bold text-[#0021A5]">{matches.length} {matches.length === 1 ? 'person' : 'people'}</span> can help you.
+          </p>
+        )}
+
+        {/* Avatar row */}
+        {!loading && matches.length > 0 && (
+          <div className="flex justify-center gap-3 mb-4">
+            {topMatches.map((match, i) => (
+              <div key={i} className="text-center">
+                <div 
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                  style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
+                >
+                  {getInitials(match.helper_name || match.parent_name)}
+                </div>
+                <p className="text-xs text-gray-500 mt-1 max-w-[60px] truncate">
+                  {getShortTitle(match)}
+                </p>
+              </div>
+            ))}
+            {remainingCount > 0 && (
+              <div className="text-center">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold shadow-lg">
+                  +{remainingCount}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Company mentions */}
+        {companies.length > 0 && (
+          <p className="text-gray-500 mb-8 text-sm md:text-base">
+            Including Directors, VPs, and hiring managers at{' '}
+            <span className="font-medium text-gray-700">{companies.join(', ')}</span>.
+          </p>
+        )}
+
+        {/* Two paths */}
+        <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-6 shadow-xl">
+          <h2 className="font-bold text-gray-900 mb-4 text-lg">
+            What do you want to do first?
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Path 1: Wait */}
+            <div className="border-2 border-gray-200 rounded-xl p-5 text-left hover:border-gray-300 transition-colors">
+              <div className="text-3xl mb-3">📬</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Wait for responses</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Parents who match your question will be notified. Most respond within 48 hours.
+              </p>
+              <button
+                onClick={handleDashboard}
+                className="w-full py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+            
+            {/* Path 2: Reach out (emphasized) */}
+            <div 
+              className="border-2 rounded-xl p-5 text-left relative overflow-hidden"
+              style={{ borderColor: UF_BLUE }}
+            >
+              <div className="absolute top-0 right-0 bg-[#FA4616] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                RECOMMENDED
+              </div>
+              <div className="text-3xl mb-3">💬</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Start reaching out</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Don't wait — browse the directory and message anyone who can help.
+              </p>
+              <button
+                onClick={handleDirectory}
+                className="w-full py-3 text-white rounded-xl font-semibold transition-all hover:scale-[1.02] shadow-lg"
+                style={{ 
+                  background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)`,
+                  boxShadow: `0 4px 12px ${UF_BLUE}40`
+                }}
+              >
+                Browse Directory →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Pro tip */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+          💡 <span className="font-semibold">Pro tip:</span> Do both! Students who message 3+ parents get responses{' '}
+          <span className="font-bold">80% faster</span>.
+        </div>
+      </div>
+    </div>
+  );
+}

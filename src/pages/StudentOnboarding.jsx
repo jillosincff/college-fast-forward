@@ -12,6 +12,7 @@ import {
 } from '@/components/onboarding/onboardingOptions';
 import { JobRequest } from '@/entities/JobRequest';
 import confetti from 'canvas-confetti';
+import CelebrationScreen from '@/components/onboarding/student/CelebrationScreen';
 
 export default function StudentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -52,11 +53,16 @@ export default function StudentOnboarding() {
   
   // Timeline options
   const TIMELINE_OPTIONS = [
+    { id: '', label: 'Not sure yet' },
     { id: 'immediate', label: 'ASAP' },
     { id: 'this_semester', label: 'This Semester' },
     { id: 'next_semester', label: 'Next Semester' },
     { id: 'summer', label: 'Summer 2026' },
   ];
+  
+  // State for celebration screen
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [matchCount, setMatchCount] = useState(null);
 
   // Pre-fill from user data if available
   useEffect(() => {
@@ -163,24 +169,20 @@ export default function StudentOnboarding() {
 
       await refreshUser();
 
-      // Celebration
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#0021A5', '#FA4616', '#FF6B35']
-      });
-
-      // Navigate to dashboard after brief delay
-      setTimeout(() => {
-        navigate('Dashboard');
-      }, 1500);
+      // Show celebration screen instead of navigating directly
+      setShowCelebration(true);
+      setLoading(false);
       
     } catch (error) {
       console.error('Failed to save onboarding:', error);
       setLoading(false);
     }
   };
+  
+  // Show celebration screen after onboarding complete
+  if (showCelebration) {
+    return <CelebrationScreen user={user} />;
+  }
 
   // Resume handlers
   const handleResumeChange = (e) => {
@@ -505,7 +507,7 @@ export default function StudentOnboarding() {
       totalSteps={3}
       onNext={handleFinish}
       onBack={handleBack}
-      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : 'Find My Matches →'}
+      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : (matchCount ? `See ${matchCount} people who can help →` : 'Find My Matches →')}
       nextDisabled={!isStep3Valid || loading}
     >
       <div className="max-w-lg mx-auto">
@@ -540,12 +542,12 @@ export default function StudentOnboarding() {
             />
           </div>
 
-          {/* Location and Timeline Row */}
+          {/* Location and Timeline Row - Both Optional */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Preferred Location */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Where are you looking to work?
+                Where are you looking to work? <span className="font-normal text-slate-400">(optional)</span>
               </label>
               <input
                 type="text"
@@ -561,7 +563,7 @@ export default function StudentOnboarding() {
             {/* Timeline */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                When do you want to start?
+                When do you want to start? <span className="font-normal text-slate-400">(optional)</span>
               </label>
               <select
                 value={targetTimeline}
@@ -569,12 +571,16 @@ export default function StudentOnboarding() {
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
                          focus:border-[#0021A5] focus:outline-none bg-white"
               >
-                <option value="">Select timeline</option>
                 {TIMELINE_OPTIONS.map(opt => (
                   <option key={opt.id} value={opt.id}>{opt.label}</option>
                 ))}
               </select>
             </div>
+          </div>
+          
+          {/* Helpful tip for non-job-seekers */}
+          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3 text-sm text-blue-700">
+            💡 <span className="font-medium">Not job hunting yet?</span> No problem — you can still get career advice, resume feedback, and industry insights.
           </div>
 
           {/* Help Request - REQUIRED */}
