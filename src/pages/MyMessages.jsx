@@ -32,33 +32,50 @@ export default function MyMessagesPage() {
 
   const MESSAGES_PER_PAGE = 50;
 
-  // Load conversations
+  // Load conversations by fetching messages directly (avoid problematic Conversation queries)
   const loadConversations = useCallback(async () => {
     if (!user?.email) return;
     
     setIsLoadingConvs(true);
     try {
-      // Load all messages for this user (both sent and received)
-      const allMessages = await base44.entities.Message.filter(
+      // Load all messages where user is recipient
+      const receivedMessages = await base44.entities.Message.filter(
         { recipient_email: user.email },
         '-created_date',
         100
       ) || [];
       
+      // Also load messages where user is sender
+      let sentMessages = [];
+      try {
+        sentMessages = await base44.entities.Message.filter(
+          { sender_email: user.email },
+          '-created_date',
+          50
+        ) || [];
+      } catch (e) {
+        console.log('Could not load sent messages');
+      }
+      
+      const allMessages = [...receivedMessages, ...sentMessages];
       console.log('Loaded messages:', allMessages.length);
       
-      // Group messages by conversation_id OR by sender (for orphan messages)
+      // Group messages by conversation_id OR by other participant
       const conversationMap = new Map();
       
       allMessages.forEach(msg => {
-        const key = msg.conversation_id || `sender-${msg.sender_email}`;
+        // Determine the other participant
+        const otherEmail = msg.sender_email === user.email ? msg.recipient_email : msg.sender_email;
+        const key = msg.conversation_id || `thread-${otherEmail}`;
         
         if (!conversationMap.has(key)) {
           conversationMap.set(key, {
-            id: msg.conversation_id || `orphan-${msg.sender_email}`,
-            participant_emails: [user.email, msg.sender_email],
+            id: msg.conversation_id || `orphan-${otherEmail}`,
+            participant_emails: [user.email, otherEmail],
             participant_names: {
-              [msg.sender_email]: msg.sender_name || msg.sender_email.split('@')[0]
+              [otherEmail]: msg.sender_email === user.email 
+                ? (msg.recipient_email?.split('@')[0] || 'Unknown')
+                : (msg.sender_name || msg.sender_email?.split('@')[0] || 'Unknown')
             },
             subject: msg.subject,
             last_message_preview: msg.body?.substring(0, 100),
@@ -75,11 +92,22 @@ export default function MyMessagesPage() {
         }
         
         const conv = conversationMap.get(key);
-        conv._messages.push(msg);
         
-        // Update unread count
+        // Avoid duplicates
+        if (!conv._messages.find(m => m.id === msg.id)) {
+          conv._messages.push(msg);
+        }
+        
+        // Update unread count (only for received messages)
         if (!msg.is_read && msg.recipient_email === user.email) {
           conv.unread_count[user.email] = (conv.unread_count[user.email] || 0) + 1;
+        }
+        
+        // Update last message if this one is newer
+        if (new Date(msg.created_date) > new Date(conv.last_message_at)) {
+          conv.last_message_at = msg.created_date;
+          conv.last_message_preview = msg.body?.substring(0, 100);
+          conv.last_message_sender = msg.sender_email;
         }
       });
       
