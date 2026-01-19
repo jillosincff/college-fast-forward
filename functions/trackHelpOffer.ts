@@ -88,14 +88,18 @@ Deno.serve(async (req) => {
         
         try {
             // First, check if a conversation already exists between these two users for this request
-            const existingConvs = await base44.asServiceRole.entities.Conversation.filter({
-                participant_emails: { $contains: helperEmail }
-            });
-            
-            let conversation = existingConvs?.find(c => 
-                c.participant_emails?.includes(requestCreatorEmail) && 
-                c.related_post_id === requestId
-            );
+            let conversation = null;
+            try {
+                const existingConvs = await base44.asServiceRole.entities.Conversation.filter({
+                    related_post_id: requestId
+                });
+                conversation = existingConvs?.find(c => 
+                    c.participant_emails?.includes(helperEmail) && 
+                    c.participant_emails?.includes(requestCreatorEmail)
+                );
+            } catch (filterErr) {
+                console.log('No existing conversation found, will create new one');
+            }
             
             if (!conversation) {
                 // Create a new conversation
