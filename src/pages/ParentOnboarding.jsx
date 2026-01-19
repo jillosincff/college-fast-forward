@@ -8,6 +8,7 @@ import ParentOnboardingStep1 from '@/components/onboarding/parent/ParentOnboardi
 import ParentOnboardingStep2 from '@/components/onboarding/parent/ParentOnboardingStep2';
 import ParentOnboardingStep3 from '@/components/onboarding/parent/ParentOnboardingStep3';
 import ParentOnboardingSuccess from '@/components/onboarding/parent/ParentOnboardingSuccess';
+import Testimonial from '@/components/onboarding/parent/Testimonial';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
