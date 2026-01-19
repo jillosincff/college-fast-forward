@@ -24,12 +24,27 @@ export default function MatchesReview() {
     trackEvent('match_review_started', {});
   }, []);
 
+  // Filter out invalid matches (no real name, test users, etc.)
+  const filterValidMatches = (rawMatches) => {
+    return rawMatches.filter(match => {
+      const name = match.helper_name || match.parent_name || '';
+      const hasRealName = name && 
+        !name.toLowerCase().includes('professional') && 
+        !name.toLowerCase().includes('test') &&
+        name.trim().length > 2;
+      const hasJobInfo = match.helper_title || match.parent_title || match.job_title || 
+                         match.helper_company || match.parent_company || match.company;
+      return hasRealName && hasJobInfo;
+    });
+  };
+
   const loadMatches = async () => {
     try {
       // Try to get from sessionStorage first (from celebration screen)
       const cached = sessionStorage.getItem('onboarding_matches');
       if (cached) {
-        setMatches(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        setMatches(filterValidMatches(parsed));
         setLoading(false);
         return;
       }
@@ -40,7 +55,7 @@ export default function MatchesReview() {
         '-match_score',
         50
       );
-      setMatches(studentMatches || []);
+      setMatches(filterValidMatches(studentMatches || []));
     } catch (e) {
       console.error('Failed to load matches:', e);
     } finally {
@@ -288,7 +303,7 @@ export default function MatchesReview() {
   }
 
   // Main match review UI
-  const displayName = currentMatch.helper_name || currentMatch.parent_name || 'UF Professional';
+  const displayName = currentMatch.helper_name || currentMatch.parent_name || 'Professional';
   const firstName = getFirstName(displayName);
   const title = currentMatch.helper_title || currentMatch.parent_title || currentMatch.job_title || '';
   const company = currentMatch.helper_company || currentMatch.parent_company || currentMatch.company || '';
