@@ -15,10 +15,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { questionId, friendName, friendEmail, personalNote, referrerName, referrerEmail } = await req.json();
+    const body = await req.json();
+    // Support both old (friendName, friendEmail) and new (inviteeEmail) formats
+    const questionId = body.questionId;
+    const inviteeEmail = body.inviteeEmail || body.friendEmail;
+    const friendName = body.friendName || inviteeEmail?.split('@')[0] || 'there';
+    const personalNote = body.personalNote || '';
+    const referrerName = body.referrerName || user.full_name;
+    const referrerEmail = body.referrerEmail || user.email;
 
-    if (!questionId || !friendName || !friendEmail) {
-      return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!questionId || !inviteeEmail) {
+      return Response.json({ error: 'Missing required fields: questionId and inviteeEmail' }, { status: 400 });
     }
 
     // Get the question details
@@ -48,9 +55,9 @@ Deno.serve(async (req) => {
     // Create referral record
     await base44.asServiceRole.entities.Referral.create({
       referrer_id: user.id,
-      referrer_email: referrerEmail || user.email,
-      referrer_name: referrerName || user.full_name,
-      referred_email: friendEmail,
+      referrer_email: referrerEmail,
+      referrer_name: referrerName,
+      referred_email: inviteeEmail,
       referred_name: friendName,
       question_id: questionId,
       question_title: question.title || question.role,
@@ -71,37 +78,50 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send email to referred person
-    const emailSubject = `${referrerName || user.full_name} thinks you can help a UF student`;
+    // Send email to referred person - HTML formatted
+    const emailSubject = `${referrerName} thinks you can help a student`;
+    
     const emailBody = `
-Hi ${friendName},
-
-${referrerName || user.full_name} thought you'd be the perfect person to help a University of Florida student.
-
-${personalNote ? `They said: "${personalNote}"\n\n` : ''}
-
-THE QUESTION:
-${studentFirstName} (${question.student_major || 'UF Student'}${question.student_year ? ` '${String(question.student_year).slice(-2)}` : ''}) asked:
-
-"${question.description || question.title}"
-
----
-
-You can answer directly without creating an account:
-${referralLink}
-
-It only takes a few minutes, and your advice could make a real difference in ${studentFirstName}'s career.
-
-Thank you for paying it forward!
-
-- The College Fast Forward Team
-
----
-College Fast Forward connects UF students with parents, alumni, and professionals who can help them succeed.
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+  <p>Hi,</p>
+  
+  <p><strong>${referrerName}</strong> thinks you might be able to help a student with a career question.</p>
+  
+  <div style="background: #f8f9fa; border-left: 4px solid #0021A5; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+    <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; text-transform: uppercase;">
+      ${studentFirstName}${question.student_major ? ` • ${question.student_major}` : ''}
+    </p>
+    <p style="font-size: 16px; color: #1a1a1a; margin: 0; line-height: 1.5;">
+      "${question.description || question.title}"
+    </p>
+    ${question.help_types?.length > 0 ? `
+    <p style="font-size: 13px; color: #666; margin: 12px 0 0 0;">
+      Looking for help with: ${question.help_types.map(t => t.replace(/_/g, ' ')).join(', ')}
+    </p>
+    ` : ''}
+  </div>
+  
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="${referralLink}" style="display: inline-block; background: #0021A5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+      Help This Student →
+    </a>
+  </div>
+  
+  <p style="font-size: 14px; color: #666;">
+    No account needed—just click and share your advice.
+  </p>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+  
+  <p style="font-size: 13px; color: #999;">
+    College Fast Forward connects students with professionals who can help with career questions.<br>
+    Takes 2-3 minutes. Could change their career.
+  </p>
+</div>
     `.trim();
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: friendEmail,
+      to: inviteeEmail,
       subject: emailSubject,
       body: emailBody,
       from_name: 'College Fast Forward'
@@ -123,7 +143,7 @@ College Fast Forward connects UF students with parents, alumni, and professional
     return Response.json({ 
       success: true, 
       referralLink,
-      message: `Referral sent to ${friendName}`
+      message: `Invitation sent to ${inviteeEmail}`
     });
 
   } catch (error) {
