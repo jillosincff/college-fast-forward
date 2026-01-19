@@ -80,26 +80,77 @@ Deno.serve(async (req) => {
             throw offerErr; // Throw to prevent false success response
         }
 
-        // Step 3: Create in-app message
-        console.log('Step 3: Create in-app message');
+        // Step 3: Create conversation and in-app message
+        console.log('Step 3: Create conversation and in-app message');
         let messageCreated = false;
         let messageId = null;
+        let conversationId = null;
         
         try {
+            // First, check if a conversation already exists between these two users for this request
+            const existingConvs = await base44.asServiceRole.entities.Conversation.filter({
+                participant_emails: { $contains: helperEmail }
+            });
+            
+            let conversation = existingConvs?.find(c => 
+                c.participant_emails?.includes(requestCreatorEmail) && 
+                c.related_post_id === requestId
+            );
+            
+            if (!conversation) {
+                // Create a new conversation
+                console.log('Creating new conversation...');
+                conversation = await base44.asServiceRole.entities.Conversation.create({
+                    participant_emails: [helperEmail, requestCreatorEmail],
+                    participant_names: {
+                        [helperEmail]: helperName,
+                        [requestCreatorEmail]: studentName || requestCreatorEmail.split('@')[0]
+                    },
+                    subject: `Help offer: ${requestTitle}`,
+                    related_post_id: requestId,
+                    related_post_title: requestTitle,
+                    last_message_preview: message.substring(0, 100),
+                    last_message_at: new Date().toISOString(),
+                    last_message_sender: helperEmail,
+                    unread_count: {
+                        [helperEmail]: 0,
+                        [requestCreatorEmail]: 1
+                    }
+                });
+                console.log('✅ Conversation created:', conversation.id);
+            } else {
+                // Update existing conversation
+                console.log('Updating existing conversation:', conversation.id);
+                await base44.asServiceRole.entities.Conversation.update(conversation.id, {
+                    last_message_preview: message.substring(0, 100),
+                    last_message_at: new Date().toISOString(),
+                    last_message_sender: helperEmail,
+                    unread_count: {
+                        ...conversation.unread_count,
+                        [requestCreatorEmail]: (conversation.unread_count?.[requestCreatorEmail] || 0) + 1
+                    }
+                });
+            }
+            conversationId = conversation.id;
+            
+            // Now create the message linked to the conversation
             const newMessage = await base44.asServiceRole.entities.Message.create({
+                conversation_id: conversationId,
                 recipient_email: requestCreatorEmail,
                 sender_email: helperEmail,
-                subject: `🙋 ${helperName} wants to help with: ${requestTitle}`,
-                body: `${helperName} (${helperPersona || 'Gator'}) offered to help!\n\n${message}\n\nView this in your Activity tab to respond.`,
+                sender_name: helperName,
+                subject: `Help offer: ${requestTitle}`,
+                body: message,
                 is_read: false,
                 post_id: requestId,
-                post_title: requestTitle
+                post_title: requestTitle,
+                message_type: 'intro_offer'
             });
             messageCreated = true;
             messageId = newMessage.id;
-            console.log('✅ Message created:', messageId);
+            console.log('✅ Message created:', messageId, 'in conversation:', conversationId);
         } catch (msgErr) {
-            console.error('❌ Message creation failed:', msgErr.message);
+            console.error('❌ Message/Conversation creation failed:', msgErr.message);
         }
 
         // Step 4: Send email notification
