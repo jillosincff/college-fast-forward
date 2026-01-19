@@ -126,6 +126,10 @@ export default function MessageComposer() {
     if (recipientUser) {
       setRecipient(recipientUser);
       console.log('✅ Recipient set:', recipientUser.full_name, recipientUser.email);
+      
+      // Generate dynamic templates based on student and recipient
+      const templates = generateMessageTemplates(user, recipientUser);
+      setMessageTemplates(templates);
     } else {
       console.log('❌ No recipient found for id:', recipientId, 'or email:', toEmail);
     }
