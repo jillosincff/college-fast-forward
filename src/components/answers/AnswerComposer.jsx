@@ -209,53 +209,51 @@ export default function AnswerComposer({
     return null;
   }
 
+  const studentName = getStudentFirstName(question);
+  const headerText = answerCount === 0 ? 'Be the first to help' : 'Add your perspective';
+  const ctaText = answerCount === 0 ? `Help ${studentName}` : 'Share Your Advice';
+
   return (
     <div className="answer-composer">
-      <h3 className="composer-title">Share what you've seen</h3>
+      <h3 className="composer-title">{headerText}</h3>
       
       <Textarea
         ref={textareaRef}
         value={answerText}
         onChange={(e) => setAnswerText(e.target.value.slice(0, MAX_CHARS))}
-        placeholder="Short and real is perfect. What have you seen work in real life? (Even 2–3 sentences helps.)"
-        rows={6}
+        placeholder="Short and real is perfect. What have you seen work in real life?"
+        rows={5}
         className="composer-textarea"
       />
 
-      <div className="composer-footer">
+      <div className="composer-meta">
         <span className="char-count">
           {answerText.length}/{MAX_CHARS} characters
         </span>
-        
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting || !answerText.trim()}
-          className="submit-btn"
-        >
-          {isSubmitting ? (
-            'Posting...'
-          ) : (
-            <>
-              <Send className="w-4 h-4 mr-2" />
-              Post Answer
-            </>
-          )}
-        </Button>
       </div>
 
-      {/* Simplified Referral Section */}
-      <ReferralSection question={question} currentUser={currentUser} />
+      {/* Inline tip - minimal and subtle */}
+      <p className="inline-tip">
+        <span>💡</span> 2-3 sentences is plenty. Be specific.
+      </p>
 
-      {/* Tips */}
-      <div className="tips-section">
-        <h4>💡 Tips for helpful responses (keep it short):</h4>
-        <ul>
-          <li>Share what you've seen</li>
-          <li>Be specific (one example is enough)</li>
-          <li>Suggest one next step</li>
-          <li>Optional: offer to connect them to someone</li>
-        </ul>
-      </div>
+      <Button
+        onClick={handleSubmit}
+        disabled={isSubmitting || !answerText.trim()}
+        className="submit-btn"
+      >
+        {isSubmitting ? (
+          'Posting...'
+        ) : (
+          <>
+            {ctaText}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </>
+        )}
+      </Button>
+
+      {/* Collapsed Referral Section */}
+      <ReferralSection question={question} currentUser={currentUser} collapsed={true} />
 
 
 
