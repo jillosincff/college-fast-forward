@@ -439,28 +439,34 @@ export default function MatchesReview() {
           </div>
         </div>
 
-        {/* Progress */}
+        {/* Progress - Show only 3 segments for top-3 flow */}
         <div className="mb-4">
-          <div className="flex gap-1 mb-2">
-            {matches.map((_, i) => (
+          <div className="flex gap-2 mb-2">
+            {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i < currentIndex ? 'bg-blue-500' : 'bg-gray-200'
+                className={`h-2 flex-1 rounded-full transition-colors ${
+                  i < currentIndex 
+                    ? 'bg-blue-500' 
+                    : i === currentIndex 
+                      ? 'bg-blue-300' 
+                      : 'bg-gray-200'
                 }`}
               />
             ))}
           </div>
           <p className="text-sm text-gray-500 text-center">
-            {reviewed} of {matches.length} reviewed
+            {Math.min(currentIndex, 3)} of 3 reviewed
             {messagesSent > 0 && <span className="text-green-600 font-medium"> · {messagesSent} messaged</span>}
           </p>
         </div>
 
-        {/* Pro tip */}
-        <p className="text-sm text-gray-500 text-center mb-4">
-          💡 Students who message 3+ people get responses 80% faster
-        </p>
+        {/* Remaining matches hint */}
+        {matches.length > 3 && (
+          <p className="text-sm text-gray-500 text-center mb-4">
+            💡 {matches.length - 3} more matches waiting on your dashboard
+          </p>
+        )}
 
         {/* Skip to dashboard */}
         <button

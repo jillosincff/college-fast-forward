@@ -48,23 +48,20 @@ export default function CelebrationScreen({ user, onContinue }) {
   };
 
   const handleSeeMatches = () => {
-    trackEvent('celebration_cta_clicked', { user_id: user?.id, match_count: matches.length });
-    // Store matches in sessionStorage for the review screen
-    sessionStorage.setItem('onboarding_matches', JSON.stringify(matches));
+    trackEvent('celebration_cta_clicked', { user_id: user?.id, match_count: validMatches.length, top3_shown: validMatches.slice(0, 3).map(m => m.id) });
+    // Store valid matches in sessionStorage for the review screen
+    sessionStorage.setItem('onboarding_matches', JSON.stringify(validMatches));
     navigate('MatchesReview');
   };
 
-  // Get top 4 matches for avatar display
-  const topMatches = matches.slice(0, 4);
-  const remainingCount = Math.max(0, matches.length - 4);
-
-  // Get notable companies
-  const companies = [...new Set(
-    matches
-      .map(m => m.helper_company || m.parent_company || m.company)
-      .filter(Boolean)
-      .filter(c => !c.toLowerCase().includes('self-employed') && !c.toLowerCase().includes('retired'))
-  )].slice(0, 3);
+  // Filter out invalid matches (no real name)
+  const validMatches = matches.filter(m => {
+    const name = m.helper_name || m.parent_name || '';
+    return name && 
+      !name.toLowerCase().includes('professional') && 
+      !name.toLowerCase().includes('test') &&
+      name.trim().length > 2;
+  });
 
   const getInitials = (name) => {
     if (!name) return 'UF';
@@ -88,68 +85,52 @@ export default function CelebrationScreen({ user, onContinue }) {
         </h1>
         
         {loading ? (
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-lg text-gray-600 mb-2">
             Finding people who can help you...
           </p>
         ) : (
-          <p className="text-lg text-gray-600 mb-6">
-            Your question is live and <span className="font-bold text-[#0021A5]">{matches.length} {matches.length === 1 ? 'person' : 'people'}</span> can help you.
-          </p>
-        )}
-
-        {/* Avatar row */}
-        {!loading && matches.length > 0 && (
-          <div className="flex justify-center gap-3 mb-3">
-            {topMatches.map((match, i) => (
-              <div key={i} className="text-center">
-                <div 
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
-                  style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
-                >
-                  {getInitials(match.helper_name || match.parent_name)}
-                </div>
-                <p className="text-xs text-gray-500 mt-1 max-w-[60px] truncate">
-                  {getShortTitle(match)}
-                </p>
-              </div>
-            ))}
-            {remainingCount > 0 && (
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold shadow-lg">
-                  +{remainingCount}
-                </div>
-              </div>
+          <>
+            <p className="text-lg text-gray-600 mb-2">
+              Your question is live and <span className="font-bold text-[#0021A5]">{validMatches.length} {validMatches.length === 1 ? 'person' : 'people'}</span> can help you.
+            </p>
+            {validMatches.length >= 3 && (
+              <p className="text-gray-500 mb-6">
+                We picked your top 3 to start with:
+              </p>
             )}
-          </div>
-        )}
-
-        {/* Company mentions */}
-        {companies.length > 0 && (
-          <p className="text-gray-500 mb-8 text-sm">
-            Including Directors, VPs, and hiring managers at{' '}
-            <span className="font-medium text-gray-700">{companies.join(', ')}</span>.
-          </p>
+          </>
         )}
 
         {/* Top 3 Preview Card */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-6 shadow-xl">
-          {/* Top 3 avatars with names */}
-          {!loading && matches.length >= 3 && (
-            <div className="flex justify-center gap-4 mb-4">
-              {matches.slice(0, 3).map((match, i) => {
+          {/* Top 3 avatars with names, titles, companies */}
+          {!loading && validMatches.length > 0 && (
+            <div className="flex justify-center gap-6 mb-6">
+              {validMatches.slice(0, 3).map((match, i) => {
                 const name = match.helper_name || match.parent_name || '';
+                const photoUrl = match.profile_image_url || match.helper_photo_url || '';
                 const title = match.helper_title || match.parent_title || match.job_title || '';
+                const company = match.helper_company || match.parent_company || match.company || '';
                 const shortTitle = title.replace('Director', 'Dir').replace('Manager', 'Mgr').replace('Vice President', 'VP').split(' ').slice(0, 2).join(' ');
                 return (
-                  <div key={i} className="text-center">
-                    <div 
-                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg mx-auto"
-                      style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
-                    >
-                      {getInitials(name)}
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{name.split(' ')[0]}</p>
-                    <p className="text-xs text-gray-500 max-w-[80px] truncate">{shortTitle}</p>
+                  <div key={i} className="text-center max-w-[100px]">
+                    {photoUrl ? (
+                      <img 
+                        src={photoUrl} 
+                        alt={name}
+                        className="w-16 h-16 rounded-full object-cover shadow-lg mx-auto"
+                      />
+                    ) : (
+                      <div 
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg mx-auto"
+                        style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
+                      >
+                        {getInitials(name)}
+                      </div>
+                    )}
+                    <p className="text-sm font-medium text-gray-900 mt-2 truncate">{name.split(' ')[0]}</p>
+                    <p className="text-xs text-gray-500 truncate">{shortTitle}</p>
+                    <p className="text-xs text-gray-400 truncate">{company}</p>
                   </div>
                 );
               })}
@@ -158,7 +139,6 @@ export default function CelebrationScreen({ user, onContinue }) {
           
           <p className="text-gray-600 mb-4 text-center">
             These people are the best fit for what you need.
-            Message them to start a conversation.
           </p>
           
           <button
@@ -170,14 +150,16 @@ export default function CelebrationScreen({ user, onContinue }) {
               boxShadow: `0 4px 12px ${UF_BLUE}40`
             }}
           >
-            {loading ? 'Loading...' : `See Your Top 3 Matches →`}
+            {loading ? 'Loading...' : `See Your Top 3 →`}
           </button>
         </div>
 
-        {/* Pro tip */}
-        <p className="text-sm text-gray-500">
-          💡 <span className="font-medium">Pro tip:</span> Students who message 3+ people get responses 80% faster.
-        </p>
+        {/* Footnote */}
+        {!loading && validMatches.length > 3 && (
+          <p className="text-sm text-gray-500">
+            💡 You can browse all {validMatches.length} from your dashboard
+          </p>
+        )}
       </div>
     </div>
   );
