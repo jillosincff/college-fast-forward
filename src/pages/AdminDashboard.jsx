@@ -28,6 +28,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { approveInviteRequest } from '@/functions/approveInviteRequest';
 import CommunityInviteManager from '@/components/admin/CommunityInviteManager'; // Added CommunityInviteManager import
 import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircleApplicationsManager';
+import ReengagementSettings from '@/components/admin/ReengagementSettings';
 import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
