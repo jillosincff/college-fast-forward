@@ -36,27 +36,12 @@ Deno.serve(async (req) => {
     const question = questions[0];
 
     // Check if invitee already has an account on CFF
+    // ALWAYS treat as external invite - send the magic link email
+    // This ensures the email is always sent, regardless of account status
     let existingUser = null;
-    try {
-      const users = await base44.asServiceRole.entities.User.filter({ email: inviteeEmail });
-      console.log('User lookup result for', inviteeEmail, ':', JSON.stringify(users));
-      if (users && users.length > 0) {
-        // CRITICAL: Verify the email matches exactly (case-insensitive)
-        const matchedUser = users.find(u => u.email?.toLowerCase() === inviteeEmail.toLowerCase());
-        if (matchedUser) {
-          existingUser = matchedUser;
-          console.log('Found existing user:', existingUser.full_name, existingUser.email);
-        } else {
-          console.log('User lookup returned results but no exact email match for:', inviteeEmail);
-        }
-      } else {
-        console.log('No existing user found for:', inviteeEmail);
-      }
-    } catch (e) {
-      console.log('User lookup failed (continuing as external invite):', e.message);
-    }
+    console.log('Processing referral for:', inviteeEmail, '- treating as external invite');
 
-    const isInternalTag = !!existingUser;
+    const isInternalTag = false; // Always send external invite email with magic link
     const friendName = existingUser?.full_name || inviteeEmail.split('@')[0] || 'there';
 
     // Create referral token
