@@ -254,43 +254,35 @@ export default function MessageComposer() {
     );
   }
 
+  const recipientFirstName = recipient?.full_name?.split(' ')[0] || 'them';
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('MyMessages')}
-              className="text-slate-600"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
-            <div className="flex items-center gap-3 flex-1">
-              <UserAvatar user={recipient} className="w-10 h-10" />
-              <div>
-                <h1 className="font-bold text-slate-900">{recipient.full_name || 'User'}</h1>
-                <p className="text-sm text-slate-500">
-                  {recipient.job_title && recipient.current_company 
-                    ? `${recipient.job_title} at ${recipient.current_company}`
-                    : recipient.persona === 'parent' ? 'Gator Parent' : 'Gator Student'}
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('MyMessages')}
+            className="text-slate-600 -ml-2"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
+        {/* Profile Card - Context from dashboard */}
+        <RecipientProfileCard recipient={recipient} />
+
         {/* Message Thread */}
-        <div className="space-y-4 mb-6 min-h-[200px]">
+        <div className="space-y-4 mb-6">
           {messages.length === 0 && isFirstMessage && (
-            <div className="text-center py-8">
-              <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-600">Start a conversation with {recipient.full_name?.split(' ')[0] || 'them'}</p>
+            <div className="text-center py-6">
+              <MessageSquare className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-slate-600 font-medium">Start a conversation with {recipientFirstName}</p>
             </div>
           )}
 
