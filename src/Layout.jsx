@@ -120,6 +120,7 @@ const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
 const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
 const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
+const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -667,7 +668,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
 const adminPages = ['TestingDashboard'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
@@ -760,6 +761,7 @@ const getPageComponent = (pageName) => {
     case 'GatorWelcome': return GatorWelcome;
     case 'GatorParentInvite': return GatorParentInvite;
     case 'ReferralAnswer': return ReferralAnswer;
+    case 'MatchesReview': return MatchesReview;
     default: return LandingPage;
   }
 };
