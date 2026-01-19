@@ -124,6 +124,14 @@ export default function PostRequestPage() { // Renamed from PostRequest
         posterLastName = nameParts.slice(1).join(' ') || '';
       }
 
+      // Fetch fresh user data to ensure we have latest profile info
+      let freshUser = user;
+      try {
+        freshUser = await base44.auth.me();
+      } catch (e) {
+        console.log('Using cached user data');
+      }
+
       const requestData = {
         ...values,
         status: 'active',
@@ -131,15 +139,15 @@ export default function PostRequestPage() { // Renamed from PostRequest
         is_anonymous: values.is_anonymous || false,
         // CRITICAL: Always store poster_email for notifications (even for anonymous posts)
         poster_email: userEmail,
-        poster_profile_image: user?.profile_image_url || null,
+        poster_profile_image: freshUser?.profile_image_url || user?.profile_image_url || null,
         poster_name: posterName,
         poster_first_name: posterFirstName,
         poster_last_name: posterLastName,
         // Populate student info from user profile
-        student_major: user?.major || user?.student_major || null,
-        student_year: user?.graduation_year || user?.student_year || null,
-        student_minor: user?.minor || user?.student_minor || null,
-        student_pre_track: user?.pre_track || user?.student_pre_track || null,
+        student_major: freshUser?.major || freshUser?.student_major || null,
+        student_year: freshUser?.graduation_year || freshUser?.student_year || null,
+        student_minor: freshUser?.minor || freshUser?.student_minor || null,
+        student_pre_track: freshUser?.pre_professional_track || freshUser?.pre_track || null,
       };
 
       let createdRequest;
