@@ -269,11 +269,9 @@ const styles = `
   }
 
   .expand-btn {
-    width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    align-items: center;
+    gap: 8px;
     padding: 0;
     background: none;
     border: none;
@@ -281,22 +279,18 @@ const styles = `
     text-align: left;
   }
 
-  .collapsed-label {
-    font-size: 13px;
-    color: #9CA3AF;
-  }
-
-  .collapsed-action {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .collapsed-text {
     font-size: 14px;
-    font-weight: 500;
     color: #374151;
   }
 
-  .expand-btn:hover .collapsed-action {
+  .collapsed-link {
     color: #0021A5;
+    font-weight: 500;
+  }
+
+  .expand-btn:hover .collapsed-link {
+    text-decoration: underline;
   }
 
   .referral-section {
