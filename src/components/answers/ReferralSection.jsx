@@ -325,6 +325,22 @@ const styles = `
     font-size: 15px;
     font-weight: 600;
     color: #0F172A;
+    flex: 1;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .close-btn:hover {
+    color: #6B7280;
+    background: #F1F5F9;
   }
 
   .referral-desc {
