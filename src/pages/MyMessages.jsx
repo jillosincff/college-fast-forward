@@ -38,12 +38,20 @@ export default function MyMessagesPage() {
     
     setIsLoadingConvs(true);
     try {
+      console.log('Loading messages for:', user.email);
+      
       // Load all messages where user is recipient
-      const receivedMessages = await base44.entities.Message.filter(
-        { recipient_email: user.email },
-        '-created_date',
-        100
-      ) || [];
+      let receivedMessages = [];
+      try {
+        receivedMessages = await base44.entities.Message.filter(
+          { recipient_email: user.email },
+          '-created_date',
+          100
+        ) || [];
+        console.log('Received messages:', receivedMessages.length);
+      } catch (e) {
+        console.error('Failed to load received messages:', e);
+      }
       
       // Also load messages where user is sender
       let sentMessages = [];
