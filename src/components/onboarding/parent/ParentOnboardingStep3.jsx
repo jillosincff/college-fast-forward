@@ -119,6 +119,8 @@ export default function ParentOnboardingStep3({
 
   const loadMatchingQuestions = async () => {
     setLoading(true);
+    const startTime = Date.now();
+    
     try {
       // Fetch active student questions
       const allQuestions = await JobRequest.filter(
@@ -130,6 +132,9 @@ export default function ParentOnboardingStep3({
       if (allQuestions.length === 0) {
         setFlowType('empty');
         setNoQuestions(true);
+        // Ensure minimum 1.5s loading time
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
         setLoading(false);
         return;
       }
@@ -162,7 +167,7 @@ export default function ParentOnboardingStep3({
         // Matched flow - show up to 5 best matches
         console.log('[ParentOnboardingStep3] Setting MATCHED flow with', goodMatches.length, 'questions');
         setFlowType('matched');
-        setQuestions(goodMatches.slice(0, 5));
+        setQuestions(goodMatches.slice(0, MAX_QUESTIONS));
       } else {
         // No match flow - show oldest unanswered questions (up to 3)
         console.log('[ParentOnboardingStep3] No good matches, trying NO_MATCH flow');
@@ -188,6 +193,11 @@ export default function ParentOnboardingStep3({
           }
         }
       }
+      
+      // Ensure minimum 1.5s loading time for effect
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+      
     } catch (error) {
       console.error('Failed to load questions:', error);
       setFlowType('empty');
