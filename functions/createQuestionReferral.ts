@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       r: user.id,
       rn: referrerName || user.full_name,
       re: referrerEmail || user.email,
-      fe: friendEmail,
+      fe: inviteeEmail,
       exp: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
     };
 
