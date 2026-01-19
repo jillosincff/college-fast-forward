@@ -190,8 +190,10 @@ export default function ReferralSection({ question, currentUser }) {
           disabled={status === 'sending'}
           onKeyDown={(e) => e.key === 'Enter' && handleSendInvite()}
         />
-        {status === 'error' && (
+        {status === 'error' ? (
           <p className="error-message">⚠️ {errorMessage}</p>
+        ) : (
+          <p className="privacy-note">🔒 Their email won't be shared with the student</p>
         )}
       </div>
 
