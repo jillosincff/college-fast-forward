@@ -5,12 +5,13 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         const { helpOffer, request, helper } = await req.json();
 
-        // Get the student who posted the request using the User entity
-        const students = await base44.asServiceRole.entities.User.filter({ email: request.created_by });
+        // Get the student who posted the request using poster_email (preferred) or created_by
+        const posterEmail = request.poster_email || request.created_by;
+        const students = await base44.asServiceRole.entities.User.filter({ email: posterEmail });
         const student = students && students.length > 0 ? students[0] : null;
         
         if (!student) {
-            console.error('Student not found for email:', request.created_by);
+            console.error('Student not found for email:', posterEmail);
             return new Response(JSON.stringify({ error: 'Student not found' }), { status: 404 });
         }
 
