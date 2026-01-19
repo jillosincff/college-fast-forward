@@ -66,7 +66,14 @@ export default function MyMessagesPage() {
       }
       
       const allMessages = [...receivedMessages, ...sentMessages];
-      console.log('Loaded messages:', allMessages.length);
+      console.log('Total messages loaded:', allMessages.length);
+      
+      if (allMessages.length === 0) {
+        console.log('No messages found for user');
+        setConversations([]);
+        setIsLoadingConvs(false);
+        return;
+      }
       
       // Group messages by conversation_id OR by other participant
       const conversationMap = new Map();
@@ -74,6 +81,10 @@ export default function MyMessagesPage() {
       allMessages.forEach(msg => {
         // Determine the other participant
         const otherEmail = msg.sender_email === user.email ? msg.recipient_email : msg.sender_email;
+        if (!otherEmail) {
+          console.log('Skipping message with no other participant:', msg.id);
+          return;
+        }
         const key = msg.conversation_id || `thread-${otherEmail}`;
         
         if (!conversationMap.has(key)) {
