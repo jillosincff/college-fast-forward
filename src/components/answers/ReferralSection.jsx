@@ -263,12 +263,49 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
 }
 
 const styles = `
+  .referral-collapsed {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #E5E7EB;
+  }
+
+  .expand-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .collapsed-label {
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+
+  .collapsed-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .expand-btn:hover .collapsed-action {
+    color: #0021A5;
+  }
+
   .referral-section {
-    background: #F0F9FF;
-    border: 1px solid #BAE6FD;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
     padding: 20px;
-    margin-top: 16px;
+    margin-top: 24px;
   }
 
   .referral-section.success {
