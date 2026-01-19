@@ -141,12 +141,22 @@ export default function MyMessagesPage() {
 
     if (showLoading) setIsLoadingMessages(true);
     try {
-      const msgs = await base44.entities.Message.filter(
-        { conversation_id: conversationId },
-        'created_date',
-        MESSAGES_PER_PAGE
-      );
-      setMessages(msgs || []);
+      // Check if this is an orphan conversation
+      const conv = conversations.find(c => c.id === conversationId);
+      
+      let msgs = [];
+      if (conv?._isOrphan) {
+        // Use cached orphan messages
+        msgs = conv._orphanMessages || [];
+      } else {
+        msgs = await base44.entities.Message.filter(
+          { conversation_id: conversationId },
+          'created_date',
+          MESSAGES_PER_PAGE
+        ) || [];
+      }
+      
+      setMessages(msgs);
       setHasMoreMessages((msgs?.length || 0) >= MESSAGES_PER_PAGE);
       setMessageOffset(msgs?.length || 0);
 
@@ -159,22 +169,23 @@ export default function MyMessagesPage() {
         });
       }
 
-      // Update unread count in conversation
-      if (unreadMsgs.length > 0) {
-        const conv = conversations.find(c => c.id === conversationId);
-        if (conv) {
+      // Update unread count in conversation (skip for orphan convs)
+      if (unreadMsgs.length > 0 && conv && !conv._isOrphan) {
+        try {
           await base44.entities.Conversation.update(conversationId, {
             unread_count: {
               ...conv.unread_count,
               [user.email]: 0
             }
           });
-          setConversations(prev => prev.map(c => 
-            c.id === conversationId 
-              ? { ...c, unread_count: { ...c.unread_count, [user.email]: 0 } }
-              : c
-          ));
+        } catch (e) {
+          console.log('Could not update conversation unread count');
         }
+        setConversations(prev => prev.map(c => 
+          c.id === conversationId 
+            ? { ...c, unread_count: { ...c.unread_count, [user.email]: 0 } }
+            : c
+        ));
       }
     } catch (error) {
       console.error('Failed to load messages:', error);
