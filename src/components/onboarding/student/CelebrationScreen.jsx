@@ -11,7 +11,11 @@ export default function CelebrationScreen({ user, onContinue }) {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const firstName = user?.full_name?.split(/[\s,]+/)[0] || 'Gator';
+  // Handle "Last, First" format (e.g., "Osinoff, Lindsey" -> "Lindsey")
+  const fullName = user?.full_name || '';
+  const firstName = fullName.includes(',') 
+    ? fullName.split(',')[1]?.trim().split(/\s+/)[0] || 'Gator'
+    : fullName.split(/\s+/)[0] || 'Gator';
 
   useEffect(() => {
     // Fire confetti
