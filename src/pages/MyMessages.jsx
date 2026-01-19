@@ -40,40 +40,16 @@ export default function MyMessagesPage() {
     try {
       console.log('Loading messages for:', user.email);
       
-      // Load messages where user is recipient - use $or query
+      // Load all messages using list() - RLS will filter automatically
       let allMessagesRaw = [];
       try {
-        // First try loading received messages
-        const received = await base44.entities.Message.filter(
-          { recipient_email: user.email },
-          '-created_date',
-          100
-        ) || [];
-        console.log('Received messages loaded:', received.length);
-        allMessagesRaw = [...received];
+        allMessagesRaw = await base44.entities.Message.list('-created_date', 200) || [];
+        console.log('Messages loaded via list():', allMessagesRaw.length);
       } catch (e) {
-        console.error('Failed to load received messages:', e);
+        console.error('Failed to load messages:', e);
       }
       
-      try {
-        // Also load sent messages
-        const sent = await base44.entities.Message.filter(
-          { sender_email: user.email },
-          '-created_date',
-          100
-        ) || [];
-        console.log('Sent messages loaded:', sent.length);
-        // Merge avoiding duplicates
-        sent.forEach(msg => {
-          if (!allMessagesRaw.find(m => m.id === msg.id)) {
-            allMessagesRaw.push(msg);
-          }
-        });
-      } catch (e) {
-        console.error('Failed to load sent messages:', e);
-      }
-      
-      // Filter to only messages involving this user
+      // Filter to only messages involving this user (RLS should already handle this, but double-check)
       const receivedMessages = allMessagesRaw.filter(m => m.recipient_email === user.email);
       const sentMessages = allMessagesRaw.filter(m => m.sender_email === user.email);
       
