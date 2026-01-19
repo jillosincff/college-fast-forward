@@ -5,15 +5,26 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         const { helpOffer, request, helper } = await req.json();
 
-        // Get the student who posted the request using poster_email (preferred) or created_by
-        const posterEmail = request.poster_email || request.created_by;
-        const students = await base44.asServiceRole.entities.User.filter({ email: posterEmail });
+        // CRITICAL: Get the actual poster email - must use poster_email, NOT created_by
+        // created_by can be 'anonymous' or a service account, poster_email is the actual user
+        const posterEmail = request.poster_email;
+        
+        if (!posterEmail) {
+            console.error('No poster_email on request:', request.id, '- falling back to created_by:', request.created_by);
+        }
+        
+        const emailToNotify = posterEmail || request.created_by;
+        console.log('🎯 Will notify poster at:', emailToNotify);
+        
+        const students = await base44.asServiceRole.entities.User.filter({ email: emailToNotify });
         const student = students && students.length > 0 ? students[0] : null;
         
         if (!student) {
-            console.error('Student not found for email:', posterEmail);
-            return new Response(JSON.stringify({ error: 'Student not found' }), { status: 404 });
+            console.error('Student/Poster not found for email:', emailToNotify);
+            return new Response(JSON.stringify({ error: 'Poster not found for email: ' + emailToNotify }), { status: 404 });
         }
+        
+        console.log('✅ Found poster:', student.email, student.full_name);
 
         const emailSubject = `🙋‍♂️ Someone stepped up to help with your ${request.role || request.title} request!`;
         
