@@ -4,30 +4,12 @@ import { navigate, useParams } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Message } from '@/entities/Message';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Send, Loader2, Zap, MessageSquare, User } from 'lucide-react';
-import UserAvatar from '@/components/common/UserAvatar';
+import { ArrowLeft, Send, Loader2, MessageSquare, User } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Message templates for first-time messages
-const MESSAGE_TEMPLATES = [
-  {
-    id: 'intro',
-    label: 'Quick Introduction',
-    template: (parentName, topic) => `Hi ${parentName}! I saw your profile and thought you might be able to help. ${topic ? `I'm trying to figure out ${topic} and ` : ''}would love to hear your perspective if you have a few minutes.`
-  },
-  {
-    id: 'specific',
-    label: 'Specific Question',
-    template: (parentName, topic) => `Hi ${parentName}! I'm a UF student exploring my career options. ${topic ? `I'm particularly interested in ${topic}. ` : ''}Would you mind sharing some advice from your experience?`
-  },
-  {
-    id: 'coffee_chat',
-    label: 'Coffee Chat Request',
-    template: (parentName) => `Hi ${parentName}! I'd love to learn more about your career path and get your advice. Would you be open to a quick 15-minute chat sometime?`
-  }
-];
+import RecipientProfileCard from '@/components/messaging/RecipientProfileCard';
+import MessageTemplatesSelector, { generateMessageTemplates } from '@/components/messaging/MessageTemplates';
+import { trackEvent } from '@/components/utils/analytics';
 
 export default function MessageComposer() {
   const { user } = useAuth();
