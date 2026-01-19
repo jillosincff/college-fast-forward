@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Lightbulb, UserPlus } from 'lucide-react';
+import { Send, Lightbulb } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Answer } from '@/entities/Answer';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { base44 } from '@/api/base44Client';
-import RecommendHelperModal from './RecommendHelperModal';
-import ShareExternallyBox from './ShareExternallyBox';
+import ReferralSection from './ReferralSection';
 
 const MAX_CHARS = 5000;
 
@@ -31,7 +30,7 @@ export default function AnswerComposer({
   const { toast } = useToast();
   const [answerText, setAnswerText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showRecommendModal, setShowRecommendModal] = useState(false);
+
 
   // Anyone who is logged in can answer
   const canAnswer = !!currentUser;
@@ -230,20 +229,8 @@ export default function AnswerComposer({
         </Button>
       </div>
 
-      {/* Recommend Helper Button */}
-      <div className="recommend-section">
-        <Button
-          variant="outline"
-          onClick={() => setShowRecommendModal(true)}
-          className="recommend-btn"
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Know someone who can help? Tag them!
-        </Button>
-
-        {/* Share Externally Box */}
-        <ShareExternallyBox question={question} currentUser={currentUser} />
-      </div>
+      {/* Simplified Referral Section */}
+      <ReferralSection question={question} currentUser={currentUser} />
 
       {/* Tips */}
       <div className="tips-section">
@@ -256,13 +243,7 @@ export default function AnswerComposer({
         </ul>
       </div>
 
-      {/* Recommend Helper Modal */}
-      <RecommendHelperModal
-        isOpen={showRecommendModal}
-        onClose={() => setShowRecommendModal(false)}
-        question={question}
-        currentUser={currentUser}
-      />
+
 
       <style jsx>{`
         .answer-composer {
@@ -329,27 +310,6 @@ export default function AnswerComposer({
           padding: 16px;
           background: #F9FAFB;
           border-radius: 12px;
-        }
-
-        .recommend-section {
-          margin-top: 16px;
-          padding-top: 16px;
-          border-top: 1px solid #E5E7EB;
-        }
-
-        .recommend-btn {
-          width: 100%;
-          border: 2px dashed #0021A5;
-          color: #0021A5;
-          font-weight: 600;
-          padding: 12px;
-          border-radius: 8px;
-          background: #F0F4FF;
-        }
-
-        .recommend-btn:hover {
-          background: #E0E7FF;
-          border-color: #001885;
         }
 
         .tips-section h4 {
