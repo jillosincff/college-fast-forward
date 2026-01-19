@@ -298,6 +298,12 @@ const styles = `
     margin: 6px 0 0 0;
   }
 
+  .privacy-note {
+    font-size: 12px;
+    color: #9CA3AF;
+    margin: 6px 0 0 0;
+  }
+
   .send-btn {
     width: 100%;
     height: 44px;
