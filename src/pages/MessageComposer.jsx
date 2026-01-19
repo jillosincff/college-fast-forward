@@ -312,58 +312,45 @@ export default function MessageComposer() {
           })}
         </div>
 
-        {/* First Message Templates */}
-        {isFirstMessage && (
-          <Card className="mb-4 border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-blue-800 mb-3">
-                💡 Not sure what to say? Try one of these:
-              </p>
-              <div className="space-y-2">
-                {MESSAGE_TEMPLATES.map(template => (
-                  <button
-                    key={template.id}
-                    onClick={() => applyTemplate(template)}
-                    className="w-full text-left p-3 bg-white border border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all text-sm"
-                  >
-                    <span className="font-medium text-blue-700">{template.label}</span>
-                    <p className="text-slate-600 text-xs mt-1 line-clamp-2">
-                      {template.template(recipient.full_name?.split(' ')[0] || 'there', '').substring(0, 80)}...
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* First Message Templates - Dynamic based on recipient */}
+        {isFirstMessage && messageTemplates.length > 0 && (
+          <div className="mb-6">
+            <MessageTemplatesSelector
+              templates={messageTemplates}
+              onSelect={handleTemplateSelect}
+              selectedId={selectedTemplateId}
+            />
+          </div>
         )}
 
         {/* Message Composer */}
-        <Card>
-          <CardContent className="p-4">
-            <Textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value.slice(0, 5000))}
-              placeholder={`Message ${recipient.full_name?.split(' ')[0] || 'them'}...`}
-              rows={4}
-              className="resize-none border-slate-200 focus:border-blue-500"
-            />
-            <div className="flex items-center justify-between mt-3">
-              <span className="text-xs text-slate-400">{newMessage.length}/5000</span>
-              <Button
-                onClick={handleSend}
-                disabled={!newMessage.trim() || sending}
-                className="bg-[#FA4616] hover:bg-orange-600"
-              >
-                {sending ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Send className="w-4 h-4 mr-2" />
-                )}
-                Send Message
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+          <Textarea
+            value={newMessage}
+            onChange={(e) => {
+              setNewMessage(e.target.value.slice(0, 5000));
+              if (selectedTemplateId) setSelectedTemplateId(null); // Clear selection if they edit
+            }}
+            placeholder={`Message ${recipientFirstName}...`}
+            rows={5}
+            className="resize-none border-slate-200 focus:border-blue-500"
+          />
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-sm text-slate-400">{newMessage.length}/5000</span>
+            <Button
+              onClick={handleSend}
+              disabled={!newMessage.trim() || sending}
+              className="bg-[#FA4616] hover:bg-orange-600 gap-2"
+            >
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              Send Message
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
