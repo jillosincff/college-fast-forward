@@ -297,7 +297,9 @@ export default function GatorWelcome() {
             // Skip welcome screen - go directly to role-specific onboarding
             if (intendedRole === 'gator') {
               navigate('StudentOnboarding');
-            } else if (intendedRole === 'parent' || intendedRole === 'alumni') {
+            } else if (intendedRole === 'parent') {
+              navigate('ParentOnboarding');
+            } else if (intendedRole === 'alumni') {
               navigate('Onboarding');
             } else {
               navigate('StudentOnboarding'); // Fallback
@@ -352,8 +354,10 @@ export default function GatorWelcome() {
         console.log('📝 [GatorWelcome] New signup - routing to onboarding');
         if (intendedRole === 'gator') {
           navigate('StudentOnboarding');
-        } else if (intendedRole === 'parent' || intendedRole === 'alumni') {
-          navigate('Onboarding'); // Go directly to parent onboarding (has empathy built in)
+        } else if (intendedRole === 'parent') {
+          navigate('ParentOnboarding');
+        } else if (intendedRole === 'alumni') {
+          navigate('Onboarding');
         } else {
           navigate('StudentOnboarding'); // Fallback
         }
@@ -422,7 +426,9 @@ export default function GatorWelcome() {
   const proceedToOnboarding = () => {
     if (role === 'gator') {
       navigate('StudentOnboarding');
-    } else if (role === 'parent' || role === 'alumni') {
+    } else if (role === 'parent') {
+      navigate('ParentOnboarding');
+    } else if (role === 'alumni') {
       navigate('Onboarding');
     } else {
       console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
