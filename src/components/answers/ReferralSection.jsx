@@ -10,6 +10,8 @@ export default function ReferralSection({ question, currentUser }) {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'success' | 'error'
+  const [resultType, setResultType] = useState(null); // 'tagged' | 'invited'
+  const [taggedUserName, setTaggedUserName] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -38,26 +40,36 @@ export default function ReferralSection({ question, currentUser }) {
       return;
     }
 
+    // Prevent inviting the question poster
+    const posterEmail = question?.poster_email || question?.created_by;
+    if (posterEmail && email.toLowerCase() === posterEmail.toLowerCase()) {
+      setStatus('error');
+      setErrorMessage("That's the student who asked the question!");
+      return;
+    }
+
     setStatus('sending');
 
     try {
-      trackEvent('referral_invite_sent', {
-        question_id: question?.id,
-        referrer_id: currentUser?.id
-      });
-
-      await base44.functions.invoke('createQuestionReferral', {
+      const response = await base44.functions.invoke('createQuestionReferral', {
         questionId: question?.id,
         referrerEmail: currentUser?.email,
         referrerName: currentUser?.full_name,
         inviteeEmail: email.toLowerCase().trim()
       });
 
-      setStatus('success');
-      toast({
-        title: "✅ Invitation sent!",
-        description: `We emailed ${email} with this question.`
+      const result = response?.data;
+      setResultType(result?.type || 'invited');
+      if (result?.type === 'tagged') {
+        setTaggedUserName(result?.userName);
+      }
+
+      trackEvent(result?.type === 'tagged' ? 'referral_internal_tag_sent' : 'referral_external_invite_sent', {
+        question_id: question?.id,
+        referrer_id: currentUser?.id
       });
+
+      setStatus('success');
 
     } catch (err) {
       console.error('Failed to send referral:', err);
@@ -101,12 +113,36 @@ export default function ReferralSection({ question, currentUser }) {
   const handleReset = () => {
     setEmail('');
     setStatus('idle');
+    setResultType(null);
+    setTaggedUserName(null);
     setErrorMessage('');
   };
 
   if (!question?.id) return null;
 
-  // Success state
+  // Success state - Tagged existing user
+  if (status === 'success' && resultType === 'tagged') {
+    return (
+      <div className="referral-section success">
+        <div className="success-content">
+          <Check className="w-6 h-6 text-green-600" />
+          <div>
+            <p className="success-title">Sent!</p>
+            <p className="success-desc">
+              {taggedUserName} has been notified about this question. We'll let you know if they respond.
+            </p>
+          </div>
+        </div>
+        <button onClick={handleReset} className="invite-another-btn">
+          Invite Someone Else
+        </button>
+
+        <style jsx>{styles}</style>
+      </div>
+    );
+  }
+
+  // Success state - Invited new user
   if (status === 'success') {
     return (
       <div className="referral-section success">
@@ -115,7 +151,7 @@ export default function ReferralSection({ question, currentUser }) {
           <div>
             <p className="success-title">Sent!</p>
             <p className="success-desc">
-              We emailed {email} with this question. We'll let you know if they respond.
+              We emailed your contact with this question. They can answer without creating an account. We'll let you know if they respond.
             </p>
           </div>
         </div>

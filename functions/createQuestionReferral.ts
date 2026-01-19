@@ -18,8 +18,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     // Support both old (friendName, friendEmail) and new (inviteeEmail) formats
     const questionId = body.questionId;
-    const inviteeEmail = body.inviteeEmail || body.friendEmail;
-    const friendName = body.friendName || inviteeEmail?.split('@')[0] || 'there';
+    const inviteeEmail = (body.inviteeEmail || body.friendEmail || '').toLowerCase().trim();
     const personalNote = body.personalNote || '';
     const referrerName = body.referrerName || user.full_name;
     const referrerEmail = body.referrerEmail || user.email;
@@ -35,6 +34,20 @@ Deno.serve(async (req) => {
     }
 
     const question = questions[0];
+
+    // Check if invitee already has an account on CFF
+    let existingUser = null;
+    try {
+      const users = await base44.asServiceRole.entities.User.filter({ email: inviteeEmail });
+      if (users && users.length > 0) {
+        existingUser = users[0];
+      }
+    } catch (e) {
+      console.log('User lookup failed (continuing as external invite):', e.message);
+    }
+
+    const isInternalTag = !!existingUser;
+    const friendName = existingUser?.full_name || inviteeEmail.split('@')[0] || 'there';
 
     // Create referral token
     const tokenPayload = {
@@ -59,13 +72,36 @@ Deno.serve(async (req) => {
       referrer_name: referrerName,
       referred_email: inviteeEmail,
       referred_name: friendName,
+      referred_user_id: existingUser?.id || null,
       question_id: questionId,
       question_title: question.title || question.role,
-      referral_token: token,
+      referral_token: isInternalTag ? null : token,
       personal_note: personalNote,
       status: 'pending',
-      expires_at: new Date(tokenPayload.exp).toISOString()
+      expires_at: isInternalTag ? null : new Date(tokenPayload.exp).toISOString()
     });
+
+    // For internal tags, create an in-app notification
+    if (isInternalTag) {
+      try {
+        await base44.asServiceRole.entities.Notification.create({
+          recipient_email: inviteeEmail,
+          type: 'student_request_match',
+          title: `${referrerName?.split(' ')[0] || 'Someone'} thinks you can help`,
+          message: `${referrerName?.split(' ')[0] || 'Someone'} thinks you might be able to help a student with a career question.`,
+          action_url: `QuestionDetail?id=${questionId}`,
+          action_label: 'View Question',
+          priority: 'normal',
+          metadata: {
+            question_id: questionId,
+            referrer_name: referrerName,
+            referrer_id: user.id
+          }
+        });
+      } catch (notifErr) {
+        console.log('Failed to create notification (non-critical):', notifErr.message);
+      }
+    }
 
     // Parse student name
     let studentFirstName = 'A student';
@@ -78,10 +114,51 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send email to referred person - HTML formatted
-    const emailSubject = `${referrerName} thinks you can help a student`;
+    // Send email - different templates for internal vs external
+    const referrerFirstName = referrerName?.split(' ')[0] || 'Someone';
+    const emailSubject = `${referrerFirstName} thinks you can help a student`;
     
-    const emailBody = `
+    let emailBody;
+    
+    if (isInternalTag) {
+      // Internal tag: user has account, link directly to question
+      const questionUrl = `https://collegefastforward.com/#QuestionDetail?id=${questionId}`;
+      emailBody = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+  <p>Hi ${friendName?.split(' ')[0] || 'there'},</p>
+  
+  <p><strong>${referrerName}</strong> thinks you might be able to help a student with a career question.</p>
+  
+  <div style="background: #f8f9fa; border-left: 4px solid #0021A5; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+    <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; text-transform: uppercase;">
+      ${studentFirstName}${question.student_major ? ` • ${question.student_major}` : ''}
+    </p>
+    <p style="font-size: 16px; color: #1a1a1a; margin: 0; line-height: 1.5;">
+      "${(question.description || question.title || '').substring(0, 200)}${(question.description || '').length > 200 ? '...' : ''}"
+    </p>
+    ${question.help_types?.length > 0 ? `
+    <p style="font-size: 13px; color: #666; margin: 12px 0 0 0;">
+      Looking for help with: ${question.help_types.map(t => t.replace(/_/g, ' ')).join(', ')}
+    </p>
+    ` : ''}
+  </div>
+  
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="${questionUrl}" style="display: inline-block; background: #0021A5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+      View Question & Respond →
+    </a>
+  </div>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+  
+  <p style="font-size: 13px; color: #999;">
+    Takes 2-3 minutes. Could change their career.
+  </p>
+</div>
+      `.trim();
+    } else {
+      // External invite: magic link for no-account response
+      emailBody = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
   <p>Hi,</p>
   
@@ -92,7 +169,7 @@ Deno.serve(async (req) => {
       ${studentFirstName}${question.student_major ? ` • ${question.student_major}` : ''}
     </p>
     <p style="font-size: 16px; color: #1a1a1a; margin: 0; line-height: 1.5;">
-      "${question.description || question.title}"
+      "${(question.description || question.title || '').substring(0, 200)}${(question.description || '').length > 200 ? '...' : ''}"
     </p>
     ${question.help_types?.length > 0 ? `
     <p style="font-size: 13px; color: #666; margin: 12px 0 0 0;">
@@ -118,7 +195,8 @@ Deno.serve(async (req) => {
     Takes 2-3 minutes. Could change their career.
   </p>
 </div>
-    `.trim();
+      `.trim();
+    }
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: inviteeEmail,
@@ -142,8 +220,12 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      referralLink,
-      message: `Invitation sent to ${inviteeEmail}`
+      type: isInternalTag ? 'tagged' : 'invited',
+      userName: isInternalTag ? existingUser.full_name : null,
+      referralLink: isInternalTag ? null : referralLink,
+      message: isInternalTag 
+        ? `${existingUser.full_name} has been notified`
+        : `Invitation sent to your contact`
     });
 
   } catch (error) {
