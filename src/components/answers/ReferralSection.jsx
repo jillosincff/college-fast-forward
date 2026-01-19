@@ -165,12 +165,32 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
     );
   }
 
-  // Default/Error state
+  // Collapsed state - simple button to expand
+  if (!isExpanded) {
+    return (
+      <div className="referral-collapsed">
+        <button 
+          onClick={() => setIsExpanded(true)}
+          className="expand-btn"
+        >
+          <span className="collapsed-label">Not your area?</span>
+          <span className="collapsed-action">
+            <Users className="w-4 h-4" />
+            Send this question to someone who can help
+          </span>
+        </button>
+        <style jsx>{styles}</style>
+      </div>
+    );
+  }
+
+  // Default/Error state - expanded
   return (
     <div className="referral-section">
       <div className="referral-header">
         <Users className="w-5 h-5 text-blue-600" />
         <span className="referral-title">Know someone who can help?</span>
+        <button onClick={() => setIsExpanded(false)} className="close-btn">✕</button>
       </div>
 
       <p className="referral-desc">
