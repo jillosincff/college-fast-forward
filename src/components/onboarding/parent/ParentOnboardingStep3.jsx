@@ -110,7 +110,8 @@ export default function ParentOnboardingStep3({
 
   // Different limits based on flow type
   const MAX_SKIPS_MATCHED = 4;
-  const MAX_SKIPS_NO_MATCH = 3;
+  const MAX_SKIPS_NO_MATCH = 2;
+  const MAX_QUESTIONS = 5; // Total questions to show
 
   useEffect(() => {
     loadMatchingQuestions();
