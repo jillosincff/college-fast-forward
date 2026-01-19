@@ -568,14 +568,6 @@ export default function ParentOnboardingStep3({
         </div>
       )}
 
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
-      >
-        ← Back to previous step
-      </button>
-
       {/* Referral Modal */}
       {showReferralModal && currentQuestion && (
         <ReferralModal
