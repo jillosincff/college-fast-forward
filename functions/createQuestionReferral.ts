@@ -39,8 +39,12 @@ Deno.serve(async (req) => {
     let existingUser = null;
     try {
       const users = await base44.asServiceRole.entities.User.filter({ email: inviteeEmail });
+      console.log('User lookup result for', inviteeEmail, ':', JSON.stringify(users));
       if (users && users.length > 0) {
         existingUser = users[0];
+        console.log('Found existing user:', existingUser.full_name, existingUser.email);
+      } else {
+        console.log('No existing user found for:', inviteeEmail);
       }
     } catch (e) {
       console.log('User lookup failed (continuing as external invite):', e.message);
