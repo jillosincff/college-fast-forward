@@ -202,18 +202,23 @@ export default function ParentOnboarding() {
           </div>
           
           <p className="text-xl text-white/90">
-            Based on what you told us, we found a student who could really use your advice.
+            Your experience could be exactly what a student needs right now.
           </p>
           
-          <div className="space-y-2 pt-4">
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">🚀</span>
-              <span className="font-semibold text-sm">One answer from you = months of cold applying for them</span>
+          <div className="space-y-3 pt-4">
+            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
+              <span className="text-2xl">🚀</span>
+              <p className="text-white">One answer from you = months of cold applying for them</p>
             </div>
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">⏱️</span>
-              <span className="font-semibold text-sm">Most answers take just 2-3 minutes</span>
+            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
+              <span className="text-2xl">⏱️</span>
+              <p className="text-white">Most answers take just 2-3 minutes</p>
             </div>
+          </div>
+          
+          {/* Social proof testimonial */}
+          <div className="border-t border-blue-700/50 pt-6 mt-6">
+            <Testimonial />
           </div>
         </div>
       );
