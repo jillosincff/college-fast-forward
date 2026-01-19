@@ -33,7 +33,9 @@ export default function QuestionCard({ question, showMatchIndicator = true }) {
               {question.poster_first_name || question.poster_name?.split(' ')[0] || 'Student'}
             </span>
             <span className="text-gray-300">•</span>
-            <span className="text-sm text-gray-500">{question.student_major || 'Undeclared'}</span>
+            <span className="text-sm text-gray-500">
+              {question.student_major || question.student_year || 'UF Student'}
+            </span>
             {question.created_date && (
               <>
                 <span className="text-gray-300">•</span>
