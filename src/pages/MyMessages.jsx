@@ -38,11 +38,68 @@ export default function MyMessagesPage() {
     
     setIsLoadingConvs(true);
     try {
-      const convs = await base44.entities.Conversation.filter(
-        { participant_emails: { $contains: user.email } },
-        '-last_message_at'
-      );
-      setConversations(convs || []);
+      // Load actual conversations
+      let convs = [];
+      try {
+        convs = await base44.entities.Conversation.filter(
+          { participant_emails: { $contains: user.email } },
+          '-last_message_at'
+        ) || [];
+      } catch (e) {
+        console.log('Conversation filter failed, trying alternate method');
+        convs = [];
+      }
+
+      // Also load orphan messages (messages without conversation_id) and create virtual conversations
+      try {
+        const orphanMessages = await base44.entities.Message.filter(
+          { recipient_email: user.email },
+          '-created_date',
+          50
+        );
+        
+        // Group orphan messages by sender
+        const orphanBySender = {};
+        orphanMessages?.filter(m => !m.conversation_id).forEach(msg => {
+          if (!orphanBySender[msg.sender_email]) {
+            orphanBySender[msg.sender_email] = [];
+          }
+          orphanBySender[msg.sender_email].push(msg);
+        });
+
+        // Create virtual conversations for orphan messages
+        Object.entries(orphanBySender).forEach(([senderEmail, msgs]) => {
+          const latestMsg = msgs[0];
+          // Check if we already have a conversation with this sender
+          const existingConv = convs.find(c => c.participant_emails?.includes(senderEmail));
+          if (!existingConv) {
+            convs.push({
+              id: `orphan-${senderEmail}`,
+              participant_emails: [user.email, senderEmail],
+              participant_names: {
+                [senderEmail]: latestMsg.sender_name || senderEmail.split('@')[0]
+              },
+              subject: latestMsg.subject,
+              last_message_preview: latestMsg.body?.substring(0, 100),
+              last_message_at: latestMsg.created_date,
+              last_message_sender: senderEmail,
+              unread_count: {
+                [user.email]: msgs.filter(m => !m.is_read).length
+              },
+              related_post_id: latestMsg.post_id,
+              related_post_title: latestMsg.post_title,
+              _isOrphan: true,
+              _orphanMessages: msgs
+            });
+          }
+        });
+      } catch (e) {
+        console.log('Could not load orphan messages:', e);
+      }
+
+      // Sort by last message
+      convs.sort((a, b) => new Date(b.last_message_at || 0) - new Date(a.last_message_at || 0));
+      setConversations(convs);
 
       // Check URL for specific conversation
       const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
