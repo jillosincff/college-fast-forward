@@ -375,6 +375,9 @@ export default function Dashboard() {
               }}
             />
 
+            {/* What To Do Next - Engagement prompts */}
+            <WhatToDoNext user={user} />
+
             {/* Opportunities - Compact */}
             <CompactOpportunities 
               opportunities={opportunities} 
