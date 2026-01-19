@@ -502,7 +502,7 @@ export default function ParentOnboardingStep3({
             className="w-full py-2 text-slate-500 hover:text-slate-700 text-sm flex items-center justify-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            {currentIndex >= questions.length - 1 ? "Skip" : "Skip → Show Another"}
+            {currentIndex >= questions.length - 1 ? "Skip for now" : "Show me another student"}
           </button>
         </div>
       )}

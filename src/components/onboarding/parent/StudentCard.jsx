@@ -1,15 +1,16 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
 
+// Aligned with MatchContext labels for consistency
 const HELP_TYPE_LABELS = {
-  job_search: 'Job Search',
+  job_search: 'Job Referrals',
   resume: 'Resume Help',
-  interviews: 'Interview Prep',
+  interviews: 'Resume Help',
   networking: 'Networking',
-  direction: 'Career Direction',
+  direction: 'Career Guidance',
   industry_insights: 'Industry Insights',
   grad_school: 'Grad School',
-  salary: 'Salary Advice'
+  salary: 'Career Guidance'
 };
 
 export default function StudentCard({ question, studentName, isVisible = true }) {
@@ -32,8 +33,8 @@ export default function StudentCard({ question, studentName, isVisible = true })
             {initial}
           </div>
           
-          <div className="text-white">
-            <h3 className="text-xl font-semibold">{studentName}</h3>
+          <div>
+            <h3 className="text-xl font-semibold text-white">{studentName}</h3>
             <p className="text-blue-200">
               {majorDisplay} {yearDisplay}
             </p>
