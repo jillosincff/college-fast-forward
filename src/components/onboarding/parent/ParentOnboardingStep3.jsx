@@ -287,12 +287,12 @@ export default function ParentOnboardingStep3({
     }
   };
 
-  // Loading state
+  // Loading state with spinner
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-[#0021A5] animate-spin mb-4" />
-        <p className="text-slate-600">Finding a student who needs your help...</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center py-16">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0021A5] border-t-transparent mb-6" />
+        <p className="text-xl text-slate-700">Finding students who need you...</p>
       </div>
     );
   }
