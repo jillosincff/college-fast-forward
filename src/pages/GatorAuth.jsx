@@ -5,6 +5,8 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Loader2, GraduationCap, Heart, ArrowRight, Award } from 'lucide-react';
 
+console.log('🔵 [GatorAuth] Module loaded');
+
 /**
  * UNIFIED AUTH FLOW - Single page handles:
  * 1. Welcome screen with Google sign-in (unauthenticated users)
