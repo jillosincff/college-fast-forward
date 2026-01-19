@@ -685,6 +685,13 @@ const AdminDashboard = () => {
               <BarChart3 className="w-4 h-4 mr-1" />
               Engagement
             </TabsTrigger>
+            <TabsTrigger 
+              value="reengagement" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+            >
+              <Mail className="w-4 h-4 mr-1" />
+              Re-Engagement
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
