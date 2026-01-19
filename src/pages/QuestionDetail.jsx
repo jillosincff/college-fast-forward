@@ -609,27 +609,29 @@ export default function QuestionDetailPage() {
           </div>
         </div>
 
-        {/* Answers Section */}
+        {/* Answers Section - only show header if there are answers */}
         <div className="answers-section">
-          <div className="answers-header">
-            <h2>Answers ({answers.length})</h2>
-            
-            {/* Sort controls only for logged-in users */}
-            {!isPublicView && answers.length > 0 && (
-              <div className="sort-controls">
-                <span>Sort by:</span>
-                <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="sort-select"
-                >
-                  <option value="upvotes">Most Upvoted</option>
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                </select>
-              </div>
-            )}
-          </div>
+          {answers.length > 0 && (
+            <div className="answers-header">
+              <h2>Answers ({answers.length})</h2>
+              
+              {/* Sort controls only for logged-in users */}
+              {!isPublicView && (
+                <div className="sort-controls">
+                  <span>Sort by:</span>
+                  <select 
+                    value={sortBy} 
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="sort-select"
+                  >
+                    <option value="upvotes">Most Upvoted</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Public View: Limited answer list */}
           {isPublicView ? (
