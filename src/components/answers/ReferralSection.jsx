@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { trackEvent } from '@/components/utils/analytics';
 
-export default function ReferralSection({ question, currentUser }) {
+export default function ReferralSection({ question, currentUser, collapsed = false }) {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'success' | 'error'
@@ -14,6 +14,7 @@ export default function ReferralSection({ question, currentUser }) {
   const [taggedUserName, setTaggedUserName] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(!collapsed);
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
