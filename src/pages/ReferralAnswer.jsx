@@ -74,6 +74,22 @@ export default function ReferralAnswer() {
         return;
       }
 
+      // Check if user is already authenticated - redirect to normal question page
+      const isAuthenticated = await base44.auth.isAuthenticated();
+      if (isAuthenticated) {
+        // Parse token to get question ID and redirect
+        try {
+          const decoded = JSON.parse(atob(token.replace(/-/g, '+').replace(/_/g, '/')));
+          if (decoded.q) {
+            console.log('Authenticated user on magic link - redirecting to question:', decoded.q);
+            navigate(`QuestionDetail?id=${decoded.q}`);
+            return;
+          }
+        } catch (e) {
+          console.log('Could not decode token for redirect:', e);
+        }
+      }
+
       setReferralToken(token);
 
       // Validate token and get question data
