@@ -186,9 +186,9 @@ Deno.serve(async (req) => {
                     ` : ''}
                     
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="https://collegefastforward.com/#Dashboard" 
+                        <a href="https://www.collegefastforward.com/#MyMessages${conversationId ? `?conv=${conversationId}` : ''}" 
                            style="background-color: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
-                            View in Your Dashboard →
+                            View Message →
                         </a>
                     </div>
                     
