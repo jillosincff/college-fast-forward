@@ -135,6 +135,11 @@ export default function PostRequestPage() { // Renamed from PostRequest
         poster_name: posterName,
         poster_first_name: posterFirstName,
         poster_last_name: posterLastName,
+        // Populate student info from user profile
+        student_major: user?.major || user?.student_major || null,
+        student_year: user?.graduation_year || user?.student_year || null,
+        student_minor: user?.minor || user?.student_minor || null,
+        student_pre_track: user?.pre_track || user?.student_pre_track || null,
       };
 
       let createdRequest;
