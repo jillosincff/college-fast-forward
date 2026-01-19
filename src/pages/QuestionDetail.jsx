@@ -653,38 +653,35 @@ export default function QuestionDetailPage() {
             </>
           ) : (
             <>
-              {/* Logged-in View: Full answer list */}
-              <div className="answers-list">
-                {answers.map(answer => (
-                  <AnswerCard
-                    key={answer.id}
-                    answer={answer}
-                    currentUser={user}
-                    isQuestionAsker={isQuestionAsker}
-                    onUpvoteChange={handleUpvoteChange}
-                    onMarkBest={handleMarkBest}
-                    onMessage={handleMessageAuthor}
-                  />
-                ))}
-              </div>
-              
-              {answers.length === 0 && !isLoading && (
-                <div className="no-answers">
-                  <MessageSquare className="w-12 h-12 text-gray-300" />
-                  <h3>No answers yet</h3>
-                  <p>Be the first to share your advice!</p>
+              {/* Logged-in View: Full answer list - only show if there are answers */}
+              {answers.length > 0 && (
+                <div className="answers-list">
+                  {answers.map(answer => (
+                    <AnswerCard
+                      key={answer.id}
+                      answer={answer}
+                      currentUser={user}
+                      isQuestionAsker={isQuestionAsker}
+                      onUpvoteChange={handleUpvoteChange}
+                      onMarkBest={handleMarkBest}
+                      onMessage={handleMessageAuthor}
+                    />
+                  ))}
                 </div>
               )}
 
-              {/* Answer Composer - only for logged-in users */}
-              <div ref={answerComposerRef}>
-                <AnswerComposer
-                  question={question}
-                  currentUser={user}
-                  onAnswerPosted={handleAnswerPosted}
-                  autoFocus={shouldOpenComposer}
-                />
-              </div>
+              {/* Answer Composer - only for logged-in users who are not the asker */}
+              {!isQuestionAsker && (
+                <div ref={answerComposerRef}>
+                  <AnswerComposer
+                    question={question}
+                    currentUser={user}
+                    onAnswerPosted={handleAnswerPosted}
+                    autoFocus={shouldOpenComposer}
+                    answerCount={answers.length}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>
