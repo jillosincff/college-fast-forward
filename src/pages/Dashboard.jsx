@@ -31,6 +31,7 @@ import ChallengeCard from '@/components/dashboard/student/ChallengeCard';
 import FamilyCard from '@/components/dashboard/student/FamilyCard';
 import ConversationsSection from '@/components/dashboard/student/ConversationsSection';
 import ResponsesSection from '@/components/dashboard/student/ResponsesSection';
+import WhatToDoNext from '@/components/dashboard/student/WhatToDoNext';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
