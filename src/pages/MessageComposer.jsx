@@ -42,7 +42,7 @@ export default function MessageComposer() {
   const [isFirstMessage, setIsFirstMessage] = useState(true);
 
   useEffect(() => {
-    if (!user || !recipientId) {
+    if (!user) {
       setLoading(false);
       return;
     }
@@ -51,33 +51,66 @@ export default function MessageComposer() {
 
   const loadConversation = async () => {
     setLoading(true);
-    console.log('🔍 MessageComposer: Loading conversation for recipientId:', recipientId);
+    
+    // Get params from URL
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const toEmail = urlParams.get('to');
+    const toName = urlParams.get('name');
+    const matchId = urlParams.get('matchId');
+    
+    console.log('🔍 MessageComposer: Loading with to:', toEmail, 'name:', toName, 'matchId:', matchId, 'recipientId:', recipientId);
     
     let recipientUser = null;
     
-    // PRIORITY 1: Check Match records for cached parent info (most reliable - no RLS issues)
-    try {
-      console.log('🔍 Trying Match lookup...');
-      const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
-      if (matches?.length > 0 && matches[0].parent_email) {
-        recipientUser = {
-          id: recipientId,
-          email: matches[0].parent_email,
-          full_name: matches[0].parent_name,
-          persona: 'parent',
-          job_title: matches[0].parent_role,
-          current_company: matches[0].parent_company
-        };
-        console.log('✅ Found recipient from Match cache:', recipientUser.email);
+    // PRIORITY 0: Direct email from URL params (most reliable - comes from match data)
+    if (toEmail && toEmail.includes('@')) {
+      recipientUser = {
+        id: toEmail,
+        email: toEmail,
+        full_name: toName || toEmail.split('@')[0],
+        persona: 'parent'
+      };
+      
+      // Try to enrich with more data from ParentExpertise
+      try {
+        const expertise = await base44.entities.ParentExpertise.filter({ parent_email: toEmail });
+        if (expertise?.length > 0) {
+          recipientUser.full_name = expertise[0].parent_name || recipientUser.full_name;
+          recipientUser.job_title = expertise[0].current_role;
+          recipientUser.current_company = expertise[0].current_company;
+        }
+      } catch (e) {
+        console.log('⚠️ ParentExpertise enrichment failed:', e.message);
       }
-    } catch (e) {
-      console.log('⚠️ Match lookup failed:', e.message);
+      
+      console.log('✅ Found recipient from URL params:', recipientUser.email);
     }
     
-    // PRIORITY 2: Look up from ParentExpertise (has open read RLS for gators)
-    if (!recipientUser) {
+    // PRIORITY 1: Check Match records for cached parent info (if no direct email)
+    if (!recipientUser && recipientId) {
       try {
-        console.log('🔍 Trying ParentExpertise lookup...');
+        console.log('🔍 Trying Match lookup for recipientId:', recipientId);
+        const matches = await base44.entities.Match.filter({ parent_id: recipientId }, undefined, 1);
+        if (matches?.length > 0 && matches[0].parent_email) {
+          recipientUser = {
+            id: recipientId,
+            email: matches[0].parent_email,
+            full_name: matches[0].parent_name,
+            persona: 'parent',
+            job_title: matches[0].parent_role,
+            current_company: matches[0].parent_company
+          };
+          console.log('✅ Found recipient from Match cache:', recipientUser.email);
+        }
+      } catch (e) {
+        console.log('⚠️ Match lookup failed:', e.message);
+      }
+    }
+    
+    // PRIORITY 2: Look up from ParentExpertise by parent_id
+    if (!recipientUser && recipientId) {
+      try {
+        console.log('🔍 Trying ParentExpertise lookup for parent_id:', recipientId);
         const expertise = await base44.entities.ParentExpertise.filter({ parent_id: recipientId });
         if (expertise?.length > 0 && expertise[0].parent_email) {
           recipientUser = {
@@ -110,7 +143,7 @@ export default function MessageComposer() {
       setRecipient(recipientUser);
       console.log('✅ Recipient set:', recipientUser.full_name, recipientUser.email);
     } else {
-      console.log('❌ No recipient found for id:', recipientId);
+      console.log('❌ No recipient found for id:', recipientId, 'or email:', toEmail);
     }
 
     // Load existing messages between these users
