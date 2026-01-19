@@ -43,10 +43,15 @@ export default function MyMessagesPage() {
       // Load all messages using list() - RLS will filter automatically
       let allMessagesRaw = [];
       try {
-        allMessagesRaw = await base44.entities.Message.list('-created_date', 200) || [];
+        const result = await base44.entities.Message.list('-created_date', 200);
+        allMessagesRaw = result || [];
         console.log('Messages loaded via list():', allMessagesRaw.length);
+        if (allMessagesRaw.length > 0) {
+          console.log('Sample message:', JSON.stringify(allMessagesRaw[0], null, 2));
+        }
       } catch (e) {
         console.error('Failed to load messages:', e);
+        console.error('Error details:', e.message, e.response?.data);
       }
       
       // Filter to only messages involving this user (RLS should already handle this, but double-check)
@@ -54,6 +59,14 @@ export default function MyMessagesPage() {
       const sentMessages = allMessagesRaw.filter(m => m.sender_email === user.email);
       
       console.log('Total messages:', allMessagesRaw.length, 'Received:', receivedMessages.length, 'Sent:', sentMessages.length);
+      
+      // DEBUG: Log all unique recipient/sender emails to see what RLS returned
+      if (allMessagesRaw.length > 0) {
+        const uniqueRecipients = [...new Set(allMessagesRaw.map(m => m.recipient_email))];
+        const uniqueSenders = [...new Set(allMessagesRaw.map(m => m.sender_email))];
+        console.log('Unique recipients in results:', uniqueRecipients);
+        console.log('Unique senders in results:', uniqueSenders);
+      }
       
       const allMessages = [...receivedMessages, ...sentMessages];
       console.log('Total messages loaded:', allMessages.length);
