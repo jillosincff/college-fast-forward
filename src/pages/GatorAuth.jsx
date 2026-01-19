@@ -26,7 +26,25 @@ function GoogleIcon() {
 }
 
 export default function GatorAuth() {
-  const { user, isLoading, refreshUser } = useAuth();
+  console.log('🔵 [GatorAuth] Component rendering');
+  
+  let authContext;
+  try {
+    authContext = useAuth();
+    console.log('🔵 [GatorAuth] useAuth succeeded:', !!authContext);
+  } catch (e) {
+    console.error('❌ [GatorAuth] useAuth failed:', e);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50 p-4">
+        <div className="text-center">
+          <p className="text-red-600 font-bold">Auth Error</p>
+          <p className="text-red-500 text-sm">{e.message}</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const { user, isLoading, refreshUser } = authContext;
   
   // NEW FLOW: Role selection FIRST, then OAuth
   // Steps: null (determining) → 'role-select' (pick role) → 'oauth' (sign in) → 'processing' (applying role)
