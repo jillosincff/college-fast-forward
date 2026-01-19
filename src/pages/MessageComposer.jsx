@@ -220,10 +220,14 @@ export default function MessageComposer() {
     }
   };
 
-  const applyTemplate = (template) => {
-    const topic = user?.major || '';
-    const parentName = recipient?.full_name?.split(' ')[0] || 'there';
-    setNewMessage(template.template(parentName, topic));
+  const handleTemplateSelect = (template) => {
+    setNewMessage(template.message);
+    setSelectedTemplateId(template.id);
+    
+    trackEvent('message_template_selected', {
+      template_id: template.id,
+      recipient_email: recipient?.email
+    });
   };
 
   if (loading) {
