@@ -22,6 +22,8 @@ export default function MessageComposer() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  const [messageTemplates, setMessageTemplates] = useState([]);
 
   useEffect(() => {
     if (!user) {
