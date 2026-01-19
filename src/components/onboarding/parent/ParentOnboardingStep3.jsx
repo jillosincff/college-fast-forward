@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { JobRequest } from '@/entities/JobRequest';
-import { Loader2, RefreshCw, Send, Users, ChevronRight } from 'lucide-react';
+import { Send, Users, RefreshCw, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import SearchingState from './SearchingState';
+import StudentCard from './StudentCard';
+import MatchContext, { getMatchTags, getMatchReason } from './MatchContext';
+import AnswerSuccessState from './AnswerSuccessState';
 import ReferralModal from './ReferralModal';
 
 // Map student help_types to parent ways_to_help
@@ -16,36 +21,28 @@ const HELP_TYPE_MAPPING = {
   grad_school: 'grad_school'
 };
 
-// Scoring function - supports both legacy target_industry and new target_industries array
+// Scoring function
 function scoreQuestion(question, parentIndustries, parentWaysToHelp) {
   let score = 0;
   
-  // Map student help_types to parent taxonomy
   const mappedHelpTypes = (question.help_types || [])
     .map(ht => HELP_TYPE_MAPPING[ht])
     .filter(Boolean);
   
-  // Help type match (+50)
   const helpOverlap = mappedHelpTypes.some(ht => parentWaysToHelp.includes(ht));
   if (helpOverlap) score += 50;
   
-  // Industry match - support both array and legacy string
   const studentIndustries = question.target_industries?.length > 0 
     ? question.target_industries 
     : (question.target_industry ? [question.target_industry] : []);
   
   if (studentIndustries.length > 0) {
-    // Student specified industries - check for overlap
     const industryOverlap = studentIndustries.some(ind => parentIndustries.includes(ind));
-    if (industryOverlap) {
-      score += 40;
-    }
+    if (industryOverlap) score += 40;
   } else {
-    // "Anyone" selected or no industry = partial credit
     score += 10;
   }
   
-  // Age boosts
   const ageInDays = (Date.now() - new Date(question.created_date).getTime()) / (1000 * 60 * 60 * 24);
   if (ageInDays > 7) score += 15;
   if (ageInDays > 30) score += 10;
@@ -58,36 +55,11 @@ function parseStudentName(posterName) {
   if (!posterName) return 'A student';
   const parts = posterName.split(',').map(p => p.trim());
   if (parts.length >= 2) {
-    // "Fronte, Lia A." -> "Lia"
     const firstName = parts[1].split(' ')[0];
     return firstName || parts[1];
   }
   return posterName.split(' ')[0] || 'A student';
 }
-
-function formatRelativeTime(dateStr) {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
-}
-
-const HELP_TYPE_LABELS = {
-  job_search: 'Job Search',
-  resume: 'Resume Help',
-  interviews: 'Interview Prep',
-  networking: 'Networking',
-  direction: 'Career Direction',
-  industry_insights: 'Industry Insights',
-  grad_school: 'Grad School',
-  salary: 'Salary Advice'
-};
 
 export default function ParentOnboardingStep3({ 
   formData, 
@@ -104,14 +76,18 @@ export default function ParentOnboardingStep3({
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [noQuestions, setNoQuestions] = useState(false);
-  const [flowType, setFlowType] = useState(null); // 'matched' | 'noMatch' | 'empty'
+  const [flowType, setFlowType] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [answeredStudentName, setAnsweredStudentName] = useState('');
+  const [showCard, setShowCard] = useState(false);
   const [showReferralSuccess, setShowReferralSuccess] = useState(false);
   const [referralName, setReferralName] = useState('');
 
-  // Different limits based on flow type
   const MAX_SKIPS_MATCHED = 4;
   const MAX_SKIPS_NO_MATCH = 2;
-  const MAX_QUESTIONS = 5; // Total questions to show
+  const MAX_QUESTIONS = 5;
+
+  const parentFirstName = user?.full_name?.split(' ')[0] || 'there';
 
   useEffect(() => {
     loadMatchingQuestions();
@@ -119,27 +95,25 @@ export default function ParentOnboardingStep3({
 
   const loadMatchingQuestions = async () => {
     setLoading(true);
+    setShowCard(false);
     const startTime = Date.now();
     
     try {
-      // Fetch active student questions
       const allQuestions = await JobRequest.filter(
         { status: 'active', poster_type: 'student', is_alumni_career_request: false },
-        'created_date', // oldest first for FIFO tiebreaker
+        'created_date',
         200
       );
 
       if (allQuestions.length === 0) {
         setFlowType('empty');
         setNoQuestions(true);
-        // Ensure minimum 1.5s loading time
         const elapsed = Date.now() - startTime;
-        if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+        if (elapsed < 2000) await new Promise(r => setTimeout(r, 2000 - elapsed));
         setLoading(false);
         return;
       }
 
-      // Score and filter questions
       const parentIndustries = formData.industries || [];
       const parentWaysToHelp = formData.waysToHelp || [];
 
@@ -149,54 +123,36 @@ export default function ParentOnboardingStep3({
           matchScore: scoreQuestion(q, parentIndustries, parentWaysToHelp)
         }))
         .sort((a, b) => {
-          // Sort by score descending, then by age (older first) for tiebreaker
           if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
           return new Date(a.created_date) - new Date(b.created_date);
         });
 
-      // Check if we have good matches (score >= 50)
       const goodMatches = scoredQuestions.filter(q => q.matchScore >= 50);
       
-      console.log('[ParentOnboardingStep3] Scoring results:', {
-        totalQuestions: allQuestions.length,
-        goodMatchesCount: goodMatches.length,
-        topScores: scoredQuestions.slice(0, 5).map(q => ({ id: q.id, score: q.matchScore, title: q.title?.slice(0, 30) }))
-      });
-      
       if (goodMatches.length > 0) {
-        // Matched flow - show up to 5 best matches
-        console.log('[ParentOnboardingStep3] Setting MATCHED flow with', goodMatches.length, 'questions');
         setFlowType('matched');
         setQuestions(goodMatches.slice(0, MAX_QUESTIONS));
       } else {
-        // No match flow - show oldest unanswered questions (up to 3)
-        console.log('[ParentOnboardingStep3] No good matches, trying NO_MATCH flow');
         const oldestUnanswered = allQuestions
           .filter(q => (q.answer_count || 0) === 0)
           .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
           .slice(0, 3);
         
-        console.log('[ParentOnboardingStep3] Oldest unanswered count:', oldestUnanswered.length);
-        
         if (oldestUnanswered.length > 0) {
           setFlowType('noMatch');
           setQuestions(oldestUnanswered.map(q => ({ ...q, matchScore: 0 })));
+        } else if (scoredQuestions.length > 0) {
+          setFlowType('noMatch');
+          setQuestions(scoredQuestions.slice(0, 3));
         } else {
-          // All questions have been answered - but we still have questions, just show some
-          console.log('[ParentOnboardingStep3] All questions answered, showing top scored anyway');
-          if (scoredQuestions.length > 0) {
-            setFlowType('noMatch');
-            setQuestions(scoredQuestions.slice(0, 3));
-          } else {
-            setFlowType('empty');
-            setNoQuestions(true);
-          }
+          setFlowType('empty');
+          setNoQuestions(true);
         }
       }
       
-      // Ensure minimum 1.5s loading time for effect
+      // Ensure minimum 2s loading time
       const elapsed = Date.now() - startTime;
-      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+      if (elapsed < 2000) await new Promise(r => setTimeout(r, 2000 - elapsed));
       
     } catch (error) {
       console.error('Failed to load questions:', error);
@@ -204,24 +160,30 @@ export default function ParentOnboardingStep3({
       setNoQuestions(true);
     } finally {
       setLoading(false);
+      // Trigger card reveal animation
+      setTimeout(() => setShowCard(true), 100);
     }
   };
 
   const currentQuestion = questions[currentIndex];
+  const studentName = parseStudentName(currentQuestion?.poster_name);
+  const isGoodMatch = flowType === 'matched';
+  const totalQuestions = Math.min(MAX_QUESTIONS, questions.length);
 
   const handleSkip = () => {
     const newSkipCount = skipCount + 1;
     setSkipCount(newSkipCount);
     setShowAnswerInput(false);
     setAnswerText('');
+    setShowCard(false);
 
-    const maxSkips = flowType === 'matched' ? MAX_SKIPS_MATCHED : MAX_SKIPS_NO_MATCH;
+    const maxSkips = isGoodMatch ? MAX_SKIPS_MATCHED : MAX_SKIPS_NO_MATCH;
 
     if (newSkipCount >= maxSkips || currentIndex >= questions.length - 1) {
-      // Graceful exit
       onComplete({ skippedAll: true, flowType });
     } else {
       setCurrentIndex(currentIndex + 1);
+      setTimeout(() => setShowCard(true), 100);
     }
   };
 
@@ -234,7 +196,6 @@ export default function ParentOnboardingStep3({
 
     setSubmitting(true);
     try {
-      // Create the answer
       await base44.entities.Answer.create({
         question_id: currentQuestion.id,
         question_type: 'JobRequest',
@@ -248,18 +209,12 @@ export default function ParentOnboardingStep3({
         is_best_answer: false
       });
 
-      // Update question answer count
       await JobRequest.update(currentQuestion.id, {
         answer_count: (currentQuestion.answer_count || 0) + 1
       });
 
-      // Complete with success
-      onComplete({ 
-        answeredQuestion: true, 
-        questionId: currentQuestion.id,
-        studentName: parseStudentName(currentQuestion.poster_name),
-        flowType
-      });
+      setAnsweredStudentName(studentName);
+      setShowSuccess(true);
     } catch (error) {
       console.error('Failed to submit answer:', error);
       alert('Something went wrong. Please try again.');
@@ -284,20 +239,49 @@ export default function ParentOnboardingStep3({
       onComplete({ referredSomeone: true, flowType });
     } else {
       setCurrentIndex(currentIndex + 1);
+      setShowCard(false);
+      setTimeout(() => setShowCard(true), 100);
     }
   };
 
-  // Loading state with spinner
+  const handleHelpAnother = () => {
+    if (currentIndex < questions.length - 1) {
+      setShowSuccess(false);
+      setAnswerText('');
+      setShowAnswerInput(false);
+      setCurrentIndex(currentIndex + 1);
+      setShowCard(false);
+      setTimeout(() => setShowCard(true), 100);
+    }
+  };
+
+  const handleDashboard = () => {
+    onComplete({ 
+      answeredQuestion: true, 
+      questionId: currentQuestion?.id,
+      studentName: answeredStudentName,
+      flowType
+    });
+  };
+
+  // Loading state
   if (loading) {
+    return <SearchingState />;
+  }
+
+  // Success state after answering
+  if (showSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center py-16">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0021A5] border-t-transparent mb-6" />
-        <p className="text-xl text-slate-700">Finding students who need you...</p>
-      </div>
+      <AnswerSuccessState
+        studentName={answeredStudentName}
+        onDashboard={handleDashboard}
+        onHelpAnother={handleHelpAnother}
+        hasMoreQuestions={currentIndex < questions.length - 1}
+      />
     );
   }
 
-  // No questions at all - everything answered
+  // No questions state
   if (noQuestions && flowType === 'empty') {
     return (
       <div className="space-y-6">
@@ -313,20 +297,12 @@ export default function ParentOnboardingStep3({
           </p>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={onBack}
-            className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
-          >
-            ← Back
-          </button>
-          <button
-            onClick={() => onComplete({ noQuestions: true, flowType: 'empty' })}
-            className="flex-1 py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
-          >
-            Go to My Dashboard →
-          </button>
-        </div>
+        <button
+          onClick={() => onComplete({ noQuestions: true, flowType: 'empty' })}
+          className="w-full py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
+        >
+          Go to My Dashboard →
+        </button>
       </div>
     );
   }
@@ -344,9 +320,6 @@ export default function ParentOnboardingStep3({
           </h2>
           <p className="text-slate-600 mb-6">
             We'll reach out to {referralName} and let you know if they're able to help.
-          </p>
-          <p className="text-slate-500 text-sm">
-            Want to see another question, or continue to your dashboard?
           </p>
         </div>
 
@@ -374,12 +347,7 @@ export default function ParentOnboardingStep3({
     );
   }
 
-  // If no current question but we have questions array, something's wrong
-  if (!currentQuestion && questions.length > 0) {
-    console.error('No current question but questions exist', { currentIndex, questionsLength: questions.length });
-  }
-
-  // If we somehow have no questions to show (but didn't hit noQuestions state), show empty
+  // No current question fallback
   if (!currentQuestion) {
     return (
       <div className="space-y-6">
@@ -394,42 +362,32 @@ export default function ParentOnboardingStep3({
             We'll notify you when students need your help!
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={onBack}
-            className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
-          >
-            ← Back
-          </button>
-          <button
-            onClick={() => onComplete({ noQuestions: true, flowType: flowType || 'empty' })}
-            className="flex-1 py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
-          >
-            Go to My Dashboard →
-          </button>
-        </div>
+        <button
+          onClick={() => onComplete({ noQuestions: true, flowType: flowType || 'empty' })}
+          className="w-full py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all"
+        >
+          Go to My Dashboard →
+        </button>
       </div>
     );
   }
 
-  // Question display
-  const studentName = parseStudentName(currentQuestion?.poster_name);
-  const totalQuestions = Math.min(MAX_QUESTIONS, questions.length);
-
-  // Header copy based on flow type
-  const subheaderText = flowType === 'matched' 
-    ? "A UF student needs your help right now. Based on what you told us, you might be the perfect person to answer this."
-    : "Here's a question from a UF student. Even if it's not your exact area, you might know someone who can help.";
+  // Main question display
+  const matchReason = getMatchReason(currentQuestion, formData.industries, formData.waysToHelp);
+  const subheaderText = isGoodMatch 
+    ? `Based on your ${matchReason}, you might be perfect for this.`
+    : "This might not be your exact area, but maybe you can help—or know someone who can?";
 
   return (
     <div className="space-y-6">
+      {/* Personalized header */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl lg:text-2xl font-bold text-slate-800">
-            One more thing
+            {parentFirstName}, meet {studentName}.
           </h2>
           <span className="text-sm text-slate-500">
-            Question {currentIndex + 1} of {totalQuestions}
+            {currentIndex + 1} of {totalQuestions}
           </span>
         </div>
         <p className="text-slate-600">
@@ -437,48 +395,26 @@ export default function ParentOnboardingStep3({
         </p>
       </div>
 
-      {/* Question Card */}
-      <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#0021A5] to-[#001580] px-5 py-4 text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold">
-              {studentName.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p className="font-semibold">{studentName}</p>
-              <p className="text-sm text-white/80">
-                {currentQuestion.student_major && `${currentQuestion.student_major} `}
-                {currentQuestion.student_year && `'${String(currentQuestion.student_year).slice(-2)}`}
-                {' • Posted '}
-                {formatRelativeTime(currentQuestion.created_date)}
-              </p>
-            </div>
-          </div>
-        </div>
+      {/* Humanized Student Card with animation */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: showCard ? 1 : 0, y: showCard ? 0 : 20 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <StudentCard 
+          question={currentQuestion} 
+          studentName={studentName}
+          isVisible={showCard}
+        />
+      </motion.div>
 
-        {/* Body */}
-        <div className="p-5">
-          {/* Help type badges */}
-          {currentQuestion.help_types && currentQuestion.help_types.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {currentQuestion.help_types.slice(0, 4).map(ht => (
-                <span 
-                  key={ht}
-                  className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
-                >
-                  {HELP_TYPE_LABELS[ht] || ht}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Question text */}
-          <p className="text-slate-800 text-base leading-relaxed">
-            {currentQuestion.description || currentQuestion.title}
-          </p>
-        </div>
-      </div>
+      {/* Match context */}
+      <MatchContext 
+        question={currentQuestion}
+        parentIndustries={formData.industries}
+        parentWaysToHelp={formData.waysToHelp}
+        showMatchTags={isGoodMatch}
+      />
 
       {/* Answer Input */}
       {showAnswerInput ? (
@@ -498,7 +434,7 @@ export default function ParentOnboardingStep3({
             <div className="flex justify-between mt-1">
               {answerText.trim().length < 50 && answerText.length > 0 && (
                 <p className="text-xs text-amber-600">
-                  A bit more detail would really help this student ({50 - answerText.trim().length} more characters)
+                  A bit more detail would really help ({50 - answerText.trim().length} more characters)
                 </p>
               )}
               <p className="text-xs text-slate-400 ml-auto">{answerText.length} characters</p>
@@ -542,28 +478,31 @@ export default function ParentOnboardingStep3({
         </div>
       ) : (
         /* Action Buttons */
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
+          {/* Primary CTA */}
           <button
             onClick={handleAnswerClick}
-            className="w-full py-4 rounded-xl font-bold text-lg bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-[#0021A5] hover:bg-[#001580] text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
           >
-            Answer This Question
-            <ChevronRight className="w-5 h-5" />
+            Answer {studentName}'s Question
+            <span>→</span>
           </button>
 
+          {/* Secondary */}
           <button
             onClick={handleReferral}
-            className="w-full py-3 rounded-xl font-medium text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+            className="w-full py-3 border-2 border-slate-300 hover:border-[#0021A5] text-slate-700 font-medium rounded-xl transition-colors"
           >
             I Know Someone Who Can Help
           </button>
 
+          {/* Tertiary */}
           <button
             onClick={handleSkip}
-            className="w-full py-3 rounded-xl font-medium text-slate-500 hover:bg-slate-50 transition-all text-sm flex items-center justify-center gap-2"
+            className="w-full py-2 text-slate-500 hover:text-slate-700 text-sm flex items-center justify-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            Skip → Show Another
+            {currentIndex >= questions.length - 1 ? "Skip" : "Skip → Show Another"}
           </button>
         </div>
       )}
