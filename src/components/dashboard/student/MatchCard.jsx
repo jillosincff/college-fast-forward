@@ -23,6 +23,7 @@ export default function MatchCard({ match, onMessage }) {
   const matchScore = match.match_score || match.matchScore || 85;
   const yearsExperience = match.years_experience || match.yearsExperience;
   const isFastResponder = match.is_fast_responder || match.isFastResponder;
+  const hasMessaged = match.status === 'student_connected' || match.status === 'intro_made';
 
   return (
     <div className="bg-gray-50 hover:bg-blue-50 rounded-2xl p-4 md:p-5 transition-all border-2 border-transparent hover:border-blue-100">
