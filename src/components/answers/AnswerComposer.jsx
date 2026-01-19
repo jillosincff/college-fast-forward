@@ -260,39 +260,38 @@ export default function AnswerComposer({
       <style jsx>{`
         .answer-composer {
           background: white;
-          border: 2px solid #E5E7EB;
-          border-radius: 16px;
+          border: 1px solid #E5E7EB;
+          border-radius: 12px;
           padding: 24px;
-          margin-top: 32px;
+          margin-top: 24px;
         }
 
         .composer-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: #0021A5;
+          font-size: 18px;
+          font-weight: 600;
+          color: #111827;
           margin: 0 0 16px 0;
         }
 
         .composer-textarea {
-          min-height: 150px;
+          min-height: 120px;
           font-size: 16px;
           line-height: 1.6;
-          border: 2px solid #E5E7EB;
-          border-radius: 12px;
-          padding: 16px;
+          border: 1px solid #D1D5DB;
+          border-radius: 8px;
+          padding: 12px;
           resize: vertical;
+          width: 100%;
         }
 
         .composer-textarea:focus {
           border-color: #0021A5;
           outline: none;
+          box-shadow: 0 0 0 2px rgba(0, 33, 165, 0.1);
         }
 
-        .composer-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 12px;
+        .composer-meta {
+          margin-top: 8px;
         }
 
         .char-count {
@@ -300,16 +299,34 @@ export default function AnswerComposer({
           color: #9CA3AF;
         }
 
+        .inline-tip {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          color: #6B7280;
+          margin: 8px 0 16px 0;
+        }
+
+        .inline-tip span {
+          flex-shrink: 0;
+        }
+
         .submit-btn {
-          background: #FA4616;
+          width: 100%;
+          background: #0021A5 !important;
           color: white;
           font-weight: 600;
-          padding: 12px 24px;
+          padding: 14px 24px;
           border-radius: 8px;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .submit-btn:hover:not(:disabled) {
-          background: #E03D0F;
+          background: #001A84 !important;
         }
 
         .submit-btn:disabled {
@@ -317,44 +334,17 @@ export default function AnswerComposer({
           cursor: not-allowed;
         }
 
-        .tips-section {
-          margin-top: 20px;
-          padding: 16px;
-          background: #F9FAFB;
-          border-radius: 12px;
-        }
-
-        .tips-section h4 {
-          font-size: 14px;
-          font-weight: 600;
-          color: #374151;
-          margin: 0 0 8px 0;
-        }
-
-        .tips-section ul {
-          margin: 0;
-          padding: 0 0 0 20px;
-        }
-
-        .tips-section li {
-          font-size: 13px;
-          color: #6B7280;
-          margin-bottom: 4px;
-        }
-
         @media (max-width: 640px) {
-          .composer-footer {
-            flex-direction: column;
-            gap: 12px;
-            align-items: stretch;
+          .answer-composer {
+            padding: 16px;
           }
 
-          .char-count {
-            text-align: center;
+          .composer-title {
+            font-size: 16px;
           }
 
-          .submit-btn {
-            width: 100%;
+          .composer-textarea {
+            font-size: 16px; /* Prevent iOS zoom */
           }
         }
       `}</style>
