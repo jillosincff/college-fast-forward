@@ -66,20 +66,26 @@ Deno.serve(async (req) => {
     const referralLink = `${baseUrl}/#ReferralAnswer?token=${token}`;
 
     // Create referral record
-    await base44.asServiceRole.entities.Referral.create({
+    const referralData = {
       referrer_id: user.id,
       referrer_email: referrerEmail,
       referrer_name: referrerName,
       referred_email: inviteeEmail,
       referred_name: friendName,
-      referred_user_id: existingUser?.id || null,
       question_id: questionId,
       question_title: question.title || question.role,
-      referral_token: isInternalTag ? null : token,
+      referral_token: token,
       personal_note: personalNote,
       status: 'pending',
-      expires_at: isInternalTag ? null : new Date(tokenPayload.exp).toISOString()
-    });
+      expires_at: new Date(tokenPayload.exp).toISOString()
+    };
+    
+    // Only add optional fields if they have values
+    if (existingUser?.id) {
+      referralData.referred_user_id = existingUser.id;
+    }
+    
+    await base44.asServiceRole.entities.Referral.create(referralData);
 
     // For internal tags, create an in-app notification
     if (isInternalTag) {
