@@ -68,9 +68,9 @@ export default function MatchesReview() {
     }
   }, [currentMatch, user]);
 
-  // Check for transition point (after 5 reviews)
+  // Check for transition point (after 3 reviews for top-3 flow)
   useEffect(() => {
-    if (reviewed === 5 && !showTransition && matches.length > 5) {
+    if (reviewed === 3 && !showTransition && matches.length > 3) {
       setShowTransition(true);
     }
   }, [reviewed, matches.length]);
@@ -186,27 +186,28 @@ export default function MatchesReview() {
     );
   }
 
-  // Transition screen after 5 reviews
+  // Transition screen after 3 reviews (top-3 completion)
   if (showTransition) {
     const remainingMatches = matches.length - currentIndex;
+    trackEvent('match_review_transition_shown', { messages_sent: messagesSent, skipped });
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
-          <div className="text-5xl mb-4">🎯</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Great start!</h1>
+          <div className="text-5xl mb-4">🎉</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Nice work!</h1>
           <p className="text-gray-500 mb-8">
-            You've messaged {messagesSent} {messagesSent === 1 ? 'person' : 'people'}
-            {skipped > 0 && ` and skipped ${skipped}`}.
+            You messaged {messagesSent} of your top matches.
+            {messagesSent > 0 && ' Most people respond within 48 hours.'}
           </p>
           
-          {/* Continue reviewing */}
+          {/* See more matches */}
           {remainingMatches > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">📬</span>
+                <span className="text-2xl">🔍</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">See {remainingMatches} more matches</p>
-                  <p className="text-sm text-gray-500">Continue reviewing people matched to your question</p>
+                  <p className="font-semibold text-gray-900">See more matches</p>
+                  <p className="text-sm text-gray-500">{remainingMatches} other parents & alumni who can help</p>
                 </div>
               </div>
               <button
@@ -214,7 +215,7 @@ export default function MatchesReview() {
                 className="w-full mt-3 py-2.5 text-white font-semibold rounded-lg"
                 style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
               >
-                Continue Reviewing
+                Browse More Matches →
               </button>
             </div>
           )}
@@ -222,10 +223,10 @@ export default function MatchesReview() {
           {/* Browse directory */}
           <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left">
             <div className="flex items-start gap-3">
-              <span className="text-2xl">🔍</span>
+              <span className="text-2xl">📂</span>
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">Browse the full directory</p>
-                <p className="text-sm text-gray-500">Find even more people — 500+ parents & alumni</p>
+                <p className="text-sm text-gray-500">500+ parents & alumni from all industries</p>
               </div>
             </div>
             <button
@@ -236,22 +237,13 @@ export default function MatchesReview() {
             </button>
           </div>
           
-          {/* Dashboard */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-left">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">📊</span>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">Go to your dashboard</p>
-                <p className="text-sm text-gray-500">See your question, messages, and matches anytime</p>
-              </div>
-            </div>
-            <button
-              onClick={handleSkipToDashboard}
-              className="w-full mt-3 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
-            >
-              Go to Dashboard
-            </button>
-          </div>
+          {/* Dashboard - Primary */}
+          <button
+            onClick={handleSkipToDashboard}
+            className="w-full py-3 text-gray-600 hover:text-gray-800 font-medium"
+          >
+            Go to Dashboard
+          </button>
         </div>
       </div>
     );
@@ -298,10 +290,20 @@ export default function MatchesReview() {
   // Main match review UI
   const displayName = currentMatch.helper_name || currentMatch.parent_name || 'UF Professional';
   const firstName = getFirstName(displayName);
-  const title = currentMatch.helper_title || currentMatch.parent_title || '';
-  const company = currentMatch.helper_company || currentMatch.parent_company || '';
+  const title = currentMatch.helper_title || currentMatch.parent_title || currentMatch.job_title || '';
+  const company = currentMatch.helper_company || currentMatch.parent_company || currentMatch.company || '';
   const matchReasons = currentMatch.match_reasons || currentMatch.matchReasons || [];
   const studentsHelped = currentMatch.students_helped_count || 0;
+  const bio = currentMatch.bio || currentMatch.helper_bio || '';
+  const linkedinUrl = currentMatch.linkedin_url || currentMatch.helper_linkedin_url || '';
+  const yearsExp = currentMatch.years_experience || currentMatch.helper_years_experience || '';
+  const photoUrl = currentMatch.profile_image_url || currentMatch.helper_photo_url || '';
+
+  // Top 3 flow - show only first 3 matches
+  const isTop3Flow = matches.length > 3;
+  const showingTop3 = isTop3Flow && currentIndex < 3;
+  const displayTotal = isTop3Flow ? 3 : matches.length;
+  const displayIndex = isTop3Flow ? Math.min(currentIndex + 1, 3) : currentIndex + 1;
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
@@ -310,47 +312,96 @@ export default function MatchesReview() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Your Top Matches</h1>
-            <p className="text-gray-500 text-sm">Message them directly to start a conversation</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+              {isTop3Flow ? 'Your Top 3 Matches' : 'Your Top Matches'}
+            </h1>
+            <p className="text-gray-500 text-sm">
+              {isTop3Flow ? 'We picked the people most likely to help you' : 'Message them directly to start a conversation'}
+            </p>
           </div>
           <span className="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border">
-            {currentIndex + 1} of {matches.length}
+            {displayIndex} of {displayTotal}
           </span>
         </div>
 
-        {/* Match Card */}
+        {/* Match Card - Rich Profile */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-6 mb-6">
-          {/* Profile */}
-          <div className="flex items-center gap-4 mb-4">
-            <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0"
-              style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
-            >
-              {getInitials(displayName)}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-xl font-bold text-gray-900 truncate">{displayName}</h2>
-              {(title || company) && (
-                <p className="text-gray-500 truncate">
-                  {title}{title && company && ' at '}{company}
-                </p>
+          {/* Header: Photo + Info + LinkedIn */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-4">
+              {/* Profile Photo or Initials */}
+              {photoUrl ? (
+                <img 
+                  src={photoUrl} 
+                  alt={displayName}
+                  className="w-16 h-16 rounded-full object-cover shadow-lg flex-shrink-0"
+                />
+              ) : (
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
+                >
+                  {getInitials(displayName)}
+                </div>
               )}
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-gray-900 truncate">{displayName}</h2>
+                {(title || company) && (
+                  <p className="text-gray-600 truncate">
+                    {title}{title && company && ' at '}{company}
+                  </p>
+                )}
+                {yearsExp && (
+                  <p className="text-sm text-gray-500">{yearsExp} experience</p>
+                )}
+              </div>
             </div>
+            
+            {/* LinkedIn button */}
+            {linkedinUrl && (
+              <a
+                href={linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 flex-shrink-0"
+                onClick={() => trackEvent('match_linkedin_clicked', { match_id: currentMatch.id })}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                LinkedIn
+              </a>
+            )}
           </div>
 
-          {/* Why you matched */}
-          {matchReasons.length > 0 && (
-            <p className="text-sm text-gray-500 mb-2">
-              ✨ <span className="font-medium">Why you matched:</span> {matchReasons.slice(0, 3).join(' · ')}
+          {/* Bio */}
+          {bio && (
+            <p className="text-gray-600 italic mb-4 bg-slate-50 rounded-lg p-3">
+              💬 "{bio}"
             </p>
           )}
 
-          {/* Social proof */}
-          {studentsHelped > 0 && (
-            <p className="text-sm text-gray-500 mb-4">
-              📊 {firstName} has helped {studentsHelped} student{studentsHelped > 1 ? 's' : ''} this month
-            </p>
-          )}
+          <hr className="my-4 border-gray-100" />
+
+          {/* Why you matched */}
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-gray-700 mb-2">✨ Why you matched:</p>
+            <ul className="text-sm text-gray-600 space-y-1">
+              {matchReasons.length > 0 ? (
+                matchReasons.slice(0, 4).map((reason, i) => (
+                  <li key={i}>• {reason}</li>
+                ))
+              ) : (
+                <>
+                  {title && <li>• Works as {title} — relevant to your interests</li>}
+                  {company && <li>• Can share insights about {company}</li>}
+                </>
+              )}
+              {studentsHelped > 0 && (
+                <li>• Has helped {studentsHelped}+ students</li>
+              )}
+            </ul>
+          </div>
 
           <hr className="my-4 border-gray-100" />
 

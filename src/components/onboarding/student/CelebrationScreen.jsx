@@ -131,11 +131,34 @@ export default function CelebrationScreen({ user, onContinue }) {
           </p>
         )}
 
-        {/* Single CTA Card */}
-        <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-6 shadow-xl text-left">
-          <p className="text-gray-600 mb-4">
-            These people match your interests and can help with what you need. 
-            Start connecting now — most respond within 48 hours.
+        {/* Top 3 Preview Card */}
+        <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-6 shadow-xl">
+          {/* Top 3 avatars with names */}
+          {!loading && matches.length >= 3 && (
+            <div className="flex justify-center gap-4 mb-4">
+              {matches.slice(0, 3).map((match, i) => {
+                const name = match.helper_name || match.parent_name || '';
+                const title = match.helper_title || match.parent_title || match.job_title || '';
+                const shortTitle = title.replace('Director', 'Dir').replace('Manager', 'Mgr').replace('Vice President', 'VP').split(' ').slice(0, 2).join(' ');
+                return (
+                  <div key={i} className="text-center">
+                    <div 
+                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg mx-auto"
+                      style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
+                    >
+                      {getInitials(name)}
+                    </div>
+                    <p className="text-sm font-medium text-gray-900 mt-1">{name.split(' ')[0]}</p>
+                    <p className="text-xs text-gray-500 max-w-[80px] truncate">{shortTitle}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          
+          <p className="text-gray-600 mb-4 text-center">
+            These people are the best fit for what you need.
+            Message them to start a conversation.
           </p>
           
           <button
@@ -147,7 +170,7 @@ export default function CelebrationScreen({ user, onContinue }) {
               boxShadow: `0 4px 12px ${UF_BLUE}40`
             }}
           >
-            {loading ? 'Loading...' : `See Your Matches →`}
+            {loading ? 'Loading...' : `See Your Top 3 Matches →`}
           </button>
         </div>
 

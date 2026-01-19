@@ -17,6 +17,7 @@ import GatorRoleSelection from './pages/GatorRoleSelection';
 import GatorWelcome from './pages/GatorWelcome';
 import InviteRequired from './pages/InviteRequired';
 import LandingPage from './pages/LandingPage';
+import MatchesReview from './pages/MatchesReview';
 import MessageComposer from './pages/MessageComposer';
 import MyApplications from './pages/MyApplications';
 import MyImpact from './pages/MyImpact';
@@ -45,7 +46,6 @@ import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
 import WelcomeRole from './pages/WelcomeRole';
-import MatchesReview from './pages/MatchesReview';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +69,7 @@ export const PAGES = {
     "GatorWelcome": GatorWelcome,
     "InviteRequired": InviteRequired,
     "LandingPage": LandingPage,
+    "MatchesReview": MatchesReview,
     "MessageComposer": MessageComposer,
     "MyApplications": MyApplications,
     "MyImpact": MyImpact,
@@ -97,7 +98,6 @@ export const PAGES = {
     "TestingDashboard": TestingDashboard,
     "UnsubscribeReengagement": UnsubscribeReengagement,
     "WelcomeRole": WelcomeRole,
-    "MatchesReview": MatchesReview,
 }
 
 export const pagesConfig = {
