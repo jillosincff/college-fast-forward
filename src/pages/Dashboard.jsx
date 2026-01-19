@@ -21,6 +21,7 @@ import CompactOpportunities from '@/components/dashboard/student/CompactOpportun
 import CompactChallenge from '@/components/dashboard/student/CompactChallenge';
 import FamilyBoostStatus from '@/components/dashboard/student/FamilyBoostStatus';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
+import FirstMessageNudgeModal from '@/components/onboarding/student/FirstMessageNudgeModal';
 // New UF-branded components
 import FoundingMemberBanner from '@/components/dashboard/student/FoundingMemberBanner';
 import DashboardHeader from '@/components/dashboard/student/DashboardHeader';
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showLogIntroModal, setShowLogIntroModal] = useState(false);
+  const [showFirstMessageNudge, setShowFirstMessageNudge] = useState(false);
   const [helpRequest, setHelpRequest] = useState(null);
   const [matches, setMatches] = useState([]);
   const [networkStats, setNetworkStats] = useState({
@@ -237,6 +239,17 @@ export default function Dashboard() {
     } finally {
       setLoadingData(false);
       setInitialLoadComplete(true);
+      
+      // Check if should show first message nudge (has matches but hasn't messaged)
+      if (studentMatches?.length > 0) {
+        const hasMessaged = studentMatches.some(m => 
+          m.status === 'student_connected' || m.status === 'intro_made'
+        );
+        if (!hasMessaged && !localStorage.getItem('firstMessageNudgeDismissed')) {
+          // Small delay to let dashboard render first
+          setTimeout(() => setShowFirstMessageNudge(true), 1000);
+        }
+      }
     }
   };
 
@@ -532,6 +545,24 @@ export default function Dashboard() {
             loadStartedRef.current = false;
             await loadDashboardData();
           }}
+        />
+      )}
+
+      {/* First Message Nudge Modal */}
+      {showFirstMessageNudge && unmessagedMatches.length > 0 && (
+        <FirstMessageNudgeModal
+          topMatch={unmessagedMatches[0]}
+          allMatchesCount={matches.length}
+          onMessage={(match) => {
+            const name = match.helper_name || match.parent_name || 'Helper';
+            const email = match.helper_email || match.parent_email;
+            navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+          }}
+          onBrowse={() => {
+            // Scroll to matches section
+            document.querySelector('[class*="MatchesSection"]')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          onClose={() => setShowFirstMessageNudge(false)}
         />
       )}
     </div>

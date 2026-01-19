@@ -32,6 +32,10 @@ export default function StatsCards({ stats, state }) {
     if (state === 'all_caught_up') {
       return { value: activeConversations, label: activeConversations === 1 ? 'Convo' : 'Convos', sublabel: 'Active' };
     }
+    // Show action CTA instead of "0" for messages sent
+    if (messagesSent === 0) {
+      return { value: '→', label: 'Start a', sublabel: 'Convo', isAction: true };
+    }
     return { value: messagesSent, label: 'Messages', sublabel: 'Sent' };
   };
 

@@ -39,7 +39,7 @@ export default function MatchesSection({ matches = [], user, onMessageMatch }) {
               🤝 {remainingCount > 0 ? `${remainingCount} People Ready to Help You` : 'Your Matches'}
             </h2>
             <p className="text-gray-600 text-sm mt-1">
-              Message them to start a conversation
+              Message them directly — don't wait for them to come to you!
             </p>
           </div>
           
@@ -97,6 +97,23 @@ export default function MatchesSection({ matches = [], user, onMessageMatch }) {
           </Button>
         </div>
       )}
+
+      {/* Browse Directory CTA */}
+      <div className="px-4 md:px-6 py-4 bg-gradient-to-r from-blue-50 to-slate-50 border-t">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-700">🔍 Want more options?</p>
+            <p className="text-xs text-gray-500">Browse the full directory to find anyone who can help.</p>
+          </div>
+          <Button 
+            variant="outline"
+            onClick={() => navigate('GatorDirectory')}
+            className="font-semibold text-sm"
+          >
+            Browse Directory →
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }
