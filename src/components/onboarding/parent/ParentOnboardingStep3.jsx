@@ -414,16 +414,12 @@ export default function ParentOnboardingStep3({
 
   // Question display
   const studentName = parseStudentName(currentQuestion?.poster_name);
-  const maxQuestions = flowType === 'matched' ? MAX_SKIPS_MATCHED + 1 : MAX_SKIPS_NO_MATCH;
+  const totalQuestions = Math.min(MAX_QUESTIONS, questions.length);
 
   // Header copy based on flow type
-  const headerText = flowType === 'matched' 
-    ? "One more thing: a UF student needs your help right now."
-    : "We don't have a perfect match for your expertise right now—but maybe you can still help?";
-  
-  const subheaderText = flowType === 'matched'
-    ? "Based on what you just told us, you might be the perfect person to answer this."
-    : null;
+  const subheaderText = flowType === 'matched' 
+    ? "A UF student needs your help right now. Based on what you told us, you might be the perfect person to answer this."
+    : "Here's a question from a UF student. Even if it's not your exact area, you might know someone who can help.";
 
   return (
     <div className="space-y-6">
