@@ -308,10 +308,17 @@ export default function QuestionsPage() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesName = profile.full_name?.toLowerCase().includes(query);
+      const matchesFirstName = profile.first_name?.toLowerCase().includes(query);
+      const matchesLastName = profile.last_name?.toLowerCase().includes(query);
+      const matchesPosterName = profile.request?.poster_name?.toLowerCase().includes(query);
+      const matchesPosterFirstName = profile.request?.poster_first_name?.toLowerCase().includes(query);
+      const matchesPosterLastName = profile.request?.poster_last_name?.toLowerCase().includes(query);
       const matchesMajor = profile.major?.toLowerCase().includes(query);
       const matchesBio = profile.bio?.toLowerCase().includes(query);
       const matchesDescription = profile.request?.description?.toLowerCase().includes(query);
-      if (!matchesName && !matchesMajor && !matchesBio && !matchesDescription) return false;
+      const matchesRole = profile.request?.role?.toLowerCase().includes(query);
+      const matchesIndustry = profile.request?.target_industry?.toLowerCase().includes(query);
+      if (!matchesName && !matchesFirstName && !matchesLastName && !matchesPosterName && !matchesPosterFirstName && !matchesPosterLastName && !matchesMajor && !matchesBio && !matchesDescription && !matchesRole && !matchesIndustry) return false;
     }
 
     if (filters.questionType !== 'all' && profile.request) {
