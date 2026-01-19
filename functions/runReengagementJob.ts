@@ -138,6 +138,23 @@ Deno.serve(async (req) => {
     
     console.log(`🔄 Starting re-engagement job (dryRun: ${dryRun}, limit: ${limit})`);
     
+    // Get settings first - check if enabled
+    const settingsRecords = await base44.asServiceRole.entities.ReengagementSettings.filter({});
+    
+    if (settingsRecords.length === 0) {
+      console.log('⏭️ No re-engagement settings found, skipping job');
+      return Response.json({ success: true, skipped: true, reason: 'No settings configured' });
+    }
+    
+    const settings = settingsRecords[0];
+    
+    if (!settings.enabled) {
+      console.log('⏭️ Re-engagement emails are disabled, skipping job');
+      return Response.json({ success: true, skipped: true, reason: 'Re-engagement disabled' });
+    }
+    
+    console.log(`📧 Re-engagement enabled, using thresholds: ${settings.day1_threshold}/${settings.day2_threshold}/${settings.day3_threshold} days`);
+    
     // Get all users with parent/alumni persona
     const allUsers = await base44.asServiceRole.entities.User.filter({});
     
@@ -153,6 +170,13 @@ Deno.serve(async (req) => {
     const emailPrefs = await base44.asServiceRole.entities.EmailPreference.filter({});
     const prefsByUser = {};
     emailPrefs.forEach(p => { prefsByUser[p.user_id] = p; });
+    
+    // Use settings thresholds
+    const day1Threshold = settings.day1_threshold || 7;
+    const day2Threshold = settings.day2_threshold || 21;
+    const day3Threshold = settings.day3_threshold || 45;
+    const stopThreshold = settings.stop_threshold || 60;
+    const maxEmailsPerDay = settings.max_emails_per_day || 100;
     
     // Get recent re-engagement emails (last 60 days)
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
