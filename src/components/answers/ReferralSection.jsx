@@ -173,10 +173,9 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
           onClick={() => setIsExpanded(true)}
           className="expand-btn"
         >
-          <span className="collapsed-label">Not your area?</span>
-          <span className="collapsed-action">
-            <Users className="w-4 h-4" />
-            Send this question to someone who can help
+          <Users className="w-4 h-4 text-blue-600" />
+          <span className="collapsed-text">
+            Know someone who can help? <span className="collapsed-link">Send them this question</span>
           </span>
         </button>
         <style jsx>{styles}</style>
