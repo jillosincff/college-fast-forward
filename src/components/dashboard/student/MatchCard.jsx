@@ -84,18 +84,27 @@ export default function MatchCard({ match, onMessage }) {
           </div>
         </div>
 
-        {/* CTA */}
-        <Button
-          onClick={() => onMessage?.(match)}
-          className="flex-shrink-0 text-white font-semibold px-3 md:px-5 py-2 md:py-2.5 rounded-xl shadow-lg transition hover:scale-105 text-sm md:text-base"
-          style={{ 
-            background: UF_BUTTON_GRADIENT,
-            boxShadow: `0 4px 12px ${UF_BLUE}30`
-          }}
-        >
-          <span className="hidden sm:inline">Message {firstName} →</span>
-          <span className="sm:hidden">Message →</span>
-        </Button>
+        {/* CTA or Sent Badge */}
+        {hasMessaged ? (
+          <div className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 md:px-4 py-2 md:py-2.5 rounded-xl bg-emerald-100 text-emerald-700 font-semibold text-sm md:text-base">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Message Sent</span>
+          </div>
+        ) : (
+          <Button
+            onClick={() => onMessage?.(match)}
+            className="flex-shrink-0 text-white font-semibold px-3 md:px-5 py-2 md:py-2.5 rounded-xl shadow-lg transition hover:scale-105 text-sm md:text-base"
+            style={{ 
+              background: UF_BUTTON_GRADIENT,
+              boxShadow: `0 4px 12px ${UF_BLUE}30`
+            }}
+          >
+            <span className="hidden sm:inline">Message {firstName} →</span>
+            <span className="sm:hidden">Message →</span>
+          </Button>
+        )}
       </div>
     </div>
   );
