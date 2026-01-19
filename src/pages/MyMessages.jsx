@@ -40,20 +40,44 @@ export default function MyMessagesPage() {
     try {
       console.log('Loading messages for:', user.email);
       
-      // Load all messages - use list() which is more reliable than filter()
+      // Load messages where user is recipient - use $or query
       let allMessagesRaw = [];
       try {
-        allMessagesRaw = await base44.entities.Message.list('-created_date', 200) || [];
-        console.log('All messages loaded:', allMessagesRaw.length);
+        // First try loading received messages
+        const received = await base44.entities.Message.filter(
+          { recipient_email: user.email },
+          '-created_date',
+          100
+        ) || [];
+        console.log('Received messages loaded:', received.length);
+        allMessagesRaw = [...received];
       } catch (e) {
-        console.error('Failed to load messages with list:', e);
+        console.error('Failed to load received messages:', e);
+      }
+      
+      try {
+        // Also load sent messages
+        const sent = await base44.entities.Message.filter(
+          { sender_email: user.email },
+          '-created_date',
+          100
+        ) || [];
+        console.log('Sent messages loaded:', sent.length);
+        // Merge avoiding duplicates
+        sent.forEach(msg => {
+          if (!allMessagesRaw.find(m => m.id === msg.id)) {
+            allMessagesRaw.push(msg);
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load sent messages:', e);
       }
       
       // Filter to only messages involving this user
       const receivedMessages = allMessagesRaw.filter(m => m.recipient_email === user.email);
       const sentMessages = allMessagesRaw.filter(m => m.sender_email === user.email);
       
-      console.log('Received messages:', receivedMessages.length, 'Sent messages:', sentMessages.length);
+      console.log('Total messages:', allMessagesRaw.length, 'Received:', receivedMessages.length, 'Sent:', sentMessages.length);
       
       const allMessages = [...receivedMessages, ...sentMessages];
       console.log('Total messages loaded:', allMessages.length);
