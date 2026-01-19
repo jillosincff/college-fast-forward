@@ -248,20 +248,26 @@ Deno.serve(async (req) => {
           continue;
         }
         
-        // Determine which email type to send
+        // Determine which email type to send (using settings thresholds)
         let emailType = null;
-        if (daysSinceActive >= 7 && daysSinceActive < 21 && emailCount === 0) {
+        if (daysSinceActive >= day1Threshold && daysSinceActive < day2Threshold && emailCount === 0) {
           emailType = 'day7';
-        } else if (daysSinceActive >= 21 && daysSinceActive < 45 && emailCount === 1) {
+        } else if (daysSinceActive >= day2Threshold && daysSinceActive < day3Threshold && emailCount === 1) {
           emailType = 'day21';
-        } else if (daysSinceActive >= 45 && daysSinceActive < 60 && emailCount === 2) {
+        } else if (daysSinceActive >= day3Threshold && daysSinceActive < stopThreshold && emailCount === 2) {
           emailType = 'day45';
-        } else if (emailCount >= 3) {
+        } else if (daysSinceActive >= stopThreshold || emailCount >= 3) {
           results.skipped.maxEmailsReached++;
           continue;
         } else {
           // Not time for next email yet
           continue;
+        }
+        
+        // Check daily limit
+        if (results.emailsSent >= maxEmailsPerDay) {
+          console.log(`Daily limit of ${maxEmailsPerDay} reached, stopping`);
+          break;
         }
         
         // Get matched questions for this user
