@@ -40,30 +40,20 @@ export default function MyMessagesPage() {
     try {
       console.log('Loading messages for:', user.email);
       
-      // Load all messages where user is recipient
-      let receivedMessages = [];
+      // Load all messages - use list() which is more reliable than filter()
+      let allMessagesRaw = [];
       try {
-        receivedMessages = await base44.entities.Message.filter(
-          { recipient_email: user.email },
-          '-created_date',
-          100
-        ) || [];
-        console.log('Received messages:', receivedMessages.length);
+        allMessagesRaw = await base44.entities.Message.list('-created_date', 200) || [];
+        console.log('All messages loaded:', allMessagesRaw.length);
       } catch (e) {
-        console.error('Failed to load received messages:', e);
+        console.error('Failed to load messages with list:', e);
       }
       
-      // Also load messages where user is sender
-      let sentMessages = [];
-      try {
-        sentMessages = await base44.entities.Message.filter(
-          { sender_email: user.email },
-          '-created_date',
-          50
-        ) || [];
-      } catch (e) {
-        console.log('Could not load sent messages');
-      }
+      // Filter to only messages involving this user
+      const receivedMessages = allMessagesRaw.filter(m => m.recipient_email === user.email);
+      const sentMessages = allMessagesRaw.filter(m => m.sender_email === user.email);
+      
+      console.log('Received messages:', receivedMessages.length, 'Sent messages:', sentMessages.length);
       
       const allMessages = [...receivedMessages, ...sentMessages];
       console.log('Total messages loaded:', allMessages.length);
