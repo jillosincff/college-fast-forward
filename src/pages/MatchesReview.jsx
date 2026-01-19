@@ -157,6 +157,8 @@ export default function MatchesReview() {
   };
 
   const handleContinueReviewing = () => {
+    // Skip to match #4 (index 3) so they see different people
+    setCurrentIndex(3);
     setShowTransition(false);
   };
 
