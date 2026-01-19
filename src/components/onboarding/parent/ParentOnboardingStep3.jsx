@@ -426,20 +426,15 @@ export default function ParentOnboardingStep3({
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl lg:text-2xl font-bold text-slate-800">
-            {flowType === 'matched' ? 'One more thing' : 'Help a Gator?'}
+            One more thing
           </h2>
           <span className="text-sm text-slate-500">
-            Question {currentIndex + 1} of {Math.min(maxQuestions, questions.length)}
+            Question {currentIndex + 1} of {totalQuestions}
           </span>
         </div>
         <p className="text-slate-600">
-          {headerText}
+          {subheaderText}
         </p>
-        {subheaderText && (
-          <p className="text-slate-500 text-sm mt-1">
-            {subheaderText}
-          </p>
-        )}
       </div>
 
       {/* Question Card */}
