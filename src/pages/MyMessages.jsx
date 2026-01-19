@@ -130,14 +130,17 @@ export default function MyMessagesPage() {
 
     if (showLoading) setIsLoadingMessages(true);
     try {
-      // Check if this is an orphan conversation
+      // Check if this is an orphan conversation or we have cached messages
       const conv = conversations.find(c => c.id === conversationId);
       
       let msgs = [];
-      if (conv?._isOrphan) {
-        // Use cached orphan messages
-        msgs = conv._orphanMessages || [];
-      } else {
+      if (conv?._messages && conv._messages.length > 0) {
+        // Use cached messages from the conversation
+        msgs = [...conv._messages].sort((a, b) => 
+          new Date(a.created_date) - new Date(b.created_date)
+        );
+      } else if (!conversationId.startsWith('orphan-')) {
+        // Try to load from conversation_id
         msgs = await base44.entities.Message.filter(
           { conversation_id: conversationId },
           'created_date',
@@ -145,6 +148,7 @@ export default function MyMessagesPage() {
         ) || [];
       }
       
+      console.log('Loaded messages for conversation:', conversationId, msgs.length);
       setMessages(msgs);
       setHasMoreMessages((msgs?.length || 0) >= MESSAGES_PER_PAGE);
       setMessageOffset(msgs?.length || 0);
@@ -152,24 +156,18 @@ export default function MyMessagesPage() {
       // Mark messages as read
       const unreadMsgs = msgs?.filter(m => !m.is_read && m.recipient_email === user?.email) || [];
       for (const msg of unreadMsgs) {
-        await base44.entities.Message.update(msg.id, { 
-          is_read: true, 
-          read_at: new Date().toISOString() 
-        });
-      }
-
-      // Update unread count in conversation (skip for orphan convs)
-      if (unreadMsgs.length > 0 && conv && !conv._isOrphan) {
         try {
-          await base44.entities.Conversation.update(conversationId, {
-            unread_count: {
-              ...conv.unread_count,
-              [user.email]: 0
-            }
+          await base44.entities.Message.update(msg.id, { 
+            is_read: true, 
+            read_at: new Date().toISOString() 
           });
         } catch (e) {
-          console.log('Could not update conversation unread count');
+          console.log('Could not mark message as read:', msg.id);
         }
+      }
+
+      // Update local unread count
+      if (unreadMsgs.length > 0) {
         setConversations(prev => prev.map(c => 
           c.id === conversationId 
             ? { ...c, unread_count: { ...c.unread_count, [user.email]: 0 } }
