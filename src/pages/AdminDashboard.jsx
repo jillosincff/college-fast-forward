@@ -1107,6 +1107,11 @@ const AdminDashboard = () => {
             <TabsContent value="engagement" className="space-y-6">
               <EngagementAnalytics />
             </TabsContent>
+
+            {/* Re-Engagement Settings Tab */}
+            <TabsContent value="reengagement" className="space-y-6">
+              <ReengagementSettings />
+            </TabsContent>
           </Tabs>
         )}
       </div>
