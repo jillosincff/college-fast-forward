@@ -41,8 +41,14 @@ Deno.serve(async (req) => {
       const users = await base44.asServiceRole.entities.User.filter({ email: inviteeEmail });
       console.log('User lookup result for', inviteeEmail, ':', JSON.stringify(users));
       if (users && users.length > 0) {
-        existingUser = users[0];
-        console.log('Found existing user:', existingUser.full_name, existingUser.email);
+        // CRITICAL: Verify the email matches exactly (case-insensitive)
+        const matchedUser = users.find(u => u.email?.toLowerCase() === inviteeEmail.toLowerCase());
+        if (matchedUser) {
+          existingUser = matchedUser;
+          console.log('Found existing user:', existingUser.full_name, existingUser.email);
+        } else {
+          console.log('User lookup returned results but no exact email match for:', inviteeEmail);
+        }
       } else {
         console.log('No existing user found for:', inviteeEmail);
       }
