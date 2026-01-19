@@ -267,36 +267,51 @@ export default function MatchesReview() {
   // Completion screen
   if (isComplete) {
     trackEvent('match_review_completed', { messages_sent: messagesSent, total_matches: matches.length });
+    const remainingMatches = matches.length - 3;
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
-          <div className="text-5xl mb-4">✅</div>
+          <div className="text-5xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            You've reviewed all your matches!
+            {messagesSent > 0 ? 'Nice work!' : 'All done!'}
           </h1>
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-500 mb-6">
             {messagesSent > 0 
               ? `You messaged ${messagesSent} ${messagesSent === 1 ? 'person' : 'people'}. Most respond within 48 hours.`
-              : `No messages sent yet — you can always message them from your dashboard.`
+              : `You can message your matches anytime from your dashboard.`
             }
           </p>
           
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-            <span className="text-3xl mb-3 block">🔍</span>
-            <h2 className="font-semibold text-gray-900 mb-1">Want to find more people?</h2>
-            <p className="text-sm text-gray-500 mb-4">Browse the full directory — 500+ parents and alumni</p>
-            <button
-              onClick={handleBrowseDirectory}
-              className="w-full py-3 text-white font-semibold rounded-xl"
-              style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
-            >
-              Browse Directory →
-            </button>
-          </div>
-          
-          <button onClick={handleSkipToDashboard} className="text-gray-500 hover:text-gray-700">
-            Go to Dashboard
+          {/* PRIMARY ACTION: Go to Dashboard */}
+          <button
+            onClick={handleSkipToDashboard}
+            className="w-full py-3 text-white font-semibold rounded-xl mb-6"
+            style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
+          >
+            Go to Your Dashboard →
           </button>
+          
+          {/* SECONDARY OPTIONS */}
+          <div className="border-t border-gray-200 pt-6">
+            <p className="text-sm text-gray-500 mb-4">Want to connect with more people?</p>
+            
+            <div className="flex gap-3">
+              {remainingMatches > 0 && (
+                <button
+                  onClick={() => navigate('MyMatches')}
+                  className="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  See {remainingMatches} More
+                </button>
+              )}
+              <button
+                onClick={handleBrowseDirectory}
+                className="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Browse Directory
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -321,22 +336,34 @@ export default function MatchesReview() {
   const displayIndex = isTop3Flow ? Math.min(currentIndex + 1, 3) : currentIndex + 1;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
-      <div className="max-w-xl mx-auto">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              {isTop3Flow ? 'Your Top 3 Matches' : 'Your Top Matches'}
-            </h1>
-            <p className="text-gray-500 text-sm">
-              {isTop3Flow ? 'We picked the people most likely to help you' : 'Message them directly to start a conversation'}
-            </p>
-          </div>
-          <span className="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border">
+    <div className="min-h-screen bg-gray-50">
+      {/* Persistent Top Navigation */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+        <div className="max-w-xl mx-auto flex items-center justify-between">
+          <button
+            onClick={handleSkipToDashboard}
+            className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Go to Dashboard</span>
+          </button>
+          <span className="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
             {displayIndex} of {displayTotal}
           </span>
+        </div>
+      </div>
+      
+      <div className="py-6 px-4">
+        <div className="max-w-xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+            {isTop3Flow ? 'Your Top 3 Matches' : 'Your Top Matches'}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            {isTop3Flow ? 'We picked the people most likely to help you' : 'Message them directly to start a conversation'}
+          </p>
         </div>
 
         {/* Match Card - Rich Profile */}
@@ -483,13 +510,7 @@ export default function MatchesReview() {
           </p>
         )}
 
-        {/* Skip to dashboard */}
-        <button
-          onClick={handleSkipToDashboard}
-          className="w-full py-2 text-gray-400 hover:text-gray-600 text-sm"
-        >
-          Skip to Dashboard
-        </button>
+        </div>
       </div>
     </div>
   );

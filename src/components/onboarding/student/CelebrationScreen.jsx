@@ -54,6 +54,12 @@ export default function CelebrationScreen({ user, onContinue }) {
     navigate('MatchesReview');
   };
 
+  const handleSkipToDashboard = () => {
+    trackEvent('celebration_skip_to_dashboard', { user_id: user?.id, match_count: validMatches.length });
+    sessionStorage.removeItem('onboarding_matches');
+    navigate('Dashboard');
+  };
+
   // Filter out invalid matches (no real name)
   const validMatches = matches.filter(m => {
     const name = m.helper_name || m.parent_name || '';
@@ -154,12 +160,13 @@ export default function CelebrationScreen({ user, onContinue }) {
           </button>
         </div>
 
-        {/* Footnote */}
-        {!loading && validMatches.length > 3 && (
-          <p className="text-sm text-gray-500">
-            💡 You can browse all {validMatches.length} from your dashboard
-          </p>
-        )}
+        {/* Skip to dashboard link */}
+        <button
+          onClick={handleSkipToDashboard}
+          className="text-sm text-gray-500 hover:text-gray-700 underline"
+        >
+          or skip to your dashboard
+        </button>
       </div>
     </div>
   );
