@@ -1265,8 +1265,8 @@ export default function QuestionsPage() {
           }
 
           .filters-toggle-btn {
-            width: 100%;
-            min-height: 48px;
+            width: auto;
+            min-height: 36px;
           }
 
           .filter-grid {
