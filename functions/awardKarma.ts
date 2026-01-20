@@ -1,32 +1,74 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-// Karma point values
+// NEW Karma point values based on spec
 const KARMA_VALUES = {
-  answer: 10,
-  upvote_received: 5,
-  best_answer: 50,
-  referral: 25,
+  onboarding_complete: 50,
+  answer: 15,
+  upvote_received: 3,
+  best_answer: 25,
+  salary_submitted: 25,
+  interview_question_submitted: 15,
+  interview_question_confirmed: 5,
+  message_received: 5,
+  message_responded: 10,
+  referral_given: 50,
+  mock_interview: 30,
+  outcome_reported: 75,
+  ama_hosted: 200,
+  // Legacy mappings
+  referral: 50,
   intro_made: 15,
   opportunity_posted: 20,
   opportunity_application: 10
 };
 
-// Level thresholds and boosts
-const KARMA_LEVELS = {
-  bronze: { min: 0, max: 50, boost: 0 },
-  silver: { min: 50, max: 150, boost: 1 },
-  gold: { min: 150, max: 300, boost: 2 },
-  platinum: { min: 300, max: Infinity, boost: 3 }
-};
+// NEW Level thresholds based on spec
+const KARMA_TIERS = [
+  { name: 'none', threshold: 0, boost: 0 },
+  { name: 'active', threshold: 100, boost: 1 },
+  { name: 'engaged', threshold: 300, boost: 1.5 },
+  { name: 'priority', threshold: 500, boost: 2 },
+  { name: 'champion', threshold: 1000, boost: 3 }
+];
 
 // Boost duration in hours
 const BOOST_DURATION_HOURS = 48;
 
 function getKarmaLevel(totalKarma) {
-  if (totalKarma >= 300) return { level: 'platinum', boost: 3 };
-  if (totalKarma >= 150) return { level: 'gold', boost: 2 };
-  if (totalKarma >= 50) return { level: 'silver', boost: 1 };
-  return { level: 'bronze', boost: 0 };
+  let currentTier = KARMA_TIERS[0];
+  for (const tier of KARMA_TIERS) {
+    if (totalKarma >= tier.threshold) {
+      currentTier = tier;
+    } else {
+      break;
+    }
+  }
+  return { level: currentTier.name, boost: currentTier.boost, threshold: currentTier.threshold };
+}
+
+function getNextTier(totalKarma) {
+  for (const tier of KARMA_TIERS) {
+    if (totalKarma < tier.threshold) {
+      return { 
+        name: tier.name, 
+        threshold: tier.threshold, 
+        points_needed: tier.threshold,
+        points_remaining: tier.threshold - totalKarma,
+        benefit: getBenefitLabel(tier.name)
+      };
+    }
+  }
+  return { name: 'max', threshold: 1000, points_needed: 0, points_remaining: 0 };
+}
+
+function getBenefitLabel(tierName) {
+  const benefits = {
+    active: 'Active Family badge',
+    engaged: 'Boosted visibility',
+    priority: 'Priority placement',
+    champion: 'Featured status'
+  };
+  return benefits[tierName] || '';
 }
 
 Deno.serve(async (req) => {
@@ -37,7 +79,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me().catch(() => null);
     
     const body = await req.json();
-    const { familyGroupId, parentUserId, parentEmail, actionType, referenceId, description } = body;
+    const { familyGroupId, parentUserId, parentEmail, parentName, actionType, referenceType, referenceId, description } = body;
     
     console.log('awardKarma called:', { familyGroupId, parentUserId, parentEmail, actionType, referenceId });
     
@@ -75,10 +117,12 @@ Deno.serve(async (req) => {
           family_group_id: effectiveFamilyGroupId,
           parent_user_id: parentUserId,
           parent_email: parentEmail || parentUser?.email || '',
+          parent_name: parentName || parentUser?.full_name || '',
           points: points,
           action_type: actionType,
+          reference_type: referenceType || '',
           reference_id: referenceId || '',
-          description: description || `Earned ${points} karma for ${actionType}`
+          description: description || getDefaultDescription(actionType, points)
         });
       } catch (e) {
         console.log('Could not create karma transaction:', e.message);
@@ -108,7 +152,7 @@ Deno.serve(async (req) => {
     // Get or create FamilyKarma record if we have a family group
     let familyKarma = null;
     let newFamilyTotal = points;
-    let familyLevel = 'bronze';
+    let familyLevel = 'none';
     let familyBoost = 0;
     
     if (effectiveFamilyGroupId) {
@@ -123,7 +167,7 @@ Deno.serve(async (req) => {
         familyKarma = await base44.asServiceRole.entities.FamilyKarma.create({
           family_group_id: effectiveFamilyGroupId,
           total_karma: 0,
-          karma_level: 'bronze',
+          karma_level: 'none',
           boost_multiplier: 0
         });
       }
@@ -134,6 +178,10 @@ Deno.serve(async (req) => {
       familyLevel = levelInfo.level;
       familyBoost = levelInfo.boost;
       
+      // Check if new tier unlocked
+      const oldLevel = familyKarma.karma_level || 'none';
+      const tierUnlocked = oldLevel !== familyLevel && familyLevel !== 'none';
+      
       // Update family karma
       await base44.asServiceRole.entities.FamilyKarma.update(familyKarma.id, {
         total_karma: newFamilyTotal,
@@ -142,6 +190,9 @@ Deno.serve(async (req) => {
         last_karma_earned_at: now.toISOString(),
         boost_expires_at: boostExpiresAt.toISOString()
       });
+      
+      // Update all family members' cached karma
+      await updateFamilyMembersKarma(base44, effectiveFamilyGroupId, newFamilyTotal, familyLevel);
     }
     
     // Update boost on ALL linked students (supports multiple students)
@@ -153,7 +204,6 @@ Deno.serve(async (req) => {
     }
     
     // ALSO boost alumni career requests if this user is an alumni
-    // Alumni get the same karma boost benefits for their own career requests
     let alumniCareerRequestsBoosted = 0;
     if (parentUser?.persona === 'alumni' || parentUser?.roles?.includes('alumni')) {
       alumniCareerRequestsBoosted = await updateAlumniCareerRequestBoosts(
@@ -165,6 +215,8 @@ Deno.serve(async (req) => {
       );
     }
     
+    const nextTier = getNextTier(newFamilyTotal);
+    
     return Response.json({
       success: true,
       points_awarded: points,
@@ -173,6 +225,7 @@ Deno.serve(async (req) => {
       karma_level: familyLevel,
       boost_multiplier: familyBoost,
       boost_expires_at: boostExpiresAt.toISOString(),
+      next_tier: nextTier,
       boosted_students: boostResult.boostedStudents,
       boosted_count: boostResult.count,
       alumni_career_requests_boosted: alumniCareerRequestsBoosted
@@ -184,17 +237,51 @@ Deno.serve(async (req) => {
   }
 });
 
+function getDefaultDescription(actionType, points) {
+  const descriptions = {
+    onboarding_complete: 'Completed profile setup',
+    answer: 'Answered a question',
+    upvote_received: 'Answer was upvoted',
+    best_answer: 'Marked as best answer',
+    salary_submitted: 'Shared salary data',
+    interview_question_submitted: 'Shared interview question',
+    interview_question_confirmed: 'Interview question confirmed',
+    message_received: 'Received a student message',
+    message_responded: 'Responded to a message',
+    referral_given: 'Gave a referral',
+    mock_interview: 'Conducted mock interview',
+    outcome_reported: 'Student reported positive outcome',
+    ama_hosted: 'Hosted an AMA session'
+  };
+  return descriptions[actionType] || `Earned ${points} karma for ${actionType}`;
+}
+
+async function updateFamilyMembersKarma(base44, familyGroupId, totalKarma, karmaLevel) {
+  try {
+    const familyMembers = await base44.asServiceRole.entities.User.filter({
+      family_group_id: familyGroupId
+    });
+    
+    for (const member of familyMembers) {
+      await base44.asServiceRole.entities.User.update(member.id, {
+        family_karma: totalKarma,
+        karma_tier: karmaLevel
+      });
+    }
+    console.log(`Updated ${familyMembers.length} family members with karma ${totalKarma}`);
+  } catch (e) {
+    console.log('Could not update family members karma:', e.message);
+  }
+}
+
 async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boost, boostExpiresAt, parentEmail) {
   try {
-    // Get student emails from parent's student_emails array (primary source for multi-student)
     const studentEmails = parentUser?.student_emails || [];
     
-    // Also check legacy single student_email field
     if (parentUser?.student_email && !studentEmails.includes(parentUser.student_email)) {
       studentEmails.push(parentUser.student_email);
     }
     
-    // Also get students from family group
     let familyStudents = [];
     if (familyGroupId) {
       const familyMembers = await base44.asServiceRole.entities.User.filter({
@@ -205,7 +292,6 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
         .map(m => m.email);
     }
     
-    // Combine and dedupe all student emails
     const allStudentEmails = [...new Set([...studentEmails, ...familyStudents])];
     
     if (allStudentEmails.length === 0) {
@@ -216,7 +302,6 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
     const parentName = parentUser?.full_name?.split(' ')[0] || parentUser?.first_name || 'Your parent';
     const boostedStudents = [];
     
-    // Update ALL linked students' boost level equally
     for (const email of allStudentEmails) {
       try {
         const students = await base44.asServiceRole.entities.User.filter({ email });
@@ -233,7 +318,7 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
             name: student.full_name || student.first_name || email.split('@')[0],
             major: student.major
           });
-          console.log(`Updated student ${email} boost_level to ${boost}, expires ${boostExpiresAt.toISOString()}`);
+          console.log(`Updated student ${email} boost_level to ${boost}`);
         }
       } catch (e) {
         console.log(`Could not update student ${email}:`, e.message);
@@ -250,19 +335,16 @@ async function updateLinkedStudentBoosts(base44, parentUser, familyGroupId, boos
 
 async function updateFamilyQuestionBoosts(base44, familyGroupId, boost, boostExpiresAt) {
   try {
-    // Get family members
     const familyMembers = await base44.asServiceRole.entities.User.filter({
       family_group_id: familyGroupId
     });
     
-    // Get student emails from family
     const studentEmails = familyMembers
       .filter(m => m.persona === 'gator' || m.persona === 'student')
       .map(m => m.email);
     
     if (studentEmails.length === 0) return;
     
-    // Update their questions with new boost
     for (const email of studentEmails) {
       const questions = await base44.asServiceRole.entities.JobRequest.filter({
         created_by: email,
@@ -273,11 +355,10 @@ async function updateFamilyQuestionBoosts(base44, familyGroupId, boost, boostExp
         await base44.asServiceRole.entities.JobRequest.update(q.id, {
           karma_boost: boost,
           boosted_until: boostExpiresAt.toISOString(),
-          priority_score: (q.is_boosted ? 999 : 0) + (boost * 100) // Higher multiplier for visibility
+          priority_score: (q.is_boosted ? 999 : 0) + (boost * 100)
         });
       }
       
-      // Also update HelpRequests
       const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({
         student_email: email,
         status: 'active'
@@ -297,24 +378,20 @@ async function updateFamilyQuestionBoosts(base44, familyGroupId, boost, boostExp
   }
 }
 
-// Also boost alumni career requests when alumni earns karma
 async function updateAlumniCareerRequestBoosts(base44, alumniUserId, alumniEmail, boost, boostExpiresAt) {
   try {
-    // Find alumni career requests by this user
     const alumniRequests = await base44.asServiceRole.entities.JobRequest.filter({
       poster_email: alumniEmail,
       is_alumni_career_request: true,
       status: 'active'
     });
     
-    // Also check by created_by
     const alumniRequestsByCreator = await base44.asServiceRole.entities.JobRequest.filter({
       created_by: alumniEmail,
       is_alumni_career_request: true,
       status: 'active'
     });
     
-    // Dedupe by id
     const seenIds = new Set();
     const allRequests = [];
     [...alumniRequests, ...alumniRequestsByCreator].forEach(r => {
@@ -330,7 +407,6 @@ async function updateAlumniCareerRequestBoosts(base44, alumniUserId, alumniEmail
         boosted_until: boostExpiresAt.toISOString(),
         priority_score: (request.is_boosted ? 999 : 0) + (boost * 100)
       });
-      console.log(`Boosted alumni career request ${request.id} to level ${boost}`);
     }
     
     console.log(`Updated boost to ${boost} for ${allRequests.length} alumni career requests`);
