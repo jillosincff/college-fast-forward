@@ -258,10 +258,10 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="bg-slate-900 text-white rounded-2xl p-8 max-w-2xl mx-auto"
             >
-              <p className="text-lg">
-                <strong>Here's the truth:</strong> It doesn't matter how perfect their resume is. Without a warm connection, their resume goes into the same black hole as everyone else's.
+              <p className="text-lg text-gray-100">
+                <strong className="text-white">Here's the truth:</strong> It doesn't matter how perfect their resume is. Without a warm connection, their resume goes into the same black hole as everyone else's.
               </p>
-              <p className="text-white/70 mt-4">
+              <p className="text-gray-200 mt-4">
                 The students who land jobs? <strong className="text-white">They have someone on the inside.</strong>
               </p>
             </motion.div>
