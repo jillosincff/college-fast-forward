@@ -949,6 +949,12 @@ export default function QuestionsPage() {
           font-weight: 500;
         }
 
+        .activity-stats {
+          font-size: 13px;
+          color: #6B7280;
+          margin: 12px 0 0 0;
+        }
+
         .search-row {
           display: flex;
           gap: 12px;
