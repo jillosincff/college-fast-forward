@@ -91,6 +91,20 @@ Deno.serve(async (req) => {
     const totalKarma = familyKarma.total_karma || 0;
     const currentTier = getKarmaLevel(totalKarma);
     
+    // Calculate percentile ranking (what % of families have less karma)
+    let karmaPercentile = familyKarma.karma_percentile || 0;
+    try {
+      const allFamilies = await base44.asServiceRole.entities.FamilyKarma.list('-total_karma', 1000);
+      if (allFamilies.length > 1) {
+        const familiesWithLessKarma = allFamilies.filter(f => (f.total_karma || 0) < totalKarma).length;
+        karmaPercentile = Math.round((familiesWithLessKarma / allFamilies.length) * 100);
+      } else if (totalKarma > 0) {
+        karmaPercentile = 100; // Only family with karma = top 100%
+      }
+    } catch (e) {
+      console.log('Could not calculate percentile:', e.message);
+    }
+    
     // Get recent transactions
     const transactions = await base44.asServiceRole.entities.KarmaTransaction.filter(
       { family_group_id: familyGroupId },
@@ -233,7 +247,7 @@ Deno.serve(async (req) => {
       next_level: getNextTier(totalKarma),
       unlocked_benefits: getUnlockedBenefits(totalKarma),
       locked_benefits: getLockedBenefits(totalKarma),
-      karma_percentile: familyKarma.karma_percentile || 0,
+      karma_percentile: karmaPercentile,
       linked_students: linkedStudents,
       linked_students_count: linkedStudents.length,
       linked_students_text: linkedStudentsText,
