@@ -475,47 +475,59 @@ export default function QuestionsPage() {
 
 
 
-        {/* Search and Filters */}
+        {/* Search and Filters - Reddit Style */}
         <div className="filters-section">
           <div className="filters-container">
-            {/* Quick Filter Tabs */}
+            {/* Search Bar */}
+            <div className="search-row mb-4">
+              <div className="search-wrapper">
+                <Search className="search-icon" />
+                <Input
+                  type="text"
+                  placeholder="Search questions..."
+                  className="search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Sort Tabs */}
+            <div className="mb-4">
+              <SortTabs activeSort={sortBy} onSortChange={setSortBy} />
+            </div>
+
+            {/* Topic Filters */}
+            <div className="mb-4">
+              <TopicFilters activeTopic={activeTopic} onTopicChange={setActiveTopic} />
+            </div>
+
+            {/* Quick Filter Tabs + Stats */}
             <div className="filter-tabs-row">
               <div className="filter-tabs">
                 <button
                   className={`filter-tab ${filters.questionType === 'all' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
                   onClick={() => setFilters({...filters, questionType: 'all', noAnswers: false, urgent: false})}
                 >
-                  All Questions
+                  All
                 </button>
                 <button
-                  className={`filter-tab ${filters.questionType === 'student' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  className={`filter-tab ${filters.questionType === 'student' ? 'active' : ''}`}
                   onClick={() => setFilters({...filters, questionType: 'student', noAnswers: false, urgent: false})}
                 >
                   🎓 Students
                 </button>
                 <button
-                  className={`filter-tab ${filters.questionType === 'parent' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  className={`filter-tab ${filters.questionType === 'parent' ? 'active' : ''}`}
                   onClick={() => setFilters({...filters, questionType: 'parent', noAnswers: false, urgent: false})}
                 >
                   👨‍👩‍👧 Parents
                 </button>
                 <button
-                  className={`filter-tab ${filters.questionType === 'alumni' && !filters.noAnswers && !filters.urgent ? 'active' : ''}`}
+                  className={`filter-tab ${filters.questionType === 'alumni' ? 'active' : ''}`}
                   onClick={() => setFilters({...filters, questionType: 'alumni', noAnswers: false, urgent: false})}
                 >
                   🎯 Alumni
-                </button>
-                <button
-                  className={`filter-tab ${filters.noAnswers ? 'active' : ''}`}
-                  onClick={() => setFilters({...filters, questionType: 'all', noAnswers: !filters.noAnswers, urgent: false})}
-                >
-                  🆘 No Answers
-                </button>
-                <button
-                  className={`filter-tab ${filters.urgent ? 'active' : ''}`}
-                  onClick={() => setFilters({...filters, questionType: 'all', urgent: !filters.urgent, noAnswers: false})}
-                >
-                  🔥 ASAP
                 </button>
                 {/* Alumni Career toggle - only show to parents and alumni */}
                 {(user?.persona === 'parent' || user?.persona === 'alumni' || user?.roles?.includes('parent') || user?.roles?.includes('alumni')) && (
@@ -527,32 +539,22 @@ export default function QuestionsPage() {
                   </button>
                 )}
               </div>
-              <div className="filter-stats">
-                {totalQuestionsFiltered} questions
-              </div>
-            </div>
-
-            <div className="search-row">
-              <div className="search-wrapper">
-                <Search className="search-icon" />
-                <Input
-                  type="text"
-                  placeholder="Search questions..."
-                  className="search-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
 
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setShowFilters(!showFilters)}
                 className="filters-toggle-btn"
               >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
+                <Filter className="w-4 h-4 mr-1" />
+                More
               </Button>
             </div>
+
+            {/* Activity Stats */}
+            <p className="activity-stats">
+              📊 {stats.totalQuestions.toLocaleString()} questions · {stats.totalAnswers.toLocaleString()} answers · {stats.activeThisWeek} active this week
+            </p>
 
             {/* Collapsible Filter Panel */}
             {showFilters && (
@@ -587,17 +589,7 @@ export default function QuestionsPage() {
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
                     <option value="2027">2027</option>
-                  </select>
-
-                  <select
-                    className="filter-select"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                  >
-                    <option value="relevance">Sort: Relevance</option>
-                    <option value="newest">Sort: Newest</option>
-                    <option value="most_views">Sort: Most Views</option>
-                    <option value="unanswered">Sort: Unanswered First</option>
+                    <option value="2028">2028</option>
                   </select>
                 </div>
               </motion.div>
