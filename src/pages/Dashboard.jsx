@@ -32,6 +32,7 @@ import FamilyCard from '@/components/dashboard/student/FamilyCard';
 import ConversationsSection from '@/components/dashboard/student/ConversationsSection';
 import ResponsesSection from '@/components/dashboard/student/ResponsesSection';
 import WhatToDoNext from '@/components/dashboard/student/WhatToDoNext';
+import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -487,25 +488,35 @@ export default function Dashboard() {
         {/* COLLAPSED SECTIONS - Always available but not prominent         */}
         {/* ═══════════════════════════════════════════════════════════════ */}
 
-        {/* Your Family - Collapsed */}
-        <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
-          <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              👨‍👩‍👧 Your Family
-            </h3>
-            <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
-          </summary>
-          <div className="p-5 pt-0 border-t border-slate-100">
-            <p className="text-slate-600 mb-4">Invite your parents to join and unlock the full network!</p>
-            <Button
-              onClick={() => setShowInviteModal(true)}
-              className="bg-[#FA4616] hover:bg-orange-600"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Invite a Parent
-            </Button>
-          </div>
-        </details>
+        {/* Your Family's Karma - Student View */}
+        {(user?.family_karma > 0 || linkedParents.length > 0) && (
+          <FamilyKarmaCard 
+            user={user}
+            viewMode="student"
+          />
+        )}
+
+        {/* Your Family - Collapsed (invite if no linked parents) */}
+        {linkedParents.length === 0 && (
+          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
+            <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                👨‍👩‍👧 Your Family
+              </h3>
+              <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="p-5 pt-0 border-t border-slate-100">
+              <p className="text-slate-600 mb-4">Invite your parents to join and unlock the full network!</p>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-[#FA4616] hover:bg-orange-600"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Invite a Parent
+              </Button>
+            </div>
+          </details>
+        )}
 
         {/* More Tools - Collapsed */}
         <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
