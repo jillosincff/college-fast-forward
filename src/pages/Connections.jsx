@@ -26,6 +26,14 @@ import InterviewBrowse from '@/components/community/InterviewBrowse';
 export default function QuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Get initial tab from URL
+  const getInitialTab = () => {
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    return urlParams.get('tab') || 'questions';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [requests, setRequests] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +62,14 @@ export default function QuestionsPage() {
     totalAnswers: 0,
     activeThisWeek: 0
   });
+  
+  // Update URL when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    const currentHash = window.location.hash.split('?')[0];
+    window.history.replaceState(null, '', `${currentHash}?tab=${tab}`);
+    trackEvent('community_tab_changed', { tab });
+  };
 
   const loadUserLikes = async () => {
     if (!user?.email) return;
