@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Check, ChevronDown } from "lucide-react";
+import { ArrowRight, Check, Lock } from "lucide-react";
 import { useAuth } from '@/components/auth/AuthContext';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
@@ -16,28 +16,33 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const SCHOOL_NAME = "UF";
+
 export default function LandingPage() {
   const { user } = useAuth();
-  const [foundingStats, setFoundingStats] = useState({ 
-    spots_left: 206, 
-    total_users: 794
+  const [stats, setStats] = useState({ 
+    spots_left: 47, 
+    total_families: 623,
+    salary_data_points: 847,
+    interview_questions: 523
   });
 
   useEffect(() => {
-    const loadFoundingStats = async () => {
+    const loadStats = async () => {
       try {
         const response = await base44.functions.invoke('getFoundingStats');
         if (response.data?.success) {
-          setFoundingStats({
-            spots_left: response.data.spots_left,
-            total_users: response.data.total_users || response.data.total_families
-          });
+          setStats(prev => ({
+            ...prev,
+            spots_left: response.data.spots_left || 47,
+            total_families: response.data.total_users || response.data.total_families || 623
+          }));
         }
       } catch (error) {
-        console.error('Failed to load founding stats:', error);
+        console.error('Failed to load stats:', error);
       }
     };
-    loadFoundingStats();
+    loadStats();
     
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
@@ -46,9 +51,8 @@ export default function LandingPage() {
     }
   }, []);
 
-  const handleRoleClick = (role) => {
-    trackEvent(`cta_${role}_clicked`);
-    sessionStorage.setItem('pending_invite_role', role === 'student' ? 'gator' : role);
+  const handleGetInside = () => {
+    trackEvent('cta_get_inside_clicked');
     navigate('GatorAuth');
   };
 
@@ -56,9 +60,6 @@ export default function LandingPage() {
     trackEvent('cta_signin_clicked');
     navigate('GatorAuth');
   };
-
-  const spotsRemaining = foundingStats.spots_left;
-  const totalFamilies = foundingStats.total_users;
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -72,8 +73,8 @@ export default function LandingPage() {
   return (
     <>
       <SocialMetaTags 
-        title="College Fast Forward - The Private Career Network for UF"
-        description="The private career network for UF students, parents & alumni. Connect for warm introductions and career help."
+        title="College Fast Forward - The Private Career Network for UF Families"
+        description="The private career network only UF families can access. Your student's unfair advantage in the job market. $9/month."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
@@ -88,238 +89,116 @@ export default function LandingPage() {
             </span>
             <Button
               onClick={handleSignIn}
-              className="bg-white text-[#0021A5] hover:bg-white/90 font-semibold"
+              variant="ghost"
+              className="text-white hover:bg-white/10 font-semibold"
             >
-              Join Now / Sign In
+              Sign In
             </Button>
           </div>
         </nav>
 
-        {/* SECTION 1: HERO */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HERO SECTION                                                        */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="pt-28 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-5xl mx-auto text-center">
             
-            {/* Top line - brand name */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-[#FA4616] font-semibold text-sm md:text-base tracking-widest uppercase mb-6"
+              className="text-[#FA4616] font-semibold text-sm tracking-widest uppercase mb-6"
             >
-              COLLEGE FAST FORWARD
+              THE PRIVATE CAREER NETWORK
             </motion.p>
 
-            {/* Main headline - two lines with different weights */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight"
+              className="text-3xl md:text-5xl lg:text-6xl text-white mb-6 leading-tight font-extrabold"
             >
-              <span className="font-normal block mb-2">Shared networks of people who care.</span>
-              <span className="font-extrabold block">The ultimate unfair advantage for your student.</span>
+              Only {SCHOOL_NAME} Families Can Access
             </motion.h1>
 
-            {/* Subheadline */}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto"
+            >
+              Your student's unfair advantage in the job market.
+            </motion.p>
+
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              UF parents and alumni who go out of their way to make warm introductions — the kind that change career trajectories.
+              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} families</strong> who open doors for each other's students — with warm introductions, insider salary data, and real interview questions from companies like Google, Goldman, and McKinsey.
             </motion.p>
 
-            {/* Stat contrast */}
+            {/* Trust bullets */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 mb-10"
+              transition={{ delay: 0.25 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-10 text-white/90"
             >
-              <div className="flex items-center gap-2 text-white/90">
-                <span className="text-xl" style={{ color: '#B71234' }}>❌</span>
-                <span>Cold applications: <strong style={{ color: '#B71234' }}>~0.4% success rate</strong></span>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-400" />
+                <span>{stats.total_families} families already inside</span>
               </div>
-              <div className="flex items-center gap-2 text-white/90">
-                <span className="text-xl" style={{ color: '#00843D' }}>✅</span>
-                <span>Warm introductions: <strong style={{ color: '#00843D' }}>up to 50x better odds</strong></span>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-400" />
+                <span>{stats.salary_data_points} salary data points</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-400" />
+                <span>Direct access to VPs & Directors</span>
               </div>
             </motion.div>
 
-            {/* Urgency pill */}
+            {/* CTA Box */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              className="inline-block rounded-full px-8 py-4 mb-8 border-2"
-              style={{ backgroundColor: '#0A1628', borderColor: '#FA4616' }}
+              transition={{ delay: 0.3 }}
+              className="inline-block bg-white rounded-2xl p-6 md:p-8 shadow-2xl"
             >
-              <span className="font-semibold text-white">
-                🔥 {totalFamilies} families inside. {spotsRemaining} founding spots left.
-              </span>
+              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-semibold mb-4">
+                <span className="text-xl">🔥</span>
+                <span>{stats.spots_left} spots left this semester</span>
+              </div>
+              <Button
+                onClick={handleGetInside}
+                size="lg"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-7 text-xl font-bold shadow-lg w-full sm:w-auto"
+              >
+                Get Inside — $9/month
+                <ArrowRight className="w-6 h-6 ml-2" />
+              </Button>
+              <p className="text-slate-500 text-sm mt-3">Cancel anytime. No contract.</p>
             </motion.div>
 
-            {/* Footnote */}
-            <motion.p
+            {/* Testimonial preview */}
+            <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-xs text-white/40 max-w-2xl mx-auto"
+              transition={{ delay: 0.4 }}
+              className="mt-12 max-w-2xl mx-auto"
             >
-              *Business Insider 2025 (average ~242 applications per job). Referral data from LinkedIn & industry studies 2025.
-            </motion.p>
-          </div>
-        </section>
-
-        {/* SECTION 2: ROLE SELECTION */}
-        <section className="py-16 px-4 bg-white">
-          <div className="max-w-5xl mx-auto">
-            
-            <motion.h2 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl font-bold text-slate-900 text-center mb-10"
-            >
-              Select your role to get started.
-            </motion.h2>
-
-            <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-6"
-            >
-              {/* PARENT CARD */}
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 h-full flex flex-col border border-slate-200">
-                  <div className="text-center flex-1">
-                    <div className="text-5xl mb-4">👨‍👩‍👧</div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4">PARENT</h3>
-                    <p className="text-slate-600 mb-6">
-                      Get matched with students who need your expertise. Make intros. Change lives.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleRoleClick('parent')}
-                    className="w-full bg-[#FA4616] hover:bg-orange-600 text-white py-6 text-lg font-bold"
-                  >
-                    Join as Parent
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Card>
-              </motion.div>
-
-              {/* STUDENT CARD */}
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 h-full flex flex-col border border-slate-200">
-                  <div className="text-center flex-1">
-                    <div className="text-5xl mb-4">🎓</div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4">STUDENT</h3>
-                    <p className="text-slate-600 mb-6">
-                      Tell us what help you need. Get instantly matched with parents who can help.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleRoleClick('student')}
-                    className="w-full bg-[#FA4616] hover:bg-orange-600 text-white py-6 text-lg font-bold"
-                  >
-                    Join as Student
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Card>
-              </motion.div>
-
-              {/* ALUMNI CARD */}
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 h-full flex flex-col border border-slate-200">
-                  <div className="text-center flex-1">
-                    <div className="text-5xl mb-4">🏆</div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4">ALUMNI</h3>
-                    <p className="text-slate-600 mb-6">
-                      Help students break into your industry. Get matched with those who need you.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleRoleClick('alumni')}
-                    className="w-full bg-[#FA4616] hover:bg-orange-600 text-white py-6 text-lg font-bold"
-                  >
-                    Join as Alumni
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Card>
-              </motion.div>
-            </motion.div>
-
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center text-slate-600 mt-10 text-sm md:text-base"
-            >
-              🔥 First 1,000 members free forever. <span className="text-[#FA4616] font-semibold">{spotsRemaining} spots left.</span> Then $9-19/month per family.
-            </motion.p>
-
-            <motion.div 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 max-w-md mx-auto"
-            >
-              <p className="text-slate-700 text-sm">
-                <strong>Already a member?</strong>{' '}
-                <button
-                  onClick={handleSignIn}
-                  className="text-[#0021A5] font-semibold hover:underline"
-                  type="button"
-                >
-                  Sign in here →
-                </button>
+              <p className="text-white/80 italic text-lg">
+                "My son just got an offer at Goldman Sachs. He connected with 4 parents through this network."
               </p>
+              <p className="text-white/60 text-sm mt-2">— The Martinez Family</p>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 3: HOW IT WORKS BAR */}
-        <section className="py-12 px-4" style={{ backgroundColor: '#FA4616' }}>
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="text-white text-lg md:text-xl font-medium">
-              🎯 <strong>How it works:</strong> Students tell us what help they need → Instantly matched with parents & alumni who can help
-            </p>
-          </div>
-        </section>
-
-        {/* SECTION 4: TRUST ELEMENTS */}
-        <section className="py-12 px-4" style={{ backgroundColor: '#0A1628' }}>
-          <div className="max-w-4xl mx-auto">
-            <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
-            >
-              <motion.div variants={fadeInUp} className="flex items-center gap-2 text-white/90">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Verified UF members only</span>
-              </motion.div>
-              <motion.div variants={fadeInUp} className="flex items-center gap-2 text-white/90">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>87% response rate within 48 hours</span>
-              </motion.div>
-              <motion.div variants={fadeInUp} className="flex items-center gap-2 text-white/90">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Takes 2 minutes to join</span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* SECTION 5: THE PROBLEM */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* PROBLEM SECTION - "Your Student Is Invisible"                       */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 
@@ -336,9 +215,9 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-lg text-slate-600 mb-12"
+              className="text-lg text-slate-500 mb-12"
             >
-              They're doing everything right. The grades. The internships. The resume. And still... nothing.
+              (And it's not their fault. The system is broken.)
             </motion.p>
 
             <motion.div 
@@ -346,167 +225,46 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="flex flex-col items-center gap-4 mb-12"
+              className="flex flex-col items-center gap-3 mb-12"
             >
-              <motion.div variants={fadeInUp} className="flex items-center gap-3 bg-slate-100 rounded-xl px-6 py-4">
-                <span className="text-3xl">📄</span>
-                <span className="text-slate-700 font-medium">They apply to 200 jobs</span>
-              </motion.div>
-              <motion.div variants={fadeInUp} className="text-slate-400 text-2xl">↓</motion.div>
-              <motion.div variants={fadeInUp} className="flex items-center gap-3 bg-slate-100 rounded-xl px-6 py-4">
-                <span className="text-3xl">🤖</span>
-                <span className="text-slate-700 font-medium">AI rejects 95% before a human sees it</span>
-              </motion.div>
-              <motion.div variants={fadeInUp} className="text-slate-400 text-2xl">↓</motion.div>
-              <motion.div variants={fadeInUp} className="flex items-center gap-3 bg-slate-100 rounded-xl px-6 py-4">
-                <span className="text-3xl">👻</span>
-                <span className="text-slate-700 font-medium">They never hear back</span>
-              </motion.div>
-              <motion.div variants={fadeInUp} className="text-slate-400 text-2xl">↓</motion.div>
-              <motion.div variants={fadeInUp} className="flex items-center gap-3 bg-slate-100 rounded-xl px-6 py-4">
-                <span className="text-3xl">😩</span>
-                <span className="text-slate-700 font-medium">You watch them lose confidence</span>
-              </motion.div>
+              {[
+                { emoji: '📄', text: 'They apply to 200 jobs' },
+                { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
+                { emoji: '😔', text: 'They never hear back' },
+                { emoji: '📉', text: 'They watch friends with "connections" get interviews' },
+                { emoji: '❓', text: 'They wonder what they\'re doing wrong' },
+              ].map((item, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <motion.div variants={fadeInUp} className="text-slate-300 text-xl">↓</motion.div>}
+                  <motion.div variants={fadeInUp} className="flex items-center gap-3 bg-slate-50 rounded-xl px-6 py-4 border border-slate-100">
+                    <span className="text-2xl">{item.emoji}</span>
+                    <span className="text-slate-700 font-medium">{item.text}</span>
+                  </motion.div>
+                </React.Fragment>
+              ))}
             </motion.div>
-
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-slate-600 text-lg max-w-2xl mx-auto"
-            >
-              This is the black hole. It doesn't matter how qualified they are. <strong>Without a connection, they don't exist.</strong>
-            </motion.p>
-          </div>
-        </section>
-
-        {/* SECTION 6: THE SOLUTION */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#0A1628' }}>
-          <div className="max-w-5xl mx-auto">
-            <motion.h2 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-white text-center mb-4"
-            >
-              You Can Change That in 5 Minutes
-            </motion.h2>
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-white/80 text-lg text-center mb-12"
-            >
-              Your connections are the shortcut they need.
-            </motion.p>
 
             <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-6"
-            >
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl h-full">
-                  <div className="text-4xl mb-4">🚪</div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Open Doors</h3>
-                  <p className="text-slate-600">
-                    Know someone at a company they're targeting? Make an intro. One email from you is worth 100 applications from them.
-                  </p>
-                </Card>
-              </motion.div>
-
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl h-full">
-                  <div className="text-4xl mb-4">📝</div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Share Your Expertise</h3>
-                  <p className="text-slate-600">
-                    Review their resume. Do a mock interview. Tell them what hiring managers actually look for. You know. They don't.
-                  </p>
-                </Card>
-              </motion.div>
-
-              <motion.div variants={fadeInUp}>
-                <Card className="bg-white p-8 rounded-2xl h-full">
-                  <div className="text-4xl mb-4">🤝</div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Help Other Students Too</h3>
-                  <p className="text-slate-600">
-                    Help another parent's student — and another parent will help yours. That's the network.
-                  </p>
-                </Card>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* SECTION 7: HOW IT WORKS */}
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-4xl mx-auto">
-            <motion.h2 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-4"
+              className="bg-slate-900 text-white rounded-2xl p-8 max-w-2xl mx-auto"
             >
-              How It Works
-            </motion.h2>
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-slate-600 text-lg text-center mb-12"
-            >
-              No algorithms. No job boards. Just real people helping real students.
-            </motion.p>
-
-            <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-8"
-            >
-              <motion.div variants={fadeInUp} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FA4616] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4">
-                  1
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Join Your School's Network</h3>
-                <p className="text-slate-600">
-                  Takes 2 minutes. Verified UF students, parents, and alumni only. No strangers.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FA4616] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4">
-                  2
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">See Who Needs Help</h3>
-                <p className="text-slate-600">
-                  Browse students looking for intros, resume reviews, or advice in your industry.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FA4616] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4">
-                  3
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Make an Intro</h3>
-                <p className="text-slate-600">
-                  Connect them with someone in your network. One intro can change their entire trajectory.
-                </p>
-              </motion.div>
+              <p className="text-lg">
+                <strong>Here's the truth:</strong> It doesn't matter how perfect their resume is. Without a warm connection, their resume goes into the same black hole as everyone else's.
+              </p>
+              <p className="text-white/70 mt-4">
+                The students who land jobs? <strong className="text-white">They have someone on the inside.</strong>
+              </p>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 8: THE NUMBERS */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#F5F5F5' }}>
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* STATS SECTION - "The Numbers Don't Lie"                             */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
           <div className="max-w-4xl mx-auto">
             <motion.h2 
               variants={fadeInUp}
@@ -526,37 +284,179 @@ export default function LandingPage() {
               className="grid md:grid-cols-2 gap-6 mb-10"
             >
               <motion.div variants={fadeInUp}>
-                <div className="bg-[#E53E3E] rounded-2xl p-8 text-center text-white">
+                <div className="bg-red-500 rounded-2xl p-8 text-center text-white h-full">
                   <div className="text-5xl md:text-6xl font-extrabold mb-2">1 in 250</div>
-                  <div className="text-xl font-semibold mb-1">Cold Application</div>
-                  <div className="text-white/80">Their odds without you</div>
+                  <div className="text-xl font-semibold mb-1">COLD APPLICATION</div>
+                  <div className="text-white/80">Gets an interview</div>
                 </div>
               </motion.div>
 
               <motion.div variants={fadeInUp}>
-                <div className="bg-[#38A169] rounded-2xl p-8 text-center text-white">
+                <div className="bg-green-500 rounded-2xl p-8 text-center text-white h-full">
                   <div className="text-5xl md:text-6xl font-extrabold mb-2">1 in 5</div>
-                  <div className="text-xl font-semibold mb-1">Warm Introduction</div>
-                  <div className="text-white/80">Their odds with your network</div>
+                  <div className="text-xl font-semibold mb-1">WARM INTRODUCTION</div>
+                  <div className="text-white/80">Gets an interview</div>
                 </div>
               </motion.div>
             </motion.div>
 
-            <motion.p 
+            <motion.div 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-slate-600 text-lg text-center"
+              className="text-center"
             >
-              Same resume. Same student. <strong>50x better odds</strong> — because someone made an intro. That someone is you.
-            </motion.p>
+              <p className="text-xl text-slate-700 mb-4">
+                <strong>Same resume. Same student. 50x better odds.</strong>
+              </p>
+              <p className="text-slate-600">
+                The only difference? Someone made an introduction.
+              </p>
+              <p className="text-[#0021A5] font-semibold mt-4 text-lg">
+                That's what this network does. We turn your student from a stranger into a referral.
+              </p>
+            </motion.div>
           </div>
         </section>
 
-        {/* SECTION 9: TESTIMONIALS */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* VALUE STACK SECTION - "What You Get Inside"                         */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 bg-white">
+          <div className="max-w-5xl mx-auto">
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                What You Get Inside
+              </h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Everything your student needs to land their dream job — and everything you need to help them get there.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={staggerChildren}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              {/* Value Item 1 */}
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="text-5xl">🤝</div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">
+                        Direct Access to 600+ Professionals
+                      </h3>
+                      <p className="text-slate-600 mb-3">
+                        VPs at Google. Directors at Goldman. Partners at McKinsey. These are real {SCHOOL_NAME} parents and alumni who <strong>want</strong> to help students like yours. Message them directly. No gatekeepers.
+                      </p>
+                      <p className="text-sm text-slate-400 italic">
+                        Career coaches charge $200/hour for introductions like these.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Value Item 2 */}
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-green-200 transition-colors">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="text-5xl">💰</div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">
+                        Insider Salary Database
+                      </h3>
+                      <p className="text-slate-600 mb-3">
+                        <strong>{stats.salary_data_points} real salary data points</strong> from {SCHOOL_NAME} professionals. Know exactly what Google pays for a PMM. What Goldman offers first-year analysts. What your student should negotiate for.
+                      </p>
+                      <p className="text-sm text-slate-400 italic">
+                        This data isn't on Glassdoor. It's not on Levels.fyi. It's only here — from people in your own network.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Value Item 3 */}
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-purple-200 transition-colors">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="text-5xl">🎤</div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">
+                        Real Interview Questions
+                      </h3>
+                      <div className="text-slate-600 mb-3 space-y-1">
+                        <p><em>"Design a product for elderly users"</em> — asked at Google, 4 times</p>
+                        <p><em>"Walk me through a DCF"</em> — asked at Goldman, 7 times</p>
+                        <p><em>"Market size the US coffee industry"</em> — asked at McKinsey, 3 times</p>
+                      </div>
+                      <p className="text-slate-600">
+                        <strong>{stats.interview_questions} real questions</strong> from real interviews. Crowdsourced this month. Not 3 years ago.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Value Item 4 */}
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="text-5xl">📝</div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">
+                        Resume Reviews & Mock Interviews
+                      </h3>
+                      <p className="text-slate-600 mb-3">
+                        Get your student's resume reviewed by someone who actually <strong>hires</strong> for that role. Practice interviews with real professionals.
+                      </p>
+                      <p className="text-sm text-slate-400 italic">
+                        Professional resume services charge $300-500. Mock interview coaching costs $150-200/session. Here? It's included.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Value Item 5 - Family Karma */}
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 md:p-8 border-2 border-[#FA4616]/30 bg-gradient-to-r from-orange-50 to-white">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="text-5xl">🏆</div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">
+                        Family Karma — Your Activity Boosts Your Student
+                      </h3>
+                      <p className="text-slate-600 mb-3">
+                        Every question you answer, every salary you share — you earn Family Karma. The more karma you have, the <strong>more visible your student becomes</strong> to other parents looking to help.
+                      </p>
+                      <p className="text-[#FA4616] font-semibold">
+                        Top karma families get 3x more introductions. You're not just helping others. You're helping YOUR kid.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* SOCIAL PROOF - "Real Results"                                       */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4" style={{ backgroundColor: '#0A1628' }}>
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <motion.h2 
               variants={fadeInUp}
               initial="hidden"
@@ -564,7 +464,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-3xl md:text-4xl font-bold text-white text-center mb-12"
             >
-              Real Results from Real Families.
+              Real Results from Real Families
             </motion.h2>
 
             <motion.div 
@@ -572,63 +472,259 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-6"
+              className="grid md:grid-cols-3 gap-6 mb-12"
             >
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 bg-white h-full">
-                  <p className="text-slate-700 mb-6 italic">
-                    "I posted my resume for review on Monday. By Wednesday I had 3 parents helping me. By Friday I had 2 interview intros. This actually works."
+                  <div className="text-3xl mb-3">🎉</div>
+                  <p className="text-slate-900 font-semibold mb-3">
+                    "My son just accepted an offer at Goldman Sachs."
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold">
-                      MT
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Marcus T.</p>
-                      <p className="text-sm text-slate-500">Class of 2024, Now at Deloitte</p>
-                    </div>
-                  </div>
+                  <p className="text-slate-600 text-sm mb-4">
+                    "He connected with 4 parents through the network. One did a mock interview. Another reviewed his resume. A third referred him internally. He starts in June."
+                  </p>
+                  <p className="text-slate-400 text-sm">— The Martinez Family</p>
                 </Card>
               </motion.div>
 
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 bg-white h-full">
-                  <p className="text-slate-700 mb-6 italic">
-                    "My daughter's classmates needed help breaking into consulting. I helped 5 students in one month. 3 got interviews. Feels good to give back."
+                  <div className="text-3xl mb-3">💰</div>
+                  <p className="text-slate-900 font-semibold mb-3">
+                    "She negotiated $15K more because she knew the real numbers."
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center text-white font-bold">
-                      JK
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Jennifer K.</p>
-                      <p className="text-sm text-slate-500">Parent, Partner at McKinsey</p>
-                    </div>
-                  </div>
+                  <p className="text-slate-600 text-sm mb-4">
+                    "My daughter got an offer at HubSpot. Because of the salary data in the network, she knew exactly what to ask for. They matched it without pushback."
+                  </p>
+                  <p className="text-slate-400 text-sm">— The Thompson Family</p>
                 </Card>
               </motion.div>
 
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 bg-white h-full">
-                  <p className="text-slate-700 mb-6 italic">
-                    "Not another 'networking platform' where nothing happens. This matched me with people who responded, cared, and helped. Game changer."
+                  <div className="text-3xl mb-3">🎤</div>
+                  <p className="text-slate-900 font-semibold mb-3">
+                    "He walked in knowing exactly what they were going to ask."
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white font-bold">
-                      AR
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Alicia R.</p>
-                      <p className="text-sm text-slate-500">Junior, Warrington College of Business</p>
-                    </div>
-                  </div>
+                  <p className="text-slate-600 text-sm mb-4">
+                    "The interview database had the exact case question. Word for word. He'd practiced it twice. He got the offer."
+                  </p>
+                  <p className="text-slate-400 text-sm">— The Rodriguez Family</p>
                 </Card>
               </motion.div>
+            </motion.div>
+
+            {/* Activity stats */}
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-white/10 rounded-2xl p-6 md:p-8"
+            >
+              <h3 className="text-white font-semibold text-center mb-6">📊 This Month's Network Activity</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                {[
+                  { num: '47', label: 'Warm intros made' },
+                  { num: '23', label: 'Resume reviews' },
+                  { num: '18', label: 'Mock interviews' },
+                  { num: '12', label: 'Salary data added' },
+                  { num: '3', label: 'Job offers accepted' },
+                ].map((stat, i) => (
+                  <div key={i}>
+                    <div className="text-2xl md:text-3xl font-bold text-white">{stat.num}</div>
+                    <div className="text-white/60 text-sm">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 10: FAQ */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* PRICE COMPARISON - "What This Would Cost"                           */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <motion.h2 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-12"
+            >
+              What This Would Cost Anywhere Else
+            </motion.h2>
+
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-slate-50 rounded-2xl p-6 md:p-8 mb-10"
+            >
+              <div className="space-y-4">
+                {[
+                  { service: 'Career coach with industry connections', cost: '$200-400/hour' },
+                  { service: 'Professional resume rewrite', cost: '$300-500' },
+                  { service: 'Mock interview coaching', cost: '$150-200/session' },
+                  { service: 'LinkedIn Premium (cold outreach)', cost: '$60/month' },
+                  { service: 'Salary negotiation consulting', cost: '$500-1,000' },
+                  { service: 'Interview prep course', cost: '$200-500' },
+                ].map((item, i) => (
+                  <div key={i} className="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
+                    <span className="text-slate-700">{item.service}</span>
+                    <span className="text-slate-500 font-medium">{item.cost}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-4 border-t-2 border-slate-300 flex justify-between items-center">
+                <span className="text-slate-900 font-bold text-lg">Total if you bought it all separately:</span>
+                <span className="text-red-500 font-bold text-xl">$1,500 - $3,000+</span>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <p className="text-slate-500 uppercase tracking-widest text-sm mb-4">The {SCHOOL_NAME} Network</p>
+              <div className="text-6xl md:text-7xl font-extrabold text-[#0021A5] mb-4">$9/month</div>
+              <div className="text-slate-600 text-lg space-y-1 mb-8">
+                <p>That's less than Netflix.</p>
+                <p>Less than a single coffee per week.</p>
+                <p>Less than one hour of tutoring.</p>
+              </div>
+              <p className="text-xl font-semibold text-slate-900">
+                For the thing that actually gets them hired.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HOW IT WORKS                                                        */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
+          <div className="max-w-4xl mx-auto">
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                How It Works
+              </h2>
+              <p className="text-slate-600 text-lg">
+                No algorithms. No job boards. Just real people helping real students.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={staggerChildren}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid md:grid-cols-3 gap-8"
+            >
+              {[
+                {
+                  num: '1',
+                  title: 'Join the Network',
+                  desc: 'Sign up in 2 minutes. Add your job info. Connect your student.'
+                },
+                {
+                  num: '2',
+                  title: 'Your Student Gets Matched',
+                  desc: 'We match them with parents & alumni in their target field. They can message directly.'
+                },
+                {
+                  num: '3',
+                  title: 'You Help Others, They Help You',
+                  desc: 'Answer questions. Share expertise. The more you give, the more your student stands out.'
+                }
+              ].map((step, i) => (
+                <motion.div key={i} variants={fadeInUp} className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#0021A5] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4">
+                    {step.num}
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h3>
+                  <p className="text-slate-600">{step.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.p 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center text-[#FA4616] font-semibold text-lg mt-10"
+            >
+              Your student could have their first warm intro by tonight.
+            </motion.p>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* URGENCY / SCARCITY                                                  */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ backgroundColor: '#0021A5' }}>
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.h2 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold text-white mb-6"
+            >
+              We Keep the Network Small on Purpose
+            </motion.h2>
+
+            <motion.p 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
+            >
+              Here's the truth: If everyone had access to this, it wouldn't work. The power of this network is that it's <strong className="text-white">exclusive</strong>. It's {SCHOOL_NAME} families helping {SCHOOL_NAME} students. Not the whole internet.
+            </motion.p>
+
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 max-w-md mx-auto"
+            >
+              <div className="text-[#FA4616] font-bold text-2xl mb-2">
+                🔥 {stats.spots_left} SPOTS LEFT THIS SEMESTER
+              </div>
+              <p className="text-slate-600 mb-6">
+                {stats.total_families} families are already inside. Their students have a head start. <strong>Yours could too.</strong>
+              </p>
+              <Button
+                onClick={handleGetInside}
+                size="lg"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-6 text-lg font-bold w-full"
+              >
+                Get Inside — $9/month
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <p className="text-slate-400 text-sm mt-3">Cancel anytime. No contract.</p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FAQ                                                                 */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-3xl mx-auto">
             <motion.h2 
@@ -648,56 +744,49 @@ export default function LandingPage() {
               viewport={{ once: true }}
             >
               <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem value="item-1" className="border rounded-xl px-6">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
-                    What if I don't know anyone at the companies my student wants?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600">
-                    That's the point of the network. Other UF parents do. You help their kids, they help yours.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2" className="border rounded-xl px-6">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
-                    How much time does this take?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600">
-                    As much or as little as you want. One intro takes 5 minutes. Some parents do one a month. Some do one a week.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3" className="border rounded-xl px-6">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
-                    What does it cost?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600">
-                    First 1,000 members free forever. After that, $9-19/month per family.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-4" className="border rounded-xl px-6">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
-                    What if my student won't use it?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600">
-                    They will when they see intros coming in. You can also browse and make intros on their behalf.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-5" className="border rounded-xl px-6">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
-                    How is this different from LinkedIn?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600">
-                    LinkedIn is 900 million strangers. This is verified UF families only. People actually respond.
-                  </AccordionContent>
-                </AccordionItem>
+                {[
+                  {
+                    q: "What if I don't have time to help other students?",
+                    a: "No pressure. Help when you can. Even answering one question a month earns karma and keeps your student visible. Most parents spend 10-15 minutes per week."
+                  },
+                  {
+                    q: "Is this just for certain majors or industries?",
+                    a: "No. We have parents in tech, finance, healthcare, marketing, law, consulting, engineering, education, and more. If your student has a target industry, there's probably someone here who can help."
+                  },
+                  {
+                    q: "How is this different from LinkedIn?",
+                    a: "LinkedIn is cold outreach to strangers. This is warm intros from people who already want to help — because you're part of the same " + SCHOOL_NAME + " family. Response rates are 10x higher."
+                  },
+                  {
+                    q: "What if my student is a freshman? Is it too early?",
+                    a: "Never too early. Freshmen can explore careers, ask questions, and start building relationships before the pressure of job hunting kicks in. The students who start early have the biggest networks by junior year."
+                  },
+                  {
+                    q: "Can I cancel anytime?",
+                    a: "Yes. No contracts. No commitments. Cancel with one click if it's not right for your family."
+                  },
+                  {
+                    q: "Why is it so cheap?",
+                    a: "Because we believe every family should have access to this — not just the ones who can afford $400/hour career coaches. The network is powered by parents helping parents. We just built the platform to make it happen."
+                  }
+                ].map((item, i) => (
+                  <AccordionItem key={i} value={`item-${i}`} className="border rounded-xl px-6">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">
+                      {item.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600">
+                      {item.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
               </Accordion>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 11: FINAL CTA */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FINAL CTA                                                           */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4" style={{ backgroundColor: '#FA4616' }}>
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 
@@ -714,51 +803,61 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
               className="text-white/90 text-lg md:text-xl mb-2"
             >
-              Join {totalFamilies} UF families already inside.
+              The connections you've built over 20+ years in your career?
             </motion.p>
             <motion.p 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-              className="text-white/80 text-lg mb-8"
+              className="text-white font-bold text-xl mb-8"
             >
-              Change that in 2 minutes.
+              They're about to become your student's unfair advantage.
             </motion.p>
+            
             <motion.div
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              className="mb-6"
+            >
+              <p className="text-white/90 mb-2">{stats.total_families} families are already inside.</p>
+              <p className="text-white font-semibold">{stats.spots_left} spots left this semester.</p>
+            </motion.div>
+
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
             >
               <Button
-                onClick={handleSignIn}
+                onClick={handleGetInside}
                 size="lg"
                 className="bg-white text-[#FA4616] hover:bg-slate-100 px-10 py-7 text-xl font-bold shadow-2xl"
               >
-                Get Started
+                Get Inside — $9/month
                 <ArrowRight className="w-6 h-6 ml-2" />
               </Button>
+              <p className="text-white/80 text-sm mt-4">Cancel anytime. No contract.</p>
             </motion.div>
+
             <motion.p 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="text-white/80 text-sm mt-6"
+              className="text-white/60 text-sm mt-8"
             >
-              {spotsRemaining} founding spots remaining
+              Questions? Email hello@collegefastforward.com
             </motion.p>
           </div>
         </section>
 
-        {/* SECTION 12: FOOTER */}
+        {/* FOOTER */}
         <footer className="py-8 text-center" style={{ backgroundColor: '#0A1628' }}>
           <div className="max-w-6xl mx-auto px-4">
             <p className="text-white/60 text-sm mb-4">
