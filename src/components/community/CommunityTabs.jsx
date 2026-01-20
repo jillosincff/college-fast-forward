@@ -1,10 +1,11 @@
 import React from 'react';
-import { MessageSquare, DollarSign, Mic } from 'lucide-react';
+import { MessageSquare, DollarSign, Mic, Bot } from 'lucide-react';
 
 const TABS = [
   { id: 'questions', label: 'Questions', icon: MessageSquare, emoji: '💬' },
   { id: 'salaries', label: 'Salaries', icon: DollarSign, emoji: '💰' },
-  { id: 'interviews', label: 'Interviews', icon: Mic, emoji: '🎤' }
+  { id: 'interviews', label: 'Interviews', icon: Mic, emoji: '🎤' },
+  { id: 'ai-advisor', label: 'AI Advisor', icon: Bot, emoji: '🤖' }
 ];
 
 export default function CommunityTabs({ activeTab, onTabChange }) {
