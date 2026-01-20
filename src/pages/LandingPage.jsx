@@ -136,7 +136,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, insider salary data, and real interview questions from companies like Google, Goldman, and McKinsey.
+              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, career advice, and real connections to professionals at Google, Goldman, McKinsey & more.
             </motion.p>
 
             {/* Trust bullets */}
