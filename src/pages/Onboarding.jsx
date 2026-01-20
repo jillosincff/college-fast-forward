@@ -654,7 +654,7 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Boost your student's visibility</p>
             </>
           )}
-          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
