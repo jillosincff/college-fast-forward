@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import moment from 'moment';
 import { useAuth } from '@/components/auth/AuthContext';
 import { HelpRequest } from '@/entities/HelpRequest';
+import { Answer } from '@/entities/Answer';
 import { deleteJobRequest } from '@/functions/deleteJobRequest';
-import { MoreVertical, Pencil, Trash2, MapPin, Calendar, Briefcase, MessageSquare, Users, FileText, BookOpen, GraduationCap } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, MapPin, Calendar, Briefcase, MessageSquare, Users, FileText, BookOpen, GraduationCap, Eye, ChevronUp } from 'lucide-react';
 import EditQuestionModal from './EditQuestionModal';
+import ActivityBadge from '@/components/questions/ActivityBadge';
+import TopAnswerPreview from '@/components/questions/TopAnswerPreview';
 import {
   DropdownMenu,
   DropdownMenuContent,
