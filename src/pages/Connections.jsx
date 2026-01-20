@@ -7,7 +7,7 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { ProfileLike } from '@/entities/ProfileLike';
 import { Answer } from '@/entities/Answer';
 import { base44 } from '@/api/base44Client';
-import { Search, Plus, Filter, MessageSquare, DollarSign, Mic } from 'lucide-react';
+import { Search, Plus, Filter, MessageSquare, DollarSign, Mic, Bot } from 'lucide-react';
 import moment from 'moment';
 import { getDisplayName } from '@/components/utils/nameUtils';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ import TopicFilters, { getQuestionTopics, HELP_TYPE_TO_TOPIC, INDUSTRY_TO_TOPIC 
 import CommunityTabs from '@/components/community/CommunityTabs';
 import SalaryBrowse from '@/components/community/SalaryBrowse';
 import InterviewBrowse from '@/components/community/InterviewBrowse';
+import AICareerAdvisor from '@/components/ai-advisor/AICareerAdvisor';
+import DataSubmissionModal from '@/components/ai-advisor/DataSubmissionModal';
 
 export default function QuestionsPage() {
   const { user } = useAuth();
@@ -56,6 +58,7 @@ export default function QuestionsPage() {
   const [visibleCount, setVisibleCount] = useState(20);
   const [showFilters, setShowFilters] = useState(false);
   const [showParentBanner, setShowParentBanner] = useState(true);
+  const [showDataSubmissionModal, setShowDataSubmissionModal] = useState(false);
 
   const [stats, setStats] = useState({
     totalQuestions: 0,
@@ -470,6 +473,28 @@ export default function QuestionsPage() {
           </div>
         )}
         
+        {activeTab === 'ai-advisor' && (
+          <div className="tab-content">
+            <div className="max-w-3xl mx-auto">
+              <AICareerAdvisor 
+                onMentorConnect={(mentor) => {
+                  navigate(`MessageComposer?to=${mentor.user_id}&subject=Career advice from AI Advisor`);
+                }}
+              />
+              <div className="mt-6 text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDataSubmissionModal(true)}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Contribute Data (Salary or Interview)
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {activeTab === 'questions' && (
           <>
 
@@ -739,6 +764,11 @@ export default function QuestionsPage() {
           request={selectedRequest}
         />
       )}
+
+      <DataSubmissionModal
+        open={showDataSubmissionModal}
+        onOpenChange={setShowDataSubmissionModal}
+      />
 
       <style jsx>{`
         .questions-page {
