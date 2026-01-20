@@ -9,6 +9,7 @@ import { InterviewQuestion } from '@/entities/InterviewQuestion';
 import { useAuth } from '@/components/auth/AuthContext';
 import { toast } from 'sonner';
 import { Mic, Lock, Loader2, Plus, X } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const QUESTION_TYPES = [
   { value: 'behavioral', label: 'Behavioral / Fit' },
@@ -80,8 +81,9 @@ export default function InterviewQuestionForm({ onSuccess, onCancel }) {
 
     setIsSubmitting(true);
     try {
+      let firstQuestionId = null;
       for (const question of validQuestions) {
-        await InterviewQuestion.create({
+        const record = await InterviewQuestion.create({
           user_id: user.id,
           is_anonymous: isAnonymous,
           submitter_name: isAnonymous ? null : user.full_name,
@@ -96,9 +98,26 @@ export default function InterviewQuestionForm({ onSuccess, onCancel }) {
           question_type: question.question_type,
           answer_tips: question.answer_tips || null
         });
+        if (!firstQuestionId) firstQuestionId = record.id;
       }
 
-      toast.success(`Thank you! ${validQuestions.length} question${validQuestions.length > 1 ? 's' : ''} submitted.`);
+      // Award karma for interview questions (+15 pts per question)
+      try {
+        await base44.functions.invoke('awardKarma', {
+          parentUserId: user.id,
+          parentEmail: user.email,
+          parentName: user.full_name,
+          actionType: 'interview_question_submitted',
+          referenceType: 'interview_question',
+          referenceId: firstQuestionId,
+          description: `Shared ${validQuestions.length} interview question${validQuestions.length > 1 ? 's' : ''}`
+        });
+      } catch (e) {
+        console.log('Could not award karma:', e);
+      }
+
+      const karmaEarned = validQuestions.length * 15;
+      toast.success(`Thank you! ${validQuestions.length} question${validQuestions.length > 1 ? 's' : ''} submitted. +${karmaEarned} karma earned!`);
       onSuccess?.();
     } catch (error) {
       console.error('Error submitting questions:', error);

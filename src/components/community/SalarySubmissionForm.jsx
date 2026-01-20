@@ -10,6 +10,7 @@ import { SalarySubmission } from '@/entities/SalarySubmission';
 import { useAuth } from '@/components/auth/AuthContext';
 import { toast } from 'sonner';
 import { DollarSign, Lock, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const INDUSTRIES = [
   'Technology',
@@ -90,7 +91,7 @@ export default function SalarySubmissionForm({ onSuccess, onCancel }) {
 
     setIsSubmitting(true);
     try {
-      await SalarySubmission.create({
+      const salaryRecord = await SalarySubmission.create({
         ...formData,
         user_id: user.id,
         job_title_normalized: formData.job_title.toLowerCase().trim(),
@@ -102,7 +103,22 @@ export default function SalarySubmissionForm({ onSuccess, onCancel }) {
         data_year: parseInt(formData.data_year)
       });
 
-      toast.success('Thank you! Your salary data has been submitted anonymously.');
+      // Award karma for salary submission (+25 pts)
+      try {
+        await base44.functions.invoke('awardKarma', {
+          parentUserId: user.id,
+          parentEmail: user.email,
+          parentName: user.full_name,
+          actionType: 'salary_submitted',
+          referenceType: 'salary',
+          referenceId: salaryRecord.id,
+          description: 'Shared salary data'
+        });
+      } catch (e) {
+        console.log('Could not award karma:', e);
+      }
+
+      toast.success('Thank you! Your salary data has been submitted. +25 karma earned!');
       onSuccess?.();
     } catch (error) {
       console.error('Error submitting salary:', error);
