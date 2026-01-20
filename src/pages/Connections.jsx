@@ -991,9 +991,10 @@ export default function QuestionsPage() {
         }
 
         .filters-toggle-btn {
-          height: 44px;
-          padding: 0 20px;
-          font-weight: 600;
+          height: 36px;
+          padding: 0 12px;
+          font-weight: 500;
+          font-size: 13px;
         }
 
         .filter-panel {
