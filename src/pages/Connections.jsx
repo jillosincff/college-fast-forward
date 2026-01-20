@@ -730,6 +730,10 @@ export default function QuestionsPage() {
         </div>
       </div>
 
+        </>
+        )}
+      </div>
+
       {showHelpModal && (
         <MessageAndHelpModal
           isOpen={showHelpModal}
