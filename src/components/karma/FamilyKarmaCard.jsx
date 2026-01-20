@@ -104,7 +104,7 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
           <div className="flex items-center justify-between mb-2">
             <span className="text-3xl font-bold">{karma} pts</span>
             {nextTier?.name !== 'max' && (
-              <span className="text-sm opacity-90">→ {nextTier?.threshold} for {TIER_LABELS[nextTier?.name]}</span>
+              <span className="text-sm font-semibold text-white">→ {nextTier?.threshold} for {TIER_LABELS[nextTier?.name]}</span>
             )}
           </div>
           
