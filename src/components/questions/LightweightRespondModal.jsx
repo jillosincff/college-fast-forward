@@ -139,14 +139,15 @@ export default function LightweightRespondModal({
         
         setStep('success');
         
-        // Auto-close and trigger callback after brief success message
+        // Immediately trigger callback - the parent will show the answer composer
+        // Use a short delay just to show the checkmark briefly
         setTimeout(() => {
           onVerificationComplete?.({
             email: otpSentTo,
             firstName: firstName.trim(),
             role: role || 'other'
           });
-        }, 1500);
+        }, 800);
       } else {
         throw new Error(response?.data?.error || 'Invalid verification code');
       }

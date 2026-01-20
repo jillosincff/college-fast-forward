@@ -418,7 +418,19 @@ export default function QuestionDetailPage() {
   };
 
   const handleLightweightVerified = (responderInfo) => {
-    setLightweightResponder(responderInfo);
+    console.log('handleLightweightVerified called with:', responderInfo);
+    
+    // CRITICAL: Ensure we have the verified flag set
+    const verifiedInfo = {
+      ...responderInfo,
+      verified: true
+    };
+    
+    // Update state AND session storage to ensure composer shows
+    setLightweightResponder(verifiedInfo);
+    sessionStorage.setItem('lightweight_responder', JSON.stringify(verifiedInfo));
+    
+    // Close the modal
     setShowLightweightModal(false);
     
     // Track verification complete
@@ -426,6 +438,14 @@ export default function QuestionDetailPage() {
       question_id: questionId,
       responder_role: responderInfo.role
     });
+    
+    // Force scroll to where the composer will appear after state update
+    setTimeout(() => {
+      const composerElement = document.querySelector('.lightweight-composer');
+      if (composerElement) {
+        composerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const handleLightweightAnswerPosted = (newAnswer) => {
