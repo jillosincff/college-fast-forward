@@ -328,19 +328,22 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
       
       {/* Tags Row - Above content */}
       <div className="tags-row">
-      {/* Alumni Career Request Badge */}
-      {question.is_alumni_career_request && (
-        <span className="poster-badge alumni-career">🎯 Alumni Career Request</span>
-      )}
-      {/* Poster Type Badge */}
-      {!question.is_alumni_career_request && posterType !== 'student' && (
-        <span className={`poster-badge ${posterType}`}>
-          {posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
-        </span>
-      )}
-      {!question.is_alumni_career_request && posterType === 'student' && (
-        <span className="poster-badge student">🎓 UF Student</span>
-      )}
+        {/* Activity Badge (Hot/Rising/New) */}
+        <ActivityBadge question={question} />
+        
+        {/* Alumni Career Request Badge */}
+        {question.is_alumni_career_request && (
+          <span className="poster-badge alumni-career">🎯 Alumni Career Request</span>
+        )}
+        {/* Poster Type Badge */}
+        {!question.is_alumni_career_request && posterType !== 'student' && (
+          <span className={`poster-badge ${posterType}`}>
+            {posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+          </span>
+        )}
+        {!question.is_alumni_career_request && posterType === 'student' && (
+          <span className="poster-badge student">🎓 UF Student</span>
+        )}
         
         {/* Help type tags - smaller */}
         {question.help_types?.slice(0, 2).map((type, idx) => (
@@ -352,7 +355,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         
         {/* Answered badge */}
         {(question.answer_count || 0) > 0 && (
-          <span className="answered-badge">✓ Answered</span>
+          <span className="answered-badge">✓ {question.answer_count} {question.answer_count === 1 ? 'Answer' : 'Answers'}</span>
         )}
       </div>
 
