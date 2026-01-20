@@ -152,11 +152,11 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>{stats.salary_data_points} salary data points</span>
+                <span>AI career advisor for salary & interview guidance</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>Direct access to VPs & Directors</span>
+                <span>Direct access to parents at Google, Goldman, McKinsey & more</span>
               </div>
             </motion.div>
 
@@ -374,20 +374,29 @@ export default function LandingPage() {
                 </Card>
               </motion.div>
 
-              {/* Value Item 2 */}
+              {/* Value Item 2 - AI Career Advisor */}
               <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-green-200 transition-colors">
+                <Card className="p-6 md:p-8 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
                   <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">💰</div>
+                    <div className="text-5xl">🤖</div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Insider Salary Database
+                        AI Career Advisor
                       </h3>
                       <p className="text-slate-600 mb-3">
-                        <strong>{stats.salary_data_points} real salary data points</strong> from {SCHOOL_NAME} professionals. Know exactly what Google pays for a PMM. What Goldman offers first-year analysts. What your student should negotiate for.
+                        <em>"I got a PM offer at a startup in Miami — $78K + equity. How does that compare?"</em>
                       </p>
-                      <p className="text-sm text-slate-400 italic">
-                        This data isn't on Glassdoor. It's not on Levels.fyi. It's only here — from people in your own network.
+                      <p className="text-slate-600 mb-3">
+                        Get instant, personalized guidance on salaries, interviews, negotiation, and career decisions — powered by real data from the {SCHOOL_NAME} network.
+                      </p>
+                      <div className="text-slate-600 text-sm space-y-1 mb-3">
+                        <p>✓ <strong>Evaluate offers</strong> — "Is this salary competitive for my role?"</p>
+                        <p>✓ <strong>Prepare for interviews</strong> — "What should I expect at Google?"</p>
+                        <p>✓ <strong>Negotiate confidently</strong> — "Should I push back? How?"</p>
+                        <p>✓ <strong>Make career decisions</strong> — "Consulting vs. startup — help me think through this."</p>
+                      </div>
+                      <p className="text-sm text-purple-600 font-medium italic">
+                        Like having a career coach in your pocket. 24/7.
                       </p>
                     </div>
                   </div>
@@ -396,20 +405,20 @@ export default function LandingPage() {
 
               {/* Value Item 3 */}
               <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-purple-200 transition-colors">
+                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
                   <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">🎤</div>
+                    <div className="text-5xl">💬</div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Real Interview Questions
+                        Community Q&A
                       </h3>
                       <div className="text-slate-600 mb-3 space-y-1">
-                        <p><em>"Design a product for elderly users"</em> — asked at Google, 4 times</p>
-                        <p><em>"Walk me through a DCF"</em> — asked at Goldman, 7 times</p>
-                        <p><em>"Market size the US coffee industry"</em> — asked at McKinsey, 3 times</p>
+                        <p><em>"What's it really like working at Goldman?"</em></p>
+                        <p><em>"How do I break into tech from a non-CS background?"</em></p>
+                        <p><em>"Should I take this offer or wait?"</em></p>
                       </div>
                       <p className="text-slate-600">
-                        <strong>{stats.interview_questions} real questions</strong> from real interviews. Crowdsourced this month. Not 3 years ago.
+                        Ask anything. Get answers from people who've been there — not anonymous internet strangers, but {SCHOOL_NAME} parents and alumni who actually care.
                       </p>
                     </div>
                   </div>
@@ -498,10 +507,10 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full">
                   <div className="text-3xl mb-3">💰</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "She negotiated $15K more because she knew the real numbers."
+                    "She negotiated $12K more because she knew what to ask for."
                   </p>
                   <p className="text-slate-600 text-sm mb-4">
-                    "My daughter got an offer at HubSpot. Because of the salary data in the network, she knew exactly what to ask for. They matched it without pushback."
+                    "My daughter got an offer at HubSpot. The AI advisor helped her understand what similar roles were paying, and a parent in the network coached her through the negotiation. It worked."
                   </p>
                   <p className="text-slate-400 text-sm">— The Thompson Family</p>
                 </Card>
@@ -511,10 +520,10 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full">
                   <div className="text-3xl mb-3">🎤</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "He walked in knowing exactly what they were going to ask."
+                    "He walked into the Google interview feeling totally prepared."
                   </p>
                   <p className="text-slate-600 text-sm mb-4">
-                    "The interview database had the exact case question. Word for word. He'd practiced it twice. He got the offer."
+                    "The AI advisor told him what to expect, and then a parent who's a PM at a similar company did two mock interviews with him. He got the offer."
                   </p>
                   <p className="text-slate-400 text-sm">— The Rodriguez Family</p>
                 </Card>
@@ -535,7 +544,7 @@ export default function LandingPage() {
                   { num: '47', label: 'Warm intros made' },
                   { num: '23', label: 'Resume reviews' },
                   { num: '18', label: 'Mock interviews' },
-                  { num: '12', label: 'Salary data added' },
+                  { num: '156', label: 'AI advisor chats' },
                   { num: '3', label: 'Job offers accepted' },
                 ].map((stat, i) => (
                   <div key={i}>
