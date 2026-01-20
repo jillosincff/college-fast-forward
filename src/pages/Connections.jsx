@@ -407,13 +407,16 @@ export default function QuestionsPage() {
   return (
     <>
       <div className="questions-page">
-        {/* HEADER - Minimal */}
+        {/* HEADER - Reddit Style */}
         <div className="page-header">
           <div className="header-content">
             <div className="header-left">
-              <h1>Community Questions</h1>
+              <h1 className="flex items-center gap-2">
+                <MessageSquare className="w-7 h-7 text-blue-600" />
+                Community Questions
+              </h1>
               <p className="subtitle">
-                Students, parents, and alumni helping each other
+                The Gator career community — learn from others, share what you know
               </p>
             </div>
             
