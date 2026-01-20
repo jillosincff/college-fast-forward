@@ -911,7 +911,7 @@ export default function QuestionsPage() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 12px;
+          gap: 12px;
         }
 
         .filter-tabs {
