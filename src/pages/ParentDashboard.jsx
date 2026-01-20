@@ -384,6 +384,37 @@ export default function ParentDashboard() {
             </div>
           </section>
 
+          {/* ========== INVITE STUDENT BANNER (if no linked student) ========== */}
+          {!hasLinkedStudent && (
+            <section 
+              className="rounded-3xl p-5 border-2 flex items-center justify-between"
+              style={{ 
+                background: 'linear-gradient(135deg, #FFF5F2 0%, #FEF3E7 100%)', 
+                borderColor: 'rgba(250, 70, 22, 0.4)' 
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg"
+                  style={{ background: 'linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%)' }}
+                >
+                  🎓
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">Is your student not yet on CFF?</p>
+                  <p className="text-sm text-gray-600">Invite them to join and link your accounts for karma boosts</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => navigate('GatorParentInvite')}
+                className="text-white font-semibold px-5 py-2.5 rounded-xl transition hover:scale-105 whitespace-nowrap"
+                style={{ backgroundColor: '#FA4616', boxShadow: '0 4px 12px rgba(250, 70, 22, 0.3)' }}
+              >
+                Invite Student →
+              </button>
+            </section>
+          )}
+
           {/* ========== QUICK ACTIONS ========== */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             

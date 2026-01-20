@@ -1,3 +1,4 @@
+import AIAdvisor from './pages/AIAdvisor';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
 import AdminReferrals from './pages/AdminReferrals';
@@ -46,11 +47,11 @@ import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
 import WelcomeRole from './pages/WelcomeRole';
-import AIAdvisor from './pages/AIAdvisor';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AIAdvisor": AIAdvisor,
     "AdminDashboard": AdminDashboard,
     "AdminEmail": AdminEmail,
     "AdminReferrals": AdminReferrals,
@@ -99,7 +100,6 @@ export const PAGES = {
     "TestingDashboard": TestingDashboard,
     "UnsubscribeReengagement": UnsubscribeReengagement,
     "WelcomeRole": WelcomeRole,
-    "AIAdvisor": AIAdvisor,
 }
 
 export const pagesConfig = {
