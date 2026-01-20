@@ -136,7 +136,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, career advice, and real connections to professionals at Google, Goldman, McKinsey & more.
+              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, career guidance, and real connections to professionals at Google, Goldman, and McKinsey.
             </motion.p>
 
             {/* Trust bullets */}
@@ -156,7 +156,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>Direct access to parents at Google, Goldman, McKinsey & more</span>
+                <span>Direct access to VPs, Directors & hiring managers</span>
               </div>
             </motion.div>
 
