@@ -643,7 +643,7 @@ export default function LandingPage() {
                   <h3 className="text-lg font-bold text-slate-900 mb-1">GROWTH</h3>
                   <p className="text-sm text-slate-500 mb-3">1,001 - 5,000 members</p>
                   <div className="text-4xl font-extrabold text-slate-700 mb-2">$9</div>
-                  <p className="text-slate-500 font-semibold text-sm">/month</p>
+                  <p className="text-slate-500 font-semibold text-sm">/month per family</p>
                   <div className="mt-4 pt-4 border-t border-slate-200">
                     <p className="text-slate-500">Coming soon</p>
                   </div>
