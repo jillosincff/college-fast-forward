@@ -747,6 +747,23 @@ export default function QuestionsPage() {
           min-height: 100vh;
           background: #F9FAFB;
         }
+        
+        .community-tabs-wrapper {
+          background: white;
+          border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .community-tabs-container {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
+        
+        .tab-content {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 24px 20px;
+        }
 
         /* HEADER - Minimal */
         .page-header {
