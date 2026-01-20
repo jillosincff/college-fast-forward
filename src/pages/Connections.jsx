@@ -310,6 +310,19 @@ export default function QuestionsPage() {
       return false;
     }
 
+    // Topic filter - match against help_types and industry
+    if (activeTopic) {
+      const questionTopics = getQuestionTopics(profile.request);
+      if (!questionTopics.includes(activeTopic)) {
+        // Also check industry directly
+        const industry = profile.request?.target_industry;
+        const industryTopic = industry ? INDUSTRY_TO_TOPIC[industry] : null;
+        if (industryTopic !== activeTopic) {
+          return false;
+        }
+      }
+    }
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesName = profile.full_name?.toLowerCase().includes(query);
