@@ -7,7 +7,7 @@ import { navigate } from '@/components/utils/navigation';
 
 // Tier colors
 const TIER_STYLES = {
-  none: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', icon: '📊', gradient: 'from-slate-100 to-slate-200' },
+  none: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', icon: '📊', gradient: 'from-slate-100 to-slate-200', darkText: true },
   active: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: '⭐', gradient: 'from-blue-500 to-blue-600' },
   engaged: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: '⭐⭐', gradient: 'from-purple-500 to-purple-600' },
   priority: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', icon: '🌟', gradient: 'from-amber-500 to-orange-500' },
@@ -100,11 +100,11 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
         </h2>
         
         {/* Karma Score + Progress */}
-        <div className={`bg-gradient-to-r ${tierStyle.gradient} rounded-lg p-4 mb-4 text-white`}>
+        <div className={`bg-gradient-to-r ${tierStyle.gradient} rounded-lg p-4 mb-4 ${tierStyle.darkText ? 'text-slate-700' : 'text-white'}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-3xl font-bold">{karma} pts</span>
             {nextTier?.name !== 'max' && (
-              <span className="text-sm font-semibold text-gray-800">→ {nextTier?.threshold} for {TIER_LABELS[nextTier?.name]}</span>
+              <span className={`text-sm font-semibold ${tierStyle.darkText ? 'text-slate-600' : 'text-white'}`}>→ {nextTier?.threshold} for {TIER_LABELS[nextTier?.name]}</span>
             )}
           </div>
           
