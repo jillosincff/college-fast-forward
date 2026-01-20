@@ -250,8 +250,8 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 6 steps, Parents have 5 (with link student)
-  const totalSteps = isAlumni ? 6 : 5;
+  // Progress bar component - Alumni has 7 steps (with invite parent), Parents have 5 (with link student)
+  const totalSteps = isAlumni ? 7 : 5;
   
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
@@ -291,9 +291,16 @@ export default function Onboarding() {
             </span>
             <span className="hidden sm:inline text-white/80 text-xs">Story</span>
           </div>
+          <div className={`w-4 h-0.5 ${step >= 6 ? 'bg-white/50' : 'bg-white/20'}`}></div>
+          <div className="flex items-center gap-1 text-sm">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 6 ? 'bg-white/30' : 'bg-white/10'}`}>
+              {step > 6 ? <Check className="w-3.5 h-3.5 text-white" /> : '👨‍👩‍👧'}
+            </span>
+            <span className="hidden sm:inline text-white/80 text-xs">Family</span>
+          </div>
         </>
       )}
-      {/* Link step only for parents - Alumni skip this entirely */}
+      {/* Link step only for parents - Alumni have their own invite parent step */}
       {!isAlumni && (
         <>
           <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
@@ -305,9 +312,9 @@ export default function Onboarding() {
           </div>
         </>
       )}
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 6 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
+      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 7 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
       <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 6 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 7 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
         <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
       </div>
     </div>
@@ -462,7 +469,7 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of 6</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of 7</p>
             <h1 className="text-3xl font-bold text-white">One last thing — inspire the next generation? 📖</h1>
           </div>
           
@@ -524,8 +531,42 @@ export default function Onboarding() {
       );
     }
     
-    // Ready step (step 5 for parents, step 6 for alumni)
-    if ((step === 5 && !isAlumni) || (step === 6 && isAlumni)) {
+    // Alumni Step 6: Invite Parent
+    if (step === 6 && isAlumni) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 6 of 7</p>
+            <h1 className="text-3xl font-bold text-white">Invite a Parent 👨‍👩‍👧</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Recent grad? Invite a parent to join — together, you earn karma faster.
+          </p>
+          
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              <strong>Why invite family?</strong><br />
+              When your parent helps other students, YOUR career requests get boosted. It's a team effort!
+            </p>
+          </div>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">⚡</span>
+              <span className="font-semibold text-sm">Parents' karma boosts YOUR visibility</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🤝</span>
+              <span className="font-semibold text-sm">Their network becomes your advantage</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Ready step (step 5 for parents, step 7 for alumni)
+    if ((step === 5 && !isAlumni) || (step === 7 && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
@@ -599,6 +640,12 @@ export default function Onboarding() {
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Inspire the next generation? 📖</h1>
               <p className="text-sm text-white/90">Share your story with students</p>
+            </>
+          )}
+          {step === 6 && isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Invite a Parent 👨‍👩‍👧</h1>
+              <p className="text-sm text-white/90">Earn karma together as a family</p>
             </>
           )}
           {step === 4 && !isAlumni && (
@@ -1149,7 +1196,7 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 4 (Parents ONLY): Link Your Student - Alumni skip this step */}
+          {/* STEP 4 (Parents ONLY): Link Your Student */}
           {step === 4 && !isAlumni && (
             <LinkStudentStep
               user={user}
@@ -1164,8 +1211,68 @@ export default function Onboarding() {
             />
           )}
 
-          {/* STEP 5 (Parents) / STEP 6 (Alumni): Ready */}
-          {((step === 5 && !isAlumni) || (step === 6 && isAlumni)) && (
+          {/* STEP 6 (Alumni ONLY): Invite Parent */}
+          {step === 6 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Invite a Parent
+                </h2>
+                <p className="text-slate-500">
+                  Recent grad? Team up with a parent to earn karma faster.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-blue-50 to-orange-50 rounded-xl p-6 border-2 border-blue-200">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                      👨‍👩‍👧
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-800 mb-1">Why invite family?</h3>
+                      <p className="text-sm text-slate-600">
+                        When your parent helps other students on CFF, <strong>your career requests get priority visibility</strong>. Their karma = your boost!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate('GatorParentInvite')}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-lg transition-all bg-[#FA4616] text-white hover:bg-[#E03D12] shadow-lg hover:shadow-xl"
+                  >
+                    <span>📧</span>
+                    Invite a Parent Now
+                  </button>
+                  
+                  <button
+                    onClick={() => setStep(7)}
+                    className="w-full py-3 rounded-xl font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                  >
+                    Skip for now — I'll do this later
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-400 text-center">
+                  You can always invite parents later from your dashboard
+                </p>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setStep(5)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* STEP 5 (Parents) / STEP 7 (Alumni): Ready */}
+          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -1256,7 +1363,7 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(isAlumni ? 5 : 4)}
+                    onClick={() => setStep(isAlumni ? 6 : 4)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
