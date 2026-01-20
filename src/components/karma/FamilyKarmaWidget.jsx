@@ -1,28 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Sparkles, TrendingUp, Award, ChevronRight, RefreshCw } from 'lucide-react';
+import { Sparkles, TrendingUp, Award, ChevronRight, RefreshCw, Lock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { navigate } from '@/components/utils/navigation';
 
-const LEVEL_COLORS = {
-  bronze: { bg: '#E8EDFF', text: 'white', border: '#0021A5', gradient: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)' },
-  silver: { bg: '#F3F4F6', text: '#1F2937', border: '#B8B8B8', gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)' },
-  gold: { bg: '#FEF9C3', text: '#1F2937', border: '#FFD700', gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' },
-  platinum: { bg: '#E0E7FF', text: 'white', border: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
+// NEW tier colors matching spec
+const TIER_STYLES = {
+  none: { 
+    gradient: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)',
+    label: 'Getting Started',
+    icon: '📊'
+  },
+  active: { 
+    gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+    label: 'Active Family',
+    icon: '⭐'
+  },
+  engaged: { 
+    gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+    label: 'Engaged Family',
+    icon: '⭐⭐'
+  },
+  priority: { 
+    gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+    label: 'Priority Family',
+    icon: '🌟'
+  },
+  champion: { 
+    gradient: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+    label: 'Champion Family',
+    icon: '🏆'
+  }
 };
 
-const LEVEL_THRESHOLDS = {
-  bronze: { min: 0, max: 50 },
-  silver: { min: 50, max: 150 },
-  gold: { min: 150, max: 500 },
-  platinum: { min: 500, max: Infinity }
-};
-
-const LEVEL_ICONS = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-  platinum: '💎'
+// NEW tier thresholds matching spec
+const TIER_THRESHOLDS = {
+  none: { min: 0, max: 100 },
+  active: { min: 100, max: 300 },
+  engaged: { min: 300, max: 500 },
+  priority: { min: 500, max: 1000 },
+  champion: { min: 1000, max: Infinity }
 };
 
 export default function FamilyKarmaWidget({ user, compact = false, onSearchStudent, onInviteStudent }) {
@@ -77,46 +95,88 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
     );
   }
 
-  if (!karmaData || !karmaData.family_group_id) {
-    // No family group - show starter widget with connect CTA (COMPACT LAYOUT)
-    const level = 'bronze';
-    const colors = LEVEL_COLORS[level];
-    const threshold = LEVEL_THRESHOLDS[level];
+  // Map old tier names to new ones for backwards compatibility
+  const mapTierName = (tier) => {
+    const mapping = {
+      bronze: 'none',
+      silver: 'active',
+      gold: 'engaged',
+      platinum: 'priority'
+    };
+    return mapping[tier] || tier || 'none';
+  };
+
+  const rawLevel = karmaData?.karma_level || 'none';
+  const level = mapTierName(rawLevel);
+  const tierStyle = TIER_STYLES[level] || TIER_STYLES.none;
+  const totalKarma = karmaData?.total_karma || 0;
+  const nextLevel = karmaData?.next_level;
+  const boostMultiplier = karmaData?.boost_multiplier || 0;
+  const threshold = TIER_THRESHOLDS[level] || TIER_THRESHOLDS.none;
+  
+  // Check for expiring boost
+  const boostExpiresAt = karmaData?.boost_expires_at ? new Date(karmaData.boost_expires_at) : null;
+  const now = new Date();
+  const hoursUntilExpiry = boostExpiresAt ? Math.max(0, Math.floor((boostExpiresAt - now) / (1000 * 60 * 60))) : null;
+  const isBoostExpiringSoon = hoursUntilExpiry !== null && hoursUntilExpiry > 0 && hoursUntilExpiry <= 12;
+  
+  // Multi-student support
+  const linkedStudents = karmaData?.linked_students || [];
+  const linkedStudentsText = karmaData?.linked_students_text || 'your students';
+  const studentCount = karmaData?.linked_students_count || 0;
+  const unlockedBenefits = karmaData?.unlocked_benefits || [];
+  const lockedBenefits = karmaData?.locked_benefits || [];
+  
+  // Calculate progress to next level
+  let progressPercent = 100;
+  let pointsToNext = 0;
+  if (nextLevel && nextLevel.name !== 'max' && nextLevel.points_needed > 0) {
+    const pointsEarned = nextLevel.points_needed - nextLevel.points_remaining;
+    progressPercent = Math.min(100, (pointsEarned / nextLevel.points_needed) * 100);
+    pointsToNext = nextLevel.points_remaining;
+  }
+
+  // Compact badge view
+  if (compact) {
+    if (level === 'none' || totalKarma < 100) return null;
     
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium`}
+        style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#2563EB' }}
+      >
+        <span>{tierStyle.icon}</span>
+        <span>{tierStyle.label}</span>
+      </span>
+    );
+  }
+
+  // No family group yet
+  if (!karmaData || !karmaData.family_group_id) {
     return (
       <div 
         className="rounded-2xl p-6 shadow-xl relative overflow-hidden text-white"
-        style={{ background: colors.gradient }}
+        style={{ background: TIER_STYLES.none.gradient }}
       >
-        {/* Pattern overlay */}
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
         
         <div className="relative z-10">
-          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold flex items-center gap-2 text-white">
               <Sparkles className="w-5 h-5 text-white" />
               Family Karma
             </h3>
-            <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full text-white">
-              {LEVEL_ICONS[level]} BRONZE
-            </span>
           </div>
 
-          {/* COMPACT: Two-column layout - Points LEFT, Ways to Earn RIGHT */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {/* Left: Karma Points */}
             <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
-              <div className="text-5xl font-bold mb-1 text-center text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>0</div>
+              <div className="text-5xl font-bold mb-1 text-center text-white">0</div>
               <div className="text-sm font-semibold text-center mb-3 text-white/90">Karma Points</div>
-              
-              {/* Progress to Silver */}
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1 text-white/80">
-                  <span>Progress to Silver</span>
-                  <span>0/{threshold.max}</span>
+                  <span>Progress to Active</span>
+                  <span>0/100</span>
                 </div>
                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                   <div className="h-full bg-white rounded-full" style={{ width: '0%' }} />
@@ -124,32 +184,30 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
               </div>
             </div>
 
-            {/* Right: Ways to Earn Points */}
             <div className="bg-white/15 backdrop-blur rounded-xl p-4">
               <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Points:</h4>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                  <span className="text-white">💬 Answer a student question</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
+                  <span className="text-white">💬 Answer a question</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+15</span>
                 </div>
                 <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                  <span className="text-white">⬆️ Get upvoted by community</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
+                  <span className="text-white">💰 Share salary data</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
                 </div>
                 <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                  <span className="text-white">✅ Marked "Best" by student</span>
-                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
+                  <span className="text-white">🎤 Share interview Qs</span>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+15</span>
                 </div>
               </div>
               <div className="mt-3 pt-2 border-t border-white/20">
                 <p className="text-[11px] text-white font-semibold text-center">
-                  📌 Your karma pins your student's requests to the top for faster help.
+                  📌 Your karma boosts your student's visibility to other helpers.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Connect CTA - More Compact */}
           <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🔗</span>
@@ -178,89 +236,45 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
     );
   }
 
-  const level = karmaData.karma_level || 'bronze';
-  const colors = LEVEL_COLORS[level];
-  const icon = LEVEL_ICONS[level];
-  const totalKarma = karmaData.total_karma || 0;
-  const nextLevel = karmaData.next_level;
-  const boostMultiplier = karmaData.boost_multiplier || 0;
-  const threshold = LEVEL_THRESHOLDS[level];
-  
-  // Check for expiring boost - show nudge if within 12 hours
-  const boostExpiresAt = karmaData.boost_expires_at ? new Date(karmaData.boost_expires_at) : null;
-  const now = new Date();
-  const hoursUntilExpiry = boostExpiresAt ? Math.max(0, Math.floor((boostExpiresAt - now) / (1000 * 60 * 60))) : null;
-  const isBoostExpiringSoon = hoursUntilExpiry !== null && hoursUntilExpiry > 0 && hoursUntilExpiry <= 12;
-  
-  // Multi-student support
-  const linkedStudents = karmaData.linked_students || [];
-  const linkedStudentsText = karmaData.linked_students_text || 'your students';
-  const studentCount = karmaData.linked_students_count || 0;
-  
-  // Calculate progress to next level
-  let progressPercent = 100;
-  let pointsToNext = 0;
-  if (nextLevel && nextLevel.name !== 'max' && nextLevel.points_needed > 0) {
-    const pointsEarned = nextLevel.points_needed - nextLevel.points_remaining;
-    progressPercent = Math.min(100, (pointsEarned / nextLevel.points_needed) * 100);
-    pointsToNext = nextLevel.points_remaining;
-  }
-
-  if (compact) {
-    return (
-      <div 
-        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-sm"
-        style={{ background: colors.bg, borderColor: colors.border }}
-      >
-        <span>{icon}</span>
-        <span className="font-bold" style={{ color: colors.text }}>{totalKarma}</span>
-        <span className="text-slate-500">karma</span>
-      </div>
-    );
-  }
-
+  // Full widget with family data
   return (
     <div 
       className="rounded-2xl p-6 shadow-xl relative overflow-hidden text-white"
-      style={{ background: colors.gradient }}
+      style={{ background: tierStyle.gradient }}
     >
-      {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-10" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }} />
       
       <div className="relative z-10">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold flex items-center gap-2 text-white">
             <Sparkles className="w-5 h-5 text-white" />
             Family Karma
           </h3>
           <span className="text-sm font-bold bg-white/25 backdrop-blur px-3 py-1 rounded-full text-white">
-            {icon} {level.toUpperCase()}
+            {tierStyle.icon} {tierStyle.label.toUpperCase()}
           </span>
         </div>
 
-        {/* COMPACT: Two-column layout - Points LEFT, Ways to Earn RIGHT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {/* Left: Karma Points + Progress */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-5 flex flex-col justify-center">
-            <div className="text-5xl font-bold mb-1 text-center text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{totalKarma}</div>
+            <div className="text-5xl font-bold mb-1 text-center text-white">{totalKarma}</div>
             <div className="text-sm font-semibold text-center mb-3 text-white/90">Karma Points</div>
             
-            {/* Boost Badge - Inline */}
-            <div className="flex justify-center mb-3">
-              <span className="bg-white/25 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-white">
-                ⚡ +{boostMultiplier} Boost
-              </span>
-            </div>
+            {boostMultiplier > 0 && (
+              <div className="flex justify-center mb-3">
+                <span className="bg-white/25 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-white">
+                  ⚡ +{boostMultiplier} Boost Active
+                </span>
+              </div>
+            )}
             
-            {/* Progress to Next Level */}
             {nextLevel && nextLevel.name !== 'max' ? (
               <div>
                 <div className="flex justify-between text-xs mb-1 text-white/80">
                   <span>Progress to {nextLevel.name.charAt(0).toUpperCase() + nextLevel.name.slice(1)}</span>
-                  <span>{totalKarma}/{threshold.max}</span>
+                  <span>{totalKarma}/{nextLevel.threshold}</span>
                 </div>
                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                   <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
@@ -274,45 +288,43 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
             )}
           </div>
 
-          {/* Right: Ways to Earn Points */}
           <div className="bg-white/15 backdrop-blur rounded-xl p-4">
             <h4 className="font-bold text-xs mb-2 text-white">Ways to Earn Points:</h4>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">💬 Answer a student question</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+10</span>
+                <span className="text-white">💬 Answer a question</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+15</span>
               </div>
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">⬆️ Get upvoted by community</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+5</span>
+                <span className="text-white">💰 Share salary data</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
               </div>
               <div className="flex justify-between items-center bg-white/10 rounded-lg px-2 py-1.5">
-                <span className="text-white">✅ Marked "Best" by student</span>
-                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+50</span>
+                <span className="text-white">✅ Best answer</span>
+                <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold text-white">+25</span>
               </div>
             </div>
             
-            {/* Recent Activity - Compact */}
             {karmaData.recent_transactions?.length > 0 && (
               <div className="mt-3 pt-3 border-t border-white/20">
                 <h4 className="font-bold text-xs mb-1.5 text-white">Recent:</h4>
                 {karmaData.recent_transactions.slice(0, 2).map((tx, idx) => (
                   <div key={idx} className="flex justify-between items-center text-xs mb-1">
-                    <span className="truncate text-white">{getActivityLabel(tx.action_type)}</span>
+                    <span className="truncate text-white">{tx.description}</span>
                     <span className="bg-white/25 px-2 py-0.5 rounded-full font-bold ml-2 text-white">+{tx.points}</span>
                   </div>
                 ))}
               </div>
             )}
             
-            {/* Boost status with multi-student support */}
+            {/* Boost status */}
             {isBoostExpiringSoon ? (
               <div className="mt-3 pt-2 border-t border-white/20">
                 <p className="text-[11px] text-white font-bold text-center animate-pulse">
                   ⚠️ {linkedStudentsText}'s boost expires in {hoursUntilExpiry}h — answer a question to extend!
                 </p>
               </div>
-            ) : familyBoost > 0 && studentCount > 0 ? (
+            ) : boostMultiplier > 0 && studentCount > 0 ? (
               <div className="mt-3 pt-2 border-t border-white/20">
                 <p className="text-[11px] text-white font-bold text-center">
                   ⚡ Family Karma Active — boosting {linkedStudentsText}'s requests!
@@ -321,23 +333,35 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
             ) : (
               <div className="mt-3 pt-2 border-t border-white/20">
                 <p className="text-[11px] text-white font-semibold text-center">
-                  📌 Your karma pins your student's requests to the top for faster help.
+                  📌 Your karma boosts your student's visibility to other helpers.
                 </p>
               </div>
             )}
           </div>
         </div>
+        
+        {/* Quick action buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => navigate('Connections?tab=questions')}
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+          >
+            Answer Questions
+          </button>
+          <button
+            onClick={() => navigate('Connections?tab=salaries')}
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+          >
+            Add Salary Data
+          </button>
+          <button
+            onClick={() => navigate('Connections?tab=interviews')}
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+          >
+            Share Interview Qs
+          </button>
+        </div>
       </div>
     </div>
   );
-}
-
-function getActivityLabel(actionType) {
-  const labels = {
-    'answer': '💬 Answered question',
-    'upvote_received': '⬆️ Answer upvoted',
-    'best_answer': '✅ Best answer',
-    'referral': '👥 Referred parent'
-  };
-  return labels[actionType] || actionType;
 }
