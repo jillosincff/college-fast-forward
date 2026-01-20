@@ -17,12 +17,13 @@ import {
 } from "@/components/ui/accordion";
 
 const SCHOOL_NAME = "UF";
+const FOUNDING_LIMIT = 1000;
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ 
-    spots_left: 47, 
-    total_families: 623,
+    spots_left: 152, 
+    total_families: 848,
     salary_data_points: 847,
     interview_questions: 523
   });
@@ -52,7 +53,7 @@ export default function LandingPage() {
   }, []);
 
   const handleGetInside = () => {
-    trackEvent('cta_get_inside_clicked');
+    trackEvent('cta_claim_free_spot_clicked');
     navigate('GatorAuth');
   };
 
@@ -135,7 +136,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} families</strong> who open doors for each other's students — with warm introductions, insider salary data, and real interview questions from companies like Google, Goldman, and McKinsey.
+              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, insider salary data, and real interview questions from companies like Google, Goldman, and McKinsey.
             </motion.p>
 
             {/* Trust bullets */}
@@ -147,7 +148,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>{stats.total_families} families already inside</span>
+                <span>{stats.total_families} founding families already inside</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
@@ -159,26 +160,32 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* CTA Box */}
+            {/* CTA Box - FREE Founding */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="inline-block bg-white rounded-2xl p-6 md:p-8 shadow-2xl"
+              className="inline-block bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-md"
             >
-              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-semibold mb-4">
+              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-bold text-lg mb-2">
                 <span className="text-xl">🔥</span>
-                <span>{stats.spots_left} spots left this semester</span>
+                <span>{stats.spots_left} FREE founding spots left</span>
               </div>
+              <p className="text-slate-500 text-sm mb-4">(of {FOUNDING_LIMIT})</p>
+              
               <Button
                 onClick={handleGetInside}
                 size="lg"
-                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-7 text-xl font-bold shadow-lg w-full sm:w-auto"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-7 text-xl font-bold shadow-lg w-full"
               >
-                Get Inside — $9/month
+                Claim Your Free Spot
                 <ArrowRight className="w-6 h-6 ml-2" />
               </Button>
-              <p className="text-slate-500 text-sm mt-3">Cancel anytime. No contract.</p>
+              
+              <div className="mt-4 text-sm text-slate-600 space-y-1">
+                <p className="font-semibold">Founding members stay free forever.</p>
+                <p className="text-slate-400">After 1,000: $9/mo · After 5K: $19/mo</p>
+              </div>
             </motion.div>
 
             {/* Testimonial preview */}
@@ -580,28 +587,84 @@ export default function LandingPage() {
               </div>
               <div className="mt-6 pt-4 border-t-2 border-slate-300 flex justify-between items-center">
                 <span className="text-slate-900 font-bold text-lg">Total if you bought it all separately:</span>
-                <span className="text-red-500 font-bold text-xl">$1,500 - $3,000+</span>
+                <span className="text-red-500 font-bold text-xl line-through">$1,500 - $3,000+</span>
               </div>
             </motion.div>
 
+            {/* Tiered Pricing */}
             <motion.div 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-center"
+              className="text-center mb-10"
             >
-              <p className="text-slate-500 uppercase tracking-widest text-sm mb-4">The {SCHOOL_NAME} Network</p>
-              <div className="text-6xl md:text-7xl font-extrabold text-[#0021A5] mb-4">$9/month</div>
-              <div className="text-slate-600 text-lg space-y-1 mb-8">
-                <p>That's less than Netflix.</p>
-                <p>Less than a single coffee per week.</p>
-                <p>Less than one hour of tutoring.</p>
-              </div>
-              <p className="text-xl font-semibold text-slate-900">
-                For the thing that actually gets them hired.
-              </p>
+              <p className="text-slate-600 text-lg mb-2">The Earlier You Join, The Less You Pay</p>
+              <p className="text-slate-500">More members = more connections = more value. That's why the price goes up as we grow.</p>
             </motion.div>
+
+            <motion.div 
+              variants={staggerChildren}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid md:grid-cols-3 gap-4 mb-10"
+            >
+              {/* Founding Tier */}
+              <motion.div variants={fadeInUp}>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-400 rounded-2xl p-6 text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    YOU'RE HERE
+                  </div>
+                  <div className="text-3xl mb-2">🎉</div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">FOUNDING</h3>
+                  <p className="text-sm text-slate-500 mb-3">First 1,000 members</p>
+                  <div className="text-4xl font-extrabold text-green-600 mb-2">FREE</div>
+                  <p className="text-green-700 font-semibold text-sm">FOREVER</p>
+                  <div className="mt-4 pt-4 border-t border-green-300">
+                    <p className="text-green-700 font-bold">⚡ {stats.spots_left} spots left</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Growth Tier */}
+              <motion.div variants={fadeInUp}>
+                <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-6 text-center opacity-75">
+                  <div className="text-3xl mb-2">📈</div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">GROWTH</h3>
+                  <p className="text-sm text-slate-500 mb-3">1,001 - 5,000 members</p>
+                  <div className="text-4xl font-extrabold text-slate-700 mb-2">$9</div>
+                  <p className="text-slate-500 font-semibold text-sm">/month</p>
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <p className="text-slate-500">Coming soon</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Scale Tier */}
+              <motion.div variants={fadeInUp}>
+                <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-6 text-center opacity-60">
+                  <div className="text-3xl mb-2">🚀</div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">SCALE</h3>
+                  <p className="text-sm text-slate-500 mb-3">5,000+ members</p>
+                  <div className="text-4xl font-extrabold text-slate-700 mb-2">$19</div>
+                  <p className="text-slate-500 font-semibold text-sm">/month</p>
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <p className="text-slate-500">Future</p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            <motion.p 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center text-slate-600"
+            >
+              <strong>{stats.total_families} families</strong> already claimed their free spot. <strong>Your price locks in forever.</strong>
+            </motion.p>
           </div>
         </section>
 
@@ -704,20 +767,21 @@ export default function LandingPage() {
               className="bg-white rounded-2xl p-8 max-w-md mx-auto"
             >
               <div className="text-[#FA4616] font-bold text-2xl mb-2">
-                🔥 {stats.spots_left} SPOTS LEFT THIS SEMESTER
+                🔥 {stats.spots_left} FREE FOUNDING SPOTS LEFT
               </div>
               <p className="text-slate-600 mb-6">
-                {stats.total_families} families are already inside. Their students have a head start. <strong>Yours could too.</strong>
+                {stats.total_families} families already claimed their free spot. Once the 1,000 founding spots are gone, new members pay $9/month.
               </p>
+              <p className="text-green-600 font-semibold mb-4">Get in now. Stay free forever.</p>
               <Button
                 onClick={handleGetInside}
                 size="lg"
                 className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-6 text-lg font-bold w-full"
               >
-                Get Inside — $9/month
+                Claim Your Free Spot
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <p className="text-slate-400 text-sm mt-3">Cancel anytime. No contract.</p>
+              <p className="text-slate-400 text-sm mt-3">Founding members stay free forever.</p>
             </motion.div>
           </div>
         </section>
@@ -763,11 +827,11 @@ export default function LandingPage() {
                   },
                   {
                     q: "Can I cancel anytime?",
-                    a: "Yes. No contracts. No commitments. Cancel with one click if it's not right for your family."
+                    a: "Founding members are free forever — there's nothing to cancel! After we hit 1,000 members, new members pay $9/month and can cancel anytime."
                   },
                   {
-                    q: "Why is it so cheap?",
-                    a: "Because we believe every family should have access to this — not just the ones who can afford $400/hour career coaches. The network is powered by parents helping parents. We just built the platform to make it happen."
+                    q: "Why is it free for the first 1,000?",
+                    a: "Founding members are helping us build something special. You're not just joining a network — you're creating it. In exchange for being early and helping us grow, you get free access forever. Once we hit 1,000, new members pay $9/month. At 5,000, it goes to $19/month. The earlier you join, the more you save."
                   }
                 ].map((item, i) => (
                   <AccordionItem key={i} value={`item-${i}`} className="border rounded-xl px-6">
@@ -824,8 +888,8 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="mb-6"
             >
-              <p className="text-white/90 mb-2">{stats.total_families} families are already inside.</p>
-              <p className="text-white font-semibold">{stats.spots_left} spots left this semester.</p>
+              <p className="text-white/90 mb-2">{stats.total_families} families already claimed their free spot.</p>
+              <p className="text-white font-semibold text-xl">{stats.spots_left} FREE founding spots left.</p>
             </motion.div>
 
             <motion.div
@@ -839,10 +903,10 @@ export default function LandingPage() {
                 size="lg"
                 className="bg-white text-[#FA4616] hover:bg-slate-100 px-10 py-7 text-xl font-bold shadow-2xl"
               >
-                Get Inside — $9/month
+                Claim Your Free Spot
                 <ArrowRight className="w-6 h-6 ml-2" />
               </Button>
-              <p className="text-white/80 text-sm mt-4">Cancel anytime. No contract.</p>
+              <p className="text-white/90 text-sm mt-4 font-medium">Founding members stay free forever.</p>
             </motion.div>
 
             <motion.p 
