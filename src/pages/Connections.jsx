@@ -7,7 +7,7 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { ProfileLike } from '@/entities/ProfileLike';
 import { Answer } from '@/entities/Answer';
 import { base44 } from '@/api/base44Client';
-import { Search, Plus, Filter, MessageSquare } from 'lucide-react';
+import { Search, Plus, Filter, MessageSquare, DollarSign, Mic } from 'lucide-react';
 import moment from 'moment';
 import { getDisplayName } from '@/components/utils/nameUtils';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { checkFullAccess } from '@/components/access/useAccessControl';
 import SortTabs, { sortQuestions } from '@/components/questions/SortTabs';
 import TopicFilters, { getQuestionTopics, HELP_TYPE_TO_TOPIC, INDUSTRY_TO_TOPIC } from '@/components/questions/TopicFilters';
+import CommunityTabs from '@/components/community/CommunityTabs';
+import SalaryBrowse from '@/components/community/SalaryBrowse';
+import InterviewBrowse from '@/components/community/InterviewBrowse';
 
 export default function QuestionsPage() {
   const { user } = useAuth();
