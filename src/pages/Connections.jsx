@@ -360,54 +360,45 @@ export default function QuestionsPage() {
     return true;
   });
 
-  const sortedProfiles = [...filteredProfiles].sort((a, b) => {
-    if (sortBy === 'newest') return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
-    if (sortBy === 'most_views') return (b.request?.view_count || 0) - (a.request?.view_count || 0);
-    if (sortBy === 'unanswered') {
-      const aUnanswered = (a.request?.answer_count || 0) === 0 ? 1 : 0;
-      const bUnanswered = (b.request?.answer_count || 0) === 0 ? 1 : 0;
-      if (aUnanswered !== bUnanswered) return bUnanswered - aUnanswered;
-      // Secondary sort by newest for unanswered
-      return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
+  // Apply sorting using the sortQuestions function for trending/top/discussed
+  const sortedProfiles = useMemo(() => {
+    // First extract requests for sorting
+    const profilesWithRequests = filteredProfiles.filter(p => p.request);
+    
+    // Use sortQuestions for the main sort types
+    if (['trending', 'recent', 'top', 'discussed', 'unanswered'].includes(sortBy)) {
+      const requests = profilesWithRequests.map(p => p.request);
+      const sortedRequests = sortQuestions(requests, sortBy);
+      
+      // Map back to profiles
+      const requestIdToProfile = new Map();
+      profilesWithRequests.forEach(p => requestIdToProfile.set(p.request.id, p));
+      
+      return sortedRequests
+        .map(req => requestIdToProfile.get(req.id))
+        .filter(Boolean);
     }
     
-    // Default "relevance" sorting
-    // PRIORITY 1: Active karma boosts (check if boost hasn't expired)
-    // Alumni career requests also get boosted by their karma_boost score
-    const now = new Date();
-    const aBoostActive = a.request?.karma_boost > 0 && (!a.request?.boosted_until || new Date(a.request.boosted_until) > now);
-    const bBoostActive = b.request?.karma_boost > 0 && (!b.request?.boosted_until || new Date(b.request.boosted_until) > now);
-    
-    // Boosted requests always come first (including alumni career requests with karma boost)
-    if (aBoostActive && !bBoostActive) return -1;
-    if (!aBoostActive && bBoostActive) return 1;
-    
-    // Within boosted: sort by boost level (higher = better), then by most recent karma earn
-    if (aBoostActive && bBoostActive) {
-      const aBoostLevel = a.request?.karma_boost || 0;
-      const bBoostLevel = b.request?.karma_boost || 0;
-      if (aBoostLevel !== bBoostLevel) return bBoostLevel - aBoostLevel;
-      // Same boost level - sort by newest
+    // Fallback to legacy sorting
+    return [...profilesWithRequests].sort((a, b) => {
+      // PRIORITY 1: Active karma boosts
+      const now = new Date();
+      const aBoostActive = a.request?.karma_boost > 0 && (!a.request?.boosted_until || new Date(a.request.boosted_until) > now);
+      const bBoostActive = b.request?.karma_boost > 0 && (!b.request?.boosted_until || new Date(b.request.boosted_until) > now);
+      
+      if (aBoostActive && !bBoostActive) return -1;
+      if (!aBoostActive && bBoostActive) return 1;
+      
+      if (aBoostActive && bBoostActive) {
+        const aBoostLevel = a.request?.karma_boost || 0;
+        const bBoostLevel = b.request?.karma_boost || 0;
+        if (aBoostLevel !== bBoostLevel) return bBoostLevel - aBoostLevel;
+      }
+      
+      // Default: newest first
       return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
-    }
-    
-    // PRIORITY 2: Premium users
-    const aIsPremium = checkFullAccess(a);
-    const bIsPremium = checkFullAccess(b);
-    if (aIsPremium && !bIsPremium) return -1;
-    if (!aIsPremium && bIsPremium) return 1;
-    
-    // PRIORITY 3: Featured
-    if (a.isFeatured && !b.isFeatured) return -1;
-    if (!a.isFeatured && b.isFeatured) return 1;
-    
-    // PRIORITY 4: Has request
-    if (a.hasRequest && !b.hasRequest) return -1;
-    if (!a.hasRequest && b.hasRequest) return 1;
-    
-    // Default: newest first
-    return new Date(b.request?.created_date || b.created_date) - new Date(a.request?.created_date || a.created_date);
-  });
+    });
+  }, [filteredProfiles, sortBy]);
 
   const displayedProfiles = sortedProfiles.slice(0, visibleCount);
   const questionsWithProfiles = displayedProfiles.filter(p => p.request);
