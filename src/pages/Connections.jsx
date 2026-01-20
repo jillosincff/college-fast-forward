@@ -426,20 +426,19 @@ export default function QuestionsPage() {
   return (
     <>
       <div className="questions-page">
-        {/* HEADER - Reddit Style */}
+        {/* HEADER - Community Hub */}
         <div className="page-header">
           <div className="header-content">
             <div className="header-left">
               <h1 className="flex items-center gap-2">
-                <MessageSquare className="w-7 h-7 text-blue-600" />
-                Community Questions
+                💬 Community
               </h1>
               <p className="subtitle">
-                The Gator career community — learn from others, share what you know
+                The Gator career community — questions, salaries & interview intel
               </p>
             </div>
             
-            {user && (
+            {user && activeTab === 'questions' && (
               <Button 
                 onClick={() => navigate(user?.persona === 'gator' ? 'StudentOnboarding' : 'PostRequest')}
                 className="ask-question-btn"
@@ -450,6 +449,29 @@ export default function QuestionsPage() {
             )}
           </div>
         </div>
+        
+        {/* Community Tabs */}
+        <div className="community-tabs-wrapper">
+          <div className="community-tabs-container">
+            <CommunityTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          </div>
+        </div>
+        
+        {/* Render content based on active tab */}
+        {activeTab === 'salaries' && (
+          <div className="tab-content">
+            <SalaryBrowse />
+          </div>
+        )}
+        
+        {activeTab === 'interviews' && (
+          <div className="tab-content">
+            <InterviewBrowse />
+          </div>
+        )}
+        
+        {activeTab === 'questions' && (
+          <>
 
         {/* CTA Banner for Students */}
         {!isLoading && user?.persona === 'gator' && !requests.find(r => r.created_by === user.email) && (
