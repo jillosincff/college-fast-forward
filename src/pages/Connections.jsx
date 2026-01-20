@@ -158,12 +158,14 @@ export default function QuestionsPage() {
 
       // Calculate stats from actual answer counts
       const totalAnswers = realRequests.reduce((sum, r) => sum + (r.answer_count || 0), 0);
-      const urgentCount = realRequests.filter(r => r.timeline === 'this_week').length;
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const activeThisWeek = realRequests.filter(r => new Date(r.created_date) >= oneWeekAgo).length;
       
       setStats({
         totalQuestions: realRequests.length,
         totalAnswers,
-        urgentCount
+        activeThisWeek
       });
       
     } catch (error) {
