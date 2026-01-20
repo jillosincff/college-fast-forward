@@ -38,7 +38,8 @@ export default function QuestionsPage() {
     urgent: false,
     includeAlumniCareer: false
   });
-  const [sortBy, setSortBy] = useState('relevance');
+  const [sortBy, setSortBy] = useState('trending');
+  const [activeTopic, setActiveTopic] = useState(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [visibleCount, setVisibleCount] = useState(20);
@@ -48,7 +49,7 @@ export default function QuestionsPage() {
   const [stats, setStats] = useState({
     totalQuestions: 0,
     totalAnswers: 0,
-    urgentCount: 0
+    activeThisWeek: 0
   });
 
   const loadUserLikes = async () => {
