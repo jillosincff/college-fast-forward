@@ -465,11 +465,22 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         </div>
       )}
 
+      {/* Top Answer Preview - Reddit style */}
+      {topAnswer && (
+        <TopAnswerPreview 
+          answer={topAnswer} 
+          questionId={question.id}
+          onMessage={(recipient) => {
+            navigate('MessageComposer', { recipientEmail: recipient.email });
+          }}
+        />
+      )}
+
       {/* Stats - Compact with icons */}
       <div className="question-stats">
-        <span className="stat">💬 {question.answer_count || 0}</span>
-        <span className="stat">⬆️ {question.total_upvotes || 0}</span>
-        <span className="stat">👁️ {question.view_count || 0}</span>
+        <span className="stat"><ChevronUp className="w-4 h-4" /> {question.total_upvotes || 0}</span>
+        <span className="stat"><MessageSquare className="w-4 h-4" /> {question.answer_count || 0}</span>
+        <span className="stat"><Eye className="w-4 h-4" /> {question.view_count || 0}</span>
         {question.has_best_answer && <span className="best-badge">✅ Best</span>}
       </div>
 
@@ -478,7 +489,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
         <p className="offer-help-hint">Even 2–3 sentences help — no need to have the "right" answer.</p>
       )}
       <button className={`card-action-button ${needsAttention ? 'primary' : 'secondary'}`}>
-        {needsAttention ? 'Share what you\'ve seen →' : 'View Answers →'}
+        {needsAttention ? 'Be the first to answer →' : 'Read all answers →'}
       </button>
       {needsAttention && (
         <p className="no-expertise-hint">No expertise required</p>
