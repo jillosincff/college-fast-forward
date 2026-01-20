@@ -157,7 +157,26 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [topAnswer, setTopAnswer] = useState(null);
   const { user } = useAuth();
+  
+  // Load top answer for questions with answers
+  useEffect(() => {
+    const loadTopAnswer = async () => {
+      if ((question.answer_count || 0) === 0) return;
+      
+      try {
+        const answers = await Answer.filter({ question_id: question.id }, '-upvote_count', 1);
+        if (answers.length > 0) {
+          setTopAnswer(answers[0]);
+        }
+      } catch (err) {
+        console.log('Could not load top answer:', err);
+      }
+    };
+    
+    loadTopAnswer();
+  }, [question.id, question.answer_count]);
   
   // Check if current user owns this question
   // Note: Some questions have created_by: 'anonymous' but store real email in poster_email
