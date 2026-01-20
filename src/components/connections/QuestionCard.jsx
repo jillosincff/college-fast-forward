@@ -781,7 +781,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
           display: flex;
           gap: 16px;
           align-items: center;
-          margin-bottom: 14px;
+          margin: 14px 0;
           font-size: 13px;
           color: #6B7280;
         }
@@ -790,6 +790,10 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
           display: flex;
           gap: 4px;
           align-items: center;
+        }
+
+        .stat :global(svg) {
+          color: #9CA3AF;
         }
 
         .best-badge {
