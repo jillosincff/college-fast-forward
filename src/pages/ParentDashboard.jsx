@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
 import { useParentDashboardData } from '@/components/dashboard/parent/useParentDashboardData';
 import QuestionCard from '@/components/dashboard/parent/QuestionCard';
+import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -75,8 +76,17 @@ export default function ParentDashboard() {
   const studentPosition = data.studentQueueStatus.position;
   
   const karmaPoints = data.familyKarma;
-  const karmaLevel = karmaPoints >= 100 ? 'Gold' : karmaPoints >= 50 ? 'Silver' : 'Bronze';
-  const karmaBadge = karmaPoints >= 100 ? '🥇' : karmaPoints >= 50 ? '🥈' : '🥉';
+  // New tier system
+  const getKarmaTier = (pts) => {
+    if (pts >= 1000) return { level: 'Champion', badge: '🏆', color: '#F97316' };
+    if (pts >= 500) return { level: 'Priority', badge: '🌟', color: '#F59E0B' };
+    if (pts >= 300) return { level: 'Engaged', badge: '⭐⭐', color: '#8B5CF6' };
+    if (pts >= 100) return { level: 'Active', badge: '⭐', color: '#3B82F6' };
+    return { level: 'Getting Started', badge: '📊', color: '#6B7280' };
+  };
+  const karmaTier = getKarmaTier(karmaPoints);
+  const karmaLevel = karmaTier.level;
+  const karmaBadge = karmaTier.badge;
   
   const profilePercent = [user?.company, user?.linkedin_url, user?.title, user?.profile_image].filter(Boolean).length * 25;
 
@@ -439,6 +449,13 @@ export default function ParentDashboard() {
             </div>
             
           </section>
+
+          {/* ========== FAMILY KARMA DETAILED CARD ========== */}
+          <FamilyKarmaCard 
+            user={user} 
+            childName={studentFirstName}
+            viewMode="parent"
+          />
 
           {/* ========== PIONEER BADGE ========== */}
           {user?.is_founding_member && (
