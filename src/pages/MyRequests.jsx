@@ -69,14 +69,15 @@ export default function MyRequestsPage() {
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Button
             variant="ghost"
             onClick={handleGoBack}
-            className="text-slate-600 hover:text-slate-900"
+            className="text-slate-600 hover:text-slate-900 -ml-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </div>
         <MyListings 

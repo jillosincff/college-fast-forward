@@ -675,7 +675,7 @@ export default function OpportunitiesPage() {
             <Button
               variant={activeQuickFilter === 'all' ? 'default' : 'outline'}
               onClick={() => setActiveQuickFilter('all')}
-              className={`rounded-full px-5 py-2 font-medium ${
+              className={`rounded-full px-3 sm:px-5 py-2 font-medium text-sm sm:text-base whitespace-nowrap ${
                 activeQuickFilter === 'all' 
                   ? 'bg-blue-600 text-white hover:bg-blue-700' 
                   : 'border-2 border-slate-300 hover:border-blue-600 hover:bg-blue-50'
@@ -790,24 +790,24 @@ export default function OpportunitiesPage() {
       </div>
 
       {/* Results Summary */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-between items-center pb-6 border-b-2 border-slate-200">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 sm:pb-6 border-b-2 border-slate-200 gap-3">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-1">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-1">
               {filteredOpportunities.length.toLocaleString()} Opportunities Found
             </h2>
             {user?.major && sortBy === 'relevance' && (
-              <p className="text-slate-600 text-base font-medium flex items-center gap-2">
+              <p className="text-slate-600 text-sm sm:text-base font-medium flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-blue-600" />
                 Personalized for {user.major} • {user.graduation_year ? `Class of '${user.graduation_year.toString().slice(-2)}` : 'Junior Level'}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-3 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="relevance">🎯 Best Match</option>
               <option value="recent">📅 Most Recent</option>
