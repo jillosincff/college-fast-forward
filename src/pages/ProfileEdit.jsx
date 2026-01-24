@@ -328,23 +328,23 @@ export default function ProfileEdit() {
 
   // STUDENT/ALUMNI VIEW (original complex form)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-4 sm:py-8 overflow-x-hidden">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="mb-4 text-slate-600 hover:text-slate-900"
+            className="mb-3 sm:mb-4 text-slate-600 hover:text-slate-900 -ml-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
           
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2">
             Edit Your Profile
           </h1>
-          <p className="text-slate-600">
+          <p className="text-sm sm:text-base text-slate-600">
             Keep your information up to date to maximize opportunities
           </p>
 
@@ -363,7 +363,7 @@ export default function ProfileEdit() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Resume Upload Section - Students Only */}
           <ResumeUpload user={user} onResumeUpdated={handleResumeUpdated} />
 
@@ -533,8 +533,8 @@ export default function ProfileEdit() {
           </Card>
 
           {/* Save Button */}
-          <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 border">
-            <div className="flex gap-3">
+          <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-3 sm:p-4 border">
+            <div className="flex gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={handleBack}

@@ -80,12 +80,12 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white overflow-x-hidden">
         
         {/* TOP BAR */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0021A5] border-b border-white/10">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-            <span className="text-white font-bold text-lg md:text-xl tracking-tight">
+          <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+            <span className="text-white font-bold text-base sm:text-lg md:text-xl tracking-tight">
               College Fast Forward
             </span>
             <Button
@@ -101,7 +101,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* HERO SECTION                                                        */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        <section className="pt-28 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
+        <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-5xl mx-auto text-center">
             
             <motion.p 
@@ -116,7 +116,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-5xl lg:text-6xl text-white mb-6 leading-tight font-extrabold"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight font-extrabold px-4"
             >
               Only {SCHOOL_NAME} Families Can Access
             </motion.h1>
@@ -125,7 +125,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto"
+              className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 sm:mb-10 max-w-3xl mx-auto px-4"
             >
               Your student's unfair advantage in the job market.
             </motion.p>
@@ -134,7 +134,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
             >
               This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, career guidance, and real connections to professionals at Google, Goldman, and McKinsey.
             </motion.p>
@@ -165,9 +165,9 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="inline-block bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-md"
+              className="inline-block bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl max-w-md mx-4 w-full"
             >
-              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-bold text-lg mb-2">
+              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-bold text-base sm:text-lg mb-2">
                 <span className="text-xl">🔥</span>
                 <span>{stats.spots_left} FREE founding spots left</span>
               </div>
@@ -176,10 +176,10 @@ export default function LandingPage() {
               <Button
                 onClick={handleGetInside}
                 size="lg"
-                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-7 text-xl font-bold shadow-lg w-full"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-6 sm:px-10 py-5 sm:py-7 text-lg sm:text-xl font-bold shadow-lg w-full min-h-[56px]"
               >
                 Claim Your Free Spot
-                <ArrowRight className="w-6 h-6 ml-2" />
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2" />
               </Button>
               
               <div className="mt-4 text-sm text-slate-600 space-y-1">

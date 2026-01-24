@@ -28,17 +28,17 @@ export default function AIAdvisorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-4">
+    <div className="min-h-screen bg-slate-50 py-4 sm:py-6 px-3 sm:px-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">AI Career Advisor</h1>
-          <p className="text-slate-600 mt-1">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">AI Career Advisor</h1>
+          <p className="text-sm sm:text-base text-slate-600 mt-1">
             Get personalized career advice powered by real data from the UF network
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Chat Area */}
           <div className="lg:col-span-2">
             <AICareerAdvisor onMentorConnect={handleMentorConnect} />

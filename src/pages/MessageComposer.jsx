@@ -257,7 +257,7 @@ export default function MessageComposer() {
   const recipientFirstName = recipient?.full_name?.split(' ')[0] || 'them';
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3">
@@ -273,7 +273,7 @@ export default function MessageComposer() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Profile Card - Context from dashboard */}
         <RecipientProfileCard recipient={recipient} />
 

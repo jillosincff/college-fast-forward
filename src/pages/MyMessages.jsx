@@ -364,7 +364,7 @@ export default function MyMessagesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-96px)] flex flex-col bg-white">
+    <div className="h-[calc(100vh-96px)] flex flex-col bg-white overflow-x-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-white">
         <div className="flex items-center gap-3">

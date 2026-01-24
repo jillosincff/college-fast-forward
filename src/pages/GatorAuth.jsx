@@ -561,7 +561,7 @@ export default function GatorAuth() {
   
   if (step === 'role-select') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
+      <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 overflow-x-hidden" style={{
         background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
       }}>
         <div className="w-full max-w-lg">

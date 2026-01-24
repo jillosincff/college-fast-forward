@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { OpportunityApplication } from '@/entities/OpportunityApplication';
@@ -164,8 +163,8 @@ export default function MyApplicationsPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 min-h-screen py-6 sm:py-12 overflow-x-hidden">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8">
         <Button
           variant="ghost"
           onClick={handleGoBack}

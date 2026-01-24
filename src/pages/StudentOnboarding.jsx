@@ -218,9 +218,9 @@ export default function StudentOnboarding() {
   // STEP 1: About You - High-Energy Two-Column Layout
   if (step === 1) {
     return (
-      <div className="min-h-screen flex flex-col lg:flex-row">
+      <div className="min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
         {/* LEFT SIDE - The Hook (Hidden on mobile, shows condensed version) */}
-        <div className="lg:w-[45%] bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0021A5] text-white p-6 lg:p-10 flex flex-col justify-center">
+        <div className="lg:w-[45%] bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0021A5] text-white p-4 sm:p-6 lg:p-10 flex flex-col justify-center">
           
           {/* Progress Bar - Mobile & Desktop */}
           <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
@@ -311,7 +311,7 @@ export default function StudentOnboarding() {
         </div>
 
         {/* RIGHT SIDE - The Form */}
-        <div className="lg:w-[55%] bg-white p-6 lg:p-10 flex flex-col justify-center">
+        <div className="lg:w-[55%] bg-white p-4 sm:p-6 lg:p-10 flex flex-col justify-center">
           <div className="max-w-md mx-auto w-full">
             {/* Form Header */}
             <div className="mb-8">

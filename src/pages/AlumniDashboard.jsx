@@ -336,7 +336,7 @@ export default function AlumniDashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 overflow-x-hidden">
         
         {/* Hero Section */}
         <AlumniHeroSection
@@ -357,7 +357,7 @@ export default function AlumniDashboard() {
           weeklyAlumniHelped={alumniHelped}
         />
 
-        <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
           {/* GIVE + GET MODE: Show "Your Active Request" if exists */}
           {mode === 'give_and_get' && myRequests.length > 0 && (

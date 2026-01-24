@@ -164,7 +164,7 @@ export default function Profile() {
   const classYear = getClassYear(profileUser.graduation_year);
 
   return (
-    <div className="bg-slate-50 min-h-screen p-4 sm:p-8">
+    <div className="bg-slate-50 min-h-screen p-3 sm:p-8 overflow-x-hidden">
       <div className="max-w-4xl mx-auto">
         <Card className="overflow-hidden shadow-lg">
           <div className="bg-gradient-to-br from-blue-700 to-orange-500 h-32" />

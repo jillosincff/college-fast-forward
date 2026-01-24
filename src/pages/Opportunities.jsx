@@ -460,7 +460,7 @@ export default function OpportunitiesPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12">
+    <div className="min-h-screen bg-slate-50 pb-24 sm:pb-12 overflow-x-hidden">
       {selectedOpportunity && showApplyModal && (
         <ApplyModal 
           isOpen={showApplyModal} 
@@ -495,12 +495,12 @@ export default function OpportunitiesPage() {
 
       {/* Enhanced Search Section */}
       <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
           {/* Header with Title and Post Button */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Find Opportunities</h1>
-              <p className="text-slate-600 mt-1">Discover internships, jobs, and gigs from the Gator network</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Find Opportunities</h1>
+              <p className="text-sm sm:text-base text-slate-600 mt-1">Discover internships, jobs, and gigs from the Gator network</p>
             </div>
             <Button
               onClick={() => navigate('PostOpportunity')}
@@ -671,7 +671,7 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Quick Filters */}
-          <div className="flex gap-3 mb-4 flex-wrap">
+          <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap overflow-x-auto pb-2 scrollbar-hide">
             <Button
               variant={activeQuickFilter === 'all' ? 'default' : 'outline'}
               onClick={() => setActiveQuickFilter('all')}

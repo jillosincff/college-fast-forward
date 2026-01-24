@@ -156,7 +156,7 @@ export default function GatorInviteCode() {
   const roleEmoji = pendingRole === 'alumni' ? '🎓' : pendingRole === 'gator' ? '📚' : '👨‍👩‍👧';
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ 
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 overflow-x-hidden" style={{ 
       background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)' 
     }}>
       <motion.div
@@ -174,7 +174,7 @@ export default function GatorInviteCode() {
           Back to role selection
         </button>
 
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
+        <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-xl">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-blue-100 rounded-2xl flex items-center justify-center">

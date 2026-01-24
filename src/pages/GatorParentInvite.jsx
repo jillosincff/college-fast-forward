@@ -166,19 +166,19 @@ export default function GatorParentInvite() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
+    <div className="min-h-screen bg-slate-50 py-6 sm:py-12 px-3 sm:px-4 overflow-x-hidden">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className="text-4xl mb-3">🐊</div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="text-3xl sm:text-4xl mb-3">🐊</div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 px-4">
             Join Gator Network
           </h1>
-          <p className="text-lg text-slate-600">For Parents & Alumni</p>
+          <p className="text-base sm:text-lg text-slate-600">For Parents & Alumni</p>
         </div>
 
         {/* Two Options - Side by Side */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           
           {/* Option 1: Have Invite Code */}
           <Card className="shadow-lg border-2 border-slate-200 hover:border-blue-300 transition-colors">

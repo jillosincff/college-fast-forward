@@ -142,7 +142,7 @@ export default function ParentDashboard() {
         <WelcomeModal userName={firstName} onClose={() => setShowWelcomeModal(false)} />
       )}
 
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 overflow-x-hidden">
         
         {/* ========== HERO SECTION ========== */}
         <section className="relative overflow-hidden">
@@ -155,21 +155,21 @@ export default function ParentDashboard() {
             }} />
           </div>
           
-          <div className="relative z-10 px-6 py-12">
+          <div className="relative z-10 px-4 sm:px-6 py-8 sm:py-12">
             <div className="max-w-4xl mx-auto">
               
               {/* Dynamic headline based on student link status */}
-              <div className="text-center text-white mb-10">
-                <p className="text-sm font-semibold tracking-widest uppercase mb-3" style={{ color: '#FA4616' }}>
+              <div className="text-center text-white mb-8 sm:mb-10">
+                <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase mb-2 sm:mb-3" style={{ color: '#FA4616' }}>
                   {hasLinkedStudent ? "You're Powering" : "Join the Network"}
                 </p>
-                <h1 className="text-5xl md:text-6xl font-extrabold mb-3 text-white">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-white">
                   {hasLinkedStudent 
                     ? `${studentFirstName}'s Career Launch`
                     : "Help Students Succeed"
                   }
                 </h1>
-                <p className="text-xl opacity-90 max-w-lg mx-auto" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                <p className="text-base sm:text-lg md:text-xl opacity-90 max-w-lg mx-auto px-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   {hasLinkedStudent 
                     ? `Every connection you make opens doors for ${studentFirstName}`
                     : "Link your student to boost their visibility with every action you take"
@@ -178,15 +178,15 @@ export default function ParentDashboard() {
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
                 
                 {/* Family Karma */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 text-center border border-white/20 hover:bg-white/15 transition">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-center border border-white/20 hover:bg-white/15 transition">
                   <div className="relative inline-block mb-2">
                     <div className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse" style={{ backgroundColor: '#FA4616' }} />
-                    <span className="relative text-5xl font-black text-white">{karmaPoints}</span>
+                    <span className="relative text-3xl sm:text-4xl md:text-5xl font-black text-white">{karmaPoints}</span>
                   </div>
-                  <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
+                  <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
                   <div className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(250, 70, 22, 0.3)', color: '#FFA07A', borderColor: 'rgba(250, 70, 22, 0.5)', borderWidth: '1px' }}>
                     {karmaBadge} {karmaLevel}
                   </div>
@@ -282,7 +282,7 @@ export default function ParentDashboard() {
         </section>
 
         {/* ========== MAIN CONTENT ========== */}
-        <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
           {/* ========== INVITE STUDENT BANNER (if no linked student) ========== */}
           {!hasLinkedStudent && (
@@ -416,7 +416,7 @@ export default function ParentDashboard() {
           </section>
 
           {/* ========== QUICK ACTIONS ========== */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             
             <div className="bg-white rounded-3xl p-6 border border-gray-200 hover:shadow-lg transition">
               <div className="flex items-center gap-4 mb-5">

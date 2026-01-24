@@ -283,9 +283,9 @@ export default function GatorDirectory() {
   const isStudent = user?.persona === 'gator';
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0A1F3D' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0A1F3D' }}>
       {/* Hero Section - Gator Stadium Night Sky */}
-      <div className="relative text-white py-20 px-4 overflow-hidden" style={{
+      <div className="relative text-white py-12 sm:py-20 px-3 sm:px-4 overflow-hidden" style={{
         background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
       }}>
         {/* Stadium crowd texture overlay */}
@@ -302,42 +302,42 @@ export default function GatorDirectory() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             {/* Title */}
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-3 leading-tight text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 sm:mb-3 leading-tight text-white tracking-tight">
               UF Directory
             </h1>
             
             {/* Subtitle with emphasis */}
-            <p className="text-xl md:text-2xl mb-8 flex items-center justify-center gap-2 flex-wrap">
+            <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 flex items-center justify-center gap-2 flex-wrap px-4">
               <span className="text-white/90 font-medium">Invite-Only</span>
               <span className="text-white/50">•</span>
               <span className="text-[#FA4616] font-semibold">Parents open doors</span>
             </p>
             
             {/* Big Counter Pills */}
-            <div className="mt-10 flex justify-center gap-4 flex-wrap">
+            <div className="mt-6 sm:mt-10 flex justify-center gap-3 sm:gap-4 flex-wrap px-4">
               {/* UF Members Pill */}
               <div className="group relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
-                <div className="relative px-8 py-4 bg-[#0021A5] rounded-full border-2 border-blue-400/50 shadow-xl">
-                  <div className="text-4xl font-bold text-white mb-1">{loading ? '...' : stats.gators}</div>
-                  <div className="text-sm text-blue-200 font-medium uppercase tracking-wide">UF Members</div>
+                <div className="relative px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#0021A5] rounded-full border-2 border-blue-400/50 shadow-xl">
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">{loading ? '...' : stats.gators}</div>
+                  <div className="text-xs sm:text-sm text-blue-200 font-medium uppercase tracking-wide">UF Members</div>
                 </div>
               </div>
               
               {/* Parents Pill with BIGGER Glowing Crown */}
               <div className="group relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur opacity-40 group-hover:opacity-60 transition"></div>
-                <div className="relative px-8 py-4 bg-[#FA4616] rounded-full border-2 border-orange-400/50 shadow-xl">
-                  <div className="flex items-center justify-center gap-3 mb-1">
-                    <div className="relative">
+                <div className="relative px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#FA4616] rounded-full border-2 border-orange-400/50 shadow-xl">
+                  <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1">
+                    <div className="relative hidden sm:block">
                       <div className="absolute inset-0 blur-sm">
-                        <Crown className="w-8 h-8 text-yellow-300" />
+                        <Crown className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-300" />
                       </div>
-                      <Crown className="w-8 h-8 text-yellow-300 relative drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
+                      <Crown className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-300 relative drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
                     </div>
-                    <div className="text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
                   </div>
-                  <div className="text-sm text-orange-100 font-medium uppercase tracking-wide">UF Parents</div>
+                  <div className="text-xs sm:text-sm text-orange-100 font-medium uppercase tracking-wide">UF Parents</div>
                 </div>
               </div>
             </div>

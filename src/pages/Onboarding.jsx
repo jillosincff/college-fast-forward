@@ -594,9 +594,9 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
       {/* LEFT SIDE - UF Blue */}
-      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#000F5C] text-white p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
+      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#000F5C] text-white p-4 sm:p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
         
         <ProgressBar />
 
@@ -669,7 +669,7 @@ export default function Onboarding() {
       </div>
 
       {/* RIGHT SIDE - Form */}
-      <div className="lg:w-[55%] bg-white p-6 lg:p-10 lg:pt-10 overflow-y-auto">
+      <div className="lg:w-[55%] bg-white p-4 sm:p-6 lg:p-10 lg:pt-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           
           {/* STEP 1: Basic Info */}

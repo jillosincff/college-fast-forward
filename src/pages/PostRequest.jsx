@@ -233,8 +233,8 @@ export default function PostRequestPage() { // Renamed from PostRequest
       <style jsx>{`
         .hero-section {
           background: linear-gradient(to right, #0021A5, #FA4616);
-          min-height: 240px;
-          padding: 48px 24px;
+          min-height: 200px;
+          padding: 32px 16px;
           color: white;
           text-align: center;
           position: relative;
@@ -268,17 +268,24 @@ export default function PostRequestPage() { // Renamed from PostRequest
         }
 
         .hero-title {
-          font-size: 2.5rem;
+          font-size: 1.75rem;
           font-weight: 700;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
           line-height: 1.2;
           color: white;
         }
+        
+        @media (min-width: 768px) {
+          .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+          }
+        }
 
         .hero-subtitle {
-          font-size: 1.125rem;
+          font-size: 0.95rem;
           opacity: 0.9;
-          margin-bottom: 32px;
+          margin-bottom: 24px;
           line-height: 1.5;
           max-width: 600px;
           margin-left: auto;
@@ -459,18 +466,28 @@ export default function PostRequestPage() { // Renamed from PostRequest
           background: #ef4444;
         }
 
-        @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2rem;
+        @media (min-width: 640px) {
+          .hero-subtitle {
+            font-size: 1.125rem;
+            margin-bottom: 32px;
           }
-          
+        }
+        
+        @media (min-width: 768px) {
+          .hero-section {
+            min-height: 240px;
+            padding: 48px 24px;
+          }
+        }
+        
+        @media (max-width: 768px) {
           .hero-stats {
-            gap: 16px;
+            gap: 12px;
           }
 
           .hero-section {
-            margin: 16px;
-            padding: 32px 20px;
+            margin: 12px;
+            padding: 24px 16px;
           }
 
           .back-button {

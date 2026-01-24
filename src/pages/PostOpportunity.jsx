@@ -161,16 +161,16 @@ export default function PostOpportunityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Briefcase className="w-8 h-8 text-blue-600" />
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Briefcase className="w-7 h-7 sm:w-8 sm:h-8 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 px-4">
             Post an Opportunity
           </h1>
-          <p className="text-slate-600">
+          <p className="text-sm sm:text-base text-slate-600 px-4">
             Share internships, jobs, and student gigs with the Gator community.
           </p>
           

@@ -524,7 +524,7 @@ export default function QuestionDetailPage() {
   const posterName = isAnonymous ? 'Anonymous Parent' : (question.student_name || 'Gator');
 
   return (
-    <div className="question-detail-page">
+    <div className="question-detail-page overflow-x-hidden">
       {/* Back Navigation - only show for logged-in users */}
       {!isPublicView && (
         <div className="nav-header">
@@ -758,7 +758,13 @@ export default function QuestionDetailPage() {
         .content-container {
           max-width: 900px;
           margin: 0 auto;
-          padding: 0 20px;
+          padding: 0 12px;
+        }
+        
+        @media (min-width: 640px) {
+          .content-container {
+            padding: 0 20px;
+          }
         }
 
         .question-section {

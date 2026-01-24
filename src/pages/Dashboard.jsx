@@ -286,7 +286,7 @@ export default function Dashboard() {
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8 overflow-x-hidden">
       
       {/* Founding Member Banner */}
       <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
@@ -308,7 +308,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
         
         {/* Family Boost Status - Show when linked */}
         {(user?.boost_level > 0 || linkedParents.length > 0) && (
