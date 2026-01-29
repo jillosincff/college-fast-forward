@@ -44,10 +44,10 @@ export default function AIAdvisorPage() {
             <AICareerAdvisor onMentorConnect={handleMentorConnect} />
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
+          {/* Sidebar - Hidden on mobile, shown at bottom */}
+          <div className="space-y-4 order-first lg:order-last">
             {/* Contribute CTA */}
-            <Card className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <Card className="p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Database className="w-5 h-5 text-blue-600" />
@@ -82,7 +82,7 @@ export default function AIAdvisorPage() {
             </Card>
 
             {/* Stats Card */}
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 hidden lg:block">
               <h3 className="font-semibold text-slate-900 mb-4">Network Intelligence</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -110,7 +110,7 @@ export default function AIAdvisorPage() {
             </Card>
 
             {/* What You Can Ask */}
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 hidden lg:block">
               <h3 className="font-semibold text-slate-900 mb-3">What You Can Ask</h3>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li className="flex items-start gap-2">

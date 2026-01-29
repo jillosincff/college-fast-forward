@@ -338,9 +338,9 @@ export default function MatchesReview() {
   const displayIndex = isTop3Flow ? Math.min(currentIndex + 1, 3) : currentIndex + 1;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Persistent Top Navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 px-3 sm:px-4 py-3 sticky top-0 z-10">
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <button
             onClick={handleSkipToDashboard}
@@ -355,12 +355,12 @@ export default function MatchesReview() {
         </div>
       </div>
       
-      <div className="py-6 px-4">
+      <div className="py-4 sm:py-6 px-3 sm:px-4">
         <div className="max-w-xl mx-auto">
         
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
             {isTop3Flow ? 'Your Top 3 Matches' : 'Your Top Matches'}
           </h1>
           <p className="text-gray-500 text-sm">
@@ -369,27 +369,27 @@ export default function MatchesReview() {
         </div>
 
         {/* Match Card - Rich Profile */}
-        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           {/* Header: Photo + Info + LinkedIn */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-start justify-between mb-4 gap-2">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               {/* Profile Photo or Initials */}
               {photoUrl ? (
                 <img 
                   src={photoUrl} 
                   alt={displayName}
-                  className="w-16 h-16 rounded-full object-cover shadow-lg flex-shrink-0"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shadow-lg flex-shrink-0"
                 />
               ) : (
                 <div 
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg flex-shrink-0"
                   style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
                 >
                   {getInitials(displayName)}
                 </div>
               )}
-              <div className="min-w-0">
-                <h2 className="text-xl font-bold text-gray-900 truncate">{displayName}</h2>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base sm:text-xl font-bold text-gray-900 truncate">{displayName}</h2>
                 {(title || company) && (
                   <p className="text-gray-600 truncate">
                     {title}{title && company && ' at '}{company}
@@ -407,7 +407,7 @@ export default function MatchesReview() {
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 flex-shrink-0"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 flex-shrink-0"
                 onClick={() => trackEvent('match_linkedin_clicked', { match_id: currentMatch.id })}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -464,11 +464,11 @@ export default function MatchesReview() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={handleSend}
               disabled={!message.trim() || sending}
-              className="flex-1 py-3 text-white font-semibold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]"
+              className="flex-1 py-3 text-white font-semibold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02] text-sm sm:text-base"
               style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
             >
               {sending ? 'Sending...' : 'Send Message →'}
@@ -476,7 +476,7 @@ export default function MatchesReview() {
             <button
               onClick={handleSkip}
               disabled={sending}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 font-semibold"
+              className="px-4 sm:px-6 py-3 border-2 border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 font-semibold text-sm sm:text-base"
             >
               Skip
             </button>
