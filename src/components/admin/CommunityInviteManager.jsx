@@ -209,6 +209,7 @@ export default function CommunityInviteManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">Everyone (All Roles)</SelectItem>
                     <SelectItem value="parent">Parents</SelectItem>
                     <SelectItem value="gator">Students</SelectItem>
                     <SelectItem value="alumni">Alumni</SelectItem>
@@ -433,7 +434,7 @@ export default function CommunityInviteManager() {
                             <div className="flex-1">
                               <p className="text-xs text-slate-600">Target Role</p>
                               <p className="font-semibold text-slate-900 capitalize">
-                                {invite.role === 'alumni' ? 'Alumni' : invite.role === 'gator' ? 'Students' : invite.role === 'parent' ? 'Parents' : (invite.invite_type?.includes('alumni') ? 'Alumni' : invite.invite_type?.includes('parent') ? 'Parents' : 'Students')}
+                                {invite.role === 'all' || invite.role === 'everyone' || invite.invite_type?.includes('everyone') ? 'Everyone' : invite.role === 'alumni' ? 'Alumni' : invite.role === 'gator' ? 'Students' : invite.role === 'parent' ? 'Parents' : (invite.invite_type?.includes('alumni') ? 'Alumni' : invite.invite_type?.includes('parent') ? 'Parents' : 'Students')}
                               </p>
                             </div>
                           </div>
