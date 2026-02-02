@@ -2492,7 +2492,7 @@ const PersonaAuditSection = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, mismatched, alumni, parent, gator
+  const [filter, setFilter] = useState('mismatched'); // Default to showing only issues
   const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
