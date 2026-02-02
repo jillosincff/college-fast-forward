@@ -2600,13 +2600,57 @@ const PersonaAuditSection = () => {
   });
 
   // Stats
+  const nonUFLGators = users.filter(u => 
+    (u.persona === 'gator' || u.persona === 'student') && 
+    u.email && !u.email.toLowerCase().endsWith('@ufl.edu') &&
+    !u.roles?.includes('admin')
+  );
+
   const stats = {
     total: users.filter(u => !u.roles?.includes('admin')).length,
     alumni: users.filter(u => u.persona === 'alumni').length,
     parent: users.filter(u => u.persona === 'parent').length,
     gator: users.filter(u => u.persona === 'gator' || u.persona === 'student').length,
     noPersona: users.filter(u => !u.persona && !u.roles?.includes('admin')).length,
-    potentialIssues: users.filter(u => analyzeMislabeling(u).length > 0).length
+    potentialIssues: users.filter(u => analyzeMislabeling(u).length > 0).length,
+    nonUFLGators: nonUFLGators.length
+  };
+
+  // Email non-UFL gators
+  const [emailingGators, setEmailingGators] = useState(false);
+  
+  const handleEmailNonUFLGators = async (dryRun = true) => {
+    if (!dryRun && !confirm(`Are you sure you want to email ${stats.nonUFLGators} non-UFL gators asking them to re-register with their @ufl.edu email?`)) {
+      return;
+    }
+    
+    setEmailingGators(true);
+    try {
+      const response = await base44.functions.invoke('emailNonUFLGators', { dryRun });
+      
+      if (response.data?.success) {
+        if (dryRun) {
+          const userList = response.data.users?.map(u => `• ${u.full_name || 'No name'} (${u.email})`).join('\n');
+          alert(`Found ${response.data.count} non-UFL gators:\n\n${userList}\n\nClick "Send Emails" to email them.`);
+        } else {
+          toast({
+            title: "✅ Emails Sent!",
+            description: `Sent ${response.data.sent} emails (${response.data.errors} errors)`,
+          });
+        }
+      } else {
+        throw new Error(response.data?.error || 'Failed');
+      }
+    } catch (error) {
+      console.error('Email error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send emails",
+        variant: "destructive"
+      });
+    } finally {
+      setEmailingGators(false);
+    }
   };
 
   if (loading) {
@@ -2659,6 +2703,42 @@ const PersonaAuditSection = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Email Non-UFL Gators Section */}
+      {stats.nonUFLGators > 0 && (
+        <Card className="border-yellow-300 bg-yellow-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-yellow-900">
+                  ⚠️ {stats.nonUFLGators} "Gator" users with non-UFL emails
+                </p>
+                <p className="text-sm text-yellow-700 mt-1">
+                  These users signed up as students but don't have @ufl.edu emails
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEmailNonUFLGators(true)}
+                  disabled={emailingGators}
+                >
+                  {emailingGators ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Preview'}
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                  onClick={() => handleEmailNonUFLGators(false)}
+                  disabled={emailingGators}
+                >
+                  {emailingGators ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Emails'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filter Indicator */}
       <div className="flex items-center justify-between">
