@@ -46,26 +46,23 @@ Deno.serve(async (req) => {
         const emailBody = `
 Hi ${gator.full_name || 'there'},
 
-We noticed you signed up for College Fast Forward as a student using ${gator.email}.
+We noticed you signed up for College Fast Forward as a "Student" but your email (${gator.email}) isn't a @ufl.edu address.
 
-To get the full student experience and connect with UF parents and alumni who can help with your career, please sign up again using your @ufl.edu email address.
+Could you reply and let us know which best describes you?
 
-Here's how:
-1. Go to https://collegefastforward.com
-2. Click "Join as Student"
-3. Sign in with your @ufl.edu Google account
+1. **Current UF Student** - Please reply with your @ufl.edu email and we'll update your account
+2. **UF Alumni** - Reply "Alumni" and we'll switch your account to alumni status
+3. **UF Parent** - Reply "Parent" and we'll switch your account to parent status
 
-This ensures you're verified as a current UF student and can access all features.
+This helps us connect you with the right people and features!
 
-Questions? Just reply to this email.
-
-Go Gators! 🐊
+Thanks,
 The College Fast Forward Team
         `.trim();
 
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: gator.email,
-          subject: "Action Required: Please sign up with your @ufl.edu email",
+          subject: "Quick question about your College Fast Forward account",
           body: emailBody,
           from_name: "College Fast Forward"
         });
