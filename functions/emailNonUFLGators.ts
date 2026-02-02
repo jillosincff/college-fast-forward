@@ -11,14 +11,15 @@ Deno.serve(async (req) => {
 
     const { dryRun = true } = await req.json().catch(() => ({}));
 
-    // Find all gators with non-UFL emails
+    // Find all gators with non-UFL emails AND users with no persona
     const allUsers = await base44.asServiceRole.entities.User.filter({}, '-created_date', 9999);
     
     const nonUFLGators = (allUsers || []).filter(u => {
       const isGator = u.persona === 'gator' || u.persona === 'student';
       const isNonUFL = u.email && !u.email.toLowerCase().endsWith('@ufl.edu');
       const notAdmin = !u.roles?.includes('admin');
-      return isGator && isNonUFL && notAdmin;
+      const hasNoPersona = !u.persona && notAdmin;
+      return (isGator && isNonUFL && notAdmin) || hasNoPersona;
     });
 
     if (dryRun) {
@@ -43,7 +44,23 @@ Deno.serve(async (req) => {
 
     for (const gator of nonUFLGators) {
       try {
-        const emailBody = `
+        const hasNoPersona = !gator.persona;
+        const emailBody = hasNoPersona ? `
+Hi ${gator.full_name || 'there'},
+
+We noticed you started signing up for College Fast Forward but didn't finish setting up your account.
+
+Could you reply and let us know which best describes you?
+
+1. **Current UF Student** - Please reply with your @ufl.edu email and we'll set up your student account
+2. **UF Alumni** - Reply "Alumni" and we'll set you up as an alumni
+3. **UF Parent** - Reply "Parent" and we'll set you up as a parent
+
+This helps us connect you with the right people and features!
+
+Thanks,
+The College Fast Forward Team
+        `.trim() : `
 Hi ${gator.full_name || 'there'},
 
 We noticed you signed up for College Fast Forward as a "Student" but your email (${gator.email}) isn't a @ufl.edu address.
