@@ -2560,14 +2560,8 @@ const PersonaAuditSection = () => {
         roles: [newPersona]
       });
       
-      // Immediately update local state to remove user from list
-      setUsers(prevUsers => 
-        prevUsers.map(u => 
-          u.id === userId 
-            ? { ...u, persona: newPersona, roles: [newPersona] }
-            : u
-        )
-      );
+      // Remove the user from the list entirely (they now have a persona)
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
       
       toast({
         title: "✅ Updated!",
