@@ -2560,8 +2560,14 @@ const PersonaAuditSection = () => {
         roles: [newPersona]
       });
       
-      // Remove the user from the list entirely (they now have a persona)
-      setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
+      // Update the user in the list with new persona (don't remove - they should still show in filtered views)
+      setUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.id === userId 
+            ? { ...u, persona: newPersona, roles: [newPersona] }
+            : u
+        )
+      );
       
       toast({
         title: "✅ Updated!",
