@@ -85,6 +85,8 @@ Deno.serve(async (req) => {
         invite_type = 'admin_to_gator';
       } else if (target_role === 'alumni') {
         invite_type = 'admin_to_alumni';
+      } else if (target_role === 'everyone' || target_role === 'all') {
+        invite_type = 'admin_to_everyone';
       } else {
         invite_type = 'admin_to_parent';
       }

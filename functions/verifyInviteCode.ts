@@ -305,9 +305,11 @@ College Fast Forward Team`
 
     // Determine the role from invite
     let assignedRole = invite.role || null;
-    if (!assignedRole) {
-      // Fallback: derive from invite_type
-      if (invite.invite_type?.includes('alumni')) {
+    if (!assignedRole || assignedRole === 'everyone' || assignedRole === 'all') {
+      // For "everyone" invites, don't assign a specific role - let user choose
+      if (invite.invite_type?.includes('everyone') || invite.role === 'everyone' || invite.role === 'all') {
+        assignedRole = null; // User will choose their role
+      } else if (invite.invite_type?.includes('alumni')) {
         assignedRole = 'alumni';
       } else if (invite.invite_type?.includes('parent')) {
         assignedRole = 'parent';
