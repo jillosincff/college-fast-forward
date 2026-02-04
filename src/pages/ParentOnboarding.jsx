@@ -90,33 +90,27 @@ export default function ParentOnboarding() {
 
   // Show push notification prompt after success screen
   if (showPushPrompt && onboardingComplete) {
+    // If user answered a question, go straight to dashboard (they already saw success in Step 3)
+    if (completionResult?.answeredQuestion) {
+      goToDashboard();
+      return null;
+    }
+    
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-lg w-full">
           <ParentOnboardingSuccess 
             result={completionResult}
-            onComplete={() => setShowPushPrompt(false)}
+            onComplete={goToDashboard}
           />
           
-          {!completionResult?.answeredQuestion && (
-            <div className="mt-8">
-              <PushNotificationPrompt
-                user={user}
-                onComplete={goToDashboard}
-                onSkip={goToDashboard}
-              />
-            </div>
-          )}
-          
-          {completionResult?.answeredQuestion && (
-            <div className="mt-8">
-              <PushNotificationPrompt
-                user={user}
-                onComplete={goToDashboard}
-                onSkip={goToDashboard}
-              />
-            </div>
-          )}
+          <div className="mt-8">
+            <PushNotificationPrompt
+              user={user}
+              onComplete={goToDashboard}
+              onSkip={goToDashboard}
+            />
+          </div>
         </div>
       </div>
     );
