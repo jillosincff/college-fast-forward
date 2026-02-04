@@ -197,22 +197,23 @@ export default function ParentOnboardingStep3({
 
     setSubmitting(true);
     try {
-      await base44.entities.Answer.create({
-        question_id: currentQuestion.id,
-        question_type: 'JobRequest',
-        answerer_email: user.email,
-        answerer_name: user.full_name,
-        answerer_title: formData.jobTitle,
-        answerer_company: formData.company,
-        answerer_persona: 'parent',
-        answer_text: answerText.trim(),
-        upvote_count: 0,
-        is_best_answer: false
+      // Use JobAnswer entity for JobRequests to avoid RLS issues
+      await JobAnswer.create({
+        job_request_id: currentQuestion.id,
+        responder_id: user.id,
+        responder_email: user.email,
+        responder_name: user.full_name,
+        responder_title: formData.jobTitle,
+        responder_company: formData.company,
+        responder_type: 'parent',
+        message: answerText.trim(),
+        is_read: false,
+        is_helpful: false,
+        upvote_count: 0
       });
 
-      await JobRequest.update(currentQuestion.id, {
-        answer_count: (currentQuestion.answer_count || 0) + 1
-      });
+      // NOTE: We no longer update answer_count on JobRequest due to RLS restrictions
+      // The count is calculated dynamically from JobAnswer records
 
       setAnsweredStudentName(studentName);
       setShowSuccess(true);
