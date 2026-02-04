@@ -119,26 +119,10 @@ export default function AnswerComposer({
         });
       }
 
-      // Update question answer count in database (non-blocking, may fail due to RLS)
-      // Use the _source field to know which entity to update
-      const newCount = (Number(question.answer_count) || 0) + 1;
-      console.log('Updating DB answer_count to:', newCount, 'source:', question._source);
-      
-      // Fire and forget - don't block answer submission
-      // This may fail due to RLS if the user isn't the question creator
-      try {
-        if (question._source === 'JobRequest') {
-          JobRequest.update(question.id, { comments_count: newCount }).catch(err => {
-            console.log('JobRequest update failed (expected if RLS):', err.message);
-          });
-        } else {
-          HelpRequest.update(question.id, { answer_count: newCount }).catch(err => {
-            console.log('HelpRequest update failed (expected if RLS):', err.message);
-          });
-        }
-      } catch (updateErr) {
-        console.log('Answer count update skipped (RLS):', updateErr.message);
-      }
+      // NOTE: We no longer try to update answer_count on JobRequest/HelpRequest
+      // because RLS prevents non-creators from updating. The answer count is now
+      // calculated dynamically by counting JobAnswer/Answer records.
+      console.log('Answer created for question:', question.id, 'source:', question._source);
 
       // Award karma for posting an answer (parents and alumni)
       // Award karma even without family_group_id - awardKarma will handle finding linked students
