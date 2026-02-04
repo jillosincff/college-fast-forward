@@ -4,6 +4,7 @@ import moment from 'moment';
 import { useAuth } from '@/components/auth/AuthContext';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { Answer } from '@/entities/Answer';
+import { JobAnswer } from '@/entities/JobAnswer';
 import { deleteJobRequest } from '@/functions/deleteJobRequest';
 import { MoreVertical, Pencil, Trash2, MapPin, Calendar, Briefcase, MessageSquare, Users, FileText, BookOpen, GraduationCap, Eye, ChevronUp } from 'lucide-react';
 import EditQuestionModal from './EditQuestionModal';
@@ -163,12 +164,33 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
   // Load top answer for questions with answers
   useEffect(() => {
     const loadTopAnswer = async () => {
-      if ((question.answer_count || 0) === 0) return;
-      
       try {
-        const answers = await Answer.filter({ question_id: question.id }, '-upvote_count', 1);
-        if (answers.length > 0) {
-          setTopAnswer(answers[0]);
+        // Load from both Answer and JobAnswer entities
+        const [regularAnswers, jobAnswers] = await Promise.all([
+          Answer.filter({ question_id: question.id }, '-upvote_count', 1).catch(() => []),
+          JobAnswer.filter({ job_request_id: question.id }, '-upvote_count', 1).catch(() => [])
+        ]);
+        
+        // Normalize JobAnswer format
+        const normalizedJobAnswers = jobAnswers.map(ja => ({
+          ...ja,
+          question_id: ja.job_request_id,
+          answerer_user_id: ja.responder_id,
+          answerer_email: ja.responder_email,
+          answerer_name: ja.responder_name,
+          answerer_title: ja.responder_title,
+          answerer_company: ja.responder_company,
+          answerer_persona: ja.responder_type,
+          answer_text: ja.message,
+          upvote_count: ja.upvote_count || 0
+        }));
+        
+        // Combine and find top answer
+        const allAnswers = [...regularAnswers, ...normalizedJobAnswers];
+        if (allAnswers.length > 0) {
+          // Sort by upvotes descending
+          allAnswers.sort((a, b) => (b.upvote_count || 0) - (a.upvote_count || 0));
+          setTopAnswer(allAnswers[0]);
         }
       } catch (err) {
         console.log('Could not load top answer:', err);
@@ -176,7 +198,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
     };
     
     loadTopAnswer();
-  }, [question.id, question.answer_count]);
+  }, [question.id]);
   
   // Check if current user owns this question
   // Note: Some questions have created_by: 'anonymous' but store real email in poster_email
