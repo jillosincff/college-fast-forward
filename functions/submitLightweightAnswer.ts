@@ -87,47 +87,57 @@ Deno.serve(async (req) => {
     // Check if first-time responder (flag for review)
     const isFirstTimeResponder = (responder.response_count || 0) === 0;
 
-    // Create the answer
-    const answer = await base44.asServiceRole.entities.Answer.create({
-      question_id: questionId,
-      question_type: questionType || 'HelpRequest',
-      answer_text: sanitizedText,
-      answerer_email: normalizedEmail,
-      answerer_name: responderFirstName,
-      answerer_role: responderRole || 'other',
-      is_lightweight_responder: true,
-      lightweight_responder_id: responder.id,
-      is_flagged_for_review: isFirstTimeResponder,
-      upvote_count: 0,
-      is_best_answer: false
-    });
+    // Create the answer - use JobAnswer for JobRequests to avoid RLS issues
+    let answer;
+    
+    if (questionType === 'JobRequest') {
+      // Use JobAnswer entity for JobRequests
+      answer = await base44.asServiceRole.entities.JobAnswer.create({
+        job_request_id: questionId,
+        responder_id: responder.id,
+        responder_email: normalizedEmail,
+        responder_name: responderFirstName,
+        responder_type: responderRole || 'other',
+        message: sanitizedText,
+        is_read: false,
+        is_helpful: false,
+        upvote_count: 0
+      });
+      
+      // Normalize to Answer format for response
+      answer = {
+        ...answer,
+        question_id: questionId,
+        answerer_email: normalizedEmail,
+        answerer_name: responderFirstName,
+        answerer_role: responderRole,
+        answer_text: sanitizedText,
+        is_lightweight_responder: true
+      };
+    } else {
+      // Use Answer entity for HelpRequests
+      answer = await base44.asServiceRole.entities.Answer.create({
+        question_id: questionId,
+        question_type: questionType || 'HelpRequest',
+        answer_text: sanitizedText,
+        answerer_email: normalizedEmail,
+        answerer_name: responderFirstName,
+        answerer_role: responderRole || 'other',
+        is_lightweight_responder: true,
+        lightweight_responder_id: responder.id,
+        is_flagged_for_review: isFirstTimeResponder,
+        upvote_count: 0,
+        is_best_answer: false
+      });
+    }
 
     // Update responder stats
     await base44.asServiceRole.entities.LightweightResponder.update(responder.id, {
       response_count: (responder.response_count || 0) + 1
     });
 
-    // Update question answer count
-    try {
-      if (questionType === 'HelpRequest') {
-        const questions = await base44.asServiceRole.entities.HelpRequest.filter({ id: questionId });
-        if (questions && questions.length > 0) {
-          await base44.asServiceRole.entities.HelpRequest.update(questionId, {
-            answer_count: (questions[0].answer_count || 0) + 1
-          });
-        }
-      } else {
-        const questions = await base44.asServiceRole.entities.JobRequest.filter({ id: questionId });
-        if (questions && questions.length > 0) {
-          await base44.asServiceRole.entities.JobRequest.update(questionId, {
-            answer_count: (questions[0].answer_count || 0) + 1
-          });
-        }
-      }
-    } catch (updateErr) {
-      console.warn('Failed to update question answer count:', updateErr);
-      // Non-fatal - continue
-    }
+    // NOTE: We no longer update answer_count on the question entity
+    // The count is calculated dynamically from JobAnswer/Answer records
 
     console.log('Lightweight answer submitted:', {
       answerId: answer.id,
