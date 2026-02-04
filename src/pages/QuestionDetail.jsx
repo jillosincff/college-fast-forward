@@ -6,6 +6,7 @@ import { ArrowLeft, MessageSquare, Eye, ChevronUp, Award, Share2 } from 'lucide-
 import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { Answer } from '@/entities/Answer';
+import { JobAnswer } from '@/entities/JobAnswer';
 import { base44 } from '@/api/base44Client';
 import UserAvatar from '@/components/common/UserAvatar';
 import AnswerCard from '@/components/answers/AnswerCard';
@@ -187,7 +188,28 @@ export default function QuestionDetailPage() {
       }
       
       // Load answers FIRST so we can get accurate count
-      const allAnswers = await Answer.filter({ question_id: questionId });
+      // Load from both Answer (for HelpRequests) and JobAnswer (for JobRequests)
+      const [regularAnswers, jobAnswers] = await Promise.all([
+        Answer.filter({ question_id: questionId }).catch(() => []),
+        JobAnswer.filter({ job_request_id: questionId }).catch(() => [])
+      ]);
+      
+      // Normalize JobAnswer format to match Answer format
+      const normalizedJobAnswers = jobAnswers.map(ja => ({
+        ...ja,
+        question_id: ja.job_request_id,
+        answerer_user_id: ja.responder_id,
+        answerer_email: ja.responder_email,
+        answerer_name: ja.responder_name,
+        answerer_title: ja.responder_title,
+        answerer_company: ja.responder_company,
+        answerer_persona: ja.responder_type,
+        answer_text: ja.message,
+        upvote_count: ja.upvote_count || 0,
+        is_best_answer: ja.is_helpful || false
+      }));
+      
+      const allAnswers = [...regularAnswers, ...normalizedJobAnswers];
       const sorted = sortAnswers(allAnswers, sortBy);
       setAnswers(sorted);
       
