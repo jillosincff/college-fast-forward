@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Answer } from '@/entities/Answer';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
+import { JobAnswer } from '@/entities/JobAnswer';
 import { base44 } from '@/api/base44Client';
 import ReferralSection from './ReferralSection';
 
@@ -71,20 +72,52 @@ export default function AnswerComposer({
     setIsSubmitting(true);
 
     try {
-      // Create the answer
-      const newAnswer = await Answer.create({
-        question_id: question.id,
-        answerer_user_id: currentUser.id,
-        answerer_email: currentUser.email,
-        answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
-        answerer_title: currentUser.current_position || currentUser.current_role,
-        answerer_company: currentUser.current_company,
-        answerer_years_experience: currentUser.years_experience,
-        answerer_persona: currentUser.persona,
-        answer_text: answerText.trim(),
-        upvote_count: 0,
-        is_best_answer: false
-      });
+      // Create the answer - use JobAnswer entity for JobRequests to avoid RLS issues
+      let newAnswer;
+      
+      if (question._source === 'JobRequest') {
+        // Use JobAnswer entity (no RLS conflict since user owns their own answers)
+        newAnswer = await JobAnswer.create({
+          job_request_id: question.id,
+          responder_id: currentUser.id,
+          responder_email: currentUser.email,
+          responder_name: currentUser.full_name || currentUser.email.split('@')[0],
+          responder_title: currentUser.current_position || currentUser.current_role,
+          responder_company: currentUser.current_company,
+          responder_type: currentUser.persona || 'parent',
+          message: answerText.trim(),
+          is_read: false,
+          is_helpful: false,
+          upvote_count: 0
+        });
+        // Map to expected format for downstream code
+        newAnswer = {
+          ...newAnswer,
+          question_id: question.id,
+          answerer_user_id: currentUser.id,
+          answerer_email: currentUser.email,
+          answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
+          answerer_title: currentUser.current_position || currentUser.current_role,
+          answerer_company: currentUser.current_company,
+          answerer_persona: currentUser.persona,
+          answer_text: answerText.trim()
+        };
+      } else {
+        // Use Answer entity for HelpRequests
+        newAnswer = await Answer.create({
+          question_id: question.id,
+          answerer_user_id: currentUser.id,
+          answerer_email: currentUser.email,
+          answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
+          answerer_title: currentUser.current_position || currentUser.current_role,
+          answerer_company: currentUser.current_company,
+          answerer_years_experience: currentUser.years_experience,
+          answerer_persona: currentUser.persona,
+          answer_text: answerText.trim(),
+          upvote_count: 0,
+          is_best_answer: false
+        });
+      }
 
       // Update question answer count in database (non-blocking, may fail due to RLS)
       // Use the _source field to know which entity to update
