@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { JobRequest } from '@/entities/JobRequest';
+import { JobAnswer } from '@/entities/JobAnswer';
 import { Send, Users, RefreshCw, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SearchingState from './SearchingState';
