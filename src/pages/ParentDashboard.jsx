@@ -504,13 +504,6 @@ export default function ParentDashboard() {
             
           </section>
 
-          {/* ========== FAMILY KARMA DETAILED CARD ========== */}
-          <FamilyKarmaCard 
-            user={user} 
-            childName={studentFirstName}
-            viewMode="parent"
-          />
-
           {/* ========== PIONEER BADGE ========== */}
           {user?.is_founding_member && (
             <section 
