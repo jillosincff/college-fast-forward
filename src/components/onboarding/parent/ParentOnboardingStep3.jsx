@@ -215,6 +215,21 @@ export default function ParentOnboardingStep3({
       // NOTE: We no longer update answer_count on JobRequest due to RLS restrictions
       // The count is calculated dynamically from JobAnswer records
 
+      // Award karma and increment students_helped_count
+      base44.functions.invoke('awardKarma', {
+        familyGroupId: user.family_group_id || null,
+        parentUserId: user.id,
+        parentEmail: user.email,
+        parentName: user.full_name,
+        actionType: 'answer',
+        referenceId: currentQuestion.id,
+        description: 'Answered a question during onboarding'
+      }).then(res => {
+        console.log('Karma awarded for onboarding answer:', res?.data);
+      }).catch(err => {
+        console.log('Karma award failed (non-critical):', err.message);
+      });
+
       setAnsweredStudentName(studentName);
       setShowSuccess(true);
     } catch (error) {
