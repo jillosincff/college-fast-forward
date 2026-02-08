@@ -201,9 +201,9 @@ export default function LandingPage() {
               className="mt-12 max-w-2xl mx-auto"
             >
               <p className="text-white/80 italic text-lg">
-                "My son just got an offer at Goldman Sachs. He connected with 4 parents through this network."
+                "My daughter landed an internship with a legal marketing firm — through a connection she never would have found on a job board."
               </p>
-              <p className="text-white/60 text-sm mt-2">— The Martinez Family</p>
+              <p className="text-white/60 text-sm mt-2">— The Green Family, UF</p>
             </motion.div>
           </div>
         </section>
