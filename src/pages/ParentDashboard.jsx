@@ -237,8 +237,13 @@ export default function ParentDashboard() {
                 
               </div>
 
+              {/* Quick karma action buttons */}
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                <KarmaQuickActions />
+              </div>
+
               {/* Motivational nudge - Dynamic */}
-              <div className="mt-8 text-center">
+              <div className="mt-4 text-center">
                 {hasLinkedStudent && hasActiveRequest ? (
                   <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
                     <span style={{ color: '#FA4616' }}>✨</span>
