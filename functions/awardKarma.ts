@@ -137,12 +137,21 @@ Deno.serve(async (req) => {
       const { level } = getKarmaLevel(newUserTotal);
       
       try {
-        await base44.asServiceRole.entities.User.update(parentUserId, {
+        const updateData = {
           karma_points: newUserTotal,
           karma_earned: newUserTotal, // Keep legacy field in sync
           karma_level: level,
           last_karma_earned_at: now.toISOString()
-        });
+        };
+        
+        // Increment students_helped_count when answering a question
+        if (actionType === 'answer') {
+          const currentHelpedCount = parentUser.students_helped_count || 0;
+          updateData.students_helped_count = currentHelpedCount + 1;
+          console.log(`Incrementing students_helped_count from ${currentHelpedCount} to ${currentHelpedCount + 1}`);
+        }
+        
+        await base44.asServiceRole.entities.User.update(parentUserId, updateData);
         console.log(`Updated parent ${parentUser.email} karma to ${newUserTotal} (${level})`);
       } catch (e) {
         console.log('Could not update user karma:', e.message);
