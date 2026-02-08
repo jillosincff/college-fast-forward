@@ -121,14 +121,19 @@ export default function LandingPage() {
               Only {SCHOOL_NAME} Families Can Access
             </motion.h1>
 
-            <motion.p 
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 sm:mb-10 max-w-3xl mx-auto px-4"
+              className="mb-8 sm:mb-10 max-w-3xl mx-auto px-4"
             >
-              Your student's unfair advantage in the job market.
-            </motion.p>
+              <p className="text-xl sm:text-2xl md:text-3xl text-white font-semibold mb-2">
+                Warm introductions, not cold applications.
+              </p>
+              <p className="text-lg sm:text-xl md:text-2xl text-white/80">
+                Your student's unfair advantage in the job market.
+              </p>
+            </motion.div>
 
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
