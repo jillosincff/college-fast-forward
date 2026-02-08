@@ -179,6 +179,15 @@ export function useParentDashboardData(user) {
         ? (familyKarmaResult.value?.data?.total_karma || user?.karma_points || 0)
         : (user?.karma_points || 0);
 
+      // Students helped - count unique students from answers, fall back to user field
+      let studentsHelpedCount = user?.students_helped_count || 0;
+      if (answersResult.status === 'fulfilled') {
+        const answers = answersResult.value || [];
+        // Count unique job_request_ids as a proxy for unique students helped
+        const uniqueStudents = new Set(answers.map(a => a.job_request_id));
+        studentsHelpedCount = Math.max(studentsHelpedCount, uniqueStudents.size);
+      }
+
       // Mock leaderboard (would come from backend in production)
       const leaderboard = [
         { rank: 1, name: "Patricia M.", helped: 47, isYou: false },
