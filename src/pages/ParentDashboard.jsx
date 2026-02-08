@@ -13,7 +13,9 @@ import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
 import { useParentDashboardData } from '@/components/dashboard/parent/useParentDashboardData';
 import QuestionCard from '@/components/dashboard/parent/QuestionCard';
-import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
+import KarmaExplainerCard from '@/components/dashboard/parent/KarmaExplainerCard';
+import KarmaQuickActions from '@/components/dashboard/parent/KarmaQuickActions';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
