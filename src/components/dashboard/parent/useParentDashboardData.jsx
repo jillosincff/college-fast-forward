@@ -98,11 +98,12 @@ export function useParentDashboardData(user) {
 
     try {
       // Parallel fetch all data
-      const [jobRequestsResult, opportunitiesResult, familyStudentsResult, familyKarmaResult] = await Promise.allSettled([
+      const [jobRequestsResult, opportunitiesResult, familyStudentsResult, familyKarmaResult, answersResult] = await Promise.allSettled([
         JobRequest.filter({ status: 'active' }),
         Opportunity.filter({ created_by: user.email }),
         base44.functions.invoke('getFamilyStudents', {}),
         user.family_group_id ? base44.functions.invoke('getFamilyKarma', { family_group_id: user.family_group_id }) : Promise.resolve({ data: { total_karma: 0 } }),
+        JobAnswer.filter({ responder_email: user.email }),
       ]);
 
       // Process linked students
