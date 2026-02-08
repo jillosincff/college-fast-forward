@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { JobRequest } from '@/entities/JobRequest';
+import { JobAnswer } from '@/entities/JobAnswer';
 import { Opportunity } from '@/entities/Opportunity';
 import { base44 } from '@/api/base44Client';
 
