@@ -3,25 +3,25 @@ import { navigate } from '@/components/utils/navigation';
 
 export default function KarmaQuickActions() {
   return (
-    <div className="flex flex-wrap gap-2">
+    <>
       <button
         onClick={() => navigate('Connections?tab=questions')}
-        className="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium transition"
+        className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full border border-white/25 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur transition whitespace-nowrap"
       >
-        Answer Questions +15
+        Answer Questions <span className="font-bold text-blue-300">+15</span>
       </button>
       <button
         onClick={() => navigate('Connections?tab=salaries')}
-        className="px-3 py-1.5 text-sm bg-green-50 text-green-600 rounded-lg hover:bg-green-100 font-medium transition"
+        className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full border border-white/25 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur transition whitespace-nowrap"
       >
-        Add Salary Data +25
+        Add Salary Data <span className="font-bold text-green-300">+25</span>
       </button>
       <button
         onClick={() => navigate('Connections?tab=interviews')}
-        className="px-3 py-1.5 text-sm bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 font-medium transition"
+        className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full border border-white/25 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur transition whitespace-nowrap"
       >
-        Share Interview Qs +15
+        Share Interview Qs <span className="font-bold text-purple-300">+15</span>
       </button>
-    </div>
+    </>
   );
 }
