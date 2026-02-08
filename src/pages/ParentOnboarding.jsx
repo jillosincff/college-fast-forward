@@ -92,8 +92,16 @@ export default function ParentOnboarding() {
   if (showPushPrompt && onboardingComplete) {
     // If user answered a question, go straight to dashboard (they already saw success in Step 3)
     if (completionResult?.answeredQuestion) {
-      goToDashboard();
-      return null;
+      // Use useEffect-style pattern to navigate after render
+      setTimeout(() => navigate('ParentDashboard'), 0);
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 text-[#0021A5] animate-spin" />
+            <p className="text-slate-600">Taking you to your dashboard...</p>
+          </div>
+        </div>
+      );
     }
     
     return (
