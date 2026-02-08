@@ -183,16 +183,34 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
                 
                 {/* Family Karma */}
+                <TooltipProvider delayDuration={0}>
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-center border border-white/20 hover:bg-white/15 transition">
                   <div className="relative inline-block mb-2">
                     <div className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse" style={{ backgroundColor: '#FA4616' }} />
                     <span className="relative text-3xl sm:text-4xl md:text-5xl font-black text-white">{karmaPoints}</span>
                   </div>
-                  <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="text-white/40 hover:text-white/70 transition" aria-label="What is Family Karma?">
+                          <HelpCircle className="w-3.5 h-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[220px] text-center">
+                        <p className="text-xs">Help students, earn karma. More karma = more visibility for your student in match results.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(250, 70, 22, 0.3)', color: '#FFA07A', borderColor: 'rgba(250, 70, 22, 0.5)', borderWidth: '1px' }}>
                     {karmaBadge} {karmaLevel}
                   </div>
+                  {/* Quick actions under karma stat */}
+                  <div className="mt-3">
+                    <KarmaQuickActions />
+                  </div>
                 </div>
+                </TooltipProvider>
 
                 {/* Student Queue Position - Dynamic */}
                 <div className="backdrop-blur-xl rounded-3xl p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
