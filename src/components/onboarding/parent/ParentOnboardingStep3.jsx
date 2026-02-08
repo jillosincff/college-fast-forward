@@ -434,9 +434,9 @@ export default function ParentOnboardingStep3({
               autoFocus
             />
             <div className="flex justify-between mt-1">
-              {answerText.trim().length < 50 && answerText.length > 0 && (
+              {answerText.trim().length < 20 && answerText.length > 0 && (
                 <p className="text-xs text-amber-600">
-                  A bit more detail would really help ({50 - answerText.trim().length} more characters)
+                  A bit more detail would really help ({20 - answerText.trim().length} more characters)
                 </p>
               )}
               <p className="text-xs text-slate-400 ml-auto">{answerText.length} characters</p>
