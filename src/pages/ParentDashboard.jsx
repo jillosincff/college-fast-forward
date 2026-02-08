@@ -202,13 +202,6 @@ export default function ParentDashboard() {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(250, 70, 22, 0.3)', color: '#FFA07A', borderColor: 'rgba(250, 70, 22, 0.5)', borderWidth: '1px' }}>
-                    {karmaBadge} {karmaLevel}
-                  </div>
-                  {/* Quick actions under karma stat */}
-                  <div className="mt-3">
-                    <KarmaQuickActions />
-                  </div>
                 </div>
                 </TooltipProvider>
 
