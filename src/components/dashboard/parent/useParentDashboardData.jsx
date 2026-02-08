@@ -212,7 +212,7 @@ export function useParentDashboardData(user) {
         matchedCount,
         newTodayCount,
         myJobs,
-        studentsHelped: user?.students_helped_count || 0,
+        studentsHelped: studentsHelpedCount,
         familyKarma,
         leaderboard,
         recentActivity,
