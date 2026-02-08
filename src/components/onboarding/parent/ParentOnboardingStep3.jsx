@@ -193,7 +193,7 @@ export default function ParentOnboardingStep3({
   };
 
   const handleSubmitAnswer = async () => {
-    if (answerText.trim().length < 50) return;
+    if (answerText.trim().length < 20) return;
 
     setSubmitting(true);
     try {
