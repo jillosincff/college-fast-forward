@@ -157,7 +157,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span>AI career advisor for salary & interview guidance</span>
+                <span>Warm intros to professionals across 200+ industries</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
