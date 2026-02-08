@@ -455,10 +455,10 @@ export default function ParentOnboardingStep3({
             </button>
             <button
               onClick={handleSubmitAnswer}
-              disabled={answerText.trim().length < 50 || submitting}
+              disabled={answerText.trim().length < 20 || submitting}
               className={`
                 flex-1 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2
-                ${answerText.trim().length >= 50 && !submitting
+                ${answerText.trim().length >= 20 && !submitting
                   ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg'
                   : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 }
