@@ -192,7 +192,7 @@ export default function AnswerComposer({
           questionId: question.id,
           questionTitle: question.title || question.role || 'Your question',
           posterEmail: posterEmail,
-          posterName: question.poster_first_name || question.poster_name?.split(' ')[0] || question.student_name?.split(' ')[0],
+          posterName: getStudentFirstName(question),
           answererName: currentUser.full_name || currentUser.email.split('@')[0],
           answererTitle: currentUser.current_position || currentUser.current_role,
           answererCompany: currentUser.current_company,
