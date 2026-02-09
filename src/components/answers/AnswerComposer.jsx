@@ -318,7 +318,7 @@ export default function AnswerComposer({
 
 
 
-      <style jsx>{`
+      <style>{`
         .answer-composer {
           background: white;
           border: 1px solid #E5E7EB;
