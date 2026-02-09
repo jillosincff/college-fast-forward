@@ -321,37 +321,7 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
-          {/* ========== LINK STUDENT or BOOST CARD ========== */}
-          {!hasLinkedStudent ? (
-            <LinkStudentCard 
-              user={user} 
-              familyKarma={karmaPoints}
-              onLinked={async () => {
-                await refreshUser();
-                await refresh();
-              }}
-            />
-          ) : (
-            <StudentBoostCard
-              user={user}
-              linkedStudent={data.linkedStudent}
-              familyKarma={karmaPoints}
-              karmaLevel={data.familyKarmaLevel || karmaTier.level?.toLowerCase()}
-              boostMultiplier={data.familyBoostMultiplier || 0}
-              studentQuestionData={data.studentQueueStatus}
-            />
-          )}
-
-          {/* ========== WEEKLY STATS ========== */}
-          <WeeklyStatsPanel />
-
-          {/* ========== YOUR IMPACT ========== */}
-          <ImpactDashboard user={user} />
-
-          {/* ========== KARMA EXPLAINER (first visit only) ========== */}
-          <KarmaExplainerCard />
-
-          {/* ========== STUDENTS NEED HELP - Personalized ========== */}
+          {/* ========== STUDENTS NEED HELP - Personalized (PRIMARY ACTION) ========== */}
           <section className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
             
             <div className="px-6 py-5 border-b" style={{ background: 'linear-gradient(90deg, #FFF5F2 0%, #FEF3E7 100%)', borderColor: 'rgba(250, 70, 22, 0.2)' }}>
