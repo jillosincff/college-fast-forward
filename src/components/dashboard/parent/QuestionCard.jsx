@@ -1,13 +1,38 @@
 import React from 'react';
 import { navigate } from '@/components/utils/navigation';
 
+// Parse "Last, First" format names properly
+function getDisplayFirstName(question) {
+  const posterName = question.poster_name;
+  if (posterName && posterName.includes(',')) {
+    const parts = posterName.split(',').map(p => p.trim());
+    const first = parts[1]?.split(' ')[0];
+    if (first) return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  }
+  // poster_first_name may actually be the last name (data quirk)
+  if (question.poster_first_name && !question.poster_first_name.includes(',')) {
+    return question.poster_first_name.charAt(0).toUpperCase() + question.poster_first_name.slice(1).toLowerCase();
+  }
+  if (posterName && !posterName.includes('@')) {
+    return posterName.split(' ')[0];
+  }
+  return 'Student';
+}
+
+function getInitials(question) {
+  const name = question.poster_name;
+  if (name && name.includes(',')) {
+    const parts = name.split(',').map(p => p.trim());
+    const first = parts[1]?.split(' ')[0];
+    const last = parts[0];
+    if (first && last) return (first[0] + last[0]).toUpperCase();
+  }
+  return (name || question.poster_first_name || 'S')
+    .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
 export default function QuestionCard({ question, showMatchIndicator = true }) {
-  const initials = (question.poster_name || question.poster_first_name || 'S')
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(question);
 
   const hasNoAnswers = (question.answer_count || 0) === 0;
   const matchReason = question.matchReasons?.[0];
