@@ -18,6 +18,8 @@ import KarmaQuickActions from '@/components/dashboard/parent/KarmaQuickActions';
 import ImpactDashboard from '@/components/dashboard/parent/ImpactDashboard';
 import WeeklyStatsPanel from '@/components/dashboard/WeeklyStatsPanel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import LinkStudentCard from '@/components/dashboard/parent/LinkStudentCard';
+import StudentBoostCard from '@/components/dashboard/parent/StudentBoostCard';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -304,6 +306,27 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
+          {/* ========== LINK STUDENT or BOOST CARD ========== */}
+          {!hasLinkedStudent ? (
+            <LinkStudentCard 
+              user={user} 
+              familyKarma={karmaPoints}
+              onLinked={async () => {
+                await refreshUser();
+                await refresh();
+              }}
+            />
+          ) : (
+            <StudentBoostCard
+              user={user}
+              linkedStudent={data.linkedStudent}
+              familyKarma={karmaPoints}
+              karmaLevel={karmaTier.level?.toLowerCase()}
+              boostMultiplier={data.linkedStudent?.boost_level || 0}
+              studentQuestionData={data.studentQueueStatus}
+            />
+          )}
+
           {/* ========== WEEKLY STATS ========== */}
           <WeeklyStatsPanel />
 
@@ -312,37 +335,6 @@ export default function ParentDashboard() {
 
           {/* ========== KARMA EXPLAINER (first visit only) ========== */}
           <KarmaExplainerCard />
-
-          {/* ========== INVITE STUDENT BANNER (if no linked student) ========== */}
-          {!hasLinkedStudent && (
-            <section 
-              className="rounded-3xl p-5 border-2 flex flex-col sm:flex-row items-center justify-between gap-4"
-              style={{ 
-                background: 'linear-gradient(135deg, #FFF5F2 0%, #FEF3E7 100%)', 
-                borderColor: 'rgba(250, 70, 22, 0.4)' 
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%)' }}
-                >
-                  🎓
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">Is your student not yet on CFF?</p>
-                  <p className="text-sm text-gray-600">Invite them to join and link your accounts for karma boosts</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => navigate('GatorParentInvite')}
-                className="text-white font-semibold px-5 py-2.5 rounded-xl transition hover:scale-105 whitespace-nowrap w-full sm:w-auto"
-                style={{ backgroundColor: '#FA4616', boxShadow: '0 4px 12px rgba(250, 70, 22, 0.3)' }}
-              >
-                Invite Student →
-              </button>
-            </section>
-          )}
 
           {/* ========== STUDENTS NEED HELP - Personalized ========== */}
           <section className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
