@@ -305,6 +305,12 @@ export default function ParentOnboarding() {
           )}
           {step === 3 && (
             <>
+              <h1 className="text-xl font-bold mb-2 text-white">Link Your Student</h1>
+              <p className="text-sm text-white/90">Connect your accounts to activate Karma boosts</p>
+            </>
+          )}
+          {step === 4 && (
+            <>
               <h1 className="text-xl font-bold mb-2 text-white">Help your first student</h1>
               <p className="text-sm text-white/90">A student needs your expertise right now</p>
             </>
