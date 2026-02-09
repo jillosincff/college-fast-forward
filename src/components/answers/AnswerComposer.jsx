@@ -160,6 +160,7 @@ export default function AnswerComposer({
       // Award karma for posting an answer (parents and alumni)
       // Award karma even without family_group_id - awardKarma will handle finding linked students
       if (currentUser.persona === 'parent' || currentUser.persona === 'alumni' || currentUser.roles?.includes('parent') || currentUser.roles?.includes('alumni')) {
+        const oldLevel = currentUser.karma_level || 'none';
         base44.functions.invoke('awardKarma', {
           familyGroupId: currentUser.family_group_id || null,
           parentUserId: currentUser.id,
@@ -169,11 +170,15 @@ export default function AnswerComposer({
           description: 'Posted an answer'
         }).then(res => {
           console.log('Karma awarded for answer:', res?.data);
-          if (res?.data?.boost_multiplier > 0) {
-            toast({
-              title: "⚡ Karma Boost Active!",
-              description: `Your linked student's requests are now boosted for ${res.data.boost_multiplier >= 3 ? '48h (Platinum)' : res.data.boost_multiplier >= 2 ? '48h (Gold)' : '48h (Silver)'}`,
-            });
+          const { showKarmaToast, showTierUpToast } = require('@/components/karma/KarmaToast');
+          if (res?.data) {
+            showKarmaToast(toast, res.data);
+            // Detect tier-up
+            if (res.data.karma_level && res.data.karma_level !== oldLevel && res.data.karma_level !== 'none') {
+              setTimeout(() => {
+                showTierUpToast(toast, oldLevel, res.data.karma_level, res.data.boost_multiplier);
+              }, 2500);
+            }
           }
         }).catch(err => {
           console.log('Karma award failed (non-critical):', err.message);

@@ -4,6 +4,7 @@ import { ChevronUp, MessageSquare, Mail, Award, Clock } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
+import ThisHelpedButton from './ThisHelpedButton';
 // Upvote and Answer operations handled via backend function to bypass RLS
 import moment from 'moment';
 
@@ -232,6 +233,13 @@ export default function AnswerCard({
                 Message {answer.answerer_name?.split(' ')[0]}
               </Button>
             )}
+
+            {/* This Helped - for question asker */}
+            <ThisHelpedButton
+              answer={answer}
+              currentUser={currentUser}
+              isQuestionAsker={isQuestionAsker}
+            />
 
             {/* Mark as Best - Only for question asker */}
             {isQuestionAsker && !answer.is_best_answer && (

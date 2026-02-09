@@ -17,6 +17,7 @@ import PublicAnswerList from '@/components/questions/PublicAnswerList';
 import PublicQuestionGate from '@/components/questions/PublicQuestionGate';
 import LightweightRespondModal from '@/components/questions/LightweightRespondModal';
 import LightweightAnswerComposer from '@/components/answers/LightweightAnswerComposer';
+import ResolveQuestionButton from '@/components/questions/ResolveQuestionButton';
 import { useToast } from '@/components/ui/use-toast';
 import { trackEvent } from '@/components/utils/analytics';
 import moment from 'moment';
@@ -689,6 +690,12 @@ export default function QuestionDetailPage() {
                   Best answer selected
                 </span>
               )}
+              {question.status === 'fulfilled' && (
+                <span className="stat best">
+                  <Award className="w-4 h-4" />
+                  ✓ Resolved
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -753,6 +760,20 @@ export default function QuestionDetailPage() {
                       onMessage={handleMessageAuthor}
                     />
                   ))}
+                </div>
+              )}
+
+              {/* Resolve Button - for the question asker */}
+              {isQuestionAsker && question.status !== 'fulfilled' && (
+                <div className="mb-4">
+                  <ResolveQuestionButton
+                    question={question}
+                    answers={answers}
+                    currentUser={user}
+                    onResolved={() => {
+                      setQuestion(prev => prev ? { ...prev, status: 'fulfilled' } : prev);
+                    }}
+                  />
                 </div>
               )}
 

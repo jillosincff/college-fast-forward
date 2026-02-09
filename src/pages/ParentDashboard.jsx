@@ -15,6 +15,8 @@ import { useParentDashboardData } from '@/components/dashboard/parent/useParentD
 import QuestionCard from '@/components/dashboard/parent/QuestionCard';
 import KarmaExplainerCard from '@/components/dashboard/parent/KarmaExplainerCard';
 import KarmaQuickActions from '@/components/dashboard/parent/KarmaQuickActions';
+import ImpactDashboard from '@/components/dashboard/parent/ImpactDashboard';
+import WeeklyStatsPanel from '@/components/dashboard/WeeklyStatsPanel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function ParentDashboard() {
@@ -302,6 +304,12 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
+          {/* ========== WEEKLY STATS ========== */}
+          <WeeklyStatsPanel />
+
+          {/* ========== YOUR IMPACT ========== */}
+          <ImpactDashboard user={user} />
+
           {/* ========== KARMA EXPLAINER (first visit only) ========== */}
           <KarmaExplainerCard />
 
@@ -355,7 +363,7 @@ export default function ParentDashboard() {
                   </div>
                 </div>
                 <div className="hidden md:block font-semibold text-sm px-4 py-2 rounded-full" style={{ backgroundColor: 'rgba(0, 33, 165, 0.1)', color: '#0021A5' }}>
-                  +10 karma per answer
+                  +15 karma per answer
                 </div>
               </div>
             </div>

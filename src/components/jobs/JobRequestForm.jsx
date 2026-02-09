@@ -11,6 +11,7 @@ import { UploadFile } from '@/integrations/Core';
 import { useToast } from '@/components/ui/use-toast';
 import { useForm, Controller } from 'react-hook-form';
 import IndustrySelector from './IndustrySelector';
+import QuestionTemplates from '@/components/questions/QuestionTemplates';
 
 // Alumni career help types (consolidated 5 categories)
 const ALUMNI_HELP_TYPES = [
@@ -236,8 +237,18 @@ export default function JobRequestForm({
     </div>
   );
 
+  const handleTemplateSelect = (templateText) => {
+    // Pre-fill the description field with the template
+    reset({ ...control._formValues, description: templateText });
+  };
+
   return (
   <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+    {/* Question Templates for Students */}
+    {!isParentQuestion && !isAlumniCareerRequest && (
+      <QuestionTemplates onSelectTemplate={handleTemplateSelect} />
+    )}
+
     {/* Alumni Career Request Type Selection */}
     {isAlumniCareerRequest && (
       <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
