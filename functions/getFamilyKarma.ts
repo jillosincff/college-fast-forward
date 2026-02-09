@@ -56,18 +56,33 @@ Deno.serve(async (req) => {
     const familyGroupId = user.family_group_id;
     
     if (!familyGroupId) {
-      // User not in a family - return default state with new tier structure
+      // User not in a family - use individual karma from user record
+      const userKarma = user.karma_points || user.karma_earned || 0;
+      const userTier = getKarmaLevel(userKarma);
+      
+      // Get recent transactions for this user (without family group)
+      let userTransactions = [];
+      try {
+        userTransactions = await base44.asServiceRole.entities.KarmaTransaction.filter(
+          { parent_user_id: user.id },
+          '-created_date',
+          10
+        );
+      } catch (e) {
+        console.log('Could not fetch user transactions:', e.message);
+      }
+      
       return Response.json({
         success: true,
         family_group_id: null,
-        total_karma: 0,
-        karma_level: 'none',
-        boost_multiplier: 0,
-        user_karma: user.karma_earned || user.karma_points || 0,
-        recent_transactions: [],
-        next_level: getNextTier(0),
-        unlocked_benefits: [],
-        locked_benefits: getLockedBenefits(0),
+        total_karma: userKarma,
+        karma_level: userTier.name,
+        boost_multiplier: userTier.boost,
+        user_karma: userKarma,
+        recent_transactions: userTransactions,
+        next_level: getNextTier(userKarma),
+        unlocked_benefits: getUnlockedBenefits(userKarma),
+        locked_benefits: getLockedBenefits(userKarma),
         karma_percentile: 0
       });
     }
