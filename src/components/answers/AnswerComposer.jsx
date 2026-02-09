@@ -232,7 +232,7 @@ export default function AnswerComposer({
 
       toast({
         title: "✅ Answer posted!",
-        description: "Thank you for sharing your wisdom (+10 karma)"
+        description: "Thank you for sharing your wisdom (+15 karma)"
       });
 
       // Notify parent component to update UI immediately
