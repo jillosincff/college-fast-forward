@@ -203,6 +203,22 @@ export default function Onboarding() {
 
       await base44.auth.updateMe(updateData);
 
+      // Award karma for completing onboarding (+50 pts)
+      try {
+        await base44.functions.invoke('awardKarma', {
+          parentUserId: user.id,
+          parentEmail: user.email,
+          parentName: user.full_name,
+          actionType: 'onboarding_complete',
+          referenceType: 'onboarding',
+          referenceId: user.id,
+          description: 'Completed alumni onboarding'
+        });
+        console.log('✅ Alumni onboarding karma awarded');
+      } catch (karmaErr) {
+        console.log('Alumni onboarding karma failed (non-critical):', karmaErr.message);
+      }
+
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
