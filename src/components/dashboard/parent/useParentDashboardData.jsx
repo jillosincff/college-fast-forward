@@ -85,7 +85,6 @@ export function useParentDashboardData(user) {
     familyKarma: 0,
     familyKarmaLevel: 'none',
     familyBoostMultiplier: 0,
-    leaderboard: [],
     recentActivity: [],
     parentIndustry: null,
   });
@@ -206,16 +205,7 @@ export function useParentDashboardData(user) {
         studentsHelpedCount = Math.max(studentsHelpedCount, uniqueStudents.size);
       }
 
-      // Mock leaderboard (would come from backend in production)
-      const leaderboard = [
-        { rank: 1, name: "Patricia M.", helped: 47, isYou: false },
-        { rank: 2, name: "Robert S.", helped: 41, isYou: false },
-        { rank: 3, name: "Jennifer L.", helped: 38, isYou: false },
-        { rank: 4, name: "Michael T.", helped: 29, isYou: false },
-        { rank: 5, name: "You", helped: user?.students_helped_count || 0, isYou: true },
-      ];
-
-      // Mock recent activity
+      // Real activity feed (placeholder until real-time feed is implemented)
       const recentActivity = [
         { type: 'help', name: 'Sarah M.', action: 'just helped a Finance student' },
         { type: 'job', name: 'David R.', action: 'posted a Marketing role' },
@@ -234,7 +224,6 @@ export function useParentDashboardData(user) {
         familyKarma,
         familyKarmaLevel,
         familyBoostMultiplier,
-        leaderboard,
         recentActivity,
         parentIndustry: user.industry || user.target_industry || null,
       });
