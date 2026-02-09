@@ -161,7 +161,7 @@ export default function EnhancedQuestionCard({ question, gator, onVote, onMessag
               posterType === 'parent' ? 'bg-purple-100 text-purple-700' :
               'bg-amber-100 text-amber-700'
             }`}>
-              {posterType === 'student' ? '🎓 Student' : posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
+              {posterType === 'student' ? '🎓 UF Student' : posterType === 'parent' ? '👨‍👩‍👧 Parent' : '🎯 Alumni'}
             </span>
             
             {/* Help Types */}
