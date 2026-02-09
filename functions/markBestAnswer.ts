@@ -95,45 +95,104 @@ Deno.serve(async (req) => {
       }
     }
     
-    if (bestAnswer && answererUserId) {
+    if (bestAnswer) {
+      // Resolve the answer author - try user ID first, fall back to email lookup
+      let author = null;
+      
+      if (answererUserId) {
+        try {
+          const authorResults = await base44.asServiceRole.entities.User.filter({ id: answererUserId });
+          if (authorResults.length > 0) author = authorResults[0];
+        } catch (e) {
+          console.log('Author lookup by ID failed:', e.message);
+        }
+      }
+      
+      // Fallback: look up by email if user ID was null or lookup failed
+      if (!author && answererEmail && answererEmail.includes('@')) {
+        try {
+          const authorByEmail = await base44.asServiceRole.entities.User.filter({ email: answererEmail });
+          if (authorByEmail.length > 0) {
+            author = authorByEmail[0];
+            answererUserId = author.id;
+            console.log('Found author by email fallback:', answererEmail, '→ id:', author.id);
+          }
+        } catch (e) {
+          console.log('Author lookup by email failed:', e.message);
+        }
+      }
+
       // Award karma for best answer (+25) - parents/alumni only
-      try {
-        const answerAuthor = await base44.asServiceRole.entities.User.filter({ id: answererUserId });
-        if (answerAuthor.length > 0) {
-          const author = answerAuthor[0];
+      if (author) {
+        try {
           const isParentOrAlumni = author.persona === 'parent' || author.persona === 'alumni' || 
                                    author.roles?.includes('parent') || author.roles?.includes('alumni');
           
           if (isParentOrAlumni) {
             await base44.functions.invoke('awardKarma', {
               familyGroupId: author.family_group_id || null,
-              parentUserId: answererUserId,
-              parentEmail: answererEmail,
+              parentUserId: author.id,
+              parentEmail: author.email,
               actionType: 'best_answer',
               referenceType: 'answer',
               referenceId: answerId,
               description: 'Answer marked as best'
             });
-            console.log('Awarded 25 karma for best answer');
+            console.log('Awarded 25 karma for best answer to:', author.email);
           }
+        } catch (karmaErr) {
+          console.log('Karma award failed (non-critical):', karmaErr.message);
         }
-      } catch (karmaErr) {
-        console.log('Karma award failed (non-critical):', karmaErr.message);
+      } else {
+        console.log('Could not find answer author for karma award. userId:', answererUserId, 'email:', answererEmail);
       }
       
-      // Send notification to answerer
-      try {
-        await base44.asServiceRole.entities.Notification.create({
-          user_id: answererUserId,
-          user_email: answererEmail,
-          type: 'best_answer',
-          title: '🏆 Your answer was marked as Best Answer! (+25 karma)',
-          message: `${user.full_name || 'The question asker'} marked your answer as the best answer to their question.`,
-          link: `QuestionDetail?id=${questionId}`,
-          is_read: false
-        });
-      } catch (notifErr) {
-        console.error('Failed to create notification:', notifErr);
+      // Send notification to answerer (use email even if no user ID)
+      const notifUserId = author?.id || answererUserId;
+      const notifEmail = author?.email || answererEmail;
+      
+      if (notifEmail) {
+        try {
+          await base44.asServiceRole.entities.Notification.create({
+            user_id: notifUserId || '',
+            user_email: notifEmail,
+            type: 'best_answer',
+            title: '🏆 Your answer was marked as Best Answer! (+25 karma)',
+            message: `${user.full_name || 'The question asker'} marked your answer as the best answer to their question.`,
+            link: `QuestionDetail?id=${questionId}`,
+            is_read: false
+          });
+          
+          // Also send email notification
+          try {
+            const authorFirstName = author?.full_name?.split(' ')[0] || 'there';
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: notifEmail,
+              subject: '🏆 Your answer was marked as Best Answer! - College Fast Forward',
+              body: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f9fafb; padding: 20px;">
+                  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; margin: -30px -30px 20px -30px;">
+                      <h1 style="margin: 0; font-size: 24px;">🏆 Best Answer!</h1>
+                    </div>
+                    <p style="font-size: 16px;">Hi ${authorFirstName},</p>
+                    <p style="font-size: 16px;">${user.full_name || 'The question asker'} marked your answer as the <strong>Best Answer</strong> to their question! You earned <strong>+25 karma points</strong>.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="https://www.collegefastforward.com/#QuestionDetail?id=${questionId}" style="background-color: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">View Question →</a>
+                    </div>
+                    <p style="font-size: 14px; color: #6b7280; text-align: center;">Thank you for being an amazing Gator helper! 🐊</p>
+                  </div>
+                </div>
+              `,
+              from_name: 'College Fast Forward'
+            });
+            console.log('Best answer email sent to:', notifEmail);
+          } catch (emailErr) {
+            console.log('Best answer email failed (non-critical):', emailErr.message);
+          }
+        } catch (notifErr) {
+          console.error('Failed to create notification:', notifErr);
+        }
       }
     }
 
