@@ -102,9 +102,9 @@ export default function StudentBoostCard({ user, linkedStudent, familyKarma, kar
                 style={{ width: `${progressPercent}%`, background: 'linear-gradient(90deg, #0021A5, #FA4616)' }}
               />
             </div>
-            {nextTier && (
-              <p className="text-xs text-gray-400 mt-1.5">
-                {nextTier.remaining} more Karma to {nextTier.name} ({nextTier.boostLabel} boost)
+            {nextTier && nextTier.remaining > 0 && (
+              <p className="text-xs text-gray-500 mt-1.5 font-medium">
+                <span style={{ color: '#0021A5' }}>{nextTier.remaining} more Karma</span> to {nextTier.name} ({nextTier.boostLabel} boost)
               </p>
             )}
           </div>

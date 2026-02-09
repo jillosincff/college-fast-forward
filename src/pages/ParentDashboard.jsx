@@ -411,36 +411,39 @@ export default function ParentDashboard() {
           {/* ========== QUICK ACTIONS ========== */}
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 hover:shadow-lg transition">
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0, 33, 165, 0.1) 0%, rgba(0, 33, 165, 0.2) 100%)' }}>
-                  <span className="text-2xl">👤</span>
+            {/* Complete Profile card — only show if still incomplete */}
+            {profilePercent < 100 && (
+              <div className="bg-white rounded-3xl p-6 border border-gray-200 hover:shadow-lg transition">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0, 33, 165, 0.1) 0%, rgba(0, 33, 165, 0.2) 100%)' }}>
+                    <span className="text-2xl">👤</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">Complete Your Profile</h3>
+                    <p className="text-gray-500 text-sm">Better matching with students</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">Complete Your Profile</h3>
-                  <p className="text-gray-500 text-sm">Better matching with students</p>
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Profile strength</span>
+                    <span className="font-bold" style={{ color: '#0021A5' }}>{profilePercent}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-3">
+                    <div 
+                      className="h-3 rounded-full transition-all shadow-sm"
+                      style={{ width: `${profilePercent}%`, background: 'linear-gradient(90deg, #0021A5 0%, #003DCE 100%)' }}
+                    />
+                  </div>
                 </div>
+                <button 
+                  onClick={() => navigate('ProfileEdit')}
+                  className="w-full text-white font-semibold py-3 rounded-xl transition"
+                  style={{ backgroundColor: '#0021A5' }}
+                >
+                  Complete Profile
+                </button>
               </div>
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500">Profile strength</span>
-                  <span className="font-bold" style={{ color: '#0021A5' }}>{profilePercent}%</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-3">
-                  <div 
-                    className="h-3 rounded-full transition-all shadow-sm"
-                    style={{ width: `${profilePercent}%`, background: 'linear-gradient(90deg, #0021A5 0%, #003DCE 100%)' }}
-                  />
-                </div>
-              </div>
-              <button 
-                onClick={() => navigate('ProfileEdit')}
-                className="w-full text-white font-semibold py-3 rounded-xl transition"
-                style={{ backgroundColor: '#0021A5' }}
-              >
-                Complete Profile
-              </button>
-            </div>
+            )}
 
             <div className="rounded-3xl p-6 border" style={{ background: data.myJobs.length > 0 ? 'linear-gradient(135deg, #FFF8F5 0%, #FEF5EF 100%)' : 'white', borderColor: data.myJobs.length > 0 ? 'rgba(250, 70, 22, 0.3)' : '#e5e7eb' }}>
               <div className="flex items-center justify-between">

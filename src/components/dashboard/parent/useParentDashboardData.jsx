@@ -208,12 +208,8 @@ export function useParentDashboardData(user) {
         studentsHelpedCount = Math.max(studentsHelpedCount, uniqueStudents.size);
       }
 
-      // Real activity feed (placeholder until real-time feed is implemented)
-      const recentActivity = [
-        { type: 'help', name: 'Sarah M.', action: 'just helped a Finance student' },
-        { type: 'job', name: 'David R.', action: 'posted a Marketing role' },
-        { type: 'best', name: 'Lisa K.', action: 'earned Best Answer 🏆' },
-      ];
+      // Real activity feed (will be populated from real data in future)
+      const recentActivity = [];
 
       setData({
         linkedStudent,
