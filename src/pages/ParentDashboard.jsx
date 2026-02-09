@@ -248,12 +248,27 @@ export default function ParentDashboard() {
 
               {/* Motivational nudge - Dynamic */}
               <div className="mt-4 text-center">
-                {hasLinkedStudent && hasActiveRequest ? (
-                  <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
-                    <span style={{ color: '#FA4616' }}>✨</span>
-                    <span className="text-sm">Answer 2 more questions to move {studentFirstName} into the <strong>top 10</strong></span>
-                    <span className="text-white/50">→</span>
-                  </div>
+                {hasLinkedStudent && hasActiveRequest ? (() => {
+                  const pos = studentPosition;
+                  const total = data.studentQueueStatus.totalQuestions || 40;
+                  let milestoneText;
+                  if (pos <= 1) {
+                    milestoneText = <span className="text-sm">{studentFirstName} is <strong>#1</strong> in the feed! Keep it up 🔥</span>;
+                  } else if (pos <= 5) {
+                    milestoneText = <span className="text-sm">Answer 1 more question to push {studentFirstName} to <strong>#1</strong></span>;
+                  } else if (pos <= 10) {
+                    milestoneText = <span className="text-sm">Answer 2 more questions to move {studentFirstName} into the <strong>top 5</strong></span>;
+                  } else {
+                    milestoneText = <span className="text-sm">Answer 2 more questions to move {studentFirstName} into the <strong>top 10</strong></span>;
+                  }
+                  return (
+                    <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
+                      <span style={{ color: '#FA4616' }}>✨</span>
+                      {milestoneText}
+                      {pos > 1 && <span className="text-white/50">→</span>}
+                    </div>
+                  );
+                })()
                 ) : hasLinkedStudent ? (
                   <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
                     <span style={{ color: '#FA4616' }}>💡</span>
