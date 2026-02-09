@@ -382,7 +382,10 @@ Deno.serve(async (req) => {
     allScoredParents.sort((a, b) => b.score - a.score);
     
     // CRITICAL: Always take TOP 10 parents (more options = better)
-    const MIN_MATCHES = 10;
+    // But boost requests from students with active karma boosts get more matches
+    const karmaBoost = helpRequests[0]?.karma_boost || 0;
+    const boostActive = karmaBoost > 0 && (!helpRequests[0]?.boosted_until || new Date(helpRequests[0].boosted_until) > new Date());
+    const MIN_MATCHES = boostActive ? Math.min(15, allScoredParents.length) : 10;
     const topParentMatches = allScoredParents.slice(0, MIN_MATCHES);
     
     const matchesData = [];
