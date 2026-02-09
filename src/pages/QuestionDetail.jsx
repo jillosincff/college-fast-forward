@@ -543,7 +543,43 @@ export default function QuestionDetailPage() {
 
   const posterType = question.poster_type || 'student';
   const isAnonymous = question.is_anonymous && posterType === 'parent';
-  const posterName = isAnonymous ? 'Anonymous Parent' : (question.student_name || 'Gator');
+  
+  // Derive poster display name with proper fallback chain
+  const getPosterDisplayName = () => {
+    if (isAnonymous) return 'Anonymous Parent';
+    
+    // Try poster_first_name + poster_last_name (best source)
+    if (question.poster_first_name && question.poster_last_name && !question.poster_first_name.includes(',')) {
+      const first = question.poster_first_name.charAt(0).toUpperCase() + question.poster_first_name.slice(1).toLowerCase();
+      const lastInitial = question.poster_last_name.charAt(0).toUpperCase();
+      return `${first} ${lastInitial}.`;
+    }
+    
+    // Try poster_name (may be "Last, First" format)
+    if (question.poster_name) {
+      const name = question.poster_name;
+      if (name.includes(',')) {
+        const parts = name.split(',').map(p => p.trim());
+        const first = parts[1]?.split(' ')[0];
+        const lastInitial = parts[0]?.charAt(0)?.toUpperCase();
+        if (first && lastInitial) return `${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()} ${lastInitial}.`;
+      }
+      // Regular "First Last" format
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return `${parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase()} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
+      }
+      if (name && !name.includes('@')) return name;
+    }
+    
+    // Try student_name
+    if (question.student_name && !question.student_name.includes('@')) {
+      return question.student_name;
+    }
+    
+    return 'A UF Student';
+  };
+  const posterName = getPosterDisplayName();
 
   return (
     <div className="question-detail-page overflow-x-hidden">
