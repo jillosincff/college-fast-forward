@@ -1,26 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
-import { X } from 'lucide-react';
+import { X, ChevronRight } from 'lucide-react';
 
 const DISMISSED_KEY = 'cff_karma_explainer_dismissed';
 
 export default function KarmaExplainerCard() {
-  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem(DISMISSED_KEY);
-    if (!dismissed) {
-      setVisible(true);
+    const wasDismissed = localStorage.getItem(DISMISSED_KEY);
+    if (!wasDismissed) {
+      setDismissed(false);
+      setExpanded(true);
+    } else {
+      setDismissed(true);
+      setExpanded(false);
     }
   }, []);
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISSED_KEY, 'true');
-    setVisible(false);
+    setDismissed(true);
+    setExpanded(false);
   };
 
-  if (!visible) return null;
+  // Collapsed teaser — always visible after dismiss
+  if (dismissed && !expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-200 transition group"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="text-lg">📊</span>
+          <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-700 transition">How Karma Works</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition" />
+      </button>
+    );
+  }
 
+  // Expanded view
   return (
     <section className="relative rounded-2xl sm:rounded-3xl border-2 p-5 sm:p-6 overflow-hidden"
       style={{
@@ -28,7 +49,6 @@ export default function KarmaExplainerCard() {
         borderColor: 'rgba(0, 33, 165, 0.25)'
       }}
     >
-      {/* Close button */}
       <button
         onClick={handleDismiss}
         className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-white/60 transition text-slate-400 hover:text-slate-600"
@@ -49,7 +69,6 @@ export default function KarmaExplainerCard() {
         </div>
       </div>
 
-      {/* Quick ways to earn */}
       <div className="mb-5">
         <p className="text-sm font-semibold text-slate-700 mb-2">Quick ways to earn karma:</p>
         <div className="flex flex-col sm:flex-row gap-2">

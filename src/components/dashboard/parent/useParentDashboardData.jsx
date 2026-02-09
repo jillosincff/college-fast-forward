@@ -80,6 +80,7 @@ export function useParentDashboardData(user) {
     allQuestionsCount: 0,
     matchedCount: 0,
     newTodayCount: 0,
+    unansweredCount: 0,
     myJobs: [],
     studentsHelped: 0,
     familyKarma: 0,
@@ -149,6 +150,7 @@ export function useParentDashboardData(user) {
       let allQuestionsCount = 0;
       let matchedCount = 0;
       let newTodayCount = 0;
+      let unansweredCount = 0;
       
       if (jobRequestsResult.status === 'fulfilled') {
         const allQuestions = jobRequestsResult.value || [];
@@ -158,6 +160,7 @@ export function useParentDashboardData(user) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         newTodayCount = allQuestions.filter(q => new Date(q.created_date) >= today).length;
+        unansweredCount = allQuestions.filter(q => (q.answer_count || 0) === 0).length;
         
         // Build parent profile for matching
         const parentProfile = {
@@ -219,6 +222,7 @@ export function useParentDashboardData(user) {
         allQuestionsCount,
         matchedCount,
         newTodayCount,
+        unansweredCount,
         myJobs,
         studentsHelped: studentsHelpedCount,
         familyKarma,

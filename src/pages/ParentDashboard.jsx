@@ -290,33 +290,30 @@ export default function ParentDashboard() {
           </div>
         </section>
 
-        {/* ========== LIVE ACTIVITY PULSE ========== */}
-        <section className="bg-white border-b">
-          <div className="max-w-4xl mx-auto px-6 py-3">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#FA4616' }} />
-                  <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: '#FA4616' }} />
-                </span>
-                <span className="text-sm font-semibold text-gray-600">Live</span>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  {data.recentActivity.map((item, i) => (
-                    <React.Fragment key={i}>
-                      {i > 0 && <span className="text-gray-300">•</span>}
-                      <span><strong className="text-gray-700">{item.name}</strong> {item.action}</span>
-                    </React.Fragment>
-                  ))}
+        {/* Profile completion banner — shown below hero if < 50% */}
+        {profilePercent < 50 && (
+          <section className="bg-gradient-to-r from-blue-50 to-orange-50 border-b border-blue-100">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+              <button
+                onClick={() => navigate('ProfileEdit')}
+                className="w-full flex items-center justify-between gap-3 group"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-lg flex-shrink-0">👤</span>
+                  <span className="text-sm text-slate-700 truncate">
+                    <strong>Complete your profile</strong> to get matched with more student questions
+                  </span>
                 </div>
-              </div>
-              <div className="hidden md:block text-sm text-gray-400">
-                <strong style={{ color: '#0021A5' }}>127</strong> students helped this week
-              </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'rgba(0, 33, 165, 0.1)', color: '#0021A5' }}>
+                    {profilePercent}%
+                  </span>
+                  <span className="text-blue-600 group-hover:translate-x-0.5 transition-transform text-sm">→</span>
+                </div>
+              </button>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
@@ -347,13 +344,21 @@ export default function ParentDashboard() {
 
             <div className="p-4 space-y-3">
               {data.matchedQuestions.length > 0 ? (
-                data.matchedQuestions.slice(0, 3).map((q) => (
-                  <QuestionCard 
-                    key={q.id} 
-                    question={q} 
-                    showMatchIndicator={!!data.parentIndustry}
-                  />
-                ))
+                data.matchedQuestions.slice(0, 3).map((q) => {
+                  const studentEmails = data.linkedStudent 
+                    ? [data.linkedStudent.email?.toLowerCase()].filter(Boolean) 
+                    : [];
+                  const isOwn = studentEmails.includes(q.poster_email?.toLowerCase()) || 
+                                studentEmails.includes(q.created_by?.toLowerCase());
+                  return (
+                    <QuestionCard 
+                      key={q.id} 
+                      question={q} 
+                      showMatchIndicator={!!data.parentIndustry}
+                      isOwnStudent={isOwn}
+                    />
+                  );
+                })
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>No questions yet. Check back soon!</p>
@@ -367,7 +372,7 @@ export default function ParentDashboard() {
                 className="text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg transition hover:scale-105"
                 style={{ backgroundColor: '#0021A5', boxShadow: '0 8px 20px rgba(0, 33, 165, 0.3)' }}
               >
-                See All {data.allQuestionsCount} Questions
+                See All {data.allQuestionsCount} Questions{data.unansweredCount > 0 ? ` — ${data.unansweredCount} still need answers` : ''}
               </button>
             </div>
             

@@ -31,7 +31,7 @@ function getInitials(question) {
     .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
-export default function QuestionCard({ question, showMatchIndicator = true }) {
+export default function QuestionCard({ question, showMatchIndicator = true, isOwnStudent = false }) {
   const initials = getInitials(question);
 
   const hasNoAnswers = (question.answer_count || 0) === 0;
@@ -79,6 +79,15 @@ export default function QuestionCard({ question, showMatchIndicator = true }) {
             <span className="bg-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">
               {question.target_industry || 'General'}
             </span>
+            
+            {isOwnStudent && (
+              <span 
+                className="text-xs font-semibold px-3 py-1 rounded-full"
+                style={{ backgroundColor: 'rgba(250, 70, 22, 0.1)', color: '#D35400' }}
+              >
+                ⭐ Your student
+              </span>
+            )}
             
             {hasNoAnswers && (
               <span 
