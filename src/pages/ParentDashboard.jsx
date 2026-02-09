@@ -373,7 +373,35 @@ export default function ParentDashboard() {
             
           </section>
 
-          {/* Leaderboard removed — will re-add when real activity data is available */}
+          {/* ========== LINK STUDENT or BOOST CARD ========== */}
+          {!hasLinkedStudent ? (
+            <LinkStudentCard 
+              user={user} 
+              familyKarma={karmaPoints}
+              onLinked={async () => {
+                await refreshUser();
+                await refresh();
+              }}
+            />
+          ) : (
+            <StudentBoostCard
+              user={user}
+              linkedStudent={data.linkedStudent}
+              familyKarma={karmaPoints}
+              karmaLevel={data.familyKarmaLevel || karmaTier.level?.toLowerCase()}
+              boostMultiplier={data.familyBoostMultiplier || 0}
+              studentQuestionData={data.studentQueueStatus}
+            />
+          )}
+
+          {/* ========== WEEKLY STATS ========== */}
+          <WeeklyStatsPanel />
+
+          {/* ========== YOUR IMPACT ========== */}
+          <ImpactDashboard user={user} />
+
+          {/* ========== KARMA EXPLAINER (dismissible) ========== */}
+          <KarmaExplainerCard />
 
           {/* ========== QUICK ACTIONS ========== */}
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
