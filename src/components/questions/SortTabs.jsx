@@ -49,8 +49,13 @@ export function getTrendingScore(question) {
   // Recent activity boost (answers in last 24h would be ideal but we approximate)
   const recentBoost = ageHours < 24 ? 10 : ageHours < 48 ? 5 : 0;
   
+  // Karma boost from parent activity (boosts student visibility)
+  const karmaBoost = question.karma_boost || 0;
+  const boostActive = karmaBoost > 0 && (!question.boosted_until || new Date(question.boosted_until) > new Date(now));
+  const karmaBonus = boostActive ? karmaBoost * 15 : 0;
+  
   // Weighted engagement score
-  const engagement = (upvotes * 3) + (answers * 5) + recentBoost + (views * 0.1);
+  const engagement = (upvotes * 3) + (answers * 5) + recentBoost + (views * 0.1) + karmaBonus;
   
   // Time decay (Reddit-style gravity)
   const gravity = 1.8;
@@ -59,22 +64,48 @@ export function getTrendingScore(question) {
   return engagement / decay;
 }
 
+// Helper to check if a question has an active karma boost
+function hasActiveKarmaBoost(q) {
+  return (q.karma_boost || 0) > 0 && (!q.boosted_until || new Date(q.boosted_until) > new Date());
+}
+
+// Comparator that pins karma-boosted questions to the top within any sort
+function withKarmaBoostPriority(primarySort) {
+  return (a, b) => {
+    const aBoost = hasActiveKarmaBoost(a);
+    const bBoost = hasActiveKarmaBoost(b);
+    
+    // Both boosted or both not boosted → use primary sort
+    if (aBoost === bBoost) {
+      // If both boosted, higher boost wins first, then primary sort
+      if (aBoost && bBoost) {
+        const boostDiff = (b.karma_boost || 0) - (a.karma_boost || 0);
+        if (boostDiff !== 0) return boostDiff;
+      }
+      return primarySort(a, b);
+    }
+    
+    // Boosted questions float to top
+    return aBoost ? -1 : 1;
+  };
+}
+
 export function sortQuestions(questions, sortBy) {
   const sorted = [...questions];
   
   switch (sortBy) {
     case 'trending':
-      return sorted.sort((a, b) => getTrendingScore(b) - getTrendingScore(a));
+      return sorted.sort(withKarmaBoostPriority((a, b) => getTrendingScore(b) - getTrendingScore(a)));
     case 'recent':
-      return sorted.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      return sorted.sort(withKarmaBoostPriority((a, b) => new Date(b.created_date) - new Date(a.created_date)));
     case 'top':
-      return sorted.sort((a, b) => (b.total_upvotes || 0) - (a.total_upvotes || 0));
+      return sorted.sort(withKarmaBoostPriority((a, b) => (b.total_upvotes || 0) - (a.total_upvotes || 0)));
     case 'discussed':
-      return sorted.sort((a, b) => (b.answer_count || 0) - (a.answer_count || 0));
+      return sorted.sort(withKarmaBoostPriority((a, b) => (b.answer_count || 0) - (a.answer_count || 0)));
     case 'unanswered':
       return sorted
         .filter(q => (q.answer_count || 0) === 0)
-        .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        .sort(withKarmaBoostPriority((a, b) => new Date(b.created_date) - new Date(a.created_date)));
     default:
       return sorted;
   }

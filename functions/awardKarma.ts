@@ -22,13 +22,13 @@ const KARMA_VALUES = {
   opportunity_application: 10
 };
 
-// NEW Level thresholds based on spec
+// Level thresholds based on spec
 const KARMA_TIERS = [
   { name: 'none', threshold: 0, boost: 0 },
-  { name: 'active', threshold: 100, boost: 1 },
-  { name: 'engaged', threshold: 300, boost: 1.5 },
-  { name: 'priority', threshold: 500, boost: 2 },
-  { name: 'champion', threshold: 1000, boost: 3 }
+  { name: 'active', threshold: 1, boost: 0.5 },
+  { name: 'engaged', threshold: 50, boost: 1 },
+  { name: 'priority', threshold: 150, boost: 2 },
+  { name: 'champion', threshold: 500, boost: 3 }
 ];
 
 // Boost duration in hours
