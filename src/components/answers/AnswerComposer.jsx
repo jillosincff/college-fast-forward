@@ -14,14 +14,26 @@ const MAX_CHARS = 5000;
 
 // Helper to extract student first name
 const getStudentFirstName = (question) => {
-  if (question?.poster_first_name) return question.poster_first_name;
+  // Check poster_first_name but skip if it contains comma (malformed "Last, First")
+  if (question?.poster_first_name && !question.poster_first_name.includes(',')) {
+    const name = question.poster_first_name.trim();
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  }
   if (question?.poster_name) {
     // Handle "Last, First" format
     const parts = question.poster_name.split(',').map(p => p.trim());
-    if (parts.length >= 2) return parts[1].split(' ')[0];
-    return question.poster_name.split(' ')[0];
+    if (parts.length >= 2) {
+      const first = parts[1].split(' ')[0];
+      if (first) return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+    }
+    // Regular "First Last" format
+    const first = question.poster_name.split(' ')[0];
+    if (first && !first.includes('@')) return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
   }
-  if (question?.student_name) return question.student_name.split(' ')[0];
+  if (question?.student_name) {
+    const first = question.student_name.split(' ')[0];
+    if (first && !first.includes('@')) return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  }
   return 'this student';
 };
 
