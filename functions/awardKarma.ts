@@ -110,23 +110,21 @@ Deno.serve(async (req) => {
       console.log('Could not fetch parent user:', e.message);
     }
     
-    // Create karma transaction if we have a family group
-    if (effectiveFamilyGroupId) {
-      try {
-        await base44.asServiceRole.entities.KarmaTransaction.create({
-          family_group_id: effectiveFamilyGroupId,
-          parent_user_id: parentUserId,
-          parent_email: parentEmail || parentUser?.email || '',
-          parent_name: parentName || parentUser?.full_name || '',
-          points: points,
-          action_type: actionType,
-          reference_type: referenceType || '',
-          reference_id: referenceId || '',
-          description: description || getDefaultDescription(actionType, points)
-        });
-      } catch (e) {
-        console.log('Could not create karma transaction:', e.message);
-      }
+    // Create karma transaction (always, even without family group, for tracking)
+    try {
+      await base44.asServiceRole.entities.KarmaTransaction.create({
+        family_group_id: effectiveFamilyGroupId || `user_${parentUserId}`,
+        parent_user_id: parentUserId,
+        parent_email: parentEmail || parentUser?.email || '',
+        parent_name: parentName || parentUser?.full_name || '',
+        points: points,
+        action_type: actionType,
+        reference_type: referenceType || '',
+        reference_id: referenceId || '',
+        description: description || getDefaultDescription(actionType, points)
+      });
+    } catch (e) {
+      console.log('Could not create karma transaction:', e.message);
     }
     
     // Update user's individual karma count and timestamp
