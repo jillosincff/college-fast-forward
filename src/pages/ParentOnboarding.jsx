@@ -9,6 +9,7 @@ import ParentOnboardingStep2 from '@/components/onboarding/parent/ParentOnboardi
 import ParentOnboardingStep3 from '@/components/onboarding/parent/ParentOnboardingStep3';
 import ParentOnboardingSuccess from '@/components/onboarding/parent/ParentOnboardingSuccess';
 import Testimonial from '@/components/onboarding/parent/Testimonial';
+import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -17,6 +18,7 @@ export default function ParentOnboarding() {
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [completionResult, setCompletionResult] = useState(null);
+  const [linkedStudentEmail, setLinkedStudentEmail] = useState(null);
   
   // Form data across all steps
   const [formData, setFormData] = useState({
@@ -30,6 +32,17 @@ export default function ParentOnboarding() {
 
   const updateFormData = (updates) => {
     setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleLinkStudentComplete = (result) => {
+    if (result?.studentEmail) {
+      setLinkedStudentEmail(result.studentEmail);
+    }
+    setStep(4);
+  };
+
+  const handleLinkStudentSkip = () => {
+    setStep(4);
   };
 
   const handleStep3Complete = async (result) => {
@@ -140,10 +153,10 @@ export default function ParentOnboarding() {
     );
   }
 
-  // Progress bar
+  // Progress bar — now 4 steps (1=About, 2=Background, 3=Link Student, 4=Help)
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-2 mb-8">
-      {[1, 2, 3].map((s) => (
+      {[1, 2, 3, 4].map((s) => (
         <div key={s} className="flex items-center">
           <div className={`
             w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
@@ -151,8 +164,8 @@ export default function ParentOnboarding() {
           `}>
             {step > s ? <Check className="w-4 h-4" /> : s}
           </div>
-          {s < 3 && (
-            <div className={`w-12 h-1 mx-1 rounded ${step > s ? 'bg-green-500' : 'bg-slate-200'}`} />
+          {s < 4 && (
+            <div className={`w-8 h-1 mx-1 rounded ${step > s ? 'bg-green-500' : 'bg-slate-200'}`} />
           )}
         </div>
       ))}
@@ -215,7 +228,33 @@ export default function ParentOnboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 3</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 4</p>
+            <h1 className="text-3xl font-bold text-white">Link Your Student</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Connect your account to your student so your Karma boosts their visibility.
+          </p>
+          
+          <div className="space-y-3 pt-4">
+            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
+              <span className="text-2xl">🔗</span>
+              <p className="text-white">Every time you help a student, YOUR student's questions move up in the feed</p>
+            </div>
+            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
+              <span className="text-2xl">⚡</span>
+              <p className="text-white">More Karma = higher boost multiplier = more visibility</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (step === 4) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 4</p>
             <h1 className="text-3xl font-bold text-white">Help your first student</h1>
           </div>
           
@@ -308,10 +347,18 @@ export default function ParentOnboarding() {
               )}
 
               {step === 3 && (
+                <LinkStudentStep
+                  user={user}
+                  onNext={handleLinkStudentComplete}
+                  onSkip={handleLinkStudentSkip}
+                />
+              )}
+
+              {step === 4 && (
                 <ParentOnboardingStep3
                   formData={formData}
                   onComplete={handleStep3Complete}
-                  onBack={() => setStep(2)}
+                  onBack={() => setStep(3)}
                   user={user}
                 />
               )}
