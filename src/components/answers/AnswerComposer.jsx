@@ -114,10 +114,31 @@ export default function AnswerComposer({
           answerer_persona: currentUser.persona,
           answer_text: answerText.trim()
         };
+        
+        // ALSO create an Answer record so best-answer and upvotes work consistently
+        try {
+          await Answer.create({
+            question_id: question.id,
+            question_type: 'JobRequest',
+            answerer_user_id: currentUser.id,
+            answerer_email: currentUser.email,
+            answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
+            answerer_title: currentUser.current_position || currentUser.current_role,
+            answerer_company: currentUser.current_company,
+            answerer_years_experience: currentUser.years_experience,
+            answerer_persona: currentUser.persona,
+            answer_text: answerText.trim(),
+            upvote_count: 0,
+            is_best_answer: false
+          });
+        } catch (dupeErr) {
+          console.log('Dual Answer record creation failed (non-critical):', dupeErr.message);
+        }
       } else {
         // Use Answer entity for HelpRequests
         newAnswer = await Answer.create({
           question_id: question.id,
+          question_type: 'HelpRequest',
           answerer_user_id: currentUser.id,
           answerer_email: currentUser.email,
           answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
