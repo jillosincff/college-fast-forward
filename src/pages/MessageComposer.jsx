@@ -211,6 +211,21 @@ export default function MessageComposer() {
         } catch (emailError) {
           console.log('⚠️ Email notification failed:', emailError.message);
         }
+
+        // Award karma for responding to a message (parents/alumni only)
+        const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
+                                 user.roles?.includes('parent') || user.roles?.includes('alumni');
+        if (isParentOrAlumni) {
+          base44.functions.invoke('awardKarma', {
+            parentUserId: user.id,
+            parentEmail: user.email,
+            parentName: user.full_name,
+            actionType: 'message_responded',
+            referenceType: 'message',
+            referenceId: message.id,
+            description: 'Sent a message'
+          }).catch(e => console.log('Message karma failed (non-critical):', e.message));
+        }
       }
     } catch (error) {
       console.error('Failed to send message:', error);

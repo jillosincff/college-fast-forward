@@ -235,13 +235,16 @@ export default function ParentOnboardingStep3({
       }
 
       // Award karma and increment students_helped_count
+      // Use the created JobAnswer's job_request_id + timestamp as a reference to the actual answer
+      const answerRefId = `onboarding_answer_${currentQuestion.id}_${Date.now()}`;
       base44.functions.invoke('awardKarma', {
         familyGroupId: user.family_group_id || null,
         parentUserId: user.id,
         parentEmail: user.email,
         parentName: user.full_name,
         actionType: 'answer',
-        referenceId: currentQuestion.id,
+        referenceType: 'job_answer',
+        referenceId: answerRefId,
         description: 'Answered a question during onboarding'
       }).then(res => {
         console.log('Karma awarded for onboarding answer:', res?.data);

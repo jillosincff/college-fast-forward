@@ -206,6 +206,26 @@ Deno.serve(async (req) => {
       from_name: 'College Fast Forward'
     });
 
+    // Award karma for giving a referral (+50 pts)
+    try {
+      const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
+                               user.roles?.includes('parent') || user.roles?.includes('alumni');
+      if (isParentOrAlumni) {
+        await base44.functions.invoke('awardKarma', {
+          parentUserId: user.id,
+          parentEmail: user.email,
+          parentName: user.full_name,
+          actionType: 'referral_given',
+          referenceType: 'referral',
+          referenceId: questionId,
+          description: `Referred ${inviteeEmail} to help a student`
+        });
+        console.log('✅ Referral karma awarded');
+      }
+    } catch (karmaErr) {
+      console.log('Referral karma failed (non-critical):', karmaErr.message);
+    }
+
     // Track analytics
     try {
       await base44.analytics.track({

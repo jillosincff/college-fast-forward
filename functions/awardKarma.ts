@@ -189,13 +189,26 @@ Deno.serve(async (req) => {
       const oldLevel = familyKarma.karma_level || 'none';
       const tierUnlocked = oldLevel !== familyLevel && familyLevel !== 'none';
       
+      // Calculate this_month_karma
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      let thisMonthKarma = (familyKarma.this_month_karma || 0) + points;
+
+      // Reset monthly karma if month_reset_date is in the past
+      if (familyKarma.month_reset_date && new Date(familyKarma.month_reset_date) < monthStart) {
+        thisMonthKarma = points; // Reset to just this action's points
+      }
+
+      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
       // Update family karma
       await base44.asServiceRole.entities.FamilyKarma.update(familyKarma.id, {
         total_karma: newFamilyTotal,
         karma_level: familyLevel,
         boost_multiplier: familyBoost,
         last_karma_earned_at: now.toISOString(),
-        boost_expires_at: boostExpiresAt.toISOString()
+        boost_expires_at: boostExpiresAt.toISOString(),
+        this_month_karma: thisMonthKarma,
+        month_reset_date: nextMonthStart.toISOString()
       });
       
       // Update all family members' cached karma
