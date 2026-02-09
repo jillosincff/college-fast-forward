@@ -148,6 +148,8 @@ export default function StudentOnboarding() {
         description: helpRequest.trim(),
         target_industry: industries[0] || 'Other',
         poster_type: 'student',
+        // CRITICAL: Always store poster_email so answer notifications can reach the student
+        poster_email: user?.email,
         poster_name: user?.full_name || 'Student',
         poster_first_name: firstName,
         poster_last_name: lastName,

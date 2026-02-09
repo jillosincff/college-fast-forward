@@ -215,6 +215,25 @@ export default function ParentOnboardingStep3({
       // NOTE: We no longer update answer_count on JobRequest due to RLS restrictions
       // The count is calculated dynamically from JobAnswer records
 
+      // Send email notification to the student who posted the question
+      const posterEmail = currentQuestion.poster_email || currentQuestion.student_email;
+      if (posterEmail && posterEmail.includes('@') && posterEmail !== user.email) {
+        base44.functions.invoke('sendAnswerNotification', {
+          questionId: currentQuestion.id,
+          questionTitle: currentQuestion.title || currentQuestion.role || 'Your question',
+          posterEmail: posterEmail,
+          posterName: currentQuestion.poster_first_name || currentQuestion.poster_name?.split(',')[0],
+          answererName: user.full_name || user.email.split('@')[0],
+          answererTitle: formData.jobTitle,
+          answererCompany: formData.company,
+          answerPreview: answerText.trim()
+        }).then(res => {
+          console.log('📧 Answer notification sent from onboarding:', res?.data);
+        }).catch(err => {
+          console.log('📧 Answer notification failed (non-critical):', err.message);
+        });
+      }
+
       // Award karma and increment students_helped_count
       base44.functions.invoke('awardKarma', {
         familyGroupId: user.family_group_id || null,
