@@ -138,7 +138,7 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
           Invite Someone Else
         </button>
 
-        <style jsx>{styles}</style>
+        <style>{styles}</style>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
           Invite Someone Else
         </button>
 
-        <style jsx>{styles}</style>
+        <style>{styles}</style>
       </div>
     );
   }
@@ -178,7 +178,7 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
             Know someone who can help? <span className="collapsed-link">Send them this question</span>
           </span>
         </button>
-        <style jsx>{styles}</style>
+        <style>{styles}</style>
       </div>
     );
   }
@@ -256,7 +256,7 @@ export default function ReferralSection({ question, currentUser, collapsed = fal
         )}
       </button>
 
-      <style jsx>{styles}</style>
+      <style>{styles}</style>
     </div>
   );
 }
