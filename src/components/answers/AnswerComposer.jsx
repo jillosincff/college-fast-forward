@@ -8,6 +8,7 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { JobAnswer } from '@/entities/JobAnswer';
 import { base44 } from '@/api/base44Client';
+import { showKarmaToast, showTierUpToast } from '@/components/karma/KarmaToast';
 import ReferralSection from './ReferralSection';
 
 const MAX_CHARS = 5000;
