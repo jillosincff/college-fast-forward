@@ -171,6 +171,18 @@ export default function StudentOnboarding() {
 
       await refreshUser();
 
+      // Check if a parent already linked this student's email (auto-link)
+      try {
+        await base44.functions.invoke('linkStudentToParent', {
+          action: 'auto_link',
+          studentUserId: user.id,
+          studentEmailAddress: user.email
+        });
+        console.log('✅ Auto-link check completed');
+      } catch (autoLinkErr) {
+        console.log('Auto-link check failed (non-critical):', autoLinkErr.message);
+      }
+
       // Show celebration screen instead of navigating directly
       setShowCelebration(true);
       setLoading(false);
