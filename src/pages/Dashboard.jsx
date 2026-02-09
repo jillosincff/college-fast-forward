@@ -310,12 +310,15 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
         
-        {/* Family Boost Status - Show when linked */}
-        {(user?.boost_level > 0 || linkedParents.length > 0) && (
+        {/* Family Boost Status - Show when linked or has parent */}
+        {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
           <FamilyBoostStatus 
-            boostLevel={user?.boost_level || 0}
-            boostExpiresAt={user?.boost_expires_at}
-            boostedByParentEmail={user?.boosted_by_parent_email}
+            boostLevel={user?.boost_level || user?.karma_boost || 0}
+            boostExpiresAt={user?.boost_expires_at || user?.boosted_until}
+            boostedByParentEmail={user?.boosted_by_parent_email || linkedParents?.[0]?.email}
+            boostedByParentName={linkedParents?.[0]?.full_name}
+            parentKarma={user?.family_karma || linkedParents?.[0]?.karma_points || 0}
+            linkedParents={linkedParents}
           />
         )}
 

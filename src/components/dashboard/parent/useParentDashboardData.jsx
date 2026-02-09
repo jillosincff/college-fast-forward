@@ -108,7 +108,7 @@ export function useParentDashboardData(user) {
 
       // Process linked students
       let linkedStudent = null;
-      let studentQueueStatus = { hasActiveRequest: false, position: null };
+      let studentQueueStatus = { hasActiveRequest: false, position: null, totalQuestions: 0 };
       
       if (familyStudentsResult.status === 'fulfilled' && familyStudentsResult.value?.data?.students?.length > 0) {
         const students = familyStudentsResult.value.data.students;
@@ -116,20 +116,28 @@ export function useParentDashboardData(user) {
         
         // Check if student has active request (privacy-safe - we only check existence, not content)
         if (jobRequestsResult.status === 'fulfilled') {
-          const studentEmails = students.map(s => s.email);
-          const studentRequest = jobRequestsResult.value?.find(r => 
-            studentEmails.includes(r.poster_email) && r.status === 'active'
+          const allActive = (jobRequestsResult.value || []).filter(r => r.status === 'active');
+          const studentEmails = students.map(s => s.email?.toLowerCase());
+          const studentRequest = allActive.find(r => 
+            studentEmails.includes(r.poster_email?.toLowerCase()) || 
+            studentEmails.includes(r.created_by?.toLowerCase())
           );
           
           if (studentRequest) {
             // Calculate position based on karma-weighted priority
-            const allActive = jobRequestsResult.value.filter(r => r.status === 'active');
             const sortedByPriority = [...allActive].sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
             const position = sortedByPriority.findIndex(r => r.id === studentRequest.id) + 1;
             
             studentQueueStatus = {
               hasActiveRequest: true,
-              position: position || Math.floor(Math.random() * 20) + 5, // Fallback for demo
+              position: position || allActive.length,
+              totalQuestions: allActive.length,
+            };
+          } else {
+            studentQueueStatus = {
+              hasActiveRequest: false,
+              position: null,
+              totalQuestions: allActive.length,
             };
           }
         }

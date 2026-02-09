@@ -8,32 +8,28 @@ export default function FamilyBoostStatus({
   boostLevel = 0, 
   boostExpiresAt = null,
   boostedByParentEmail = null,
-  boostedByParentName = null
+  boostedByParentName = null,
+  parentKarma = 0,
+  linkedParents = []
 }) {
   const now = new Date();
   const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
-  const isActive = boostLevel > 0 && (!expiresAt || expiresAt > now);
+  const isExpired = expiresAt && expiresAt <= now;
+  const isActive = boostLevel > 0 && !isExpired;
   
-  // Calculate time remaining
-  let timeRemaining = '';
-  let hoursLeft = 0;
-  if (expiresAt && isActive) {
-    hoursLeft = Math.max(0, Math.floor((expiresAt - now) / (1000 * 60 * 60)));
-    if (hoursLeft > 24) {
-      timeRemaining = `${Math.floor(hoursLeft / 24)} days, ${hoursLeft % 24} hours`;
-    } else if (hoursLeft > 0) {
-      timeRemaining = `${hoursLeft} hours`;
-    } else {
-      const minutesLeft = Math.max(0, Math.floor((expiresAt - now) / (1000 * 60)));
-      timeRemaining = `${minutesLeft} minutes`;
-    }
-  }
+  // Derive parent name from multiple sources
+  const parentDisplayName = boostedByParentName || 
+    linkedParents?.[0]?.full_name?.split(',').reverse().map(s => s.trim()).join(' ') ||
+    linkedParents?.[0]?.email?.split('@')[0] ||
+    'your parent';
   
-  const levelName = boostLevel >= 3 ? 'Platinum' : boostLevel >= 2 ? 'Gold' : boostLevel >= 1 ? 'Silver' : 'None';
-  const levelColor = boostLevel >= 3 ? 'purple' : boostLevel >= 2 ? 'amber' : boostLevel >= 1 ? 'gray' : 'slate';
+  const effectiveKarma = parentKarma || linkedParents?.[0]?.karma_points || 0;
   
-  if (!isActive) {
-    // No active boost - show encouragement to ask parent
+  // If linked parents exist but no boost, show the linked+pending state
+  const hasLinkedParent = linkedParents?.length > 0 || boostedByParentEmail;
+  
+  if (!hasLinkedParent && !isActive) {
+    // No linked parent at all — encourage linking
     return (
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-4">
         <div className="flex items-start gap-3">
@@ -43,10 +39,10 @@ export default function FamilyBoostStatus({
           <div>
             <h4 className="font-semibold text-blue-800 mb-1">🚀 Unlock Family Boost!</h4>
             <p className="text-sm text-blue-700 mb-2">
-              Ask your parent to help a student — it unlocks a <strong>Family Boost</strong> that pins your requests to the top of the feed!
+              Ask your parent to join CFF — when they help students, <strong>YOUR questions get boosted to the top of the feed!</strong>
             </p>
             <p className="text-xs text-blue-600 bg-blue-100 rounded-lg px-3 py-1.5 inline-block">
-              💡 <strong>Tell them:</strong> "Answer one question on Gator Network to boost my requests!"
+              💡 <strong>Tell them:</strong> "Sign up on College Fast Forward to boost my visibility!"
             </p>
           </div>
         </div>
@@ -54,64 +50,80 @@ export default function FamilyBoostStatus({
     );
   }
   
+  if (hasLinkedParent && !isActive) {
+    // Parent linked but no active boost — parent needs to earn more karma
+    return (
+      <div className="rounded-xl border-2 border-blue-200 p-4" style={{ background: 'linear-gradient(135deg, #EEF2FF 0%, #F0F4FF 100%)' }}>
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0021A5, #003DCE)' }}>
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 mb-1">
+              ⚡ {parentDisplayName} earned {effectiveKarma} Family Karma
+            </h4>
+            <p className="text-sm text-slate-600 mb-2">
+              {effectiveKarma > 0 
+                ? `Your questions get a ${boostLevel > 0 ? `+${boostLevel}x` : 'boost'} from your parent's karma. The more they help, the higher you go!`
+                : `When ${parentDisplayName} helps students on CFF, your questions will get boosted in the feed.`
+              }
+            </p>
+            {effectiveKarma > 0 && (
+              <div className="flex items-center gap-1 text-xs text-blue-600">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Post a question to activate the boost!</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Active boost!
+  const tierName = boostLevel >= 3 ? 'Champion' : boostLevel >= 2 ? 'Priority' : boostLevel >= 1 ? 'Engaged' : 'Active';
+  
   return (
-    <div className={`bg-gradient-to-r from-${levelColor}-50 to-${levelColor}-100 rounded-xl border-2 border-${levelColor}-200 p-4 relative overflow-hidden`}
+    <div className="rounded-xl border-2 p-4 relative overflow-hidden"
          style={{
+           borderColor: 'rgba(250, 70, 22, 0.4)',
            background: boostLevel >= 3 
-             ? 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)' 
+             ? 'linear-gradient(135deg, #FFF5F2 0%, #FEF3E7 100%)' 
              : boostLevel >= 2 
-               ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
-               : 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'
+               ? 'linear-gradient(135deg, #FFF5F2 0%, #FEF3E7 100%)'
+               : 'linear-gradient(135deg, #EEF2FF 0%, #F0F4FF 100%)'
          }}>
       {/* Animated sparkles for high boost */}
       {boostLevel >= 2 && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <Star className="absolute top-2 right-4 w-4 h-4 text-yellow-400 animate-pulse" />
-          <Star className="absolute bottom-3 right-12 w-3 h-3 text-yellow-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <Star className="absolute top-2 right-4 w-4 h-4 text-orange-400 animate-pulse" />
+          <Star className="absolute bottom-3 right-12 w-3 h-3 text-orange-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
         </div>
       )}
       
       <div className="relative z-10 flex items-start gap-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}
-             style={{
-               background: boostLevel >= 3 
-                 ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' 
-                 : boostLevel >= 2 
-                   ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                   : 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
-             }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"
+             style={{ background: 'linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%)' }}>
           <Zap className="w-6 h-6 text-white" />
         </div>
         
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-bold text-slate-800">⚡ Your Requests Are Boosted!</h4>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold`}
-                  style={{
-                    background: boostLevel >= 3 ? '#9333ea' : boostLevel >= 2 ? '#f59e0b' : '#6b7280',
-                    color: 'white'
-                  }}>
-              {levelName}
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h4 className="font-bold text-slate-800">⚡ Your Questions Are Boosted!</h4>
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold text-white"
+                  style={{ background: '#FA4616' }}>
+              +{boostLevel}x • {tierName}
             </span>
           </div>
           
           <p className="text-sm text-slate-600 mb-2">
-            {boostedByParentName ? (
-              <>Boosted by family karma from <strong>{boostedByParentName}</strong>! </>
-            ) : (
-              <>Your parent's karma is boosting your requests </>
-            )}
-            to the <strong>top of the feed</strong> — you're more likely to get help faster!
+            {parentDisplayName} earned <strong>{effectiveKarma} Family Karma</strong> — your questions are <strong>+{boostLevel}x boosted</strong> in the feed. You're more likely to get help faster!
           </p>
           
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1 text-slate-500">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{timeRemaining} remaining</span>
-            </div>
-            <div className="flex items-center gap-1 text-green-600">
+          <div className="flex items-center gap-4 text-xs flex-wrap">
+            <div className="flex items-center gap-1 text-green-600 font-medium">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>Pinned to top of feed</span>
+              <span>Boosted to top of feed</span>
             </div>
           </div>
         </div>

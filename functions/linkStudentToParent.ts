@@ -211,7 +211,7 @@ Deno.serve(async (req) => {
       student_ids: studentUser ? [...new Set([...(user.student_ids || []), studentUser.id])] : user.student_ids || []
     });
 
-    // If student exists, link them too
+    // If student exists, link them too and notify them
     if (studentUser) {
       await base44.asServiceRole.entities.User.update(studentUser.id, {
         family_group_id: familyGroupId,
@@ -219,6 +219,49 @@ Deno.serve(async (req) => {
         linked_parent_emails: [...new Set([...(studentUser.linked_parent_emails || []), user.email])],
         linked_parent_ids: [...new Set([...(studentUser.linked_parent_ids || []), user.id])]
       });
+
+      // Send email to student
+      const parentName = user.full_name?.split(',').reverse().map(s => s.trim()).join(' ') || user.email.split('@')[0];
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: normalizedEmail,
+          subject: '🎉 Your parent just connected their CFF account!',
+          body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #0021A5;">Great news, Gator!</h2>
+            <p><strong>${parentName}</strong> just connected their College Fast Forward account to yours.</p>
+            <p style="background: linear-gradient(135deg, #f0f7ff 0%, #eff6ff 100%); padding: 16px; border-radius: 12px; border-left: 4px solid #0021A5;">
+              <strong>⚡ Their Family Karma is now boosting your questions in the feed!</strong><br>
+              Every time ${parentName} helps a student on CFF, YOUR questions move higher — making it more likely you'll get help faster.
+            </p>
+            ${familyKarma.total_karma > 0 ? `<p>They've already earned <strong>${familyKarma.total_karma} Karma</strong> — that's a <strong>${familyKarma.boost_multiplier}x boost</strong> on your questions right now!</p>` : ''}
+            <p style="margin-top: 24px;">
+              <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.collegefastforward.com'}/#PostRequest" 
+                 style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                Post a Question to Get Boosted →
+              </a>
+            </p>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 16px;">The more questions you post, the more ${parentName}'s karma can help you!</p>
+          </div>`
+        });
+      } catch (emailErr) {
+        console.log('Student link notification email failed (non-critical):', emailErr.message);
+      }
+
+      // Create in-app notification for student
+      try {
+        await base44.asServiceRole.entities.Notification.create({
+          user_id: studentUser.id,
+          user_email: normalizedEmail,
+          type: 'family_linked',
+          title: `${parentName} connected their CFF account!`,
+          message: `Their Family Karma (${familyKarma.total_karma || 0} pts, ${familyKarma.boost_multiplier || 0}x boost) is now boosting your questions in the feed.`,
+          is_read: false,
+          action_url: '#PostRequest',
+          action_label: 'Post a Question'
+        });
+      } catch (notifErr) {
+        console.log('Student notification creation failed (non-critical):', notifErr.message);
+      }
     }
 
     // Ensure FamilyKarma record exists
