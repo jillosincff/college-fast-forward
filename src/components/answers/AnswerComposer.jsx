@@ -170,7 +170,6 @@ export default function AnswerComposer({
           description: 'Posted an answer'
         }).then(res => {
           console.log('Karma awarded for answer:', res?.data);
-          const { showKarmaToast, showTierUpToast } = require('@/components/karma/KarmaToast');
           if (res?.data) {
             showKarmaToast(toast, res.data);
             // Detect tier-up
