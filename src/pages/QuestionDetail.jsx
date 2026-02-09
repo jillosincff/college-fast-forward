@@ -627,6 +627,12 @@ export default function QuestionDetailPage() {
                 <span className="poster-name">
                   {isPublicView ? (isAnonymous ? 'Anonymous Parent' : 'A UF Student') : posterName}
                 </span>
+                {!isPublicView && posterType === 'student' && !question.student_major && question.target_industry && (
+                  <span className="poster-meta">
+                    {question.student_year && `${question.student_year} • `}
+                    {question.target_industry}
+                  </span>
+                )}
                 {!isPublicView && posterType === 'student' && question.student_major && (
                   <span className="poster-meta">
                     {question.student_year && `${question.student_year} • `}
