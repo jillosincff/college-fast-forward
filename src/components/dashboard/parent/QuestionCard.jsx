@@ -55,7 +55,7 @@ export default function QuestionCard({ question, showMatchIndicator = true }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="font-semibold text-gray-900">
-              {question.poster_first_name || question.poster_name?.split(' ')[0] || 'Student'}
+              {getDisplayFirstName(question)}
             </span>
             <span className="text-gray-300">•</span>
             <span className="text-sm text-gray-500">
