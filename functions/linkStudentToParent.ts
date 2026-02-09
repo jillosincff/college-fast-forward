@@ -250,6 +250,27 @@ Deno.serve(async (req) => {
       student_ids: studentUser ? [...new Set([...(user.student_ids || []), studentUser.id])] : user.student_ids || []
     });
 
+    // Ensure FamilyKarma record exists BEFORE student notifications (they reference it)
+    const existingFamilyKarma = await base44.asServiceRole.entities.FamilyKarma.filter({
+      family_group_id: familyGroupId
+    });
+
+    let familyKarma;
+    const parentKarma = user.karma_points || 0;
+
+    if (existingFamilyKarma.length === 0) {
+      const { level, boost } = getKarmaLevel(parentKarma);
+      familyKarma = await base44.asServiceRole.entities.FamilyKarma.create({
+        family_group_id: familyGroupId,
+        total_karma: parentKarma,
+        karma_level: level,
+        boost_multiplier: boost,
+        last_karma_earned_at: new Date().toISOString()
+      });
+    } else {
+      familyKarma = existingFamilyKarma[0];
+    }
+
     // If student exists, link them too and notify them
     if (studentUser) {
       await base44.asServiceRole.entities.User.update(studentUser.id, {
@@ -291,6 +312,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.Notification.create({
           user_id: studentUser.id,
           user_email: normalizedEmail,
+          recipient_email: normalizedEmail,
           type: 'family_linked',
           title: `${parentName} connected their CFF account!`,
           message: `Their Family Karma (${familyKarma.total_karma || 0} pts, ${familyKarma.boost_multiplier || 0}x boost) is now boosting your questions in the feed.`,
@@ -301,27 +323,6 @@ Deno.serve(async (req) => {
       } catch (notifErr) {
         console.log('Student notification creation failed (non-critical):', notifErr.message);
       }
-    }
-
-    // Ensure FamilyKarma record exists
-    const existingFamilyKarma = await base44.asServiceRole.entities.FamilyKarma.filter({
-      family_group_id: familyGroupId
-    });
-
-    let familyKarma;
-    const parentKarma = user.karma_points || 0;
-
-    if (existingFamilyKarma.length === 0) {
-      const { level, boost } = getKarmaLevel(parentKarma);
-      familyKarma = await base44.asServiceRole.entities.FamilyKarma.create({
-        family_group_id: familyGroupId,
-        total_karma: parentKarma,
-        karma_level: level,
-        boost_multiplier: boost,
-        last_karma_earned_at: new Date().toISOString()
-      });
-    } else {
-      familyKarma = existingFamilyKarma[0];
     }
 
     // If student exists AND has active questions, apply boost immediately
