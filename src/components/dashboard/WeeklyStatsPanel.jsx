@@ -63,12 +63,15 @@ export default function WeeklyStatsPanel() {
 
   if (!stats) return null;
 
-  const items = [
-    { icon: MessageSquare, value: stats.questionsAnswered, label: 'questions answered', color: 'text-blue-300' },
-    { icon: Users, value: stats.studentsHelped, label: 'students helped', color: 'text-green-300' },
-    { icon: Handshake, value: stats.introsMade, label: 'warm intros made', color: 'text-orange-300' },
-    { icon: HelpCircle, value: stats.waitingForAnswers, label: 'still waiting for answers', color: 'text-yellow-300' },
+  const allItems = [
+    { icon: MessageSquare, value: stats.questionsAnswered, label: 'questions answered', color: 'text-blue-300', alwaysShow: true },
+    { icon: Users, value: stats.studentsHelped, label: 'students helped', color: 'text-green-300', alwaysShow: true },
+    { icon: Handshake, value: stats.introsMade, label: 'warm intros made', color: 'text-orange-300', alwaysShow: false },
+    { icon: HelpCircle, value: stats.waitingForAnswers, label: 'still waiting for answers', color: 'text-yellow-300', alwaysShow: true },
   ];
+
+  // Only show metrics with value > 0, unless they're marked as alwaysShow
+  const items = allItems.filter(item => item.alwaysShow || item.value > 0);
 
   return (
     <section className="bg-gradient-to-r from-[#0021A5] to-[#001878] rounded-2xl p-5 text-white">

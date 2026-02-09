@@ -262,7 +262,7 @@ export default function ParentDashboard() {
                       milestoneText = <span className="text-sm">Answer 2 more questions to move {studentFirstName} into the <strong>top 10</strong></span>;
                     }
                     return (
-                      <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
+                      <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20 nudge-bar">
                         <span style={{ color: '#FA4616' }}>✨</span>
                         {milestoneText}
                         {pos > 1 && <span className="text-white/50">→</span>}
@@ -403,53 +403,7 @@ export default function ParentDashboard() {
             
           </section>
 
-          {/* ========== LEADERBOARD ========== */}
-          <section className="rounded-3xl p-6 text-white overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #0021A5 0%, #001052 50%, #0021A5 100%)' }}>
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(250, 70, 22, 0.2)' }} />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/10 rounded-full blur-3xl" />
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="font-bold text-xl flex items-center gap-2 text-white">
-                    <span className="text-2xl">🏆</span>
-                    Top Parent Helpers This Week
-                  </h3>
-                  <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>Climb the ranks by helping students</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {data.leaderboard.map((p, i) => (
-                  <div 
-                    key={i}
-                    className={`flex items-center gap-4 p-4 rounded-2xl transition ${
-                      p.isYou ? 'border-2 shadow-lg' : 'bg-white/5 hover:bg-white/10'
-                    }`}
-                    style={p.isYou ? { backgroundColor: 'rgba(250, 70, 22, 0.2)', borderColor: 'rgba(250, 70, 22, 0.5)' } : {}}
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      i === 0 ? 'text-yellow-900' : i === 1 ? 'text-gray-700' : i === 2 ? 'text-amber-100' : 'text-white/70'
-                    }`} style={{
-                      background: i === 0 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' :
-                                 i === 1 ? 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%)' :
-                                 i === 2 ? 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)' :
-                                 'rgba(255,255,255,0.1)'
-                    }}>
-                      {p.rank}
-                    </div>
-                    <div className="flex-1 font-medium">
-                      {p.name} {p.isYou && <span style={{ color: '#FFA07A' }} className="font-normal">(You)</span>}
-                    </div>
-                    <div>
-                      <span className="font-bold text-lg">{p.helped}</span>
-                      <span className="text-sm ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>helped</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          {/* Leaderboard removed — will re-add when real activity data is available */}
 
           {/* ========== QUICK ACTIONS ========== */}
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

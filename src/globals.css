@@ -368,6 +368,17 @@ button {
   @apply bg-slate-400;
 }
 
+/* Nudge bar pulse animation */
+@keyframes nudgePulse {
+  0% { box-shadow: 0 0 0 0 rgba(250, 70, 22, 0.4); }
+  50% { box-shadow: 0 0 12px 4px rgba(250, 70, 22, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 70, 22, 0.4); }
+}
+
+.nudge-bar {
+  animation: nudgePulse 2.5s ease-in-out infinite;
+}
+
 /* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.9);
