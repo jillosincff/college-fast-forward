@@ -321,8 +321,8 @@ export default function ParentDashboard() {
               user={user}
               linkedStudent={data.linkedStudent}
               familyKarma={karmaPoints}
-              karmaLevel={karmaTier.level?.toLowerCase()}
-              boostMultiplier={data.linkedStudent?.boost_level || 0}
+              karmaLevel={data.familyKarmaLevel || karmaTier.level?.toLowerCase()}
+              boostMultiplier={data.familyBoostMultiplier || 0}
               studentQuestionData={data.studentQueueStatus}
             />
           )}

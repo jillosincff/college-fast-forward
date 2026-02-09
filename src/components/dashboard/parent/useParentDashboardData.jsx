@@ -75,7 +75,7 @@ export function useParentDashboardData(user) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     linkedStudent: null,
-    studentQueueStatus: { hasActiveRequest: false, position: null },
+    studentQueueStatus: { hasActiveRequest: false, position: null, totalQuestions: 0 },
     matchedQuestions: [],
     allQuestionsCount: 0,
     matchedCount: 0,
@@ -83,6 +83,8 @@ export function useParentDashboardData(user) {
     myJobs: [],
     studentsHelped: 0,
     familyKarma: 0,
+    familyKarmaLevel: 'none',
+    familyBoostMultiplier: 0,
     leaderboard: [],
     recentActivity: [],
     parentIndustry: null,
@@ -182,10 +184,18 @@ export function useParentDashboardData(user) {
       // Process jobs
       const myJobs = opportunitiesResult.status === 'fulfilled' ? (opportunitiesResult.value || []) : [];
 
-      // Family karma
-      const familyKarma = familyKarmaResult.status === 'fulfilled' 
-        ? (familyKarmaResult.value?.data?.total_karma || user?.karma_points || 0)
-        : (user?.karma_points || 0);
+      // Family karma - extract full karma data for StudentBoostCard
+      let familyKarmaTotal = user?.karma_points || 0;
+      let familyKarmaLevel = 'none';
+      let familyBoostMultiplier = 0;
+      
+      if (familyKarmaResult.status === 'fulfilled' && familyKarmaResult.value?.data) {
+        const kd = familyKarmaResult.value.data;
+        familyKarmaTotal = kd.total_karma || user?.karma_points || 0;
+        familyKarmaLevel = kd.karma_level || 'none';
+        familyBoostMultiplier = kd.boost_multiplier || 0;
+      }
+      const familyKarma = familyKarmaTotal;
 
       // Students helped - count unique students from answers, fall back to user field
       let studentsHelpedCount = user?.students_helped_count || 0;
@@ -222,6 +232,8 @@ export function useParentDashboardData(user) {
         myJobs,
         studentsHelped: studentsHelpedCount,
         familyKarma,
+        familyKarmaLevel,
+        familyBoostMultiplier,
         leaderboard,
         recentActivity,
         parentIndustry: user.industry || user.target_industry || null,

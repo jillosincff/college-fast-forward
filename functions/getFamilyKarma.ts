@@ -1,12 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// Karma tiers matching spec
+// Karma tiers - MUST match linkStudentToParent and awardKarma thresholds
 const KARMA_TIERS = [
   { name: 'none', threshold: 0, boost: 0, benefit: '' },
-  { name: 'active', threshold: 100, boost: 1, benefit: 'Active Family badge on profile' },
-  { name: 'engaged', threshold: 300, boost: 1.5, benefit: 'Boosted in match results' },
-  { name: 'priority', threshold: 500, boost: 2, benefit: 'Priority placement in matches' },
-  { name: 'champion', threshold: 1000, boost: 3, benefit: 'Featured in directory' }
+  { name: 'active', threshold: 1, boost: 0.5, benefit: 'Active Family badge on profile' },
+  { name: 'engaged', threshold: 50, boost: 1, benefit: 'Boosted in match results' },
+  { name: 'priority', threshold: 150, boost: 2, benefit: 'Priority placement in matches' },
+  { name: 'champion', threshold: 500, boost: 3, benefit: 'Featured in directory' }
 ];
 
 function getKarmaLevel(totalKarma) {
