@@ -37,6 +37,31 @@ Deno.serve(async (req) => {
       }
     }
     
+    // Method 1b: Load by student_email on parent user
+    if (students.length === 0 && user.student_email) {
+      console.log('Loading student by parent.student_email:', user.student_email);
+      try {
+        const matches = await base44.asServiceRole.entities.User.filter({ email: user.student_email });
+        if (matches && matches.length > 0) {
+          const student = matches[0];
+          students.push({
+            id: student.id,
+            full_name: student.full_name,
+            email: student.email,
+            major: student.major,
+            persona: student.persona,
+            roles: student.roles,
+            family_group_id: student.family_group_id,
+            profile_image: student.profile_image,
+            karma_points: student.karma_points,
+            boost_level: student.boost_level
+          });
+        }
+      } catch (e) {
+        console.log('Could not load student by student_email:', e.message);
+      }
+    }
+    
     // Method 2: Load by family_group_id if no linked_students found
     if (students.length === 0 && user.family_group_id) {
       console.log('Loading students by family_group_id:', user.family_group_id);
