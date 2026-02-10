@@ -766,10 +766,64 @@ const getPageComponent = (pageName) => {
   }
 };
 
+// Capture UTM parameters from newsletter links (runs once on app load)
+function captureUTMParams(user) {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const hashParams = new URLSearchParams(hashPart);
+
+    // Check both query string and hash params for utm_source
+    const utmSource = urlParams.get('utm_source') || hashParams.get('utm_source');
+    if (utmSource !== 'newsletter') return;
+
+    // Prevent duplicate captures in the same session
+    const captureKey = `utm_captured_${Date.now().toString(36)}`;
+    if (sessionStorage.getItem('utm_already_captured')) return;
+    sessionStorage.setItem('utm_already_captured', 'true');
+
+    const utmCampaign = urlParams.get('utm_campaign') || hashParams.get('utm_campaign') || '';
+    const utmContent = urlParams.get('utm_content') || hashParams.get('utm_content') || '';
+    const utmMedium = urlParams.get('utm_medium') || hashParams.get('utm_medium') || '';
+
+    // Store in sessionStorage for tagging ActivationPrompt source on later signup
+    sessionStorage.setItem('utm_source', utmSource);
+    if (utmCampaign) sessionStorage.setItem('utm_campaign', utmCampaign);
+    if (utmContent) sessionStorage.setItem('utm_content', utmContent);
+    if (utmMedium) sessionStorage.setItem('utm_medium', utmMedium);
+
+    // Save to NewsletterClick entity
+    base44.entities.NewsletterClick.create({
+      user_id: user?.id || null,
+      user_email: user?.email || null,
+      utm_source: utmSource,
+      campaign: utmCampaign,
+      content_clicked: utmContent,
+      utm_medium: utmMedium,
+      clicked_at: new Date().toISOString(),
+    }).then(() => {
+      console.log('📩 Newsletter click tracked:', { utmCampaign, utmContent });
+    }).catch(err => {
+      console.log('Newsletter click tracking failed (non-critical):', err.message);
+    });
+
+    // Clean UTM params from URL (cosmetic)
+    const cleanHash = window.location.hash.split('?')[0] || '#LandingPage';
+    window.history.replaceState(null, '', window.location.origin + '/' + cleanHash);
+  } catch (err) {
+    console.log('UTM capture failed (non-critical):', err.message);
+  }
+}
+
 function AppContent() {
   const { user, isLoading, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState(null);
   const [resolvedPage, setResolvedPage] = useState(null);
+
+  // Capture UTM params on initial load
+  useEffect(() => {
+    captureUTMParams(user);
+  }, [user]);
 
   // CRITICAL: Detect OAuth callback via is_new_user param (before any other routing)
   // But DON'T immediately route - let the normal routing logic handle it after user is loaded
