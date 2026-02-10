@@ -75,10 +75,10 @@ export default function WeeklyStatsPanel() {
 
   return (
     <section className="bg-gradient-to-r from-[#0021A5] to-[#001878] rounded-2xl p-5 text-white">
-      <h3 className="font-bold text-base mb-3 flex items-center gap-2">
+      <h3 className="font-bold text-base mb-3 flex items-center gap-2 text-white">
         🐊 This Week at UF
       </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className={`grid gap-3 ${items.length <= 3 ? 'grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((item, i) => {
           const Icon = item.icon;
           return (
