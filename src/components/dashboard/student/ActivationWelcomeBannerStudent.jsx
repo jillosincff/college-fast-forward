@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { X } from 'lucide-react';
+import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
 
 export default function ActivationWelcomeBannerStudent({ user }) {
   const [visible, setVisible] = useState(false);
@@ -105,6 +106,8 @@ export default function ActivationWelcomeBannerStudent({ user }) {
   };
 
   const handleBrowseOpportunities = () => {
+    // Mark activation — student engaged by browsing opportunities
+    checkAndMarkActivation(user.id, 'browsed_opportunities');
     navigate('Opportunities');
   };
 

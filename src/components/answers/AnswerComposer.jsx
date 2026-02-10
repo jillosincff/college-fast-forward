@@ -10,6 +10,7 @@ import { JobAnswer } from '@/entities/JobAnswer';
 import { base44 } from '@/api/base44Client';
 import { showKarmaToast, showTierUpToast } from '@/components/karma/KarmaToast';
 import ReferralSection from './ReferralSection';
+import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
 
 const MAX_CHARS = 5000;
 
@@ -239,6 +240,9 @@ export default function AnswerComposer({
         title: "✅ Answer posted!",
         description: "Thank you for sharing your wisdom (+15 karma)"
       });
+
+      // Mark activation for the answering parent/alumni
+      checkAndMarkActivation(currentUser.id, 'answered_question');
 
       // Notify parent component to update UI immediately
       console.log('Answer created, calling onAnswerPosted callback');

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import RecipientProfileCard from '@/components/messaging/RecipientProfileCard';
 import MessageTemplatesSelector, { generateMessageTemplates } from '@/components/messaging/MessageTemplates';
 import { trackEvent } from '@/components/utils/analytics';
+import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
 
 export default function MessageComposer() {
   const { user } = useAuth();
@@ -227,6 +228,9 @@ export default function MessageComposer() {
           }).catch(e => console.log('Message karma failed (non-critical):', e.message));
         }
       }
+      // Mark activation for message sender (parents AND students)
+      checkAndMarkActivation(user.id, 'sent_message');
+
     } catch (error) {
       console.error('Failed to send message:', error);
       alert('Failed to send message. Please try again.');

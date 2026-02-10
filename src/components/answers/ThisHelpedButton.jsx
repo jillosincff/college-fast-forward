@@ -4,6 +4,7 @@ import { ThumbsUp, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { showKarmaToast } from '@/components/karma/KarmaToast';
+import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
 
 export default function ThisHelpedButton({ answer, currentUser, isQuestionAsker }) {
   const { toast } = useToast();
@@ -68,6 +69,10 @@ export default function ThisHelpedButton({ answer, currentUser, isQuestionAsker 
       }
 
       setMarked(true);
+
+      // Mark activation for the student who marked it helpful
+      checkAndMarkActivation(currentUser.id, 'marked_helpful');
+
       toast({
         title: "✅ Marked as helpful!",
         description: "The helper has been notified.",
