@@ -36,8 +36,12 @@ export default function ImpactDashboard({ user }) {
       const helpfulMarks = transactions.filter(t => t.action_type === 'upvote_received');
       const outcomes = transactions.filter(t => t.action_type === 'outcome_reported');
 
+      // Count unique students helped (dedupe by reference_id to avoid double-counting)
+      const uniqueStudentRefs = new Set(answers.map(a => a.reference_id).filter(Boolean));
+      const uniqueStudentsHelped = uniqueStudentRefs.size || answers.length;
+
       setStats({
-        studentsHelped: answers.length,
+        studentsHelped: uniqueStudentsHelped,
         markedHelpful: helpfulMarks.length,
         resolvedWithCredit: outcomes.length
       });
@@ -106,7 +110,7 @@ export default function ImpactDashboard({ user }) {
           <div className="text-center p-4 bg-blue-50 rounded-xl">
             <Users className="w-5 h-5 text-[#0021A5] mx-auto mb-1" />
             <div className="text-2xl font-black text-[#0021A5]">{stats.studentsHelped}</div>
-            <div className="text-xs text-slate-500 font-medium">Students Helped</div>
+            <div className="text-xs text-slate-500 font-medium">Students Helped (all time)</div>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-xl">
             <ThumbsUp className="w-5 h-5 text-green-600 mx-auto mb-1" />
