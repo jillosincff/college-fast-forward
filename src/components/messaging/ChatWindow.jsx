@@ -118,7 +118,7 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white h-full">
+    <div className="flex-1 flex flex-col bg-white h-full min-h-0">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-3">
