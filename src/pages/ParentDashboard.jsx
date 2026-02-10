@@ -149,6 +149,13 @@ export default function ParentDashboard() {
       )}
 
       <div className="min-h-screen bg-gray-100 overflow-x-hidden">
+        <style>{`
+          @keyframes nudgePulse {
+            0% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.4); }
+            50% { box-shadow: 0 0 12px 4px rgba(232, 77, 32, 0.2); }
+            100% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.4); }
+          }
+        `}</style>
         
         {/* ========== HERO SECTION ========== */}
         <section className="relative overflow-hidden">
