@@ -102,6 +102,8 @@ export default function ActivationWelcomeBannerStudent({ user }) {
   };
 
   const handleCheckAnswers = () => {
+    // Mark activation — student engaged by checking answers
+    checkAndMarkActivation(user.id, 'read_answer');
     navigate('Connections');
   };
 
