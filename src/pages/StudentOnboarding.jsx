@@ -169,6 +169,34 @@ export default function StudentOnboarding() {
       
       await JobRequest.create(jobRequestData);
 
+      // Create ActivationPrompt for tracking first meaningful action
+      // Student just posted a question during onboarding — that counts as activation
+      try {
+        const utmSource = sessionStorage.getItem('utm_source');
+        const utmCampaign = sessionStorage.getItem('utm_campaign');
+        let source = 'organic';
+        if (utmSource === 'newsletter' && utmCampaign) {
+          source = `newsletter_${utmCampaign}`;
+        } else if (utmSource) {
+          source = utmSource;
+        }
+
+        await base44.entities.ActivationPrompt.create({
+          user_id: user.id,
+          user_type: 'student',
+          user_email: user.email,
+          prompt_stage: 'welcome',
+          status: 'acted',
+          action_taken: true,
+          action_type: 'posted_question',
+          acted_at: new Date().toISOString(),
+          source,
+        });
+        console.log('✅ ActivationPrompt created for student (already activated via question)');
+      } catch (apErr) {
+        console.log('ActivationPrompt creation failed (non-critical):', apErr.message);
+      }
+
       await refreshUser();
 
       // Check if a parent already linked this student's email (auto-link)
