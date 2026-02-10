@@ -250,7 +250,7 @@ export default function ChatWindow({
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 bg-white border-t border-slate-200">
+      <div className="px-4 py-3 bg-white border-t border-slate-200 sticky bottom-0 z-20 safe-area-bottom">
         <div className="flex items-end gap-2">
           <input
             type="file"
