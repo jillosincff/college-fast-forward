@@ -311,6 +311,9 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
         
+        {/* ========== ACTIVATION WELCOME BANNER ========== */}
+        <ActivationWelcomeBannerStudent user={user} />
+
         {/* Family Boost Status - Show when linked or has parent */}
         {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
           <FamilyBoostStatus 
