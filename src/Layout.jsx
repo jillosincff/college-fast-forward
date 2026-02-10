@@ -820,10 +820,14 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState(null);
   const [resolvedPage, setResolvedPage] = useState(null);
 
-  // Capture UTM params on initial load
+  // Capture UTM params on initial load (runs once)
+  const utmCapturedRef = React.useRef(false);
   useEffect(() => {
-    captureUTMParams(user);
-  }, [user]);
+    if (!utmCapturedRef.current) {
+      utmCapturedRef.current = true;
+      captureUTMParams(user);
+    }
+  }, []);
 
   // CRITICAL: Detect OAuth callback via is_new_user param (before any other routing)
   // But DON'T immediately route - let the normal routing logic handle it after user is loaded
