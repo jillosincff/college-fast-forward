@@ -276,7 +276,7 @@ export default function ProfileEdit() {
   };
 
   const handleBack = () => {
-    navigate('Dashboard');
+    navigate(isParent ? 'ParentDashboard' : 'Dashboard');
   };
 
   const handleResumeUpdated = async (updates) => {
