@@ -151,9 +151,9 @@ export default function ParentDashboard() {
       <div className="min-h-screen bg-gray-100 overflow-x-hidden">
         <style>{`
           @keyframes nudgePulse {
-            0% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.4); }
-            50% { box-shadow: 0 0 12px 4px rgba(232, 77, 32, 0.2); }
-            100% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.4); }
+            0% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 20px 8px rgba(232, 77, 32, 0.35); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.6); transform: scale(1); }
           }
         `}</style>
         
@@ -270,8 +270,8 @@ export default function ParentDashboard() {
                     }
                     return (
                       <div 
-                        className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20"
-                        style={{ animation: 'nudgePulse 2.5s ease-in-out infinite' }}
+                        className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white"
+                        style={{ animation: 'nudgePulse 2s ease-in-out infinite', border: '1px solid rgba(232, 77, 32, 0.5)' }}
                       >
                         <span style={{ color: '#FA4616' }}>✨</span>
                         {milestoneText}
