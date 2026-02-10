@@ -115,6 +115,24 @@ Deno.serve(async (req) => {
         console.log('Karma award failed (non-critical):', karmaErr.message);
       }
 
+      // Mark activation for the user who upvoted
+      try {
+        const upvoterPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
+          user_id: user.id,
+          action_taken: false
+        });
+        if (upvoterPrompts.length > 0) {
+          await base44.asServiceRole.entities.ActivationPrompt.update(upvoterPrompts[0].id, {
+            action_taken: true,
+            action_type: 'upvoted_question',
+            acted_at: new Date().toISOString(),
+            status: 'acted'
+          });
+        }
+      } catch (actErr) {
+        console.log('Activation mark failed (non-critical):', actErr.message);
+      }
+
       return Response.json({ 
         success: true, 
         upvote_count: newCount,

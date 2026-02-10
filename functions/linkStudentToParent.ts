@@ -362,6 +362,24 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Mark activation for the parent who linked a student
+    try {
+      const parentPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
+        user_id: user.id,
+        action_taken: false
+      });
+      if (parentPrompts.length > 0) {
+        await base44.asServiceRole.entities.ActivationPrompt.update(parentPrompts[0].id, {
+          action_taken: true,
+          action_type: 'linked_student',
+          acted_at: new Date().toISOString(),
+          status: 'acted'
+        });
+      }
+    } catch (actErr) {
+      console.log('Activation mark failed (non-critical):', actErr.message);
+    }
+
     const nextTier = getNextTier(familyKarma.total_karma || parentKarma);
 
     return Response.json({

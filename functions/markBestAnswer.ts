@@ -196,6 +196,24 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Mark activation for the student who marked a best answer
+    try {
+      const studentPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
+        user_id: user.id,
+        action_taken: false
+      });
+      if (studentPrompts.length > 0) {
+        await base44.asServiceRole.entities.ActivationPrompt.update(studentPrompts[0].id, {
+          action_taken: true,
+          action_type: 'marked_best_answer',
+          acted_at: new Date().toISOString(),
+          status: 'acted'
+        });
+      }
+    } catch (actErr) {
+      console.log('Activation mark failed (non-critical):', actErr.message);
+    }
+
     return Response.json({ 
       success: true,
       message: 'Best answer marked successfully'
