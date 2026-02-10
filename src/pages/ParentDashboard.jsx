@@ -329,6 +329,9 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
+          {/* ========== ACTIVATION WELCOME BANNER ========== */}
+          <ActivationWelcomeBanner user={user} />
+
           {/* ========== STUDENTS NEED HELP - Personalized (PRIMARY ACTION) ========== */}
           <section className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
             
