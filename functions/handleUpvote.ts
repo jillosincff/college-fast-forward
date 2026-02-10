@@ -138,25 +138,34 @@ Deno.serve(async (req) => {
       const newCount = Math.max(0, (answer.upvote_count || 0) - 1);
       await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
 
-      // Update question total upvotes - try HelpRequest first, then JobRequest
-      let questionUpdated = false;
-      const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({ id: answer.question_id });
-      if (helpRequests.length > 0) {
-        const question = helpRequests[0];
-        await base44.asServiceRole.entities.HelpRequest.update(answer.question_id, {
-          total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
-        });
-        questionUpdated = true;
-      }
-      
-      if (!questionUpdated) {
-        const jobRequests = await base44.asServiceRole.entities.JobRequest.filter({ id: answer.question_id });
-        if (jobRequests.length > 0) {
-          const question = jobRequests[0];
-          await base44.asServiceRole.entities.JobRequest.update(answer.question_id, {
-            total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
-          });
+      // Update question total upvotes
+      try {
+        if (answer.question_type === 'JobRequest') {
+          const question = await base44.asServiceRole.entities.JobRequest.get(answer.question_id);
+          if (question) {
+            await base44.asServiceRole.entities.JobRequest.update(answer.question_id, {
+              total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
+            });
+          }
+        } else {
+          try {
+            const question = await base44.asServiceRole.entities.HelpRequest.get(answer.question_id);
+            if (question) {
+              await base44.asServiceRole.entities.HelpRequest.update(answer.question_id, {
+                total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
+              });
+            }
+          } catch (e) {
+            const question = await base44.asServiceRole.entities.JobRequest.get(answer.question_id);
+            if (question) {
+              await base44.asServiceRole.entities.JobRequest.update(answer.question_id, {
+                total_upvotes: Math.max(0, (question.total_upvotes || 0) - 1)
+              });
+            }
+          }
         }
+      } catch (qErr) {
+        console.log('Question upvote update failed (non-critical):', qErr.message);
       }
 
       return Response.json({ 
