@@ -240,7 +240,7 @@ export default function ParentDashboard() {
                 </div>
 
                 {/* Students Helped */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 text-center border border-white/20">
+                <div className="rounded-3xl p-6 text-center border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                   <div className="text-5xl font-black text-white mb-2">{data.studentsHelped}</div>
                   <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Students Helped</p>
                   <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>all time</p>
