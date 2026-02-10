@@ -236,7 +236,7 @@ export default function ParentDashboard() {
                 <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 text-center border border-white/20 hover:bg-white/15 transition">
                   <div className="text-5xl font-black text-white mb-2">{data.studentsHelped}</div>
                   <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Students Helped</p>
-                  <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>by your advice</p>
+                  <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>all time</p>
                 </div>
                 
               </div>
@@ -262,7 +262,10 @@ export default function ParentDashboard() {
                       milestoneText = <span className="text-sm">Answer 2 more questions to move {studentFirstName} into the <strong>top 10</strong></span>;
                     }
                     return (
-                      <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20 nudge-bar">
+                      <div 
+                        className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20"
+                        style={{ animation: 'nudgePulse 2.5s ease-in-out infinite' }}
+                      >
                         <span style={{ color: '#FA4616' }}>✨</span>
                         {milestoneText}
                         {pos > 1 && <span className="text-white/50">→</span>}
