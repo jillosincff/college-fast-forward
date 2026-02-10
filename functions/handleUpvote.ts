@@ -16,12 +16,10 @@ Deno.serve(async (req) => {
     }
 
     // Get the answer
-    const answers = await base44.asServiceRole.entities.Answer.filter({ id: answerId });
-    if (answers.length === 0) {
+    const answer = await base44.asServiceRole.entities.Answer.get(answerId);
+    if (!answer) {
       return Response.json({ error: 'Answer not found' }, { status: 404 });
     }
-
-    const answer = answers[0];
 
     // Check if user already upvoted
     const existingUpvotes = await base44.asServiceRole.entities.Upvote.filter({
