@@ -99,6 +99,34 @@ export default function ParentOnboarding() {
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 
+      // Create ActivationPrompt for tracking first meaningful action
+      try {
+        // Determine source from UTM params stored in sessionStorage
+        const utmSource = sessionStorage.getItem('utm_source');
+        const utmCampaign = sessionStorage.getItem('utm_campaign');
+        let source = 'organic';
+        if (utmSource === 'newsletter' && utmCampaign) {
+          source = `newsletter_${utmCampaign}`;
+        } else if (utmSource) {
+          source = utmSource;
+        }
+
+        await base44.entities.ActivationPrompt.create({
+          user_id: user.id,
+          user_type: 'parent',
+          user_email: user.email,
+          prompt_stage: 'welcome',
+          status: result.answeredQuestion ? 'acted' : 'pending',
+          action_taken: !!result.answeredQuestion,
+          action_type: result.answeredQuestion ? 'answered_question' : null,
+          acted_at: result.answeredQuestion ? new Date().toISOString() : null,
+          source,
+        });
+        console.log('✅ ActivationPrompt created for parent');
+      } catch (apErr) {
+        console.log('ActivationPrompt creation failed (non-critical):', apErr.message);
+      }
+
       if (refreshUser) await refreshUser();
       
       setCompletionResult(result);
