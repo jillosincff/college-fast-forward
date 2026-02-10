@@ -95,9 +95,8 @@ Deno.serve(async (req) => {
 
       // Award karma to the answer author (parents/alumni only)
       try {
-        const answerAuthor = await base44.asServiceRole.entities.User.filter({ id: answer.answerer_user_id });
-        if (answerAuthor.length > 0) {
-          const author = answerAuthor[0];
+        const author = await base44.asServiceRole.entities.User.get(answer.answerer_user_id);
+        if (author) {
           const isParentOrAlumni = author.persona === 'parent' || author.persona === 'alumni' || 
                                    author.roles?.includes('parent') || author.roles?.includes('alumni');
           
