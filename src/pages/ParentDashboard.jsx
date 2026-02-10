@@ -20,6 +20,7 @@ import WeeklyStatsPanel from '@/components/dashboard/WeeklyStatsPanel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import LinkStudentCard from '@/components/dashboard/parent/LinkStudentCard';
 import StudentBoostCard from '@/components/dashboard/parent/StudentBoostCard';
+import ActivationWelcomeBanner from '@/components/dashboard/parent/ActivationWelcomeBanner';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
