@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       subject = `Welcome to the UF family, ${firstName}! 🎉`;
       emailHtml = buildParentWelcome({ firstName, questionCount, memberCount, matchedQuestion });
     } else if (isAlumni) {
-      subject = `Welcome back to the UF family, ${firstName}! 🎉`;
+      subject = `Welcome back, ${firstName}! UF students need your experience 🎓`;
       emailHtml = buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion });
     } else {
       subject = `You're in, ${firstName}! Here's what happens next 🚀`;
