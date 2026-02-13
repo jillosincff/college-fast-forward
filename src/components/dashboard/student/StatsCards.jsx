@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Zap } from 'lucide-react';
+
 const UF_ORANGE = '#FA4616';
 
 export default function StatsCards({ stats, state }) {
@@ -8,7 +10,8 @@ export default function StatsCards({ stats, state }) {
     totalMatches = 0, 
     messagesSent = 0,
     unreadResponses = 0,
-    activeConversations = 0 
+    activeConversations = 0,
+    studentKarma = 0
   } = stats || {};
   
   // Dynamic middle card
@@ -43,7 +46,17 @@ export default function StatsCards({ stats, state }) {
   const rightCard = getRightCard();
 
   return (
-    <div className="grid grid-cols-3 gap-2 md:gap-4">
+    <div className="grid grid-cols-4 gap-2 md:gap-4">
+      {/* Student Karma */}
+      <div className="bg-white/10 backdrop-blur rounded-2xl p-3 md:p-4 text-center border border-white/20">
+        <div className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-1">
+          {studentKarma}
+          <Zap className="w-4 h-4 md:w-5 md:h-5 text-yellow-300" />
+        </div>
+        <div className="text-xs md:text-sm text-white/70">Karma</div>
+        <div className="text-xs text-white/50">Points</div>
+      </div>
+
       {/* Active Questions */}
       <div className="bg-white/10 backdrop-blur rounded-2xl p-3 md:p-4 text-center border border-white/20">
         <div className="text-2xl md:text-3xl font-bold">{activeQuestions}</div>
