@@ -1,6 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-console.log('🚀 sendAnswerNotification loaded v2');
+console.log('🚀 sendAnswerNotification loaded v3');
 
 Deno.serve(async (req) => {
     console.log('📨 Answer notification request received');
@@ -34,6 +34,16 @@ Deno.serve(async (req) => {
 
         console.log('Init SDK');
         const base44 = createClientFromRequest(req);
+
+        // Check email preferences
+        try {
+            const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: posterEmail });
+            const pref = prefs?.[0];
+            if (pref && (pref.all_emails === false || pref.answer_notifications === false)) {
+                console.log('User unsubscribed from answer notifications:', posterEmail);
+                return Response.json({ success: true, skipped: true, reason: 'Unsubscribed' });
+            }
+        } catch (e) { console.log('Pref check failed (continuing):', e.message); }
 
         // Send email notification
         console.log('Sending email notification to:', posterEmail);
@@ -106,6 +116,18 @@ Deno.serve(async (req) => {
             
             emailSent = true;
             console.log('✅ Email sent to:', posterEmail);
+
+            // Log the email
+            try {
+                await base44.asServiceRole.entities.EmailLog.create({
+                    user_email: posterEmail,
+                    email_type: 'new_answer',
+                    subject: `${answererName} replied to your question`,
+                    status: 'sent',
+                    sent_at: new Date().toISOString(),
+                    metadata: { questionId, answererName }
+                });
+            } catch (logErr) { console.log('Email log failed:', logErr.message); }
         } catch (emailErr) {
             console.error('❌ Email error:', emailErr.message);
         }
