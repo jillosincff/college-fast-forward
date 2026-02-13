@@ -9,22 +9,24 @@ const schoolConfig = {
   primaryColor: '#0021A5'
 };
 
+const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
+
 // Subject line variants for A/B testing
 const subjectLineVariants = {
   day7: [
-    (data) => `A ${data.schoolShortName} student needs your ${data.industry} expertise`,
+    (data) => `A UF student needs someone in ${data.industry}`,
     (data) => `${data.studentName} is looking for someone like you`,
-    (data) => `Can you spare 2 minutes for a ${data.schoolShortName} student?`
+    (data) => `Can you spare 2 minutes for a UF student?`
   ],
   day21: [
     (data) => `${data.count} students are waiting for someone with your background`,
     (data) => `Students keep asking about ${data.industry} — can you help?`,
-    (data) => `${data.count} ${data.schoolShortName} students need your advice`
+    (data) => `${data.count} UF students need your advice`
   ],
   day45: [
-    (data) => `We miss you — ${data.schoolShortName} students still need help`,
+    (data) => `We miss you — UF students still need help`,
     (data) => `It's been a while — ${data.count} students could use your advice`,
-    (data) => `A ${data.schoolShortName} student is hoping you'll come back`
+    (data) => `A UF student is hoping you'll come back`
   ]
 };
 
