@@ -35,6 +35,7 @@ import WhatToDoNext from '@/components/dashboard/student/WhatToDoNext';
 import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
 import ActivationWelcomeBannerStudent from '@/components/dashboard/student/ActivationWelcomeBannerStudent';
 import StudentKarmaCard from '@/components/dashboard/student/StudentKarmaCard';
+import HelpFellowGatorSection from '@/components/dashboard/student/HelpFellowGatorSection';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
