@@ -74,9 +74,9 @@ Deno.serve(async (req) => {
 
     let subject, emailHtml;
 
-    // For students, fetch their most recent question
+    // For students or alumni job seekers, fetch their most recent question
     let studentQuestion = null;
-    if (isGator && userId) {
+    if ((isGator || (isAlumni && isAlumniJobSeeker)) && userId) {
       try {
         const [helpReqs, jobReqs] = await Promise.all([
           base44.asServiceRole.entities.HelpRequest.filter({ student_id: userId }, '-created_date', 1),
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         ]);
         const allStudentQs = [...helpReqs, ...jobReqs].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
         studentQuestion = allStudentQs[0] || null;
-      } catch (e) { console.log('Student question fetch failed:', e.message); }
+      } catch (e) { console.log('Question fetch failed:', e.message); }
     }
 
     if (isParent) {
