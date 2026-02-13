@@ -357,7 +357,8 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: user.email,
           subject,
-          body: emailHtml
+          body: emailHtml,
+          from_name: 'College Fast Forward'
         });
         
         // Record the email
