@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
@@ -121,6 +121,7 @@ const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
 const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
 const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
+const Insights = React.lazy(() => import('./pages/Insights'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -314,7 +315,8 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
         { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent'] },
-      ], []);
+              { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent'] },
+            ], []);
 
   const filteredNavItems = useMemo(() => {
     if (!user) {
@@ -762,6 +764,7 @@ const getPageComponent = (pageName) => {
     case 'GatorParentInvite': return GatorParentInvite;
     case 'ReferralAnswer': return ReferralAnswer;
     case 'MatchesReview': return MatchesReview;
+      case 'Insights': return Insights;
     default: return LandingPage;
   }
 };
