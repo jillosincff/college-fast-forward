@@ -602,7 +602,7 @@ Deno.serve(async (req) => {
           } else if (isAlumniSeeker) {
             ({ subject, emailHtml } = buildAlumniSeekerNudge24h({ firstName, memberCount }));
           } else {
-            ({ subject, emailHtml } = buildStudentNudge24h({ firstName }));
+            ({ subject, emailHtml } = buildStudentNudge48h({ firstName }));
           }
         }
 
