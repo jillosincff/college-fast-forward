@@ -78,18 +78,58 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
     }
 
+    const subject = 'Your parent just joined CFF! 🎉';
+
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: studentEmail,
-      subject: `🎉 ${parentFirst} just joined the UF Network!`,
+      subject,
       body: emailHtml,
       from_name: 'College Fast Forward'
     });
+
+    // Award +50 karma to student for parent invite
+    try {
+      // Look up student user
+      const students = await base44.asServiceRole.entities.User.filter({ email: studentEmail }, undefined, 1);
+      const student = students?.[0];
+      if (student) {
+        // Award student karma
+        const studentKarmaRecords = await base44.asServiceRole.entities.StudentKarma.filter({ user_email: studentEmail }, undefined, 1);
+        if (studentKarmaRecords.length > 0) {
+          const sk = studentKarmaRecords[0];
+          await base44.asServiceRole.entities.StudentKarma.update(sk.id, {
+            total_karma: (sk.total_karma || 0) + 50,
+            this_month_karma: (sk.this_month_karma || 0) + 50,
+            last_karma_earned_at: new Date().toISOString()
+          });
+        } else {
+          await base44.asServiceRole.entities.StudentKarma.create({
+            user_id: student.id,
+            user_email: studentEmail,
+            total_karma: 50,
+            this_month_karma: 50,
+            last_karma_earned_at: new Date().toISOString()
+          });
+        }
+
+        // Log karma transaction
+        await base44.asServiceRole.entities.KarmaTransaction.create({
+          family_group_id: `student_${student.id}`,
+          parent_user_id: student.id,
+          parent_email: studentEmail,
+          parent_name: studentName || student.full_name || '',
+          points: 50,
+          action_type: 'invite_parent_joined',
+          description: `+50 karma: ${parentDisplayName} joined via your invite`
+        });
+      }
+    } catch (e) { console.log('Karma award failed (non-critical):', e.message); }
 
     try {
       await base44.asServiceRole.entities.EmailLog.create({
         user_email: studentEmail,
         email_type: 'parent_joined',
-        subject: `${parentFirst} just joined the UF Network!`,
+        subject,
         status: 'sent',
         sent_at: new Date().toISOString(),
         metadata: { parentName, parentEmail }
