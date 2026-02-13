@@ -308,7 +308,9 @@ Deno.serve(async (req) => {
           .sort((a, b) => b.score - a.score)
           .slice(0, 5);
         
-        if (matchedQuestions.length < 2) {
+        // 7d needs at least 1 matched question; 21d/45d need at least 2
+        const minMatches = emailType === 'day7' ? 1 : 2;
+        if (matchedQuestions.length < minMatches) {
           results.skipped.noMatches++;
           continue;
         }
