@@ -90,6 +90,9 @@ Deno.serve(async (req) => {
     if (isParent) {
       subject = `Welcome to the UF family, ${firstName}! 🎉`;
       emailHtml = buildParentWelcome({ firstName, questionCount, memberCount, matchedQuestion });
+    } else if (isAlumni && isAlumniJobSeeker) {
+      subject = `You're in, ${firstName}! The UF network is on it 🎓`;
+      emailHtml = buildAlumniJobSeekerWelcome({ firstName, studentQuestion });
     } else if (isAlumni) {
       subject = `Welcome back, ${firstName}! UF students need your experience 🎓`;
       emailHtml = buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion });
