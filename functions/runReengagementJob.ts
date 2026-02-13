@@ -350,6 +350,20 @@ Deno.serve(async (req) => {
           subject_variant: variant
         });
         
+        // Log to EmailLog
+        try {
+          const emailLogType = emailType === 'day7' ? 'reengagement_7d' : emailType === 'day21' ? 'reengagement_21d' : 'reengagement_45d';
+          await base44.asServiceRole.entities.EmailLog.create({
+            user_id: user.id,
+            user_email: user.email,
+            email_type: emailLogType,
+            subject,
+            status: 'sent',
+            sent_at: new Date().toISOString(),
+            metadata: { variant, questionCount: matchedQuestions.length, trackingId }
+          });
+        } catch (logErr) { console.log('EmailLog failed:', logErr.message); }
+
         console.log(`✅ Sent ${emailType} email to ${user.email} (variant ${variant})`);
         results.emailsSent++;
         
