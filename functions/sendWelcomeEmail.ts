@@ -267,11 +267,40 @@ function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQues
 // ═══════════════════════════════════════════════════════
 // 1C — STUDENT WELCOME
 // ═══════════════════════════════════════════════════════
-function buildStudentWelcome({ firstName, questionCount, memberCount }) {
+function buildStudentWelcome({ firstName, questionCount, memberCount, studentQuestion }) {
+  const questionPreview = truncate(studentQuestion?.description || studentQuestion?.role || 'Your question', 120);
+  const hasQuestion = !!studentQuestion;
+
+  const questionBlock = hasQuestion ? `
+      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 20px 0; background: #fafafa;">
+        <p style="color: #374151; font-style: italic; margin: 0; font-size: 15px;">"${questionPreview}"</p>
+      </div>
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 12px 0;">Here's what happens next:</p>
+      <div style="margin: 0 0 24px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 15px;">✅ Parents and alumni with matching experience will be notified</p>
+        <p style="margin: 0 0 8px 0; font-size: 15px;">✅ You'll get an email the moment someone responds</p>
+        <p style="margin: 0; font-size: 15px;">✅ Average response time: under 24 hours</p>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 16px 0;">While you wait, here are 3 things you can do:</p>` : `
+      <p style="font-size: 16px;">You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.</p>
+
+      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 20px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 15px;">👥 <strong>${memberCount}</strong> parents and alumni are in the network</p>
+        <p style="margin: 0; font-size: 15px;">💬 Most questions get a response within <strong>24 hours</strong></p>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 16px 0;">Here are 3 things you can do right now:</p>`;
+
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${memberCount} UF parents and alumni are ready to help you.</span>
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${hasQuestion ? 'Parents and alumni are being notified about your question now.' : `${memberCount} UF parents and alumni are ready to help you.`}</span>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -280,25 +309,28 @@ function buildStudentWelcome({ firstName, questionCount, memberCount }) {
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">Welcome to the UF Network! You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.</p>
+      <p style="font-size: 16px;">Welcome to College Fast Forward at the University of Florida!</p>
+      ${hasQuestion ? `<p style="font-size: 16px;">Your question is live and visible to the entire UF network:</p>` : ''}
+      ${questionBlock}
 
-      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 20px 0;">
-        <p style="margin: 0 0 6px 0; font-size: 15px;">👥 <strong>${memberCount}</strong> parents and alumni are in the network</p>
-        <p style="margin: 0; font-size: 15px;">💬 Most questions get a response within <strong>24 hours</strong></p>
+      <!-- Action 1: Invite Parents -->
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; margin: 0 0 12px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>1. 👨‍👩‍👧 Invite your parents</strong> — they earn Karma that boosts YOUR visibility</p>
+        <a href="${APP_BASE_URL}/#GatorParentInvite?utm_source=welcome" style="display: inline-block; background: #0021A5; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Invite Parents →</a>
       </div>
 
-      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin: 20px 0;">
-        <h3 style="color: #0021A5; margin: 0 0 12px 0; font-size: 16px;">🚀 Quick wins to get started:</h3>
-        <ul style="margin: 0; padding-left: 20px; color: #374151;">
-          <li style="margin-bottom: 8px;"><strong>Post a question</strong> — Tell us what you need help with (+5 karma)</li>
-          <li style="margin-bottom: 8px;"><strong>Complete your profile</strong> — Helps parents find the best matches (+15 karma)</li>
-          <li style="margin-bottom: 8px;"><strong>Invite your parents</strong> — They can help other UF students too (+50 karma)</li>
-        </ul>
+      <!-- Action 2: Help a student -->
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 20px; margin: 0 0 12px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>2. 💬 Help a fellow UF student</strong> — answer someone else's question (+5 karma)</p>
+        <a href="${APP_BASE_URL}/#Connections?utm_source=welcome" style="display: inline-block; background: #166534; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">See Student Questions →</a>
       </div>
 
-      <div style="text-align: center; margin: 28px 0;">
-        <a href="${APP_BASE_URL}/#PostRequest?utm_source=welcome" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Ask Your First Question →</a>
+      <!-- Action 3: Share salary data -->
+      <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>3. 💰 Share salary data</strong> — help everyone negotiate better (+25 karma)</p>
+        <a href="${APP_BASE_URL}/#Insights?utm_source=welcome" style="display: inline-block; background: #92400e; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Share Anonymously →</a>
       </div>
+
       <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
     </div>
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
