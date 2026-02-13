@@ -25,7 +25,7 @@ function truncate(str, max) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { userId, userEmail, userName, persona, userIndustries } = await req.json();
+    const { userId, userEmail, userName, persona, userIndustries, isAlumniJobSeeker } = await req.json();
 
     if (!userEmail) {
       return Response.json({ error: 'userEmail required' }, { status: 400 });
