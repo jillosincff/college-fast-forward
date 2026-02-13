@@ -315,6 +315,9 @@ export default function Dashboard() {
         {/* ========== ACTIVATION WELCOME BANNER ========== */}
         <ActivationWelcomeBannerStudent user={user} />
 
+        {/* Student Karma Card */}
+        <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />
+
         {/* Family Boost Status - Show when linked or has parent */}
         {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
           <FamilyBoostStatus 
