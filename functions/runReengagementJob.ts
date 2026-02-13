@@ -348,14 +348,15 @@ Deno.serve(async (req) => {
         // Build email HTML
         const emailHtml = buildReengagementEmailHtml(emailType, {
           parentFirstName: parseFirstName(user.full_name),
-          schoolShortName: schoolConfig.schoolShortName,
-          primaryColor: schoolConfig.primaryColor,
           primaryIndustry,
           questions: formattedQuestions,
           count: matchedQuestions.length,
-          trackingId,
           unsubscribeUrl: `${APP_BASE_URL}/#UnsubscribeReengagement?userId=${user.id}`,
-          dashboardUrl: `${APP_BASE_URL}/#ParentDashboard?utm_source=reengagement&utm_campaign=${emailType}`
+          dashboardUrl: `${APP_BASE_URL}/#ParentDashboard?utm_source=reengagement&utm_campaign=${emailType}`,
+          communityUrl: `${APP_BASE_URL}/#Connections?utm_source=reengagement&utm_campaign=${emailType}`,
+          newMemberCount: newMembersThisMonth,
+          memberCount: totalMemberCount,
+          totalQuestionsAnswered,
         });
         
         // Send the email
