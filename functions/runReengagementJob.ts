@@ -460,24 +460,15 @@ function buildReengagementEmailHtml(emailType, data) {
 </body></html>`;
   }
 
-  // ── 9B: 21-Day — multiple questions, social proof ──
+  // ── 9B: 21-Day — growth stats + numbered question list ──
   if (emailType === 'day21') {
-    const questionRows = questions.slice(0, 3).map((q, i) => `<tr>
-      <td style="padding: 14px 0; ${i < Math.min(questions.length, 3) - 1 ? 'border-bottom: 1px solid #f3f4f6;' : ''}">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-          <td style="width: 28px; vertical-align: top; padding-right: 12px;">
-            <span style="display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: #0021A5; color: white; text-align: center; line-height: 28px; font-weight: 700; font-size: 14px;">${i + 1}</span>
-          </td>
-          <td>
-            <div style="margin-bottom: 4px;"><strong style="color: #111827; font-size: 14px;">${q.studentName}</strong> <span style="color: #6b7280; font-size: 13px;">· ${q.major}</span></div>
-            <p style="color: #374151; font-style: italic; margin: 0 0 8px 0; font-size: 14px;">"${q.preview}"</p>
-            <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Help ${q.studentName} →</a>
-          </td>
-        </tr></table>
-      </td>
-    </tr>`).join('');
+    const questionList = questions.slice(0, 3).map((q, i) => `
+      <tr><td style="padding: 10px 0; ${i < Math.min(questions.length, 3) - 1 ? 'border-bottom: 1px solid #f3f4f6;' : ''}">
+        <span style="color: #6b7280; font-size: 14px;">${i + 1}.</span>
+        <span style="color: #374151; font-style: italic; font-size: 14px;">"${q.preview}"</span>
+      </td></tr>`).join('');
 
-    const preheader = `${count} students have posted questions that match your background.`;
+    const preheader = `The UF network has been growing — ${count} students have questions that match your expertise.`;
 
     return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -490,21 +481,21 @@ function buildReengagementEmailHtml(emailType, data) {
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
-      <p style="font-size: 16px;"><strong>${count}</strong> students have posted questions that match your background. Here are a few:</p>
+      <p style="font-size: 16px;">The UF network has been growing — <strong>${newMemberCount}</strong> new members joined this month.</p>
+      <p style="font-size: 16px;">Right now, <strong>${count}</strong> students have questions that match your expertise:</p>
 
       <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 8px 0; margin: 20px 0;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
-          ${questionRows}
+          ${questionList}
         </table>
       </div>
 
-      <p style="font-size: 16px;">These students don't have the connections you have. One answer could open doors they didn't know existed.</p>
-
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See All Matching Questions →</a>
+        <a href="${communityUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See All Questions →</a>
       </div>
 
-      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+      <p style="font-size: 16px;">Your experience matters more than you think.</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— Jill, CFF Founder</p>
     </div>
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
       <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
