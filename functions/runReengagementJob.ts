@@ -417,7 +417,7 @@ Deno.serve(async (req) => {
 });
 
 function buildReengagementEmailHtml(emailType, data) {
-  const { parentFirstName, primaryIndustry, questions, count, unsubscribeUrl, dashboardUrl } = data;
+  const { parentFirstName, primaryIndustry, questions, count, unsubscribeUrl, dashboardUrl, communityUrl, newMemberCount, memberCount, totalQuestionsAnswered } = data;
 
   // ── 9A: 7-Day — single matched question, minimal ──
   if (emailType === 'day7') {
