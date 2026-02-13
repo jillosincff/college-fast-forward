@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.EmailLog.create({
         user_email: helperEmail,
         email_type: 'thank_you',
-        subject: `${studentFirst} just thanked you`,
+        subject: `A UF student said your answer helped! ⭐`,
         status: 'sent',
         sent_at: new Date().toISOString(),
         metadata: { studentName, questionTitle }
