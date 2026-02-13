@@ -10,11 +10,10 @@ import { base44 } from '@/api/base44Client';
 import { getUserMessages } from '@/functions/getUserMessages';
 import { getUserCount } from '@/functions/getUserCount';
 
-// New focused components
+// Components
 import NewUserWelcome from '@/components/dashboard/student/NewUserWelcome';
 import WaitingForMatches from '@/components/dashboard/student/WaitingForMatches';
 import WaitingForResponses from '@/components/dashboard/student/WaitingForResponses';
-import UnreadResponsesSection from '@/components/dashboard/student/UnreadResponsesSection';
 import MoreMatchesPrompt from '@/components/dashboard/student/MoreMatchesPrompt';
 import MatchesSection from '@/components/dashboard/student/MatchesSection';
 import CompactOpportunities from '@/components/dashboard/student/CompactOpportunities';
@@ -22,14 +21,9 @@ import CompactChallenge from '@/components/dashboard/student/CompactChallenge';
 import FamilyBoostStatus from '@/components/dashboard/student/FamilyBoostStatus';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
 import FirstMessageNudgeModal from '@/components/onboarding/student/FirstMessageNudgeModal';
-// New UF-branded components
 import FoundingMemberBanner from '@/components/dashboard/student/FoundingMemberBanner';
 import DashboardHeader from '@/components/dashboard/student/DashboardHeader';
-import StatsCards from '@/components/dashboard/student/StatsCards';
 import AllCaughtUpState from '@/components/dashboard/student/states/AllCaughtUpState';
-import ChallengeCard from '@/components/dashboard/student/ChallengeCard';
-import FamilyCard from '@/components/dashboard/student/FamilyCard';
-import ConversationsSection from '@/components/dashboard/student/ConversationsSection';
 import ResponsesSection from '@/components/dashboard/student/ResponsesSection';
 import WhatToDoNext from '@/components/dashboard/student/WhatToDoNext';
 import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
@@ -39,6 +33,11 @@ import HelpFellowGatorSection from '@/components/dashboard/student/HelpFellowGat
 import ShareWhatYouLearnedCard from '@/components/dashboard/student/ShareWhatYouLearnedCard';
 import ShareOfferDataCard from '@/components/dashboard/student/ShareOfferDataCard';
 import PostJobGigCard from '@/components/dashboard/student/PostJobGigCard';
+// New 1F/1G components
+import YouGotResponseBanner from '@/components/dashboard/student/YouGotResponseBanner';
+import StudentHelpRequestPreview from '@/components/dashboard/student/StudentHelpRequestPreview';
+import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
+import ExploreSection from '@/components/dashboard/student/ExploreSection';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
