@@ -125,26 +125,46 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Check if we already sent a daily digest in the last 20h
+        const twentyHoursAgo = new Date(now - 20*60*60*1000).toISOString();
+        const recentDigests = userLogs.filter(l => l.email_type === 'daily_match_digest' && l.sent_at >= twentyHoursAgo);
+        if (recentDigests.length > 0) {
+          results.skipped++;
+          continue;
+        }
+
         // Match questions to this parent's expertise
-        const exp = expertiseByUser[helper.id];
-        const userIndustry = exp?.industry || helper.industries?.[0] || '';
+        const exp = expertiseByUser[helper.id] || expertiseByUser[helper.email];
+        const userIndustries = exp?.industries || (helper.industries ? helper.industries : []);
+        const userIndustry = userIndustries[0] || exp?.industry || '';
 
         let matched = todaysQuestions;
         if (userIndustry) {
           const industryLower = userIndustry.toLowerCase();
-          matched = todaysQuestions.filter(q => {
+          const industryMatched = todaysQuestions.filter(q => {
             const qi = (q.industry || q.target_industry || '').toLowerCase();
-            return qi.includes(industryLower) || industryLower.includes(qi);
+            return userIndustries.some(ui => {
+              const uiLower = ui.toLowerCase();
+              return qi.includes(uiLower) || uiLower.includes(qi);
+            }) || qi.includes(industryLower) || industryLower.includes(qi);
           });
+          if (industryMatched.length > 0) matched = industryMatched;
         }
 
-        if (matched.length === 0) matched = todaysQuestions.slice(0, 3);
-        matched = matched.slice(0, 5);
+        matched = matched.slice(0, 3);
 
         if (matched.length === 0) {
           results.skipped++;
           continue;
         }
+
+        // Get this helper's karma and students helped count
+        const family = familiesByUser[helper.id];
+        const familyKarma = family ? karmaByFamily[family.family_group_id] : null;
+        const karma = familyKarma?.total_karma || 0;
+        const helperAnswersList = answersByEmail[helper.email] || [];
+        const uniqueQuestionIds = [...new Set(helperAnswersList.map(a => a.question_id || a.job_request_id))];
+        const studentsHelped = uniqueQuestionIds.length;
 
         const firstName = parseFirstName(helper.full_name);
 
