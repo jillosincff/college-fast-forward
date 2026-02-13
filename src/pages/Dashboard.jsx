@@ -324,6 +324,9 @@ export default function Dashboard() {
         {/* Help a Fellow Gator - Peer Q&A */}
         <HelpFellowGatorSection user={user} />
 
+        {/* Share What You've Learned */}
+        <ShareWhatYouLearnedCard user={user} />
+
         {/* Family Boost Status - Show when linked or has parent */}
         {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
           <FamilyBoostStatus 
