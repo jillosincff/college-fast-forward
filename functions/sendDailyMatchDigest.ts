@@ -86,10 +86,13 @@ Deno.serve(async (req) => {
     const prefsByUser = {};
     prefs.forEach(p => { prefsByUser[p.user_id] = p; });
 
-    // Get parent expertise for matching
+    // Get parent expertise for matching (index by both parent_id and user_email)
     const expertise = await base44.asServiceRole.entities.ParentExpertise.filter({});
     const expertiseByUser = {};
-    expertise.forEach(e => { expertiseByUser[e.parent_id] = e; });
+    expertise.forEach(e => {
+      if (e.parent_id) expertiseByUser[e.parent_id] = e;
+      if (e.user_email) expertiseByUser[e.user_email] = e;
+    });
 
     // Fetch all email logs for rate limiting
     const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
