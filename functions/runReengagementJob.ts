@@ -413,74 +413,147 @@ Deno.serve(async (req) => {
 });
 
 function buildReengagementEmailHtml(emailType, data) {
-  const { parentFirstName, schoolShortName, primaryColor, primaryIndustry, questions, count, trackingId, unsubscribeUrl, dashboardUrl } = data;
-  
-  const questionCards = questions.slice(0, emailType === 'day7' ? 1 : 3).map(q => `
-    <div style="border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 16px; background: #FAFAFA;">
-      <div style="margin-bottom: 12px;">
-        <strong style="color: #111827;">${q.studentName}</strong>
-        <span style="color: #6B7280;"> · ${q.major}${q.gradYear ? ` '${q.gradYear}` : ''}</span>
-        <div style="color: #9CA3AF; font-size: 13px; margin-top: 4px;">Posted ${q.timeAgo}</div>
-      </div>
-      <p style="color: #374151; font-style: italic; margin: 0 0 16px 0;">"${q.preview}"</p>
-      ${q.helpTypes ? `<div style="color: #6B7280; font-size: 13px; margin-bottom: 16px;">Looking for: ${q.helpTypes}</div>` : ''}
-      <a href="${q.url}" style="display: inline-block; background: ${primaryColor}; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Help ${q.studentName} →</a>
-    </div>
-  `).join('');
-  
-  let intro, outro;
-  
-  switch (emailType) {
-    case 'day7':
-      intro = `A student posted a question that matches your background:`;
-      outro = `2-3 minutes of your time could change their trajectory.`;
-      break;
-    case 'day21':
-      intro = `${count} students have posted questions that match your background. Here are a few:`;
-      outro = `These students don't have the connections you have. One answer could open doors they didn't know existed.`;
-      break;
-    case 'day45':
-      intro = `It's been a while! While you were away, ${count} students posted questions that match your ${primaryIndustry} background.<br><br>Here's one that could really use your perspective:`;
-      outro = `Most answers take 2-3 minutes. No pressure — but if you have a few minutes, a student would really appreciate it.`;
-      break;
-  }
-  
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  const { parentFirstName, primaryIndustry, questions, count, unsubscribeUrl, dashboardUrl } = data;
+
+  // ── 9A: 7-Day — single matched question, minimal ──
+  if (emailType === 'day7') {
+    const q = questions[0];
+    const preheader = `A student posted a question right in your area — still unanswered.`;
+
+    return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #111827; max-width: 600px; margin: 0 auto; padding: 20px;">
-  
-  <p style="font-size: 16px;">Hi ${parentFirstName},</p>
-  
-  <p style="font-size: 16px;">${intro}</p>
-  
-  <div style="margin: 24px 0;">
-    ${questionCards}
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
+      <p style="font-size: 16px;">It's been a few days — meanwhile, a student posted a question right in your area:</p>
+
+      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #111827; font-size: 15px;">${q.studentName}</strong>
+          <span style="color: #6b7280; font-size: 13px;"> · ${q.major}</span>
+        </div>
+        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${q.preview}"</p>
+        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">⏰ Unanswered · Posted ${q.timeAgo}</p>
+        <div style="text-align: center;">
+          <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Help ${q.studentName} →</a>
+        </div>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
   </div>
-  
-  ${emailType !== 'day7' ? `
-  <div style="text-align: center; margin: 24px 0;">
-    <a href="${dashboardUrl}" style="display: inline-block; background: ${primaryColor}; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">See All Matching Questions →</a>
+</body></html>`;
+  }
+
+  // ── 9B: 21-Day — multiple questions, social proof ──
+  if (emailType === 'day21') {
+    const questionRows = questions.slice(0, 3).map((q, i) => `<tr>
+      <td style="padding: 14px 0; ${i < Math.min(questions.length, 3) - 1 ? 'border-bottom: 1px solid #f3f4f6;' : ''}">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+          <td style="width: 28px; vertical-align: top; padding-right: 12px;">
+            <span style="display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: #0021A5; color: white; text-align: center; line-height: 28px; font-weight: 700; font-size: 14px;">${i + 1}</span>
+          </td>
+          <td>
+            <div style="margin-bottom: 4px;"><strong style="color: #111827; font-size: 14px;">${q.studentName}</strong> <span style="color: #6b7280; font-size: 13px;">· ${q.major}</span></div>
+            <p style="color: #374151; font-style: italic; margin: 0 0 8px 0; font-size: 14px;">"${q.preview}"</p>
+            <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Help ${q.studentName} →</a>
+          </td>
+        </tr></table>
+      </td>
+    </tr>`).join('');
+
+    const preheader = `${count} students have posted questions that match your background.`;
+
+    return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
+      <p style="font-size: 16px;"><strong>${count}</strong> students have posted questions that match your background. Here are a few:</p>
+
+      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 8px 0; margin: 20px 0;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          ${questionRows}
+        </table>
+      </div>
+
+      <p style="font-size: 16px;">These students don't have the connections you have. One answer could open doors they didn't know existed.</p>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See All Matching Questions →</a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
   </div>
-  ` : ''}
-  
-  <p style="font-size: 16px; color: #374151;">${outro}</p>
-  
-  <p style="font-size: 16px; color: #6B7280;">— College Fast Forward</p>
-  
-  <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;">
-  
-  <p style="font-size: 12px; color: #9CA3AF; text-align: center;">College Fast Forward</p>
-  <p style="font-size: 11px; color: #9CA3AF; text-align: center; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-  <p style="font-size: 11px; color: #9CA3AF; text-align: center; margin: 8px 0 0 0;">
-    <a href="${unsubscribeUrl}" style="color: #9CA3AF;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9CA3AF;">Email Preferences</a>
-  </p>
-  
-</body>
-</html>
-  `.trim();
+</body></html>`;
+  }
+
+  // ── 9C: 45-Day — warm, low-pressure, single highlight ──
+  const q = questions[0];
+  const preheader = `It's been a while — ${count} students could use your ${primaryIndustry} perspective.`;
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
+      <p style="font-size: 16px;">It's been a while! While you were away, <strong>${count}</strong> students posted questions that match your ${primaryIndustry} background.</p>
+      <p style="font-size: 16px;">Here's one that could really use your perspective:</p>
+
+      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #111827; font-size: 15px;">${q.studentName}</strong>
+          <span style="color: #6b7280; font-size: 13px;"> · ${q.major}</span>
+        </div>
+        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${q.preview}"</p>
+        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">⏰ Unanswered · Posted ${q.timeAgo}</p>
+        <div style="text-align: center;">
+          <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Help ${q.studentName} →</a>
+        </div>
+      </div>
+
+      <p style="font-size: 16px;">Most answers take 2-3 minutes. No pressure — but if you have a few minutes, a student would really appreciate it.</p>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${dashboardUrl}" style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">See All Matching Questions →</a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body></html>`;
 }
