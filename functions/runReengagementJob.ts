@@ -379,7 +379,7 @@ Deno.serve(async (req) => {
             subject,
             status: 'sent',
             sent_at: new Date().toISOString(),
-            metadata: { variant, questionCount: matchedQuestions.length, trackingId }
+            metadata: { questionCount: matchedQuestions.length, trackingId }
           });
         } catch (logErr) { console.log('EmailLog failed:', logErr.message); }
 
