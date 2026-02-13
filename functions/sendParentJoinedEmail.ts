@@ -53,6 +53,16 @@ Deno.serve(async (req) => {
   </div>
 </body></html>`;
 
+    // Anti-spam: max 1 email/day, max 3/week
+    const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+    const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail }, '-sent_at', 50);
+    const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
+    const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
+    if (todayCount >= 1 || weekCount >= 3) {
+      return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
+    }
+
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: studentEmail,
       subject: `🎉 ${parentFirst} just joined the UF Network!`,
