@@ -318,10 +318,10 @@ Deno.serve(async (req) => {
         const studentName = parseFirstName(matchedQuestions[0].poster_name);
         
         const subjectData = {
-          schoolShortName: schoolConfig.schoolShortName,
           industry: primaryIndustry,
           studentName,
-          count: matchedQuestions.length
+          count: matchedQuestions.length,
+          firstName: parseFirstName(user.full_name)
         };
         
         const { variant, subject } = getSubjectLineVariant(user.id, emailType, subjectData);
