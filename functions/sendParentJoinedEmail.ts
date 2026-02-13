@@ -20,34 +20,47 @@ Deno.serve(async (req) => {
     }
 
     const studentFirst = (studentName || 'there').split(' ')[0];
-    const parentFirst = (parentName || 'Your parent').split(' ')[0];
+    // Build display name: "FirstName L." format
+    const parentParts = (parentName || 'Your parent').split(' ');
+    const parentDisplayName = parentParts.length > 1
+      ? `${parentParts[0]} ${parentParts[parentParts.length - 1][0]}.`
+      : parentParts[0];
+
+    const dashboardUrl = `${APP_BASE_URL}/#Dashboard?utm_source=parent_joined`;
 
     const emailHtml = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${parentDisplayName} just joined CFF — you earned +50 karma!</span>
+</head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 24px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="CFF" style="height: 50px; margin-bottom: 4px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 22px;">Your UF Family Just Got Stronger! 🎉</h1>
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
     </div>
-    <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 16px;">Hi ${studentFirst},</p>
-      <p style="font-size: 16px;">Great news! <strong>${parentFirst}</strong> just joined the UF Network through your invite.</p>
-      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;">
-        <p style="font-size: 18px; font-weight: 700; color: #166534; margin: 0;">🎉 +50 karma earned!</p>
-        <p style="font-size: 14px; color: #166534; margin: 4px 0 0 0;">Your questions now get priority visibility in the network.</p>
-      </div>
-      <p style="font-size: 16px;">What this means for you:</p>
-      <ul style="color: #374151; font-size: 15px;">
-        <li style="margin-bottom: 8px;">Your questions get boosted to the top of the feed</li>
-        <li style="margin-bottom: 8px;">${parentFirst} can now help other UF students too</li>
-        <li style="margin-bottom: 8px;">The more parents who join, the stronger the UF Network gets</li>
-      </ul>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${studentFirst},</p>
+      <p style="font-size: 16px;">Great news — <strong>${parentDisplayName}</strong> just joined College Fast Forward!</p>
+      <p style="font-size: 16px;">Here's what this means for you:</p>
+
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 24px 0;">
+        <tr>
+          <td style="padding: 10px 0; font-size: 15px; color: #374151;">✅ Their Karma boosts your visibility in the network</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; font-size: 15px; color: #374151;">✅ You're now connected as a family</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; font-size: 15px; color: #374151;">✅ You earned <strong>+50 karma</strong> for inviting them</td>
+        </tr>
+      </table>
+
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${APP_BASE_URL}/#Dashboard" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Your Dashboard →</a>
+        <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See Your Dashboard →</a>
       </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
     </div>
-    <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
       <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
