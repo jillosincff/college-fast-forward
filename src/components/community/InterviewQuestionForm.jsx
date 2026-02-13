@@ -101,17 +101,30 @@ export default function InterviewQuestionForm({ onSuccess, onCancel }) {
         if (!firstQuestionId) firstQuestionId = record.id;
       }
 
-      // Award karma for interview questions (+15 pts per question)
+      // Award karma for interview questions
       try {
-        await base44.functions.invoke('awardKarma', {
-          parentUserId: user.id,
-          parentEmail: user.email,
-          parentName: user.full_name,
-          actionType: 'interview_question_submitted',
-          referenceType: 'interview_question',
-          referenceId: firstQuestionId,
-          description: `Shared ${validQuestions.length} interview question${validQuestions.length > 1 ? 's' : ''}`
-        });
+        // Parent/alumni karma
+        if (user.persona === 'parent' || user.persona === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+          await base44.functions.invoke('awardKarma', {
+            parentUserId: user.id,
+            parentEmail: user.email,
+            parentName: user.full_name,
+            actionType: 'interview_question_submitted',
+            referenceType: 'interview_question',
+            referenceId: firstQuestionId,
+            description: `Shared ${validQuestions.length} interview question${validQuestions.length > 1 ? 's' : ''}`
+          });
+        }
+        // Student karma
+        if (user.persona === 'gator' || user.roles?.includes('gator')) {
+          await base44.functions.invoke('awardStudentKarma', {
+            userId: user.id,
+            userEmail: user.email,
+            actionType: 'interview_question_submitted',
+            referenceId: firstQuestionId,
+            description: `Shared ${validQuestions.length} interview question${validQuestions.length > 1 ? 's' : ''}`
+          });
+        }
       } catch (e) {
         console.log('Could not award karma:', e);
       }

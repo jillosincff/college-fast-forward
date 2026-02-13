@@ -103,17 +103,30 @@ export default function SalarySubmissionForm({ onSuccess, onCancel }) {
         data_year: parseInt(formData.data_year)
       });
 
-      // Award karma for salary submission (+25 pts)
+      // Award karma for salary submission
       try {
-        await base44.functions.invoke('awardKarma', {
-          parentUserId: user.id,
-          parentEmail: user.email,
-          parentName: user.full_name,
-          actionType: 'salary_submitted',
-          referenceType: 'salary',
-          referenceId: salaryRecord.id,
-          description: 'Shared salary data'
-        });
+        // Award parent/alumni karma
+        if (user.persona === 'parent' || user.persona === 'alumni' || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+          await base44.functions.invoke('awardKarma', {
+            parentUserId: user.id,
+            parentEmail: user.email,
+            parentName: user.full_name,
+            actionType: 'salary_submitted',
+            referenceType: 'salary',
+            referenceId: salaryRecord.id,
+            description: 'Shared salary data'
+          });
+        }
+        // Award student karma
+        if (user.persona === 'gator' || user.roles?.includes('gator')) {
+          await base44.functions.invoke('awardStudentKarma', {
+            userId: user.id,
+            userEmail: user.email,
+            actionType: 'share_salary',
+            referenceId: salaryRecord.id,
+            description: 'Shared salary data'
+          });
+        }
       } catch (e) {
         console.log('Could not award karma:', e);
       }

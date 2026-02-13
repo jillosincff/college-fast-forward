@@ -115,6 +115,22 @@ Deno.serve(async (req) => {
         console.log('Karma award failed (non-critical):', karmaErr.message);
       }
 
+      // Award student karma for upvoting (+2 pts)
+      try {
+        const isGator = user.persona === 'gator' || user.roles?.includes('gator');
+        if (isGator) {
+          await base44.functions.invoke('awardStudentKarma', {
+            userId: user.id,
+            userEmail: user.email,
+            actionType: 'upvote_answer',
+            referenceId: answerId,
+            description: 'Upvoted a helpful answer'
+          });
+        }
+      } catch (studentKarmaErr) {
+        console.log('Student karma for upvote failed (non-critical):', studentKarmaErr.message);
+      }
+
       // Mark activation for the user who upvoted
       try {
         const upvoterPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
