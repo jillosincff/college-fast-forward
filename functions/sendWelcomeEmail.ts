@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: userEmail,
-      subject: `Welcome to the Gator Network, ${firstName}! 🐊`,
+      subject: `Welcome to the UF Network, ${firstName}! 🐊`,
       body: emailHtml,
       from_name: 'College Fast Forward'
     });
