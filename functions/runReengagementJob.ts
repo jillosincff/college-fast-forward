@@ -74,22 +74,8 @@ function generateTrackingId() {
   return 'trk_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 }
 
-function hashUserId(userId) {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) {
-    hash = ((hash << 5) - hash) + userId.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-function getSubjectLineVariant(userId, emailType, data) {
-  const variants = subjectLineVariants[emailType];
-  const variantIndex = hashUserId(userId) % variants.length;
-  return {
-    variant: ['A', 'B', 'C'][variantIndex],
-    subject: variants[variantIndex](data)
-  };
+function getSubject(emailType, data) {
+  return subjectLineVariants[emailType][0](data);
 }
 
 // Simple industry matching score
