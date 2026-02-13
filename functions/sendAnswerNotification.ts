@@ -41,26 +41,13 @@ Deno.serve(async (req) => {
 
         const base44 = createClientFromRequest(req);
 
-        // Check email preferences
-        try {
-            const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: posterEmail });
-            const pref = prefs?.[0];
-            if (pref && (pref.all_emails === false || pref.answer_notifications === false)) {
-                return Response.json({ success: true, skipped: true, reason: 'Unsubscribed' });
-            }
-        } catch (e) { console.log('Pref check failed (continuing):', e.message); }
-
-        // Anti-spam: max 1 email/day, max 3/week
-        const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-        const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
-        try {
-            const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: posterEmail }, '-sent_at', 50);
-            const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
-            const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
-            if (todayCount >= 1 || weekCount >= 3) {
-                return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
-            }
-        } catch (e) { console.log('Rate limit check failed (continuing):', e.message); }
+        // Anti-spam + preferences via shared helper
+        const canSendResult = await base44.functions.invoke('emailHelpers', {
+          action: 'canSendEmail', userEmail: posterEmail, emailType: 'new_answer'
+        });
+        if (!canSendResult.data?.canSend) {
+          return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
+        }
 
         // Build display values
         const firstName = (posterName || 'there').split(' ')[0];

@@ -12,11 +12,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'studentEmail and parentName required' }, { status: 400 });
     }
 
-    // Check prefs
-    const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: studentEmail });
-    const pref = prefs?.[0];
-    if (pref && (pref.all_emails === false || pref.parent_joined_notifications === false)) {
-      return Response.json({ success: true, skipped: true });
+    // Anti-spam + preferences via shared helper
+    const canSendResult = await base44.functions.invoke('emailHelpers', {
+      action: 'canSendEmail', userEmail: studentEmail, emailType: 'parent_joined'
+    });
+    if (!canSendResult.data?.canSend) {
+      return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
     }
 
     const studentFirst = (studentName || 'there').split(' ')[0];
@@ -67,16 +68,6 @@ Deno.serve(async (req) => {
     </div>
   </div>
 </body></html>`;
-
-    // Anti-spam: max 1 email/day, max 3/week
-    const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-    const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
-    const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail }, '-sent_at', 50);
-    const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
-    const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
-    if (todayCount >= 1 || weekCount >= 3) {
-      return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
-    }
 
     const subject = 'Your parent just joined CFF! 🎉';
 

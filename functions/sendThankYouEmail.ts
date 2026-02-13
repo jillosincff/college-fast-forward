@@ -28,11 +28,12 @@ Deno.serve(async (req) => {
       totalStudentsHelped = Math.max(1, questionIds.length);
     } catch (e) { /* fallback to 1 */ }
 
-    // Check email preferences
-    const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: helperEmail });
-    const pref = prefs?.[0];
-    if (pref && (pref.all_emails === false || pref.thank_you_notifications === false)) {
-      return Response.json({ success: true, skipped: true, reason: 'Unsubscribed' });
+    // Anti-spam + preferences via shared helper
+    const canSendResult = await base44.functions.invoke('emailHelpers', {
+      action: 'canSendEmail', userEmail: helperEmail, emailType: 'thank_you'
+    });
+    if (!canSendResult.data?.canSend) {
+      return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
     }
 
     const helperFirst = (helperName || 'there').split(' ')[0];
@@ -72,16 +73,6 @@ Deno.serve(async (req) => {
     </div>
   </div>
 </body></html>`;
-
-    // Anti-spam: max 1 email/day, max 3/week
-    const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-    const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
-    const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: helperEmail }, '-sent_at', 50);
-    const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
-    const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
-    if (todayCount >= 1 || weekCount >= 3) {
-      return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
-    }
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: helperEmail,

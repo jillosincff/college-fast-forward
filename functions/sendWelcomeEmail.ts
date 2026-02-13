@@ -36,14 +36,12 @@ Deno.serve(async (req) => {
     const isAlumni = persona === 'alumni';
     const isGator = persona === 'gator' || persona === 'student';
 
-    // Anti-spam: max 1 email/day, max 3/week
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: userEmail }, '-sent_at', 50);
-    const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
-    const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
-    if (todayCount >= 1 || weekCount >= 3) {
-      return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
+    // Anti-spam via shared helper
+    const canSendResult = await base44.functions.invoke('emailHelpers', {
+      action: 'canSendEmail', userEmail, userId, emailType: 'welcome'
+    });
+    if (!canSendResult.data?.canSend) {
+      return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
     }
 
     // ── Fetch live stats and matched question ──
