@@ -2,13 +2,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
 
-// School branding config
-const schoolConfig = {
-  schoolName: 'University of Florida',
-  schoolShortName: 'UF',
-  primaryColor: '#0021A5'
-};
-
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
 
 // Subject lines per spec
