@@ -377,6 +377,21 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Award student karma for parent linking (+50)
+    if (studentUser) {
+      try {
+        await base44.functions.invoke('awardStudentKarma', {
+          userId: studentUser.id,
+          userEmail: normalizedEmail,
+          actionType: 'invite_parent_joined',
+          description: 'Parent linked to your account'
+        });
+        console.log('✅ Student karma awarded for parent manual link');
+      } catch (skErr) {
+        console.log('Student karma for parent link failed (non-critical):', skErr.message);
+      }
+    }
+
     // Mark activation for the parent who linked a student
     try {
       const parentPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
