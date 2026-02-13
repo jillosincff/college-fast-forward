@@ -74,6 +74,19 @@ Deno.serve(async (req) => {
 
     let subject, emailHtml;
 
+    // For students, fetch their most recent question
+    let studentQuestion = null;
+    if (isGator && userId) {
+      try {
+        const [helpReqs, jobReqs] = await Promise.all([
+          base44.asServiceRole.entities.HelpRequest.filter({ student_id: userId }, '-created_date', 1),
+          base44.asServiceRole.entities.JobRequest.filter({ created_by: userEmail }, '-created_date', 1)
+        ]);
+        const allStudentQs = [...helpReqs, ...jobReqs].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        studentQuestion = allStudentQs[0] || null;
+      } catch (e) { console.log('Student question fetch failed:', e.message); }
+    }
+
     if (isParent) {
       subject = `Welcome to the UF family, ${firstName}! 🎉`;
       emailHtml = buildParentWelcome({ firstName, questionCount, memberCount, matchedQuestion });
@@ -81,8 +94,8 @@ Deno.serve(async (req) => {
       subject = `Welcome back to the UF family, ${firstName}! 🎉`;
       emailHtml = buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion });
     } else {
-      subject = `Welcome to the UF Network, ${firstName}!`;
-      emailHtml = buildStudentWelcome({ firstName, questionCount, memberCount });
+      subject = `You're in, ${firstName}! Here's what happens next 🚀`;
+      emailHtml = buildStudentWelcome({ firstName, questionCount, memberCount, studentQuestion });
     }
 
     await base44.asServiceRole.integrations.Core.SendEmail({
