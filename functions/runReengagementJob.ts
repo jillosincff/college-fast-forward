@@ -275,17 +275,20 @@ Deno.serve(async (req) => {
           continue;
         }
         
+        // HARD STOP: after 45-day email (3 sent), never send again
+        if (emailCount >= 3) {
+          results.skipped.maxEmailsReached++;
+          continue;
+        }
+
         // Determine which email type to send (using settings thresholds)
         let emailType = null;
         if (daysSinceActive >= day1Threshold && daysSinceActive < day2Threshold && emailCount === 0) {
           emailType = 'day7';
         } else if (daysSinceActive >= day2Threshold && daysSinceActive < day3Threshold && emailCount === 1) {
           emailType = 'day21';
-        } else if (daysSinceActive >= day3Threshold && daysSinceActive < stopThreshold && emailCount === 2) {
+        } else if (daysSinceActive >= day3Threshold && emailCount === 2) {
           emailType = 'day45';
-        } else if (daysSinceActive >= stopThreshold || emailCount >= 3) {
-          results.skipped.maxEmailsReached++;
-          continue;
         } else {
           // Not time for next email yet
           continue;
