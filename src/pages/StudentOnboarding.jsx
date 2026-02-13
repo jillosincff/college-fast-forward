@@ -199,6 +199,19 @@ export default function StudentOnboarding() {
 
       await refreshUser();
 
+      // Award student karma for completing profile (+15)
+      try {
+        await base44.functions.invoke('awardStudentKarma', {
+          userId: user.id,
+          userEmail: user.email,
+          actionType: 'complete_profile',
+          description: 'Completed student profile'
+        });
+        console.log('✅ Student karma awarded for profile completion');
+      } catch (karmaErr) {
+        console.log('Student karma for profile failed (non-critical):', karmaErr.message);
+      }
+
       // Check if a parent already linked this student's email (auto-link)
       try {
         await base44.functions.invoke('linkStudentToParent', {
