@@ -534,14 +534,36 @@ Deno.serve(async (req) => {
 
         let subject, emailHtml;
 
-        if (isParent) {
-          ({ subject, emailHtml } = buildParentNudge24h({ firstName, matchedQuestion, activeParentCount }));
-        } else if (isAlumni && !isAlumniSeeker) {
-          ({ subject, emailHtml } = buildAlumniHelperNudge24h({ firstName, matchedQuestion, activeParentCount }));
-        } else if (isAlumniSeeker) {
-          ({ subject, emailHtml } = buildAlumniSeekerNudge24h({ firstName, memberCount }));
+        if (nudgeType === '24h') {
+          // ── 24h nudge templates (EMAIL 3) ──
+          if (isParent) {
+            ({ subject, emailHtml } = buildParentNudge24h({ firstName, matchedQuestion, activeParentCount }));
+          } else if (isAlumni && !isAlumniSeeker) {
+            ({ subject, emailHtml } = buildAlumniHelperNudge24h({ firstName, matchedQuestion, activeParentCount }));
+          } else if (isAlumniSeeker) {
+            ({ subject, emailHtml } = buildAlumniSeekerNudge24h({ firstName, memberCount }));
+          } else {
+            ({ subject, emailHtml } = buildStudentNudge24h({ firstName }));
+          }
         } else {
-          ({ subject, emailHtml } = buildStudentNudge24h({ firstName }));
+          // ── 48h nudge templates (EMAIL 4) ──
+          if (isParent) {
+            const matchedQs = findMatchedQuestions(unansweredQuestions, userIndustries, 3);
+            ({ subject, emailHtml } = buildParentNudge48h({
+              firstName,
+              unansweredQuestions,
+              matchedQuestions: matchedQs,
+              activeParentCount: answeredParentsThisWeek,
+              topKarma
+            }));
+          } else if (isAlumni && !isAlumniSeeker) {
+            // Reuse alumni helper 24h for now (48h variants for alumni/student/seeker can be added later)
+            ({ subject, emailHtml } = buildAlumniHelperNudge24h({ firstName, matchedQuestion, activeParentCount }));
+          } else if (isAlumniSeeker) {
+            ({ subject, emailHtml } = buildAlumniSeekerNudge24h({ firstName, memberCount }));
+          } else {
+            ({ subject, emailHtml } = buildStudentNudge24h({ firstName }));
+          }
         }
 
         if (!dryRun) {
