@@ -45,12 +45,41 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, skipped: true, reason: 'No new questions today' });
     }
 
-    // Get parent/alumni users
+    // Get parent/alumni users (skip alumni job seekers)
     const allUsers = await base44.asServiceRole.entities.User.filter({});
     const helpers = allUsers.filter(u =>
       (u.persona === 'parent' || u.persona === 'alumni') &&
-      u.onboarding_completed !== false
+      u.onboarding_completed !== false &&
+      !(u.persona === 'alumni' && (u.alumni_intent === 'career_help' || u.alumni_help_type))
     );
+
+    // Pre-fetch karma and answer counts for stats
+    const [allKarma, allAnswers, allJobAnswers] = await Promise.all([
+      base44.asServiceRole.entities.FamilyKarma.filter({}, '-total_karma', 500),
+      base44.asServiceRole.entities.Answer.filter({}, '-created_date', 1000),
+      base44.asServiceRole.entities.JobAnswer.filter({}, '-created_date', 1000)
+    ]);
+    // Build karma lookup by family_group_id
+    const karmaByFamily = {};
+    allKarma.forEach(k => { karmaByFamily[k.family_group_id] = k; });
+    // Build answers-by-email lookup
+    const answersByEmail = {};
+    allAnswers.forEach(a => {
+      if (!answersByEmail[a.answerer_email]) answersByEmail[a.answerer_email] = [];
+      answersByEmail[a.answerer_email].push(a);
+    });
+    allJobAnswers.forEach(a => {
+      if (!answersByEmail[a.responder_email]) answersByEmail[a.responder_email] = [];
+      answersByEmail[a.responder_email].push(a);
+    });
+    // Family lookup for karma
+    let familiesByUser = {};
+    try {
+      const families = await base44.asServiceRole.entities.Family.filter({});
+      families.forEach(f => {
+        (f.parent_ids || []).forEach(pid => { familiesByUser[pid] = f; });
+      });
+    } catch (e) { /* no families */ }
 
     // Get email prefs
     const prefs = await base44.asServiceRole.entities.EmailPreference.filter({});
