@@ -296,10 +296,11 @@ export default function Dashboard() {
       {/* Founding Member Banner */}
       <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
 
-      {/* Welcome Header with Stats - Only show when NOT new user */}
+      {/* 1. HERO: Welcome + UF · Major · Class Year + Stats */}
       {userState !== 'new_user' && (
         <DashboardHeader 
           firstName={firstName}
+          user={user}
           stats={{
             activeQuestions: myActiveQuestions,
             totalMatches: matches.length,
@@ -313,181 +314,63 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Main Content */}
+      {/* Main Content — Ordered per 1G spec */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
         
-        {/* ========== ACTIVATION WELCOME BANNER ========== */}
+        {/* Activation Banner (if applicable) */}
         <ActivationWelcomeBannerStudent user={user} />
 
-        {/* Student Karma Card */}
-        <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />
+        {/* New user state gets its own welcome flow */}
+        {userState === 'new_user' && (
+          <NewUserWelcome user={user} />
+        )}
 
-        {/* Help a Fellow Gator - Peer Q&A */}
-        <HelpFellowGatorSection user={user} />
+        {/* 2. 🎉 YOU GOT A RESPONSE! (with thank/upvote — 1F) */}
+        {unreadCount > 0 && (
+          <YouGotResponseBanner user={user} unreadMessages={unreadMessages} />
+        )}
 
-        {/* Share What You've Learned */}
-        <ShareWhatYouLearnedCard user={user} />
+        {/* 3. YOUR HELP REQUEST */}
+        {helpRequest && (
+          <StudentHelpRequestPreview helpRequest={helpRequest} />
+        )}
 
-        {/* Share Your Offer Data */}
-        <ShareOfferDataCard user={user} />
+        {/* Waiting states */}
+        {userState === 'waiting_for_matches' && (
+          <WaitingForMatches helpRequest={helpRequest} />
+        )}
+        {userState === 'waiting_for_responses' && (
+          <WaitingForResponses messagedMatches={messagedMatches} />
+        )}
 
-        {/* Post a Job/Gig */}
-        <PostJobGigCard />
-
-        {/* Family Boost Status - Show when linked or has parent */}
-        {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
-          <FamilyBoostStatus 
-            boostLevel={user?.boost_level || user?.karma_boost || 0}
-            boostExpiresAt={user?.boost_expires_at || user?.boosted_until}
-            boostedByParentEmail={user?.boosted_by_parent_email || linkedParents?.[0]?.email}
-            boostedByParentName={linkedParents?.[0]?.full_name}
-            parentKarma={user?.family_karma || linkedParents?.[0]?.karma_points || 0}
-            linkedParents={linkedParents}
+        {/* Matches section when available */}
+        {matches.length > 0 && userState === 'has_matches_not_messaged' && (
+          <MatchesSection 
+            matches={matches} 
+            user={user}
+            onMessageMatch={(match) => {
+              const name = match.helper_name || match.parent_name || 'Helper';
+              const email = match.helper_email || match.parent_email;
+              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+            }}
           />
         )}
 
-        {/* Family Link Success Banner */}
-        {linkedParents.length > 0 && (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-green-800">
-                  🎉 Linked to {linkedParents.map(p => p.full_name || p.email).join(', ')}
-                </p>
-                <p className="text-sm text-green-600">Their support boosts your visibility!</p>
-              </div>
-            </div>
-          </div>
+        {/* More matches prompt */}
+        {unmessagedMatches.length > 0 && (userState === 'waiting_for_responses' || userState === 'has_unread_responses') && (
+          <MoreMatchesPrompt 
+            unmessagedMatches={unmessagedMatches}
+            totalMatches={matches.length}
+            isWaitingForResponses={userState === 'waiting_for_responses'}
+            onMessageMatch={(match) => {
+              const name = match.helper_name || match.parent_name || 'Helper';
+              const email = match.helper_email || match.parent_email;
+              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
+            }}
+          />
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* STATE-BASED CONTENT - The core dynamic section                 */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-
-        {/* STATE 1: New User - No Question Posted */}
-        {userState === 'new_user' && (
-          <>
-            <NewUserWelcome user={user} />
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title="While you're here — Latest Opportunities"
-            />
-          </>
-        )}
-
-        {/* STATE 2: Question Posted - Waiting for Matches */}
-        {userState === 'waiting_for_matches' && (
-          <>
-            <WaitingForMatches helpRequest={helpRequest} />
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title="While you wait — Latest Opportunities"
-            />
-          </>
-        )}
-
-        {/* STATE 3: Has Matches - Hasn't Messaged (PRIMARY STATE) */}
-        {userState === 'has_matches_not_messaged' && (
-          <>
-            {/* MATCHES FIRST - The star of the show */}
-            <MatchesSection 
-              matches={matches} 
-              user={user}
-              onMessageMatch={(match) => {
-                const name = match.helper_name || match.parent_name || 'Helper';
-                const email = match.helper_email || match.parent_email;
-                navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-              }}
-            />
-
-            {/* What To Do Next - Engagement prompts */}
-            <WhatToDoNext user={user} />
-
-            {/* Opportunities - Compact */}
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title={opportunities.length > 1 ? `${opportunities.length} New Opportunities` : "Latest Opportunities"}
-            />
-
-            {/* Challenge - At bottom, compact */}
-            <CompactChallenge 
-              user={user} 
-              onLogIntro={() => setShowLogIntroModal(true)}
-            />
-          </>
-        )}
-
-        {/* STATE 4: Has Messaged - Waiting for Responses */}
-        {userState === 'waiting_for_responses' && (
-          <>
-            {/* Waiting status */}
-            <WaitingForResponses messagedMatches={messagedMatches} />
-
-            {/* More matches to message */}
-            {unmessagedMatches.length > 0 && (
-              <MoreMatchesPrompt 
-                unmessagedMatches={unmessagedMatches}
-                totalMatches={matches.length}
-                isWaitingForResponses={true}
-                onMessageMatch={(match) => {
-                  const name = match.helper_name || match.parent_name || 'Helper';
-                  const email = match.helper_email || match.parent_email;
-                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-                }}
-              />
-            )}
-
-            {/* What To Do Next - Engagement prompts */}
-            <WhatToDoNext user={user} />
-
-            {/* Opportunities - Compact */}
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title={opportunities.length > 1 ? `${opportunities.length} New Opportunities` : "Latest Opportunities"}
-            />
-          </>
-        )}
-
-        {/* STATE 5: Has Unread Responses (HIGHEST PRIORITY) */}
-        {userState === 'has_unread_responses' && (
-          <>
-            {/* UNREAD RESPONSES FIRST - Top priority */}
-            <ResponsesSection 
-              responses={unreadMessages} 
-              onReadResponse={(msg) => {
-                if (msg.conversation_id) {
-                  navigate(`MyMessages?id=${msg.conversation_id}`);
-                } else {
-                  navigate('MyMessages');
-                }
-              }}
-            />
-
-            {/* More matches available */}
-            {unmessagedMatches.length > 0 && (
-              <MoreMatchesPrompt 
-                unmessagedMatches={unmessagedMatches}
-                totalMatches={matches.length}
-                onMessageMatch={(match) => {
-                  const name = match.helper_name || match.parent_name || 'Helper';
-                  const email = match.helper_email || match.parent_email;
-                  navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-                }}
-              />
-            )}
-
-            {/* Opportunities - Compact */}
-            <CompactOpportunities 
-              opportunities={opportunities} 
-              title={opportunities.length > 1 ? `${opportunities.length} New Opportunities` : "Latest Opportunities"}
-            />
-          </>
-        )}
-
-        {/* STATE 6: All Caught Up - Explore Mode */}
+        {/* All caught up state */}
         {userState === 'all_caught_up' && (
           <AllCaughtUpState 
             conversations={messagedMatches}
@@ -511,41 +394,45 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* COLLAPSED SECTIONS - Always available but not prominent         */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* Student Karma Card */}
+        <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />
 
-        {/* Your Family's Karma - Student View */}
-        {(user?.family_karma > 0 || linkedParents.length > 0) && (
-          <FamilyKarmaCard 
-            user={user}
-            viewMode="student"
+        {/* 4. 💬 HELP A FELLOW GATOR (+5 karma) */}
+        <HelpFellowGatorSection user={user} />
+
+        {/* 5. 👨‍👩‍👧 INVITE YOUR PARENTS / Family Network */}
+        <InviteParentsCard linkedParents={linkedParents} onInviteParent={() => setShowInviteModal(true)} />
+
+        {/* Family Boost Status */}
+        {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
+          <FamilyBoostStatus 
+            boostLevel={user?.boost_level || user?.karma_boost || 0}
+            boostExpiresAt={user?.boost_expires_at || user?.boosted_until}
+            boostedByParentEmail={user?.boosted_by_parent_email || linkedParents?.[0]?.email}
+            boostedByParentName={linkedParents?.[0]?.full_name}
+            parentKarma={user?.family_karma || linkedParents?.[0]?.karma_points || 0}
+            linkedParents={linkedParents}
           />
         )}
 
-        {/* Your Family - Collapsed (invite if no linked parents) */}
-        {linkedParents.length === 0 && (
-          <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
-            <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                👨‍👩‍👧 Your Family
-              </h3>
-              <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="p-5 pt-0 border-t border-slate-100">
-              <p className="text-slate-600 mb-4">Invite your parents to join and unlock the full network!</p>
-              <Button
-                onClick={() => setShowInviteModal(true)}
-                className="bg-[#FA4616] hover:bg-orange-600"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Invite a Parent
-              </Button>
-            </div>
-          </details>
+        {/* 6. 📝 SHARE WHAT YOU LEARNED (+10 karma) */}
+        <ShareWhatYouLearnedCard user={user} />
+
+        {/* 7. 💰 SHARE YOUR OFFER DATA (+25 karma) */}
+        <ShareOfferDataCard user={user} />
+
+        {/* 8. 💼 POST A JOB/GIG (+10 karma) */}
+        <PostJobGigCard />
+
+        {/* 9. EXPLORE */}
+        <ExploreSection />
+
+        {/* Family Karma (if applicable) */}
+        {(user?.family_karma > 0 || linkedParents.length > 0) && (
+          <FamilyKarmaCard user={user} viewMode="student" />
         )}
 
-        {/* More Tools - Collapsed */}
+        {/* 10. MORE TOOLS */}
         <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
           <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
