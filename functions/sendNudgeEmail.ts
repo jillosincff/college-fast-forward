@@ -369,6 +369,46 @@ function buildParentNudge48h({ firstName, unansweredQuestions, matchedQuestions,
   return { subject, emailHtml };
 }
 
+// ═══════════════════════════════════════════════════════
+// 4B — STUDENT 48h NUDGE
+// ═══════════════════════════════════════════════════════
+function buildStudentNudge48h({ firstName }) {
+  const subject = `Get your parents involved — it makes a real difference`;
+
+  const emailHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">Students whose parents join CFF get 3x more introductions.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">Quick fact: students whose parents join CFF get <strong>3x more introductions</strong> and <strong>2x faster response times</strong>.</p>
+      <p style="font-size: 16px;">It takes 30 seconds to invite them:</p>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${APP_BASE_URL}/#GatorParentInvite?utm_source=nudge_48h" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Send Parent Invite →</a>
+      </div>
+
+      <p style="font-size: 16px;">Your parents' professional network becomes YOUR secret weapon.</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return { subject, emailHtml };
+}
+
 // ── Find multiple matched questions for parent (up to count) ──
 function findMatchedQuestions(questions, userIndustries, count = 3) {
   const industries = (userIndustries || []).map(i => i.toLowerCase());
