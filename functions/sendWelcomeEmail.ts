@@ -200,7 +200,7 @@ function buildParentWelcome({ firstName, questionCount, memberCount, matchedQues
 }
 
 // ═══════════════════════════════════════════════════════
-// 1B — ALUMNI WELCOME (similar to parent but different copy)
+// 1C — ALUMNI WELCOME
 // ═══════════════════════════════════════════════════════
 function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion }) {
   const studentName = matchedQuestion
@@ -216,7 +216,8 @@ function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQues
     : `${APP_BASE_URL}/#Connections`;
 
   const questionCardHtml = matchedQuestion ? `
-      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 24px 0; background: #fafafa;">
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 24px 0 8px 0;">A student who could use your help:</p>
+      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 0 0 24px 0; background: #fafafa;">
         <div style="margin-bottom: 8px;">
           <strong style="color: #111827; font-size: 15px;">${studentName}</strong>
           ${major ? `<span style="color: #6b7280; font-size: 13px;"> · ${major}</span>` : ''}
@@ -225,14 +226,14 @@ function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQues
         <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${questionPreview}"</p>
         <p style="color: #9ca3af; font-size: 13px; margin: 0 0 14px 0;">⏰ Posted ${timeAgo} · ${answerCount} answer${answerCount !== 1 ? 's' : ''}</p>
         <div style="text-align: center;">
-          <a href="${answerUrl}" style="display: inline-block; background: #FA4616; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Answer This Question →</a>
+          <a href="${answerUrl}" style="display: inline-block; background: #FA4616; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Help This Student →</a>
         </div>
       </div>` : '';
 
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">Welcome back — ${questionCount} UF students could use your expertise.</span>
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${questionCount} UF students could use your real-world experience.</span>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -241,17 +242,17 @@ function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQues
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">Welcome back to the UF family! You've joined a growing network of UF alumni who are paying it forward by helping current students navigate their careers.</p>
+      <p style="font-size: 16px;">Welcome to College Fast Forward! As a UF alum, your experience is exactly what current students need.</p>
 
-      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 20px 0;">
-        <p style="margin: 0 0 6px 0; font-size: 15px;">📬 <strong>${questionCount}</strong> students are waiting for career advice</p>
-        <p style="margin: 0; font-size: 15px;">👥 <strong>${memberCount}</strong> members are in the UF network</p>
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 24px 0 12px 0;">Here's what's happening in the UF network right now:</p>
+      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 15px;">📬 <strong>${questionCount}</strong> student questions waiting for answers</p>
+        <p style="margin: 0; font-size: 15px;">👥 <strong>${memberCount}</strong> members in the network</p>
       </div>
 
-      <p style="font-size: 16px; font-weight: 600; color: #111827;">Here's a student who could use your help:</p>
       ${questionCardHtml}
 
-      <p style="font-size: 16px;">It takes 2-3 minutes. Your real-world experience is exactly what students need.</p>
+      <p style="font-size: 16px;">Your real-world experience is worth more than any textbook. It takes 2-3 minutes to make a difference.</p>
       <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
     </div>
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
