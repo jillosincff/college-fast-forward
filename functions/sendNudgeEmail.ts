@@ -427,6 +427,23 @@ Deno.serve(async (req) => {
     const memberCount = allUsers.length;
     const activeParentCount = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent')).length;
 
+    // Fetch top karma for 48h nudge stats
+    let topKarma = 0;
+    try {
+      const karmaRecords = await base44.asServiceRole.entities.FamilyKarma.filter({}, '-total_karma', 1);
+      if (karmaRecords[0]?.this_month_karma) topKarma = karmaRecords[0].this_month_karma;
+      else if (karmaRecords[0]?.total_karma) topKarma = karmaRecords[0].total_karma;
+    } catch (e) { /* fallback 0 */ }
+
+    // Count parents who answered this week
+    const oneWeekAgo = new Date(now - 7*24*60*60*1000).toISOString();
+    let answeredParentsThisWeek = activeParentCount;
+    try {
+      const weekAnswers = await base44.asServiceRole.entities.Answer.filter({}, '-created_date', 200);
+      const parentEmails = new Set(weekAnswers.filter(a => a.created_date >= oneWeekAgo).map(a => a.answerer_email));
+      if (parentEmails.size > 0) answeredParentsThisWeek = parentEmails.size;
+    } catch (e) { /* fallback */ }
+
     // Fetch all email logs for rate limiting
     const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
     const logsByEmail = {};
