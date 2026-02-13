@@ -67,8 +67,8 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.PayItForwardNotification.create({
       recipient_parent_email: linkedParent.email,
       student_email: student_email,
-      student_name: student_name || student.full_name || 'Your Gator',
-      helper_parent_name: helper_parent_name || 'A Gator Parent',
+      student_name: student_name || student.full_name || 'Your student',
+      helper_parent_name: helper_parent_name || 'A UF Parent',
       helper_parent_email: helper_parent_email,
       trigger_type: trigger_type || 'message',
       is_read: false,
@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
     const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
     
     if (SENDGRID_API_KEY && linkedParent.email) {
-      const studentFirstName = (student_name || student.full_name || 'your Gator').split(' ')[0];
-      const helperFirstName = (helper_parent_name || 'A Gator Parent').split(' ')[0];
+      const studentFirstName = (student_name || student.full_name || 'your student').split(' ')[0];
+      const helperFirstName = (helper_parent_name || 'A UF Parent').split(' ')[0];
       
       const emailBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -91,26 +91,26 @@ Deno.serve(async (req) => {
           <h2 style="color: #0021A5; text-align: center;">Good news! ${studentFirstName} was just helped ❤️</h2>
           
           <p style="font-size: 16px; color: #333; line-height: 1.6;">
-            ${helperFirstName}, a fellow Gator Parent, just reached out to ${studentFirstName} with career help.
+            ${helperFirstName}, a fellow UF parent, just reached out to ${studentFirstName} with career help.
           </p>
           
           <p style="font-size: 16px; color: #333; line-height: 1.6;">
-            That's what Gator Nation does — we help each other.
+            That's what the UF community does — we help each other.
           </p>
           
           <p style="font-size: 16px; color: #333; line-height: 1.6; font-weight: bold;">
-            Can you pay it forward and help another Gator today?
+            Can you pay it forward and help another UF student today?
           </p>
           
           <div style="text-align: center; margin: 32px 0;">
             <a href="https://app.base44.com/a/684474c5723dc90efce23588#Connections" 
                style="background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
-              🐊 Help a Gator →
+              Help a UF Student →
             </a>
           </div>
           
           <p style="font-size: 14px; color: #666; text-align: center; margin-top: 32px;">
-            Go Gators! 🧡💙
+            University of Florida 🧡💙
           </p>
           
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
               email: 'notifications@collegefastforward.com',
               name: 'College Fast Forward'
             },
-            subject: `❤️ Good news! ${studentFirstName} was just helped by a Gator Parent`,
+            subject: `❤️ Good news! ${studentFirstName} was just helped by a UF parent`,
             content: [{
               type: 'text/html',
               value: emailBody

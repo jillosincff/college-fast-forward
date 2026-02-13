@@ -4,7 +4,7 @@ const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastfor
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
 
 function parseFirstName(name) {
-  return (name || 'Gator').split(' ')[0];
+  return (name || 'there').split(' ')[0];
 }
 
 function getWeekKey() {
@@ -147,11 +147,11 @@ Deno.serve(async (req) => {
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 24px; text-align: center; border-radius: 12px 12px 0 0;">
       <img src="${LOGO_URL}" alt="CFF" style="height: 50px; margin-bottom: 4px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 20px;">📊 Your Weekly Gator Digest</h1>
+      <h1 style="color: white; margin: 8px 0 0 0; font-size: 20px;">📊 Your Weekly UF Digest</h1>
     </div>
     <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 16px;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">Here's what happened in the Gator Network this week:</p>
+      <p style="font-size: 16px;">Here's what happened in the UF Network this week:</p>
       
       <div style="display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 100px; background: #eff6ff; border-radius: 10px; padding: 14px; text-align: center;">
@@ -176,11 +176,11 @@ Deno.serve(async (req) => {
       ${featuredHtml}
 
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${APP_BASE_URL}/#Connections?utm_source=weekly_digest" style="display: inline-block; background: #0021A5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Explore the Gator Network →</a>
+        <a href="${APP_BASE_URL}/#Connections?utm_source=weekly_digest" style="display: inline-block; background: #0021A5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Explore the UF Network →</a>
       </div>
     </div>
     <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 14px; color: #6b7280; margin: 0;">Go Gators! 🐊🧡💙</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 0;">University of Florida 🧡💙</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe from weekly digest</a></p>
     </div>
   </div>
@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
         if (!dryRun) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: u.email,
-            subject: `📊 Your Gator Week: ${thisWeekQuestions.length} questions, ${thisWeekAnswers.length} answers`,
+            subject: `📊 Your UF Week: ${thisWeekQuestions.length} questions, ${thisWeekAnswers.length} answers`,
             body: emailHtml,
             from_name: 'College Fast Forward'
           });
@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
               user_id: u.id,
               user_email: u.email,
               email_type: 'weekly_digest',
-              subject: `Your Gator Week: ${thisWeekQuestions.length} questions, ${thisWeekAnswers.length} answers`,
+              subject: `Your UF Week: ${thisWeekQuestions.length} questions, ${thisWeekAnswers.length} answers`,
               status: 'sent',
               sent_at: now.toISOString()
             });

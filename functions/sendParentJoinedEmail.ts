@@ -28,11 +28,11 @@ Deno.serve(async (req) => {
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 24px; text-align: center; border-radius: 12px 12px 0 0;">
       <img src="${LOGO_URL}" alt="CFF" style="height: 50px; margin-bottom: 4px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 22px;">Your Gator Family Just Got Stronger! 🎉</h1>
+      <h1 style="color: white; margin: 8px 0 0 0; font-size: 22px;">Your UF Family Just Got Stronger! 🎉</h1>
     </div>
     <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 16px;">Hi ${studentFirst},</p>
-      <p style="font-size: 16px;">Great news! <strong>${parentFirst}</strong> just joined the Gator Network through your invite.</p>
+      <p style="font-size: 16px;">Great news! <strong>${parentFirst}</strong> just joined the UF Network through your invite.</p>
       <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;">
         <p style="font-size: 18px; font-weight: 700; color: #166534; margin: 0;">🎉 +50 karma earned!</p>
         <p style="font-size: 14px; color: #166534; margin: 4px 0 0 0;">Your questions now get priority visibility in the network.</p>
@@ -41,21 +41,21 @@ Deno.serve(async (req) => {
       <ul style="color: #374151; font-size: 15px;">
         <li style="margin-bottom: 8px;">Your questions get boosted to the top of the feed</li>
         <li style="margin-bottom: 8px;">${parentFirst} can now help other UF students too</li>
-        <li style="margin-bottom: 8px;">The more parents who join, the stronger the Gator Network gets</li>
+        <li style="margin-bottom: 8px;">The more parents who join, the stronger the UF Network gets</li>
       </ul>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${APP_BASE_URL}/#Dashboard" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Your Dashboard →</a>
       </div>
     </div>
     <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">Go Gators! 🐊🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Manage preferences</a></p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">University of Florida 🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Manage preferences</a></p>
     </div>
   </div>
 </body></html>`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: studentEmail,
-      subject: `🎉 ${parentFirst} just joined the Gator Network!`,
+      subject: `🎉 ${parentFirst} just joined the UF Network!`,
       body: emailHtml,
       from_name: 'College Fast Forward'
     });
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.EmailLog.create({
         user_email: studentEmail,
         email_type: 'parent_joined',
-        subject: `${parentFirst} just joined the Gator Network!`,
+        subject: `${parentFirst} just joined the UF Network!`,
         status: 'sent',
         sent_at: new Date().toISOString(),
         metadata: { parentName, parentEmail }

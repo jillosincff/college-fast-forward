@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         let questionPreview = '';
         if (questions.length > 0) {
           const q = questions[0];
-          const studentName = (q.student_name || q.poster_name || 'A Gator').split(' ')[0];
+          const studentName = (q.student_name || q.poster_name || 'A UF student').split(' ')[0];
           const desc = (q.description || '').substring(0, 120);
           questionPreview = `
             <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin: 16px 0; background: #fafafa;">
@@ -83,24 +83,24 @@ Deno.serve(async (req) => {
         let subject, intro, ctaText, ctaUrl;
         if (nudgeType === '24h') {
           if (isParent) {
-            subject = `A Gator student could use your help right now`;
+            subject = `A UF student could use your help right now`;
             intro = `You signed up yesterday but haven't had a chance to help yet. No pressure — but here's a student who could really use someone with your background:`;
             ctaText = 'See Who Needs Help →';
             ctaUrl = `${APP_BASE_URL}/#Connections?utm_source=nudge&utm_campaign=24h`;
           } else {
-            subject = `Gators are ready to help you — ask your first question!`;
-            intro = `You joined the Gator Network yesterday. UF parents and alumni are standing by to help with career advice, job leads, and more.`;
+            subject = `UF parents and alumni are ready to help you — ask your first question!`;
+            intro = `You joined the UF Network yesterday. UF parents and alumni are standing by to help with career advice, job leads, and more.`;
             ctaText = 'Ask Your First Question →';
             ctaUrl = `${APP_BASE_URL}/#PostRequest?utm_source=nudge&utm_campaign=24h`;
           }
         } else {
           if (isParent) {
-            subject = `${questions.length || 'Several'} Gator students are still waiting for help`;
+            subject = `${questions.length || 'Several'} UF students are still waiting for help`;
             intro = `It's been a couple days since you joined. Students are actively posting questions — and many match your professional background.`;
             ctaText = 'Browse Student Questions →';
             ctaUrl = `${APP_BASE_URL}/#Connections?utm_source=nudge&utm_campaign=48h`;
           } else {
-            subject = `Your Gator Network is waiting — it takes 30 seconds to ask`;
+            subject = `Your UF Network is waiting — it takes 30 seconds to ask`;
             intro = `Just a quick reminder: there are experienced UF parents and alumni ready to help you. Post a question and you could get a response within hours.`;
             ctaText = 'Post a Question →';
             ctaUrl = `${APP_BASE_URL}/#PostRequest?utm_source=nudge&utm_campaign=48h`;
@@ -121,10 +121,10 @@ Deno.serve(async (req) => {
       <div style="text-align: center; margin: 24px 0;">
         <a href="${ctaUrl}" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${ctaText}</a>
       </div>
-      <p style="font-size: 14px; color: #6b7280; text-align: center;">It only takes 2-3 minutes. Every action helps the Gator family.</p>
+      <p style="font-size: 14px; color: #6b7280; text-align: center;">It only takes 2-3 minutes. Every action helps the UF community.</p>
     </div>
     <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">Go Gators! 🐊 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a></p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">University of Florida 🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a></p>
     </div>
   </div>
 </body></html>`;

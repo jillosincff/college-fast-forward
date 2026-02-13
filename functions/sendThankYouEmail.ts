@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     }
 
     const helperFirst = (helperName || 'there').split(' ')[0];
-    const studentFirst = (studentName || 'A Gator').split(' ')[0];
+    const studentFirst = (studentName || 'A UF student').split(' ')[0];
 
     const emailHtml = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     </div>
     <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 16px;">Hi ${helperFirst},</p>
-      <p style="font-size: 16px;">${studentFirst} just marked your answer as their <strong>Best Answer</strong>! Your advice is making a real impact in the Gator family.</p>
+      <p style="font-size: 16px;">${studentFirst} just marked your answer as their <strong>Best Answer</strong>! Your advice is making a real impact in the UF community.</p>
       ${questionTitle ? `<div style="background: #fef3c7; padding: 14px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #f59e0b;">
         <p style="margin: 0; font-size: 14px; font-weight: 600; color: #92400e;">Question: "${questionTitle}"</p>
       </div>` : ''}
@@ -41,12 +41,12 @@ Deno.serve(async (req) => {
         <p style="margin: 0; font-size: 15px; color: #166534; font-style: italic;">"${thankYouMessage}"</p>
       </div>` : ''}
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${APP_BASE_URL}/#Connections" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Help Another Gator →</a>
+        <a href="${APP_BASE_URL}/#Connections" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Help Another UF Student →</a>
       </div>
-      <p style="font-size: 14px; color: #6b7280; text-align: center;">Every answer strengthens the Gator Network. Thank you for paying it forward!</p>
+      <p style="font-size: 14px; color: #6b7280; text-align: center;">Every answer strengthens the UF Network. Thank you for paying it forward!</p>
     </div>
     <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">Go Gators! 🐊🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Manage preferences</a></p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">University of Florida 🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Manage preferences</a></p>
     </div>
   </div>
 </body></html>`;

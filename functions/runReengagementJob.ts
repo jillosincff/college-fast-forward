@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://getgatorshired.com";
+const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
 
 // School branding config
 const schoolConfig = {

@@ -53,11 +53,11 @@ Deno.serve(async (req) => {
       .map(t => helpTypeLabels[t] || t)
       .join(', ');
 
-    const subject = `🎉 ${matchCount} Gator parent${matchCount > 1 ? 's' : ''} can help with your ${helpTypesText} request!`;
+    const subject = `🎉 ${matchCount} UF parent${matchCount > 1 ? 's' : ''} can help with your ${helpTypesText} request!`;
     
     const body = `Hi ${helpRequest.student_name?.split(' ')[0] || 'there'},
 
-Great news! We've matched you with ${matchCount} experienced Gator parent${matchCount > 1 ? 's' : ''} who can help with your request for ${helpTypesText}.
+Great news! We've matched you with ${matchCount} experienced UF parent${matchCount > 1 ? 's' : ''} who can help with your request for ${helpTypesText}.
 
 **Your request:**
 "${helpRequest.description}"
@@ -70,14 +70,14 @@ Great news! We've matched you with ${matchCount} experienced Gator parent${match
 🚀 **View Your Matches:**
 ${Deno.env.get('APP_URL') || 'https://your-app.com'}/#Dashboard
 
-These parents are ready and willing to help. Don't be shy - they signed up specifically to support Gators like you!
+These parents are ready and willing to help. Don't be shy — they signed up specifically to support UF students like you!
 
 Good luck,
-The Gator Network Team
+The UF Network Team
 
 ---
 College Fast Forward
-Where Gators Help Gators`;
+Where UF Helps UF`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: helpRequest.student_email,

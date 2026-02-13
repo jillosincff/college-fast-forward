@@ -118,15 +118,15 @@ Deno.serve(async (req) => {
     </div>
     <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 16px;">Hi ${firstName},</p>
-      <p style="font-size: 16px;"><strong>${matched.length} Gator${matched.length > 1 ? 's' : ''}</strong> posted questions today that match your background:</p>
+      <p style="font-size: 16px;"><strong>${matched.length} UF student${matched.length > 1 ? 's' : ''}</strong> posted questions today that match your background:</p>
       <div style="margin: 20px 0;">${questionCards}</div>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${APP_BASE_URL}/#Connections?utm_source=daily_digest" style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">See All Questions →</a>
       </div>
-      <p style="font-size: 14px; color: #6b7280; text-align: center;">2-3 minutes of your time can change a Gator's career trajectory.</p>
+      <p style="font-size: 14px; color: #6b7280; text-align: center;">2-3 minutes of your time can change a UF student's career trajectory.</p>
     </div>
     <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">Go Gators! 🐊 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a></p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">University of Florida 🧡💙 — <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a></p>
     </div>
   </div>
 </body></html>`;
@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
         if (!dryRun) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: helper.email,
-            subject: `${matched.length} Gator${matched.length > 1 ? 's' : ''} need${matched.length === 1 ? 's' : ''} your help today`,
+            subject: `${matched.length} UF student${matched.length > 1 ? 's' : ''} need${matched.length === 1 ? 's' : ''} your help today`,
             body: emailHtml,
             from_name: 'College Fast Forward'
           });
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
               user_id: helper.id,
               user_email: helper.email,
               email_type: 'daily_match_digest',
-              subject: `${matched.length} Gators need your help today`,
+              subject: `${matched.length} UF students need your help today`,
               status: 'sent',
               sent_at: now.toISOString(),
               metadata: { matchCount: matched.length }

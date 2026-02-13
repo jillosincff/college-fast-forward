@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
                             This notification was sent through College Fast Forward.
                         </p>
                         <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 5px 0 0 0;">
-                            Go Gators!
+                            University of Florida 🧡💙
                         </p>
                         <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 20px;">
                             <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Manage notification preferences</a>

@@ -19,15 +19,15 @@ Deno.serve(async (req) => {
 
     let roleMessage, ctaText, ctaUrl;
     if (isParent) {
-      roleMessage = `Welcome to the Gator family! You've just joined a network of UF parents and alumni who are helping students land their dream careers.`;
+      roleMessage = `Welcome to the UF family! You've just joined a network of UF parents and alumni who are helping students land their dream careers.`;
       ctaText = 'See Students Who Need Help →';
       ctaUrl = `${APP_BASE_URL}/#Connections`;
     } else if (isAlumni) {
-      roleMessage = `Welcome back, fellow Gator! You've joined a growing network of UF alumni who are paying it forward by helping current students navigate their careers.`;
+      roleMessage = `Welcome back, fellow UF alumni! You've joined a growing network of UF alumni who are paying it forward by helping current students navigate their careers.`;
       ctaText = 'Browse Student Questions →';
       ctaUrl = `${APP_BASE_URL}/#Connections`;
     } else {
-      roleMessage = `Welcome to the Gator Network! You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.`;
+      roleMessage = `Welcome to the UF Network! You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.`;
       ctaText = 'Ask Your First Question →';
       ctaUrl = `${APP_BASE_URL}/#PostRequest`;
     }
@@ -38,14 +38,14 @@ Deno.serve(async (req) => {
         <ul style="margin: 0; padding-left: 20px; color: #374151;">
           <li style="margin-bottom: 8px;"><strong>Post a question</strong> — Tell us what you need help with (+5 karma)</li>
           <li style="margin-bottom: 8px;"><strong>Complete your profile</strong> — Helps parents find the best matches (+15 karma)</li>
-          <li style="margin-bottom: 8px;"><strong>Invite your parents</strong> — They can help other Gators too (+50 karma)</li>
+          <li style="margin-bottom: 8px;"><strong>Invite your parents</strong> — They can help other UF students too (+50 karma)</li>
         </ul>
       </div>` : isParent ? `
       <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin: 20px 0;">
         <h3 style="color: #0021A5; margin: 0 0 12px 0; font-size: 16px;">🚀 Here's how to make an impact:</h3>
         <ul style="margin: 0; padding-left: 20px; color: #374151;">
           <li style="margin-bottom: 8px;"><strong>Browse student questions</strong> — See who needs your expertise</li>
-          <li style="margin-bottom: 8px;"><strong>Answer a question</strong> — 2-3 minutes can change a Gator's trajectory</li>
+          <li style="margin-bottom: 8px;"><strong>Answer a question</strong> — 2-3 minutes can change a UF student's trajectory</li>
           <li style="margin-bottom: 8px;"><strong>Share salary data</strong> — Help students understand real compensation</li>
         </ul>
       </div>` : '';
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
       <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 24px;">Welcome to the Gator Network! 🐊</h1>
+      <h1 style="color: white; margin: 8px 0 0 0; font-size: 24px;">Welcome to the UF Network!</h1>
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827;">Hi ${firstName},</p>
@@ -66,11 +66,11 @@ Deno.serve(async (req) => {
       <div style="text-align: center; margin: 28px 0;">
         <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">${ctaText}</a>
       </div>
-      <p style="font-size: 15px; color: #6b7280; text-align: center;">Every connection strengthens the Gator Network.</p>
+      <p style="font-size: 15px; color: #6b7280; text-align: center;">Every connection strengthens the UF Network.</p>
     </div>
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 14px; color: #6b7280; margin: 0;">Go Gators! 🐊🧡💙</p>
-      <p style="font-size: 12px; color: #9ca3af; margin: 8px 0 0 0;">College Fast Forward — Where Gators Help Gators</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 0;">University of Florida 🧡💙</p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 8px 0 0 0;">College Fast Forward — Where UF Helps UF</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Manage email preferences</a></p>
     </div>
   </div>
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         user_id: userId || '',
         user_email: userEmail,
         email_type: 'welcome',
-        subject: `Welcome to the Gator Network, ${firstName}! 🐊`,
+        subject: `Welcome to the UF Network, ${firstName}!`,
         status: 'sent',
         sent_at: new Date().toISOString(),
         metadata: { persona }

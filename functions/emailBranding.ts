@@ -30,8 +30,8 @@ function wrapEmailHtml({ title, preheader, bodyContent, footerExtra, unsubscribe
     
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 14px; color: #6b7280; margin: 0 0 4px 0;">Go Gators! 🐊🧡💙</p>
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward — Where Gators Help Gators</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 0 0 4px 0;">University of Florida 🧡💙</p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward — Where UF Helps UF</p>
       ${footerExtra || ''}
       ${unsubscribeUrl ? `<p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Manage email preferences</a></p>` : `<p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af; text-decoration: underline;">Manage email preferences</a></p>`}
     </div>
@@ -47,7 +47,7 @@ function ctaButton(text, url, color = '#0021A5') {
 }
 
 function questionCard(q) {
-  const name = q.posterName || q.poster_name || 'A Gator';
+  const name = q.posterName || q.poster_name || 'A UF student';
   const firstName = name.split(' ')[0];
   const preview = (q.description || q.preview || '').substring(0, 150);
   const industry = q.industry || q.target_industry || '';
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       brandColors: { primary: '#0021A5', accent: '#FA4616' },
       schoolName: 'University of Florida',
       schoolShort: 'UF',
-      language: { family: 'Gator family', network: 'Gator Network', fellow: 'fellow Gator' }
+      language: { family: 'UF family', network: 'UF Network', fellow: 'fellow UF student' }
     });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
