@@ -3,83 +3,42 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
 
+function parseFirstName(name) {
+  return (name || 'there').split(' ')[0];
+}
+
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return 'recently';
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`;
+  return 'recently';
+}
+
+function truncate(str, max) {
+  if (!str) return '';
+  return str.length > max ? str.substring(0, max) + '...' : str;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { userId, userEmail, userName, persona } = await req.json();
+    const { userId, userEmail, userName, persona, userIndustries } = await req.json();
 
     if (!userEmail) {
       return Response.json({ error: 'userEmail required' }, { status: 400 });
     }
 
-    const firstName = (userName || 'there').split(' ')[0];
+    const firstName = parseFirstName(userName);
     const isParent = persona === 'parent';
     const isAlumni = persona === 'alumni';
     const isGator = persona === 'gator' || persona === 'student';
 
-    let roleMessage, ctaText, ctaUrl;
-    if (isParent) {
-      roleMessage = `Welcome to the UF family! You've just joined a network of UF parents and alumni who are helping students land their dream careers.`;
-      ctaText = 'See Students Who Need Help →';
-      ctaUrl = `${APP_BASE_URL}/#Connections`;
-    } else if (isAlumni) {
-      roleMessage = `Welcome back, fellow UF alumni! You've joined a growing network of UF alumni who are paying it forward by helping current students navigate their careers.`;
-      ctaText = 'Browse Student Questions →';
-      ctaUrl = `${APP_BASE_URL}/#Connections`;
-    } else {
-      roleMessage = `Welcome to the UF Network! You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.`;
-      ctaText = 'Ask Your First Question →';
-      ctaUrl = `${APP_BASE_URL}/#PostRequest`;
-    }
-
-    const quickWins = isGator ? `
-      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin: 20px 0;">
-        <h3 style="color: #0021A5; margin: 0 0 12px 0; font-size: 16px;">🚀 Quick wins to get started:</h3>
-        <ul style="margin: 0; padding-left: 20px; color: #374151;">
-          <li style="margin-bottom: 8px;"><strong>Post a question</strong> — Tell us what you need help with (+5 karma)</li>
-          <li style="margin-bottom: 8px;"><strong>Complete your profile</strong> — Helps parents find the best matches (+15 karma)</li>
-          <li style="margin-bottom: 8px;"><strong>Invite your parents</strong> — They can help other UF students too (+50 karma)</li>
-        </ul>
-      </div>` : isParent ? `
-      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin: 20px 0;">
-        <h3 style="color: #0021A5; margin: 0 0 12px 0; font-size: 16px;">🚀 Here's how to make an impact:</h3>
-        <ul style="margin: 0; padding-left: 20px; color: #374151;">
-          <li style="margin-bottom: 8px;"><strong>Browse student questions</strong> — See who needs your expertise</li>
-          <li style="margin-bottom: 8px;"><strong>Answer a question</strong> — 2-3 minutes can change a UF student's trajectory</li>
-          <li style="margin-bottom: 8px;"><strong>Share salary data</strong> — Help students understand real compensation</li>
-        </ul>
-      </div>` : '';
-
-    const emailHtml = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 24px;">Welcome to the UF Network!</h1>
-    </div>
-    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 18px; color: #111827;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">${roleMessage}</p>
-      ${quickWins}
-      <div style="text-align: center; margin: 28px 0;">
-        <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">${ctaText}</a>
-      </div>
-      <p style="font-size: 15px; color: #6b7280; text-align: center;">Every connection strengthens the UF Network.</p>
-    </div>
-    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 14px; color: #6b7280; margin: 0;">College Fast Forward</p>
-      <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
-    </div>
-  </div>
-</body>
-</html>`;
-
     // Anti-spam: max 1 email/day, max 3/week
-    const oneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
-    const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const recentLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: userEmail }, '-sent_at', 50);
     const todayCount = recentLogs.filter(l => l.sent_at >= oneDayAgo).length;
     const weekCount = recentLogs.filter(l => l.sent_at >= oneWeekAgo).length;
@@ -87,9 +46,48 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, skipped: true, reason: `Rate limited (today: ${todayCount}, week: ${weekCount})` });
     }
 
+    // ── Fetch live stats and matched question ──
+    const [activeHelpReqs, activeJobReqs, allUsers] = await Promise.all([
+      base44.asServiceRole.entities.HelpRequest.filter({ status: 'active' }, '-created_date', 100),
+      base44.asServiceRole.entities.JobRequest.filter({ status: 'active' }, '-created_date', 100),
+      base44.asServiceRole.entities.User.filter({})
+    ]);
+
+    const allActiveQuestions = [...activeHelpReqs, ...activeJobReqs];
+    const unansweredQuestions = allActiveQuestions.filter(q => (q.answer_count || 0) === 0);
+    const questionCount = unansweredQuestions.length || allActiveQuestions.length;
+    const memberCount = allUsers.length;
+
+    // Find a matched question for parent/alumni (by industry)
+    let matchedQuestion = null;
+    if (isParent || isAlumni) {
+      const industries = userIndustries || [];
+      if (industries.length > 0) {
+        matchedQuestion = unansweredQuestions.find(q => {
+          const qi = (q.industry || q.target_industry || '').toLowerCase();
+          return industries.some(i => qi.includes(i.toLowerCase()) || i.toLowerCase().includes(qi));
+        });
+      }
+      if (!matchedQuestion) matchedQuestion = unansweredQuestions[0];
+      if (!matchedQuestion) matchedQuestion = allActiveQuestions[0];
+    }
+
+    let subject, emailHtml;
+
+    if (isParent) {
+      subject = `Welcome to the UF family, ${firstName}! 🎉`;
+      emailHtml = buildParentWelcome({ firstName, questionCount, memberCount, matchedQuestion });
+    } else if (isAlumni) {
+      subject = `Welcome back to the UF family, ${firstName}! 🎉`;
+      emailHtml = buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion });
+    } else {
+      subject = `Welcome to the UF Network, ${firstName}!`;
+      emailHtml = buildStudentWelcome({ firstName, questionCount, memberCount });
+    }
+
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: userEmail,
-      subject: `Welcome to the UF Network, ${firstName}!`,
+      subject,
       body: emailHtml,
       from_name: 'College Fast Forward'
     });
@@ -100,7 +98,7 @@ Deno.serve(async (req) => {
         user_id: userId || '',
         user_email: userEmail,
         email_type: 'welcome',
-        subject: `Welcome to the UF Network, ${firstName}!`,
+        subject,
         status: 'sent',
         sent_at: new Date().toISOString(),
         metadata: { persona }
@@ -115,3 +113,187 @@ Deno.serve(async (req) => {
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
+
+// ═══════════════════════════════════════════════════════
+// 1A — PARENT WELCOME
+// ═══════════════════════════════════════════════════════
+function buildParentWelcome({ firstName, questionCount, memberCount, matchedQuestion }) {
+  const studentName = matchedQuestion
+    ? parseFirstName(matchedQuestion.student_name || matchedQuestion.poster_name)
+    : 'A UF student';
+  const major = matchedQuestion?.student_major || matchedQuestion?.major || '';
+  const classYear = matchedQuestion?.student_year || '';
+  const questionPreview = truncate(matchedQuestion?.description || 'is looking for career advice', 120);
+  const timeAgo = formatTimeAgo(matchedQuestion?.created_date);
+  const answerCount = matchedQuestion?.answer_count || 0;
+  const answerUrl = matchedQuestion
+    ? `${APP_BASE_URL}/#QuestionDetail?id=${matchedQuestion.id}&type=${matchedQuestion.role ? 'job' : 'help'}&utm_source=welcome`
+    : `${APP_BASE_URL}/#Connections`;
+
+  const questionCardHtml = matchedQuestion ? `
+      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 24px 0; background: #fafafa;">
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #111827; font-size: 15px;">${studentName}</strong>
+          ${major ? `<span style="color: #6b7280; font-size: 13px;"> · ${major}</span>` : ''}
+          ${classYear ? `<span style="color: #6b7280; font-size: 13px;"> · ${classYear}</span>` : ''}
+        </div>
+        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${questionPreview}"</p>
+        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 14px 0;">⏰ Posted ${timeAgo} · ${answerCount} answer${answerCount !== 1 ? 's' : ''}</p>
+        <div style="text-align: center;">
+          <a href="${answerUrl}" style="display: inline-block; background: #FA4616; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Answer This Question →</a>
+        </div>
+      </div>` : '';
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${questionCount} students are waiting for career advice from the UF network.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">You're officially part of the University of Florida network on College Fast Forward.</p>
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 24px 0 12px 0;">Here's what's happening right now:</p>
+      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 15px;">📬 <strong>${questionCount}</strong> students are waiting for career advice</p>
+        <p style="margin: 0 0 6px 0; font-size: 15px;">👥 <strong>${memberCount}</strong> parents and alumni are in the network</p>
+        <p style="margin: 0; font-size: 15px;">⭐ Your Family Karma: <strong>0 points</strong></p>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0 0 24px 0;" />
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 4px 0;">Your next step — help a student:</p>
+      ${questionCardHtml}
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+
+      <p style="font-size: 16px;">It takes 2-3 minutes. Your answer could change a student's trajectory.</p>
+      <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
+      <p style="font-size: 13px; color: #9ca3af; margin: 16px 0 0 0;">P.S. Every answer you give earns Karma that boosts your student's visibility in the network.</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// 1B — ALUMNI WELCOME (similar to parent but different copy)
+// ═══════════════════════════════════════════════════════
+function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion }) {
+  const studentName = matchedQuestion
+    ? parseFirstName(matchedQuestion.student_name || matchedQuestion.poster_name)
+    : 'A UF student';
+  const major = matchedQuestion?.student_major || matchedQuestion?.major || '';
+  const classYear = matchedQuestion?.student_year || '';
+  const questionPreview = truncate(matchedQuestion?.description || 'is looking for career advice', 120);
+  const timeAgo = formatTimeAgo(matchedQuestion?.created_date);
+  const answerCount = matchedQuestion?.answer_count || 0;
+  const answerUrl = matchedQuestion
+    ? `${APP_BASE_URL}/#QuestionDetail?id=${matchedQuestion.id}&type=${matchedQuestion.role ? 'job' : 'help'}&utm_source=welcome`
+    : `${APP_BASE_URL}/#Connections`;
+
+  const questionCardHtml = matchedQuestion ? `
+      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 24px 0; background: #fafafa;">
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #111827; font-size: 15px;">${studentName}</strong>
+          ${major ? `<span style="color: #6b7280; font-size: 13px;"> · ${major}</span>` : ''}
+          ${classYear ? `<span style="color: #6b7280; font-size: 13px;"> · ${classYear}</span>` : ''}
+        </div>
+        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${questionPreview}"</p>
+        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 14px 0;">⏰ Posted ${timeAgo} · ${answerCount} answer${answerCount !== 1 ? 's' : ''}</p>
+        <div style="text-align: center;">
+          <a href="${answerUrl}" style="display: inline-block; background: #FA4616; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Answer This Question →</a>
+        </div>
+      </div>` : '';
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">Welcome back — ${questionCount} UF students could use your expertise.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">Welcome back to the UF family! You've joined a growing network of UF alumni who are paying it forward by helping current students navigate their careers.</p>
+
+      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 20px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 15px;">📬 <strong>${questionCount}</strong> students are waiting for career advice</p>
+        <p style="margin: 0; font-size: 15px;">👥 <strong>${memberCount}</strong> members are in the UF network</p>
+      </div>
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827;">Here's a student who could use your help:</p>
+      ${questionCardHtml}
+
+      <p style="font-size: 16px;">It takes 2-3 minutes. Your real-world experience is exactly what students need.</p>
+      <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// 1C — STUDENT WELCOME
+// ═══════════════════════════════════════════════════════
+function buildStudentWelcome({ firstName, questionCount, memberCount }) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${memberCount} UF parents and alumni are ready to help you.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">Welcome to the UF Network! You now have access to UF parents and alumni who are ready to help you with career advice, job leads, resume reviews, and more.</p>
+
+      <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin: 20px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 15px;">👥 <strong>${memberCount}</strong> parents and alumni are in the network</p>
+        <p style="margin: 0; font-size: 15px;">💬 Most questions get a response within <strong>24 hours</strong></p>
+      </div>
+
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin: 20px 0;">
+        <h3 style="color: #0021A5; margin: 0 0 12px 0; font-size: 16px;">🚀 Quick wins to get started:</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #374151;">
+          <li style="margin-bottom: 8px;"><strong>Post a question</strong> — Tell us what you need help with (+5 karma)</li>
+          <li style="margin-bottom: 8px;"><strong>Complete your profile</strong> — Helps parents find the best matches (+15 karma)</li>
+          <li style="margin-bottom: 8px;"><strong>Invite your parents</strong> — They can help other UF students too (+50 karma)</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${APP_BASE_URL}/#PostRequest?utm_source=welcome" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Ask Your First Question →</a>
+      </div>
+      <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
