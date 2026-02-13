@@ -12,6 +12,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'helperEmail and studentName required' }, { status: 400 });
     }
 
+    // Count total unique students this helper has helped
+    let totalStudentsHelped = 1;
+    try {
+      const [helperAnswers, helperJobAnswers] = await Promise.all([
+        base44.asServiceRole.entities.Answer.filter({ answerer_email: helperEmail }, '-created_date', 200),
+        base44.asServiceRole.entities.JobAnswer.filter({ responder_email: helperEmail }, '-created_date', 200)
+      ]);
+      // Collect unique question authors by email from the questions they answered
+      const questionIds = [...new Set([
+        ...helperAnswers.map(a => a.question_id),
+        ...helperJobAnswers.map(a => a.job_request_id)
+      ])];
+      // Use question count as proxy for unique students helped
+      totalStudentsHelped = Math.max(1, questionIds.length);
+    } catch (e) { /* fallback to 1 */ }
+
     // Check email preferences
     const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: helperEmail });
     const pref = prefs?.[0];
