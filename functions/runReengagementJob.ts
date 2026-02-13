@@ -171,7 +171,6 @@ Deno.serve(async (req) => {
     const day1Threshold = settings.day1_threshold || 7;
     const day2Threshold = settings.day2_threshold || 21;
     const day3Threshold = settings.day3_threshold || 45;
-    const stopThreshold = settings.stop_threshold || 60;
     const maxEmailsPerDay = settings.max_emails_per_day || 100;
     
     // Get recent re-engagement emails (last 60 days)
