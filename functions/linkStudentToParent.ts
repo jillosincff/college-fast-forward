@@ -173,6 +173,21 @@ Deno.serve(async (req) => {
         console.log('Parent notification email failed (non-critical):', emailErr.message);
       }
 
+      // Award student karma for having a parent join (+50)
+      if (studentUserId) {
+        try {
+          await base44.functions.invoke('awardStudentKarma', {
+            userId: studentUserId,
+            userEmail: studentEmailAddress,
+            actionType: 'invite_parent_joined',
+            description: 'Parent joined and linked to your account'
+          });
+          console.log('✅ Student karma awarded for parent joining');
+        } catch (skErr) {
+          console.log('Student karma for parent join failed (non-critical):', skErr.message);
+        }
+      }
+
       return Response.json({
         success: true,
         linked: true,
