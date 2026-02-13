@@ -37,31 +37,35 @@ Deno.serve(async (req) => {
 
     const helperFirst = (helperName || 'there').split(' ')[0];
     const studentFirst = (studentName || 'A UF student').split(' ')[0];
+    const questionPreview = questionTitle ? (questionTitle.length > 100 ? questionTitle.substring(0, 100) + '...' : questionTitle) : '';
 
     const emailHtml = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${studentFirst} just said your answer was helpful! +5 Karma earned.</span>
+</head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 24px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="CFF" style="height: 50px; margin-bottom: 4px;" />
-      <h1 style="color: white; margin: 8px 0 0 0; font-size: 22px;">You Made a Difference! ❤️</h1>
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
     </div>
-    <div style="background: #fff; padding: 28px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 16px;">Hi ${helperFirst},</p>
-      <p style="font-size: 16px;">${studentFirst} just marked your answer as their <strong>Best Answer</strong>! Your advice is making a real impact in the UF community.</p>
-      ${questionTitle ? `<div style="background: #fef3c7; padding: 14px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #f59e0b;">
-        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #92400e;">Question: "${questionTitle}"</p>
-      </div>` : ''}
-      ${thankYouMessage ? `<div style="background: #f0fdf4; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #22c55e;">
-        <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #166534;">💬 ${studentFirst} says:</p>
-        <p style="margin: 0; font-size: 15px; color: #166534; font-style: italic;">"${thankYouMessage}"</p>
-      </div>` : ''}
-      <div style="text-align: center; margin: 24px 0;">
-        <a href="${APP_BASE_URL}/#Connections" style="display: inline-block; background: #FA4616; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Help Another UF Student →</a>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${helperFirst},</p>
+      <p style="font-size: 16px;">${studentFirst} just said your answer was helpful!</p>
+
+      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
+        ${questionPreview ? `<p style="color: #374151; margin: 0 0 12px 0; font-size: 15px;">Your answer to: <em>"${questionPreview}"</em></p>` : ''}
+        <p style="color: #166534; font-weight: 700; font-size: 16px; margin: 0; background: #f0fdf4; display: inline-block; padding: 6px 14px; border-radius: 6px;">⭐ +5 Karma earned</p>
       </div>
-      <p style="font-size: 14px; color: #6b7280; text-align: center;">Every answer strengthens the UF Network. Thank you for paying it forward!</p>
+
+      <p style="font-size: 16px;">You've now helped <strong>${totalStudentsHelped}</strong> student${totalStudentsHelped !== 1 ? 's' : ''} in the UF network. Keep it up!</p>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${APP_BASE_URL}/#Connections?utm_source=thank_you_email" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See More Questions to Answer →</a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
     </div>
-    <div style="background: #f9fafb; padding: 16px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
       <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
       <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
