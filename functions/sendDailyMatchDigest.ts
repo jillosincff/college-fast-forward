@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
         if (!dryRun) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: helper.email,
-            subject: `${matched.length} UF student${matched.length > 1 ? 's' : ''} need${matched.length === 1 ? 's' : ''} your help today`,
+            subject,
             body: emailHtml,
             from_name: 'College Fast Forward'
           });
@@ -237,10 +237,10 @@ Deno.serve(async (req) => {
               user_id: helper.id,
               user_email: helper.email,
               email_type: 'daily_match_digest',
-              subject: `${matched.length} UF students need your help today`,
+              subject,
               status: 'sent',
               sent_at: now.toISOString(),
-              metadata: { matchCount: matched.length }
+              metadata: { matchCount: matched.length, karma, studentsHelped }
             });
           } catch (e) { console.log('Log failed:', e.message); }
         }
