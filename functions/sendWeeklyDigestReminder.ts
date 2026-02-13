@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
 <body>
   <div class="header">
     <h1>📧 Weekly Digest Reminder</h1>
-    <p style="margin: 8px 0 0 0; opacity: 0.9;">Time to write this week's Gator Fam newsletter!</p>
+    <p style="margin: 8px 0 0 0; opacity: 0.9;">Time to write this week's UF community newsletter!</p>
   </div>
 
   <div class="content">
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       <h3>📝 Suggested Email Template</h3>
       <pre>Subject: [Write something catchy here!]
 
-Hey Gator Fam 🐊
+Hey UF Fam
 
 Quick Sunday check-in: here are a few of the newest UF students who just posted what they need. Many match your industry or city.
 
@@ -95,7 +95,7 @@ One small action from you = huge boost for your student.
 Thanks for everything you do,
 [Your Name] & the College Fast Forward team
 
-(Not the right week? No problem — we'll catch you next Sunday. Go Gators! 🧡💙)</pre>
+(Not the right week? No problem — we'll catch you next Sunday. University of Florida 🧡💙)</pre>
     </div>
   </div>
 
