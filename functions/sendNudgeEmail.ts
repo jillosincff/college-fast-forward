@@ -134,13 +134,13 @@ function buildParentNudge24h({ firstName, matchedQuestion, activeParentCount }) 
 // ═══════════════════════════════════════════════════════
 // 3B — STUDENT 24h NUDGE
 // ═══════════════════════════════════════════════════════
-function buildStudentNudge24h({ firstName, memberCount }) {
-  const subject = `${memberCount}+ UF parents and alumni are ready to help you`;
+function buildStudentNudge24h({ firstName }) {
+  const subject = `While you wait — here's how to get answers faster`;
 
   const emailHtml = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">UF parents and alumni are standing by — what do you need help with?</span>
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">Invite your parents to boost your visibility and get faster answers.</span>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -149,21 +149,18 @@ function buildStudentNudge24h({ firstName, memberCount }) {
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">You joined CFF yesterday — here are 3 ways to get the most out of the UF network:</p>
+      <p style="font-size: 16px;">Your question is live and parents are being notified. While you wait, here's how to speed things up:</p>
 
-      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; margin: 20px 0 12px 0;">
-        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>1. 👨‍👩‍👧 Invite your parents</strong> — their Karma boosts YOUR questions</p>
-        <a href="${APP_BASE_URL}/#GatorParentInvite?utm_source=nudge_24h" style="display: inline-block; background: #0021A5; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Invite Parents →</a>
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; margin: 20px 0 16px 0;">
+        <p style="margin: 0 0 4px 0; font-size: 15px;">🚀 <strong>#1 way to get faster answers: Invite your parents</strong></p>
+        <p style="margin: 0 0 12px 0; font-size: 14px; color: #4b5563;">When your parents join CFF, their Karma boosts YOUR visibility in the network.</p>
+        <a href="${APP_BASE_URL}/#GatorParentInvite?utm_source=nudge_24h" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">Invite Your Parents →</a>
       </div>
 
-      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 20px; margin: 0 0 12px 0;">
-        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>2. 💬 Help a fellow Gator</strong> — answer a peer's question (+5 karma)</p>
-        <a href="${APP_BASE_URL}/#Connections?utm_source=nudge_24h" style="display: inline-block; background: #166534; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">See Questions →</a>
-      </div>
-
-      <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
-        <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>3. 💰 Share salary or interview data</strong> — help everyone negotiate better</p>
-        <a href="${APP_BASE_URL}/#Insights?utm_source=nudge_24h" style="display: inline-block; background: #92400e; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Contribute Data →</a>
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 4px 0; font-size: 15px;">💬 <strong>Help another UF student</strong> (+5 karma)</p>
+        <p style="margin: 0 0 12px 0; font-size: 14px; color: #4b5563;">Students who contribute get seen first by parents.</p>
+        <a href="${APP_BASE_URL}/#Connections?utm_source=nudge_24h" style="display: inline-block; background: #166534; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">Answer a Question →</a>
       </div>
 
       <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
