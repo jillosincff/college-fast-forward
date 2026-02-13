@@ -18,8 +18,8 @@ export default function Insights() {
     salaryReports: [],
     salarySubmissions: [],
     interviewQuestions: [],
+    interviewReports: [],
     answers: [],
-    matches: [],
     opportunities: [],
   });
 
@@ -36,6 +36,7 @@ export default function Insights() {
         salaryReports,
         salarySubmissions,
         interviewQuestions,
+        interviewReports,
         answers,
         opportunities,
       ] = await Promise.all([
@@ -44,6 +45,7 @@ export default function Insights() {
         base44.entities.SalaryReport.list('-created_date', 200),
         base44.entities.SalarySubmission.list('-created_date', 200),
         base44.entities.InterviewQuestion.list('-created_date', 200),
+        base44.entities.InterviewReport.list('-created_date', 200),
         base44.entities.Answer.list('-created_date', 200),
         base44.entities.Opportunity.list('-created_date', 50),
       ]);
@@ -54,6 +56,7 @@ export default function Insights() {
         salaryReports: salaryReports || [],
         salarySubmissions: salarySubmissions || [],
         interviewQuestions: interviewQuestions || [],
+        interviewReports: interviewReports || [],
         answers: answers || [],
         opportunities: opportunities || [],
       });
@@ -120,7 +123,11 @@ export default function Insights() {
         />
 
         {/* Interview Insights */}
-        <InterviewInsights interviewQuestions={data.interviewQuestions} />
+        <InterviewInsights
+          interviewQuestions={data.interviewQuestions}
+          interviewReports={data.interviewReports}
+          onDataRefresh={loadData}
+        />
 
         {/* Network Impact */}
         <NetworkImpactStats
