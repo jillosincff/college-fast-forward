@@ -191,6 +191,15 @@ Deno.serve(async (req) => {
     const allQuestions = [...jobRequests, ...helpRequests];
     
     console.log(`Found ${allQuestions.length} active questions`);
+
+    // Compute community stats for 21d/45d templates
+    const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+    const newMembersThisMonth = allUsers.filter(u => u.created_date >= thisMonthStart).length;
+    const totalMemberCount = allUsers.length;
+    // Count total answered questions (non-zero answer_count)
+    const totalQuestionsAnswered = allQuestions.filter(q => (q.answer_count || 0) > 0).length
+      + (await base44.asServiceRole.entities.HelpRequest.filter({ status: 'resolved' })).length
+      + (await base44.asServiceRole.entities.HelpRequest.filter({ status: 'closed' })).length;
     
     // Fetch all email logs for cross-function rate limiting
     const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
