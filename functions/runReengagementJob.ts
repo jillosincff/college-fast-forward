@@ -383,7 +383,7 @@ Deno.serve(async (req) => {
           });
         } catch (logErr) { console.log('EmailLog failed:', logErr.message); }
 
-        console.log(`✅ Sent ${emailType} email to ${user.email} (variant ${variant})`);
+        console.log(`✅ Sent ${emailType} email to ${user.email}`);
         results.emailsSent++;
         
       } catch (err) {
