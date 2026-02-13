@@ -506,9 +506,8 @@ function buildReengagementEmailHtml(emailType, data) {
 </body></html>`;
   }
 
-  // ── 9C: 45-Day — warm, low-pressure, single highlight ──
-  const q = questions[0];
-  const preheader = `It's been a while — ${count} students could use your ${primaryIndustry} perspective.`;
+  // ── 9C: 45-Day FINAL — personal from Jill, explicit unsubscribe, hard stop ──
+  const preheader = `This is the last time I'll nudge you — I promise.`;
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -521,28 +520,21 @@ function buildReengagementEmailHtml(emailType, data) {
     </div>
     <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
       <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
-      <p style="font-size: 16px;">It's been a while! While you were away, <strong>${count}</strong> students posted questions that match your ${primaryIndustry} background.</p>
-      <p style="font-size: 16px;">Here's one that could really use your perspective:</p>
-
-      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
-        <div style="margin-bottom: 8px;">
-          <strong style="color: #111827; font-size: 15px;">${q.studentName}</strong>
-          <span style="color: #6b7280; font-size: 13px;"> · ${q.major}</span>
-        </div>
-        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${q.preview}"</p>
-        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">⏰ Unanswered · Posted ${q.timeAgo}</p>
-        <div style="text-align: center;">
-          <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Help ${q.studentName} →</a>
-        </div>
-      </div>
-
-      <p style="font-size: 16px;">Most answers take 2-3 minutes. No pressure — but if you have a few minutes, a student would really appreciate it.</p>
+      <p style="font-size: 16px;">This is the last time I'll nudge you — I promise.</p>
+      <p style="font-size: 16px;">Since you joined, the UF network has grown to <strong>${memberCount}</strong> members. <strong>${totalQuestionsAnswered}</strong> questions have been answered and students are landing internships through warm introductions.</p>
+      <p style="font-size: 16px;">If you have 5 minutes, even once a month, it makes a difference:</p>
 
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${dashboardUrl}" style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">See All Matching Questions →</a>
+        <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See What's New →</a>
       </div>
 
-      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
+      <p style="font-size: 16px;">If you'd rather not hear from us, no hard feelings:</p>
+
+      <div style="text-align: center; margin: 16px 0 24px 0;">
+        <a href="${unsubscribeUrl}" style="display: inline-block; background: #f3f4f6; color: #6b7280; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; border: 1px solid #d1d5db;">Unsubscribe from nudges →</a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— Jill</p>
     </div>
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
       <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
