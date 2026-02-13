@@ -203,7 +203,72 @@ function buildParentWelcome({ firstName, questionCount, memberCount, matchedQues
 }
 
 // ═══════════════════════════════════════════════════════
-// 1C — ALUMNI WELCOME
+// 1D — ALUMNI JOB SEEKER WELCOME
+// ═══════════════════════════════════════════════════════
+function buildAlumniJobSeekerWelcome({ firstName, studentQuestion }) {
+  const questionPreview = truncate(studentQuestion?.description || studentQuestion?.role || 'Your question', 120);
+  const hasQuestion = !!studentQuestion;
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">Your question is live — the UF network is being notified.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">Welcome to College Fast Forward! Your question is live and the UF network is being notified.</p>
+
+      ${hasQuestion ? `
+      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 20px 0; background: #fafafa;">
+        <p style="color: #374151; font-style: italic; margin: 0; font-size: 15px;">"${questionPreview}"</p>
+      </div>` : ''}
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 12px 0;">Here's what happens next:</p>
+      <div style="margin: 0 0 24px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 15px;">✅ Parents and alumni with relevant experience will be notified</p>
+        <p style="margin: 0 0 8px 0; font-size: 15px;">✅ You'll get an email the moment someone responds</p>
+        <p style="margin: 0; font-size: 15px;">✅ Browse the directory to find people who can help</p>
+      </div>
+
+      <div style="text-align: center; margin: 0 0 28px 0;">
+        <a href="${APP_BASE_URL}/#AlumniDashboard?utm_source=welcome" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See Your Dashboard →</a>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0 0 24px 0;" />
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 16px 0;">While you wait, help build the network:</p>
+
+      <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin: 0 0 12px 0;">
+        <p style="margin: 0; font-size: 15px;">💰 <strong>Share salary data</strong> from your job search (+25 karma)</p>
+      </div>
+
+      <div style="background: #ede9fe; border: 1px solid #c4b5fd; border-radius: 10px; padding: 16px 20px; margin: 0 0 20px 0;">
+        <p style="margin: 0; font-size: 15px;">🎤 <strong>Share interview experiences</strong> (+15 karma)</p>
+      </div>
+
+      <div style="text-align: center; margin: 0 0 24px 0;">
+        <a href="${APP_BASE_URL}/#Insights?utm_source=welcome" style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Explore CFF Insights →</a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// 1C — ALUMNI HELPER WELCOME
 // ═══════════════════════════════════════════════════════
 function buildAlumniWelcome({ firstName, questionCount, memberCount, matchedQuestion }) {
   const studentName = matchedQuestion
