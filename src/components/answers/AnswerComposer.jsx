@@ -186,6 +186,21 @@ export default function AnswerComposer({
         });
       }
 
+      // Award student karma for answering a fellow student's question
+      if (currentUser.persona === 'gator' || currentUser.roles?.includes('gator')) {
+        base44.functions.invoke('awardStudentKarma', {
+          userId: currentUser.id,
+          userEmail: currentUser.email,
+          actionType: 'answer_question',
+          referenceId: newAnswer.id,
+          description: 'Answered a fellow student\'s question'
+        }).then(res => {
+          if (res?.data?.success) {
+            toast({ title: `+${res.data.points_awarded} Karma! 🐊`, description: res.data.tier_unlocked ? `Level up: ${res.data.karma_level}!` : `Total: ${res.data.new_total} karma` });
+          }
+        }).catch(err => console.log('Student karma failed (non-critical):', err.message));
+      }
+
       // Send email notification to the question poster
       // Handle cases where created_by is 'anonymous' - use student_email or other fallbacks
       console.log('📧 Attempting to send answer notification');
