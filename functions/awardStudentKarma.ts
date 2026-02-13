@@ -9,7 +9,7 @@ const STUDENT_KARMA_VALUES = {
   upvote_answer: 2,
   complete_profile: 15,
   post_question: 5,
-  interview_question_submitted: 10,
+  interview_question_submitted: 15,
   interview_question_confirmed: 3,
 };
 
