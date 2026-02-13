@@ -21,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import LinkStudentCard from '@/components/dashboard/parent/LinkStudentCard';
 import StudentBoostCard from '@/components/dashboard/parent/StudentBoostCard';
 import ActivationWelcomeBanner from '@/components/dashboard/parent/ActivationWelcomeBanner';
+import LiveActivityTicker from '@/components/dashboard/parent/LiveActivityTicker';
+import YouGotResponseBanner from '@/components/dashboard/parent/YouGotResponseBanner';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -47,6 +49,14 @@ export default function ParentDashboard() {
       return () => clearTimeout(timer);
     }
   }, []);
+
+  // Determine first visit vs returning
+  const isFirstVisit = !localStorage.getItem('parent_dashboard_visited');
+  useEffect(() => {
+    if (user?.id) {
+      localStorage.setItem('parent_dashboard_visited', 'true');
+    }
+  }, [user?.id]);
 
   const getCapitalizedFirstName = (fullName) => {
     if (!fullName?.trim()) return 'Parent';
@@ -178,11 +188,19 @@ export default function ParentDashboard() {
                   {hasLinkedStudent ? "You're Powering" : "Join the Network"}
                 </p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-white">
-                  {hasLinkedStudent 
-                    ? `${studentFirstName}'s Career Launch`
-                    : "Help Students Succeed"
+                  {isFirstVisit
+                    ? `Welcome, ${firstName}!`
+                    : hasLinkedStudent 
+                      ? `Welcome back, ${firstName}!`
+                      : `Welcome back, ${firstName}!`
                   }
                 </h1>
+                <p className="text-lg sm:text-xl font-medium text-white/80 mb-1">
+                  {hasLinkedStudent 
+                    ? `You're powering ${studentFirstName}'s career launch`
+                    : "Help UF students succeed"
+                  }
+                </p>
                 <p className="text-base sm:text-lg md:text-xl opacity-90 max-w-lg mx-auto px-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   {hasLinkedStudent 
                     ? `Every connection you make opens doors for ${studentFirstName}`
@@ -252,6 +270,11 @@ export default function ParentDashboard() {
               {/* Quick karma action buttons */}
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 <KarmaQuickActions />
+              </div>
+
+              {/* Live Activity Ticker */}
+              <div className="mt-4 max-w-2xl mx-auto">
+                <LiveActivityTicker />
               </div>
 
               {/* Motivational nudge - Dynamic */}
@@ -329,6 +352,9 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
+          {/* ========== YOU GOT A RESPONSE (Thank you flow) ========== */}
+          <YouGotResponseBanner user={user} />
+
           {/* ========== ACTIVATION WELCOME BANNER ========== */}
           <ActivationWelcomeBanner user={user} />
 
