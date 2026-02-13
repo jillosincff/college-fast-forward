@@ -314,7 +314,7 @@ Deno.serve(async (req) => {
           firstName: parseFirstName(user.full_name)
         };
         
-        const { variant, subject } = getSubjectLineVariant(user.id, emailType, subjectData);
+        const subject = getSubject(emailType, subjectData);
         const trackingId = generateTrackingId();
         
         // Format questions for email
