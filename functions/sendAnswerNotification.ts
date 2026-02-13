@@ -108,13 +108,13 @@ Deno.serve(async (req) => {
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
                         
                         <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0;">
-                            This notification was sent through College Fast Forward.
+                            College Fast Forward
                         </p>
-                        <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 5px 0 0 0;">
-                            University of Florida 🧡💙
+                        <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 4px 0 0 0;">
+                            8731 Lewis River Road, Delray Beach, FL 33446
                         </p>
-                        <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 20px;">
-                            <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Manage notification preferences</a>
+                        <p style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 16px;">
+                            <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="https://www.collegefastforward.com/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a>
                         </p>
                     </div>
                 </div>

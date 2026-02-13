@@ -30,10 +30,13 @@ function wrapEmailHtml({ title, preheader, bodyContent, footerExtra, unsubscribe
     
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 14px; color: #6b7280; margin: 0 0 4px 0;">University of Florida 🧡💙</p>
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward — Where UF Helps UF</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 0 0 4px 0;">College Fast Forward</p>
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
       ${footerExtra || ''}
-      ${unsubscribeUrl ? `<p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Manage email preferences</a></p>` : `<p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af; text-decoration: underline;">Manage email preferences</a></p>`}
+      <p style="font-size: 11px; color: #9ca3af; margin: 12px 0 0 0;">
+        ${unsubscribeUrl ? `<a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a> · ` : ''}
+        <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af; text-decoration: underline;">Email Preferences</a>
+      </p>
     </div>
   </div>
 </body>

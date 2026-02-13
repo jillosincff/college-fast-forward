@@ -471,8 +471,10 @@ function buildReengagementEmailHtml(emailType, data) {
   
   <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;">
   
-  <p style="font-size: 12px; color: #9CA3AF; text-align: center;">
-    <a href="${unsubscribeUrl}" style="color: #9CA3AF;">Unsubscribe from these reminders</a>
+  <p style="font-size: 12px; color: #9CA3AF; text-align: center;">College Fast Forward</p>
+  <p style="font-size: 11px; color: #9CA3AF; text-align: center; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+  <p style="font-size: 11px; color: #9CA3AF; text-align: center; margin: 8px 0 0 0;">
+    <a href="${unsubscribeUrl}" style="color: #9CA3AF;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9CA3AF;">Email Preferences</a>
   </p>
   
 </body>
