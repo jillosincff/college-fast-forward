@@ -201,12 +201,6 @@ export default function ParentDashboard() {
                     : "Help UF students succeed"
                   }
                 </p>
-                <p className="text-base sm:text-lg md:text-xl opacity-90 max-w-lg mx-auto px-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  {hasLinkedStudent 
-                    ? `Every connection you make opens doors for ${studentFirstName}`
-                    : "Link your student to boost their visibility with every action you take"
-                  }
-                </p>
               </div>
 
               {/* Stats Cards */}
