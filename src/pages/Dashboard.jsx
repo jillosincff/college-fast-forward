@@ -303,6 +303,7 @@ export default function Dashboard() {
             messagesSent: messagesSentCount,
             unreadResponses: unreadCount,
             activeConversations: messagedMatches.length,
+            studentKarma: user?.student_karma || 0,
           }}
           state={userState === 'waiting_for_matches' ? 'waiting_matches' : 
                  userState === 'all_caught_up' ? 'all_caught_up' : 'default'}
