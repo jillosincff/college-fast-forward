@@ -170,6 +170,17 @@ export default function PostRequestPage() { // Renamed from PostRequest
           description: "This request will be live for 30 days. Your help request is now visible to the community.",
         });
 
+        // Award student karma for posting a question
+        if (posterType === 'student' || user?.persona === 'gator' || user?.roles?.includes('gator')) {
+          base44.functions.invoke('awardStudentKarma', {
+            userId: user.id,
+            userEmail: user.email,
+            actionType: 'post_question',
+            referenceId: createdRequest?.id,
+            description: 'Posted a help request'
+          }).catch(err => console.log('Student karma for post failed (non-critical):', err.message));
+        }
+
         // Send push notifications to matching parents/alumni (async, don't block UI)
         if (createdRequest?.id) {
           try {
