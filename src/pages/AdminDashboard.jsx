@@ -30,6 +30,7 @@ import CommunityInviteManager from '@/components/admin/CommunityInviteManager'; 
 import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircleApplicationsManager';
 import ReengagementSettings from '@/components/admin/ReengagementSettings';
 import AmbassadorManager from '@/components/admin/AmbassadorManager';
+import EmailTestPanel from '@/components/admin/EmailTestPanel';
 import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
@@ -694,6 +695,13 @@ const AdminDashboard = () => {
               Re-Engagement
             </TabsTrigger>
             <TabsTrigger 
+              value="email-test" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Mail className="w-4 h-4 mr-1" />
+              Email Test Panel
+            </TabsTrigger>
+            <TabsTrigger 
               value="ambassadors" 
               className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
             >
@@ -1124,6 +1132,11 @@ const AdminDashboard = () => {
             {/* Ambassadors Tab */}
             <TabsContent value="ambassadors" className="space-y-6">
               <AmbassadorManager />
+            </TabsContent>
+
+            {/* Email Test Panel Tab */}
+            <TabsContent value="email-test" className="space-y-6">
+              <EmailTestPanel />
             </TabsContent>
           </Tabs>
         )}
