@@ -37,6 +37,7 @@ import ActivationWelcomeBannerStudent from '@/components/dashboard/student/Activ
 import StudentKarmaCard from '@/components/dashboard/student/StudentKarmaCard';
 import HelpFellowGatorSection from '@/components/dashboard/student/HelpFellowGatorSection';
 import ShareWhatYouLearnedCard from '@/components/dashboard/student/ShareWhatYouLearnedCard';
+import ShareOfferDataCard from '@/components/dashboard/student/ShareOfferDataCard';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -326,6 +327,9 @@ export default function Dashboard() {
 
         {/* Share What You've Learned */}
         <ShareWhatYouLearnedCard user={user} />
+
+        {/* Share Your Offer Data */}
+        <ShareOfferDataCard user={user} />
 
         {/* Family Boost Status - Show when linked or has parent */}
         {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
