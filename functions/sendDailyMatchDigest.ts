@@ -62,7 +62,17 @@ Deno.serve(async (req) => {
     const expertiseByUser = {};
     expertise.forEach(e => { expertiseByUser[e.parent_id] = e; });
 
-    const results = { processed: 0, sent: 0, skipped: 0, errors: [] };
+    // Fetch all email logs for rate limiting
+    const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
+    const logsByEmail = {};
+    allEmailLogs.forEach(l => {
+      if (!logsByEmail[l.user_email]) logsByEmail[l.user_email] = [];
+      logsByEmail[l.user_email].push(l);
+    });
+    const oneDayAgoStr = new Date(now - 24*60*60*1000).toISOString();
+    const oneWeekAgoStr = new Date(now - 7*24*60*60*1000).toISOString();
+
+    const results = { processed: 0, sent: 0, skipped: 0, rateLimited: 0, errors: [] };
 
     for (const helper of helpers.slice(0, limit)) {
       try {
@@ -71,6 +81,15 @@ Deno.serve(async (req) => {
         const pref = prefsByUser[helper.id];
         if (pref && (pref.all_emails === false || pref.daily_digest === false)) {
           results.skipped++;
+          continue;
+        }
+
+        // Anti-spam: max 1/day, max 3/week
+        const userLogs = logsByEmail[helper.email] || [];
+        const todayCount = userLogs.filter(l => l.sent_at >= oneDayAgoStr).length;
+        const weekCount = userLogs.filter(l => l.sent_at >= oneWeekAgoStr).length;
+        if (todayCount >= 1 || weekCount >= 3) {
+          results.rateLimited++;
           continue;
         }
 

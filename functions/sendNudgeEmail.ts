@@ -37,7 +37,19 @@ Deno.serve(async (req) => {
       { status: 'active' }, '-created_date', 5
     );
 
-    const results = { processed: 0, nudge24Sent: 0, nudge48Sent: 0, skipped: 0, errors: [] };
+    // Fetch all email logs for rate limiting
+    const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
+    const logsByEmail = {};
+    allEmailLogs.forEach(l => {
+      if (!logsByEmail[l.user_email]) logsByEmail[l.user_email] = [];
+      logsByEmail[l.user_email].push(l);
+    });
+
+    const oneDayAgoStr = new Date(now - 24*60*60*1000).toISOString();
+    const oneWeekAgoStr = new Date(now - 7*24*60*60*1000).toISOString();
+    const NUDGE_REENGAGE_TYPES = ['nudge_24h','nudge_48h','reengagement_7d','reengagement_21d','reengagement_45d'];
+
+    const results = { processed: 0, nudge24Sent: 0, nudge48Sent: 0, skipped: 0, rateLimited: 0, errors: [] };
 
     for (const prompt of prompts.slice(0, limit)) {
       try {
@@ -47,6 +59,22 @@ Deno.serve(async (req) => {
         const pref = prefsByUser[prompt.user_id];
         if (pref && (pref.all_emails === false || pref.nudge_emails === false)) {
           results.skipped++;
+          continue;
+        }
+
+        // Cancel pending nudges if user already took action
+        if (prompt.action_taken) {
+          results.skipped++;
+          continue;
+        }
+
+        // Anti-spam: max 1/day, max 3/week, max 3 nudge/reengage ever
+        const userLogs = logsByEmail[prompt.user_email] || [];
+        const todayCount = userLogs.filter(l => l.sent_at >= oneDayAgoStr).length;
+        const weekCount = userLogs.filter(l => l.sent_at >= oneWeekAgoStr).length;
+        const totalNudgeReengage = userLogs.filter(l => NUDGE_REENGAGE_TYPES.includes(l.email_type)).length;
+        if (todayCount >= 1 || weekCount >= 3 || totalNudgeReengage >= 3) {
+          results.rateLimited++;
           continue;
         }
 

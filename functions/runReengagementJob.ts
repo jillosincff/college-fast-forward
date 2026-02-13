@@ -196,6 +196,17 @@ Deno.serve(async (req) => {
     
     console.log(`Found ${allQuestions.length} active questions`);
     
+    // Fetch all email logs for cross-function rate limiting
+    const allEmailLogs = await base44.asServiceRole.entities.EmailLog.filter({}, '-sent_at', 2000);
+    const logsByEmail = {};
+    allEmailLogs.forEach(l => {
+      if (!logsByEmail[l.user_email]) logsByEmail[l.user_email] = [];
+      logsByEmail[l.user_email].push(l);
+    });
+    const rateLimitOneDayAgo = new Date(Date.now() - 24*60*60*1000).toISOString();
+    const rateLimitOneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    const NUDGE_REENGAGE_TYPES = ['nudge_24h','nudge_48h','reengagement_7d','reengagement_21d','reengagement_45d'];
+
     const results = {
       processed: 0,
       emailsSent: 0,
@@ -205,7 +216,8 @@ Deno.serve(async (req) => {
         unsubscribed: 0,
         recentEmail: 0,
         ignoredPrevious: 0,
-        maxEmailsReached: 0
+        maxEmailsReached: 0,
+        rateLimited: 0
       },
       errors: []
     };
@@ -216,8 +228,18 @@ Deno.serve(async (req) => {
         
         // Check if user has unsubscribed
         const prefs = prefsByUser[user.id];
-        if (prefs && prefs.reengagement_emails === false) {
+        if (prefs && (prefs.reengagement_emails === false || prefs.all_emails === false)) {
           results.skipped.unsubscribed++;
+          continue;
+        }
+
+        // Anti-spam: max 1/day, max 3/week, max 3 nudge/reengage ever
+        const userLogs = logsByEmail[user.email] || [];
+        const todayCount = userLogs.filter(l => l.sent_at >= rateLimitOneDayAgo).length;
+        const weekCount = userLogs.filter(l => l.sent_at >= rateLimitOneWeekAgo).length;
+        const totalNudgeReengage = userLogs.filter(l => NUDGE_REENGAGE_TYPES.includes(l.email_type)).length;
+        if (todayCount >= 1 || weekCount >= 3 || totalNudgeReengage >= 3) {
+          results.skipped.rateLimited++;
           continue;
         }
         
