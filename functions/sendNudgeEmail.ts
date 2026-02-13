@@ -283,6 +283,114 @@ function buildAlumniSeekerNudge24h({ firstName, memberCount }) {
 }
 
 // ═══════════════════════════════════════════════════════
+// 4A — PARENT 48h NUDGE
+// ═══════════════════════════════════════════════════════
+function buildParentNudge48h({ firstName, unansweredQuestions, matchedQuestions, activeParentCount, topKarma }) {
+  const questionCount = unansweredQuestions.length || 'Several';
+
+  // Build the 3 matched question cards
+  let questionCards = '';
+  matchedQuestions.slice(0, 3).forEach((q, i) => {
+    const name = parseFirstName(q.student_name || q.poster_name || 'A UF Student');
+    const major = q.student_major || q.industry || q.target_industry || '';
+    const preview = truncate(q.description || '', 100);
+    const qUrl = `${APP_BASE_URL}/#QuestionDetail?id=${q.id}&type=${q.role ? 'job' : 'help'}&utm_source=nudge_48h`;
+    questionCards += `
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+            <td style="width: 28px; vertical-align: top; padding-right: 12px;">
+              <span style="display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: #0021A5; color: white; text-align: center; line-height: 28px; font-weight: 700; font-size: 14px;">${i + 1}</span>
+            </td>
+            <td>
+              <a href="${qUrl}" style="text-decoration: none;">
+                <strong style="color: #111827; font-size: 14px;">${name}</strong>
+                ${major ? `<span style="color: #6b7280; font-size: 13px;"> · ${major}</span>` : ''}
+                <p style="color: #374151; font-style: italic; margin: 4px 0 0 0; font-size: 14px;">"${preview}"</p>
+              </a>
+            </td>
+          </tr></table>
+        </td>
+      </tr>`;
+  });
+
+  const subject = `${questionCount} UF students are still waiting for help`;
+
+  const emailHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${questionCount} student questions are unanswered — ${activeParentCount} parents answered this week.</span>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
+      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
+    </div>
+    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
+      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
+      <p style="font-size: 16px;">Here's what's happening in the UF network right now:</p>
+
+      <div style="background: #f9fafb; border-radius: 10px; padding: 16px 20px; margin: 16px 0 24px 0;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="padding: 4px 0; font-size: 15px;">📬 <strong>${questionCount}</strong> student questions are unanswered</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-size: 15px;">👥 <strong>${activeParentCount}</strong> parents answered questions this week</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-size: 15px;">⭐ Top parent earned <strong>${topKarma}</strong> Karma this month</td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 8px 0;">Three students who match your background:</p>
+
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+        ${questionCards}
+      </table>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${APP_BASE_URL}/#Connections?utm_source=nudge_48h" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See All Questions →</a>
+      </div>
+
+      <p style="font-size: 15px; color: #374151;">Your Family Karma is still at 0. One answer changes that.</p>
+      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— Jill, CFF Founder</p>
+    </div>
+    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
+      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
+      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return { subject, emailHtml };
+}
+
+// ── Find multiple matched questions for parent (up to count) ──
+function findMatchedQuestions(questions, userIndustries, count = 3) {
+  const industries = (userIndustries || []).map(i => i.toLowerCase());
+  const matched = [];
+  const remaining = [];
+
+  for (const q of questions) {
+    const qi = (q.industry || q.target_industry || '').toLowerCase();
+    const isMatch = industries.length > 0 && industries.some(i => qi.includes(i) || i.includes(qi));
+    if (isMatch) {
+      matched.push(q);
+    } else {
+      remaining.push(q);
+    }
+  }
+
+  // Fill with industry matches first, then remaining
+  const result = [...matched, ...remaining];
+  return result.slice(0, count);
+}
+
+// ═══════════════════════════════════════════════════════
 // MAIN HANDLER
 // ═══════════════════════════════════════════════════════
 Deno.serve(async (req) => {
