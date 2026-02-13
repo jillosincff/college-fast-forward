@@ -159,8 +159,7 @@ Deno.serve(async (req) => {
     const day3Threshold = settings.day3_threshold || 45;
     const maxEmailsPerDay = settings.max_emails_per_day || 100;
     
-    // Get recent re-engagement emails (last 60 days)
-    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+    // Get recent re-engagement emails
     const recentEmails = await base44.asServiceRole.entities.ReengagementEmail.filter({});
     
     // Group emails by user
