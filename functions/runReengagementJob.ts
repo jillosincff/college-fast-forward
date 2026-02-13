@@ -366,7 +366,7 @@ Deno.serve(async (req) => {
           status: 'sent',
           tracking_id: trackingId,
           sent_at: new Date().toISOString(),
-          subject_variant: variant
+          subject_variant: 'A'
         });
         
         // Log to EmailLog
