@@ -274,6 +274,18 @@ input, select, textarea {
     overflow-x: hidden;
     box-sizing: border-box;
   }
+
+  /* Full-width forms on mobile */
+  input, textarea, select, .form-control {
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Full-width buttons on mobile (except inline small buttons) */
+  button:not(.btn-sm):not([class*="h-8"]):not([class*="h-9"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]):not([class*="rounded-full"]):not([data-state]) {
+    width: 100%;
+  }
 }
 
 /* Prevent text selection on buttons */
