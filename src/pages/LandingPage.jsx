@@ -512,8 +512,6 @@ export default function LandingPage() {
                   { service: 'Professional resume rewrite', cost: '$300-500' },
                   { service: 'Mock interview coaching', cost: '$150-200/session' },
                   { service: 'LinkedIn Premium (cold outreach)', cost: '$60/month' },
-                  { service: 'Salary negotiation consulting', cost: '$500-1,000' },
-                  { service: 'Interview prep course', cost: '$200-500' },
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
                     <span className="text-slate-700">{item.service}</span>
@@ -523,7 +521,7 @@ export default function LandingPage() {
               </div>
               <div className="mt-6 pt-4 border-t-2 border-slate-300 flex justify-between items-center">
                 <span className="text-slate-900 font-bold text-lg">Total if you bought it all separately:</span>
-                <span className="text-red-500 font-bold text-xl line-through">$1,500 - $3,000+</span>
+                <span className="text-red-500 font-bold text-xl line-through">$750 - $1,500+</span>
               </div>
             </motion.div>
 
@@ -584,7 +582,7 @@ export default function LandingPage() {
                   <h3 className="text-lg font-bold text-slate-900 mb-1">SCALE</h3>
                   <p className="text-sm text-slate-500 mb-3">5,000+ members</p>
                   <div className="text-4xl font-extrabold text-slate-700 mb-2">$19</div>
-                  <p className="text-slate-500 font-semibold text-sm">/month</p>
+                  <p className="text-slate-500 font-semibold text-sm">/month per family</p>
                   <div className="mt-4 pt-4 border-t border-slate-200">
                     <p className="text-slate-500">Future</p>
                   </div>
