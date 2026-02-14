@@ -418,6 +418,96 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* THE CFF PLEDGE                                                      */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="mb-8"
+            >
+              <span className="text-4xl mb-4 block">🤝</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+                Our Pledge to Each Other
+              </h2>
+            </motion.div>
+
+            <motion.p
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-lg text-slate-600 mb-10"
+            >
+              This network works because every parent makes the same promise:
+            </motion.p>
+
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl border-2 border-slate-200 p-8 md:p-10 text-left max-w-xl mx-auto mb-10 shadow-sm"
+            >
+              <div className="space-y-5">
+                {[
+                  "I'll respond when a student reaches out.",
+                  "I'll share what I know.",
+                  "I'll open doors when I can.",
+                  "I'll help other people's kids the way I'd want someone to help mine."
+                ].map((line, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-[#0021A5] mt-0.5 flex-shrink-0" />
+                    <p className="text-slate-800 font-medium text-lg leading-snug">{line}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="space-y-3 mb-10"
+            >
+              <p className="text-slate-600 text-lg">
+                That's it. No algorithms. No AI matching you with strangers who don't care.
+              </p>
+              <p className="text-slate-800 font-semibold text-lg">
+                Just a community of parents who show up for each other's students.
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              <p className="text-slate-700 mb-1">
+                <strong>{stats.total_families} parents</strong> have already taken this pledge.
+              </p>
+              <p className="text-slate-600 mb-8">
+                Your student is already benefiting from their generosity.
+              </p>
+              <p className="text-[#0021A5] font-bold text-xl mb-6">Now it's your turn.</p>
+              <Button
+                onClick={handleGetInside}
+                size="lg"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-10 py-6 text-lg font-bold shadow-lg"
+              >
+                I'll Take the Pledge
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* SOCIAL PROOF - "Real Results"                                       */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4" style={{ backgroundColor: '#0A1628' }}>
