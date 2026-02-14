@@ -508,6 +508,55 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FAMILY KARMA                                                         */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 bg-white">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="mb-8"
+            >
+              <span className="text-4xl mb-4 block">🏆</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Family Karma — Caring Has Its Rewards
+              </h2>
+            </motion.div>
+
+            <motion.p
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto"
+            >
+              Every time you help a student — answering a question, making an introduction, sharing salary data — you earn Family Karma.
+            </motion.p>
+
+            <motion.div
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-8 md:p-10 max-w-lg mx-auto mb-10"
+            >
+              <p className="text-slate-800 text-lg mb-4">
+                The more karma you earn, the <strong className="text-slate-900">more visible your student becomes</strong> to other parents looking to help.
+              </p>
+              <div className="bg-white rounded-xl p-5 border border-amber-200 mb-4">
+                <p className="text-2xl md:text-3xl font-extrabold text-[#FA4616]">3x</p>
+                <p className="text-slate-600 font-medium">more introductions for top karma families</p>
+              </div>
+              <p className="text-[#FA4616] font-bold text-lg">
+                You're not just helping others. You're helping YOUR kid.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* SOCIAL PROOF - "Real Results"                                       */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4" style={{ backgroundColor: '#0A1628' }}>
@@ -527,7 +576,7 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-6 mb-12"
+              className="grid md:grid-cols-2 gap-6 mb-12"
             >
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 bg-white h-full">
@@ -565,6 +614,19 @@ export default function LandingPage() {
                     "The AI advisor told him what to expect, and then a parent who's a PM at a similar company did two mock interviews with him. He got the offer."
                   </p>
                   <p className="text-slate-400 text-sm">— The Rodriguez Family</p>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={fadeInUp}>
+                <Card className="p-6 bg-white h-full border-2 border-[#FA4616]/20">
+                  <div className="text-3xl mb-3">🤝</div>
+                  <p className="text-slate-900 font-semibold mb-3">
+                    "I answered one student's question about consulting. Two days later, a parent I'd never met helped MY daughter land an interview at Deloitte."
+                  </p>
+                  <p className="text-slate-600 text-sm mb-4">
+                    "This network is incredible. You give a little, and it comes back tenfold."
+                  </p>
+                  <p className="text-slate-400 text-sm">— The Johnson Family</p>
                 </Card>
               </motion.div>
             </motion.div>
