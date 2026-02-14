@@ -14,7 +14,9 @@ import CFFPledgePage from '@/components/onboarding/parent/CFFPledgePage';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
-  const [step, setStep] = useState(1);
+  // If user already completed profile but not pledge, jump straight to pledge
+  const initialStep = (user?.onboarding_completed && user?.pledge_taken === false) ? 5 : 1;
+  const [step, setStep] = useState(initialStep);
   const [loading, setLoading] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
