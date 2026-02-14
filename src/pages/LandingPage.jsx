@@ -318,10 +318,10 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* VALUE STACK SECTION - "What You Get Inside"                         */}
+        {/* HOW IT ACTUALLY WORKS - "Parents Who Care"                          */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4 bg-white">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <motion.div 
               variants={fadeInUp}
               initial="hidden"
@@ -330,76 +330,89 @@ export default function LandingPage() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                What You Get Inside
+                This Isn't a Job Board. It's Parents Who Care.
               </h2>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-3">
-                Your student gets instantly matched with {SCHOOL_NAME} parents and alumni whose experience directly fits what they need.
-              </p>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                These aren't strangers. They're professionals who've been where your student wants to go — and they genuinely want to help them get there.
+              <p className="text-lg text-slate-600">
+                Here's what happens inside CFF every single day:
               </p>
             </motion.div>
 
+            {/* Story Cards */}
             <motion.div 
               variants={staggerChildren}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="space-y-6"
+              className="space-y-4 mb-12"
             >
-              {/* Value Item 1 - Instant Matching */}
               <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">🤝</div>
+                <Card className="p-6 md:p-8 border-2 border-blue-100 bg-blue-50/50">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">👩‍💼</div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Instant Matching
-                      </h3>
-                      <p className="text-slate-600">
-                        Your student posts what they need. We match them with parents and alumni who have the exact expertise, connections, and experience to help. No searching. No cold outreach. No hoping someone responds.
+                      <p className="font-bold text-slate-900 mb-1">Sarah <span className="font-normal text-slate-500">— Marketing VP, 22 years exp</span></p>
+                      <p className="text-slate-700 leading-relaxed">
+                        A student asks about breaking into brand management. Sarah answers in 10 minutes. She offers to introduce the student to her contact at P&G.
+                      </p>
+                      <p className="text-[#0021A5] font-semibold mt-3 italic">
+                        Why? Because she'd want someone to do the same for her kid.
                       </p>
                     </div>
                   </div>
                 </Card>
               </motion.div>
 
-              {/* Value Item 2 - Real Conversations */}
-              <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">💬</div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Real Conversations, Real Help
-                      </h3>
-                      <p className="text-slate-600">
-                        Your student messages their matches directly. Ask for advice. Get introductions. Practice for interviews. Whatever they need — from someone who actually does the job they want.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+              <motion.div variants={fadeInUp} className="flex justify-center">
+                <span className="text-slate-300 text-2xl">↕</span>
               </motion.div>
 
-              {/* Value Item 3 - Family Karma */}
               <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-[#FA4616]/30 bg-gradient-to-r from-orange-50 to-white">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">🏆</div>
+                <Card className="p-6 md:p-8 border-2 border-green-100 bg-green-50/50">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">👨‍💼</div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Family Karma — Your Activity Boosts Your Student
-                      </h3>
-                      <p className="text-slate-600 mb-3">
-                        When you help other students, you earn Family Karma. The more karma you have, the <strong>more visible your student becomes</strong>.
+                      <p className="font-bold text-slate-900 mb-1">David <span className="font-normal text-slate-500">— Tech Director, 18 years exp</span></p>
+                      <p className="text-slate-700 leading-relaxed">
+                        Sarah's daughter needs help breaking into tech. David answers her question and connects her with his former colleague at Microsoft.
                       </p>
-                      <p className="text-[#FA4616] font-semibold">
-                        You're not just helping others. You're helping YOUR kid.
+                      <p className="text-green-700 font-semibold mt-3 italic">
+                        Why? Because he pledged to help. And because someone else is helping HIS son right now.
                       </p>
                     </div>
                   </div>
                 </Card>
               </motion.div>
+            </motion.div>
+
+            {/* The Deal */}
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="bg-slate-900 text-white rounded-2xl p-8 text-center mb-10"
+            >
+              <p className="text-xl md:text-2xl font-bold mb-2">This is the deal:</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-[#FA4616]">
+                You help their kid. They help yours.
+              </p>
+              <p className="text-xl md:text-2xl font-bold mt-2">Everyone's student wins.</p>
+            </motion.div>
+
+            {/* Network Description */}
+            <motion.div 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center max-w-3xl mx-auto"
+            >
+              <p className="text-lg text-slate-700 mb-4">
+                Right now, <strong className="text-slate-900">{stats.total_families} {SCHOOL_NAME} families</strong> are doing this for each other. Their connections span 200+ industries. VPs. Directors. Hiring managers. People who can actually open doors.
+              </p>
+              <p className="text-lg text-slate-700">
+                Your student gets matched instantly with the parents and alumni whose experience fits what they need. They message directly. No algorithms. No gatekeepers. <strong className="text-slate-900">Just people who care.</strong>
+              </p>
             </motion.div>
           </div>
         </section>
