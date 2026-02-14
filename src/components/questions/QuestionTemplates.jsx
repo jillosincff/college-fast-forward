@@ -65,7 +65,7 @@ export default function QuestionTemplates({ onSelectTemplate }) {
               key={t.id}
               type="button"
               onClick={() => handleSelect(t)}
-              className="text-left p-3 rounded-xl border-2 border-slate-200 hover:border-[#FA4616] hover:bg-orange-50 transition-all group"
+              className="text-left p-3 rounded-xl border-2 border-slate-200 hover:border-[#FA4616] hover:bg-orange-50 transition-all group min-h-[56px]"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{t.icon}</span>

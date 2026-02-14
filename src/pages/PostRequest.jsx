@@ -493,28 +493,61 @@ export default function PostRequestPage() { // Renamed from PostRequest
         
         @media (max-width: 768px) {
           .hero-stats {
-            gap: 12px;
+            gap: 8px;
+          }
+
+          .stat-item {
+            font-size: 0.75rem;
+            padding: 6px 10px;
           }
 
           .hero-section {
             margin: 12px;
             padding: 24px 16px;
+            min-height: auto;
+          }
+
+          .hero-subtitle {
+            font-size: 0.85rem;
+            margin-bottom: 16px;
           }
 
           .back-button {
             position: static;
             margin-bottom: 16px;
             align-self: flex-start;
+            min-height: 44px;
           }
 
           .form-container {
-            margin: 16px;
-            padding: 24px;
+            margin: 12px;
+            padding: 16px;
             margin-top: -20px;
+            border-radius: 12px;
+          }
+
+          .form-header {
+            margin-bottom: 20px;
+          }
+
+          .form-title {
+            font-size: 1.25rem;
+          }
+
+          .form-subtitle {
+            font-size: 0.875rem;
           }
 
           .main-content {
             padding: 0 0 24px;
+          }
+
+          .tips-section {
+            display: none;
+          }
+
+          .examples-section {
+            display: none;
           }
         }
       `}</style>

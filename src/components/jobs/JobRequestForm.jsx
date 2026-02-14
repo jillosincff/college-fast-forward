@@ -438,8 +438,8 @@ export default function JobRequestForm({
             </FormField>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <label htmlFor="relocation_ok" className="flex items-center space-x-2 min-h-[44px] cursor-pointer">
               <Controller
                 name="relocation_ok"
                 control={control}
@@ -451,9 +451,9 @@ export default function JobRequestForm({
                   />
                 )}
               />
-              <Label htmlFor="relocation_ok">Open to relocating</Label>
-            </div>
-            <div className="flex items-center space-x-2">
+              <Label htmlFor="relocation_ok" className="cursor-pointer">Open to relocating</Label>
+            </label>
+            <label htmlFor="visa_needed" className="flex items-center space-x-2 min-h-[44px] cursor-pointer">
               <Controller
                 name="visa_needed"
                 control={control}
@@ -465,8 +465,8 @@ export default function JobRequestForm({
                   />
                 )}
               />
-              <Label htmlFor="visa_needed">Need visa sponsorship</Label>
-            </div>
+              <Label htmlFor="visa_needed" className="cursor-pointer">Need visa sponsorship</Label>
+            </label>
           </div>
         </CardContent>
       </Card>
@@ -553,7 +553,7 @@ export default function JobRequestForm({
       {isParent && (
         <Card>
           <CardContent className="pt-6">
-            <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-blue-300 transition-colors">
+            <label className="flex items-start gap-3 p-3 sm:p-4 bg-slate-50 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-blue-300 transition-colors min-h-[56px]">
               <Checkbox
                 id="is_anonymous"
                 checked={isAnonymous}
@@ -582,7 +582,7 @@ export default function JobRequestForm({
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-[#0021A5] hover:bg-[#001a7a] text-white px-8 py-3 text-lg font-semibold min-w-[200px]"
+          className="bg-[#0021A5] hover:bg-[#001a7a] text-white px-8 py-4 text-lg font-semibold min-w-[200px] w-full sm:w-auto"
         >
           {isSubmitting ? (
             <>

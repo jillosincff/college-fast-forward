@@ -61,7 +61,7 @@ export default function IndustrySelector({
       <div className="space-y-3">
         <label 
           className={`
-            flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
+            flex items-start gap-3 p-3 sm:p-4 rounded-xl border-2 cursor-pointer transition-all min-h-[56px]
             ${respondentType === 'anyone' 
               ? 'border-[#0021A5] bg-blue-50' 
               : 'border-slate-200 hover:border-slate-300 bg-white'
@@ -83,7 +83,7 @@ export default function IndustrySelector({
 
         <label 
           className={`
-            flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
+            flex items-start gap-3 p-3 sm:p-4 rounded-xl border-2 cursor-pointer transition-all min-h-[56px]
             ${respondentType === 'specific' 
               ? 'border-[#0021A5] bg-blue-50' 
               : 'border-slate-200 hover:border-slate-300 bg-white'
@@ -119,8 +119,8 @@ export default function IndustrySelector({
                   onClick={() => toggleIndustry(ind.id)}
                   disabled={isDisabled}
                   className={`
-                    flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
-                    transition-all duration-200 border-2
+                    flex items-center gap-2 px-3 py-3 sm:py-2.5 rounded-lg text-left text-sm
+                    transition-all duration-200 border-2 min-h-[44px]
                     ${isSelected
                       ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
                       : isDisabled
