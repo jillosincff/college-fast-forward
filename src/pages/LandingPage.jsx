@@ -323,8 +323,11 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 What You Get Inside
               </h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-3">
+                Your student gets instantly matched with {SCHOOL_NAME} parents and alumni whose experience directly fits what they need.
+              </p>
               <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                Everything your student needs to land their dream job — and everything you need to help them get there.
+                These aren't strangers. They're professionals who've been where your student wants to go — and they genuinely want to help them get there.
               </p>
             </motion.div>
 
@@ -335,98 +338,41 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              {/* Value Item 1 */}
+              {/* Value Item 1 - Instant Matching */}
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="text-5xl">🤝</div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Direct Access to 600+ Professionals
+                        Instant Matching
                       </h3>
-                      <p className="text-slate-600 mb-3">
-                        VPs at Google. Directors at Goldman. Partners at McKinsey. These are real {SCHOOL_NAME} parents and alumni who <strong>want</strong> to help students like yours. Message them directly. No gatekeepers.
-                      </p>
-                      <p className="text-sm text-slate-400 italic">
-                        Career coaches charge $200/hour for introductions like these.
+                      <p className="text-slate-600">
+                        Your student posts what they need. We match them with parents and alumni who have the exact expertise, connections, and experience to help. No searching. No cold outreach. No hoping someone responds.
                       </p>
                     </div>
                   </div>
                 </Card>
               </motion.div>
 
-              {/* Value Item 2 - AI Career Advisor */}
-              <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">🤖</div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        AI Career Advisor
-                      </h3>
-                      <p className="text-slate-600 mb-3">
-                        <em>"I got a PM offer at a startup in Miami — $78K + equity. How does that compare?"</em>
-                      </p>
-                      <p className="text-slate-600 mb-3">
-                        Get instant, personalized guidance on salaries, interviews, negotiation, and career decisions — powered by real data from the {SCHOOL_NAME} network.
-                      </p>
-                      <div className="text-slate-600 text-sm space-y-1 mb-3">
-                        <p>✓ <strong>Evaluate offers</strong> — "Is this salary competitive for my role?"</p>
-                        <p>✓ <strong>Prepare for interviews</strong> — "What should I expect at Google?"</p>
-                        <p>✓ <strong>Negotiate confidently</strong> — "Should I push back? How?"</p>
-                        <p>✓ <strong>Make career decisions</strong> — "Consulting vs. startup — help me think through this."</p>
-                      </div>
-                      <p className="text-sm text-purple-600 font-medium italic">
-                        Like having a career coach in your pocket. 24/7.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Value Item 3 */}
+              {/* Value Item 2 - Real Conversations */}
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="text-5xl">💬</div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Community Q&A
+                        Real Conversations, Real Help
                       </h3>
-                      <div className="text-slate-600 mb-3 space-y-1">
-                        <p><em>"What's it really like working at Goldman?"</em></p>
-                        <p><em>"How do I break into tech from a non-CS background?"</em></p>
-                        <p><em>"Should I take this offer or wait?"</em></p>
-                      </div>
                       <p className="text-slate-600">
-                        Ask anything. Get answers from people who've been there — not anonymous internet strangers, but {SCHOOL_NAME} parents and alumni who actually care.
+                        Your student messages their matches directly. Ask for advice. Get introductions. Practice for interviews. Whatever they need — from someone who actually does the job they want.
                       </p>
                     </div>
                   </div>
                 </Card>
               </motion.div>
 
-              {/* Value Item 4 */}
-              <motion.div variants={fadeInUp}>
-                <Card className="p-6 md:p-8 border-2 border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="text-5xl">📝</div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Resume Reviews & Mock Interviews
-                      </h3>
-                      <p className="text-slate-600 mb-3">
-                        Get your student's resume reviewed by someone who actually <strong>hires</strong> for that role. Practice interviews with real professionals.
-                      </p>
-                      <p className="text-sm text-slate-400 italic">
-                        Professional resume services charge $300-500. Mock interview coaching costs $150-200/session. Here? It's included.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Value Item 5 - Family Karma */}
+              {/* Value Item 3 - Family Karma */}
               <motion.div variants={fadeInUp}>
                 <Card className="p-6 md:p-8 border-2 border-[#FA4616]/30 bg-gradient-to-r from-orange-50 to-white">
                   <div className="flex flex-col md:flex-row gap-6">
@@ -436,10 +382,10 @@ export default function LandingPage() {
                         Family Karma — Your Activity Boosts Your Student
                       </h3>
                       <p className="text-slate-600 mb-3">
-                        Every question you answer, every salary you share — you earn Family Karma. The more karma you have, the <strong>more visible your student becomes</strong> to other parents looking to help.
+                        When you help other students, you earn Family Karma. The more karma you have, the <strong>more visible your student becomes</strong>.
                       </p>
                       <p className="text-[#FA4616] font-semibold">
-                        Top karma families get 3x more introductions. You're not just helping others. You're helping YOUR kid.
+                        You're not just helping others. You're helping YOUR kid.
                       </p>
                     </div>
                   </div>
