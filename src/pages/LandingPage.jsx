@@ -504,101 +504,44 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="bg-slate-50 rounded-2xl p-6 md:p-8 mb-10"
+              className="text-center max-w-2xl mx-auto mb-10"
             >
-              <div className="space-y-4">
-                {[
-                  { service: 'Career coach with industry connections', cost: '$200-400/hour' },
-                  { service: 'Professional resume rewrite', cost: '$300-500' },
-                  { service: 'Mock interview coaching', cost: '$150-200/session' },
-                  { service: 'LinkedIn Premium (cold outreach)', cost: '$60/month' },
-                ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
-                    <span className="text-slate-700">{item.service}</span>
-                    <span className="text-slate-500 font-medium">{item.cost}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-4 border-t-2 border-slate-300 flex justify-between items-center">
-                <span className="text-slate-900 font-bold text-lg">Total if you bought it all separately:</span>
-                <span className="text-red-500 font-bold text-xl line-through">$750 - $1,500+</span>
-              </div>
+              <p className="text-xl md:text-2xl text-slate-700 mb-2">
+                A career coach charges <strong className="text-slate-900">$200–400/hour</strong> to make the introductions you'll find inside.
+              </p>
+              <p className="text-xl md:text-2xl text-slate-700 mt-6 mb-2">
+                Your student gets <strong className="text-slate-900">unlimited access</strong>.
+              </p>
+              <p className="text-xl md:text-2xl text-slate-900 font-bold">
+                Founding members pay nothing. Forever.
+              </p>
             </motion.div>
 
-            {/* Tiered Pricing */}
+            {/* Founding Tier - Single Card */}
             <motion.div 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-center mb-10"
+              className="max-w-md mx-auto mb-10"
             >
-              <p className="text-slate-600 text-lg mb-2">The Earlier You Join, The Less You Pay</p>
-              <p className="text-slate-500">More members = more connections = more value. That's why the price goes up as we grow.</p>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-400 rounded-2xl p-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  YOU'RE HERE
+                </div>
+                <div className="text-3xl mb-2">🎉</div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">FOUNDING</h3>
+                <p className="text-sm text-slate-500 mb-3">First 1,000 members</p>
+                <div className="text-5xl font-extrabold text-green-600 mb-2">FREE</div>
+                <p className="text-green-700 font-semibold text-sm">FOREVER</p>
+                <div className="mt-4 pt-4 border-t border-green-300">
+                  <p className="text-green-700 font-bold">⚡ {stats.spots_left} spots left</p>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm text-center mt-4">
+                After 1,000: $9/mo · After 5K: $19/mo
+              </p>
             </motion.div>
-
-            <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-4 mb-10"
-            >
-              {/* Founding Tier */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-400 rounded-2xl p-6 text-center relative overflow-hidden">
-                  <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    YOU'RE HERE
-                  </div>
-                  <div className="text-3xl mb-2">🎉</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">FOUNDING</h3>
-                  <p className="text-sm text-slate-500 mb-3">First 1,000 members</p>
-                  <div className="text-4xl font-extrabold text-green-600 mb-2">FREE</div>
-                  <p className="text-green-700 font-semibold text-sm">FOREVER</p>
-                  <div className="mt-4 pt-4 border-t border-green-300">
-                    <p className="text-green-700 font-bold">⚡ {stats.spots_left} spots left</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Growth Tier */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-6 text-center opacity-75">
-                  <div className="text-3xl mb-2">📈</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">GROWTH</h3>
-                  <p className="text-sm text-slate-500 mb-3">1,001 - 5,000 members</p>
-                  <div className="text-4xl font-extrabold text-slate-700 mb-2">$9</div>
-                  <p className="text-slate-500 font-semibold text-sm">/month per family</p>
-                  <div className="mt-4 pt-4 border-t border-slate-200">
-                    <p className="text-slate-500">Coming soon</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Scale Tier */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-6 text-center opacity-60">
-                  <div className="text-3xl mb-2">🚀</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">SCALE</h3>
-                  <p className="text-sm text-slate-500 mb-3">5,000+ members</p>
-                  <div className="text-4xl font-extrabold text-slate-700 mb-2">$19</div>
-                  <p className="text-slate-500 font-semibold text-sm">/month per family</p>
-                  <div className="mt-4 pt-4 border-t border-slate-200">
-                    <p className="text-slate-500">Future</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center text-slate-600"
-            >
-              <strong>{stats.total_families} families</strong> already claimed their free spot. <strong>Your price locks in forever.</strong>
-            </motion.p>
           </div>
         </section>
 
