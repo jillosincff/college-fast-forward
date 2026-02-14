@@ -944,6 +944,10 @@ export default function LandingPage() {
                     a: "Never too early. Freshmen can explore careers, ask questions, and start building relationships before the pressure of job hunting kicks in. The students who start early have the biggest networks by junior year."
                   },
                   {
+                    q: "How do I know other parents will actually help my student?",
+                    a: "Every parent who joins takes the CFF Pledge — a promise to respond to students, share expertise, and make introductions. This isn't a passive directory. It's a community of parents who committed to showing up. Our data shows that parents in the CFF network respond at 10x the rate of cold outreach on platforms like LinkedIn."
+                  },
+                  {
                     q: "Can I cancel anytime?",
                     a: "Founding members are free forever — there's nothing to cancel! After we hit 1,000 members, new members pay $9/month and can cancel anytime."
                   },
@@ -976,7 +980,7 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-3xl md:text-5xl font-extrabold text-white mb-4"
+              className="text-3xl md:text-5xl font-extrabold text-white mb-6"
             >
               Your Network. Their Future.
             </motion.h2>
@@ -985,18 +989,27 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-white/90 text-lg md:text-xl mb-2"
+              className="text-white/90 text-lg md:text-xl mb-4 max-w-2xl mx-auto"
             >
-              The connections you've built over 20+ years in your career?
+              You've spent decades building connections, expertise, and relationships.
             </motion.p>
             <motion.p 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-white font-bold text-xl mb-8"
+              className="text-white text-lg md:text-xl mb-2 max-w-2xl mx-auto"
             >
-              They're about to become your student's unfair advantage.
+              Inside CFF, <strong>{stats.total_families} other {SCHOOL_NAME} parents</strong> have done the same. And they've pledged to use all of it to help each other's students succeed.
+            </motion.p>
+            <motion.p 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-white font-bold text-xl md:text-2xl mb-8"
+            >
+              Your kid deserves that kind of network behind them.
             </motion.p>
             
             <motion.div
@@ -1006,7 +1019,6 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="mb-6"
             >
-              <p className="text-white/90 mb-2">{stats.total_families} families already claimed their free spot.</p>
               <p className="text-white font-semibold text-xl">{stats.spots_left} FREE founding spots left.</p>
             </motion.div>
 
@@ -1034,7 +1046,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-white/60 text-sm mt-8"
             >
-              Questions? Email hello@collegefastforward.com
+              Questions? Email support@collegefastforward.com
             </motion.p>
           </div>
         </section>
