@@ -125,10 +125,10 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="mb-8 sm:mb-10 max-w-3xl mx-auto px-4"
+              className="mb-6 sm:mb-8 max-w-3xl mx-auto px-4"
             >
-              <p className="text-xl sm:text-2xl md:text-3xl text-white font-semibold">
-                Warm introductions, not cold applications.
+              <p className="text-xl sm:text-2xl md:text-3xl text-white/90 leading-snug">
+                What if <strong className="text-white">{stats.total_families} parents</strong> cared about your student's career as much as you do?
               </p>
             </motion.div>
 
@@ -136,9 +136,18 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              className="text-lg sm:text-xl md:text-2xl text-white font-bold mb-4 px-4"
+            >
+              They do. They're already inside.
+            </motion.p>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
               className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
             >
-              <strong className="text-white">{stats.total_families} {SCHOOL_NAME} families</strong> opening doors for each other's students — with real connections to hiring managers, VPs, and professionals across 200+ industries.
+              College Fast Forward is a private network of {SCHOOL_NAME} parents and alumni who've pledged to help each other's students succeed — with real introductions, real advice, and real connections to people who can change their trajectory.
             </motion.p>
 
             {/* CTA Box - FREE Founding */}
@@ -243,7 +252,7 @@ export default function LandingPage() {
                 <strong className="text-white">Here's the truth:</strong> It doesn't matter how perfect their resume is. Without a warm connection, their resume goes into the same black hole as everyone else's.
               </p>
               <p className="text-gray-200 mt-4">
-                The students who land jobs? <strong className="text-white">They have someone on the inside.</strong>
+                The students who land jobs? <strong className="text-white">They have someone on the inside who cares enough to pick up the phone.</strong>
               </p>
             </motion.div>
           </div>
