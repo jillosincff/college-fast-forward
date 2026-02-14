@@ -379,7 +379,7 @@ export default function MyMessagesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-96px)] flex flex-col bg-white overflow-x-hidden overflow-y-hidden">
+    <div className="h-[calc(100vh-96px)] sm:h-[calc(100vh-96px)] flex flex-col bg-white overflow-x-hidden overflow-y-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-white">
         <div className="flex items-center gap-3">
@@ -420,7 +420,7 @@ export default function MyMessagesPage() {
         <div className={`
           ${showMobileSidebar ? 'flex' : 'hidden'} 
           lg:flex flex-col w-full lg:w-80 xl:w-96 border-r border-slate-200 bg-white
-          absolute lg:relative z-10 h-full
+          absolute lg:relative z-10 h-full overflow-hidden
         `}>
           {/* Search */}
           <div className="p-3 border-b border-slate-100">

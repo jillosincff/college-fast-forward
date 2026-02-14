@@ -419,14 +419,14 @@ export default function GatorDirectory() {
         <div className="px-4 sm:px-0">
           
           {/* Filters Bar - Scrolls Normally */}
-          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg mb-8 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-600 font-medium">
+          <div className="bg-white/95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-lg mb-6 sm:mb-8 border border-slate-200">
+            <div className="flex items-center justify-between mb-4 gap-2">
+              <p className="text-sm text-slate-600 font-medium hidden sm:block">
                 💡 <strong>Tip:</strong> Filter by role, industry, or help type to find the right connections!
               </p>
               
               {/* View Toggle */}
-              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1 ml-auto">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all ${
@@ -449,7 +449,7 @@ export default function GatorDirectory() {
             </div>
             
             {/* Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
               <div>
                 <label htmlFor="filter-persona" className="block text-sm font-medium text-slate-700 mb-1">
                   Role

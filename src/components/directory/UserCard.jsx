@@ -303,10 +303,10 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
   // Grid view rendering (default)
   return (
     <Card className={`overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 bg-white ${cardBorderClass} group`}>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
       {/* Header with Avatar and Name - Larger for better readability */}
-      <div className="flex items-start gap-5 mb-4">
-        <Avatar className="w-18 h-18 flex-shrink-0" style={{ width: '72px', height: '72px' }}>
+      <div className="flex items-start gap-3 sm:gap-5 mb-4">
+        <Avatar className="w-14 h-14 sm:w-18 sm:h-18 flex-shrink-0" style={{ width: undefined, height: undefined }}>
           <AvatarImage src={user.profile_image} alt={displayName} />
           <AvatarFallback className="bg-[#0021A5] text-white text-xl font-semibold">
             {initials}
@@ -557,7 +557,7 @@ export default function UserCard({ user, onMessage, onViewProfile, isLimitedMode
         )}
 
         {/* Action Buttons - Message is primary (orange), Profile is secondary */}
-        <div className="flex gap-3 mt-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
           {isLimitedMode ? (
             <div className="relative group flex-1">
               <Button

@@ -120,22 +120,22 @@ export default function ChatWindow({
   return (
     <div className="flex-1 flex flex-col bg-white h-full min-h-0">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-200 bg-white">
+      <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white font-bold flex-shrink-0">
             {otherName.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-900">{otherName}</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-slate-900 truncate">{otherName}</h3>
             {conversation.subject && (
-              <p className="text-sm text-slate-500 truncate max-w-md">{conversation.subject}</p>
+              <p className="text-sm text-slate-500 truncate">{conversation.subject}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 bg-slate-50">
         {hasMore && (
           <button
             onClick={onLoadMore}
@@ -155,7 +155,7 @@ export default function ChatWindow({
               key={msg.id}
               className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`flex gap-2 max-w-[75%] ${isOwn ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex gap-2 max-w-[85%] sm:max-w-[75%] ${isOwn ? 'flex-row-reverse' : ''}`}>
                 {showAvatar && !isOwn && (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                     {(msg.sender_name || msg.sender_email)?.charAt(0).toUpperCase()}
@@ -250,7 +250,7 @@ export default function ChatWindow({
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 bg-white border-t border-slate-200 sticky bottom-0 z-20 safe-area-bottom">
+      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-white border-t border-slate-200 sticky bottom-0 z-20 safe-area-bottom">
         <div className="flex items-end gap-2">
           <input
             type="file"
@@ -288,7 +288,8 @@ export default function ChatWindow({
           <Button
             onClick={handleSend}
             disabled={(!newMessage.trim() && attachments.length === 0) || isSending}
-            className="bg-[#0021A5] hover:bg-[#001580] flex-shrink-0"
+            className="bg-[#0021A5] hover:bg-[#001580] flex-shrink-0 min-w-[44px] min-h-[44px]"
+            size="icon"
           >
             {isSending ? (
               <Loader2 className="w-5 h-5 animate-spin" />
