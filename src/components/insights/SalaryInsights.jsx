@@ -97,28 +97,28 @@ export default function SalaryInsights({ salaryReports = [], salarySubmissions =
 
   return (
     <Card className="border-2 border-green-100 shadow-lg rounded-2xl overflow-hidden">
-      <CardContent className="p-6">
-        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5">
+      <CardContent className="p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2 mb-5">
           <DollarSign className="w-5 h-5 text-green-600" />
           💰 Salary Insights
         </h2>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-green-700">{totalReports}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6">
+          <div className="bg-green-50 rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">{totalReports}</p>
             <p className="text-xs text-green-600">Reports</p>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-green-700">{formatSalary(avgSalary)}</p>
+          <div className="bg-green-50 rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">{formatSalary(avgSalary)}</p>
             <p className="text-xs text-green-600">Average</p>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-green-700">{formatSalary(minSalary)}</p>
+          <div className="bg-green-50 rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">{formatSalary(minSalary)}</p>
             <p className="text-xs text-green-600">Low</p>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-green-700">{formatSalary(maxSalary)}</p>
+          <div className="bg-green-50 rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">{formatSalary(maxSalary)}</p>
             <p className="text-xs text-green-600">High</p>
           </div>
         </div>
@@ -140,9 +140,9 @@ export default function SalaryInsights({ salaryReports = [], salarySubmissions =
 
         {tab === 'overview' && industryData.length > 0 && (
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={industryData} layout="vertical" margin={{ left: 10, right: 20 }}>
+            <BarChart data={industryData} layout="vertical" margin={{ left: 0, right: 10 }}>
               <XAxis type="number" tickFormatter={formatSalary} tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11, fill: '#475569' }} />
+              <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10, fill: '#475569' }} />
               <Tooltip
                 formatter={(value) => [formatSalary(value), 'Avg Salary']}
                 contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }}

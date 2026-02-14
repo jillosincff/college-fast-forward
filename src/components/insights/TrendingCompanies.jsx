@@ -36,7 +36,7 @@ export default function TrendingCompanies({ jobRequests = [], helpRequests = [] 
 
   return (
     <Card className="border-2 border-slate-100 shadow-lg rounded-2xl overflow-hidden">
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5">
           <TrendingUp className="w-5 h-5 text-orange-500" />
           🔥 What Gators Are Asking About

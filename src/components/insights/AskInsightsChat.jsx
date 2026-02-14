@@ -68,7 +68,7 @@ Question: ${question}`;
                 <button
                   key={i}
                   onClick={() => askQuestion(q)}
-                  className="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition-colors text-left"
+                  className="text-xs sm:text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition-colors text-left min-h-[40px]"
                 >
                   {q}
                 </button>
@@ -119,19 +119,19 @@ Question: ${question}`;
           </div>
         )}
 
-        <div className="border-t p-4 flex gap-2">
+        <div className="border-t p-3 sm:p-4 flex gap-2">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask about salaries, companies, interviews..."
+            placeholder="Ask about salaries, companies..."
             onKeyDown={(e) => e.key === 'Enter' && askQuestion()}
             disabled={loading}
-            className="flex-1"
+            className="flex-1 min-w-0"
           />
           <Button
             onClick={() => askQuestion()}
             disabled={!query.trim() || loading}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 flex-shrink-0 w-11 sm:w-auto px-3"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>

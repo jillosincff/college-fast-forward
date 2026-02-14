@@ -53,13 +53,13 @@ export default function HelpTopicsChart({ helpRequests = [] }) {
           📊 What Students Need Help With
         </h2>
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={data} layout="vertical" margin={{ left: 20, right: 20 }}>
+          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 10 }}>
             <XAxis type="number" hide />
             <YAxis
               type="category"
               dataKey="name"
-              width={140}
-              tick={{ fontSize: 12, fill: '#475569' }}
+              width={110}
+              tick={{ fontSize: 11, fill: '#475569' }}
             />
             <Tooltip
               formatter={(value) => [`${value} questions`, 'Count']}

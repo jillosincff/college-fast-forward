@@ -136,32 +136,32 @@ export default function InterviewInsights({ interviewQuestions = [], interviewRe
     <>
     <Card className="border-2 border-purple-100 shadow-lg rounded-2xl">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
             <Mic className="w-5 h-5 text-purple-600" />
             🎤 Interview Insights
           </h2>
           <Button size="sm" onClick={() => setShowForm(true)} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="w-4 h-4 mr-1" /> Share Experience
+            <Plus className="w-4 h-4 mr-1" /> Share
           </Button>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-5">
           <div className="bg-purple-50 rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-purple-700">{visible.length}</p>
+            <p className="text-lg sm:text-xl font-bold text-purple-700">{visible.length}</p>
             <p className="text-xs text-purple-600">Questions</p>
           </div>
           <div className="bg-purple-50 rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-purple-700">{topCompanies.length}</p>
+            <p className="text-lg sm:text-xl font-bold text-purple-700">{topCompanies.length}</p>
             <p className="text-xs text-purple-600">Companies</p>
           </div>
           <div className="bg-purple-50 rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-purple-700">{Object.keys(byType).length}</p>
+            <p className="text-lg sm:text-xl font-bold text-purple-700">{Object.keys(byType).length}</p>
             <p className="text-xs text-purple-600">Question Types</p>
           </div>
           <div className="bg-purple-50 rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-purple-700">
+            <p className="text-lg sm:text-xl font-bold text-purple-700">
               {visible.reduce((s, q) => s + (q.confirmation_count || 0), 0)}
             </p>
             <p className="text-xs text-purple-600">Confirmations</p>

@@ -14,17 +14,17 @@ export default function InsightsHero({ totalMembers, totalQuestions, totalSalary
         <p className="text-lg md:text-xl text-white/80 max-w-2xl mb-8">
           Real-time intelligence from the Gator network — powered by data from students, parents, and alumni.
         </p>
-        <div className="grid grid-cols-3 gap-4 max-w-lg">
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-            <p className="text-2xl md:text-3xl font-bold text-white">{totalMembers || '900+'}</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-lg">
+          <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{totalMembers || '900+'}</p>
             <p className="text-xs text-white/60 mt-1">Members</p>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-            <p className="text-2xl md:text-3xl font-bold text-white">{totalQuestions || 0}</p>
+          <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{totalQuestions || 0}</p>
             <p className="text-xs text-white/60 mt-1">Questions</p>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-            <p className="text-2xl md:text-3xl font-bold text-white">{totalSalaryReports || 0}</p>
+          <div className="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{totalSalaryReports || 0}</p>
             <p className="text-xs text-white/60 mt-1">Salary Reports</p>
           </div>
         </div>

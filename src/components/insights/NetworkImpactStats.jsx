@@ -25,16 +25,16 @@ export default function NetworkImpactStats({
         <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5">
           📊 Gator Network Impact
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {stats.map((stat, i) => {
             const Icon = stat.icon;
             return (
-              <div key={i} className="bg-slate-50 rounded-xl p-4 flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
-                  <Icon className="w-5 h-5" />
+              <div key={i} className="bg-slate-50 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 text-center sm:text-left">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stat.color}`}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-slate-800">{stat.value}</p>
+                  <p className="text-lg sm:text-xl font-bold text-slate-800">{stat.value}</p>
                   <p className="text-xs text-slate-500">{stat.label}</p>
                 </div>
               </div>
