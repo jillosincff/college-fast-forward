@@ -126,7 +126,7 @@ export default function QuestionCard({ question, showMatchIndicator = true, isOw
         </div>
 
         {/* CTA with karma badge */}
-        <div className="flex-shrink-0 flex flex-col items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
+        <div className="flex-shrink-0 flex flex-col items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition">
           <button 
             className="text-white font-semibold px-4 py-2 rounded-xl text-sm shadow-lg"
             style={{ backgroundColor: '#0021A5', boxShadow: '0 8px 16px rgba(0, 33, 165, 0.25)' }}
@@ -138,7 +138,7 @@ export default function QuestionCard({ question, showMatchIndicator = true, isOw
             Answer +15 ✨
           </button>
           {(question.view_count > 0 || question.views_count > 0) && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 hidden sm:block">
               {question.view_count || question.views_count} views
             </span>
           )}

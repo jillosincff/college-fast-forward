@@ -204,14 +204,14 @@ export default function ParentDashboard() {
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
                 
                 {/* Family Karma */}
                 <TooltipProvider delayDuration={0}>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-center border border-white/20 hover:bg-white/15 transition">
-                  <div className="relative inline-block mb-2">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border border-white/20 hover:bg-white/15 transition">
+                  <div className="relative inline-block mb-1 sm:mb-2">
                     <div className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse" style={{ backgroundColor: '#FA4616' }} />
-                    <span className="relative text-3xl sm:text-4xl md:text-5xl font-black text-white">{karmaPoints}</span>
+                    <span className="relative text-2xl sm:text-4xl md:text-5xl font-black text-white">{karmaPoints}</span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
@@ -230,33 +230,33 @@ export default function ParentDashboard() {
                 </TooltipProvider>
 
                 {/* Student Queue Position - Dynamic */}
-                <div className="backdrop-blur-xl rounded-3xl p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
+                <div className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
                   {hasLinkedStudent && hasActiveRequest ? (
                     <>
-                      <div className="text-5xl font-black text-white mb-2">#{studentPosition}</div>
-                      <p className="text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}'s Position</p>
-                      <p className="text-xs mt-2" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>in the help queue</p>
+                      <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">#{studentPosition}</div>
+                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}'s Position</p>
+                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>in the help queue</p>
                     </>
                   ) : hasLinkedStudent ? (
                     <>
-                      <div className="text-4xl mb-2">💤</div>
-                      <p className="text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}</p>
-                      <p className="text-xs mt-2" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>No active request yet</p>
+                      <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">💤</div>
+                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}</p>
+                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>No active request yet</p>
                     </>
                   ) : (
                     <>
-                      <div className="text-4xl mb-2">🔗</div>
-                      <p className="text-sm font-medium" style={{ color: '#FFA07A' }}>Link Student</p>
-                      <p className="text-xs mt-2" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>to activate boosts</p>
+                      <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🔗</div>
+                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>Link Student</p>
+                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>to activate boosts</p>
                     </>
                   )}
                 </div>
 
                 {/* Students Helped */}
-                <div className="rounded-3xl p-6 text-center border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                  <div className="text-5xl font-black text-white mb-2">{data.studentsHelped}</div>
-                  <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Students Helped</p>
-                  <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>all time</p>
+                <div className="col-span-2 sm:col-span-1 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                  <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">{data.studentsHelped}</div>
+                  <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Students Helped</p>
+                  <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255,255,255,0.5)' }}>all time</p>
                 </div>
                 
               </div>
@@ -355,22 +355,22 @@ export default function ParentDashboard() {
           {/* ========== STUDENTS NEED HELP - Personalized (PRIMARY ACTION) ========== */}
           <section className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
             
-            <div className="px-6 py-5 border-b" style={{ background: 'linear-gradient(90deg, #FFF5F2 0%, #FEF3E7 100%)', borderColor: 'rgba(250, 70, 22, 0.2)' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%)', boxShadow: '0 8px 16px rgba(250, 70, 22, 0.3)' }}>
-                    <span className="text-white text-xl">🙋</span>
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b" style={{ background: 'linear-gradient(90deg, #FFF5F2 0%, #FEF3E7 100%)', borderColor: 'rgba(250, 70, 22, 0.2)' }}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg, #FA4616 0%, #FF6B3D 100%)', boxShadow: '0 8px 16px rgba(250, 70, 22, 0.3)' }}>
+                    <span className="text-white text-lg sm:text-xl">🙋</span>
                   </div>
-                  <div>
-                    <h2 className="font-bold text-xl text-gray-900">
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-base sm:text-xl text-gray-900 truncate">
                       Students Need {expertiseText}
                     </h2>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-xs sm:text-sm truncate">
                       {questionSubtext}
                     </p>
                   </div>
                 </div>
-                <div className="hidden md:block font-semibold text-sm px-4 py-2 rounded-full" style={{ backgroundColor: 'rgba(0, 33, 165, 0.1)', color: '#0021A5' }}>
+                <div className="hidden md:block font-semibold text-sm px-4 py-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'rgba(0, 33, 165, 0.1)', color: '#0021A5' }}>
                   +15 karma per answer
                 </div>
               </div>
@@ -400,10 +400,10 @@ export default function ParentDashboard() {
               )}
             </div>
 
-            <div className="px-6 py-5 bg-gray-50 border-t text-center">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-gray-50 border-t text-center">
               <button 
                 onClick={() => navigate('Connections')}
-                className="text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg transition hover:scale-105"
+                className="w-full sm:w-auto text-white font-bold px-6 sm:px-8 py-3 rounded-xl text-base sm:text-lg shadow-lg transition hover:scale-105"
                 style={{ backgroundColor: '#0021A5', boxShadow: '0 8px 20px rgba(0, 33, 165, 0.3)' }}
               >
                 See All {data.allQuestionsCount} Questions{data.unansweredCount > 0 ? ` — ${data.unansweredCount} still need answers` : ''}
