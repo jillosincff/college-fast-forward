@@ -834,6 +834,7 @@ export default function QuestionDetailPage() {
         .back-btn {
           color: #6B7280;
           font-weight: 600;
+          min-height: 44px;
         }
 
         .back-btn:hover {
@@ -1134,7 +1135,7 @@ export default function QuestionDetailPage() {
 
           .sort-select {
             min-height: 40px;
-            font-size: 14px;
+            font-size: 16px; /* Prevent iOS zoom */
           }
 
           .no-answers {

@@ -465,6 +465,11 @@ export default function AnswerCard({
         }
 
         @media (max-width: 640px) {
+          .answer-card {
+            padding: 14px;
+            margin-bottom: 12px;
+          }
+
           .answer-layout {
             flex-direction: column;
           }
@@ -474,6 +479,29 @@ export default function AnswerCard({
             gap: 8px;
           }
 
+          .author-section {
+            gap: 10px;
+            margin-bottom: 12px;
+          }
+
+          .author-avatar {
+            width: 36px;
+            height: 36px;
+          }
+
+          .author-name {
+            font-size: 14px;
+          }
+
+          .author-meta {
+            font-size: 13px;
+          }
+
+          .answer-text {
+            font-size: 15px;
+            line-height: 1.6;
+          }
+
           .answer-actions {
             flex-direction: column;
           }
@@ -481,6 +509,7 @@ export default function AnswerCard({
           .action-btn {
             width: 100%;
             justify-content: center;
+            min-height: 44px;
           }
         }
       `}</style>
