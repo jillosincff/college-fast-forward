@@ -579,41 +579,41 @@ const AdminDashboard = () => {
 
         {(analytics || loading) && (
           <Tabs defaultValue="growth" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-8 gap-2 h-auto p-2 bg-white border border-slate-200">
+          <TabsList className="flex w-full gap-2 h-auto p-2 bg-white border border-slate-200 overflow-x-auto scrollbar-hide flex-nowrap">
             <TabsTrigger 
               value="growth" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               User Growth
             </TabsTrigger>
             <TabsTrigger 
               value="features" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               Feature Usage
             </TabsTrigger>
             <TabsTrigger 
               value="performance" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               Performance
             </TabsTrigger>
             <TabsTrigger 
               value="database" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               Database
             </TabsTrigger>
             <TabsTrigger 
               value="signup" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <AlertTriangle className="w-4 h-4 mr-1" />
               Sign-up Issues
             </TabsTrigger>
             <TabsTrigger 
               value="invites" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               Invite Requests
               {inviteRequests.length > 0 && (
@@ -624,35 +624,35 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="community" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Share2 className="w-4 h-4 mr-1" />
               Community Invites
             </TabsTrigger>
             <TabsTrigger 
               value="manual" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <UserPlus className="w-4 h-4 mr-1" />
               Manual Invite
             </TabsTrigger>
             <TabsTrigger 
               value="backfill" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Database className="w-4 h-4 mr-1" />
               Backfill Requests
             </TabsTrigger>
             <TabsTrigger 
               value="export" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Download className="w-4 h-4 mr-1" />
               Export Users
             </TabsTrigger>
             <TabsTrigger 
               value="founding-circle" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white relative"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white relative whitespace-nowrap flex-shrink-0"
             >
               🔥 Founding Circle
               {foundingCircleCount > 0 && (
@@ -663,47 +663,47 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="referrals" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               🎁 Referrals
             </TabsTrigger>
             <TabsTrigger 
               value="persona-audit" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               🔍 Persona Audit
             </TabsTrigger>
             <TabsTrigger 
               value="opportunities" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-green-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Briefcase className="w-4 h-4 mr-1" />
               Opportunities
             </TabsTrigger>
             <TabsTrigger 
               value="engagement" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <BarChart3 className="w-4 h-4 mr-1" />
               Engagement
             </TabsTrigger>
             <TabsTrigger 
               value="reengagement" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Mail className="w-4 h-4 mr-1" />
               Re-Engagement
             </TabsTrigger>
             <TabsTrigger 
               value="email-test" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Mail className="w-4 h-4 mr-1" />
               Email Test Panel
             </TabsTrigger>
             <TabsTrigger 
               value="ambassadors" 
-              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
             >
               <Users className="w-4 h-4 mr-1" />
               Ambassadors
