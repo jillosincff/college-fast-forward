@@ -11,7 +11,7 @@ const SORTS = [
 
 export default function SortTabs({ activeSort, onSortChange }) {
   return (
-    <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto scrollbar-hide">
+    <div className="flex gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-1">
       {SORTS.map(sort => {
         const Icon = sort.icon;
         const isActive = activeSort === sort.id;
@@ -19,7 +19,7 @@ export default function SortTabs({ activeSort, onSortChange }) {
           <button
             key={sort.id}
             onClick={() => onSortChange(sort.id)}
-            className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
               isActive
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'

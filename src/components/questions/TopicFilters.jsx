@@ -67,14 +67,14 @@ export default function TopicFilters({ activeTopic, onTopicChange }) {
   const visibleTopics = showAll ? TOPICS : TOPICS.slice(0, 7);
   
   return (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
       {visibleTopics.map(topic => {
         const isActive = activeTopic === topic.id || (topic.id === 'all' && !activeTopic);
         return (
           <button
             key={topic.id}
             onClick={() => onTopicChange(topic.id === 'all' ? null : topic.id)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all flex-shrink-0 ${
               isActive
                 ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 shadow-sm'
                 : 'bg-slate-100 text-slate-600 border-2 border-transparent hover:bg-slate-200'

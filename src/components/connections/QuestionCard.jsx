@@ -801,7 +801,8 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
 
         .question-stats {
           display: flex;
-          gap: 16px;
+          flex-wrap: wrap;
+          gap: 12px;
           align-items: center;
           margin: 14px 0;
           font-size: 13px;
