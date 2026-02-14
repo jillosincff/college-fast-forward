@@ -308,7 +308,7 @@ export default function LandingPage() {
                 <strong>Same resume. Same student. 50x better odds.</strong>
               </p>
               <p className="text-slate-600">
-                The only difference? Someone made an introduction.
+                The only difference? Someone cared enough to make an introduction.
               </p>
               <p className="text-[#0021A5] font-semibold mt-4 text-lg">
                 That's what this network does. We turn your student from a stranger into a referral.
