@@ -75,7 +75,7 @@ export default function LandingPage() {
     <>
       <SocialMetaTags 
         title="College Fast Forward - The Private Career Network for UF Families"
-        description="The private career network only UF families can access. Your student's unfair advantage in the job market. $9/month."
+        description="The private career network only UF families can access. Warm introductions, not cold applications."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
@@ -127,11 +127,8 @@ export default function LandingPage() {
               transition={{ delay: 0.15 }}
               className="mb-8 sm:mb-10 max-w-3xl mx-auto px-4"
             >
-              <p className="text-xl sm:text-2xl md:text-3xl text-white font-semibold mb-2">
+              <p className="text-xl sm:text-2xl md:text-3xl text-white font-semibold">
                 Warm introductions, not cold applications.
-              </p>
-              <p className="text-lg sm:text-xl md:text-2xl text-white/80">
-                Your student's unfair advantage in the job market.
               </p>
             </motion.div>
 
@@ -141,29 +138,8 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
             >
-              This isn't LinkedIn. This isn't a job board. This is <strong className="text-white">{stats.total_families} {SCHOOL_NAME} founding families</strong> who open doors for each other's students — with warm introductions, career guidance, and real connections to hiring managers, founders, and professionals who want to help fellow Gators.
+              <strong className="text-white">{stats.total_families} {SCHOOL_NAME} families</strong> opening doors for each other's students — with real connections to hiring managers, VPs, and professionals across 200+ industries.
             </motion.p>
-
-            {/* Trust bullets */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-10 text-white/90"
-            >
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>{stats.total_families} founding families already inside</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Warm intros to professionals across 200+ industries</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-400" />
-                <span>Direct access to VPs, Directors & hiring managers</span>
-              </div>
-            </motion.div>
 
             {/* CTA Box - FREE Founding */}
             <motion.div 
