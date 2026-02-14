@@ -267,6 +267,13 @@ input, select, textarea {
   }
 }
 
+/* Scroll focused inputs into view above virtual keyboard */
+@media (max-width: 768px) {
+  input:focus, textarea:focus, select:focus {
+    scroll-margin-bottom: 200px;
+  }
+}
+
 /* Prevent any container from causing horizontal overflow on mobile */
 @media (max-width: 768px) {
   main, .page-container, .content-wrapper {
