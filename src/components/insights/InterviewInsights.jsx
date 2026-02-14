@@ -104,14 +104,14 @@ export default function InterviewInsights({ interviewQuestions = [], interviewRe
     return (
       <>
         <Card className="border-2 border-purple-100 shadow-lg rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Mic className="w-5 h-5 text-purple-600" />
                 🎤 Interview Insights
               </h2>
               <Button size="sm" onClick={() => setShowForm(true)} className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="w-4 h-4 mr-1" /> Share Experience
+                <Plus className="w-4 h-4 mr-1" /> Share
               </Button>
             </div>
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center">
