@@ -792,7 +792,7 @@ export default function LandingPage() {
                 How It Works
               </h2>
               <p className="text-slate-600 text-lg">
-                No algorithms. No job boards. Just real people helping real students.
+                No algorithms. No job boards. Just people who care.
               </p>
             </motion.div>
 
@@ -806,18 +806,18 @@ export default function LandingPage() {
               {[
                 {
                   num: '1',
-                  title: 'Join the Network',
-                  desc: 'Sign up in 2 minutes. Add your job info. Connect your student.'
+                  title: 'Join & Connect Your Student',
+                  desc: 'Sign up in 2 minutes. Share your professional background. Link your student. Take the pledge.'
                 },
                 {
                   num: '2',
-                  title: 'Your Student Gets Matched',
-                  desc: 'We match them with parents & alumni in their target field. They can message directly.'
+                  title: 'Your Student Gets Matched Instantly',
+                  desc: "We connect them with parents and alumni whose experience fits exactly what they need. They message directly. No cold outreach."
                 },
                 {
                   num: '3',
-                  title: 'You Help Others, They Help You',
-                  desc: 'Answer questions. Share expertise. The more you give, the more your student stands out.'
+                  title: 'You Help Theirs, They Help Yours',
+                  desc: `Answer a student's question. Make an introduction. Every action earns Karma that makes YOUR student more visible to the ${stats.total_families} parents who pledged to help.`
                 }
               ].map((step, i) => (
                 <motion.div key={i} variants={fadeInUp} className="text-center">
@@ -864,7 +864,17 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
             >
-              Here's the truth: If everyone had access to this, it wouldn't work. The power of this network is that it's <strong className="text-white">exclusive</strong>. It's {SCHOOL_NAME} families helping {SCHOOL_NAME} students. Not the whole internet.
+              If everyone had access, it wouldn't work. The power of this network is that every person in it <strong className="text-white">chose to be here</strong>. They're not browsing. They're not passive. They pledged to show up for each other's students.
+            </motion.p>
+
+            <motion.p 
+              variants={fadeInUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
+            >
+              That's why we keep it exclusive. {SCHOOL_NAME} families only. Capped membership. <strong className="text-white">Real people who actually care.</strong>
             </motion.p>
 
             <motion.div 
