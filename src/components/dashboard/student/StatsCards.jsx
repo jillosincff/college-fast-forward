@@ -46,7 +46,7 @@ export default function StatsCards({ stats, state }) {
   const rightCard = getRightCard();
 
   return (
-    <div className="grid grid-cols-4 gap-2 md:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4">
       {/* Student Karma */}
       <div className="bg-white/10 backdrop-blur rounded-2xl p-3 md:p-4 text-center border border-white/20">
         <div className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-1">

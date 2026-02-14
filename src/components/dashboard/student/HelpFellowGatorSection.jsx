@@ -233,17 +233,17 @@ export default function HelpFellowGatorSection({ user }) {
   return (
     <Card className="bg-white border-2 border-blue-100 shadow-lg rounded-xl overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
               <MessageSquare className="w-5 h-5 text-blue-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-bold text-slate-900">Help a Fellow Gator</h3>
               <p className="text-xs text-slate-500">Students in your field need your perspective</p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full flex-shrink-0">
             +5 karma
           </span>
         </div>

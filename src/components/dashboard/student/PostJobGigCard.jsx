@@ -8,14 +8,14 @@ export default function PostJobGigCard() {
   return (
     <Card className="bg-white border-2 border-blue-100 shadow-lg rounded-xl overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
               <Briefcase className="w-5 h-5 text-blue-600" />
             </div>
             <h3 className="font-bold text-slate-900">Know About a Job or Gig?</h3>
           </div>
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full flex-shrink-0">
             +10 karma
           </span>
         </div>

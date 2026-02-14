@@ -439,7 +439,7 @@ export default function Dashboard() {
             <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
           </summary>
           <div className="p-5 pt-0 border-t border-slate-100">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <Button onClick={() => navigate('MyMessages')} variant="outline" className="justify-start h-auto py-4">
                 <MessageSquare className="w-5 h-5 mr-2" /> My Messages
               </Button>
