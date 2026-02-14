@@ -10,6 +10,7 @@ import ParentOnboardingStep3 from '@/components/onboarding/parent/ParentOnboardi
 import ParentOnboardingSuccess from '@/components/onboarding/parent/ParentOnboardingSuccess';
 import Testimonial from '@/components/onboarding/parent/Testimonial';
 import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
+import CFFPledgePage from '@/components/onboarding/parent/CFFPledgePage';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -45,11 +46,10 @@ export default function ParentOnboarding() {
     setStep(4);
   };
 
-  const handleStep3Complete = async (result) => {
+  const handleStep4HelpComplete = async (result) => {
+    // Save profile data but DON'T mark onboarding complete yet — pledge is next
     setLoading(true);
-    
     try {
-      // Save all profile data
       const updateData = {
         current_position: formData.jobTitle?.trim() || undefined,
         current_company: formData.company?.trim() || undefined,
@@ -61,22 +61,35 @@ export default function ParentOnboarding() {
         ways_to_help: formData.waysToHelp,
         expertise_areas: formData.waysToHelp,
         help_types: formData.waysToHelp,
-        onboarding_completed: true,
-        onboarding_completed_at: new Date().toISOString(),
         onboarding_question_answered: result.answeredQuestion || false,
         onboarding_flow_type: result.flowType || 'unknown',
         onboarding_referral_submitted: result.referredSomeone || false,
         visible_in_directory: true
       };
-
-      // Clean undefined values
       Object.keys(updateData).forEach(key => {
         if (updateData[key] === undefined) delete updateData[key];
       });
-
       await base44.auth.updateMe(updateData);
+      if (refreshUser) await refreshUser();
+      setCompletionResult(result);
+      setStep(5); // Go to pledge
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // Award karma for completing onboarding (+50 pts)
+  const handlePledgeComplete = async () => {
+    setLoading(true);
+    try {
+      await base44.auth.updateMe({
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
+      });
+
+      // Award karma for completing onboarding
       try {
         await base44.functions.invoke('awardKarma', {
           parentUserId: user.id,
@@ -87,21 +100,19 @@ export default function ParentOnboarding() {
           referenceId: user.id,
           description: 'Completed parent onboarding'
         });
-        console.log('✅ Onboarding karma awarded');
       } catch (karmaErr) {
         console.log('Onboarding karma failed (non-critical):', karmaErr.message);
       }
 
-      // Clear any pending invite data
+      // Clear pending invite data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 
-      // Create ActivationPrompt for tracking first meaningful action
+      // Create ActivationPrompt
       try {
-        // Determine source from UTM params stored in sessionStorage
         const utmSource = sessionStorage.getItem('utm_source');
         const utmCampaign = sessionStorage.getItem('utm_campaign');
         let source = 'organic';
@@ -110,46 +121,49 @@ export default function ParentOnboarding() {
         } else if (utmSource) {
           source = utmSource;
         }
-
         await base44.entities.ActivationPrompt.create({
           user_id: user.id,
           user_type: 'parent',
           user_email: user.email,
           prompt_stage: 'welcome',
-          status: result.answeredQuestion ? 'acted' : 'pending',
-          action_taken: !!result.answeredQuestion,
-          action_type: result.answeredQuestion ? 'answered_question' : null,
-          acted_at: result.answeredQuestion ? new Date().toISOString() : null,
+          status: completionResult?.answeredQuestion ? 'acted' : 'pending',
+          action_taken: !!completionResult?.answeredQuestion,
+          action_type: completionResult?.answeredQuestion ? 'answered_question' : null,
+          acted_at: completionResult?.answeredQuestion ? new Date().toISOString() : null,
           source,
         });
-        console.log('✅ ActivationPrompt created for parent');
       } catch (apErr) {
         console.log('ActivationPrompt creation failed (non-critical):', apErr.message);
       }
 
       if (refreshUser) await refreshUser();
-      
-      setCompletionResult(result);
       setOnboardingComplete(true);
-      setShowPushPrompt(true);
-      
+      navigate('ParentDashboard');
     } catch (error) {
-      console.error('Failed to save onboarding:', error);
+      console.error('Failed to complete onboarding:', error);
       alert('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Legacy handler replaced by handleStep4HelpComplete + handlePledgeComplete
+  const handleStep3Complete = async (result) => {
+    handleStep4HelpComplete(result);
+  };
+
   const goToDashboard = () => {
     navigate('ParentDashboard');
   };
 
+  // Step 5: CFF Pledge (full screen, no nav, no progress bar)
+  if (step === 5) {
+    return <CFFPledgePage user={user} onComplete={handlePledgeComplete} />;
+  }
+
   // Show push notification prompt after success screen
   if (showPushPrompt && onboardingComplete) {
-    // If user answered a question, go straight to dashboard (they already saw success in Step 3)
     if (completionResult?.answeredQuestion) {
-      // Use useEffect-style pattern to navigate after render
       setTimeout(() => navigate('ParentDashboard'), 0);
       return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -181,7 +195,8 @@ export default function ParentOnboarding() {
     );
   }
 
-  // Progress bar — now 4 steps (1=About, 2=Background, 3=Link Student, 4=Help)
+  // Progress bar — now 4 visible steps (pledge is separate full-screen)
+  const totalVisibleSteps = 4;
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-2 mb-8">
       {[1, 2, 3, 4].map((s) => (
@@ -192,7 +207,7 @@ export default function ParentOnboarding() {
           `}>
             {step > s ? <Check className="w-4 h-4" /> : s}
           </div>
-          {s < 4 && (
+          {s < totalVisibleSteps && (
             <div className={`w-8 h-1 mx-1 rounded ${step > s ? 'bg-green-500' : 'bg-slate-200'}`} />
           )}
         </div>
