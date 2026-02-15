@@ -318,36 +318,7 @@ export default function ParentOnboarding() {
       );
     }
     
-    if (step === 4) {
-      return (
-        <div className="space-y-5">
-          <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 4</p>
-            <h1 className="text-3xl font-bold text-white">Help your first student</h1>
-          </div>
-          
-          <p className="text-xl text-white/90">
-            Your experience could be exactly what a student needs right now.
-          </p>
-          
-          <div className="space-y-3 pt-4">
-            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
-              <span className="text-2xl">🚀</span>
-              <p className="text-white">One answer from you = months of cold applying for them</p>
-            </div>
-            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
-              <span className="text-2xl">⏱️</span>
-              <p className="text-white">Most answers take just 2-3 minutes</p>
-            </div>
-          </div>
-          
-          {/* Social proof testimonial */}
-          <div className="border-t border-blue-700/50 pt-6 mt-6">
-            <Testimonial />
-          </div>
-        </div>
-      );
-    }
+
   };
 
   return (
