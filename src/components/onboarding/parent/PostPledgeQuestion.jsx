@@ -257,14 +257,15 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
   };
 
   const handleSkip = async () => {
-    // Store skipped question ID for dashboard banner
+    // Store skipped question ID + source for dashboard banner
     if (question?.id) {
       localStorage.setItem('skipped_pledge_question_id', question.id);
+      localStorage.setItem('skipped_pledge_question_source', question._source || 'job');
     }
     try {
       base44.analytics.track({
         eventName: 'post_pledge_question_skipped',
-        properties: { question_id: question?.id },
+        properties: { question_id: question?.id, question_source: question._source },
       });
     } catch {}
     await markShown(false);
