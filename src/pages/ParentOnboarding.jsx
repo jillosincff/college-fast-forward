@@ -392,15 +392,6 @@ export default function ParentOnboarding() {
                   onSkip={handleLinkStudentSkip}
                 />
               )}
-
-              {step === 4 && (
-                <ParentOnboardingStep3
-                  formData={formData}
-                  onComplete={handleStep3Complete}
-                  onBack={() => setStep(3)}
-                  user={user}
-                />
-              )}
             </>
           )}
 
