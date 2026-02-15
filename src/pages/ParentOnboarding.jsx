@@ -53,15 +53,16 @@ export default function ParentOnboarding() {
     if (result?.studentEmail) {
       setLinkedStudentEmail(result.studentEmail);
     }
-    setStep(4);
+    // After linking student, save profile and go to pledge (step 4)
+    saveProfileAndGoToPledge();
   };
 
   const handleLinkStudentSkip = () => {
-    setStep(4);
+    // After skipping link, save profile and go to pledge (step 4)
+    saveProfileAndGoToPledge();
   };
 
-  const handleStep4HelpComplete = async (result) => {
-    // Save profile data but DON'T mark onboarding complete yet — pledge is next
+  const saveProfileAndGoToPledge = async () => {
     setLoading(true);
     try {
       const updateData = {
@@ -75,9 +76,6 @@ export default function ParentOnboarding() {
         ways_to_help: formData.waysToHelp,
         expertise_areas: formData.waysToHelp,
         help_types: formData.waysToHelp,
-        onboarding_question_answered: result.answeredQuestion || false,
-        onboarding_flow_type: result.flowType || 'unknown',
-        onboarding_referral_submitted: result.referredSomeone || false,
         visible_in_directory: true
       };
       Object.keys(updateData).forEach(key => {
@@ -85,8 +83,7 @@ export default function ParentOnboarding() {
       });
       await base44.auth.updateMe(updateData);
       if (refreshUser) await refreshUser();
-      setCompletionResult(result);
-      setStep(5); // Go to pledge
+      setStep(4); // Go to pledge
     } catch (error) {
       console.error('Failed to save profile:', error);
       alert('Something went wrong. Please try again.');
@@ -96,8 +93,8 @@ export default function ParentOnboarding() {
   };
 
   const handlePledgeComplete = async () => {
-    // After pledge, go to post-pledge question screen (step 6)
-    setStep(6);
+    // After pledge, go to post-pledge question screen (step 5)
+    setStep(5);
   };
 
   const handlePostPledgeComplete = async (result) => {
