@@ -42,6 +42,7 @@ export default function SkippedPledgeQuestionBanner({ user }) {
     setDismissed(true);
     sessionStorage.setItem('skipped_pledge_banner_dismissed', 'true');
     localStorage.removeItem('skipped_pledge_question_id');
+    localStorage.removeItem('skipped_pledge_question_source');
   };
 
   const handleAnswer = () => {
