@@ -292,6 +292,10 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
   if (!question) return null;
 
   const studentName = parseFirstName(question.poster_name);
+  const isLinkedStudent = (user?.student_emails || []).some(email => {
+    const posterEmail = question.poster_email || question.student_email || question.created_by;
+    return posterEmail && email === posterEmail;
+  });
   const matchedIndustry = userIndustries.find(i => {
     const qInd = question.target_industries?.length > 0
       ? question.target_industries
