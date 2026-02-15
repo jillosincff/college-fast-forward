@@ -147,12 +147,16 @@ export default function ParentDashboard() {
     }
   };
 
-  // Redirect parents who haven't taken the pledge (and have completed onboarding)
+  // Redirect parents who haven't taken the pledge or first question screen
   useEffect(() => {
-    if (user && user.persona === 'parent' && user.onboarding_completed && user.pledge_taken === false) {
-      navigate('ParentOnboarding');
+    if (user && user.persona === 'parent' && user.onboarding_completed) {
+      if (user.pledge_taken === false) {
+        navigate('ParentOnboarding');
+      } else if (user.pledge_taken && user.first_question_shown === false) {
+        navigate('ParentOnboarding');
+      }
     }
-  }, [user?.pledge_taken, user?.onboarding_completed, user?.persona]);
+  }, [user?.pledge_taken, user?.first_question_shown, user?.onboarding_completed, user?.persona]);
 
   if (!user || loading) {
     return (
