@@ -11,12 +11,18 @@ import ParentOnboardingSuccess from '@/components/onboarding/parent/ParentOnboar
 import Testimonial from '@/components/onboarding/parent/Testimonial';
 import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
 import CFFPledgePage from '@/components/onboarding/parent/CFFPledgePage';
+import PostPledgeQuestion from '@/components/onboarding/parent/PostPledgeQuestion';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
   // If user already completed profile but not pledge, jump straight to pledge
-  const initialStep = (user?.onboarding_completed && user?.pledge_taken === false) ? 5 : 1;
-  const [step, setStep] = useState(initialStep);
+  // If pledge taken but first question not shown, jump to post-pledge question
+  const getInitialStep = () => {
+    if (user?.onboarding_completed && user?.pledge_taken && user?.first_question_shown === false) return 6;
+    if (user?.onboarding_completed && user?.pledge_taken === false) return 5;
+    return 1;
+  };
+  const [step, setStep] = useState(getInitialStep);
   const [loading, setLoading] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
@@ -84,12 +90,24 @@ export default function ParentOnboarding() {
   };
 
   const handlePledgeComplete = async () => {
+    // After pledge, go to post-pledge question screen (step 6)
+    setStep(6);
+  };
+
+  const handlePostPledgeComplete = async (result) => {
     setLoading(true);
     try {
-      await base44.auth.updateMe({
+      const updateData = {
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
-      });
+      };
+
+      // If they answered, mark it
+      if (result?.answered) {
+        updateData.onboarding_question_answered = true;
+      }
+
+      await base44.auth.updateMe(updateData);
 
       // Award karma for completing onboarding
       try {
@@ -128,10 +146,10 @@ export default function ParentOnboarding() {
           user_type: 'parent',
           user_email: user.email,
           prompt_stage: 'welcome',
-          status: completionResult?.answeredQuestion ? 'acted' : 'pending',
-          action_taken: !!completionResult?.answeredQuestion,
-          action_type: completionResult?.answeredQuestion ? 'answered_question' : null,
-          acted_at: completionResult?.answeredQuestion ? new Date().toISOString() : null,
+          status: result?.answered ? 'acted' : 'pending',
+          action_taken: !!result?.answered,
+          action_type: result?.answered ? 'answered_question' : null,
+          acted_at: result?.answered ? new Date().toISOString() : null,
           source,
         });
       } catch (apErr) {
@@ -157,6 +175,11 @@ export default function ParentOnboarding() {
   const goToDashboard = () => {
     navigate('ParentDashboard');
   };
+
+  // Step 6: Post-Pledge First Question (full screen)
+  if (step === 6) {
+    return <PostPledgeQuestion user={user} formData={formData} onComplete={handlePostPledgeComplete} />;
+  }
 
   // Step 5: CFF Pledge (full screen, no nav, no progress bar)
   if (step === 5) {
