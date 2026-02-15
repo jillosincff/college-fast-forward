@@ -150,20 +150,51 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
 
     setSubmitting(true);
     try {
-      // Create the answer
-      await base44.entities.JobAnswer.create({
-        job_request_id: question.id,
-        responder_id: user.id,
-        responder_email: user.email,
-        responder_name: user.full_name,
-        responder_title: user.job_title || user.current_position || formData?.jobTitle || '',
-        responder_company: user.company || user.current_company || formData?.company || '',
-        responder_type: 'parent',
-        message: answerText.trim(),
-        is_read: false,
-        is_helpful: false,
-        upvote_count: 0,
-      });
+      const isHelpRequest = question._source === 'help';
+
+      if (isHelpRequest) {
+        // Create Answer entity for HelpRequest
+        await base44.entities.Answer.create({
+          question_id: question.id,
+          question_type: 'HelpRequest',
+          answerer_user_id: user.id,
+          answerer_email: user.email,
+          answerer_name: user.full_name,
+          answerer_title: user.job_title || user.current_position || formData?.jobTitle || '',
+          answerer_company: user.company || user.current_company || formData?.company || '',
+          answerer_persona: 'parent',
+          answer_text: answerText.trim(),
+          upvote_count: 0,
+          is_best_answer: false,
+        });
+        // Update answer count
+        try {
+          await base44.entities.HelpRequest.update(question.id, {
+            answer_count: (question.answer_count || 0) + 1,
+          });
+        } catch {}
+      } else {
+        // Create JobAnswer for JobRequest
+        await base44.entities.JobAnswer.create({
+          job_request_id: question.id,
+          responder_id: user.id,
+          responder_email: user.email,
+          responder_name: user.full_name,
+          responder_title: user.job_title || user.current_position || formData?.jobTitle || '',
+          responder_company: user.company || user.current_company || formData?.company || '',
+          responder_type: 'parent',
+          message: answerText.trim(),
+          is_read: false,
+          is_helpful: false,
+          upvote_count: 0,
+        });
+        // Update answer count
+        try {
+          await base44.entities.JobRequest.update(question.id, {
+            answer_count: (question.answer_count || 0) + 1,
+          });
+        } catch {}
+      }
 
       // Award karma (non-critical)
       try {
