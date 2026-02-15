@@ -234,7 +234,8 @@ export default function GatorWelcome() {
         persona: intendedRole,
         roles: [intendedRole],
         onboarding_completed: false,
-        is_new_signup: true
+        is_new_signup: true,
+        ...(intendedRole === 'parent' ? { pledge_taken: false, first_question_shown: false } : {})
       };
       console.log('🔄 [GatorWelcome] Update data:', JSON.stringify(updateData));
       
