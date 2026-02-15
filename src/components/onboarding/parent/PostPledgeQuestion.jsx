@@ -233,7 +233,9 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
           eventName: 'post_pledge_question_answered',
           properties: {
             question_id: question.id,
+            question_source: question._source || 'job',
             answer_length: answerText.trim().length,
+            is_linked_student: isLinkedStudent,
           },
         });
       } catch {}
