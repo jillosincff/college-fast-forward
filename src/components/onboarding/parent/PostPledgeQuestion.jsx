@@ -375,10 +375,14 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
       >
         {/* Title */}
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 text-center">
-          You're in. And someone already needs you.
+          {isLinkedStudent
+            ? `You're in. And ${studentName} already needs you.`
+            : "You're in. And someone already needs you."}
         </h1>
         <p className="text-center text-slate-600 text-base md:text-lg leading-relaxed max-w-lg mb-8">
-          This student posted a question that matches your background. You're one of the first people who can help.
+          {isLinkedStudent
+            ? "Your student already posted a question. You're the perfect person to help."
+            : "This student posted a question that matches your background. You're one of the first people who can help."}
         </p>
 
         {/* Question Card */}
