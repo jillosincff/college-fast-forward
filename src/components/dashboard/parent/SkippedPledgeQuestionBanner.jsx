@@ -46,7 +46,8 @@ export default function SkippedPledgeQuestionBanner({ user }) {
 
   const handleAnswer = () => {
     if (question) {
-      navigate(`QuestionDetail?id=${question.id}&type=job`);
+      const type = question._source === 'help' ? 'help' : 'job';
+      navigate(`QuestionDetail?id=${question.id}&type=${type}`);
     } else {
       navigate('Connections');
     }
