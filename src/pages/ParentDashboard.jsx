@@ -150,7 +150,8 @@ export default function ParentDashboard() {
   // Redirect parents who haven't taken the pledge or first question screen
   useEffect(() => {
     if (user && user.persona === 'parent' && user.onboarding_completed) {
-      if (user.pledge_taken === false) {
+      // pledge_taken could be false (explicitly set) or undefined (never set) — both mean not pledged
+      if (!user.pledge_taken) {
         navigate('ParentOnboarding');
       } else if (user.pledge_taken && user.first_question_shown === false) {
         navigate('ParentOnboarding');
