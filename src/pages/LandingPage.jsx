@@ -109,7 +109,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-[#FA4616] font-semibold text-sm tracking-widest uppercase mb-6"
             >
-              THE PRIVATE CAREER NETWORK
+              Only {SCHOOL_NAME} Families Can Access
             </motion.p>
 
             <motion.h1 
@@ -118,27 +118,16 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight font-extrabold px-4"
             >
-              Only {SCHOOL_NAME} Families Can Access
+              Imagine having hundreds of friends<br />helping your kid land a job.
             </motion.h1>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="mb-6 sm:mb-8 max-w-3xl mx-auto px-4"
-            >
-              <p className="text-xl sm:text-2xl md:text-3xl text-white/90 leading-snug">
-                What if <strong className="text-white">{stats.total_families} parents</strong> cared about your student's career as much as you do?
-              </p>
-            </motion.div>
 
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg sm:text-xl md:text-2xl text-white font-bold mb-4 px-4"
+              transition={{ delay: 0.15 }}
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-extrabold mb-4 px-4"
             >
-              They do. They're already inside.
+              Now you do.
             </motion.p>
 
             <motion.p 
