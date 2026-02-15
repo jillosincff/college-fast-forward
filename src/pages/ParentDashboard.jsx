@@ -148,18 +148,17 @@ export default function ParentDashboard() {
   };
 
   // Redirect parents who haven't taken the pledge or first question screen
-  useEffect(() => {
-    if (user && user.persona === 'parent' && user.onboarding_completed) {
-      // pledge_taken could be false (explicitly set) or undefined (never set) — both mean not pledged
-      if (!user.pledge_taken) {
-        navigate('ParentOnboarding');
-      } else if (user.pledge_taken && user.first_question_shown === false) {
-        navigate('ParentOnboarding');
-      }
-    }
-  }, [user?.pledge_taken, user?.first_question_shown, user?.onboarding_completed, user?.persona]);
+  // CRITICAL: Check BEFORE rendering anything to prevent flash of dashboard content
+  const needsPledge = user && user.persona === 'parent' && user.onboarding_completed && !user.pledge_taken;
+  const needsFirstQuestion = user && user.persona === 'parent' && user.onboarding_completed && user.pledge_taken && user.first_question_shown === false;
 
-  if (!user || loading) {
+  useEffect(() => {
+    if (needsPledge || needsFirstQuestion) {
+      navigate('ParentOnboarding');
+    }
+  }, [needsPledge, needsFirstQuestion]);
+
+  if (!user || loading || needsPledge || needsFirstQuestion) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
