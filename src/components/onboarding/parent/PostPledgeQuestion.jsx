@@ -53,6 +53,12 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
   const firstName = user?.full_name?.includes(',')
     ? user.full_name.split(',')[1]?.trim().split(/\s+/)[0] || 'Parent'
     : user?.full_name?.trim().split(/\s+/)[0] || 'Parent';
+  
+  // Check if the matched question is from the parent's linked student
+  const isLinkedStudent = question && (user?.student_emails || []).some(email => {
+    const posterEmail = question.poster_email || question.student_email || question.created_by;
+    return posterEmail && email === posterEmail;
+  });
 
   useEffect(() => {
     loadQuestion();
