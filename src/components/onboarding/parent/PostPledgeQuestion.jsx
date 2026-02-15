@@ -60,22 +60,60 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
 
   const loadQuestion = async () => {
     try {
-      // Fetch active student questions
-      const questions = await base44.entities.JobRequest.filter(
-        { status: 'active', poster_type: 'student' },
-        '-created_date',
-        100
-      );
+      // Fetch from both JobRequest and HelpRequest for wider pool
+      const [jobQuestions, helpQuestions] = await Promise.all([
+        base44.entities.JobRequest.filter(
+          { status: 'active', poster_type: 'student' },
+          '-created_date',
+          100
+        ).catch(() => []),
+        base44.entities.HelpRequest.filter(
+          { status: 'active' },
+          '-created_date',
+          100
+        ).catch(() => []),
+      ]);
 
-      if (!questions || questions.length === 0) {
-        // No questions — skip this screen entirely
+      // Normalize HelpRequests to look like JobRequests for scoring
+      const normalizedHelp = (helpQuestions || []).map(q => ({
+        ...q,
+        _source: 'help',
+        poster_name: q.student_name || q.poster_name,
+        poster_email: q.student_email,
+        poster_first_name: q.student_name?.split(' ')[0],
+        student_major: q.student_major,
+        student_year: q.student_year,
+        target_industry: q.industry,
+        target_industries: q.industry ? [q.industry] : [],
+        title: q.description,
+        role: q.description?.slice(0, 60),
+      }));
+
+      const normalizedJob = (jobQuestions || []).map(q => ({ ...q, _source: 'job' }));
+      const allQuestions = [...normalizedJob, ...normalizedHelp];
+
+      if (allQuestions.length === 0) {
         await markShown(false);
         onComplete({ skipped: true, noQuestions: true });
         return;
       }
 
-      // Score and sort
-      const scored = questions
+      // Priority 1: Linked student's question
+      const linkedStudentEmails = user?.student_emails || [];
+      if (linkedStudentEmails.length > 0) {
+        const studentQ = allQuestions.find(q => {
+          const posterEmail = q.poster_email || q.student_email || q.created_by;
+          return posterEmail && linkedStudentEmails.includes(posterEmail);
+        });
+        if (studentQ) {
+          setQuestion(studentQ);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Priority 2: Score and sort by relevance
+      const scored = allQuestions
         .map(q => ({ ...q, _score: scoreQuestion(q, userIndustries) }))
         .sort((a, b) => b._score - a._score);
 
