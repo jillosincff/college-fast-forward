@@ -13,14 +13,23 @@ export default function SkippedPledgeQuestionBanner({ user }) {
     // Only show once per session
     if (sessionStorage.getItem('skipped_pledge_banner_dismissed')) return;
 
+    const source = localStorage.getItem('skipped_pledge_question_source') || 'job';
+
     async function load() {
       try {
-        const questions = await base44.entities.JobRequest.filter(
-          { status: 'active' },
-          '-created_date',
-          200
-        );
-        const found = questions.find(q => q.id === skippedId);
+        let found = null;
+        if (source === 'help') {
+          const questions = await base44.entities.HelpRequest.filter({ status: 'active' }, '-created_date', 200);
+          found = questions.find(q => q.id === skippedId);
+          if (found) {
+            found._source = 'help';
+            found.poster_name = found.student_name || found.poster_name;
+          }
+        } else {
+          const questions = await base44.entities.JobRequest.filter({ status: 'active' }, '-created_date', 200);
+          found = questions.find(q => q.id === skippedId);
+          if (found) found._source = 'job';
+        }
         if (found) setQuestion(found);
       } catch {
         // Silently fail
