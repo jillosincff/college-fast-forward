@@ -24,6 +24,7 @@ import ActivationWelcomeBanner from '@/components/dashboard/parent/ActivationWel
 import LiveActivityTicker from '@/components/dashboard/parent/LiveActivityTicker';
 import YouGotResponseBanner from '@/components/dashboard/parent/YouGotResponseBanner';
 import PledgeReminderBanner from '@/components/dashboard/parent/PledgeReminderBanner';
+import SkippedPledgeQuestionBanner from '@/components/dashboard/parent/SkippedPledgeQuestionBanner';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -354,6 +355,9 @@ export default function ParentDashboard() {
         {/* ========== MAIN CONTENT ========== */}
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
+          {/* ========== SKIPPED PLEDGE QUESTION BANNER ========== */}
+          <SkippedPledgeQuestionBanner user={user} />
+
           {/* ========== PLEDGE REMINDER ========== */}
           <PledgeReminderBanner user={user} />
 
