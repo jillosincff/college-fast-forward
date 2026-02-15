@@ -176,13 +176,13 @@ export default function ParentOnboarding() {
     navigate('ParentDashboard');
   };
 
-  // Step 6: Post-Pledge First Question (full screen)
-  if (step === 6) {
+  // Step 5: Post-Pledge First Question (full screen)
+  if (step === 5) {
     return <PostPledgeQuestion user={user} formData={formData} onComplete={handlePostPledgeComplete} />;
   }
 
-  // Step 5: CFF Pledge (full screen, no nav, no progress bar)
-  if (step === 5) {
+  // Step 4: CFF Pledge (full screen, no nav, no progress bar)
+  if (step === 4) {
     return <CFFPledgePage user={user} onComplete={handlePledgeComplete} />;
   }
 
