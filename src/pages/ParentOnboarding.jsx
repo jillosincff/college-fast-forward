@@ -296,7 +296,7 @@ export default function ParentOnboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 4</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 3</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student</h1>
           </div>
           
