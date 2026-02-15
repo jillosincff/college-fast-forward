@@ -20,10 +20,14 @@ export default function ParentOnboarding() {
   // - If onboarding done + pledge not taken → step 5
   // - Otherwise start from step 1
   const getInitialStep = () => {
+    // User completed onboarding + pledge but hasn't seen first question yet
     if (user?.onboarding_completed && user?.pledge_taken && user?.first_question_shown === false) return 6;
+    // User completed onboarding but hasn't taken pledge
     if (user?.onboarding_completed && user?.pledge_taken === false) return 5;
-    // Also handle: profile saved but not yet marked complete (mid-flow return after step 4)
+    // User saved profile (mid-flow return) but hasn't taken pledge yet
     if (user?.pledge_taken === false && user?.current_position) return 5;
+    // User took pledge but hasn't seen first question
+    if (user?.pledge_taken === true && user?.first_question_shown === false) return 6;
     return 1;
   };
   const [step, setStep] = useState(getInitialStep);
