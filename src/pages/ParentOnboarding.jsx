@@ -15,11 +15,15 @@ import PostPledgeQuestion from '@/components/onboarding/parent/PostPledgeQuestio
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
-  // If user already completed profile but not pledge, jump straight to pledge
-  // If pledge taken but first question not shown, jump to post-pledge question
+  // Route returning users to the right step:
+  // - If onboarding done + pledge taken but first question not shown → step 6
+  // - If onboarding done + pledge not taken → step 5
+  // - Otherwise start from step 1
   const getInitialStep = () => {
     if (user?.onboarding_completed && user?.pledge_taken && user?.first_question_shown === false) return 6;
     if (user?.onboarding_completed && user?.pledge_taken === false) return 5;
+    // Also handle: profile saved but not yet marked complete (mid-flow return after step 4)
+    if (user?.pledge_taken === false && user?.current_position) return 5;
     return 1;
   };
   const [step, setStep] = useState(getInitialStep);
