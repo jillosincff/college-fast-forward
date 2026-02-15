@@ -170,10 +170,7 @@ export default function ParentOnboarding() {
     }
   };
 
-  // Legacy handler replaced by handleStep4HelpComplete + handlePledgeComplete
-  const handleStep3Complete = async (result) => {
-    handleStep4HelpComplete(result);
-  };
+
 
   const goToDashboard = () => {
     navigate('ParentDashboard');
