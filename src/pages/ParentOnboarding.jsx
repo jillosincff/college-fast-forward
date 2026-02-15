@@ -220,11 +220,11 @@ export default function ParentOnboarding() {
     );
   }
 
-  // Progress bar — now 4 visible steps (pledge is separate full-screen)
-  const totalVisibleSteps = 4;
+  // Progress bar — 3 visible steps (pledge + question are separate full-screen)
+  const totalVisibleSteps = 3;
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-2 mb-8">
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3].map((s) => (
         <div key={s} className="flex items-center">
           <div className={`
             w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
