@@ -421,11 +421,15 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
           </div>
 
           {/* Match indicator */}
-          {matchedIndustry && (
+          {isLinkedStudent ? (
+            <p className="text-sm text-green-700 font-medium">
+              ✅ This is your student's question
+            </p>
+          ) : matchedIndustry ? (
             <p className="text-sm text-green-700 font-medium">
               ✅ Matches your {matchedIndustry} background
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* Answer Section */}
