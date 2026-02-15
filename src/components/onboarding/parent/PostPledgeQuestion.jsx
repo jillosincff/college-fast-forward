@@ -213,11 +213,11 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
       }
 
       // Send notification to student (non-critical, fire-and-forget)
-      const posterEmail = question.poster_email || question.student_email;
+      const posterEmail = question.poster_email || question.student_email || question.created_by;
       if (posterEmail && posterEmail.includes('@') && posterEmail !== user.email) {
         base44.functions.invoke('sendAnswerNotification', {
           questionId: question.id,
-          questionTitle: question.title || question.role || 'Your question',
+          questionTitle: question.title || question.role || question.description?.slice(0, 60) || 'Your question',
           posterEmail,
           posterName: question.poster_first_name || parseFirstName(question.poster_name),
           answererName: user.full_name,
