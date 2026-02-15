@@ -14,18 +14,14 @@ import PostPledgeQuestion from '@/components/onboarding/parent/PostPledgeQuestio
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
-  // Route returning users to the right step:
-  // - If onboarding done + pledge taken but first question not shown → step 6
-  // - If onboarding done + pledge not taken → step 5
-  // - Otherwise start from step 1
   // Flow: 1=Profile, 2=Industry, 3=Link Student, 4=Pledge, 5=Post-Pledge Question
   const getInitialStep = () => {
-    // User took pledge but hasn't seen first question yet
+    // User took pledge but hasn't seen first question yet → go to question
     if (user?.pledge_taken === true && user?.first_question_shown === false) return 5;
-    // User completed profile but hasn't taken pledge yet
-    if (!user?.pledge_taken && user?.current_position) return 4;
-    // User completed onboarding but hasn't taken pledge (returning user)
+    // User completed onboarding (returning user) but hasn't taken pledge → go to pledge
     if (user?.onboarding_completed && !user?.pledge_taken) return 4;
+    // User completed profile steps but hasn't taken pledge yet → go to pledge
+    if (!user?.pledge_taken && user?.current_position) return 4;
     return 1;
   };
   const [step, setStep] = useState(getInitialStep);
