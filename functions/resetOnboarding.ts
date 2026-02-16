@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -9,40 +9,37 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse request body for optional email parameter (admin only)
+    // Parse request body
     let targetEmail = user.email;
+    let mode = 'full';
     try {
       const body = await req.json();
-      if (body.email && user.roles?.includes('admin')) {
+      if (body.email && user.role === 'admin') {
         targetEmail = body.email;
       }
+      if (body.mode) mode = body.mode;
     } catch (e) {
       // No body or invalid JSON - use current user
     }
 
     // Find user by email
-    const targetUser = await base44.asServiceRole.entities.User.filter({ email: targetEmail });
-    if (!targetUser || targetUser.length === 0) {
+    const targetUsers = await base44.asServiceRole.entities.User.filter({ email: targetEmail });
+    if (!targetUsers || targetUsers.length === 0) {
       return Response.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Parse optional mode - 'full' resets everything, 'fix' just fixes onboarding flags
-    let mode = 'full';
-    try {
-      const body2 = await req.clone().json().catch(() => ({}));
-      if (body2.mode) mode = body2.mode;
-    } catch (e) {}
+    const targetUserId = targetUsers[0].id;
 
     if (mode === 'fix') {
-      // Minimal fix - just reset onboarding state without clearing profile data
-      await base44.asServiceRole.entities.User.update(targetUser[0].id, {
+      // Minimal fix - just reset onboarding state flags
+      await base44.asServiceRole.entities.User.update(targetUserId, {
         onboarding_completed: false,
         pledge_taken: false,
         first_question_shown: false,
       });
     } else {
       // Full reset - clear everything
-      await base44.asServiceRole.entities.User.update(targetUser[0].id, {
+      await base44.asServiceRole.entities.User.update(targetUserId, {
         onboarding_completed: false,
         pledge_taken: false,
         first_question_shown: false,
@@ -64,8 +61,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      message: `Onboarding state reset for ${targetEmail}. Refresh to start over.`,
-      email: targetEmail
+      message: `Onboarding state reset (mode=${mode}) for ${targetEmail}. Refresh to start over.`,
+      email: targetEmail,
+      mode
     });
   } catch (error) {
     console.error('Reset onboarding error:', error);
