@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { base44 } from '@/api/base44Client';
@@ -37,14 +37,13 @@ export default function CFFPledgePage({ user, onComplete }) {
   const [parentCount, setParentCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [celebrated, setCelebrated] = useState(false);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     async function loadCount() {
       try {
-        const parents = await base44.entities.User.filter({ persona: 'parent' }, undefined, 1);
-        // We just need the count — estimate from the landing page stats or use a reasonable number
-        // Since filter returns items, use length as a rough count
-        setParentCount(885); // Will be dynamic via backend later
+        await base44.entities.User.filter({ persona: 'parent' }, undefined, 1);
+        setParentCount(885);
       } catch {
         setParentCount(885);
       }
@@ -55,11 +54,13 @@ export default function CFFPledgePage({ user, onComplete }) {
   const allChecked = Object.values(checks).every(Boolean);
 
   const handleCheck = (key) => {
+    if (submitting || celebrated) return;
     setChecks((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handlePledge = async () => {
-    if (!allChecked || submitting) return;
+    if (!allChecked || submitting || completedRef.current) return;
+    completedRef.current = true;
     setSubmitting(true);
 
     // Save pledge to user
@@ -100,23 +101,10 @@ export default function CFFPledgePage({ user, onComplete }) {
       colors: ['#0021A5', '#FA4616', '#FFD700'],
     });
 
-    // Use a ref-safe timeout so navigation still fires even if component re-renders
-    const timer = setTimeout(() => {
+    // Navigate after celebration delay
+    setTimeout(() => {
       onComplete();
     }, 1800);
-    
-    // Cleanup not needed — we WANT this to fire
-    return () => {};
-  };
-
-  // Prevent component from resetting if parent re-renders while celebrating
-  const [pledgeSubmitted, setPledgeSubmitted] = useState(false);
-
-  // Wrap handlePledge to also set a guard
-  const onPledgeClick = async () => {
-    if (pledgeSubmitted) return;
-    setPledgeSubmitted(true);
-    await handlePledge();
   };
 
   const firstName =
@@ -125,7 +113,7 @@ export default function CFFPledgePage({ user, onComplete }) {
       : user?.full_name?.trim().split(/\s+/)[0] || 'Parent';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 md:py-16" style={{ background: '#fafbfc' }}>
+    <div className="min-h-screen flex flex-col items-center justify-start px-4 py-8 md:py-16 overflow-y-auto" style={{ background: '#fafbfc' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -153,13 +141,13 @@ export default function CFFPledgePage({ user, onComplete }) {
 
         {/* Pledge Card */}
         <div
-          className={`w-full rounded-2xl border-2 p-6 md:p-8 mb-6 transition-all duration-300 bg-white ${
+          className={`w-full rounded-2xl border-2 p-4 sm:p-6 md:p-8 mb-6 transition-all duration-300 bg-white ${
             allChecked
               ? 'border-[#0021A5] shadow-[0_0_20px_rgba(0,33,165,0.1)]'
               : 'border-slate-200'
           }`}
         >
-          <p className="text-lg md:text-xl font-semibold text-slate-900 mb-6">
+          <p className="text-lg md:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">
             I, <span className="text-[#0021A5]">{firstName}</span>, pledge to:
           </p>
 
@@ -168,7 +156,8 @@ export default function CFFPledgePage({ user, onComplete }) {
               <button
                 key={item.key}
                 onClick={() => handleCheck(item.key)}
-                className={`w-full flex items-start gap-4 p-4 rounded-xl text-left transition-colors duration-200 ${
+                disabled={submitting || celebrated}
+                className={`w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl text-left transition-colors duration-200 ${
                   checks[item.key] ? 'bg-blue-50/50' : 'hover:bg-slate-50'
                 }`}
                 style={{ borderBottom: item.key !== 'help_others' ? '1px solid #f0f0f0' : 'none' }}
@@ -258,7 +247,7 @@ export default function CFFPledgePage({ user, onComplete }) {
         </AnimatePresence>
 
         {/* Disclaimer */}
-        <p className="text-center text-slate-400 text-xs mt-4 max-w-sm">
+        <p className="text-center text-slate-400 text-xs mt-4 max-w-sm pb-8">
           This isn't a legal contract — it's a promise to a community of parents who are counting on each other.
         </p>
       </motion.div>
