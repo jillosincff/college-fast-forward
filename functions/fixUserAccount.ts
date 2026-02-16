@@ -23,16 +23,29 @@ Deno.serve(async (req) => {
 
     const targetUser = users[0];
     
-    // The SDK stores custom user fields inside the `data` object
-    // But the updateMe API sets them at the top level
-    // For service role, we need to set the data object directly with flattened fields
+    // Clean up any nested 'data' key from previous bad updates, then merge
     const currentData = targetUser.data || {};
-    // Remove any nested 'data' key from previous bad update
     const { data: _nestedData, ...cleanData } = currentData;
     const newData = { ...cleanData, ...updates };
     
-    // Update user data
-    await base44.asServiceRole.entities.User.update(targetUser.id, { data: newData });
+    // Use raw fetch to set data cleanly without SDK merge behavior
+    const APP_ID = Deno.env.get('BASE44_APP_ID');
+    const SERVICE_KEY = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
+    
+    const apiUrl = `https://app.base44.com/api/v1/apps/${APP_ID}/entities/User/${targetUser.id}`;
+    const resp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SERVICE_KEY}`
+      },
+      body: JSON.stringify({ data: newData })
+    });
+    
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`Failed to update user: ${resp.status} ${errText}`);
+    }
 
     return Response.json({ 
       success: true, 
