@@ -11,10 +11,9 @@ export default function ParentPledge() {
   const { user, refreshUser } = useAuth();
 
   const handlePledgeComplete = async () => {
-    // Refresh user so pledge_taken=true is picked up by routing
-    if (refreshUser) await refreshUser();
-    // Existing parents skip the post-pledge question — go straight to dashboard
+    // Navigate first, then refresh in background so the page doesn't re-render/reset
     navigate('ParentDashboard');
+    if (refreshUser) refreshUser();
   };
 
   if (!user) {
