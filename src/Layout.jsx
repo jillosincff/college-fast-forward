@@ -1074,7 +1074,7 @@ function AppContent() {
       }
       
       // Redirect to pledge from dashboard pages
-      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights'];
+      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Favorites', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
       if (dashboardAndMainPages.includes(currentPage)) {
         console.log('🔄 [Pledge] Existing parent needs pledge, redirecting to ParentPledge');
         navigate('ParentPledge');
