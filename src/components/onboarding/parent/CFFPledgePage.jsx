@@ -100,9 +100,23 @@ export default function CFFPledgePage({ user, onComplete }) {
       colors: ['#0021A5', '#FA4616', '#FFD700'],
     });
 
-    setTimeout(() => {
+    // Use a ref-safe timeout so navigation still fires even if component re-renders
+    const timer = setTimeout(() => {
       onComplete();
     }, 1800);
+    
+    // Cleanup not needed — we WANT this to fire
+    return () => {};
+  };
+
+  // Prevent component from resetting if parent re-renders while celebrating
+  const [pledgeSubmitted, setPledgeSubmitted] = useState(false);
+
+  // Wrap handlePledge to also set a guard
+  const onPledgeClick = async () => {
+    if (pledgeSubmitted) return;
+    setPledgeSubmitted(true);
+    await handlePledge();
   };
 
   const firstName =
