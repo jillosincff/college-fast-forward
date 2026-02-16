@@ -26,23 +26,41 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Reset onboarding flags and clear profile data
-    await base44.asServiceRole.entities.User.update(targetUser[0].id, {
-      onboarding_completed: false,
-      expertise_shared: false,
-      welcome_shown: false,
-      has_seen_dashboard: false,
-      first_login: false,
-      current_position: null,
-      current_company: null,
-      description_of_work: null,
-      ways_to_help: [],
-      linkedin_url: '',
-      bio: '',
-      job_title: '',
-      industry: '',
-      years_of_experience: null
-    });
+    // Parse optional mode - 'full' resets everything, 'fix' just fixes onboarding flags
+    let mode = 'full';
+    try {
+      const body2 = await req.clone().json().catch(() => ({}));
+      if (body2.mode) mode = body2.mode;
+    } catch (e) {}
+
+    if (mode === 'fix') {
+      // Minimal fix - just reset onboarding state without clearing profile data
+      await base44.asServiceRole.entities.User.update(targetUser[0].id, {
+        onboarding_completed: false,
+        pledge_taken: false,
+        first_question_shown: false,
+      });
+    } else {
+      // Full reset - clear everything
+      await base44.asServiceRole.entities.User.update(targetUser[0].id, {
+        onboarding_completed: false,
+        pledge_taken: false,
+        first_question_shown: false,
+        expertise_shared: false,
+        welcome_shown: false,
+        has_seen_dashboard: false,
+        first_login: false,
+        current_position: null,
+        current_company: null,
+        description_of_work: null,
+        ways_to_help: [],
+        linkedin_url: '',
+        bio: '',
+        job_title: '',
+        industry: '',
+        years_of_experience: null
+      });
+    }
 
     return Response.json({ 
       success: true, 
