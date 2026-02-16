@@ -151,22 +151,15 @@ export default function ParentDashboard() {
   // IMPORTANT: onboarding_completed === false means actively in onboarding flow
   // onboarding_completed === undefined means grandfathered user (treat as complete, don't redirect)
   const needsOnboarding = user && user.persona === 'parent' && user.onboarding_completed === false;
-  // Redirect parents who completed onboarding but haven't taken pledge or first question
-  // Also applies to grandfathered users (undefined) who never took the pledge
-  const needsPledge = user && user.persona === 'parent' && user.onboarding_completed !== false && !user.pledge_taken;
-  const needsFirstQuestion = user && user.persona === 'parent' && user.onboarding_completed !== false && user.pledge_taken && user.first_question_shown === false;
 
   useEffect(() => {
     if (needsOnboarding) {
       console.log('🔄 [ParentDashboard] Parent needs onboarding, redirecting');
       navigate('ParentOnboarding');
-    } else if (needsPledge || needsFirstQuestion) {
-      console.log('🔄 [ParentDashboard] Parent needs pledge/question, redirecting');
-      navigate('ParentOnboarding');
     }
-  }, [needsOnboarding, needsPledge, needsFirstQuestion]);
+  }, [needsOnboarding]);
 
-  if (!user || loading || needsOnboarding || needsPledge || needsFirstQuestion) {
+  if (!user || loading || needsOnboarding) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
