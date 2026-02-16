@@ -227,7 +227,31 @@ export default function ProfileEdit() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe(formData);
+      // Only send editable profile fields — never spread the entire formData
+      // which may contain non-string values from the user object
+      const profileUpdate = {
+        bio: formData.bio || '',
+        linkedin_url: formData.linkedin_url || '',
+        phone: formData.phone || '',
+        location_city: formData.location_city || '',
+        location_state: formData.location_state || '',
+        company: formData.company || '',
+        job_title: formData.job_title || '',
+        industry: formData.industry || '',
+        years_of_experience: formData.years_of_experience || '',
+        expertise_areas: formData.expertise_areas || [],
+        mentorship_topics: formData.mentorship_topics || [],
+        companies_worked_at: formData.companies_worked_at || [],
+        can_provide_referrals: formData.can_provide_referrals || false,
+        major: formData.major || '',
+        graduation_year: formData.graduation_year || '',
+        gpa: formData.gpa || '',
+        skills: formData.skills || [],
+        interests: formData.interests || [],
+        ways_to_help: formData.ways_to_help || [],
+        show_in_directory: formData.show_in_directory !== false,
+      };
+      await base44.auth.updateMe(profileUpdate);
       
       // Link students if provided (for parents)
       if (isParent && formData.student_emails?.trim()) {

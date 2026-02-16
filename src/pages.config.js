@@ -80,6 +80,7 @@ import Onboarding from './pages/Onboarding';
 import Opportunities from './pages/Opportunities';
 import ParentDashboard from './pages/ParentDashboard';
 import ParentOnboarding from './pages/ParentOnboarding';
+import ParentPledge from './pages/ParentPledge';
 import PaymentCancel from './pages/PaymentCancel';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PostOpportunity from './pages/PostOpportunity';
@@ -97,7 +98,6 @@ import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
 import WelcomeRole from './pages/WelcomeRole';
-import ParentPledge from './pages/ParentPledge';
 import __Layout from './Layout.jsx';
 
 
@@ -135,6 +135,7 @@ export const PAGES = {
     "Opportunities": Opportunities,
     "ParentDashboard": ParentDashboard,
     "ParentOnboarding": ParentOnboarding,
+    "ParentPledge": ParentPledge,
     "PaymentCancel": PaymentCancel,
     "PaymentSuccess": PaymentSuccess,
     "PostOpportunity": PostOpportunity,
@@ -152,7 +153,6 @@ export const PAGES = {
     "TestingDashboard": TestingDashboard,
     "UnsubscribeReengagement": UnsubscribeReengagement,
     "WelcomeRole": WelcomeRole,
-    "ParentPledge": ParentPledge,
 }
 
 export const pagesConfig = {
