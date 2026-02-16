@@ -30,7 +30,15 @@ Deno.serve(async (req) => {
 
     const targetUserId = targetUsers[0].id;
 
-    if (mode === 'fix') {
+    if (mode === 'complete') {
+      // Mark onboarding as done - for users stuck in onboarding loop
+      await base44.asServiceRole.entities.User.update(targetUserId, {
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
+        pledge_taken: true,
+        first_question_shown: true,
+      });
+    } else if (mode === 'fix') {
       // Minimal fix - just reset onboarding state flags
       await base44.asServiceRole.entities.User.update(targetUserId, {
         onboarding_completed: false,
