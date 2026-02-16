@@ -18,34 +18,26 @@ Deno.serve(async (req) => {
     // Find user by email
     const users = await base44.asServiceRole.entities.User.filter({ email });
     if (!users || users.length === 0) {
-      return Response.json({ error: 'User not found with email: ' + email }, { status: 404 });
+      return Response.json({ error: 'User not found: ' + email }, { status: 404 });
     }
 
     const targetUser = users[0];
-    const previousData = { ...targetUser.data } || {};
-    console.log('Found user:', targetUser.id, targetUser.email, 'current data:', JSON.stringify(previousData));
+    console.log('Found user:', targetUser.id, targetUser.email);
     
-    // Build clean merged data - remove any nested 'data' key from previous bad updates
-    const cleanPrev = { ...previousData };
-    delete cleanPrev.data; // remove nested data key if exists
-    const newData = { ...cleanPrev, ...updates };
-    
-    console.log('Updating user data to:', JSON.stringify(newData));
-    
-    // Update user with the data field
-    const result = await base44.asServiceRole.entities.User.update(targetUser.id, { data: newData });
-    console.log('Update result:', JSON.stringify(result));
+    // Update user directly with the updates object
+    await base44.asServiceRole.entities.User.update(targetUser.id, updates);
+
+    // Re-read to confirm
+    const updated = await base44.asServiceRole.entities.User.filter({ email });
 
     return Response.json({ 
       success: true, 
       userId: targetUser.id,
       email: targetUser.email,
-      previousData: cleanPrev,
-      newData,
-      result
+      updatedUser: updated?.[0] || null
     });
   } catch (error) {
-    console.error('Error:', error.message, error.stack);
+    console.error('fixUserAccount error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
