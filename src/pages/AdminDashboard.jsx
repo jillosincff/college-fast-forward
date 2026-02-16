@@ -2581,12 +2581,19 @@ const PersonaAuditSection = () => {
   const handleUpdatePersona = async (userId, newPersona) => {
     setUpdating(userId);
     try {
-      await base44.entities.User.update(userId, {
-        persona: newPersona,
-        roles: [newPersona]
+      const response = await base44.functions.invoke('fixUserAccount', {
+        email: users.find(u => u.id === userId)?.email,
+        updates: {
+          persona: newPersona,
+          roles: [newPersona]
+        }
       });
       
-      // Update the user in the list with new persona (don't remove - they should still show in filtered views)
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+      
+      // Update the user in the list with new persona
       setUsers(prevUsers => 
         prevUsers.map(u => 
           u.id === userId 
