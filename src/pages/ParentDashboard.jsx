@@ -148,11 +148,13 @@ export default function ParentDashboard() {
   };
 
   // Redirect parents who haven't completed onboarding at all
-  // CRITICAL: If onboarding_completed is undefined but user has persona=parent, they're stuck — send them to onboarding
-  const needsOnboarding = user && user.persona === 'parent' && user.onboarding_completed !== true;
+  // IMPORTANT: onboarding_completed === false means actively in onboarding flow
+  // onboarding_completed === undefined means grandfathered user (treat as complete, don't redirect)
+  const needsOnboarding = user && user.persona === 'parent' && user.onboarding_completed === false;
   // Redirect parents who completed onboarding but haven't taken pledge or first question
-  const needsPledge = user && user.persona === 'parent' && user.onboarding_completed === true && !user.pledge_taken;
-  const needsFirstQuestion = user && user.persona === 'parent' && user.onboarding_completed === true && user.pledge_taken && user.first_question_shown === false;
+  // Also applies to grandfathered users (undefined) who never took the pledge
+  const needsPledge = user && user.persona === 'parent' && user.onboarding_completed !== false && !user.pledge_taken;
+  const needsFirstQuestion = user && user.persona === 'parent' && user.onboarding_completed !== false && user.pledge_taken && user.first_question_shown === false;
 
   useEffect(() => {
     if (needsOnboarding) {
