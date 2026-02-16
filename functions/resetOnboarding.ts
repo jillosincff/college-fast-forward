@@ -38,6 +38,13 @@ Deno.serve(async (req) => {
         pledge_taken: true,
         first_question_shown: true,
       });
+    } else if (mode === 'set') {
+      // Set specific fields from the request body
+      const body = await req.clone().json().catch(() => ({}));
+      const fieldsToSet = body.fields || {};
+      if (Object.keys(fieldsToSet).length > 0) {
+        await base44.asServiceRole.entities.User.update(targetUserId, fieldsToSet);
+      }
     } else if (mode === 'fix') {
       // Minimal fix - just reset onboarding state flags
       await base44.asServiceRole.entities.User.update(targetUserId, {
