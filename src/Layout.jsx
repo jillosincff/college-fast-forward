@@ -1058,6 +1058,30 @@ function AppContent() {
       }
     }
 
+    // FORCE PLEDGE: Existing parents who completed onboarding but never took the pledge
+    // This catches grandfathered parents (onboarding_completed is true or undefined, but pledge_taken is falsy)
+    // New parents hit the pledge during onboarding flow above. This is ONLY for existing parents.
+    if (user && 
+        (user.persona === 'parent' || user.roles?.includes('parent')) && 
+        user.onboarding_completed !== false && 
+        !user.pledge_taken) {
+      
+      // Allow them to stay on the pledge page
+      if (currentPage === 'ParentPledge') {
+        console.log('✅ [Pledge] Parent on pledge page, allowing');
+        setResolvedPage(currentPage);
+        return;
+      }
+      
+      // Redirect to pledge from dashboard pages
+      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights'];
+      if (dashboardAndMainPages.includes(currentPage)) {
+        console.log('🔄 [Pledge] Existing parent needs pledge, redirecting to ParentPledge');
+        navigate('ParentPledge');
+        return;
+      }
+    }
+
     // STEP 1: Admin pages ALWAYS bypass routing
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') {
       console.log('✅ [Admin] Direct access:', currentPage);
