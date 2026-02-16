@@ -12,12 +12,13 @@ Deno.serve(async (req) => {
     // Parse request body
     let targetEmail = user.email;
     let mode = 'full';
+    let bodyData = {};
     try {
-      const body = await req.json();
-      if (body.email && user.role === 'admin') {
-        targetEmail = body.email;
+      bodyData = await req.json();
+      if (bodyData.email && user.role === 'admin') {
+        targetEmail = bodyData.email;
       }
-      if (body.mode) mode = body.mode;
+      if (bodyData.mode) mode = bodyData.mode;
     } catch (e) {
       // No body or invalid JSON - use current user
     }
@@ -40,8 +41,7 @@ Deno.serve(async (req) => {
       });
     } else if (mode === 'set') {
       // Set specific fields from the request body
-      const body = await req.clone().json().catch(() => ({}));
-      const fieldsToSet = body.fields || {};
+      const fieldsToSet = bodyData.fields || {};
       if (Object.keys(fieldsToSet).length > 0) {
         await base44.asServiceRole.entities.User.update(targetUserId, fieldsToSet);
       }
