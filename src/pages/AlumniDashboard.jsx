@@ -428,6 +428,7 @@ export default function AlumniDashboard() {
           studentsHelped={studentsHelped}
           alumniHelped={alumniHelped}
           myRequests={myRequests}
+          matchesCount={alumniWhoCanHelp.length}
           onPostRequest={() => setShowPostRequestModal(true)}
           mode={mode}
         />
