@@ -766,8 +766,8 @@ export default function Onboarding() {
           )}
           {step === 4 && isAlumniSeeker && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">Give & Get</h1>
-              <p className="text-sm text-white/90">Select your expertise areas</p>
+              <h1 className="text-xl font-bold mb-2 text-white">Get Help. Pay It Forward.</h1>
+              <p className="text-sm text-white/90">Tell us what you need and how you can help students</p>
             </>
           )}
           {step === 5 && isAlumni && (
