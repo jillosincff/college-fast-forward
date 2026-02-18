@@ -146,6 +146,10 @@ export default function Onboarding() {
     }
   };
 
+  // Derived: is the alumni a helper?
+  const isAlumniHelper = isAlumni && alumniIntent === 'help_students';
+  const isAlumniSeeker = isAlumni && alumniIntent === 'seeking_help';
+
   const canProceedStep1 = !linkedinError;
   const canProceedStep2 = expertise.length > 0;
   const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
