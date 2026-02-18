@@ -69,15 +69,17 @@ export default function AlumniHeroSection({
               className="text-sm font-semibold tracking-widest uppercase mb-3"
               style={{ color: '#FA4616' }}
             >
-              Give Back. Get Ahead.
+              {isSeekerMode ? 'Your Career Network' : 'Give Back. Get Ahead.'}
             </p>
             <h1 className="text-5xl md:text-6xl font-extrabold mb-3 text-white">
               Your UF Network
             </h1>
             <p className="text-xl opacity-90 max-w-lg mx-auto text-white/80">
-              {mode === 'give_only' 
-                ? 'Help students and alumni. Build your karma. Strengthen the network.'
-                : 'Help students and alumni. When you need support, they\'ve got your back.'
+              {isSeekerMode
+                ? 'Connect with alumni and parents who can help you land your next opportunity.'
+                : mode === 'give_only' 
+                  ? 'Help students and alumni. Build your karma. Strengthen the network.'
+                  : 'Help students and alumni. When you need support, they\'ve got your back.'
               }
             </p>
           </div>
