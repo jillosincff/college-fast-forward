@@ -273,72 +273,47 @@ export default function Onboarding() {
   // Progress bar component - Alumni has 8 steps (with intent + invite parent), Parents have 5 (with link student)
   const totalSteps = isAlumni ? 8 : 5;
   
-  const ProgressBar = () => (
-    <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
-      <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 1 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 1 ? <Check className="w-3.5 h-3.5 text-white" /> : '👤'}
-        </span>
-        <span className="hidden sm:inline text-white/80 text-xs">You</span>
+  // Alumni steps: 1=You, 2=Industry, 3=Intent, 4=Help, 5=UF, 6=Story, 7=Family, 8=Ready
+  // Parent steps: 1=You, 2=Industry, 3=Help, 4=Link, 5=Ready
+  const ProgressBar = () => {
+    const alumniSteps = [
+      { emoji: '👤', label: 'You' },
+      { emoji: '🏢', label: 'Industry' },
+      { emoji: '🎯', label: 'Intent' },
+      { emoji: '💼', label: 'Help' },
+      { emoji: '🎓', label: 'UF' },
+      { emoji: '📖', label: 'Story' },
+      { emoji: '👨‍👩‍👧', label: 'Family' },
+      { emoji: '🤝', label: 'Ready' },
+    ];
+    const parentSteps = [
+      { emoji: '👤', label: 'You' },
+      { emoji: '🏢', label: 'Industry' },
+      { emoji: '💼', label: 'Help' },
+      { emoji: '🔗', label: 'Link' },
+      { emoji: '🤝', label: 'Ready' },
+    ];
+    const steps = isAlumni ? alumniSteps : parentSteps;
+
+    return (
+      <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
+        {steps.map((s, i) => {
+          const stepNum = i + 1;
+          return (
+            <React.Fragment key={i}>
+              {i > 0 && <div className={`w-4 h-0.5 ${step >= stepNum ? 'bg-white/50' : 'bg-white/20'}`}></div>}
+              <div className="flex items-center gap-1 text-sm">
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= stepNum ? 'bg-white/30' : 'bg-white/10'}`}>
+                  {step > stepNum ? <Check className="w-3.5 h-3.5 text-white" /> : s.emoji}
+                </span>
+                <span className="hidden sm:inline text-white/80 text-xs">{s.label}</span>
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
-      <div className={`w-4 h-0.5 ${step >= 2 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-      <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 2 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 2 ? <Check className="w-3.5 h-3.5 text-white" /> : '🏢'}
-        </span>
-        <span className="hidden sm:inline text-white/80 text-xs">Industry</span>
-      </div>
-      <div className={`w-4 h-0.5 ${step >= 3 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-      <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 3 ? 'bg-white/30' : 'bg-white/10'}`}>
-          {step > 3 ? <Check className="w-3.5 h-3.5 text-white" /> : '💼'}
-        </span>
-        <span className="hidden sm:inline text-white/80 text-xs">Help</span>
-      </div>
-      {isAlumni && (
-        <>
-          <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
-              {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🎓'}
-            </span>
-            <span className="hidden sm:inline text-white/80 text-xs">UF</span>
-          </div>
-          <div className={`w-4 h-0.5 ${step >= 5 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 5 ? 'bg-white/30' : 'bg-white/10'}`}>
-              {step > 5 ? <Check className="w-3.5 h-3.5 text-white" /> : '📖'}
-            </span>
-            <span className="hidden sm:inline text-white/80 text-xs">Story</span>
-          </div>
-          <div className={`w-4 h-0.5 ${step >= 6 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 6 ? 'bg-white/30' : 'bg-white/10'}`}>
-              {step > 6 ? <Check className="w-3.5 h-3.5 text-white" /> : '👨‍👩‍👧'}
-            </span>
-            <span className="hidden sm:inline text-white/80 text-xs">Family</span>
-          </div>
-        </>
-      )}
-      {/* Link step only for parents - Alumni have their own invite parent step */}
-      {!isAlumni && (
-        <>
-          <div className={`w-4 h-0.5 ${step >= 4 ? 'bg-white/50' : 'bg-white/20'}`}></div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= 4 ? 'bg-white/30' : 'bg-white/10'}`}>
-              {step > 4 ? <Check className="w-3.5 h-3.5 text-white" /> : '🔗'}
-            </span>
-            <span className="hidden sm:inline text-white/80 text-xs">Link</span>
-          </div>
-        </>
-      )}
-      <div className={`w-4 h-0.5 ${step >= (isAlumni ? 7 : 5) ? 'bg-white/50' : 'bg-white/20'}`}></div>
-      <div className="flex items-center gap-1 text-sm">
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-base ${step >= (isAlumni ? 7 : 5) ? 'bg-white/30' : 'bg-white/10'}`}>🤝</span>
-        <span className="hidden sm:inline text-white/80 text-xs">Ready</span>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Left side content based on step
   const LeftSideContent = () => {
