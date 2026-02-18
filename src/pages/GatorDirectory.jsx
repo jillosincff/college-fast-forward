@@ -84,21 +84,34 @@ export default function GatorDirectory() {
       setLoading(true);
       setError(null);
       
-      const response = await base44.functions.invoke('getDirectoryUsers', {});
+      const rawResponse = await base44.functions.invoke('getDirectoryUsers', {});
       
-      // Handle different response shapes from base44.functions.invoke
-      const responseData = response?.data || response;
-      const usersArray = responseData?.data || responseData;
+      console.log('[GatorDirectory] Raw response type:', typeof rawResponse);
+      console.log('[GatorDirectory] Raw response keys:', rawResponse ? Object.keys(rawResponse) : 'null');
       
-      console.log('[GatorDirectory] Response shape:', { 
-        hasResponse: !!response, 
-        hasData: !!responseData, 
-        isArray: Array.isArray(usersArray),
-        count: Array.isArray(usersArray) ? usersArray.length : 'N/A'
-      });
+      // base44.functions.invoke returns axios response: { data: { success, data: [...] } }
+      // But in some cases it might return the body directly
+      let usersArray = null;
+      
+      if (rawResponse?.data?.data && Array.isArray(rawResponse.data.data)) {
+        // Standard axios shape: response.data.data
+        usersArray = rawResponse.data.data;
+      } else if (rawResponse?.data && Array.isArray(rawResponse.data)) {
+        // response.data is the array directly
+        usersArray = rawResponse.data;
+      } else if (Array.isArray(rawResponse)) {
+        // raw response is the array
+        usersArray = rawResponse;
+      } else if (rawResponse?.success && rawResponse?.data && Array.isArray(rawResponse.data)) {
+        // Body returned directly (no axios wrapper)
+        usersArray = rawResponse.data;
+      }
+      
+      console.log('[GatorDirectory] Parsed users array:', Array.isArray(usersArray), 'count:', usersArray?.length);
       
       if (!usersArray || !Array.isArray(usersArray)) {
-        throw new Error(responseData?.details || 'Invalid data from server.');
+        console.error('[GatorDirectory] Could not parse users. Raw:', JSON.stringify(rawResponse).substring(0, 500));
+        throw new Error('Invalid data from server.');
       }
       
       // Accept users with full_name - persona may be normalized by the backend
