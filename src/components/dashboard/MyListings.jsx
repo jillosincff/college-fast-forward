@@ -79,7 +79,7 @@ const RequestRow = ({ request, onDelete }) => {
             <DropdownMenuItem onClick={() => navigate('Connections', { requestId: request.id })}>
               <Eye className="w-4 h-4 mr-2" /> View Request
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('PostRequest', { editId: request.id })}>
+            <DropdownMenuItem onClick={() => navigate('PostRequest', { edit: request.id })}>
               <Edit className="w-4 h-4 mr-2" /> {isExpiringSoon ? 'Renew' : 'Edit'}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(request.id)} className="text-red-600">
