@@ -948,39 +948,11 @@ export default function Onboarding() {
                   <p className="text-xs text-amber-600">Please select at least one way you'd like to help</p>
                 )}
 
-                {/* Additional helper fields for alumni helpers */}
+                {/* Additional helper fields for alumni helpers - years of experience */}
                 {isAlumniHelper && (
                   <>
                     <div className="border-t border-slate-200 my-4" />
                     
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Current company <span className="font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        placeholder="Company name"
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                                 focus:border-[#0021A5] focus:outline-none transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Current role/title <span className="font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={jobTitle}
-                        onChange={(e) => setJobTitle(e.target.value)}
-                        placeholder="e.g., VP of Marketing, Software Engineer"
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                                 focus:border-[#0021A5] focus:outline-none transition-colors"
-                      />
-                    </div>
-
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Years of experience <span className="font-normal text-slate-400">(optional)</span>
@@ -999,51 +971,6 @@ export default function Onboarding() {
                         <option value="16-20">16–20 years</option>
                         <option value="20+">20+ years</option>
                       </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Industries <span className="font-normal text-slate-400">(select all that apply)</span>
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {INDUSTRIES.map(ind => (
-                          <button
-                            key={`helper-ind-${ind.id}`}
-                            type="button"
-                            onClick={() => toggleIndustry(ind.id)}
-                            className={`
-                              flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm
-                              transition-all duration-200 border-2
-                              ${industries.includes(ind.id)
-                                ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                              }
-                            `}
-                          >
-                            <span>{ind.emoji}</span>
-                            <span className="font-medium">{ind.label}</span>
-                            {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={linkedinUrl}
-                        onChange={(e) => handleLinkedInChange(e.target.value)}
-                        placeholder="https://linkedin.com/in/yourname"
-                        className={`w-full px-4 py-3 border-2 rounded-xl text-base
-                                 focus:outline-none transition-colors
-                                 ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
-                      />
-                      {linkedinError && (
-                        <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
-                      )}
                     </div>
                   </>
                 )}
