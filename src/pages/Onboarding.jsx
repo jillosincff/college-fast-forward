@@ -788,8 +788,96 @@ export default function Onboarding() {
       <div className="lg:w-[55%] bg-white p-4 sm:p-6 lg:p-10 lg:pt-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           
-          {/* STEP 1: Basic Info */}
-          {step === 1 && (
+          {/* ===== ALUMNI STEP 1: UF Details ===== */}
+          {step === 1 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Your Alumni Details
+                </h2>
+                <p className="text-slate-500">
+                  Let's start with your time at the University of Florida.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What year did you graduate? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={alumniGradYear}
+                    onChange={(e) => setAlumniGradYear(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                  >
+                    <option value="">Select year</option>
+                    {gradYearOptions.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What was your major? <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={alumniMajor}
+                    onChange={(e) => setAlumniMajor(e.target.value)}
+                    placeholder="e.g., Computer Science, Finance, Political Science"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Minor <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={alumniMinor}
+                    onChange={(e) => setAlumniMinor(e.target.value)}
+                    placeholder="e.g., Business Administration, Psychology"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Any graduate degrees? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={graduateDegrees}
+                    onChange={(e) => setGraduateDegrees(e.target.value)}
+                    placeholder="e.g., MBA Harvard 2015, JD Yale 2018"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">List any graduate degrees with school and year</p>
+                </div>
+
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={!canProceedStep3Alumni}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                    canProceedStep3Alumni
+                      ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                      : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  Continue →
+                </button>
+
+                {!canProceedStep3Alumni && (
+                  <p className="text-xs text-amber-600 text-center">Please enter your graduation year and major</p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* ===== PARENT STEP 1: Basic Info ===== */}
+          {step === 1 && !isAlumni && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -810,8 +898,7 @@ export default function Onboarding() {
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     placeholder="Company name"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -824,8 +911,7 @@ export default function Onboarding() {
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                     placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                             focus:border-[#0021A5] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -838,9 +924,7 @@ export default function Onboarding() {
                     value={linkedinUrl}
                     onChange={(e) => handleLinkedInChange(e.target.value)}
                     placeholder="https://linkedin.com/in/yourname"
-                    className={`w-full px-4 py-3 border-2 rounded-xl text-base
-                             focus:outline-none transition-colors
-                             ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
+                    className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none transition-colors ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
                   />
                   {linkedinError ? (
                     <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
@@ -852,24 +936,100 @@ export default function Onboarding() {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!canProceedStep1}
-                  className={`
-                    w-full py-4 rounded-xl font-bold text-lg transition-all
-                    ${canProceedStep1
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                    canProceedStep1
                       ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
                       : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    }
-                  `}
+                  }`}
                 >
                   Continue →
                 </button>
-                
-
               </div>
             </>
           )}
 
-          {/* STEP 2: Industry */}
-          {step === 2 && (
+          {/* ===== ALUMNI STEP 2: You (company, job, linkedin) ===== */}
+          {step === 2 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  Tell us about yourself
+                </h2>
+                <p className="text-slate-500">
+                  Where are you now professionally?
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Where do you work? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="Company name"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What's your job title? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="e.g., VP of Marketing, Software Engineer, Attorney"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={linkedinUrl}
+                    onChange={(e) => handleLinkedInChange(e.target.value)}
+                    placeholder="https://linkedin.com/in/yourname"
+                    className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none transition-colors ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
+                  />
+                  {linkedinError ? (
+                    <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
+                  ) : (
+                    <p className="text-xs text-slate-400 mt-1">Helps students learn more about your background</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(3)}
+                    disabled={!canProceedStep1}
+                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+                      canProceedStep1
+                        ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Continue →
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ===== PARENT STEP 2: Industry ===== */}
+          {step === 2 && !isAlumni && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
@@ -887,14 +1047,11 @@ export default function Onboarding() {
                       key={ind.id}
                       type="button"
                       onClick={() => toggleIndustry(ind.id)}
-                      className={`
-                        flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm
-                        transition-all duration-200 border-2
-                        ${industries.includes(ind.id)
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm transition-all duration-200 border-2 ${
+                        industries.includes(ind.id)
                           ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                        }
-                      `}
+                      }`}
                     >
                       <span>{ind.emoji}</span>
                       <span className="font-medium">{ind.label}</span>
@@ -925,18 +1082,72 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 3 (Alumni only): Intent Selection */}
+          {/* ===== ALUMNI STEP 3: Industry ===== */}
           {step === 3 && isAlumni && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  What's your industry?
+                </h2>
+                <p className="text-slate-500">
+                  Select all that apply — this helps us match you with the right students.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-2">
+                  {INDUSTRIES.map(ind => (
+                    <button
+                      key={ind.id}
+                      type="button"
+                      onClick={() => toggleIndustry(ind.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm transition-all duration-200 border-2 ${
+                        industries.includes(ind.id)
+                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <span>{ind.emoji}</span>
+                      <span className="font-medium">{ind.label}</span>
+                      {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(2)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(4)}
+                    className="flex-1 py-4 rounded-xl font-bold text-lg transition-all bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl"
+                  >
+                    Continue →
+                  </button>
+                </div>
+
+                <p className="text-center text-sm text-slate-400">
+                  You can skip this if none apply
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* ===== ALUMNI STEP 4: Intent Selection ===== */}
+          {step === 4 && isAlumni && (
             <AlumniIntentStep
               selectedIntent={alumniIntent}
               onSelect={setAlumniIntent}
-              onNext={() => setStep(4)}
-              onBack={() => setStep(2)}
+              onNext={() => setStep(5)}
+              onBack={() => setStep(3)}
             />
           )}
 
-          {/* STEP 3 (Parents) / STEP 4 (Alumni Helper): How to Help */}
-          {((step === 3 && !isAlumni) || (step === 4 && isAlumniHelper)) && (
+          {/* ===== PARENT STEP 3 / ALUMNI STEP 5 (Helper): How to Help ===== */}
+          {((step === 3 && !isAlumni) || (step === 5 && isAlumniHelper)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
