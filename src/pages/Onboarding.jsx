@@ -1116,8 +1116,8 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 5 (Alumni only): Story Sharing */}
-          {step === 5 && isAlumni && (
+          {/* STEP 6 (Alumni only): Story Sharing */}
+          {step === 6 && isAlumni && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
