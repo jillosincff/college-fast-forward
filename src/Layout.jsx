@@ -1243,8 +1243,13 @@ function AppContent() {
         } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-          destination = 'AlumniDashboard';
-        } else {
+              // Route alumni based on intent: helpers → ParentDashboard, seekers → AlumniDashboard
+              if (user.alumni_intent === 'help_students') {
+                destination = 'ParentDashboard';
+              } else {
+                destination = 'AlumniDashboard';
+              }
+            } else {
           destination = 'Dashboard';
         }
         console.log('➡️ [Onboarded] → Dashboard:', destination);
