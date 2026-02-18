@@ -1513,6 +1513,7 @@ export default function Onboarding() {
                   <div className="space-y-2 text-sm text-slate-600">
                     {company && <p>🏢 {company}</p>}
                     {jobTitle && <p>💼 {jobTitle}</p>}
+                    {yearsExperience && <p>📅 {yearsExperience} years experience</p>}
                     {industries.length > 0 && (
                       <p>🏭 {industries.map(i => INDUSTRIES.find(ind => ind.id === i)?.label).join(', ')}</p>
                     )}
