@@ -270,8 +270,8 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 7 steps (with invite parent), Parents have 5 (with link student)
-  const totalSteps = isAlumni ? 7 : 5;
+  // Progress bar component - Alumni has 8 steps (with intent + invite parent), Parents have 5 (with link student)
+  const totalSteps = isAlumni ? 8 : 5;
   
   const ProgressBar = () => (
     <div className="flex items-center justify-center gap-1.5 mb-6 lg:mb-8">
