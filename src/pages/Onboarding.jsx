@@ -1294,7 +1294,7 @@ export default function Onboarding() {
                   </button>
                   
                   <button
-                    onClick={() => setStep(7)}
+                    onClick={() => setStep(8)}
                     className="w-full py-3 rounded-xl font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
                   >
                     Skip for now — I'll do this later
