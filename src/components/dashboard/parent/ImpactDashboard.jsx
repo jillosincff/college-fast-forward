@@ -55,10 +55,18 @@ export default function ImpactDashboard({ user }) {
         setKarmaLevel(user.karma_level || 'none');
       }
 
-      // Recent activity (last 5 transactions with descriptions)
+      // Recent activity — deduplicate same action_type entries, keep first occurrence
+      const seen = new Set();
+      const dedupedTransactions = transactions.filter(t => {
+        const key = t.action_type;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
       setRecentActivity(
-        transactions.slice(0, 5).map(t => ({
-          description: t.description || `Earned ${t.points} karma for ${t.action_type.replace(/_/g, ' ')}`,
+        dedupedTransactions.slice(0, 5).map(t => ({
+          description: actionLabels[t.action_type] || t.description || `Earned ${t.points} karma`,
           timeAgo: moment(t.created_date).fromNow(),
           points: t.points,
           type: t.action_type
@@ -73,6 +81,7 @@ export default function ImpactDashboard({ user }) {
 
   const actionIcons = {
     answer: '💬',
+    answer_question: '💬',
     upvote_received: '👍',
     best_answer: '🏆',
     outcome_reported: '🎉',
@@ -80,7 +89,40 @@ export default function ImpactDashboard({ user }) {
     interview_question_submitted: '📝',
     message_responded: '✉️',
     referral_given: '🤝',
-    onboarding_complete: '✅'
+    onboarding_complete: '✅',
+    complete_profile: '👤',
+    post_question: '❓',
+    post_job_gig: '💼',
+    share_salary: '💰',
+    share_story: '📖',
+    invite_parent_joined: '🎉',
+    upvote_answer: '👍',
+    mock_interview: '🎤'
+  };
+
+  // Human-readable labels for karma action types
+  const actionLabels = {
+    onboarding_complete: 'Completed onboarding',
+    answer: 'Answered a question',
+    answer_question: 'Answered a question',
+    upvote_received: 'Answer upvoted',
+    upvote_answer: 'Upvoted an answer',
+    best_answer: 'Marked as best answer',
+    outcome_reported: 'Reported an outcome',
+    salary_submitted: 'Shared salary data',
+    share_salary: 'Shared salary data',
+    interview_question_submitted: 'Shared interview question',
+    interview_question_confirmed: 'Confirmed interview question',
+    message_responded: 'Responded to a message',
+    message_received: 'Received a message',
+    referral_given: 'Made an introduction',
+    complete_profile: 'Completed profile',
+    post_question: 'Posted a question',
+    post_job_gig: 'Posted a job',
+    share_story: 'Shared a story',
+    invite_parent_joined: 'Invited parent joined',
+    mock_interview: 'Completed mock interview',
+    ama_hosted: 'Hosted an AMA',
   };
 
   if (loading) {
