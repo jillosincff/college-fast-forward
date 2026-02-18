@@ -76,30 +76,6 @@ export default function SeekerPostRequestStep({ user, seekerNeeds = [], onComple
         </p>
       </div>
 
-      {/* Help type selection */}
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          What kind of help do you need? <span className="text-red-500">*</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {HELP_CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              type="button"
-              onClick={() => toggleType(cat.value)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full border-2 font-medium text-sm transition-all ${
-                selectedTypes.includes(cat.value)
-                  ? 'border-[#0021A5] bg-[#0021A5] text-white'
-                  : 'border-slate-300 bg-white text-slate-700 hover:border-[#0021A5] hover:bg-blue-50'
-              }`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Title */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
