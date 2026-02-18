@@ -307,7 +307,7 @@ export default function Onboarding() {
         <AlumniPledge
           user={user}
           intent={alumniIntent}
-          onComplete={() => setStep(8)}  
+          onComplete={() => setStep(8)}
         />
       );
     }
