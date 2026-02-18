@@ -363,13 +363,33 @@ export default function AlumniDashboard() {
 
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
-          {/* GIVE + GET MODE: Show "Your Active Request" if exists */}
-          {mode === 'give_and_get' && myRequests.length > 0 && (
+          {/* SEEKER MODE: Primary content is getting help */}
+          {mode === 'seeking' && myRequests.length > 0 && (
             <YourActiveRequestSection request={myRequests[0]} />
           )}
 
-          {/* GIVE + GET MODE: Show "Alumni Can Help You" if no active request */}
-          {mode === 'give_and_get' && myRequests.length === 0 && alumniWhoCanHelp.length > 0 && (
+          {/* SEEKER MODE: Prompt to post a request if none yet */}
+          {mode === 'seeking' && myRequests.length === 0 && (
+            <section className="bg-white rounded-3xl shadow-lg border-2 overflow-hidden" style={{ borderColor: 'rgba(250, 70, 22, 0.3)' }}>
+              <div className="p-6 text-center">
+                <div className="text-4xl mb-3">🙋</div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Tell the Network What You Need</h2>
+                <p className="text-gray-600 mb-5 max-w-md mx-auto">
+                  Post a help request and let alumni and parents in the UF network reach out to you with advice, intros, and opportunities.
+                </p>
+                <button
+                  onClick={() => setShowPostRequestModal(true)}
+                  className="text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg transition hover:scale-105"
+                  style={{ backgroundColor: '#FA4616', boxShadow: '0 8px 20px rgba(250, 70, 22, 0.3)' }}
+                >
+                  Post a Help Request →
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* Alumni/Parents who can help (seeker + give_and_get modes) */}
+          {(mode === 'seeking' || mode === 'give_and_get') && alumniWhoCanHelp.length > 0 && (
             <AlumniCanHelpYouSection
               matches={alumniWhoCanHelp}
               total={alumniWhoCanHelp.length}
@@ -378,16 +398,23 @@ export default function AlumniDashboard() {
             />
           )}
 
-          {/* Help Students */}
-          <AlumniStudentQuestionsSection
-            questions={studentQuestions}
-            totalCount={studentQuestions.length}
-            newToday={studentQuestions.filter(q => {
-              const hoursOld = (Date.now() - new Date(q.created_date).getTime()) / (1000 * 60 * 60);
-              return hoursOld < 24;
-            }).length}
-            alumni={user}
-          />
+          {/* GIVE + GET MODE: Show "Your Active Request" if exists */}
+          {mode === 'give_and_get' && myRequests.length > 0 && (
+            <YourActiveRequestSection request={myRequests[0]} />
+          )}
+
+          {/* Help Students — shown for give_only and give_and_get, lower priority for seekers */}
+          {mode !== 'seeking' && (
+            <AlumniStudentQuestionsSection
+              questions={studentQuestions}
+              totalCount={studentQuestions.length}
+              newToday={studentQuestions.filter(q => {
+                const hoursOld = (Date.now() - new Date(q.created_date).getTime()) / (1000 * 60 * 60);
+                return hoursOld < 24;
+              }).length}
+              alumni={user}
+            />
+          )}
 
           {/* Help Fellow Alumni */}
           {alumniRequests.length > 0 && (
@@ -401,11 +428,13 @@ export default function AlumniDashboard() {
             />
           )}
 
-          {/* Leaderboard */}
-          <AlumniLeaderboardSection
-            entries={leaderboard}
-            currentUserId={user.id}
-          />
+          {/* Leaderboard — not primary for seekers */}
+          {mode !== 'seeking' && (
+            <AlumniLeaderboardSection
+              entries={leaderboard}
+              currentUserId={user.id}
+            />
+          )}
 
           {/* Quick Actions */}
           <AlumniQuickActionsSection
