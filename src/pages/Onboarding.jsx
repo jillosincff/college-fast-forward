@@ -658,8 +658,11 @@ export default function Onboarding() {
       );
     }
     
-    // Alumni Step 7: Invite Parent
-    if (step === 7 && isAlumni) {
+    // Alumni Step 7: Pledge (rendered as full-screen component, no left side needed)
+    // Left side won't show for step 7 since it's full-screen
+
+    // Alumni Step 8: Invite Parent
+    if (step === 8 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
