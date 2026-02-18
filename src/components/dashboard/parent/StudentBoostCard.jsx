@@ -134,7 +134,7 @@ export default function StudentBoostCard({ user, linkedStudent, familyKarma, kar
       
       <div className="px-5 py-4 bg-white space-y-3">
         <p className="text-sm text-gray-600">
-          You've earned <strong>{familyKarma || 0} Family Karma</strong> ({TIER_LABELS[karmaLevel] || 'Getting Started'} tier, {boostMultiplier || 0}x boost).
+          You've earned <strong>{familyKarma || 0} Karma</strong> ({TIER_LABELS[karmaLevel] || 'Getting Started'} tier, {boostMultiplier || 0}x boost).
         </p>
         <p className="text-sm text-gray-500">
           {studentName} hasn't posted any questions yet. When they do, their questions will automatically get boosted to the top of the feed!
