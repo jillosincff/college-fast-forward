@@ -11,14 +11,18 @@ Deno.serve(async (req) => {
 
     const { dryRun = true } = await req.json().catch(() => ({}));
 
-    // Find all gators with non-UFL emails AND users with no persona
-    const allUsers = await base44.asServiceRole.entities.User.filter({}, '-created_date', 9999);
+    // Find gators first, then filter for non-UFL emails
+    const [gators, students] = await Promise.all([
+      base44.asServiceRole.entities.User.filter({ persona: 'gator' }, '-created_date', 500),
+      base44.asServiceRole.entities.User.filter({ persona: 'student' }, '-created_date', 500)
+    ]);
     
-    const nonUFLGators = (allUsers || []).filter(u => {
-      const isGator = u.persona === 'gator' || u.persona === 'student';
+    const allGators = [...(gators || []), ...(students || [])];
+    
+    const nonUFLGators = allGators.filter(u => {
       const isNonUFL = u.email && !u.email.toLowerCase().endsWith('@ufl.edu');
       const notAdmin = !u.roles?.includes('admin');
-      return isGator && isNonUFL && notAdmin;
+      return isNonUFL && notAdmin;
     });
 
     if (dryRun) {
