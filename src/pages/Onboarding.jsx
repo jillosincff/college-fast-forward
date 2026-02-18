@@ -1503,8 +1503,17 @@ export default function Onboarding() {
             />
           )}
 
-          {/* STEP 5 (Parents) / STEP 8 (Alumni): Ready */}
-            {((step === 5 && !isAlumni) || (step === 8 && isAlumni)) && (
+          {/* ===== ALUMNI SEEKER STEP 8: Post Request ===== */}
+          {step === 8 && isAlumniSeeker && (
+            <SeekerPostRequestStep
+              user={user}
+              onComplete={() => setStep(9)}
+              onSkip={() => setStep(9)}
+            />
+          )}
+
+          {/* STEP 5 (Parents) / STEP 8 (Alumni Helper) / STEP 9 (Alumni Seeker): Ready */}
+            {((step === 5 && !isAlumni) || (step === 8 && isAlumniHelper) || (step === 9 && isAlumniSeeker)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
