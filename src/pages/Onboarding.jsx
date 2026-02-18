@@ -680,8 +680,40 @@ export default function Onboarding() {
     // Alumni Step 7: Pledge (rendered as full-screen component, no left side needed)
     // Left side won't show for step 7 since it's full-screen
 
-    // Ready step (step 5 for parents, step 8 for alumni)
-    if ((step === 5 && !isAlumni) || (step === 8 && isAlumni)) {
+    // Alumni seeker step 8: Post your request
+    if (step === 8 && isAlumniSeeker) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 8 of {totalSteps}</p>
+            <h1 className="text-3xl font-bold text-white">Post your first request 🚀</h1>
+          </div>
+          <p className="text-xl text-white/90">
+            This is how people in the network will find you and offer help.
+          </p>
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
+            <p className="text-white">
+              <strong>How it works:</strong><br />
+              Post what you need → Parents and alumni who match your request will see it → They reach out to you with intros, advice, and connections.
+            </p>
+          </div>
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🎯</span>
+              <span className="font-semibold text-sm">Specific requests get 3x more responses</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🔒</span>
+              <span className="font-semibold text-sm">Only visible to parents and alumni — not students</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Ready step (step 5 for parents, step 8 for alumni helpers, step 9 for alumni seekers)
+    const readyStep = isAlumniSeeker ? 9 : (isAlumni ? 8 : 5);
+    if ((step === 5 && !isAlumni) || (step === readyStep && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
