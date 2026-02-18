@@ -38,6 +38,12 @@ export default function ParentDashboard() {
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
+  // Determine user type for conditional rendering
+  const isParent = user?.persona === 'parent';
+  const isAlumniHelper = user?.persona === 'alumni' && user?.alumni_intent === 'help_students';
+  const showStudentLinking = isParent; // Only parents link students
+  const karmaLabel = isParent ? 'Family Karma' : 'Karma';
+
   useEffect(() => {
     if (user?.id) {
       trackEvent('parent_dashboard_viewed', { userId: user.id });
