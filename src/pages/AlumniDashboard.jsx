@@ -454,6 +454,7 @@ export default function AlumniDashboard() {
               matches={alumniWhoCanHelp}
               total={alumniWhoCanHelp.length}
               matchedCategories={user.needs_help_with || []}
+              activeRequest={myRequests[0] || null}
               onPostRequest={() => setShowPostRequestModal(true)}
             />
           )}
