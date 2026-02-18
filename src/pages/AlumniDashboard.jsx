@@ -266,43 +266,97 @@ export default function AlumniDashboard() {
     }));
   };
 
-  const findAlumniWhoCanHelp = (allAlumni, currentUser) => {
+  const findAlumniWhoCanHelp = (allAlumni, currentUser, myActiveRequests = []) => {
     const myNeeds = currentUser.needs_help_with || [];
-    // For seekers without specific needs, still show alumni/parents who have expertise
-    if (myNeeds.length === 0 && mode !== 'seeking') return [];
-    const matchAll = myNeeds.length === 0; // If no specific needs, show all with expertise
+    
+    // Extract matching signals from the user's active help requests
+    const requestIndustries = [];
+    const requestHelpTypes = [];
+    const requestRoles = [];
+    myActiveRequests.forEach(req => {
+      if (req.target_industry) requestIndustries.push(req.target_industry.toLowerCase());
+      if (req.target_industries) req.target_industries.forEach(i => requestIndustries.push(i.toLowerCase()));
+      if (req.help_types) requestHelpTypes.push(...req.help_types);
+      if (req.role) requestRoles.push(req.role.toLowerCase());
+      if (req.alumni_help_type) requestHelpTypes.push(req.alumni_help_type);
+    });
+
+    // For seekers without specific needs AND no requests, still show alumni/parents who have expertise
+    const hasAnySignal = myNeeds.length > 0 || requestIndustries.length > 0 || requestHelpTypes.length > 0;
+    if (!hasAnySignal && mode !== 'seeking') return [];
+    const matchAll = !hasAnySignal; // If no signals at all, show broadly
 
     // Filter alumni/parents who can help
     const matches = allAlumni
       .filter(a => a.email !== currentUser.email) // Exclude self
-      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help || a.persona === 'parent') // Has expertise or is a parent
+      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help || a.persona === 'parent' || a.industry) // Has expertise or is a parent
       .map(alumni => {
         const theirExpertise = [
           ...(alumni.expertise_areas || []),
           ...(alumni.help_types || []),
           ...(alumni.ways_to_help || [])
         ];
+        const theirIndustry = (alumni.industry || '').toLowerCase();
+        const theirTitle = (alumni.current_position || alumni.job_title || '').toLowerCase();
+        const theirCompany = (alumni.current_company || alumni.company || '').toLowerCase();
         
-        // Find matching categories
-        const matchedCategories = matchAll ? theirExpertise.slice(0, 3) : myNeeds.filter(need => theirExpertise.includes(need));
-        
-        if (!matchAll && matchedCategories.length === 0) return null;
+        let score = 0;
+        const matchedCategories = [];
+
+        // Match on user profile needs
+        myNeeds.forEach(need => {
+          if (theirExpertise.includes(need)) {
+            score += 3;
+            if (!matchedCategories.includes(need)) matchedCategories.push(need);
+          }
+        });
+
+        // Match on request industries
+        if (theirIndustry && requestIndustries.includes(theirIndustry)) {
+          score += 5; // Strong signal — industry match from their actual request
+          if (!matchedCategories.includes(alumni.industry)) matchedCategories.push(alumni.industry);
+        }
+
+        // Match on request help types
+        requestHelpTypes.forEach(ht => {
+          if (theirExpertise.includes(ht)) {
+            score += 2;
+            if (!matchedCategories.includes(ht)) matchedCategories.push(ht);
+          }
+        });
+
+        // Match on role keywords from request
+        requestRoles.forEach(role => {
+          if (theirTitle.includes(role) || theirCompany.includes(role)) {
+            score += 4;
+          }
+        });
+
+        // If matchAll (no signals), show anyone with expertise
+        if (matchAll) {
+          const displayCategories = theirExpertise.slice(0, 3);
+          if (displayCategories.length === 0 && alumni.industry) displayCategories.push(alumni.industry);
+          return {
+            id: alumni.id, email: alumni.email,
+            displayName: getDisplayName(alumni.full_name), full_name: alumni.full_name,
+            jobTitle: alumni.current_position || alumni.job_title, current_position: alumni.current_position,
+            company: alumni.current_company || alumni.company, current_company: alumni.current_company,
+            graduationYear: alumni.graduation_year, matchedCategories: displayCategories,
+            canHelpWith: theirExpertise, isFastResponder: alumni.is_fast_responder || false,
+            karmaLevel: alumni.karma_level || 'bronze', matchScore: 1
+          };
+        }
+
+        if (score === 0) return null;
         
         return {
-          id: alumni.id,
-          email: alumni.email,
-          displayName: getDisplayName(alumni.full_name),
-          full_name: alumni.full_name,
-          jobTitle: alumni.current_position || alumni.job_title,
-          current_position: alumni.current_position,
-          company: alumni.current_company || alumni.company,
-          current_company: alumni.current_company,
-          graduationYear: alumni.graduation_year,
-          matchedCategories,
-          canHelpWith: theirExpertise,
-          isFastResponder: alumni.is_fast_responder || false,
-          karmaLevel: alumni.karma_level || 'bronze',
-          matchScore: matchedCategories.length
+          id: alumni.id, email: alumni.email,
+          displayName: getDisplayName(alumni.full_name), full_name: alumni.full_name,
+          jobTitle: alumni.current_position || alumni.job_title, current_position: alumni.current_position,
+          company: alumni.current_company || alumni.company, current_company: alumni.current_company,
+          graduationYear: alumni.graduation_year, matchedCategories: matchedCategories.slice(0, 3),
+          canHelpWith: theirExpertise, isFastResponder: alumni.is_fast_responder || false,
+          karmaLevel: alumni.karma_level || 'bronze', matchScore: score
         };
       })
       .filter(Boolean)
