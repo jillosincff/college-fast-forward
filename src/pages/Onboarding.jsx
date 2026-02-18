@@ -296,6 +296,17 @@ export default function Onboarding() {
     navigate('ParentDashboard');
   };
 
+  // Step 7 (Alumni): Pledge - rendered full-screen, outside the split layout
+  if (step === 7 && isAlumni) {
+    return (
+      <AlumniPledge
+        user={user}
+        intent={alumniIntent}
+        onComplete={() => setStep(8)}
+      />
+    );
+  }
+
   // Show push notification prompt after onboarding is complete
   if (showPushPrompt && onboardingComplete) {
     return (
