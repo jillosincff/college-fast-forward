@@ -435,6 +435,34 @@ export default function Onboarding() {
     // Step 3 for parents, step 4 for alumni: How to help
     if ((step === 3 && !isAlumni) || (step === 4 && isAlumni)) {
       const stepLabel = isAlumni ? `Step 4 of ${totalSteps}` : `Step 3 of ${totalSteps}`;
+      
+      // Alumni helpers get a dedicated left panel
+      if (isAlumniHelper) {
+        return (
+          <div className="space-y-5">
+            <div>
+              <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
+              <h1 className="text-3xl font-bold text-white">Help Students Succeed</h1>
+            </div>
+            
+            <p className="text-xl text-white/90">
+              Your experience opens doors. Share what you know, make introductions, and help the next generation of UF graduates launch their careers.
+            </p>
+            
+            <div className="space-y-2 pt-4">
+              <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+                <span className="text-xl">🚀</span>
+                <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+                <span className="text-xl">⏱️</span>
+                <span className="font-semibold text-sm">Most help takes just 5-10 minutes</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
       return (
         <div className="space-y-5">
           <div>
