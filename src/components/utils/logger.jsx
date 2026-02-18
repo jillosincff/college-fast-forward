@@ -9,7 +9,8 @@ const logger = {
   
   error: (message, data = {}) => {
     // Don't log network errors to avoid noise
-    if (message?.includes('Network Error') || data?.error?.includes('Network Error')) {
+    const errStr = typeof data?.error === 'string' ? data.error : data?.error?.message || '';
+    if (message?.includes?.('Network Error') || errStr.includes('Network Error')) {
       return;
     }
     console.error(`[ERROR] ${message}`, data);
