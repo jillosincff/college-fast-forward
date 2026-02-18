@@ -628,7 +628,7 @@ export default function Onboarding() {
       );
     }
     
-    // Link Student step (step 4 for parents ONLY)
+    // PARENT Step 4: Link Student
     if (step === 4 && !isAlumni) {
       return (
         <div className="space-y-5">
@@ -702,32 +702,36 @@ export default function Onboarding() {
 
         {/* Mobile: Condensed Content */}
         <div className="lg:hidden text-center mb-6">
-          {step === 1 && (
+          {step === 1 && isAlumni && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">
-                {isAlumni 
-                  ? 'Welcome to College Fast Forward'
-                  : 'Welcome to College Fast Forward'
-                }
-              </h1>
+              <h1 className="text-xl font-bold mb-2 text-white">Your Alumni Details 🎓</h1>
+              <p className="text-sm text-white/90">Tell us about your time at UF</p>
+            </>
+          )}
+          {step === 1 && !isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
               <p className="text-lg font-black mb-3 text-white">
-                {isAlumni 
-                  ? 'Your experience can change someone\'s trajectory.'
-                  : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
-                }
+                You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.
               </p>
             </>
           )}
-          {step === 2 && (
+          {step === 2 && isAlumni && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">What's your superpower?</h1>
+              <h1 className="text-xl font-bold mb-2 text-white">Tell us about yourself</h1>
+              <p className="text-sm text-white/90">Where do you work now?</p>
+            </>
+          )}
+          {step === 2 && !isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">What's your industry?</h1>
               <p className="text-sm text-white/90">Select your areas of expertise</p>
             </>
           )}
           {step === 3 && isAlumni && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">What brings you to CFF?</h1>
-              <p className="text-sm text-white/90">Choose your path</p>
+              <h1 className="text-xl font-bold mb-2 text-white">What's your industry?</h1>
+              <p className="text-sm text-white/90">Select your industry</p>
             </>
           )}
           {step === 3 && !isAlumni && (
@@ -736,34 +740,34 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Select your expertise areas</p>
             </>
           )}
-          {step === 4 && isAlumniHelper && (
+          {step === 4 && isAlumni && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">Help Students Succeed</h1>
-              <p className="text-sm text-white/90">Select your expertise areas</p>
-            </>
-          )}
-          {step === 4 && isAlumniSeeker && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">Get Help. Pay It Forward.</h1>
-              <p className="text-sm text-white/90">Tell us what you need and how you can help students</p>
-            </>
-          )}
-          {step === 5 && isAlumni && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">Your Alumni Details 🎓</h1>
-              <p className="text-sm text-white/90">Tell us about your time at UF</p>
-            </>
-          )}
-          {step === 6 && isAlumni && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">Inspire the next generation? 📖</h1>
-              <p className="text-sm text-white/90">Share your story with students</p>
+              <h1 className="text-xl font-bold mb-2 text-white">What brings you to CFF?</h1>
+              <p className="text-sm text-white/90">Choose your path</p>
             </>
           )}
           {step === 4 && !isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Link Your Student 🔗</h1>
               <p className="text-sm text-white/90">Boost your student's visibility</p>
+            </>
+          )}
+          {step === 5 && isAlumniHelper && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Help Students Succeed</h1>
+              <p className="text-sm text-white/90">Select your expertise areas</p>
+            </>
+          )}
+          {step === 5 && isAlumniSeeker && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">What do you need help with?</h1>
+              <p className="text-sm text-white/90">Select at least one</p>
+            </>
+          )}
+          {step === 6 && isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Inspire the next generation? 📖</h1>
+              <p className="text-sm text-white/90">Share your story with students</p>
             </>
           )}
           {((step === 5 && !isAlumni) || (step === 8 && isAlumni)) && (
