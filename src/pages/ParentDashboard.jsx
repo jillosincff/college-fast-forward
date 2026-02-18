@@ -303,7 +303,7 @@ export default function ParentDashboard() {
 
               {/* Motivational nudge - Dynamic */}
               <div className="mt-4 text-center">
-                {hasLinkedStudent && hasActiveRequest ? (
+                {showStudentLinking && hasLinkedStudent && hasActiveRequest ? (
                   (() => {
                     const pos = studentPosition;
                     let milestoneText;
@@ -327,10 +327,15 @@ export default function ParentDashboard() {
                       </div>
                     );
                   })()
-                ) : hasLinkedStudent ? (
+                ) : showStudentLinking && hasLinkedStudent ? (
                   <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
                     <span style={{ color: '#FA4616' }}>💡</span>
                     <span className="text-sm">When {studentFirstName} posts a question, your karma will boost their visibility</span>
+                  </div>
+                ) : !showStudentLinking ? (
+                  <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
+                    <span style={{ color: '#FA4616' }}>💡</span>
+                    <span className="text-sm">Every answer you give earns karma and helps a Gator get closer to their dream job</span>
                   </div>
                 ) : null}
               </div>
