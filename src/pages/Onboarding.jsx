@@ -101,6 +101,13 @@ export default function Onboarding() {
   // Alumni helper: Years of experience
   const [yearsExperience, setYearsExperience] = useState('');
   
+  // Alumni seeker specific fields
+  const [seekerNeeds, setSeekerNeeds] = useState([]);
+  const [seekerPayItForward, setSeekerPayItForward] = useState([]);
+  const [seekerCurrentRole, setSeekerCurrentRole] = useState('');
+  const [seekerActivelyLooking, setSeekerActivelyLooking] = useState(false);
+  const [seekerTargetRoles, setSeekerTargetRoles] = useState('');
+  
   // Visibility setting
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
 
