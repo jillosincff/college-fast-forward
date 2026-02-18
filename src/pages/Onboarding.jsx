@@ -397,11 +397,40 @@ export default function Onboarding() {
       );
     }
     
-    if (step === 3) {
+    // Alumni step 3: Intent selection
+    if (step === 3 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of {totalSteps}</p>
+            <h1 className="text-3xl font-bold text-white">What brings you here?</h1>
+          </div>
+          
+          <p className="text-xl text-white/90">
+            Whether you're here to give back or get a career boost — we've got you covered.
+          </p>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🤝</span>
+              <span className="font-semibold text-sm">Helpers answer questions & open doors for students</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🔍</span>
+              <span className="font-semibold text-sm">Seekers get matched with parents & alumni who can help</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Step 3 for parents, step 4 for alumni: How to help
+    if ((step === 3 && !isAlumni) || (step === 4 && isAlumni)) {
+      const stepLabel = isAlumni ? `Step 4 of ${totalSteps}` : `Step 3 of ${totalSteps}`;
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
             <h1 className="text-3xl font-bold text-white">{isAlumni ? 'Give & Get' : 'How can you help?'}</h1>
           </div>
           
