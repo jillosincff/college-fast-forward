@@ -555,12 +555,12 @@ export default function Onboarding() {
       );
     }
     
-    // Alumni Step 6: Invite Parent
-    if (step === 6 && isAlumni) {
+    // Alumni Step 7: Invite Parent
+    if (step === 7 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 6 of 7</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 7 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">Invite a Parent 👨‍👩‍👧</h1>
           </div>
           
