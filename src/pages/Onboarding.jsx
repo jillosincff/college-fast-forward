@@ -381,71 +381,106 @@ export default function Onboarding() {
     );
   };
 
+  // Helper: get alumni step number (alumni flow is reordered)
+  // Alumni: 1=UF, 2=You, 3=Industry, 4=Intent, 5=Help, 6=Story, 7=Pledge, 8=Ready
+  // Parent: 1=You, 2=Industry, 3=Help, 4=Link, 5=Ready
+
   // Left side content based on step
   const LeftSideContent = () => {
-    if (step === 1) {
+    // ALUMNI Step 1: UF Details
+    if (step === 1 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
             <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
           </div>
-          
-          {isAlumni ? (
-            <>
-              <div className="py-3">
-                <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-                  You're about to join a community of parents and alumni who are committed to helping students succeed.
-                </p>
-              </div>
-              
-              <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-                <p className="text-white font-semibold">
-                  Your experience can change someone's trajectory.
-                </p>
-                <p className="text-white/80 text-sm mt-2">
-                  Whether you're here to give back or get a career boost — students are already waiting for someone like you.
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="py-3">
-                <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-                  You have something students desperately need:{' '}
-                  <span className="underline decoration-4 decoration-white/70">access</span>.
-                </p>
-              </div>
-              
-              <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-                <p className="text-white">
-                  <strong>70-80% of jobs are filled through referrals.</strong>{' '}
-                  But today's students are stuck in an "experience loop"—they can't get hired without experience, and can't get experience without being hired.
-                </p>
-              </div>
-              
-              <p className="text-lg text-white">
-                Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
-                <strong>And it takes you 5 minutes.</strong>
-              </p>
-            </>
-          )}
+          <div className="py-3">
+            <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
+              Let's start with your time at UF 🎓
+            </p>
+          </div>
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+            <p className="text-white">
+              This helps us match you with the right students and adds credibility to your profile.
+            </p>
+          </div>
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">🔗</span>
+              <span className="font-semibold text-sm">Students connect with alumni who share their major</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+              <span className="text-xl">✨</span>
+              <span className="font-semibold text-sm">Your degree adds authority to your advice</span>
+            </div>
+          </div>
         </div>
       );
     }
-    
-    if (step === 2) {
+
+    // PARENT Step 1: You
+    if (step === 1 && !isAlumni) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
+            <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
+          </div>
+          <div className="py-3">
+            <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
+              You have something students desperately need:{' '}
+              <span className="underline decoration-4 decoration-white/70">access</span>.
+            </p>
+          </div>
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+            <p className="text-white">
+              <strong>70-80% of jobs are filled through referrals.</strong>{' '}
+              But today's students are stuck in an "experience loop"—they can't get hired without experience, and can't get experience without being hired.
+            </p>
+          </div>
+          <p className="text-lg text-white">
+            Your <strong>single introduction</strong> could be the door that changes a student's entire career trajectory.{' '}
+            <strong>And it takes you 5 minutes.</strong>
+          </p>
+        </div>
+      );
+    }
+
+    // ALUMNI Step 2: You (company, job title, LinkedIn)
+    if (step === 2 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of {totalSteps}</p>
+            <h1 className="text-3xl font-bold text-white">Tell us about yourself</h1>
+          </div>
+          <p className="text-xl text-white/90">
+            Where are you now? This helps students understand your background.
+          </p>
+          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
+            <p className="text-white font-semibold">
+              Your experience can change someone's trajectory.
+            </p>
+            <p className="text-white/80 text-sm mt-2">
+              Whether you're here to give back or get a career boost — students are already waiting for someone like you.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // PARENT Step 2 / ALUMNI Step 3: Industry
+    if ((step === 2 && !isAlumni) || (step === 3 && isAlumni)) {
+      return (
+        <div className="space-y-5">
+          <div>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step {isAlumni ? 3 : 2} of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">What's your industry?</h1>
           </div>
-          
           <p className="text-xl text-white/90">
             We'll match you with students interested in your field.
           </p>
-          
           <div className="space-y-2 pt-4">
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">🎯</span>
@@ -460,19 +495,17 @@ export default function Onboarding() {
       );
     }
     
-    // Alumni step 3: Intent selection
-    if (step === 3 && isAlumni) {
+    // ALUMNI Step 4: Intent selection
+    if (step === 4 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of {totalSteps}</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">What brings you here?</h1>
           </div>
-          
           <p className="text-xl text-white/90">
             Whether you're here to give back or get a career boost — we've got you covered.
           </p>
-          
           <div className="space-y-2 pt-4">
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">🤝</span>
@@ -487,11 +520,10 @@ export default function Onboarding() {
       );
     }
 
-    // Step 3 for parents, step 4 for alumni: How to help
-    if ((step === 3 && !isAlumni) || (step === 4 && isAlumni)) {
-      const stepLabel = isAlumni ? `Step 4 of ${totalSteps}` : `Step 3 of ${totalSteps}`;
+    // PARENT Step 3 / ALUMNI Step 5: How to help
+    if ((step === 3 && !isAlumni) || (step === 5 && isAlumni)) {
+      const stepLabel = isAlumni ? `Step 5 of ${totalSteps}` : `Step 3 of ${totalSteps}`;
       
-      // Alumni helpers get a dedicated left panel
       if (isAlumniHelper) {
         return (
           <div className="space-y-5">
@@ -499,11 +531,9 @@ export default function Onboarding() {
               <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
               <h1 className="text-3xl font-bold text-white">Help Students Succeed</h1>
             </div>
-            
             <p className="text-xl text-white/90">
               Your experience opens doors. Share what you know, make introductions, and help the next generation of UF graduates launch their careers.
             </p>
-            
             <div className="space-y-2 pt-4">
               <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
                 <span className="text-xl">🚀</span>
@@ -523,13 +553,11 @@ export default function Onboarding() {
           <div className="space-y-5">
             <div>
               <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
-              <h1 className="text-3xl font-bold text-white">Get Help. Pay It Forward.</h1>
+              <h1 className="text-3xl font-bold text-white">What do you need help with?</h1>
             </div>
-            
             <p className="text-xl text-white/90">
-              Connect with parents and alumni who want to help you succeed. And when you do — help someone coming up behind you.
+              Connect with parents and alumni who want to help you succeed.
             </p>
-            
             <div className="space-y-2 pt-4">
               <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
                 <span className="text-xl">🤝</span>
@@ -537,7 +565,7 @@ export default function Onboarding() {
               </div>
               <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
                 <span className="text-xl">🔄</span>
-                <span className="font-semibold text-sm">Pay it forward by helping current students</span>
+                <span className="font-semibold text-sm">You'll be matched based on your needs</span>
               </div>
             </div>
           </div>
@@ -550,11 +578,9 @@ export default function Onboarding() {
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
             <h1 className="text-3xl font-bold text-white">How can you help?</h1>
           </div>
-          
           <p className="text-xl text-white/90">
             Students need guidance in many areas. Pick what fits you best.
           </p>
-          
           <div className="space-y-2 pt-4">
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">🚀</span>
@@ -563,39 +589,6 @@ export default function Onboarding() {
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
               <span className="text-xl">⏱️</span>
               <span className="font-semibold text-sm">Most help takes just 5-10 minutes</span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    // Alumni Step 5: UF Details
-    if (step === 5 && isAlumni) {
-      return (
-        <div className="space-y-5">
-          <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of {totalSteps}</p>
-            <h1 className="text-3xl font-bold text-white">Your Alumni Details 🎓</h1>
-          </div>
-          
-          <p className="text-xl text-white/90">
-            A little more about your time at the University of Florida.
-          </p>
-          
-          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
-            <p className="text-white">
-              This helps us match you with the right students and adds credibility to your profile.
-            </p>
-          </div>
-          
-          <div className="space-y-2 pt-4">
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">🔗</span>
-              <span className="font-semibold text-sm">Students connect with alumni who share their major</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">✨</span>
-              <span className="font-semibold text-sm">Your degree adds authority to your advice</span>
             </div>
           </div>
         </div>
