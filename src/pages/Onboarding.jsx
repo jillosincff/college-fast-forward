@@ -1520,7 +1520,7 @@ export default function Onboarding() {
 
                 <div className="flex gap-3 pt-4">
                   <button
-                    onClick={() => setStep(6)}
+                    onClick={() => setStep(7)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
@@ -1530,8 +1530,8 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 5 (Parents) / STEP 8 (Alumni): Ready */}
-          {((step === 5 && !isAlumni) || (step === 8 && isAlumni)) && (
+          {/* STEP 5 (Parents) / STEP 9 (Alumni): Ready */}
+          {((step === 5 && !isAlumni) || (step === 9 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
