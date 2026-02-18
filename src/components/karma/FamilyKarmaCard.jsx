@@ -254,8 +254,8 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
         </div>
       </div>
       
-      {/* Family contributions */}
-      {familyContributions.length > 0 && (
+      {/* Family contributions — only for students with linked parents */}
+      {!isAlumniSeekerView && familyContributions.length > 0 && (
         <div className="border-t border-gray-100 pt-4 mb-4">
           <p className="text-sm font-medium text-gray-700 mb-2">Your family earned karma by:</p>
           <div className="space-y-2">
