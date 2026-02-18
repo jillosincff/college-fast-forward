@@ -396,20 +396,17 @@ export default function Onboarding() {
             <>
               <div className="py-3">
                 <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-                  Pay it forward to current students — and get discreet help with your own career when you need it.
+                  You're about to join a community of parents and alumni who are committed to helping students succeed.
                 </p>
               </div>
               
               <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-                <p className="text-white text-sm">
-                  <strong>As an alum, you can:</strong>
+                <p className="text-white font-semibold">
+                  Your experience can change someone's trajectory.
                 </p>
-                <ul className="text-white text-sm mt-2 space-y-1 ml-4 list-disc">
-                  <li>Answer student questions and share your experience</li>
-                  <li>Post exclusive opportunities</li>
-                  <li>Privately post career requests (new role, industry shift, business advice)</li>
-                  <li>Earn karma that boosts visibility for your own requests</li>
-                </ul>
+                <p className="text-white/80 text-sm mt-2">
+                  Whether you're here to give back or get a career boost — students are already waiting for someone like you.
+                </p>
               </div>
             </>
           ) : (
