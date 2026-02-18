@@ -1257,8 +1257,8 @@ export default function Onboarding() {
             />
           )}
 
-          {/* STEP 6 (Alumni ONLY): Invite Parent */}
-          {step === 6 && isAlumni && (
+          {/* STEP 7 (Alumni ONLY): Invite Parent */}
+          {step === 7 && isAlumni && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
