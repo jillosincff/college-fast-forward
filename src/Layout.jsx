@@ -401,53 +401,53 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                             if (item.name === 'Dashboard') {
                                 if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
                                 else if (user.persona === 'alumni') targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
-                                else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
-                                else targetPageForNav = 'Dashboard';
-                            }
-                            const isActive = currentPage === targetPageForNav;
-                            return (
-                                <ShadButton
-                                  key={item.name}
-                                  variant="ghost"
-                                  onClick={() => onNavigate(targetPageForNav)}
-                                  className={`font-medium transition-colors duration-200 text-sm ${
-                                    isActive
-                                      ? 'text-blue-600 border-b-2 border-blue-600 rounded-none'
-                                      : 'text-gray-600 hover:text-gray-900'
-                                  }`}
-                                >
-                                  {item.name}
-                                </ShadButton>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+                                                                      else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
+                                                                      else targetPageForNav = 'Dashboard';
+                                                                  }
+                                                                  const isActive = currentPage === targetPageForNav;
+                                                                  return (
+                                                                      <ShadButton
+                                                                        key={item.name}
+                                                                        variant="ghost"
+                                                                        onClick={() => onNavigate(targetPageForNav)}
+                                                                        className={`font-medium transition-colors duration-200 text-sm ${
+                                                                          isActive
+                                                                            ? 'text-blue-600 border-b-2 border-blue-600 rounded-none'
+                                                                            : 'text-gray-600 hover:text-gray-900'
+                                                                        }`}
+                                                                      >
+                                                                        {item.name}
+                                                                      </ShadButton>
+                                                                  );
+                                                              })}
+                                                          </div>
+                                                      )}
+                                                  </div>
 
-            <div className="flex items-center gap-3 md:gap-4">
-              {user && (
-                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                  <SheetTrigger asChild className="md:hidden">
-                    <ShadButton variant="outline" className="h-10 w-10 rounded-full p-0 border-2 border-slate-300">
-                      <Menu className="h-5 w-5 text-slate-700" />
-                      <span className="sr-only">Toggle navigation menu</span>
-                    </ShadButton>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-64 p-0">
-                    <div className="flex flex-col h-full">
-                      <div className="p-4 border-b">
-                        <img
-                          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-                          alt="College Fast Forward"
-                          className="h-20 w-auto object-contain"
-                        />
-                      </div>
-                      <nav className="flex-grow flex flex-col p-4 space-y-1">
-                        {filteredNavItems.map((item) => {
-                          let targetPageForNav = item.page;
-                          if (item.name === 'Dashboard') {
-                            if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
-                            else if (user.persona === 'alumni') targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+                                                  <div className="flex items-center gap-3 md:gap-4">
+                                                    {user && (
+                                                      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                                                        <SheetTrigger asChild className="md:hidden">
+                                                          <ShadButton variant="outline" className="h-10 w-10 rounded-full p-0 border-2 border-slate-300">
+                                                            <Menu className="h-5 w-5 text-slate-700" />
+                                                            <span className="sr-only">Toggle navigation menu</span>
+                                                          </ShadButton>
+                                                        </SheetTrigger>
+                                                        <SheetContent side="left" className="w-64 p-0">
+                                                          <div className="flex flex-col h-full">
+                                                            <div className="p-4 border-b">
+                                                              <img
+                                                                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                                                                alt="College Fast Forward"
+                                                                className="h-20 w-auto object-contain"
+                                                              />
+                                                            </div>
+                                                            <nav className="flex-grow flex flex-col p-4 space-y-1">
+                                                              {filteredNavItems.map((item) => {
+                                                                let targetPageForNav = item.page;
+                                                                if (item.name === 'Dashboard') {
+                                                                  if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
+                                                                  else if (user.persona === 'alumni') targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
                             else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
                             else targetPageForNav = 'Dashboard';
                           }
