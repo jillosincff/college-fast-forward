@@ -1601,7 +1601,16 @@ export default function Onboarding() {
                     {isAlumni && storyOption === 'yes' && alumniStory && (
                       <p>📖 Sharing your story {storyAnonymous ? '(anonymously)' : '(with first name)'}</p>
                     )}
-                    <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>
+                    {isAlumniSeeker && seekerNeeds.length > 0 && (
+                      <p>🔍 Looking for: {seekerNeeds.map(n => SEEKER_NEEDS.find(s => s.id === n)?.label).join(', ')}</p>
+                    )}
+                    {isAlumniSeeker && seekerCurrentRole && <p>👤 Current role: {seekerCurrentRole}</p>}
+                    {isAlumniSeeker && seekerActivelyLooking && <p>🟢 Actively looking</p>}
+                    {isAlumniSeeker && seekerTargetRoles && <p>🎯 Target roles: {seekerTargetRoles}</p>}
+                    {isAlumniSeeker && seekerPayItForward.length > 0 && (
+                      <p>🔄 Paying it forward: {seekerPayItForward.map(p => SEEKER_PAY_IT_FORWARD.find(s => s.id === p)?.label?.split(' — ')[0]).join(', ')}</p>
+                    )}
+                    {!isAlumniSeeker && <p>🤝 Ready to help with: {expertise.map(e => EXPERTISE_AREAS.find(a => a.id === e)?.label).join(', ')}</p>}
                     {/* Only show linked student for parents */}
                     {!isAlumni && linkedStudent && <p>🔗 Linked to: {linkedStudent.full_name || linkedStudent.email}</p>}
                   </div>
