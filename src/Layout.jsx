@@ -1247,12 +1247,9 @@ function AppContent() {
         } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-              // Route alumni based on intent: helpers → ParentDashboard, seekers → AlumniDashboard
-              if (user.alumni_intent === 'help_students') {
-                destination = 'ParentDashboard';
-              } else {
-                destination = 'AlumniDashboard';
-              }
+              // Route all alumni to ParentDashboard
+              // Helpers see student questions to answer; Seekers see parent/alumni matches who can help them
+              destination = 'ParentDashboard';
             } else {
           destination = 'Dashboard';
         }
