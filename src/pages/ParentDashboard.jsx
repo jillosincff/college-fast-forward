@@ -205,20 +205,18 @@ export default function ParentDashboard() {
               {/* Dynamic headline based on student link status */}
               <div className="text-center text-white mb-8 sm:mb-10">
                 <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase mb-2 sm:mb-3" style={{ color: '#FA4616' }}>
-                  {hasLinkedStudent ? "You're Powering" : "Join the Network"}
+                  {showStudentLinking && hasLinkedStudent ? "You're Powering" : "Join the Network"}
                 </p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-white">
                   {isFirstVisit
                     ? `Welcome, ${firstName}!`
-                    : hasLinkedStudent 
-                      ? `Welcome back, ${firstName}!`
-                      : `Welcome back, ${firstName}!`
+                    : `Welcome back, ${firstName}!`
                   }
                 </h1>
                 <p className="text-lg sm:text-xl font-medium text-white/80 mb-1">
-                  {hasLinkedStudent 
+                  {showStudentLinking && hasLinkedStudent 
                     ? `You're powering ${studentFirstName}'s career launch`
-                    : "Help UF students succeed"
+                    : "Every action you take helps a student get closer to their career"
                   }
                 </p>
               </div>
