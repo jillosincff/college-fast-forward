@@ -95,7 +95,7 @@ export default function AlumniHeroSection({
                   {karma}
                 </span>
               </div>
-              <p className="text-sm font-medium text-white/70">Your Karma</p>
+              <p className="text-sm font-medium text-white/70">Karma</p>
               <div 
                 className="mt-2 inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full border"
                 style={{ 
