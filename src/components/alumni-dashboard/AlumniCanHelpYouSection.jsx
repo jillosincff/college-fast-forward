@@ -82,24 +82,26 @@ export default function AlumniCanHelpYouSection({ matches, total, matchedCategor
           </div>
         )}
         
-        <div 
-          className="flex items-center justify-between p-4 rounded-xl"
-          style={{ backgroundColor: `${UF_BLUE}08` }}
-        >
-          <div className="flex items-center gap-3">
-            <span>💡</span>
-            <span className="text-sm text-gray-700">
-              Or post a request and let alumni come to you
-            </span>
-          </div>
-          <button
-            onClick={onPostRequest}
-            className="text-white font-semibold px-4 py-2 rounded-xl text-sm transition hover:scale-105"
-            style={{ backgroundColor: UF_BLUE }}
+        {!activeRequest && (
+          <div 
+            className="flex items-center justify-between p-4 rounded-xl"
+            style={{ backgroundColor: `${UF_BLUE}08` }}
           >
-            Post a Request →
-          </button>
-        </div>
+            <div className="flex items-center gap-3">
+              <span>💡</span>
+              <span className="text-sm text-gray-700">
+                Or post a request and let alumni come to you
+              </span>
+            </div>
+            <button
+              onClick={onPostRequest}
+              className="text-white font-semibold px-4 py-2 rounded-xl text-sm transition hover:scale-105"
+              style={{ backgroundColor: UF_BLUE }}
+            >
+              Post a Request →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
