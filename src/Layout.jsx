@@ -1105,13 +1105,14 @@ function AppContent() {
         // User is logged in - redirect to appropriate dashboard
         let destination = 'Dashboard';
         if (user.roles?.includes('admin')) {
-          destination = 'AdminDashboard';
-        } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
-          destination = 'ParentDashboard';
-        } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-          destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
-        }
-        console.log('🔄 [LandingPage] Authenticated user → redirecting to:', destination);
+            destination = 'AdminDashboard';
+          } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
+            destination = 'ParentDashboard';
+          } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+            // Alumni helpers → ParentDashboard, Alumni seekers → AlumniDashboard
+            destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+          }
+          console.log('🔄 [LandingPage] Authenticated user → redirecting to:', destination);
         navigate(destination);
         return;
       }
