@@ -35,8 +35,8 @@ export default function LandingPage() {
         if (response.data?.success) {
           setStats(prev => ({
             ...prev,
-            spots_left: response.data.spots_left || 47,
-            total_families: response.data.total_users || response.data.total_families || 623
+            spots_left: response.data.spots_left || 51,
+            total_families: response.data.total_users || response.data.total_families || 949
           }));
         }
       } catch (error) {
