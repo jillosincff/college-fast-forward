@@ -1219,13 +1219,13 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(4)}
+                    onClick={() => setStep(5)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
                   </button>
                   <button
-                    onClick={() => setStep(6)}
+                    onClick={() => setStep(7)}
                     disabled={!canProceedStep5Alumni}
                     className={`
                       flex-1 py-4 rounded-xl font-bold text-lg transition-all
