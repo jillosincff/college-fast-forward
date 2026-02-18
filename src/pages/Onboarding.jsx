@@ -502,18 +502,41 @@ export default function Onboarding() {
         );
       }
       
+      if (isAlumniSeeker) {
+        return (
+          <div className="space-y-5">
+            <div>
+              <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
+              <h1 className="text-3xl font-bold text-white">Get Help. Pay It Forward.</h1>
+            </div>
+            
+            <p className="text-xl text-white/90">
+              Connect with parents and alumni who want to help you succeed. And when you do — help someone coming up behind you.
+            </p>
+            
+            <div className="space-y-2 pt-4">
+              <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+                <span className="text-xl">🤝</span>
+                <span className="font-semibold text-sm">Alumni & parents in your industry are ready to help</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
+                <span className="text-xl">🔄</span>
+                <span className="font-semibold text-sm">Pay it forward by helping current students</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
       return (
         <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">{stepLabel}</p>
-            <h1 className="text-3xl font-bold text-white">{isAlumni ? 'Give & Get' : 'How can you help?'}</h1>
+            <h1 className="text-3xl font-bold text-white">How can you help?</h1>
           </div>
           
           <p className="text-xl text-white/90">
-            {isAlumni 
-              ? 'Help students. Get help when YOU need it. That\'s the deal.'
-              : 'Students need guidance in many areas. Pick what fits you best.'
-            }
+            Students need guidance in many areas. Pick what fits you best.
           </p>
           
           <div className="space-y-2 pt-4">
@@ -522,8 +545,8 @@ export default function Onboarding() {
               <span className="font-semibold text-sm">One intro from you = months of cold applying for them</span>
             </div>
             <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">{isAlumni ? '🤝' : '⏱️'}</span>
-              <span className="font-semibold text-sm">{isAlumni ? 'When you need a career pivot, alumni have your back' : 'Most help takes just 5-10 minutes'}</span>
+              <span className="text-xl">⏱️</span>
+              <span className="font-semibold text-sm">Most help takes just 5-10 minutes</span>
             </div>
           </div>
         </div>
