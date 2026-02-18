@@ -1442,13 +1442,11 @@ export default function Onboarding() {
                   <button
                     onClick={() => setStep(7)}
                     disabled={!canProceedStep5Alumni}
-                    className={`
-                      flex-1 py-4 rounded-xl font-bold text-lg transition-all
-                      ${canProceedStep5Alumni
+                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+                      canProceedStep5Alumni
                         ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
                         : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                      }
-                    `}
+                    }`}
                   >
                     Continue →
                   </button>
