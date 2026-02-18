@@ -7,6 +7,7 @@ import PushNotificationPrompt from '@/components/notifications/PushNotificationP
 import { Switch } from '@/components/ui/switch';
 import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
 import AlumniIntentStep from '@/components/onboarding/alumni/AlumniIntentStep';
+import AlumniPledge from '@/components/onboarding/alumni/AlumniHelperPledge';
 
 // Industry options
 const INDUSTRIES = [
