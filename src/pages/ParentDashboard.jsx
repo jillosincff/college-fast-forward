@@ -572,8 +572,8 @@ export default function ParentDashboard() {
         
       </div>
 
-      {/* Search Modal */}
-      <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
+      {/* Search Modal — Parents only */}
+      {showStudentLinking && <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle style={{ color: '#0021A5' }}>Search for Your Student</DialogTitle>
