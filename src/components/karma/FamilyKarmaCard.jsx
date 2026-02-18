@@ -278,21 +278,33 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
         </div>
       )}
       
-      {/* CTA to share with family */}
+      {/* CTA */}
       <div className="border-t border-gray-100 pt-4">
         <p className="text-sm text-gray-500 mb-3 flex items-center gap-1">
           <span>💡</span>
           Want to boost your visibility?
         </p>
         <p className="text-sm text-gray-600 mb-3">
-          Your family can earn more karma by answering questions, sharing salary data, or submitting interview questions.
+          {isAlumniSeekerView
+            ? "Earn more karma by answering questions, sharing salary data, or submitting interview questions."
+            : "Your family can earn more karma by answering questions, sharing salary data, or submitting interview questions."}
         </p>
-        <button
-          onClick={() => navigate('GatorParentInvite')}
-          className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50"
-        >
-          Share Link with Family →
-        </button>
+        {!isAlumniSeekerView && (
+          <button
+            onClick={() => navigate('GatorParentInvite')}
+            className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50"
+          >
+            Share Link with Family →
+          </button>
+        )}
+        {isAlumniSeekerView && (
+          <button
+            onClick={() => navigate('Connections?tab=questions')}
+            className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50"
+          >
+            Answer Questions to Earn More →
+          </button>
+        )}
       </div>
     </div>
   );
