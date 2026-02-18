@@ -695,8 +695,8 @@ export default function Onboarding() {
       );
     }
     
-    // Ready step (step 5 for parents, step 8 for alumni)
-    if ((step === 5 && !isAlumni) || (step === 8 && isAlumni)) {
+    // Ready step (step 5 for parents, step 9 for alumni)
+    if ((step === 5 && !isAlumni) || (step === 9 && isAlumni)) {
       return (
         <div className="space-y-5">
           <div>
