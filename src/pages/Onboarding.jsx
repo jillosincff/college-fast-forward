@@ -1090,124 +1090,30 @@ export default function Onboarding() {
 
               <div className="space-y-6">
                 {/* Seeker needs */}
-                <div className="grid grid-cols-1 gap-2">
-                  {SEEKER_NEEDS.map(need => (
-                    <button
-                      key={need.id}
-                      type="button"
-                      onClick={() => toggleSeekerNeed(need.id)}
-                      className={`flex items-center gap-4 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
-                        seekerNeeds.includes(need.id)
-                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <span className="text-2xl">{need.emoji}</span>
-                      <span className="font-semibold flex-1">{need.label}</span>
-                      {seekerNeeds.includes(need.id) && <span className="text-[#0021A5] font-bold">✓</span>}
-                    </button>
-                  ))}
-                </div>
-
-                {seekerNeeds.length === 0 && (
-                  <p className="text-xs text-amber-600">Please select at least one area you need help with</p>
-                )}
-
-                {/* Pay it forward section */}
-                <div className="border-t border-slate-200 my-4" />
-                
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">
-                    How can you help students?
-                  </h3>
-                  <p className="text-slate-500 text-sm mb-4">
-                    While you're here, you can also help current students. What can you offer? <span className="text-slate-400">(optional)</span>
-                  </p>
-
                   <div className="grid grid-cols-1 gap-2">
-                    {SEEKER_PAY_IT_FORWARD.map(item => (
+                    {SEEKER_NEEDS.map(need => (
                       <button
-                        key={item.id}
+                        key={need.id}
                         type="button"
-                        onClick={() => toggleSeekerPIF(item.id)}
-                        className={`flex items-center gap-4 px-4 py-3 rounded-xl text-left transition-all duration-200 border-2 ${
-                          seekerPayItForward.includes(item.id)
-                            ? 'bg-orange-50 border-[#FA4616] text-[#FA4616]'
+                        onClick={() => toggleSeekerNeed(need.id)}
+                        className={`flex items-center gap-4 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                          seekerNeeds.includes(need.id)
+                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
                             : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                         }`}
                       >
-                        <span className="text-xl">{item.emoji}</span>
-                        <span className="font-medium flex-1 text-sm">{item.label}</span>
-                        {seekerPayItForward.includes(item.id) && <span className="text-[#FA4616] font-bold">✓</span>}
+                        <span className="text-2xl">{need.emoji}</span>
+                        <span className="font-semibold flex-1">{need.label}</span>
+                        {seekerNeeds.includes(need.id) && <span className="text-[#0021A5] font-bold">✓</span>}
                       </button>
                     ))}
                   </div>
-                </div>
 
-                {/* Additional seeker fields */}
-                <div className="border-t border-slate-200 my-4" />
+                  {seekerNeeds.length === 0 && (
+                    <p className="text-xs text-amber-600">Please select at least one area you need help with</p>
+                  )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Current role <span className="font-normal text-slate-400">(or leave blank if actively looking)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={seekerCurrentRole}
-                    onChange={(e) => setSeekerCurrentRole(e.target.value)}
-                    placeholder="e.g., Marketing Coordinator at Google"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
-                  />
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setSeekerActivelyLooking(!seekerActivelyLooking)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all border-2 ${
-                        seekerActivelyLooking
-                          ? 'bg-orange-50 border-[#FA4616] text-[#FA4616]'
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                        seekerActivelyLooking ? 'border-[#FA4616] bg-[#FA4616]' : 'border-slate-300'
-                      }`}>
-                        {seekerActivelyLooking && <span className="text-white text-xs">✓</span>}
-                      </div>
-                      <span>I'm actively looking</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    What kind of roles are you looking for? <span className="font-normal text-slate-400">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={seekerTargetRoles}
-                    onChange={(e) => setSeekerTargetRoles(e.target.value)}
-                    placeholder="e.g., Product Manager, UX Designer, Data Analyst"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={linkedinUrl}
-                    onChange={(e) => handleLinkedInChange(e.target.value)}
-                    placeholder="https://linkedin.com/in/yourname"
-                    className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none transition-colors ${
-                      linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'
-                    }`}
-                  />
-                  {linkedinError && <p className="text-xs text-red-500 mt-1">{linkedinError}</p>}
-                </div>
-
-                <div className="flex gap-3">
+                  <div className="flex gap-3">
                   <button
                     onClick={() => setStep(3)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
