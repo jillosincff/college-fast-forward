@@ -76,11 +76,13 @@ export default function KarmaExplainerCard() {
       <div className="flex items-start gap-3 mb-4">
         <span className="text-2xl flex-shrink-0">🎯</span>
         <div>
-          <h3 className="font-bold text-lg text-slate-900">How Family Karma Works</h3>
+          <h3 className="font-bold text-lg text-slate-900">
+            {user?.persona === 'parent' ? 'How Family Karma Works' : 'How Karma Works'}
+          </h3>
           <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-            Every time you help a student — answering questions, posting jobs,
-            or making introductions — your family earns karma points. The more karma
-            you earn, the more visible your student becomes in match results.
+            {user?.persona === 'parent'
+              ? "Every time you help a student — answering questions, posting jobs, or making introductions — your family earns karma points. The more karma you earn, the more visible your student becomes in match results."
+              : "Every time you help a student — answering questions, posting jobs, or making introductions — you earn karma points. The more karma you earn, the more visible you become in the network."}
           </p>
         </div>
       </div>
