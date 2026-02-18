@@ -311,12 +311,12 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   };
 
   const allNavItems = useMemo(() => [
-        { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'admin'] },
-        { name: 'Community', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent'] },
-        { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent'] },
-        { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent'] },
-        { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent'] },
-              { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent'] },
+        { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
+        { name: 'Community', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
+        { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
+        { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
+        { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
+              { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent', 'alumni'] },
             ], []);
 
   const filteredNavItems = useMemo(() => {
