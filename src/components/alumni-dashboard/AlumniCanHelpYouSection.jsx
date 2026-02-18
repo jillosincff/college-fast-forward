@@ -39,7 +39,7 @@ export default function AlumniCanHelpYouSection({ matches, total, matchedCategor
       {/* Header */}
       <div className="px-6 py-5 border-b" style={{ borderColor: `${UF_ORANGE}15` }}>
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <span>✨</span> {total} Alumni & Parents Can Help You
+          <span>✨</span> {total} Members Can Help You
         </h2>
         {allLabels ? (
           <p className="text-gray-600 text-sm mt-1">
@@ -77,7 +77,7 @@ export default function AlumniCanHelpYouSection({ matches, total, matchedCategor
                 backgroundColor: `${UF_BLUE}10`
               }}
             >
-              See All {total} Alumni →
+              See All {total} Members →
             </button>
           </div>
         )}
