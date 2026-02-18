@@ -16,6 +16,12 @@ const INTENT_OPTIONS = [
     title: 'Find opportunities',
     description: 'Get matched with parents and alumni who can help with your career. You\'ll see the job seeker dashboard.',
   },
+  {
+    id: 'both',
+    emoji: '🔄',
+    title: 'Both',
+    description: 'Help students AND get career help. You\'ll see the seeker dashboard with full helper actions enabled.',
+  },
 ];
 
 export default function AlumniIntentSwitcher({ user, onUpdated }) {
