@@ -184,6 +184,7 @@ export default function Onboarding() {
       
       // Alumni-specific fields
       if (isAlumni) {
+        if (alumniIntent) updateData.alumni_intent = alumniIntent;
         if (alumniGradYear) updateData.graduation_year = parseInt(alumniGradYear);
         if (alumniMajor.trim()) updateData.major = alumniMajor.trim();
         if (alumniMinor.trim()) updateData.minor = alumniMinor.trim();
