@@ -24,6 +24,12 @@ export default function AlumniHeroSection({
   const showFourthCard = mode === 'give_and_get' || isSeekerMode;
 
   const getNudgeMessage = () => {
+    if (isSeekerMode) {
+      if (hasActiveRequest) {
+        return `Your request is live — alumni and parents are reviewing it`;
+      }
+      return `Post a help request so alumni and parents can reach out to you`;
+    }
     if (hasActiveRequest && topRequest) {
       const position = topRequest.priority_score || 10;
       if (position > 5) {
