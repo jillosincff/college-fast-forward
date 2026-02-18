@@ -276,13 +276,18 @@ export default function AlumniDashboard() {
     // Extract matching signals from the user's active help requests
     const requestIndustries = [];
     const requestHelpTypes = [];
-    const requestRoles = [];
+    const requestKeywords = [];
     myActiveRequests.forEach(req => {
       if (req.target_industry) requestIndustries.push(req.target_industry.toLowerCase());
       if (req.target_industries) req.target_industries.forEach(i => requestIndustries.push(i.toLowerCase()));
       if (req.help_types) requestHelpTypes.push(...req.help_types);
-      if (req.role) requestRoles.push(req.role.toLowerCase());
+      if (req.role) requestKeywords.push(...req.role.toLowerCase().split(/[\s,—–-]+/).filter(w => w.length > 3));
       if (req.alumni_help_type) requestHelpTypes.push(req.alumni_help_type);
+      // Also extract keywords from description
+      if (req.description) {
+        const descWords = req.description.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+        requestKeywords.push(...descWords.slice(0, 10));
+      }
     });
 
     // For seekers without specific needs AND no requests, still show alumni/parents who have expertise
@@ -293,16 +298,17 @@ export default function AlumniDashboard() {
     // Filter alumni/parents who can help
     const matches = allAlumni
       .filter(a => a.email !== currentUser.email) // Exclude self
-      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help || a.persona === 'parent' || a.industry) // Has expertise or is a parent
       .map(alumni => {
+        // Directory fields: expertise_areas, ways_to_help, industry, job_title, company
         const theirExpertise = [
           ...(alumni.expertise_areas || []),
-          ...(alumni.help_types || []),
-          ...(alumni.ways_to_help || [])
+          ...(alumni.ways_to_help || []),
+          ...(alumni.mentorship_topics || [])
         ];
         const theirIndustry = (alumni.industry || '').toLowerCase();
-        const theirTitle = (alumni.current_position || alumni.job_title || '').toLowerCase();
-        const theirCompany = (alumni.current_company || alumni.company || '').toLowerCase();
+        const theirTitle = (alumni.job_title || '').toLowerCase();
+        const theirCompany = (alumni.company || '').toLowerCase();
+        const theirBio = (alumni.bio || '').toLowerCase();
         
         let score = 0;
         const matchedCategories = [];
@@ -316,8 +322,8 @@ export default function AlumniDashboard() {
         });
 
         // Match on request industries
-        if (theirIndustry && requestIndustries.includes(theirIndustry)) {
-          score += 5; // Strong signal — industry match from their actual request
+        if (theirIndustry && requestIndustries.some(ri => theirIndustry.includes(ri) || ri.includes(theirIndustry))) {
+          score += 5;
           if (!matchedCategories.includes(alumni.industry)) matchedCategories.push(alumni.industry);
         }
 
@@ -329,25 +335,33 @@ export default function AlumniDashboard() {
           }
         });
 
-        // Match on role keywords from request
-        requestRoles.forEach(role => {
-          if (theirTitle.includes(role) || theirCompany.includes(role)) {
-            score += 4;
+        // Match on keywords from request description/role against title, company, bio
+        requestKeywords.forEach(kw => {
+          if (theirTitle.includes(kw) || theirCompany.includes(kw) || theirBio.includes(kw)) {
+            score += 1;
           }
         });
 
-        // If matchAll (no signals), show anyone with expertise
+        // Parents with expertise always get a baseline score in seeker mode
+        if (score === 0 && alumni.persona === 'parent' && theirExpertise.length > 0) {
+          score += 1;
+          matchedCategories.push(...theirExpertise.slice(0, 2));
+        }
+
+        // If matchAll (no signals), show anyone with expertise or an industry
         if (matchAll) {
           const displayCategories = theirExpertise.slice(0, 3);
           if (displayCategories.length === 0 && alumni.industry) displayCategories.push(alumni.industry);
+          if (displayCategories.length === 0 && alumni.job_title) displayCategories.push(alumni.job_title);
+          if (displayCategories.length === 0) return null; // Skip users with no info
           return {
             id: alumni.id, email: alumni.email,
             displayName: getDisplayName(alumni.full_name), full_name: alumni.full_name,
-            jobTitle: alumni.current_position || alumni.job_title, current_position: alumni.current_position,
-            company: alumni.current_company || alumni.company, current_company: alumni.current_company,
+            jobTitle: alumni.job_title, current_position: alumni.job_title,
+            company: alumni.company, current_company: alumni.company,
             graduationYear: alumni.graduation_year, matchedCategories: displayCategories,
-            canHelpWith: theirExpertise, isFastResponder: alumni.is_fast_responder || false,
-            karmaLevel: alumni.karma_level || 'bronze', matchScore: 1
+            canHelpWith: theirExpertise, isFastResponder: false,
+            karmaLevel: 'bronze', matchScore: 1
           };
         }
 
@@ -356,11 +370,11 @@ export default function AlumniDashboard() {
         return {
           id: alumni.id, email: alumni.email,
           displayName: getDisplayName(alumni.full_name), full_name: alumni.full_name,
-          jobTitle: alumni.current_position || alumni.job_title, current_position: alumni.current_position,
-          company: alumni.current_company || alumni.company, current_company: alumni.current_company,
+          jobTitle: alumni.job_title, current_position: alumni.job_title,
+          company: alumni.company, current_company: alumni.company,
           graduationYear: alumni.graduation_year, matchedCategories: matchedCategories.slice(0, 3),
-          canHelpWith: theirExpertise, isFastResponder: alumni.is_fast_responder || false,
-          karmaLevel: alumni.karma_level || 'bronze', matchScore: score
+          canHelpWith: theirExpertise, isFastResponder: false,
+          karmaLevel: 'bronze', matchScore: score
         };
       })
       .filter(Boolean)
