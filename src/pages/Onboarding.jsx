@@ -1003,6 +1003,33 @@ export default function Onboarding() {
 
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Industries <span className="font-normal text-slate-400">(select all that apply)</span>
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {INDUSTRIES.map(ind => (
+                          <button
+                            key={`helper-ind-${ind.id}`}
+                            type="button"
+                            onClick={() => toggleIndustry(ind.id)}
+                            className={`
+                              flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm
+                              transition-all duration-200 border-2
+                              ${industries.includes(ind.id)
+                                ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                              }
+                            `}
+                          >
+                            <span>{ind.emoji}</span>
+                            <span className="font-medium">{ind.label}</span>
+                            {industries.includes(ind.id) && <span className="ml-auto">✓</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
                         LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
                       </label>
                       <input
