@@ -454,10 +454,10 @@ export default function ParentDashboard() {
           <KarmaExplainerCard />
 
           {/* ========== QUICK ACTIONS ========== */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            
-            {/* Complete Profile card — only show if still incomplete */}
-            {profilePercent < 100 && (
+          <section className="grid grid-cols-1 gap-3 sm:gap-4">
+
+            {/* Complete Profile card removed — compact banner above handles this */}
+            {false && profilePercent < 100 && (
               <div className="bg-white rounded-3xl p-6 border border-gray-200 hover:shadow-lg transition">
                 <div className="flex items-center gap-4 mb-5">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0, 33, 165, 0.1) 0%, rgba(0, 33, 165, 0.2) 100%)' }}>
