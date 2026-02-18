@@ -316,16 +316,7 @@ export default function ParentDashboard() {
                     <span style={{ color: '#FA4616' }}>💡</span>
                     <span className="text-sm">When {studentFirstName} posts a question, your karma will boost their visibility</span>
                   </div>
-                ) : (
-                  <button 
-                    onClick={() => setShowSearchModal(true)}
-                    className="inline-flex items-center gap-3 bg-white/20 hover:bg-white/30 backdrop-blur rounded-full px-6 py-3 text-white border border-white/30 transition"
-                  >
-                    <span>🔗</span>
-                    <span className="text-sm font-semibold">Link your student to activate karma boosts</span>
-                    <span>→</span>
-                  </button>
-                )}
+                ) : null}
               </div>
               
             </div>
