@@ -292,8 +292,12 @@ export default function Onboarding() {
   };
 
   const goToDashboard = () => {
-    // Alumni go to ParentDashboard (same as parents) since they share the helper view
-    navigate('ParentDashboard');
+    // Alumni helpers → ParentDashboard, Alumni seekers → AlumniDashboard
+    if (alumniIntent === 'help_students') {
+      navigate('ParentDashboard');
+    } else {
+      navigate('AlumniDashboard');
+    }
   };
 
   // Step 7 (Alumni): Pledge - rendered full-screen, outside the split layout
