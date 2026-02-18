@@ -12,10 +12,21 @@ const CATEGORY_LABELS = {
   introductions: 'Introductions',
 };
 
-export default function AlumniCanHelpYouSection({ matches, total, matchedCategories, onPostRequest }) {
+export default function AlumniCanHelpYouSection({ matches, total, matchedCategories, activeRequest, onPostRequest }) {
+  // Build subtitle from matched categories and/or active request
   const categoryLabels = matchedCategories
     .map(cat => CATEGORY_LABELS[cat] || cat)
-    .join(', ');
+    .filter(Boolean);
+  
+  const requestContext = activeRequest 
+    ? [
+        activeRequest.target_industry,
+        ...(activeRequest.target_industries || []),
+        activeRequest.role
+      ].filter(Boolean).join(', ')
+    : '';
+  
+  const allLabels = [...new Set([...categoryLabels, ...requestContext.split(', ').filter(Boolean)])].join(', ');
 
   return (
     <section 
