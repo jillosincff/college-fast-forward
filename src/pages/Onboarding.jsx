@@ -910,7 +910,7 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-6">
-                {/* GIVE Section */}
+                {/* Expertise selection (shown for all: parents, alumni helpers, alumni seekers) */}
                 <div className="grid grid-cols-1 gap-2">
                   {EXPERTISE_AREAS.map(area => (
                     <button
@@ -942,8 +942,81 @@ export default function Onboarding() {
                   <p className="text-xs text-amber-600">Please select at least one way you'd like to help</p>
                 )}
 
-                {/* GET Section - Alumni only */}
-                {isAlumni && (
+                {/* Additional helper fields for alumni helpers */}
+                {isAlumniHelper && (
+                  <>
+                    <div className="border-t border-slate-200 my-4" />
+                    
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Current company <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        placeholder="Company name"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                                 focus:border-[#0021A5] focus:outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Current role/title <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
+                        placeholder="e.g., VP of Marketing, Software Engineer"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                                 focus:border-[#0021A5] focus:outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Years of experience <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <select
+                        value={yearsExperience}
+                        onChange={(e) => setYearsExperience(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
+                                 focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                      >
+                        <option value="">Select range</option>
+                        <option value="0-2">0–2 years</option>
+                        <option value="3-5">3–5 years</option>
+                        <option value="6-10">6–10 years</option>
+                        <option value="11-15">11–15 years</option>
+                        <option value="16-20">16–20 years</option>
+                        <option value="20+">20+ years</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={linkedinUrl}
+                        onChange={(e) => handleLinkedInChange(e.target.value)}
+                        placeholder="https://linkedin.com/in/yourname"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-base
+                                 focus:outline-none transition-colors
+                                 ${linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'}`}
+                      />
+                      {linkedinError && (
+                        <p className="text-xs text-red-500 mt-1">{linkedinError}</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* GET Section - Alumni seekers only (NOT helpers) */}
+                {isAlumniSeeker && (
                   <>
                     <div className="border-t border-slate-200 my-6" />
                     
