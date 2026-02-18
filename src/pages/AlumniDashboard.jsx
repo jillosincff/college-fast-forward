@@ -37,8 +37,12 @@ export default function AlumniDashboard() {
   const [myJobs, setMyJobs] = useState([]);
   const [alumniWhoCanHelp, setAlumniWhoCanHelp] = useState([]);
   
+  // Alumni seekers use this dashboard — it's similar to student dashboard
+  const isAlumniSeeker = user?.alumni_intent === 'seeking_help' || user?.alumni_intent !== 'help_students';
+  
   // Determine dashboard mode based on user's onboarding choices
   const getDashboardMode = () => {
+    if (isAlumniSeeker) return 'give_and_get';
     if (user?.is_good_for_now) return 'give_only';
     if (!user?.needs_help_with || user.needs_help_with.length === 0) return 'give_only';
     return 'give_and_get';
