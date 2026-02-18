@@ -20,7 +20,8 @@ export default function AlumniHeroSection({
   const hasActiveRequest = myRequests.length > 0;
   const topRequest = myRequests[0];
   const badge = KARMA_BADGES[karmaLevel] || KARMA_BADGES.bronze;
-  const showFourthCard = mode === 'give_and_get';
+  const isSeekerMode = mode === 'seeking';
+  const showFourthCard = mode === 'give_and_get' || isSeekerMode;
 
   const getNudgeMessage = () => {
     if (hasActiveRequest && topRequest) {
