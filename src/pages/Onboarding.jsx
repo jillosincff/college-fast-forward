@@ -231,13 +231,16 @@ export default function Onboarding() {
         if (graduateDegrees.trim()) updateData.graduate_degrees = graduateDegrees.trim();
         if (yearsExperience) updateData.years_experience = yearsExperience;
         
-        // Alumni "Get Help" preferences (only for seekers, helpers don't need this)
+        // Seeker-specific fields
         if (alumniIntent === 'seeking_help') {
-          updateData.needs_help_with = isGoodForNow ? [] : needsHelpWith;
-          updateData.is_good_for_now = isGoodForNow;
-        } else {
-          updateData.needs_help_with = [];
-          updateData.is_good_for_now = true;
+          updateData.seeker_needs = seekerNeeds;
+          updateData.seeker_pay_it_forward = seekerPayItForward;
+          if (seekerCurrentRole.trim()) updateData.seeker_current_role = seekerCurrentRole.trim();
+          updateData.seeker_actively_looking = seekerActivelyLooking;
+          if (seekerTargetRoles.trim()) updateData.seeker_target_roles = seekerTargetRoles.trim();
+          // Also save seeker pay-it-forward as expertise for matching
+          updateData.expertise_areas = seekerPayItForward;
+          updateData.help_types = seekerPayItForward;
         }
         
         // Story sharing
