@@ -367,7 +367,9 @@ export default function GatorWelcome() {
       } else {
         // Truly returning user - redirect to dashboard
         console.log('✅ [GatorWelcome] Returning user - redirecting to dashboard');
-        const destination = intendedRole === 'parent' || intendedRole === 'alumni' ? 'ParentDashboard' : 'Dashboard';
+        let destination = 'Dashboard';
+        if (intendedRole === 'parent') destination = 'ParentDashboard';
+        else if (intendedRole === 'alumni') destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
         navigate(destination);
       }
     }
