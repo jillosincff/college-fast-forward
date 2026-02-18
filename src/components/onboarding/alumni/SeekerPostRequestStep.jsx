@@ -16,7 +16,6 @@ const HELP_CATEGORIES = [
 
 export default function SeekerPostRequestStep({ user, seekerNeeds = [], onComplete, onSkip }) {
   const { toast } = useToast();
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
