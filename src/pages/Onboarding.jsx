@@ -671,22 +671,30 @@ export default function Onboarding() {
         <div className="space-y-5">
           <div>
             <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Final Step</p>
-            <h1 className="text-3xl font-bold text-white">You're all set! 🎉</h1>
+            <h1 className="text-3xl font-bold text-white">
+              {isAlumniSeeker ? "You're almost in! 🎉" : "You're all set! 🎉"}
+            </h1>
           </div>
           
           <p className="text-xl text-white/90">
-            Students are already looking for someone like you.
+            {isAlumniSeeker
+              ? "Parents and alumni are ready to help you."
+              : "Students are already looking for someone like you."}
           </p>
           
           <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white mt-6">
             <p className="text-white">
               <strong>What happens next?</strong><br />
-              We'll match you with students who need your expertise. You'll get notified when someone wants to connect.
+              {isAlumniSeeker
+                ? "We'll match you with professionals in your target field. Post questions, get introductions, and connect with people who can open doors for you."
+                : "We'll match you with students who need your expertise. You'll get notified when someone wants to connect."}
             </p>
           </div>
           
           <p className="text-white font-medium pt-4">
-            Join <span className="font-bold">200+ parents & alumni</span> already opening doors
+            {isAlumniSeeker
+              ? "And remember — the more you help students, the more visible you become to people who can help YOU."
+              : <>Join <span className="font-bold">200+ parents & alumni</span> already opening doors</>}
           </p>
         </div>
       );
@@ -1482,11 +1490,13 @@ export default function Onboarding() {
                   </div>
                 )}
 
-                {/* Alumni karma info - no family/student language */}
+                {/* Alumni karma info */}
                 {isAlumni && (
                   <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
                     <p className="text-sm text-blue-800">
-                      <strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.
+                      {isAlumniSeeker
+                        ? <><strong>🌟 Your Karma:</strong> Every time you help a student — answering questions, sharing salary data, or interview tips — you earn karma. More karma = more visibility for YOUR career requests.</>
+                        : <><strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.</>}
                     </p>
                   </div>
                 )}
@@ -1496,7 +1506,9 @@ export default function Onboarding() {
                     <div>
                       <h3 className="font-semibold text-slate-800">Show my profile in the directory</h3>
                       <p className="text-sm text-slate-500 mt-1">
-                        Students can discover you and reach out for help
+                        {isAlumniSeeker
+                          ? "Parents and alumni can find you and offer help. Students can also reach out if they need your experience."
+                          : "Students can discover you and reach out for help"}
                       </p>
                     </div>
                     <Switch
@@ -1508,7 +1520,9 @@ export default function Onboarding() {
 
                 <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                   <p className="text-sm text-blue-800">
-                    <strong>💡 Tip:</strong> Being visible in the directory means more students can find you based on your expertise. You can always change this later in your profile settings.
+                    <strong>💡 Tip:</strong> {isAlumniSeeker
+                      ? "Being visible means professionals in your target field can find and connect with you. You can always change this later in your profile settings."
+                      : "Being visible in the directory means more students can find you based on your expertise. You can always change this later in your profile settings."}
                   </p>
                 </div>
 
