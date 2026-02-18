@@ -323,8 +323,8 @@ export default function ParentDashboard() {
           </div>
         </section>
 
-        {/* Profile completion banner — shown below hero if < 50% */}
-        {profilePercent < 50 && (
+        {/* Profile completion banner — shown below hero if incomplete */}
+        {profilePercent < 100 && (
           <section className="bg-gradient-to-r from-blue-50 to-orange-50 border-b border-blue-100">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
               <button
