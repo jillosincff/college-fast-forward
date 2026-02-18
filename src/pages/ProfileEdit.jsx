@@ -19,6 +19,7 @@ import { base44 } from '@/api/base44Client';
 import ResumeUpload from '@/components/profile/ResumeUpload';
 import ShareableProfile from '@/components/profile/ShareableProfile';
 import ExpertiseTagSelector from '@/components/profile/ExpertiseTagSelector';
+import AlumniIntentSwitcher from '@/components/profile/AlumniIntentSwitcher';
 
 
 import {
