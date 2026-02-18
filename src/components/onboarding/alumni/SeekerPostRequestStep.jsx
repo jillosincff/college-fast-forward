@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { JobRequest } from '@/entities/JobRequest';
