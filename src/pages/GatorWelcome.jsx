@@ -153,7 +153,9 @@ export default function GatorWelcome() {
     // CRITICAL: Only redirect if onboarding is EXPLICITLY true AND there's no pending role
     if (user.onboarding_completed === true && !pendingRole) {
       console.log('✅ [GatorWelcome] Already onboarded, redirecting to dashboard');
-      const destination = user.persona === 'parent' || user.persona === 'alumni' ? 'ParentDashboard' : 'Dashboard';
+      let destination = 'Dashboard';
+      if (user.persona === 'parent') destination = 'ParentDashboard';
+      else if (user.persona === 'alumni') destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
       navigate(destination);
       return;
     }
