@@ -16,7 +16,48 @@ const CATEGORY_LABELS = {
   business_advice: 'Business advice',
 };
 
-export default function YourActiveRequestSection({ request }) {
+export default function YourActiveRequestSection({ request, onPostRequest }) {
+  // No active request — prompt user to post one
+  if (!request) {
+    return (
+      <section 
+        className="rounded-3xl p-6 border"
+        style={{ 
+          background: `linear-gradient(135deg, ${UF_ORANGE}08 0%, #FFFFFF 100%)`,
+          borderColor: `${UF_ORANGE}25`
+        }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div 
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: `${UF_ORANGE}15` }}
+          >
+            <span className="text-lg">📬</span>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900">Your Request</h3>
+            <p className="text-sm text-gray-500">Let the network know what you need</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+          <div className="text-4xl mb-3">🙋</div>
+          <h4 className="font-bold text-gray-900 text-lg mb-2">Tell the Network What You Need</h4>
+          <p className="text-gray-600 mb-5 max-w-md mx-auto text-sm">
+            Post a request so alumni and parents in the UF network can reach out with advice, intros, and opportunities.
+          </p>
+          <button
+            onClick={onPostRequest}
+            className="text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg transition hover:scale-105"
+            style={{ backgroundColor: UF_ORANGE, boxShadow: `0 8px 20px ${UF_ORANGE}30` }}
+          >
+            Post a Help Request →
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   const req = request;
   const responseCount = req.answer_count || 0;
   const queuePosition = req.priority_score || 10;
@@ -54,6 +95,14 @@ export default function YourActiveRequestSection({ request }) {
         <h4 className="font-semibold text-gray-900 text-lg mb-2">
           {req.title || req.role}
         </h4>
+        
+        {/* Show the actual description the user wrote */}
+        {req.description && (
+          <p className="text-gray-700 text-sm mb-3 leading-relaxed line-clamp-3">
+            {req.description}
+          </p>
+        )}
+
         <div className="flex items-center gap-3 text-sm text-gray-500 mb-4 flex-wrap">
           <span 
             className="px-2 py-1 rounded-full"
