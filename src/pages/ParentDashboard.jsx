@@ -224,7 +224,7 @@ export default function ParentDashboard() {
               {/* Stats Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
                 
-                {/* Family Karma */}
+                {/* Karma */}
                 <TooltipProvider delayDuration={0}>
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border border-white/20 hover:bg-white/15 transition">
                   <div className="relative inline-block mb-1 sm:mb-2">
@@ -232,43 +232,55 @@ export default function ParentDashboard() {
                     <span className="relative text-2xl sm:text-4xl md:text-5xl font-black text-white">{karmaPoints}</span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
-                    <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Family Karma</p>
+                    <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{karmaLabel}</p>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button className="text-white/40 hover:text-white/70 transition" aria-label="What is Family Karma?">
+                        <button className="text-white/40 hover:text-white/70 transition" aria-label={`What is ${karmaLabel}?`}>
                           <HelpCircle className="w-3.5 h-3.5" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-[220px] text-center">
-                        <p className="text-xs">Help students, earn karma. More karma = more visibility for your student in match results.</p>
+                        <p className="text-xs">
+                          {showStudentLinking 
+                            ? 'Help students, earn karma. More karma = more visibility for your student in match results.'
+                            : 'Help students, earn karma. More karma = more visibility in the network.'}
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
                 </div>
                 </TooltipProvider>
 
-                {/* Student Queue Position - Dynamic */}
-                <div className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
-                  {hasLinkedStudent && hasActiveRequest ? (
-                    <>
-                      <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">#{studentPosition}</div>
-                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}'s Position</p>
-                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>in the help queue</p>
-                    </>
-                  ) : hasLinkedStudent ? (
-                    <>
-                      <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">💤</div>
-                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}</p>
-                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>No active request yet</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🔗</div>
-                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>Link Student</p>
-                      <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>to activate boosts</p>
-                    </>
-                  )}
-                </div>
+                {/* Middle Card: Student Queue (parents) or Questions Waiting (alumni helpers) */}
+                {showStudentLinking ? (
+                  <div className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
+                    {hasLinkedStudent && hasActiveRequest ? (
+                      <>
+                        <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">#{studentPosition}</div>
+                        <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}'s Position</p>
+                        <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>in the help queue</p>
+                      </>
+                    ) : hasLinkedStudent ? (
+                      <>
+                        <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">💤</div>
+                        <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>{studentFirstName}</p>
+                        <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>No active request yet</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🔗</div>
+                        <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>Link Student</p>
+                        <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>to activate boosts</p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border transition" style={{ background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)', borderColor: 'rgba(250, 70, 22, 0.5)' }}>
+                    <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">{data.unansweredCount || 0}</div>
+                    <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>Questions Waiting</p>
+                    <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>need your help</p>
+                  </div>
+                )}
 
                 {/* Students Helped */}
                 <div className="col-span-2 sm:col-span-1 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
