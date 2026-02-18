@@ -573,58 +573,62 @@ export default function ParentDashboard() {
       </div>
 
       {/* Search Modal — Parents only */}
-      {showStudentLinking && <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle style={{ color: '#0021A5' }}>Search for Your Student</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Student's Email or Name</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="john.doe@ufl.edu or John Doe"
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <Button onClick={handleSearch} disabled={isSearching}>
-                  {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                </Button>
+      {showStudentLinking && (
+        <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle style={{ color: '#0021A5' }}>Search for Your Student</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Student's Email or Name</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="john.doe@ufl.edu or John Doe"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <Button onClick={handleSearch} disabled={isSearching}>
+                    {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
-            </div>
-            {searchResults.length > 0 && (
-              <div className="space-y-2">
-                <Label>Results</Label>
-                {searchResults.map((student) => (
-                  <div key={student.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
-                    <div>
-                      <p className="font-medium">{student.full_name || 'Unknown'}</p>
-                      <p className="text-sm text-slate-500">{student.email}</p>
+              {searchResults.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Results</Label>
+                  {searchResults.map((student) => (
+                    <div key={student.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
+                      <div>
+                        <p className="font-medium">{student.full_name || 'Unknown'}</p>
+                        <p className="text-sm text-slate-500">{student.email}</p>
+                      </div>
+                      <Button size="sm" onClick={() => handleLinkStudent(student)}>Link</Button>
                     </div>
-                    <Button size="sm" onClick={() => handleLinkStudent(student)}>Link</Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {searchResults.length === 0 && searchQuery && !isSearching && (
-              <div className="text-center py-4 text-slate-500">
-                <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                <p>No students found. Try a different search.</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>}
+                  ))}
+                </div>
+              )}
+              {searchResults.length === 0 && searchQuery && !isSearching && (
+                <div className="text-center py-4 text-slate-500">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+                  <p>No students found. Try a different search.</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
       
-      {showStudentLinking && <AddStudentModal
-        isOpen={showAddStudentModal}
-        onClose={() => setShowAddStudentModal(false)}
-        onSuccess={async () => {
-          await refreshUser();
-          await refresh();
-        }}
-      />}
+      {showStudentLinking && (
+        <AddStudentModal
+          isOpen={showAddStudentModal}
+          onClose={() => setShowAddStudentModal(false)}
+          onSuccess={async () => {
+            await refreshUser();
+            await refresh();
+          }}
+        />
+      )}
     </>
   );
 }
