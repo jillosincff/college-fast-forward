@@ -14,14 +14,14 @@ export default function AlumniHeroSection({
   studentsHelped, 
   alumniHelped, 
   myRequests,
+  matchesCount = 0,
   onPostRequest,
-  mode = 'give_and_get' // 'give_only' or 'give_and_get'
+  mode = 'give_and_get' // 'give_only', 'give_and_get', or 'seeking'
 }) {
   const hasActiveRequest = myRequests.length > 0;
   const topRequest = myRequests[0];
-  const badge = KARMA_BADGES[karmaLevel] || KARMA_BADGES.bronze;
   const isSeekerMode = mode === 'seeking';
-  const showFourthCard = mode === 'give_and_get' || isSeekerMode;
+  const responseCount = topRequest?.answer_count || 0;
 
   const getNudgeMessage = () => {
     if (isSeekerMode) {
@@ -43,6 +43,139 @@ export default function AlumniHeroSection({
       return `Answer your first question to start building karma`;
     }
     return `You've helped ${studentsHelped} students — your network is growing`;
+  };
+
+  // Seeker mode shows 3 cards: Karma, Active Request + responses, Matches Available
+  // Helper modes show 3-4 cards: Karma, Students Helped, Alumni Helped, (optional request)
+  const renderSeekerStats = () => (
+    <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">
+      {/* Karma */}
+      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
+        <div className="relative inline-block mb-2">
+          <div 
+            className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
+            style={{ backgroundColor: '#FA4616' }}
+          />
+          <span className="relative text-4xl font-black text-white">
+            {karma}
+          </span>
+        </div>
+        <p className="text-sm font-medium text-white/70">Karma</p>
+        <p className="text-xs mt-1 text-white/50">Higher karma = more visibility</p>
+      </div>
+
+      {/* Active Request + Responses */}
+      <div 
+        className="backdrop-blur-xl rounded-3xl p-5 text-center border transition"
+        style={hasActiveRequest ? {
+          background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)',
+          borderColor: 'rgba(250, 70, 22, 0.5)'
+        } : {
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderColor: 'rgba(255,255,255,0.2)'
+        }}
+      >
+        {hasActiveRequest ? (
+          <>
+            <div className="text-4xl font-black text-white mb-2">
+              {responseCount}
+            </div>
+            <p className="text-sm font-medium" style={{ color: '#FFA07A' }}>
+              Response{responseCount !== 1 ? 's' : ''}
+            </p>
+            <p className="text-xs mt-1 text-white/50">1 active request</p>
+          </>
+        ) : (
+          <>
+            <div className="text-3xl mb-2">🙋</div>
+            <p className="text-sm font-medium text-white/70">No Request Yet</p>
+            <p className="text-xs mt-1 text-white/50">Post one to get help</p>
+          </>
+        )}
+      </div>
+
+      {/* Matches Available */}
+      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
+        <div className="text-4xl font-black text-white mb-2">
+          {matchesCount}
+        </div>
+        <p className="text-sm font-medium text-white/70">Matches</p>
+        <p className="text-xs mt-1 text-white/50">professionals who can help</p>
+      </div>
+    </div>
+  );
+
+  const renderHelperStats = () => {
+    const showFourthCard = mode === 'give_and_get';
+    return (
+      <div className={`grid gap-4 max-w-3xl mx-auto ${showFourthCard ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        {/* Karma */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
+          <div className="relative inline-block mb-2">
+            <div 
+              className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
+              style={{ backgroundColor: '#FA4616' }}
+            />
+            <span className="relative text-4xl font-black text-white">
+              {karma}
+            </span>
+          </div>
+          <p className="text-sm font-medium text-white/70">Karma</p>
+          <p className="text-xs mt-1 text-white/50">Higher karma = more visibility</p>
+        </div>
+
+        {/* Students Helped */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
+          <div className="text-4xl font-black text-white mb-2">
+            {studentsHelped}
+          </div>
+          <p className="text-sm font-medium text-white/70">Students Helped</p>
+          <p className="text-xs mt-1 text-white/50">lifetime</p>
+        </div>
+
+        {/* Alumni Helped */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
+          <div className="text-4xl font-black text-white mb-2">
+            {alumniHelped}
+          </div>
+          <p className="text-sm font-medium text-white/70">Alumni Helped</p>
+          <p className="text-xs mt-1 text-white/50">lifetime</p>
+        </div>
+
+        {/* Your Request - Only in give_and_get mode */}
+        {showFourthCard && (
+          <div 
+            className="backdrop-blur-xl rounded-3xl p-5 text-center border transition cursor-pointer hover:scale-105"
+            style={hasActiveRequest ? {
+              background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)',
+              borderColor: 'rgba(250, 70, 22, 0.5)'
+            } : {
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderColor: 'rgba(255,255,255,0.1)'
+            }}
+            onClick={hasActiveRequest ? undefined : onPostRequest}
+          >
+            {hasActiveRequest ? (
+              <>
+                <div className="text-4xl font-black text-white mb-2">
+                  {responseCount}
+                </div>
+                <p className="text-sm font-medium" style={{ color: '#FFA07A' }}>
+                  Response{responseCount !== 1 ? 's' : ''}
+                </p>
+                <p className="text-xs mt-1 text-white/50">1 active request</p>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl mb-2">🙋</div>
+                <p className="text-sm font-medium text-white/70">Need Help?</p>
+                <p className="text-xs mt-1 text-white/50">Post a request</p>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -90,90 +223,8 @@ export default function AlumniHeroSection({
             </p>
           </div>
 
-          {/* Stats Cards */}
-          <div className={`grid gap-4 max-w-3xl mx-auto ${showFourthCard ? 'grid-cols-4' : 'grid-cols-3'}`}>
-            
-            {/* Karma */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
-              <div className="relative inline-block mb-2">
-                <div 
-                  className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
-                  style={{ backgroundColor: '#FA4616' }}
-                />
-                <span className="relative text-4xl font-black text-white">
-                  {karma}
-                </span>
-              </div>
-              <p className="text-sm font-medium text-white/70">Karma</p>
-              <div 
-                className="mt-2 inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full border"
-                style={{ 
-                  backgroundColor: 'rgba(250, 70, 22, 0.3)',
-                  color: '#FFA07A',
-                  borderColor: 'rgba(250, 70, 22, 0.5)'
-                }}
-              >
-                {badge.emoji} {badge.label}
-              </div>
-            </div>
-
-            {/* Students Helped */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
-              <div className="text-4xl font-black text-white mb-2">
-                {studentsHelped}
-              </div>
-              <p className="text-sm font-medium text-white/70">Students Helped</p>
-              <p className="text-xs mt-1 text-white/50">lifetime</p>
-            </div>
-
-            {/* Alumni Helped */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 text-center border border-white/20 hover:bg-white/15 transition">
-              <div className="text-4xl font-black text-white mb-2">
-                {alumniHelped}
-              </div>
-              <p className="text-sm font-medium text-white/70">Alumni Helped</p>
-              <p className="text-xs mt-1 text-white/50">lifetime</p>
-            </div>
-
-            {/* Your Requests Status - Only in give_and_get mode */}
-            {showFourthCard && (
-              <div 
-                className="backdrop-blur-xl rounded-3xl p-5 text-center border transition cursor-pointer hover:scale-105"
-                style={hasActiveRequest ? {
-                  background: 'linear-gradient(135deg, rgba(250, 70, 22, 0.3) 0%, rgba(250, 70, 22, 0.15) 100%)',
-                  borderColor: 'rgba(250, 70, 22, 0.5)'
-                } : {
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderColor: 'rgba(255,255,255,0.1)'
-                }}
-                onClick={hasActiveRequest ? undefined : onPostRequest}
-              >
-                {hasActiveRequest ? (
-                  <>
-                    <div className="text-4xl font-black text-white mb-2">
-                      #{topRequest.priority_score || 1}
-                    </div>
-                    <p 
-                      className="text-sm font-medium"
-                      style={{ color: '#FFA07A' }}
-                    >
-                      Your Request
-                    </p>
-                    <p className="text-xs mt-1 text-white/60">
-                      {topRequest.answer_count || 0} response{(topRequest.answer_count || 0) !== 1 ? 's' : ''}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-3xl mb-2">🙋</div>
-                    <p className="text-sm font-medium text-white/70">Need Help?</p>
-                    <p className="text-xs mt-1 text-white/50">Post a request</p>
-                  </>
-                )}
-              </div>
-            )}
-            
-          </div>
+          {/* Stats Cards — different layout for seekers vs helpers */}
+          {isSeekerMode ? renderSeekerStats() : renderHelperStats()}
 
           {/* Motivational nudge */}
           <div className="mt-8 text-center">
