@@ -140,7 +140,7 @@ export default function AlumniDashboard() {
 
       // Build alumni/parents who can help (for seekers and give_and_get mode)
       if (mode === 'seeking' || (user.needs_help_with && user.needs_help_with.length > 0)) {
-        const matchedAlumni = findAlumniWhoCanHelp(allAlumni, user);
+        const matchedAlumni = findAlumniWhoCanHelp(allAlumni, user, myAlumniRequests);
         setAlumniWhoCanHelp(matchedAlumni);
       }
 
