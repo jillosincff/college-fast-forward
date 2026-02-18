@@ -825,7 +825,13 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Share your story with students</p>
             </>
           )}
-          {((step === 5 && !isAlumni) || (step === 8 && isAlumni)) && (
+          {step === 8 && isAlumniSeeker && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Post your first request 🚀</h1>
+              <p className="text-sm text-white/90">Tell the network what you need</p>
+            </>
+          )}
+          {((step === 5 && !isAlumni) || (step === 8 && isAlumniHelper) || (step === 9 && isAlumniSeeker)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
