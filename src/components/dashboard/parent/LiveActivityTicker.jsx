@@ -65,13 +65,13 @@ export default function LiveActivityTicker() {
   const current = activities[currentIndex];
 
   return (
-    <div className="bg-white/10 backdrop-blur rounded-xl px-4 py-2.5 flex items-center gap-3 text-white text-sm overflow-hidden">
+    <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-2.5 flex items-center gap-3 text-sm overflow-hidden">
       <span className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
       <div className="flex-1 min-w-0 overflow-hidden">
-        <p className="truncate transition-opacity duration-300" key={currentIndex}>
+        <p className="truncate transition-opacity duration-300 text-white font-medium" key={currentIndex}>
           <span className="mr-1">{current.emoji}</span>
           {current.text}
-          <span className="text-white/50 ml-2">· {current.time}</span>
+          <span className="text-white/70 ml-2">· {current.time}</span>
         </p>
       </div>
     </div>
