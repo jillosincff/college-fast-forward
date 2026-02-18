@@ -125,7 +125,7 @@ export default function GatorDirectory() {
       }
 
     } catch (err) {
-      logger.error("[GatorDirectory] Failed to load users", { error: err });
+      console.error("[GatorDirectory] Failed to load users:", err);
       setError(err.message || 'Please try again in a few minutes.');
     } finally {
       setLoading(false);
