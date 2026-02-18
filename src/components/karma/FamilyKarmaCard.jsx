@@ -89,14 +89,17 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
   const tierStyle = TIER_STYLES[level] || TIER_STYLES.none;
   const displayChildName = childName || linkedStudents[0]?.first_name || 'your student';
 
-  // PARENT VIEW
+  // Determine if this is a parent or alumni helper
+  const isParentUser = user?.persona === 'parent';
+
+  // PARENT / ALUMNI HELPER VIEW
   if (viewMode === 'parent') {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         {/* Header */}
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
-          <span>👨‍👩‍👧</span>
-          Family Karma
+          <span>{isParentUser ? '👨‍👩‍👧' : '⭐'}</span>
+          {isParentUser ? 'Family Karma' : 'Karma'}
         </h2>
         
         {/* Karma Score + Progress */}
