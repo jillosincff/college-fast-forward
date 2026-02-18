@@ -748,13 +748,13 @@ export default function Onboarding() {
             <>
               <h1 className="text-xl font-bold mb-2 text-white">
                 {isAlumni 
-                  ? 'Welcome to College Fast Forward — the private network for UF alumni.'
+                  ? 'Welcome to College Fast Forward'
                   : 'Welcome to College Fast Forward'
                 }
               </h1>
               <p className="text-lg font-black mb-3 text-white">
                 {isAlumni 
-                  ? 'Pay it forward to current students — and get help with your own career.'
+                  ? 'Your experience can change someone\'s trajectory.'
                   : <>You have something students need: <span className="underline decoration-2 decoration-white/70">access</span>.</>
                 }
               </p>
