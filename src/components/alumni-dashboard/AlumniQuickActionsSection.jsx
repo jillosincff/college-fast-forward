@@ -10,7 +10,7 @@ export default function AlumniQuickActionsSection({
   hasActiveRequest = false
 }) {
   const profileComplete = profilePercent >= 100;
-  const showNeedHelpCard = mode === 'give_and_get' && !hasActiveRequest;
+  const showNeedHelpCard = (mode === 'give_and_get' || mode === 'seeking') && !hasActiveRequest;
   const gridCols = showNeedHelpCard ? 'md:grid-cols-3' : 'md:grid-cols-2';
 
   return (
