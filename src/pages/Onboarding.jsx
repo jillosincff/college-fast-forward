@@ -991,13 +991,13 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setStep(2)}
+                    onClick={() => setStep(isAlumni ? 3 : 2)}
                     className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
                   >
                     ← Back
                   </button>
                   <button
-                    onClick={() => setStep(4)}
+                    onClick={() => setStep(isAlumni ? 5 : 4)}
                     disabled={!canProceedStep2}
                     className={`
                       flex-1 py-4 rounded-xl font-bold text-lg transition-all
@@ -1014,8 +1014,8 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 4 (Alumni only): Alumni Details */}
-          {step === 4 && isAlumni && (
+          {/* STEP 5 (Alumni only): Alumni Details */}
+          {step === 5 && isAlumni && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
