@@ -696,9 +696,15 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Select your expertise areas</p>
             </>
           )}
-          {step === 4 && isAlumni && (
+          {step === 4 && isAlumniHelper && (
             <>
-              <h1 className="text-xl font-bold mb-2 text-white">How can you help?</h1>
+              <h1 className="text-xl font-bold mb-2 text-white">Help Students Succeed</h1>
+              <p className="text-sm text-white/90">Select your expertise areas</p>
+            </>
+          )}
+          {step === 4 && isAlumniSeeker && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">Give & Get</h1>
               <p className="text-sm text-white/90">Select your expertise areas</p>
             </>
           )}
