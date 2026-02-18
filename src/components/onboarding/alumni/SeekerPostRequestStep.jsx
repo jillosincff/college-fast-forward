@@ -39,8 +39,8 @@ export default function SeekerPostRequestStep({ user, seekerNeeds = [], onComple
 
     try {
       await JobRequest.create({
-        role: title.trim() || `Career help — ${selectedTypes.map(t => HELP_CATEGORIES.find(c => c.value === t)?.label).join(', ')}`,
-        title: title.trim() || `Career help — ${selectedTypes.map(t => HELP_CATEGORIES.find(c => c.value === t)?.label).join(', ')}`,
+        role: `Career help — ${selectedTypes.map(t => HELP_CATEGORIES.find(c => c.value === t)?.label).join(', ')}`,
+        title: `Career help — ${selectedTypes.map(t => HELP_CATEGORIES.find(c => c.value === t)?.label).join(', ')}`,
         description: description.trim(),
         is_alumni_career_request: true,
         alumni_help_type: selectedTypes[0],
