@@ -624,7 +624,7 @@ export default function ParentDashboard() {
           await refreshUser();
           await refresh();
         }}
-      />
+      />}
     </>
   );
 }
