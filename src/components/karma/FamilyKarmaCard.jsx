@@ -229,7 +229,9 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
         </div>
         
         <p className="text-sm opacity-90">
-          Your family's activity puts you ahead of {percentile}% of students
+          {isAlumniSeekerView 
+            ? `Your contributions put you ahead of ${percentile}% of users`
+            : `Your family's activity puts you ahead of ${percentile}% of students`}
         </p>
       </div>
       
