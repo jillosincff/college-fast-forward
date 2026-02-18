@@ -268,10 +268,10 @@ export default function AlumniDashboard() {
     if (myNeeds.length === 0 && mode !== 'seeking') return [];
     const matchAll = myNeeds.length === 0; // If no specific needs, show all with expertise
 
-    // Filter alumni who can help with what user needs
+    // Filter alumni/parents who can help
     const matches = allAlumni
       .filter(a => a.email !== currentUser.email) // Exclude self
-      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help) // Has expertise
+      .filter(a => a.expertise_areas || a.help_types || a.ways_to_help || a.persona === 'parent') // Has expertise or is a parent
       .map(alumni => {
         const theirExpertise = [
           ...(alumni.expertise_areas || []),
@@ -280,9 +280,9 @@ export default function AlumniDashboard() {
         ];
         
         // Find matching categories
-        const matchedCategories = myNeeds.filter(need => theirExpertise.includes(need));
+        const matchedCategories = matchAll ? theirExpertise.slice(0, 3) : myNeeds.filter(need => theirExpertise.includes(need));
         
-        if (matchedCategories.length === 0) return null;
+        if (!matchAll && matchedCategories.length === 0) return null;
         
         return {
           id: alumni.id,
