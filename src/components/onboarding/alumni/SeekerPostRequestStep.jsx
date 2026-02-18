@@ -76,19 +76,6 @@ export default function SeekerPostRequestStep({ user, seekerNeeds = [], onComple
         </p>
       </div>
 
-      {/* Title */}
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Title <span className="font-normal text-slate-400">(optional)</span>
-        </label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g., Looking for intro to someone at Google in Product"
-          maxLength={100}
-        />
-      </div>
-
       {/* Description */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
