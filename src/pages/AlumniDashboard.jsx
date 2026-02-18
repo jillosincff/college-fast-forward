@@ -73,12 +73,16 @@ export default function AlumniDashboard() {
         Answer.filter({}, '-created_date', 200) // Get recent answers for leaderboard
       ]);
       
-      // Try to fetch alumni for matching (may fail due to RLS)
+      // Try to fetch alumni and parents for matching (may fail due to RLS)
       let allAlumni = [];
       try {
-        allAlumni = await base44.entities.User.filter({ persona: 'alumni' }, '-created_date', 100);
+        const [alumniUsers, parentUsers] = await Promise.all([
+          base44.entities.User.filter({ persona: 'alumni' }, '-created_date', 100),
+          mode === 'seeking' ? base44.entities.User.filter({ persona: 'parent' }, '-created_date', 100) : Promise.resolve([])
+        ]);
+        allAlumni = [...alumniUsers, ...parentUsers];
       } catch (e) {
-        console.log('Could not load alumni for matching (expected if RLS restricts)');
+        console.log('Could not load users for matching (expected if RLS restricts)');
       }
 
       // Calculate karma based on answers
