@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -13,12 +13,11 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    // FIXED: Use service role to bypass RLS restrictions
-    // Get ALL users with completed onboarding (not just visible_in_directory=true)
-    // Most users haven't explicitly set visible_in_directory, so we include those with onboarding_completed
+    // Use service role to bypass RLS restrictions
+    // Fetch users with completed onboarding, limited to 200 to avoid CPU time limits
     const users = await base44.asServiceRole.entities.User.filter({
       onboarding_completed: true
-    });
+    }, '-created_date', 200);
 
     console.log(`📊 Total users with onboarding_completed=true: ${users.length}`);
 
