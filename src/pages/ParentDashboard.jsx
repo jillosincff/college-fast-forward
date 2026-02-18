@@ -153,10 +153,10 @@ export default function ParentDashboard() {
     }
   };
 
-  // Redirect parents who haven't completed onboarding at all
+  // Redirect users who haven't completed onboarding at all
   // IMPORTANT: onboarding_completed === false means actively in onboarding flow
   // onboarding_completed === undefined means grandfathered user (treat as complete, don't redirect)
-  const needsOnboarding = user && user.persona === 'parent' && user.onboarding_completed === false;
+  const needsOnboarding = user && user.onboarding_completed === false && (user.persona === 'parent' || (user.persona === 'alumni' && user.alumni_intent === 'help_students'));
 
   useEffect(() => {
     if (needsOnboarding) {
