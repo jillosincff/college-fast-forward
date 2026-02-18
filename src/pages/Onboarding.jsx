@@ -521,12 +521,12 @@ export default function Onboarding() {
       );
     }
     
-    // Link Student step (step 4 for parents ONLY - alumni skip this)
+    // Link Student step (step 4 for parents ONLY)
     if (step === 4 && !isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 5</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">Link Your Student 🔗</h1>
           </div>
           
