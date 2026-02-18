@@ -790,7 +790,7 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Share your story with students</p>
             </>
           )}
-          {step === 7 && isAlumni && (
+          {step === 8 && isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Invite a Parent 👨‍👩‍👧</h1>
               <p className="text-sm text-white/90">Earn karma together as a family</p>
