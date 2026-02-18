@@ -959,41 +959,33 @@ export default function Onboarding() {
             />
           )}
 
-          {/* STEP 3 (Parents) / STEP 4 (Alumni): How to Help */}
-          {((step === 3 && !isAlumni) || (step === 4 && isAlumni)) && (
+          {/* STEP 3 (Parents) / STEP 4 (Alumni Helper): How to Help */}
+          {((step === 3 && !isAlumni) || (step === 4 && isAlumniHelper)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
                   How would you like to help?
                 </h2>
-                <p className="text-slate-500">
-                  Select at least one
-                </p>
+                <p className="text-slate-500">Select at least one</p>
               </div>
 
               <div className="space-y-6">
-                {/* Expertise selection (shown for all: parents, alumni helpers, alumni seekers) */}
                 <div className="grid grid-cols-1 gap-2">
                   {EXPERTISE_AREAS.map(area => (
                     <button
                       key={area.id}
                       type="button"
                       onClick={() => toggleExpertise(area.id)}
-                      className={`
-                        flex items-start gap-4 px-4 py-4 rounded-xl text-left
-                        transition-all duration-200 border-2
-                        ${expertise.includes(area.id)
+                      className={`flex items-start gap-4 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                        expertise.includes(area.id)
                           ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                        }
-                      `}
+                      }`}
                     >
                       <span className="text-2xl">{area.emoji}</span>
                       <div className="flex-1">
                         <span className="font-semibold block">{area.label}</span>
-                        {area.description && (
-                          <span className="text-sm text-slate-500 mt-0.5 block">{area.description}</span>
-                        )}
+                        {area.description && <span className="text-sm text-slate-500 mt-0.5 block">{area.description}</span>}
                       </div>
                       {expertise.includes(area.id) && <span className="text-[#0021A5] font-bold">✓</span>}
                     </button>
@@ -1008,7 +1000,6 @@ export default function Onboarding() {
                 {isAlumniHelper && (
                   <>
                     <div className="border-t border-slate-200 my-4" />
-                    
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Years of experience <span className="font-normal text-slate-400">(optional)</span>
@@ -1016,8 +1007,7 @@ export default function Onboarding() {
                       <select
                         value={yearsExperience}
                         onChange={(e) => setYearsExperience(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                                 focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
                       >
                         <option value="">Select range</option>
                         <option value="0-2">0–2 years</option>
@@ -1031,80 +1021,6 @@ export default function Onboarding() {
                   </>
                 )}
 
-                {/* GET Section - Alumni seekers only (NOT helpers) */}
-                {isAlumniSeeker && (
-                  <>
-                    <div className="border-t border-slate-200 my-6" />
-                    
-                    <div>
-                      <h2 className="text-xl font-bold text-slate-800 mb-1">
-                        What might YOU need help with?
-                      </h2>
-                      <p className="text-slate-500 text-sm mb-4">
-                        Optional — alumni help each other too
-                      </p>
-
-                      <div className="grid grid-cols-1 gap-2">
-                        {EXPERTISE_AREAS.map(area => {
-                          const isSelected = needsHelpWith.includes(area.id);
-                          const isDisabled = isGoodForNow;
-                          return (
-                            <button
-                              key={`need-${area.id}`}
-                              type="button"
-                              onClick={() => toggleNeedsHelp(area.id)}
-                              disabled={isDisabled}
-                              className={`
-                                flex items-center gap-4 px-4 py-3 rounded-xl text-left
-                                transition-all duration-200 border-2
-                                ${isDisabled
-                                  ? 'border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed'
-                                  : isSelected
-                                  ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
-                                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                                }
-                              `}
-                            >
-                              <span className="text-xl">{area.emoji}</span>
-                              <span className="font-medium flex-1">{area.label}</span>
-                              {isSelected && !isDisabled && <span className="text-[#0021A5] font-bold">✓</span>}
-                            </button>
-                          );
-                        })}
-
-                        {/* Good for now checkbox */}
-                        <button
-                          type="button"
-                          onClick={handleGoodForNow}
-                          className={`
-                            flex items-center gap-4 px-4 py-3 rounded-xl text-left
-                            transition-all duration-200 border-2
-                            ${isGoodForNow
-                              ? 'border-slate-400 bg-slate-100'
-                              : 'border-slate-200 bg-white hover:border-slate-300'
-                            }
-                          `}
-                        >
-                          <div 
-                            className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                              isGoodForNow 
-                                ? 'border-slate-500 bg-slate-500' 
-                                : 'border-slate-300'
-                            }`}
-                          >
-                            {isGoodForNow && <span className="text-white text-xs">✓</span>}
-                          </div>
-                          <span className="font-medium text-slate-700">
-                            I'm good for now — just here to help
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-200 my-6" />
-                  </>
-                )}
-
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Anything else you'd like {isAlumni ? 'others' : 'students'} to know? <span className="font-normal text-slate-400">(optional)</span>
@@ -1113,8 +1029,7 @@ export default function Onboarding() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder={isAlumni ? "E.g., specific industries you know well, companies you've worked at, topics you're passionate about..." : ""}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                             resize-none h-20 focus:border-[#0021A5] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base resize-none h-20 focus:border-[#0021A5] focus:outline-none transition-colors"
                     maxLength={500}
                   />
                   <p className="text-xs text-slate-400 text-right mt-1">{bio.length}/500</p>
@@ -1129,14 +1044,164 @@ export default function Onboarding() {
                   </button>
                   <button
                     onClick={() => setStep(isAlumni ? 5 : 4)}
-                    disabled={!canProceedStep2}
-                    className={`
-                      flex-1 py-4 rounded-xl font-bold text-lg transition-all
-                      ${canProceedStep2
+                    disabled={expertise.length === 0}
+                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+                      expertise.length > 0
                         ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
                         : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                      }
-                    `}
+                    }`}
+                  >
+                    Continue →
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* STEP 4 (Alumni Seeker): What do you need help with + Pay it forward */}
+          {step === 4 && isAlumniSeeker && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
+                  What do you need help with?
+                </h2>
+                <p className="text-slate-500">Select at least one</p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Seeker needs */}
+                <div className="grid grid-cols-1 gap-2">
+                  {SEEKER_NEEDS.map(need => (
+                    <button
+                      key={need.id}
+                      type="button"
+                      onClick={() => toggleSeekerNeed(need.id)}
+                      className={`flex items-center gap-4 px-4 py-4 rounded-xl text-left transition-all duration-200 border-2 ${
+                        seekerNeeds.includes(need.id)
+                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5]'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <span className="text-2xl">{need.emoji}</span>
+                      <span className="font-semibold flex-1">{need.label}</span>
+                      {seekerNeeds.includes(need.id) && <span className="text-[#0021A5] font-bold">✓</span>}
+                    </button>
+                  ))}
+                </div>
+
+                {seekerNeeds.length === 0 && (
+                  <p className="text-xs text-amber-600">Please select at least one area you need help with</p>
+                )}
+
+                {/* Pay it forward section */}
+                <div className="border-t border-slate-200 my-4" />
+                
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 mb-1">
+                    How can you help students?
+                  </h3>
+                  <p className="text-slate-500 text-sm mb-4">
+                    While you're here, you can also help current students. What can you offer? <span className="text-slate-400">(optional)</span>
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {SEEKER_PAY_IT_FORWARD.map(item => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => toggleSeekerPIF(item.id)}
+                        className={`flex items-center gap-4 px-4 py-3 rounded-xl text-left transition-all duration-200 border-2 ${
+                          seekerPayItForward.includes(item.id)
+                            ? 'bg-orange-50 border-[#FA4616] text-[#FA4616]'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        <span className="text-xl">{item.emoji}</span>
+                        <span className="font-medium flex-1 text-sm">{item.label}</span>
+                        {seekerPayItForward.includes(item.id) && <span className="text-[#FA4616] font-bold">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional seeker fields */}
+                <div className="border-t border-slate-200 my-4" />
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Current role <span className="font-normal text-slate-400">(or leave blank if actively looking)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={seekerCurrentRole}
+                    onChange={(e) => setSeekerCurrentRole(e.target.value)}
+                    placeholder="e.g., Marketing Coordinator at Google"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSeekerActivelyLooking(!seekerActivelyLooking)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all border-2 ${
+                        seekerActivelyLooking
+                          ? 'bg-orange-50 border-[#FA4616] text-[#FA4616]'
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                        seekerActivelyLooking ? 'border-[#FA4616] bg-[#FA4616]' : 'border-slate-300'
+                      }`}>
+                        {seekerActivelyLooking && <span className="text-white text-xs">✓</span>}
+                      </div>
+                      <span>I'm actively looking</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    What kind of roles are you looking for? <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={seekerTargetRoles}
+                    onChange={(e) => setSeekerTargetRoles(e.target.value)}
+                    placeholder="e.g., Product Manager, UX Designer, Data Analyst"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    LinkedIn Profile <span className="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={linkedinUrl}
+                    onChange={(e) => handleLinkedInChange(e.target.value)}
+                    placeholder="https://linkedin.com/in/yourname"
+                    className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none transition-colors ${
+                      linkedinError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#0021A5]'
+                    }`}
+                  />
+                  {linkedinError && <p className="text-xs text-red-500 mt-1">{linkedinError}</p>}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(3)}
+                    className="px-6 py-4 rounded-xl font-bold text-slate-600 border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => setStep(5)}
+                    disabled={!canProceedStep2}
+                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+                      canProceedStep2
+                        ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-lg hover:shadow-xl'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }`}
                   >
                     Continue →
                   </button>
