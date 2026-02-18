@@ -264,7 +264,9 @@ export default function AlumniDashboard() {
 
   const findAlumniWhoCanHelp = (allAlumni, currentUser) => {
     const myNeeds = currentUser.needs_help_with || [];
-    if (myNeeds.length === 0) return [];
+    // For seekers without specific needs, still show alumni/parents who have expertise
+    if (myNeeds.length === 0 && mode !== 'seeking') return [];
+    const matchAll = myNeeds.length === 0; // If no specific needs, show all with expertise
 
     // Filter alumni who can help with what user needs
     const matches = allAlumni
