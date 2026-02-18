@@ -488,12 +488,12 @@ export default function Onboarding() {
       );
     }
     
-    // Alumni Step 5: Story Sharing
-    if (step === 5 && isAlumni) {
+    // Alumni Step 6: Story Sharing
+    if (step === 6 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of 7</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 6 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">One last thing — inspire the next generation? 📖</h1>
           </div>
           
