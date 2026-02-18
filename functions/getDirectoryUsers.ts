@@ -13,18 +13,37 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    // Fetch users in two batches to get more than 200
-    // Batch 1: newest 500 users
+    // Fetch users in batches of 500 to get all onboarded users
+    let allUsers = [];
+    const PAGE_SIZE = 500;
+    
+    // Batch 1: newest 500
     const batch1 = await base44.asServiceRole.entities.User.filter(
       { onboarding_completed: true },
       '-created_date',
-      500
+      PAGE_SIZE
     );
-
-    console.log(`📊 Batch 1: ${batch1.length} users`);
-
-    // Use all users from batch (the API may return up to 500)
-    const allUsers = batch1;
+    allUsers = batch1 || [];
+    console.log(`📊 Batch 1: ${allUsers.length} users`);
+    
+    // If we got exactly 500, there may be more - fetch batch 2
+    if (allUsers.length >= PAGE_SIZE) {
+      const oldestDateInBatch1 = allUsers[allUsers.length - 1]?.created_date;
+      if (oldestDateInBatch1) {
+        const batch2 = await base44.asServiceRole.entities.User.filter(
+          { onboarding_completed: true, created_date: { $lt: oldestDateInBatch1 } },
+          '-created_date',
+          PAGE_SIZE
+        );
+        if (batch2 && batch2.length > 0) {
+          // Deduplicate by id
+          const existingIds = new Set(allUsers.map(u => u.id));
+          const newUsers = batch2.filter(u => !existingIds.has(u.id));
+          allUsers = allUsers.concat(newUsers);
+          console.log(`📊 Batch 2: ${batch2.length} users (${newUsers.length} new)`);
+        }
+      }
+    }
 
     console.log(`📊 Total users with onboarding_completed=true: ${allUsers.length}`);
 
@@ -93,8 +112,6 @@ Deno.serve(async (req) => {
         roles: u.roles || [],
         graduation_year: u.graduation_year || '',
         major: u.major || '',
-        current_company: u.current_company || '',
-        current_position: u.current_position || '',
         company: u.current_company || u.company || '',
         job_title: u.current_position || u.job_title || '',
         industry: u.industry || '',
@@ -109,7 +126,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`✅ Directory: Returning ${directoryUsers.length} users for ${user.email} (filtered out: ${filteredCount})`);
+    console.log(`✅ Directory: Returning ${directoryUsers.length} users (filtered out: ${filteredCount})`);
 
     return Response.json({
       success: true,
