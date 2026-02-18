@@ -25,6 +25,7 @@ export default function AlumniDashboard() {
   
   const [loading, setLoading] = useState(true);
   const [showPostRequestModal, setShowPostRequestModal] = useState(false);
+  const [editingRequest, setEditingRequest] = useState(null);
   
   // Dashboard data
   const [karma, setKarma] = useState(0);
@@ -446,7 +447,8 @@ export default function AlumniDashboard() {
           {mode === 'seeking' && (
             <YourActiveRequestSection 
               request={myRequests[0] || null} 
-              onPostRequest={() => setShowPostRequestModal(true)} 
+              onPostRequest={() => setShowPostRequestModal(true)}
+              onEditRequest={(req) => { setEditingRequest(req); setShowPostRequestModal(true); }}
             />
           )}
 
@@ -465,7 +467,8 @@ export default function AlumniDashboard() {
           {mode === 'give_and_get' && (
             <YourActiveRequestSection 
               request={myRequests[0] || null} 
-              onPostRequest={() => setShowPostRequestModal(true)} 
+              onPostRequest={() => setShowPostRequestModal(true)}
+              onEditRequest={(req) => { setEditingRequest(req); setShowPostRequestModal(true); }}
             />
           )}
 
@@ -541,9 +544,11 @@ export default function AlumniDashboard() {
       {/* Post Request Modal */}
       {showPostRequestModal && (
         <AlumniPostRequestModal
-          onClose={() => setShowPostRequestModal(false)}
+          existingRequest={editingRequest}
+          onClose={() => { setShowPostRequestModal(false); setEditingRequest(null); }}
           onSuccess={() => {
             setShowPostRequestModal(false);
+            setEditingRequest(null);
             loadDashboardData();
           }}
         />

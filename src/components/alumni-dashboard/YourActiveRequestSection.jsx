@@ -16,7 +16,7 @@ const CATEGORY_LABELS = {
   business_advice: 'Business advice',
 };
 
-export default function YourActiveRequestSection({ request, onPostRequest }) {
+export default function YourActiveRequestSection({ request, onPostRequest, onEditRequest }) {
   // No active request — prompt user to post one
   if (!request) {
     return (
@@ -161,7 +161,7 @@ export default function YourActiveRequestSection({ request, onPostRequest }) {
             <span>Visible to the network</span>
           </div>
           <button
-            onClick={() => navigate(`PostRequest?edit=${req.id}`)}
+            onClick={() => onEditRequest && onEditRequest(req)}
             className="text-sm font-semibold px-4 py-1.5 rounded-lg transition hover:bg-gray-100"
             style={{ color: UF_BLUE }}
           >
