@@ -12,7 +12,7 @@ const TIER_LABELS = {
 };
 
 export default function ImpactDashboard({ user }) {
-  const [stats, setStats] = useState({ studentsHelped: 0, markedHelpful: 0, resolvedWithCredit: 0 });
+  const [stats, setStats] = useState({ studentsHelped: 0, answersGiven: 0, introsMade: 0 });
   const [familyKarma, setFamilyKarma] = useState(0);
   const [karmaLevel, setKarmaLevel] = useState('none');
   const [boostMultiplier, setBoostMultiplier] = useState(0);
@@ -33,8 +33,7 @@ export default function ImpactDashboard({ user }) {
 
       // Compute stats from transactions
       const answers = transactions.filter(t => t.action_type === 'answer');
-      const helpfulMarks = transactions.filter(t => t.action_type === 'upvote_received');
-      const outcomes = transactions.filter(t => t.action_type === 'outcome_reported');
+      const intros = transactions.filter(t => t.action_type === 'referral_given');
 
       // Count unique students helped (dedupe by reference_id to avoid double-counting)
       const uniqueStudentRefs = new Set(answers.map(a => a.reference_id).filter(Boolean));
@@ -42,8 +41,8 @@ export default function ImpactDashboard({ user }) {
 
       setStats({
         studentsHelped: uniqueStudentsHelped,
-        markedHelpful: helpfulMarks.length,
-        resolvedWithCredit: outcomes.length
+        answersGiven: answers.length,
+        introsMade: intros.length
       });
 
       // Family karma
@@ -110,17 +109,17 @@ export default function ImpactDashboard({ user }) {
           <div className="text-center p-4 bg-blue-50 rounded-xl">
             <Users className="w-5 h-5 text-[#0021A5] mx-auto mb-1" />
             <div className="text-2xl font-black text-[#0021A5]">{stats.studentsHelped}</div>
-            <div className="text-xs text-slate-500 font-medium">Students Helped (all time)</div>
+            <div className="text-xs text-slate-500 font-medium">Students Helped</div>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-xl">
             <ThumbsUp className="w-5 h-5 text-green-600 mx-auto mb-1" />
-            <div className="text-2xl font-black text-green-600">{stats.markedHelpful}</div>
-            <div className="text-xs text-slate-500 font-medium">Marked Helpful</div>
+            <div className="text-2xl font-black text-green-600">{stats.answersGiven}</div>
+            <div className="text-xs text-slate-500 font-medium">Answers Given</div>
           </div>
           <div className="text-center p-4 bg-orange-50 rounded-xl">
             <CheckCircle className="w-5 h-5 text-[#FA4616] mx-auto mb-1" />
-            <div className="text-2xl font-black text-[#FA4616]">{stats.resolvedWithCredit}</div>
-            <div className="text-xs text-slate-500 font-medium">Resolved w/ Credit</div>
+            <div className="text-2xl font-black text-[#FA4616]">{stats.introsMade}</div>
+            <div className="text-xs text-slate-500 font-medium">Introductions Made</div>
           </div>
         </div>
 

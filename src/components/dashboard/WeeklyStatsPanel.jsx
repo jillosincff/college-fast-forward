@@ -67,7 +67,7 @@ export default function WeeklyStatsPanel() {
     { icon: MessageSquare, value: stats.questionsAnswered, label: 'questions answered', color: 'text-blue-300', alwaysShow: true },
     { icon: Users, value: stats.studentsHelped, label: 'students helped', color: 'text-green-300', alwaysShow: true },
     { icon: Handshake, value: stats.introsMade, label: 'warm intros made', color: 'text-orange-300', alwaysShow: false },
-    { icon: HelpCircle, value: stats.waitingForAnswers, label: 'still waiting for answers', color: 'text-yellow-300', alwaysShow: true },
+    { icon: HelpCircle, value: stats.waitingForAnswers, label: 'students could use your help', color: 'text-yellow-300', alwaysShow: true },
   ];
 
   // Only show metrics with value > 0, unless they're marked as alwaysShow
