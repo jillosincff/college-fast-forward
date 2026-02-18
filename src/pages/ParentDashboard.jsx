@@ -557,7 +557,9 @@ export default function ParentDashboard() {
                 </div>
                 <div>
                   <p className="font-bold text-lg">You're a Founding Member</p>
-                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>One of the first parents to join the network</p>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                    {isParent ? 'One of the first parents to join the network' : 'One of the first alumni to join the network'}
+                  </p>
                 </div>
               </div>
               <div className="bg-white/20 text-white font-semibold px-4 py-2 rounded-full border border-white/30">
