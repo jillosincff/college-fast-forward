@@ -1,5 +1,4 @@
 import React from 'react';
-import { navigate } from '@/components/utils/navigation';
 
 const UF_BLUE = '#0021A5';
 const UF_ORANGE = '#FA4616';
