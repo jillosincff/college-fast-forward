@@ -130,7 +130,7 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
         {/* Benefits */}
         <div className="mb-4">
           <p className="text-sm font-medium text-gray-700 mb-2">
-            How your karma helps {displayChildName}:
+            {isParentUser ? `How your karma helps ${displayChildName}:` : 'How your karma helps students:'}
           </p>
           <div className="space-y-1">
             {unlockedBenefits.map((benefit, idx) => (
