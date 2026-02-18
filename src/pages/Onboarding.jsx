@@ -845,8 +845,18 @@ export default function Onboarding() {
             </>
           )}
 
-          {/* STEP 3: How to Help (with "Get Help" for Alumni) */}
-          {step === 3 && (
+          {/* STEP 3 (Alumni only): Intent Selection */}
+          {step === 3 && isAlumni && (
+            <AlumniIntentStep
+              selectedIntent={alumniIntent}
+              onSelect={setAlumniIntent}
+              onNext={() => setStep(4)}
+              onBack={() => setStep(2)}
+            />
+          )}
+
+          {/* STEP 3 (Parents) / STEP 4 (Alumni): How to Help */}
+          {((step === 3 && !isAlumni) || (step === 4 && isAlumni)) && (
             <>
               <div className="mb-6">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
