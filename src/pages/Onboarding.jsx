@@ -95,7 +95,7 @@ export default function Onboarding() {
   const [alumniStory, setAlumniStory] = useState('');
   const [storyAnonymous, setStoryAnonymous] = useState(true);
   
-  // Alumni "Get Help" - what they need help with (Step 3)
+  // Legacy (unused - kept for safety)
   const [needsHelpWith, setNeedsHelpWith] = useState([]);
   const [isGoodForNow, setIsGoodForNow] = useState(false);
   
