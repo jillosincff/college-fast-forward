@@ -18,8 +18,7 @@ Deno.serve(async (req) => {
       const isGator = u.persona === 'gator' || u.persona === 'student';
       const isNonUFL = u.email && !u.email.toLowerCase().endsWith('@ufl.edu');
       const notAdmin = !u.roles?.includes('admin');
-      const hasNoPersona = !u.persona && notAdmin;
-      return (isGator && isNonUFL && notAdmin) || hasNoPersona;
+      return isGator && isNonUFL && notAdmin;
     });
 
     if (dryRun) {
