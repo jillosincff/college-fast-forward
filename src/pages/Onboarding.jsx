@@ -455,12 +455,12 @@ export default function Onboarding() {
       );
     }
     
-    // Alumni Step 4: UF Details
-    if (step === 4 && isAlumni) {
+    // Alumni Step 5: UF Details
+    if (step === 5 && isAlumni) {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 4 of 6</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 5 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">Your Alumni Details 🎓</h1>
           </div>
           
