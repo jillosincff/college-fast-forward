@@ -6,6 +6,7 @@ import { Loader2, Check, Link2 } from 'lucide-react';
 import PushNotificationPrompt from '@/components/notifications/PushNotificationPrompt';
 import { Switch } from '@/components/ui/switch';
 import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
+import AlumniIntentStep from '@/components/onboarding/alumni/AlumniIntentStep';
 
 // Industry options
 const INDUSTRIES = [
