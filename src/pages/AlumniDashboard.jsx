@@ -548,11 +548,6 @@ export default function AlumniDashboard() {
 
         </div>
         
-        {/* Footer */}
-        <footer className="text-gray-300 text-center py-8 mt-12" style={{ backgroundColor: '#0021A5' }}>
-          <p className="text-sm">© 2026 College Fast Forward. All Rights Reserved.</p>
-          <p className="text-xs mt-2 opacity-70">Terms of Service • Privacy Policy • Cookie Policy</p>
-        </footer>
         
       </div>
 
