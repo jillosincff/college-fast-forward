@@ -61,6 +61,9 @@ export default function Onboarding() {
   const [expertise, setExpertise] = useState([]);
   const [bio, setBio] = useState('');
   
+  // Alumni Intent (help_students or seeking_help)
+  const [alumniIntent, setAlumniIntent] = useState('');
+
   // Step 3 (Alumni only): Alumni Details
   const [alumniGradYear, setAlumniGradYear] = useState('');
   const [alumniMajor, setAlumniMajor] = useState('');
