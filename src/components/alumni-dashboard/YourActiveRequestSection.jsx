@@ -92,24 +92,24 @@ export default function YourActiveRequestSection({ request, onPostRequest, onEdi
       </div>
 
       <div className="bg-white rounded-2xl p-5 border border-gray-100">
-        <h4 className="font-semibold text-gray-900 text-lg mb-2">
-          {req.title || req.role}
-        </h4>
-        
-        {/* Show the actual description the user wrote */}
-        {req.description && (
-          <p className="text-gray-700 text-sm mb-3 leading-relaxed line-clamp-3">
-            {req.description}
-          </p>
-        )}
+        {/* Show the user's actual description prominently */}
+        <p className="font-medium text-gray-900 text-base mb-3 leading-relaxed">
+          "{req.description || req.title || req.role}"
+        </p>
 
-        <div className="flex items-center gap-3 text-sm text-gray-500 mb-4 flex-wrap">
-          <span 
-            className="px-2 py-1 rounded-full"
-            style={{ backgroundColor: `${UF_BLUE}10`, color: UF_BLUE }}
-          >
-            {CATEGORY_LABELS[req.alumni_help_type] || CATEGORY_LABELS[req.help_types?.[0]] || 'Career help'}
-          </span>
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 flex-wrap">
+          {(req.help_types && req.help_types.length > 0 
+            ? req.help_types 
+            : [req.alumni_help_type]
+          ).filter(Boolean).map((ht, i) => (
+            <span 
+              key={i}
+              className="px-2 py-1 rounded-full text-xs"
+              style={{ backgroundColor: `${UF_BLUE}10`, color: UF_BLUE }}
+            >
+              {CATEGORY_LABELS[ht] || ht}
+            </span>
+          ))}
           <span>•</span>
           <span>Posted {formatTimeAgo(req.created_date)}</span>
         </div>
