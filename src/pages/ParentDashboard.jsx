@@ -444,25 +444,27 @@ export default function ParentDashboard() {
             
           </section>
 
-          {/* ========== LINK STUDENT or BOOST CARD ========== */}
-          {!hasLinkedStudent ? (
-            <LinkStudentCard 
-              user={user} 
-              familyKarma={karmaPoints}
-              onLinked={async () => {
-                await refreshUser();
-                await refresh();
-              }}
-            />
-          ) : (
-            <StudentBoostCard
-              user={user}
-              linkedStudent={data.linkedStudent}
-              familyKarma={karmaPoints}
-              karmaLevel={data.familyKarmaLevel || karmaTier.level?.toLowerCase()}
-              boostMultiplier={data.familyBoostMultiplier || 0}
-              studentQuestionData={data.studentQueueStatus}
-            />
+          {/* ========== LINK STUDENT or BOOST CARD (Parents only) ========== */}
+          {showStudentLinking && (
+            !hasLinkedStudent ? (
+              <LinkStudentCard 
+                user={user} 
+                familyKarma={karmaPoints}
+                onLinked={async () => {
+                  await refreshUser();
+                  await refresh();
+                }}
+              />
+            ) : (
+              <StudentBoostCard
+                user={user}
+                linkedStudent={data.linkedStudent}
+                familyKarma={karmaPoints}
+                karmaLevel={data.familyKarmaLevel || karmaTier.level?.toLowerCase()}
+                boostMultiplier={data.familyBoostMultiplier || 0}
+                studentQuestionData={data.studentQueueStatus}
+              />
+            )
           )}
 
           {/* ========== WEEKLY STATS ========== */}
