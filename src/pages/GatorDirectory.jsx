@@ -86,13 +86,23 @@ export default function GatorDirectory() {
       
       const response = await base44.functions.invoke('getDirectoryUsers', {});
       
-      const responseData = response?.data;
-      if (!responseData || !Array.isArray(responseData.data)) {
+      // Handle different response shapes from base44.functions.invoke
+      const responseData = response?.data || response;
+      const usersArray = responseData?.data || responseData;
+      
+      console.log('[GatorDirectory] Response shape:', { 
+        hasResponse: !!response, 
+        hasData: !!responseData, 
+        isArray: Array.isArray(usersArray),
+        count: Array.isArray(usersArray) ? usersArray.length : 'N/A'
+      });
+      
+      if (!usersArray || !Array.isArray(usersArray)) {
         throw new Error(responseData?.details || 'Invalid data from server.');
       }
       
       // Accept users with full_name - persona may be normalized by the backend
-      const validUsers = responseData.data.filter(u => u && u.full_name);
+      const validUsers = usersArray.filter(u => u && u.full_name);
       setAllUsers(validUsers);
       
       // Calculate persona breakdown - handle both 'student' and 'gator' personas
