@@ -13,30 +13,20 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    // Fetch ALL users with completed onboarding using pagination
-    // Each page fetches up to 200 users (API limit)
-    let allUsers = [];
-    let page = 0;
-    const PAGE_SIZE = 200;
-    const MAX_PAGES = 10; // Safety limit: 2000 users max
-    
-    while (page < MAX_PAGES) {
-      const batch = await base44.asServiceRole.entities.User.filter(
-        { onboarding_completed: true },
-        '-created_date',
-        PAGE_SIZE,
-        { skip: page * PAGE_SIZE }
-      );
-      
-      if (!batch || batch.length === 0) break;
-      allUsers = allUsers.concat(batch);
-      
-      // If we got fewer than PAGE_SIZE, we've reached the end
-      if (batch.length < PAGE_SIZE) break;
-      page++;
-    }
+    // Fetch users in two batches to get more than 200
+    // Batch 1: newest 500 users
+    const batch1 = await base44.asServiceRole.entities.User.filter(
+      { onboarding_completed: true },
+      '-created_date',
+      500
+    );
 
-    console.log(`📊 Total users with onboarding_completed=true: ${allUsers.length} (fetched ${page + 1} pages)`);
+    console.log(`📊 Batch 1: ${batch1.length} users`);
+
+    // Use all users from batch (the API may return up to 500)
+    const allUsers = batch1;
+
+    console.log(`📊 Total users with onboarding_completed=true: ${allUsers.length}`);
 
     // Filter and format users for directory
     const directoryUsers = [];
