@@ -14,20 +14,25 @@ const HELP_CATEGORIES = [
   { value: 'introductions', label: 'Introductions', icon: '🤝' },
 ];
 
-export default function SeekerPostRequestStep({ user, onComplete, onSkip }) {
+export default function SeekerPostRequestStep({ user, seekerNeeds = [], onComplete, onSkip }) {
   const { toast } = useToast();
-  const [selectedTypes, setSelectedTypes] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toggleType = (value) => {
-    setSelectedTypes(prev =>
-      prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
-    );
+  // Map seeker needs from onboarding to help categories
+  const NEED_TO_HELP_MAP = {
+    'intros_hiring_managers': 'introductions',
+    'career_advice': 'career_guidance',
+    'resume_review': 'resume_interviews',
+    'interview_prep': 'resume_interviews',
+    'salary_negotiation': 'career_guidance',
+    'career_pivot': 'industry_insights',
   };
+  const mappedTypes = [...new Set(seekerNeeds.map(n => NEED_TO_HELP_MAP[n]).filter(Boolean))];
+  const selectedTypes = mappedTypes.length > 0 ? mappedTypes : ['career_guidance'];
 
-  const canSubmit = selectedTypes.length > 0 && description.trim().length >= 20;
+  const canSubmit = description.trim().length >= 20;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
