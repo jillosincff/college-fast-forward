@@ -16,15 +16,16 @@ const REQUEST_TYPES = [
   { value: 'introductions', label: 'Introductions', icon: '🤝', description: 'Connect with specific people or companies' },
 ];
 
-export default function AlumniPostRequestModal({ onClose, onSuccess }) {
+export default function AlumniPostRequestModal({ onClose, onSuccess, existingRequest = null }) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isEditing = !!existingRequest;
   
-  const [step, setStep] = useState(1);
-  const [requestType, setRequestType] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [industry, setIndustry] = useState('');
+  const [step, setStep] = useState(existingRequest ? 2 : 1);
+  const [requestType, setRequestType] = useState(existingRequest?.alumni_help_type || existingRequest?.help_types?.[0] || '');
+  const [title, setTitle] = useState(existingRequest?.title || existingRequest?.role || '');
+  const [description, setDescription] = useState(existingRequest?.description || '');
+  const [industry, setIndustry] = useState(existingRequest?.target_industry || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -35,24 +36,35 @@ export default function AlumniPostRequestModal({ onClose, onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      await JobRequest.create({
-        role: title,
-        title: title,
-        description: description,
-        target_industry: industry || 'General',
-        is_alumni_career_request: true,
-        alumni_help_type: requestType,
-        poster_type: 'alumni',
-        poster_email: user.email,
-        poster_name: user.full_name,
-        status: 'active'
-      });
-
-      toast({ title: "Request posted! 🎉", description: "Your request is now visible to other alumni." });
+      if (isEditing) {
+        await JobRequest.update(existingRequest.id, {
+          role: title,
+          title: title,
+          description: description,
+          target_industry: industry || 'General',
+          alumni_help_type: requestType,
+          help_types: requestType ? [requestType] : existingRequest.help_types,
+        });
+        toast({ title: "Request updated! ✅", description: "Your changes have been saved." });
+      } else {
+        await JobRequest.create({
+          role: title,
+          title: title,
+          description: description,
+          target_industry: industry || 'General',
+          is_alumni_career_request: true,
+          alumni_help_type: requestType,
+          poster_type: 'alumni',
+          poster_email: user.email,
+          poster_name: user.full_name,
+          status: 'active'
+        });
+        toast({ title: "Request posted! 🎉", description: "Your request is now visible to other alumni." });
+      }
       onSuccess();
     } catch (error) {
-      console.error('Failed to post request:', error);
-      toast({ title: "Error", description: "Failed to post request. Please try again.", variant: "destructive" });
+      console.error('Failed to save request:', error);
+      toast({ title: "Error", description: `Failed to ${isEditing ? 'update' : 'post'} request. Please try again.`, variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -63,9 +75,11 @@ export default function AlumniPostRequestModal({ onClose, onSuccess }) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl" style={{ color: '#0021A5' }}>
-            Ask the UF Network
+            {isEditing ? 'Edit Your Request' : 'Ask the UF Network'}
           </DialogTitle>
-          <p className="text-sm text-gray-500">Your request is visible to alumni only</p>
+          <p className="text-sm text-gray-500">
+            {isEditing ? 'Update your request details below' : 'Your request is visible to the network'}
+          </p>
         </DialogHeader>
 
         {/* Step 1: Choose Type */}
@@ -166,7 +180,7 @@ export default function AlumniPostRequestModal({ onClose, onSuccess }) {
                 className="flex-1"
                 style={{ backgroundColor: '#0021A5' }}
               >
-                {isSubmitting ? 'Posting...' : 'Post Request'}
+                {isSubmitting ? (isEditing ? 'Saving...' : 'Posting...') : (isEditing ? 'Save Changes' : 'Post Request')}
               </Button>
             </div>
           </div>
