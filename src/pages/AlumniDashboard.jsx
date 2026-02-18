@@ -42,7 +42,7 @@ export default function AlumniDashboard() {
   
   // Determine dashboard mode based on user's onboarding choices
   const getDashboardMode = () => {
-    if (isAlumniSeeker) return 'give_and_get';
+    if (isAlumniSeeker) return 'seeking';
     if (user?.is_good_for_now) return 'give_only';
     if (!user?.needs_help_with || user.needs_help_with.length === 0) return 'give_only';
     return 'give_and_get';
