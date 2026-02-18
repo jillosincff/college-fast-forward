@@ -648,7 +648,13 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Select your areas of expertise</p>
             </>
           )}
-          {step === 3 && (
+          {step === 3 && isAlumni && (
+            <>
+              <h1 className="text-xl font-bold mb-2 text-white">What brings you to CFF?</h1>
+              <p className="text-sm text-white/90">Choose your path</p>
+            </>
+          )}
+          {step === 3 && !isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">How can you help?</h1>
               <p className="text-sm text-white/90">Select your expertise areas</p>
@@ -656,17 +662,23 @@ export default function Onboarding() {
           )}
           {step === 4 && isAlumni && (
             <>
+              <h1 className="text-xl font-bold mb-2 text-white">How can you help?</h1>
+              <p className="text-sm text-white/90">Select your expertise areas</p>
+            </>
+          )}
+          {step === 5 && isAlumni && (
+            <>
               <h1 className="text-xl font-bold mb-2 text-white">Your Alumni Details 🎓</h1>
               <p className="text-sm text-white/90">Tell us about your time at UF</p>
             </>
           )}
-          {step === 5 && isAlumni && (
+          {step === 6 && isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Inspire the next generation? 📖</h1>
               <p className="text-sm text-white/90">Share your story with students</p>
             </>
           )}
-          {step === 6 && isAlumni && (
+          {step === 7 && isAlumni && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">Invite a Parent 👨‍👩‍👧</h1>
               <p className="text-sm text-white/90">Earn karma together as a family</p>
@@ -678,7 +690,7 @@ export default function Onboarding() {
               <p className="text-sm text-white/90">Boost your student's visibility</p>
             </>
           )}
-          {((step === 5 && !isAlumni) || (step === 7 && isAlumni)) && (
+          {((step === 5 && !isAlumni) || (step === 8 && isAlumni)) && (
             <>
               <h1 className="text-xl font-bold mb-2 text-white">You're all set! 🎉</h1>
               <p className="text-sm text-white/90">Just one more thing...</p>
