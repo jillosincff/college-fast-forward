@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { X, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/components/auth/AuthContext';
+import { useParentDashboardData } from '@/components/dashboard/parent/useParentDashboardData';
 
 const DISMISSED_KEY = 'cff_karma_explainer_dismissed';
 
 export default function KarmaExplainerCard() {
+  const { user } = useAuth();
+  const { data } = useParentDashboardData(user);
   const [dismissed, setDismissed] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
+  const familyKarma = data?.familyKarma || 0;
+
   useEffect(() => {
+    // Auto-hide if user has earned any karma — they already understand the system
+    if (familyKarma > 0) {
+      setDismissed(true);
+      setExpanded(false);
+      return;
+    }
+
     const wasDismissed = localStorage.getItem(DISMISSED_KEY);
     if (!wasDismissed) {
       setDismissed(false);
@@ -17,7 +30,7 @@ export default function KarmaExplainerCard() {
       setDismissed(true);
       setExpanded(false);
     }
-  }, []);
+  }, [familyKarma]);
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISSED_KEY, 'true');
@@ -25,7 +38,10 @@ export default function KarmaExplainerCard() {
     setExpanded(false);
   };
 
-  // Collapsed teaser — always visible after dismiss
+  // Don't render at all if user has karma
+  if (familyKarma > 0) return null;
+
+  // Collapsed teaser — visible after dismiss but only if 0 karma
   if (dismissed && !expanded) {
     return (
       <button
@@ -62,7 +78,7 @@ export default function KarmaExplainerCard() {
         <div>
           <h3 className="font-bold text-lg text-slate-900">How Family Karma Works</h3>
           <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-            Every time you help a student — answering questions, sharing salary data,
+            Every time you help a student — answering questions, posting jobs,
             or making introductions — your family earns karma points. The more karma
             you earn, the more visible your student becomes in match results.
           </p>
@@ -76,22 +92,22 @@ export default function KarmaExplainerCard() {
             onClick={() => { handleDismiss(); navigate('Connections?tab=questions'); }}
             className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-sm transition text-left"
           >
-            <span className="text-sm text-slate-700">Answer student questions</span>
+            <span className="text-sm text-slate-700">Answer questions</span>
             <span className="text-xs font-bold text-blue-600 whitespace-nowrap">+15 pts</span>
           </button>
           <button
-            onClick={() => { handleDismiss(); navigate('Connections?tab=salaries'); }}
+            onClick={() => { handleDismiss(); navigate('PostOpportunity'); }}
             className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-green-300 hover:shadow-sm transition text-left"
           >
-            <span className="text-sm text-slate-700">Add salary data</span>
-            <span className="text-xs font-bold text-green-600 whitespace-nowrap">+25 pts</span>
+            <span className="text-sm text-slate-700">Post a job</span>
+            <span className="text-xs font-bold text-green-600 whitespace-nowrap">+10 pts</span>
           </button>
           <button
-            onClick={() => { handleDismiss(); navigate('Connections?tab=interviews'); }}
+            onClick={() => { handleDismiss(); navigate('ProfileEdit'); }}
             className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-purple-300 hover:shadow-sm transition text-left"
           >
-            <span className="text-sm text-slate-700">Share interview questions</span>
-            <span className="text-xs font-bold text-purple-600 whitespace-nowrap">+15 pts</span>
+            <span className="text-sm text-slate-700">Complete your profile</span>
+            <span className="text-xs font-bold text-purple-600 whitespace-nowrap">+25 pts</span>
           </button>
         </div>
       </div>
