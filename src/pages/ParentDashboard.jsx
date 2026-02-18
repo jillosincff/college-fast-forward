@@ -615,9 +615,9 @@ export default function ParentDashboard() {
             )}
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog>}
       
-      <AddStudentModal
+      {showStudentLinking && <AddStudentModal
         isOpen={showAddStudentModal}
         onClose={() => setShowAddStudentModal(false)}
         onSuccess={async () => {
