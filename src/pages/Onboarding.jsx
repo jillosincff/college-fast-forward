@@ -196,10 +196,16 @@ export default function Onboarding() {
         if (alumniMajor.trim()) updateData.major = alumniMajor.trim();
         if (alumniMinor.trim()) updateData.minor = alumniMinor.trim();
         if (graduateDegrees.trim()) updateData.graduate_degrees = graduateDegrees.trim();
+        if (yearsExperience) updateData.years_experience = yearsExperience;
         
-        // Alumni "Get Help" preferences
-        updateData.needs_help_with = isGoodForNow ? [] : needsHelpWith;
-        updateData.is_good_for_now = isGoodForNow;
+        // Alumni "Get Help" preferences (only for seekers, helpers don't need this)
+        if (alumniIntent === 'seeking_help') {
+          updateData.needs_help_with = isGoodForNow ? [] : needsHelpWith;
+          updateData.is_good_for_now = isGoodForNow;
+        } else {
+          updateData.needs_help_with = [];
+          updateData.is_good_for_now = true;
+        }
         
         // Story sharing
         if (storyOption === 'yes' && alumniStory.trim()) {
