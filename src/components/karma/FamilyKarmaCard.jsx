@@ -197,13 +197,16 @@ export default function FamilyKarmaCard({ user, childName, viewMode = 'parent' }
     );
   }
 
-  // STUDENT VIEW
+  // Determine if this is a student or alumni seeker
+  const isAlumniSeekerView = user?.persona === 'alumni';
+
+  // STUDENT / ALUMNI SEEKER VIEW
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       {/* Header */}
       <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
-        <span>👨‍👩‍👧</span>
-        Your Family's Karma
+        <span>{isAlumniSeekerView ? '⭐' : '👨‍👩‍👧'}</span>
+        {isAlumniSeekerView ? 'Your Karma' : "Your Family's Karma"}
       </h2>
       
       {/* Score + Percentile */}
