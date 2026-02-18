@@ -50,16 +50,6 @@ export default function AlumniLiveActivityBar({ events, weeklyStudentsHelped, we
             </div>
           </div>
 
-          {/* Weekly stats */}
-          <div className="hidden md:flex items-center gap-4 text-sm text-gray-400">
-            <span>
-              <strong style={{ color: '#0021A5' }}>{weeklyStudentsHelped}</strong> students
-            </span>
-            <span>•</span>
-            <span>
-              <strong style={{ color: '#0021A5' }}>{weeklyAlumniHelped}</strong> alumni helped this week
-            </span>
-          </div>
           
         </div>
       </div>
