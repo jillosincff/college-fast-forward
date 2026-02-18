@@ -79,6 +79,9 @@ export default function Onboarding() {
   const [needsHelpWith, setNeedsHelpWith] = useState([]);
   const [isGoodForNow, setIsGoodForNow] = useState(false);
   
+  // Alumni helper: Years of experience
+  const [yearsExperience, setYearsExperience] = useState('');
+  
   // Visibility setting
   const [visibleInDirectory, setVisibleInDirectory] = useState(true);
 
