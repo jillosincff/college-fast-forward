@@ -375,7 +375,7 @@ export default function Onboarding() {
       return (
         <div className="space-y-5">
           <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of 5</p>
+            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of {totalSteps}</p>
             <h1 className="text-3xl font-bold text-white">What's your industry?</h1>
           </div>
           
