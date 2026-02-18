@@ -39,11 +39,17 @@ export default function AlumniCanHelpYouSection({ matches, total, matchedCategor
       {/* Header */}
       <div className="px-6 py-5 border-b" style={{ borderColor: `${UF_ORANGE}15` }}>
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <span>✨</span> {total} Alumni Can Help You
+          <span>✨</span> {total} Alumni & Parents Can Help You
         </h2>
-        <p className="text-gray-600 text-sm mt-1">
-          You mentioned you need help with: <strong style={{ color: UF_ORANGE }}>{categoryLabels}</strong>
-        </p>
+        {allLabels ? (
+          <p className="text-gray-600 text-sm mt-1">
+            Based on your needs: <strong style={{ color: UF_ORANGE }}>{allLabels}</strong>
+          </p>
+        ) : (
+          <p className="text-gray-600 text-sm mt-1">
+            People in the UF network who can help with your career
+          </p>
+        )}
       </div>
 
       {/* Match Cards */}
