@@ -1508,6 +1508,7 @@ export default function Onboarding() {
           {step === 8 && isAlumniSeeker && (
             <SeekerPostRequestStep
               user={user}
+              seekerNeeds={seekerNeeds}
               onComplete={() => setStep(9)}
               onSkip={() => setStep(9)}
             />
