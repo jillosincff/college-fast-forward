@@ -322,6 +322,7 @@ export default function ProfileEdit() {
 
   // Detect parent persona - check both persona field and roles array
   const isParent = user.persona === 'parent' || user.roles?.includes('parent');
+  const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
   const isStudent = user.persona === 'gator' || user.persona === 'student' || user.persona === 'alumni' || (!isParent && user.email?.toLowerCase().endsWith('@ufl.edu'));
 
   console.log('ProfileEdit persona detection:', { 
