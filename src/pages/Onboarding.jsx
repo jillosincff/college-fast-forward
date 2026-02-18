@@ -336,18 +336,18 @@ export default function Onboarding() {
     );
   }
 
-  // Progress bar component - Alumni has 8 steps (with intent + pledge), Parents have 5 (with link student)
+  // Progress bar component - Alumni has 8 steps, Parents have 5 (with link student)
     const totalSteps = isAlumni ? 8 : 5;
 
-    // Alumni steps: 1=You, 2=Industry, 3=Intent, 4=Help, 5=UF, 6=Story, 7=Pledge, 8=Ready
+    // Alumni steps: 1=UF, 2=You, 3=Industry, 4=Intent, 5=Help, 6=Story, 7=Pledge, 8=Ready
     // Parent steps: 1=You, 2=Industry, 3=Help, 4=Link, 5=Ready
     const ProgressBar = () => {
       const alumniSteps = [
+        { emoji: '🎓', label: 'UF' },
         { emoji: '👤', label: 'You' },
         { emoji: '🏢', label: 'Industry' },
         { emoji: '🎯', label: 'Intent' },
         { emoji: '💼', label: 'Help' },
-        { emoji: '🎓', label: 'UF' },
         { emoji: '📖', label: 'Story' },
         { emoji: '🤝', label: 'Pledge' },
         { emoji: '✅', label: 'Ready' },
