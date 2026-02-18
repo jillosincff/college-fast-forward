@@ -87,7 +87,7 @@ export default function YourActiveRequestSection({ request, onPostRequest }) {
         </div>
         <div>
           <h3 className="font-bold text-gray-900">Your Active Request</h3>
-          <p className="text-sm text-gray-500">Visible to UF alumni only</p>
+          <p className="text-sm text-gray-500">Visible to the network</p>
         </div>
       </div>
 
@@ -154,10 +154,19 @@ export default function YourActiveRequestSection({ request, onPostRequest }) {
           </div>
         </div>
 
-        {/* Privacy Badge */}
-        <div className="mt-4 flex items-center gap-2 text-xs text-gray-400">
-          <span>🔒</span>
-          <span>Only UF alumni can see this request</span>
+        {/* Footer: Edit + Privacy */}
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <span>🔒</span>
+            <span>Visible to the network</span>
+          </div>
+          <button
+            onClick={() => navigate(`PostRequest?edit=${req.id}`)}
+            className="text-sm font-semibold px-4 py-1.5 rounded-lg transition hover:bg-gray-100"
+            style={{ color: UF_BLUE }}
+          >
+            ✏️ Edit Request
+          </button>
         </div>
       </div>
     </section>
