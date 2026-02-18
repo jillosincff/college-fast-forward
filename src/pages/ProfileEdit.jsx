@@ -374,6 +374,9 @@ export default function ProfileEdit() {
         </div>
 
         <div className="space-y-4 sm:space-y-6">
+          {/* Alumni Intent Switcher */}
+          {isAlumni && <AlumniIntentSwitcher user={user} onUpdated={refreshUser} />}
+
           {/* Resume Upload Section - Students Only */}
           {!isParent && <ResumeUpload user={user} onResumeUpdated={handleResumeUpdated} />}
 
