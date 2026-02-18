@@ -35,6 +35,25 @@ const EXPERTISE_AREAS = [
   { id: 'introductions', label: 'Introductions', emoji: '🤝', description: 'Connecting with specific people or companies' },
 ];
 
+// What SEEKER alumni need help with
+const SEEKER_NEEDS = [
+  { id: 'intros_hiring_managers', label: 'Introductions to hiring managers', emoji: '🤝' },
+  { id: 'career_advice', label: 'Career advice / industry guidance', emoji: '💼' },
+  { id: 'resume_review', label: 'Resume review', emoji: '📄' },
+  { id: 'interview_prep', label: 'Interview prep', emoji: '🎤' },
+  { id: 'salary_negotiation', label: 'Salary negotiation advice', emoji: '💰' },
+  { id: 'career_pivot', label: 'Career pivot guidance', emoji: '🔄' },
+];
+
+// How seekers can pay it forward (help students)
+const SEEKER_PAY_IT_FORWARD = [
+  { id: 'career_guidance_pif', label: 'Career guidance — I can share what I\'ve learned', emoji: '💡' },
+  { id: 'interview_tips_pif', label: 'Interview tips — I\'ve been through it recently', emoji: '🎯' },
+  { id: 'salary_data_pif', label: 'Salary data — I can share offer details anonymously', emoji: '📊' },
+  { id: 'resume_feedback_pif', label: 'Resume feedback — I know what works', emoji: '📝' },
+  { id: 'industry_insights_pif', label: 'Industry insights — I can share what my field is really like', emoji: '🏢' },
+];
+
 export default function Onboarding() {
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
