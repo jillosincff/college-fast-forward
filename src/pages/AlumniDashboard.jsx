@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { JobRequest } from '@/entities/JobRequest';
 import { Opportunity } from '@/entities/Opportunity';
 import { Answer } from '@/entities/Answer';
+import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import AlumniHeroSection from '@/components/alumni-dashboard/AlumniHeroSection';
 import AlumniLiveActivityBar from '@/components/alumni-dashboard/AlumniLiveActivityBar';
 import AlumniStudentQuestionsSection from '@/components/alumni-dashboard/AlumniStudentQuestionsSection';
