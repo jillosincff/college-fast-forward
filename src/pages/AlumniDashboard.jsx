@@ -441,29 +441,12 @@ export default function AlumniDashboard() {
 
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
           
-          {/* SEEKER MODE: Primary content is getting help */}
-          {mode === 'seeking' && myRequests.length > 0 && (
-            <YourActiveRequestSection request={myRequests[0]} />
-          )}
-
-          {/* SEEKER MODE: Prompt to post a request if none yet */}
-          {mode === 'seeking' && myRequests.length === 0 && (
-            <section className="bg-white rounded-3xl shadow-lg border-2 overflow-hidden" style={{ borderColor: 'rgba(250, 70, 22, 0.3)' }}>
-              <div className="p-6 text-center">
-                <div className="text-4xl mb-3">🙋</div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Tell the Network What You Need</h2>
-                <p className="text-gray-600 mb-5 max-w-md mx-auto">
-                  Post a help request and let alumni and parents in the UF network reach out to you with advice, intros, and opportunities.
-                </p>
-                <button
-                  onClick={() => setShowPostRequestModal(true)}
-                  className="text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg transition hover:scale-105"
-                  style={{ backgroundColor: '#FA4616', boxShadow: '0 8px 20px rgba(250, 70, 22, 0.3)' }}
-                >
-                  Post a Help Request →
-                </button>
-              </div>
-            </section>
+          {/* SEEKER MODE: Show active request or prompt to post one */}
+          {mode === 'seeking' && (
+            <YourActiveRequestSection 
+              request={myRequests[0] || null} 
+              onPostRequest={() => setShowPostRequestModal(true)} 
+            />
           )}
 
           {/* Alumni/Parents who can help (seeker + give_and_get modes) */}
@@ -477,9 +460,12 @@ export default function AlumniDashboard() {
             />
           )}
 
-          {/* GIVE + GET MODE: Show "Your Active Request" if exists */}
-          {mode === 'give_and_get' && myRequests.length > 0 && (
-            <YourActiveRequestSection request={myRequests[0]} />
+          {/* GIVE + GET MODE: Show active request or prompt to post one */}
+          {mode === 'give_and_get' && (
+            <YourActiveRequestSection 
+              request={myRequests[0] || null} 
+              onPostRequest={() => setShowPostRequestModal(true)} 
+            />
           )}
 
           {/* Help Students — shown for give_only and give_and_get, lower priority for seekers */}
