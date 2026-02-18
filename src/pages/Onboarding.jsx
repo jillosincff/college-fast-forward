@@ -176,8 +176,15 @@ export default function Onboarding() {
   const isAlumniHelper = isAlumni && alumniIntent === 'help_students';
   const isAlumniSeeker = isAlumni && alumniIntent === 'seeking_help';
 
+  const toggleSeekerNeed = (id) => {
+    setSeekerNeeds(prev => prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]);
+  };
+  const toggleSeekerPIF = (id) => {
+    setSeekerPayItForward(prev => prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]);
+  };
+
   const canProceedStep1 = !linkedinError;
-  const canProceedStep2 = expertise.length > 0;
+  const canProceedStep2 = isAlumniSeeker ? seekerNeeds.length > 0 : expertise.length > 0;
   const canProceedStep3Alumni = alumniGradYear && alumniMajor.trim();
   const canProceedStep5Alumni = storyOption !== '' && (storyOption !== 'yes' || alumniStory.trim().length > 0);
   
