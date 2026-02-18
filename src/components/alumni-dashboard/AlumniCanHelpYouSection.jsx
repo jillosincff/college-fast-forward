@@ -172,7 +172,7 @@ function AlumniMatchCard({ match }) {
             boxShadow: `0 4px 12px ${UF_BLUE}30`
           }}
         >
-          Connect →
+          Message →
         </button>
         
       </div>
