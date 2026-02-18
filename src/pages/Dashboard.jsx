@@ -89,7 +89,7 @@ export default function Dashboard() {
       navigate('ParentDashboard');
       return;
     } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-      navigate('AlumniDashboard');
+      navigate(user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard');
       return;
     } else if (user.roles?.includes('admin')) {
       navigate('AdminDashboard');
