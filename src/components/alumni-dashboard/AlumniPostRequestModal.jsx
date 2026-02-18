@@ -160,8 +160,8 @@ export default function AlumniPostRequestModal({ onClose, onSuccess, existingReq
             >
               <span>🔒</span>
               <p className="text-sm text-gray-600">
-                Your request is <strong>only visible to UF alumni</strong>. 
-                Students and non-members cannot see it.
+                Your request is <strong>only visible to the UF network</strong>. 
+                Non-members cannot see it.
               </p>
             </div>
 
