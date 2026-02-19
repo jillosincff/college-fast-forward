@@ -140,6 +140,17 @@ Deno.serve(async (req) => {
     );
     
     console.log(`Found ${eligibleUsers.length} parent/alumni users with completed onboarding`);
+
+    // DEDUPLICATION RULE 1: Exclude users who have a FastTrackProfile — 
+    // the Fast Track Scout handles their re-engagement with personalized, tier-aware messaging.
+    const fastTrackProfiles = await base44.asServiceRole.entities.FastTrackProfile.filter({});
+    const fastTrackEmails = new Set(fastTrackProfiles.map(p => p.user_email?.toLowerCase()));
+    const preFilterCount = eligibleUsers.length;
+    const filteredEligibleUsers = eligibleUsers.filter(u => !fastTrackEmails.has(u.email?.toLowerCase()));
+    const fastTrackSkipped = preFilterCount - filteredEligibleUsers.length;
+    if (fastTrackSkipped > 0) {
+      console.log(`⏭️ Skipped ${fastTrackSkipped} users with FastTrackProfiles (handled by Fast Track Scout)`);
+    }
     
     // Get email preferences
     const emailPrefs = await base44.asServiceRole.entities.EmailPreference.filter({});
@@ -204,7 +215,7 @@ Deno.serve(async (req) => {
       errors: []
     };
     
-    for (const user of eligibleUsers.slice(0, limit)) {
+    for (const user of filteredEligibleUsers.slice(0, limit)) {
       try {
         results.processed++;
         
