@@ -230,6 +230,62 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 6.4: FT Exclusion
           </Button>
+          <Button
+            onClick={() => runTests('7.1')}
+            disabled={isRunning}
+            className="bg-pink-600 hover:bg-pink-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 7.1: Coach Opp
+          </Button>
+          <Button
+            onClick={() => runTests('7.2')}
+            disabled={isRunning}
+            className="bg-pink-600 hover:bg-pink-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 7.2: Coach Block
+          </Button>
+          <Button
+            onClick={() => runTests('7.3')}
+            disabled={isRunning}
+            className="bg-pink-600 hover:bg-pink-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 7.3: Comeback Badge
+          </Button>
+          <Button
+            onClick={() => runTests('8.1')}
+            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 8.1: 1st Connect
+          </Button>
+          <Button
+            onClick={() => runTests('8.2')}
+            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 8.2: Follow-Up Pro
+          </Button>
+          <Button
+            onClick={() => runTests('8.3')}
+            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 8.3: 5-Star
+          </Button>
+          <Button
+            onClick={() => runTests('8.4')}
+            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 8.4: Streak Master
+          </Button>
+          <Button
+            onClick={() => runTests('8.5')}
+            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 8.5: No Dupes
+          </Button>
 
           <Button
             onClick={cleanupTestData}
