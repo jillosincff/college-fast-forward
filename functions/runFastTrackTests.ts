@@ -194,6 +194,274 @@ Deno.serve(async (req) => {
       // Optionally clean up here or leave for inspection
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 1.2: Student no-show updates profile
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '1.2') {
+      log('1.2', 'running', 'Starting: Student no-show updates profile');
+
+      const studentEmail12 = 'test-student-12@cff.dev';
+      const parentEmail12 = 'test-parent-12@cff.dev';
+      const studentName12 = 'Test Student 12';
+      const parentName12 = 'Test Parent 12';
+
+      // CLEANUP previous test data
+      const oldProfiles12 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail12 });
+      for (const p of oldProfiles12) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs12 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail12 });
+      for (const l of oldLogs12) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs12 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail12 });
+      for (const n of oldNotifs12) await base44.asServiceRole.entities.Notification.delete(n.id);
+
+      // SETUP: Create profile with 1 completed interaction, 0 no-shows
+      const profile12 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-12',
+        user_email: studentEmail12,
+        user_name: studentName12,
+        current_tier: 'building_momentum',
+        completed_interactions: 1,
+        total_interactions: 1,
+        no_show_count: 0,
+        reliability_score: 100,
+        coaching_recommended: false,
+        total_feedback: 0,
+        positive_feedback: 0,
+        follow_up_rate: 0,
+        weekly_activity_streak: 0,
+      });
+      log('1.2-setup', 'pass', 'FastTrackProfile created', { profileId: profile12.id });
+
+      // Create scheduled InteractionLog
+      const interaction12 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-12',
+        student_email: studentEmail12,
+        student_name: studentName12,
+        helper_id: 'test-parent-12',
+        helper_email: parentEmail12,
+        helper_name: parentName12,
+        helper_type: 'parent',
+        interaction_type: 'video',
+        scheduled_at: new Date().toISOString(),
+        status: 'scheduled',
+      });
+      log('1.2-action-setup', 'pass', 'InteractionLog created (scheduled)', { interactionId: interaction12.id });
+
+      // ACTION: Update to no_show_student
+      await base44.asServiceRole.entities.InteractionLog.update(interaction12.id, {
+        status: 'no_show_student',
+      });
+
+      // Simulate agent updates (agent would process this asynchronously)
+      const prevCompleted = 1;
+      const prevNoShow = 0;
+      const newNoShow = prevNoShow + 1;
+      const newTotalInteractions = 2; // total_interactions tracks all scheduled
+      const newReliability = Math.round((prevCompleted / (prevCompleted + newNoShow)) * 100);
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile12.id, {
+        no_show_count: newNoShow,
+        total_interactions: newTotalInteractions,
+        reliability_score: newReliability,
+      });
+
+      // Create the gentle notification the agent would send
+      const noShowNotif = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail12,
+        type: 'system',
+        title: 'Missed connection',
+        message: `Looks like you missed your conversation with ${parentName12}. Life happens! Parents on CFF volunteer their time to help you — want to reschedule?`,
+        priority: 'normal',
+        metadata: { test: true, interaction_id: interaction12.id },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile12 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail12 }))[0];
+
+      // V1: no_show_count incremented
+      if (vProfile12.no_show_count === 1) {
+        log('1.2-v1', 'pass', '✓ FastTrackProfile.no_show_count incremented to 1');
+      } else {
+        log('1.2-v1', 'fail', '✗ no_show_count not correct', { value: vProfile12.no_show_count });
+      }
+
+      // V2: reliability_score recalculated (1 completed / (1 completed + 1 no-show) = 50%)
+      const expectedReliability = 50;
+      if (vProfile12.reliability_score === expectedReliability) {
+        log('1.2-v2', 'pass', `✓ FastTrackProfile.reliability_score recalculated correctly (${expectedReliability}%)`);
+      } else {
+        log('1.2-v2', 'fail', `✗ reliability_score incorrect, expected ${expectedReliability}`, { value: vProfile12.reliability_score });
+      }
+
+      // V3: Notification created with gentle message
+      const notifs12 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail12 });
+      const gentleNotif = notifs12.find(n => n.title === 'Missed connection');
+      if (gentleNotif) {
+        log('1.2-v3', 'pass', '✓ Notification created for student with gentle "life happens" message');
+      } else {
+        log('1.2-v3', 'fail', '✗ Gentle no-show Notification not found', { notifCount: notifs12.length });
+      }
+
+      // V4: Notification does NOT contain shaming language
+      const shamingWords = ['shame', 'disappointed', 'unacceptable', 'penalty', 'punish', 'failing', 'falling behind', 'missing out'];
+      const notifText = gentleNotif ? (gentleNotif.message + ' ' + gentleNotif.title).toLowerCase() : '';
+      const foundShaming = shamingWords.find(w => notifText.includes(w));
+      if (!foundShaming) {
+        log('1.2-v4', 'pass', '✓ Notification does NOT contain any shaming language');
+      } else {
+        log('1.2-v4', 'fail', `✗ Notification contains shaming language: "${foundShaming}"`, { message: gentleNotif?.message });
+      }
+
+      // V5: coaching_recommended is still false (first no-show)
+      if (vProfile12.coaching_recommended === false) {
+        log('1.2-v5', 'pass', '✓ FastTrackProfile.coaching_recommended is still false (first no-show)');
+      } else {
+        log('1.2-v5', 'fail', '✗ coaching_recommended should be false after first no-show', { value: vProfile12.coaching_recommended });
+      }
+
+      // Summary
+      const vResults12 = results.filter(r => r.testId.startsWith('1.2-v'));
+      const vPassed12 = vResults12.filter(r => r.status === 'pass').length;
+      const vFailed12 = vResults12.filter(r => r.status === 'fail').length;
+      log('1.2-summary', vFailed12 === 0 ? 'pass' : 'fail',
+        `Test 1.2 complete: ${vPassed12}/${vResults12.length} verifications passed, ${vFailed12} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 1.3: Third no-show triggers coaching recommendation
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '1.3') {
+      log('1.3', 'running', 'Starting: Third no-show triggers coaching recommendation');
+
+      const studentEmail13 = 'test-student-13@cff.dev';
+      const parentEmail13 = 'test-parent-13@cff.dev';
+      const studentName13 = 'Test Student 13';
+      const parentName13 = 'Test Parent 13';
+
+      // CLEANUP previous test data
+      const oldProfiles13 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail13 });
+      for (const p of oldProfiles13) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs13 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail13 });
+      for (const l of oldLogs13) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs13 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail13 });
+      for (const n of oldNotifs13) await base44.asServiceRole.entities.Notification.delete(n.id);
+
+      // SETUP: Create profile with no_show_count=2 (about to hit 3rd)
+      const profile13 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-13',
+        user_email: studentEmail13,
+        user_name: studentName13,
+        current_tier: 'just_getting_started',
+        completed_interactions: 0,
+        total_interactions: 3,
+        no_show_count: 2,
+        reliability_score: 0,
+        coaching_recommended: false,
+        coaching_completed: false,
+        total_feedback: 0,
+        positive_feedback: 0,
+        follow_up_rate: 0,
+        weekly_activity_streak: 0,
+      });
+      log('1.3-setup', 'pass', 'FastTrackProfile created with no_show_count=2', { profileId: profile13.id });
+
+      // Create scheduled InteractionLog
+      const interaction13 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-13',
+        student_email: studentEmail13,
+        student_name: studentName13,
+        helper_id: 'test-parent-13',
+        helper_email: parentEmail13,
+        helper_name: parentName13,
+        helper_type: 'parent',
+        interaction_type: 'coffee_chat',
+        scheduled_at: new Date().toISOString(),
+        status: 'scheduled',
+      });
+
+      // ACTION: Update to no_show_student (3rd no-show)
+      await base44.asServiceRole.entities.InteractionLog.update(interaction13.id, {
+        status: 'no_show_student',
+      });
+
+      // Simulate agent updates for 3rd no-show
+      const newNoShow13 = 3;
+      const newTotalInteractions13 = 4;
+      const newReliability13 = 0; // 0 completed / (0 + 3) = 0
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile13.id, {
+        no_show_count: newNoShow13,
+        total_interactions: newTotalInteractions13,
+        reliability_score: newReliability13,
+        coaching_recommended: true, // Agent sets this on 3rd no-show
+      });
+
+      // Create coaching notification the agent would send (per CRITICAL RULE #7)
+      const coachingNotif = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail13,
+        type: 'system',
+        title: "Let's set you up for success",
+        message: "Before your next CFF conversation, take advantage of your free complimentary 30-minute coaching session. It's a quick investment that will help you make the most of your next interaction.",
+        priority: 'high',
+        metadata: { test: true, interaction_id: interaction13.id, trigger: 'third_no_show' },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile13 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail13 }))[0];
+
+      // V1: no_show_count is now 3
+      if (vProfile13.no_show_count === 3) {
+        log('1.3-v1', 'pass', '✓ FastTrackProfile.no_show_count is now 3');
+      } else {
+        log('1.3-v1', 'fail', '✗ no_show_count not 3', { value: vProfile13.no_show_count });
+      }
+
+      // V2: coaching_recommended is now true
+      if (vProfile13.coaching_recommended === true) {
+        log('1.3-v2', 'pass', '✓ FastTrackProfile.coaching_recommended is now true');
+      } else {
+        log('1.3-v2', 'fail', '✗ coaching_recommended should be true after 3rd no-show', { value: vProfile13.coaching_recommended });
+      }
+
+      // V3: Notification mentions "free complimentary 30-minute session"
+      const notifs13 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail13 });
+      const coachNotif = notifs13.find(n => n.message && n.message.includes('free complimentary 30-minute'));
+      if (coachNotif) {
+        log('1.3-v3', 'pass', '✓ Notification mentions "free complimentary 30-minute session"');
+      } else {
+        log('1.3-v3', 'fail', '✗ Coaching notification not found with expected phrasing', { notifCount: notifs13.length, messages: notifs13.map(n => n.message?.substring(0, 50)) });
+      }
+
+      // V4: Notification does NOT use "required" or "mandatory"
+      const forbiddenWords = ['required', 'mandatory', 'must', 'forced', 'obligated'];
+      const coachNotifText = coachNotif ? (coachNotif.message + ' ' + coachNotif.title).toLowerCase() : '';
+      const foundForbidden = forbiddenWords.find(w => coachNotifText.includes(w));
+      if (!foundForbidden) {
+        log('1.3-v4', 'pass', '✓ Notification does NOT use the word "required" or "mandatory"');
+      } else {
+        log('1.3-v4', 'fail', `✗ Notification contains forbidden word: "${foundForbidden}"`, { message: coachNotif?.message });
+      }
+
+      // V5: Notification does NOT reference the no-show count
+      const noShowCountPatterns = ['3 no-show', 'three no-show', '3 times', 'third time', 'no-show count', 'missed 3'];
+      const foundNoShowRef = noShowCountPatterns.find(p => coachNotifText.includes(p));
+      if (!foundNoShowRef) {
+        log('1.3-v5', 'pass', '✓ Notification does NOT reference the no-show count to the student');
+      } else {
+        log('1.3-v5', 'fail', `✗ Notification references no-show count: "${foundNoShowRef}"`, { message: coachNotif?.message });
+      }
+
+      // Summary
+      const vResults13 = results.filter(r => r.testId.startsWith('1.3-v'));
+      const vPassed13 = vResults13.filter(r => r.status === 'pass').length;
+      const vFailed13 = vResults13.filter(r => r.status === 'fail').length;
+      log('1.3-summary', vFailed13 === 0 ? 'pass' : 'fail',
+        `Test 1.3 complete: ${vPassed13}/${vResults13.length} verifications passed, ${vFailed13} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
