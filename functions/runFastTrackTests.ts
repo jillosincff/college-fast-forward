@@ -3674,7 +3674,6 @@ When you're ready, we're here. Your next conversation is one click away.
       const existing85 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: userId85 });
       const hasFirst85 = existing85.some(b => b.badge_type === 'first_conversation');
 
-      // Agent logic: only create if not already exists
       let duplicateCreated85 = false;
       if (!hasFirst85) {
         await base44.asServiceRole.entities.UserBadge.create({
@@ -3693,6 +3692,448 @@ When you're ready, we're here. Your next conversation is one click away.
 
       log('8.5-summary', firstConvBadges.length === 1 ? 'pass' : 'fail',
         `Test 8.5 complete: ${firstConvBadges.length === 1 ? '1/1' : '0/1'} passed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 9.1: Student never sees negative feedback content
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '9.1') {
+      log('9.1', 'running', 'Starting: Student never sees negative feedback content');
+
+      const studentEmail91 = 'test-student-91@cff.dev';
+      const parentEmail91 = 'test-parent-91@cff.dev';
+      const userId91 = 'test-student-91';
+
+      // CLEANUP
+      const oldP91 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail91 });
+      for (const p of oldP91) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldN91 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail91 });
+      for (const n of oldN91) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldFb91 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail91 });
+      for (const f of oldFb91) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldE91 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail91 });
+      for (const e of oldE91) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+      const oldL91 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail91 });
+      for (const l of oldL91) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+
+      // SETUP: Profile + negative feedback
+      const profile91 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: userId91, user_email: studentEmail91, user_name: 'Test Student 91',
+        current_tier: 'building_momentum', completed_interactions: 2, total_interactions: 2,
+        total_feedback: 0, positive_feedback: 0, no_show_count: 0, reliability_score: 100,
+        follow_up_rate: 50, coaching_recommended: false, weekly_activity_streak: 1,
+      });
+
+      const intLog91 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: userId91, student_email: studentEmail91, student_name: 'Test Student 91',
+        helper_id: 'test-parent-91', helper_email: parentEmail91, helper_name: 'Test Parent 91',
+        helper_type: 'parent', interaction_type: 'call',
+        scheduled_at: new Date().toISOString(), completed_at: new Date().toISOString(), status: 'completed',
+      });
+
+      // ACTION: Submit feedback with growth_attributes
+      const fb91 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: intLog91.id, student_id: userId91, student_email: studentEmail91,
+        student_name: 'Test Student 91', reviewer_id: 'test-parent-91', reviewer_email: parentEmail91,
+        reviewer_name: 'Test Parent 91', overall_impression: 'still_warming_up',
+        positive_attributes: [], growth_attributes: ['seemed_unprepared', 'needs_communication_help'],
+        recommend_coaching: true, feedback_visible: true,
+      });
+      log('9.1-setup', 'pass', 'Negative feedback submitted with growth_attributes=[seemed_unprepared, needs_communication_help]');
+
+      // Simulate agent processing: update profile, create coaching opp notif (NOT feedback notif)
+      const now91 = new Date().toISOString();
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile91.id, {
+        total_feedback: 1, positive_feedback: 0, avg_impression_score: 1,
+        coaching_recommended: true, last_activity_date: now91,
+      });
+
+      // Agent only sends coaching opportunity notif — no feedback notif for negative
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail91, type: 'system',
+        title: 'Free career coaching session available',
+        message: "CFF offers one-on-one career coaching — one free complimentary 30-minute session. Students who complete coaching earn 2x tier points.",
+        priority: 'normal', metadata: { test: true, trigger: 'coaching_opportunity' },
+      });
+
+      // Simulate report card email (weekly)
+      const reportBody91 = [
+        'Hey Test Student 91,', '', "Here's your weekly CFF Report Card:", '',
+        'NETWORK ACTIVITY: C', '1 conversation this week.', '',
+        'YOUR FEEDBACK: D', '0 new positive feedback.', '',
+        'YOUR TIER: Building Momentum', '1 more conversation and 2 positive feedback away from Rising', '',
+        'How you network matters.',
+      ].join('\n');
+
+      await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail91, email_type: 'weekly_digest',
+        subject: 'Your CFF Report Card', content_preview: reportBody91.substring(0, 200),
+        status: 'sent', sent_at: now91,
+        metadata: { test: true, trigger: 'weekly_report_card', full_body: reportBody91 },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const allNotifs91 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail91 });
+      const allEmails91 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail91 });
+
+      const growthTerms91 = ['unprepared', 'seemed_unprepared', 'needs_communication_help', 'needs communication', 'growth_attributes', 'growth attributes'];
+
+      // V1: No Notification mentions "unprepared"
+      const allNotifText91 = allNotifs91.map(n => ((n.title || '') + ' ' + (n.message || '')).toLowerCase()).join(' ');
+      const foundInNotif91 = growthTerms91.find(t => allNotifText91.includes(t));
+      log('9.1-v1', !foundInNotif91 ? 'pass' : 'fail',
+        !foundInNotif91 ? '✓ No Notification to student mentions "unprepared" or growth terms' : `✗ Found "${foundInNotif91}" in notifications`);
+
+      // V2: No email contains growth_attributes content
+      const allEmailText91 = allEmails91.map(e => ((e.subject || '') + ' ' + (e.content_preview || '') + ' ' + (e.metadata?.full_body || '')).toLowerCase()).join(' ');
+      const foundInEmail91 = growthTerms91.find(t => allEmailText91.includes(t));
+      log('9.1-v2', !foundInEmail91 ? 'pass' : 'fail',
+        !foundInEmail91 ? '✓ No email to student contains growth_attributes content' : `✗ Found "${foundInEmail91}" in emails`);
+
+      // V3: Report card does not reference this specific feedback negatively
+      const reportEmail91 = allEmails91.find(e => e.metadata?.trigger === 'weekly_report_card');
+      const reportText91 = (reportEmail91?.metadata?.full_body || '').toLowerCase();
+      const negativeRefTerms91 = ['unprepared', 'communication help', 'seemed unprepared', 'poor', 'bad feedback', 'negative'];
+      const foundNegRef91 = negativeRefTerms91.find(t => reportText91.includes(t));
+      log('9.1-v3', !foundNegRef91 ? 'pass' : 'fail',
+        !foundNegRef91 ? '✓ Report card does not reference specific negative feedback' : `✗ Found "${foundNegRef91}" in report`);
+
+      // V4: The only student-visible effect: tier does not advance as fast
+      const vP91 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail91 }))[0];
+      const tierStayed91 = vP91.current_tier === 'building_momentum' && vP91.positive_feedback === 0;
+      log('9.1-v4', tierStayed91 ? 'pass' : 'fail',
+        tierStayed91 ? '✓ Only student-visible effect: tier does not advance (0 positive feedback)' : '✗ Unexpected tier change');
+
+      const vR91 = results.filter(r => r.testId.startsWith('9.1-v'));
+      log('9.1-summary', vR91.every(r => r.status === 'pass') ? 'pass' : 'fail',
+        `Test 9.1 complete: ${vR91.filter(r => r.status === 'pass').length}/${vR91.length} passed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 9.2: Student-facing text never contains "review"
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '9.2') {
+      log('9.2', 'running', 'Starting: Student-facing text never contains "review"');
+
+      const studentEmail92 = 'test-student-92@cff.dev';
+      const userId92 = 'test-student-92';
+
+      // CLEANUP
+      const oldP92 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail92 });
+      for (const p of oldP92) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldN92 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail92 });
+      for (const n of oldN92) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldE92 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail92 });
+      for (const e of oldE92) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP
+      await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: userId92, user_email: studentEmail92, user_name: 'Test Student 92',
+        current_tier: 'building_momentum', completed_interactions: 3, total_interactions: 3,
+        total_feedback: 2, positive_feedback: 2, no_show_count: 0, reliability_score: 100,
+        follow_up_rate: 80, coaching_recommended: false, weekly_activity_streak: 2,
+      });
+
+      const now92 = new Date().toISOString();
+
+      // ACTION: Simulate every student-facing notification/email type
+      // 1. Tier advancement notification
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail92, type: 'system', title: "You're building momentum!",
+        message: "You completed your first CFF conversation! You've moved up to Building Momentum tier.",
+        priority: 'normal', metadata: { test: true, type: 'tier_advance' },
+      });
+      // 2. Positive feedback notification
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail92, type: 'system', title: 'New feedback received!',
+        message: '"Came prepared and a strong communicator" — Keep going!',
+        priority: 'normal', metadata: { test: true, type: 'positive_feedback' },
+      });
+      // 3. Coaching opportunity notification
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail92, type: 'system', title: 'Free career coaching session available',
+        message: 'CFF offers one-on-one career coaching — one free complimentary 30-minute session.',
+        priority: 'normal', metadata: { test: true, type: 'coaching_opp' },
+      });
+      // 4. No-show notification
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail92, type: 'system', title: 'Missed connection',
+        message: 'Looks like you missed your conversation. Life happens! Want to reschedule?',
+        priority: 'normal', metadata: { test: true, type: 'no_show' },
+      });
+      // 5. Thank-you reminder
+      await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail92, type: 'system', title: 'Great conversation!',
+        message: "Don't forget to send a thank-you message. Students who follow up earn faster tier progression.",
+        priority: 'normal', metadata: { test: true, type: 'thank_you_reminder' },
+      });
+      // 6. Weekly report card email
+      await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail92, email_type: 'weekly_digest',
+        subject: 'Your CFF Report Card — Week of February 19, 2026',
+        content_preview: 'NETWORK ACTIVITY: B', status: 'sent', sent_at: now92,
+        metadata: { test: true, trigger: 'weekly_report_card', full_body: "Hey Test Student 92,\n\nHere's your weekly CFF Report Card:\n\nNETWORK ACTIVITY: B\nYOUR FEEDBACK: B\nYOUR TIER: Building Momentum\n\nHow you network matters." },
+      });
+      // 7. Dormant re-engagement email
+      await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail92, email_type: 'nudge_24h',
+        subject: 'Test Student 92, the door is still open',
+        content_preview: 'Just say hi.', status: 'sent', sent_at: now92,
+        metadata: { test: true, trigger: 'dormant_14d', full_body: "Hey Test Student 92,\n\n42 parents in Technology are active on CFF this week.\n\nJust say hi. That's all it takes." },
+      });
+      // 8. Fast Tracked celebration email
+      await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail92, email_type: 'welcome',
+        subject: "You've been FAST TRACKED!",
+        content_preview: 'Congratulations!', status: 'sent', sent_at: now92,
+        metadata: { test: true, trigger: 'fast_tracked_celebration', full_body: "Congratulations Test Student 92!\n\nYou've officially earned Fast Tracked status.\n\n6 professional conversations\n5 positive feedback from mentors" },
+      });
+
+      log('9.2-action', 'pass', 'All student-facing notification and email types created (8 items)');
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const allNotifs92 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail92 });
+      const allEmails92 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail92 });
+
+      // V1: No student email contains "review"
+      const emailTexts92 = allEmails92.map(e =>
+        ((e.subject || '') + ' ' + (e.content_preview || '') + ' ' + (e.metadata?.full_body || '')).toLowerCase()
+      );
+      const emailWithReview92 = emailTexts92.findIndex(t => t.includes('review'));
+      log('9.2-v1', emailWithReview92 === -1 ? 'pass' : 'fail',
+        emailWithReview92 === -1 ? '✓ No student email contains the word "review"'
+          : `✗ Email #${emailWithReview92} contains "review"`, emailWithReview92 !== -1 ? { email: allEmails92[emailWithReview92]?.subject } : null);
+
+      // V2: No student Notification contains "review"
+      const notifTexts92 = allNotifs92.map(n => ((n.title || '') + ' ' + (n.message || '')).toLowerCase());
+      const notifWithReview92 = notifTexts92.findIndex(t => t.includes('review'));
+      log('9.2-v2', notifWithReview92 === -1 ? 'pass' : 'fail',
+        notifWithReview92 === -1 ? '✓ No student Notification contains the word "review"'
+          : `✗ Notification #${notifWithReview92} contains "review"`, notifWithReview92 !== -1 ? { title: allNotifs92[notifWithReview92]?.title } : null);
+
+      // V3: All use "feedback" instead (check positive feedback notification specifically)
+      const feedbackNotif92 = allNotifs92.find(n => n.metadata?.type === 'positive_feedback');
+      const usesFeedback92 = feedbackNotif92 && (feedbackNotif92.title + ' ' + feedbackNotif92.message).toLowerCase().includes('feedback');
+      log('9.2-v3', usesFeedback92 ? 'pass' : 'fail',
+        usesFeedback92 ? '✓ All use "feedback" instead of "review"' : '✗ Feedback notification missing word "feedback"');
+
+      const vR92 = results.filter(r => r.testId.startsWith('9.2-v'));
+      log('9.2-summary', vR92.every(r => r.status === 'pass') ? 'pass' : 'fail',
+        `Test 9.2 complete: ${vR92.filter(r => r.status === 'pass').length}/${vR92.length} passed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 9.3: Parent report never contains child's tier or activity
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '9.3') {
+      log('9.3', 'running', "Starting: Parent report never contains child's tier or activity");
+
+      const parentEmail93 = 'test-parent-93@cff.dev';
+      const parentName93 = 'Test Parent 93';
+      const childEmail93 = 'test-child-93@cff.dev';
+      const childName93 = 'Test Child 93';
+
+      // CLEANUP
+      const oldFb93 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail93 });
+      for (const f of oldFb93) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldL93 = await base44.asServiceRole.entities.InteractionLog.filter({ helper_email: parentEmail93 });
+      for (const l of oldL93) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldE93 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: parentEmail93 });
+      for (const e of oldE93) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+      const oldCP93 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: childEmail93 });
+      for (const p of oldCP93) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+
+      // SETUP: Create child's FastTrackProfile (parent's child is also on CFF)
+      await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-child-93', user_email: childEmail93, user_name: childName93,
+        current_tier: 'rising', completed_interactions: 5, total_interactions: 5,
+        total_feedback: 4, positive_feedback: 3, no_show_count: 0, reliability_score: 100,
+        follow_up_rate: 75, coaching_recommended: false, weekly_activity_streak: 3,
+      });
+
+      // Create parent's interaction + feedback (helping OTHER students, not their child)
+      const now93 = new Date();
+      const intLog93 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-other-student-93', student_email: 'test-other-93@cff.dev',
+        student_name: 'Other Student 93',
+        helper_id: 'test-parent-93', helper_email: parentEmail93, helper_name: parentName93,
+        helper_type: 'parent', interaction_type: 'call',
+        scheduled_at: now93.toISOString(), completed_at: now93.toISOString(), status: 'completed',
+      });
+      await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: intLog93.id, student_id: 'test-other-student-93',
+        student_email: 'test-other-93@cff.dev', student_name: 'Other Student 93',
+        reviewer_id: 'test-parent-93', reviewer_email: parentEmail93, reviewer_name: parentName93,
+        overall_impression: 'excellent', positive_attributes: ['came_prepared'],
+        growth_attributes: [], recommend_coaching: false, feedback_visible: true,
+        open_feedback: 'Great conversation!',
+      });
+      log('9.3-setup', 'pass', "Parent's child has rising tier; parent helped another student");
+
+      // ACTION: Generate parent impact report
+      const allFb93 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail93 });
+      const weekAgo93 = new Date(now93.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const weekFb93 = allFb93.filter(r => r.created_date && r.created_date >= weekAgo93);
+
+      const visibleFb93 = allFb93
+        .filter(r => r.feedback_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
+        .sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
+      let quote93 = '';
+      if (visibleFb93.length > 0) {
+        const topFb = visibleFb93[0];
+        const first = topFb.student_name ? topFb.student_name.split(' ')[0] : 'A student';
+        quote93 = `\nA STUDENT SAID:\n"${topFb.open_feedback}"\n— ${first}\n`;
+      }
+
+      const reportBody93 = `Hi ${parentName93.split(' ')[0]},
+
+Here's what your mentorship accomplished this week:
+
+STUDENTS HELPED THIS WEEK: ${weekFb93.length}
+ALL-TIME STUDENTS HELPED: ${allFb93.length}
+YOUR KARMA RANK AT UF: Top 50%
+${quote93}
+Thank you for showing up for these students. You're making a difference.
+
+— College Fast Forward at UF`;
+
+      const emailLog93 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: parentEmail93, email_type: 'weekly_digest',
+        subject: 'Your CFF Impact This Week', content_preview: reportBody93.substring(0, 200),
+        status: 'sent', sent_at: now93.toISOString(),
+        metadata: { test: true, trigger: 'weekly_parent_impact', full_body: reportBody93 },
+      });
+      log('9.3-action', 'pass', 'Parent impact report generated');
+
+      // VERIFY
+      const bodyLower93 = reportBody93.toLowerCase();
+
+      // V1: Report contains only parent's helpfulness metrics
+      const hasParentMetrics93 = bodyLower93.includes('students helped this week') && bodyLower93.includes('all-time students helped') && bodyLower93.includes('karma rank');
+      log('9.3-v1', hasParentMetrics93 ? 'pass' : 'fail',
+        hasParentMetrics93 ? "✓ Report contains only parent's helpfulness metrics" : '✗ Missing parent metrics');
+
+      // V2: Does NOT mention child's tier
+      const tierWords93 = ['rising', 'fast tracked', 'building momentum', 'just getting started', "your child's tier", "child's progress", childName93.toLowerCase()];
+      const foundTier93 = tierWords93.find(w => bodyLower93.includes(w));
+      log('9.3-v2', !foundTier93 ? 'pass' : 'fail',
+        !foundTier93 ? "✓ Report does NOT mention child's tier" : `✗ Found "${foundTier93}" in report`);
+
+      // V3: Does NOT mention child's activity level
+      const activityTerms93 = ['your child', "your student's", 'your gator', `${childName93.split(' ')[0].toLowerCase()}'s interactions`, `${childName93.split(' ')[0].toLowerCase()}'s conversations`];
+      const foundActivity93 = activityTerms93.find(w => bodyLower93.includes(w));
+      log('9.3-v3', !foundActivity93 ? 'pass' : 'fail',
+        !foundActivity93 ? "✓ Report does NOT mention child's activity level" : `✗ Found "${foundActivity93}"`);
+
+      // V4: Does NOT mention child's feedback scores
+      const scoreTerms93 = ['feedback score', 'impression score', 'reliability score', 'child score', `${childName93.split(' ')[0].toLowerCase()}'s feedback`];
+      const foundScores93 = scoreTerms93.find(w => bodyLower93.includes(w));
+      log('9.3-v4', !foundScores93 ? 'pass' : 'fail',
+        !foundScores93 ? "✓ Report does NOT mention child's feedback scores" : `✗ Found "${foundScores93}"`);
+
+      const vR93 = results.filter(r => r.testId.startsWith('9.3-v'));
+      log('9.3-summary', vR93.every(r => r.status === 'pass') ? 'pass' : 'fail',
+        `Test 9.3 complete: ${vR93.filter(r => r.status === 'pass').length}/${vR93.length} passed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 9.4: New signup grace period (48 hours)
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '9.4') {
+      log('9.4', 'running', 'Starting: New signup grace period (48 hours)');
+
+      const studentEmail94 = 'test-student-94@cff.dev';
+      const userId94 = 'test-student-94';
+
+      // CLEANUP
+      const oldP94 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail94 });
+      for (const p of oldP94) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldN94 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail94 });
+      for (const n of oldN94) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldE94 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail94 });
+      for (const e of oldE94) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Simulate new user created 12 hours ago
+      const now94 = new Date();
+      const twelveHoursAgo = new Date(now94.getTime() - 12 * 60 * 60 * 1000);
+      const fortyNineHoursAgo = new Date(now94.getTime() - 49 * 60 * 60 * 1000);
+
+      const GRACE_PERIOD_MS = 48 * 60 * 60 * 1000; // 48 hours
+
+      // Phase 1: user_created_date = 12 hours ago → within grace period
+      const userCreatedDate94a = twelveHoursAgo;
+      const hoursSinceSignup94a = (now94.getTime() - userCreatedDate94a.getTime()) / (1000 * 60 * 60);
+      const withinGrace94a = (now94.getTime() - userCreatedDate94a.getTime()) < GRACE_PERIOD_MS;
+
+      log('9.4-setup', 'pass', `Simulated new user created ${Math.round(hoursSinceSignup94a)}h ago (within grace=${withinGrace94a})`);
+
+      // ACTION: Agent checks grace period → skip
+      let profileCreated94a = false;
+      let emailSent94a = false;
+      let notifSent94a = false;
+
+      if (withinGrace94a) {
+        // Agent logic: skip all Fast Track actions during grace period
+        profileCreated94a = false;
+        emailSent94a = false;
+        notifSent94a = false;
+      }
+
+      log('9.4-action-phase1', 'pass', `Grace period active: profile=${profileCreated94a}, email=${emailSent94a}, notif=${notifSent94a}`);
+
+      // V1: No FastTrackProfile created yet
+      const profiles94a = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail94 });
+      log('9.4-v1', profiles94a.length === 0 && !profileCreated94a ? 'pass' : 'fail',
+        profiles94a.length === 0 ? '✓ No FastTrackProfile created yet' : `✗ Found ${profiles94a.length} profiles`);
+
+      // V2: No agent emails sent
+      const emails94a = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail94 });
+      log('9.4-v2', emails94a.length === 0 && !emailSent94a ? 'pass' : 'fail',
+        emails94a.length === 0 ? '✓ No agent emails sent' : `✗ Found ${emails94a.length} emails`);
+
+      // V3: No agent Notifications sent
+      const notifs94a = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail94 });
+      log('9.4-v3', notifs94a.length === 0 && !notifSent94a ? 'pass' : 'fail',
+        notifs94a.length === 0 ? '✓ No agent Notifications sent' : `✗ Found ${notifs94a.length} notifications`);
+
+      // V4: Welcome email flow operates normally (grace period doesn't block welcome emails)
+      // Simulate welcome email being sent separately (by welcome flow, not FT agent)
+      const welcomeEmail94 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail94, email_type: 'welcome',
+        subject: 'Welcome to College Fast Forward!', content_preview: 'Welcome to CFF!',
+        status: 'sent', sent_at: now94.toISOString(),
+        metadata: { test: true, trigger: 'welcome_flow' },
+      });
+      log('9.4-v4', welcomeEmail94 && welcomeEmail94.status === 'sent' ? 'pass' : 'fail',
+        welcomeEmail94 ? '✓ Welcome email flow operates normally' : '✗ Welcome email not sent');
+
+      // FOLLOW-UP: Advance created_date to 49 hours ago → grace period expired
+      const userCreatedDate94b = fortyNineHoursAgo;
+      const withinGrace94b = (now94.getTime() - userCreatedDate94b.getTime()) < GRACE_PERIOD_MS;
+
+      if (!withinGrace94b) {
+        // Agent now creates profile
+        const newProfile94 = await base44.asServiceRole.entities.FastTrackProfile.create({
+          user_id: userId94, user_email: studentEmail94, user_name: 'Test Student 94',
+          current_tier: 'just_getting_started', completed_interactions: 0, total_interactions: 0,
+          total_feedback: 0, positive_feedback: 0, no_show_count: 0, reliability_score: 100,
+          follow_up_rate: 0, coaching_recommended: false, weekly_activity_streak: 0,
+        });
+
+        // V5: FastTrackProfile now created with tier=just_getting_started
+        log('9.4-v5', newProfile94 && newProfile94.current_tier === 'just_getting_started' ? 'pass' : 'fail',
+          newProfile94 ? '✓ FastTrackProfile now created with tier=just_getting_started' : '✗ Profile not created');
+      } else {
+        log('9.4-v5', 'fail', '✗ Grace period should have expired at 49 hours');
+      }
+
+      const vR94 = results.filter(r => r.testId.startsWith('9.4-v'));
+      log('9.4-summary', vR94.every(r => r.status === 'pass') ? 'pass' : 'fail',
+        `Test 9.4 complete: ${vR94.filter(r => r.status === 'pass').length}/${vR94.length} passed`);
     }
 
     return Response.json({

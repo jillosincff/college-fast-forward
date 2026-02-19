@@ -286,6 +286,34 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 8.5: No Dupes
           </Button>
+          <Button
+            onClick={() => runTests('9.1')}
+            disabled={isRunning}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 9.1: No Neg Fb
+          </Button>
+          <Button
+            onClick={() => runTests('9.2')}
+            disabled={isRunning}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 9.2: No "Review"
+          </Button>
+          <Button
+            onClick={() => runTests('9.3')}
+            disabled={isRunning}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 9.3: Parent Iso
+          </Button>
+          <Button
+            onClick={() => runTests('9.4')}
+            disabled={isRunning}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 9.4: Grace Period
+          </Button>
 
           <Button
             onClick={cleanupTestData}
