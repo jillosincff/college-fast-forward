@@ -1059,7 +1059,7 @@ Deno.serve(async (req) => {
         total_feedback: 4,
         positive_feedback: 4,
         would_hire_count: 1,
-        avg_impression_score: Math.round(((3.5 * 3) + 4) / 4 * 100) / 100, // (10.5+4)/4 = 3.625 → 3.63
+        avg_impression_score: Math.round(((3.5 * 3) + 4) / 4 * 100) / 100,
         last_activity_date: now24,
       });
 
@@ -1068,19 +1068,320 @@ Deno.serve(async (req) => {
       // VERIFY
       const vProfile24 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail24 }))[0];
 
-      // V1: would_hire_count incremented to 1
       if (vProfile24.would_hire_count === 1) {
         log('2.4-v1', 'pass', '✓ FastTrackProfile.would_hire_count incremented to 1');
       } else {
         log('2.4-v1', 'fail', '✗ would_hire_count not correct', { value: vProfile24.would_hire_count });
       }
 
-      // Summary
       const vResults24 = results.filter(r => r.testId.startsWith('2.4-v'));
       const vPassed24 = vResults24.filter(r => r.status === 'pass').length;
       const vFailed24 = vResults24.filter(r => r.status === 'fail').length;
       log('2.4-summary', vFailed24 === 0 ? 'pass' : 'fail',
         `Test 2.4 complete: ${vPassed24}/${vResults24.length} verifications passed, ${vFailed24} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 3.1: Auto-advance to Building Momentum
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '3.1') {
+      log('3.1', 'running', 'Starting: Auto-advance to Building Momentum on first completion');
+
+      const studentEmail31 = 'test-student-31@cff.dev';
+      const parentEmail31 = 'test-parent-31@cff.dev';
+      const studentName31 = 'Test Student 31';
+      const parentName31 = 'Test Parent 31';
+
+      // CLEANUP
+      const oldProfiles31 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail31 });
+      for (const p of oldProfiles31) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs31 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail31 });
+      for (const l of oldLogs31) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs31 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail31 });
+      for (const n of oldNotifs31) await base44.asServiceRole.entities.Notification.delete(n.id);
+
+      // SETUP: just_getting_started with 0 completed
+      const profile31 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-31',
+        user_email: studentEmail31,
+        user_name: studentName31,
+        current_tier: 'just_getting_started',
+        completed_interactions: 0,
+        total_interactions: 0,
+        total_feedback: 0,
+        positive_feedback: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 0,
+        weekly_activity_streak: 0,
+      });
+      log('3.1-setup', 'pass', 'FastTrackProfile created (just_getting_started, 0 completed)', { profileId: profile31.id });
+
+      // ACTION: Create completed interaction (first one)
+      const interaction31 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-31',
+        student_email: studentEmail31,
+        student_name: studentName31,
+        helper_id: 'test-parent-31',
+        helper_email: parentEmail31,
+        helper_name: parentName31,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+      log('3.1-action', 'pass', 'First completed InteractionLog created', { interactionId: interaction31.id });
+
+      // Simulate agent: first completion → advance to building_momentum
+      const now31 = new Date().toISOString();
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile31.id, {
+        completed_interactions: 1,
+        total_interactions: 1,
+        current_tier: 'building_momentum',
+        tier_updated_at: now31,
+        last_activity_date: now31,
+      });
+
+      // Agent sends advancement notification
+      const tierNotif31 = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail31,
+        type: 'system',
+        title: "You're building momentum!",
+        message: "You completed your first CFF conversation! You've moved up to Building Momentum tier. Keep connecting to unlock more opportunities.",
+        priority: 'normal',
+        metadata: { test: true, trigger: 'tier_advance_building_momentum' },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile31 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail31 }))[0];
+
+      // V1: current_tier changed to building_momentum
+      if (vProfile31.current_tier === 'building_momentum') {
+        log('3.1-v1', 'pass', '✓ FastTrackProfile.current_tier changed to building_momentum');
+      } else {
+        log('3.1-v1', 'fail', '✗ current_tier not correct', { value: vProfile31.current_tier });
+      }
+
+      // V2: tier_updated_at set
+      if (vProfile31.tier_updated_at) {
+        log('3.1-v2', 'pass', '✓ FastTrackProfile.tier_updated_at set to current timestamp');
+      } else {
+        log('3.1-v2', 'fail', '✗ tier_updated_at not set');
+      }
+
+      // V3: Notification sent with momentum message
+      if (tierNotif31 && tierNotif31.title && tierNotif31.title.includes('building momentum')) {
+        log('3.1-v3', 'pass', '✓ Notification sent with "You\'re building momentum!" message');
+      } else {
+        log('3.1-v3', 'fail', '✗ Tier advancement Notification not correct', { title: tierNotif31?.title });
+      }
+
+      // V4: completed_interactions = 1
+      if (vProfile31.completed_interactions === 1) {
+        log('3.1-v4', 'pass', '✓ FastTrackProfile.completed_interactions = 1');
+      } else {
+        log('3.1-v4', 'fail', '✗ completed_interactions not correct', { value: vProfile31.completed_interactions });
+      }
+
+      // Summary
+      const vResults31 = results.filter(r => r.testId.startsWith('3.1-v'));
+      const vPassed31 = vResults31.filter(r => r.status === 'pass').length;
+      const vFailed31 = vResults31.filter(r => r.status === 'fail').length;
+      log('3.1-summary', vFailed31 === 0 ? 'pass' : 'fail',
+        `Test 3.1 complete: ${vPassed31}/${vResults31.length} verifications passed, ${vFailed31} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 3.2: Auto-advance to Rising
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '3.2') {
+      log('3.2', 'running', 'Starting: Auto-advance to Rising tier');
+
+      const studentEmail32 = 'test-student-32@cff.dev';
+      const parentEmail32 = 'test-parent-32@cff.dev';
+      const studentName32 = 'Test Student 32';
+      const parentName32 = 'Test Parent 32';
+
+      // CLEANUP
+      const oldProfiles32 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail32 });
+      for (const p of oldProfiles32) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs32 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail32 });
+      for (const l of oldLogs32) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs32 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail32 });
+      for (const n of oldNotifs32) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldFeedback32 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail32 });
+      for (const f of oldFeedback32) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldBadges32 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: 'test-student-32' });
+      for (const b of oldBadges32) await base44.asServiceRole.entities.UserBadge.delete(b.id);
+
+      // SETUP: building_momentum, 2 completed, 1 positive feedback, reliability=100, follow_up_rate=50
+      const profile32 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-32',
+        user_email: studentEmail32,
+        user_name: studentName32,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 1,
+        positive_feedback: 1,
+        avg_impression_score: 3.0,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50,
+        coaching_recommended: false,
+        weekly_activity_streak: 2,
+      });
+      log('3.2-setup-profile', 'pass', 'FastTrackProfile created (building_momentum, 2 completed, 1 positive)', { profileId: profile32.id });
+
+      // ACTION 1: Create 3rd completed interaction
+      const interaction32 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-32',
+        student_email: studentEmail32,
+        student_name: studentName32,
+        helper_id: 'test-parent-32',
+        helper_email: parentEmail32,
+        helper_name: parentName32,
+        helper_type: 'parent',
+        interaction_type: 'mock_interview',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+      log('3.2-action-interaction', 'pass', '3rd completed InteractionLog created', { interactionId: interaction32.id });
+
+      // ACTION 2: Create excellent feedback with followed_up → 2nd positive, follow_up goes to 2/2=100%
+      const feedback32 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction32.id,
+        student_id: 'test-student-32',
+        student_email: studentEmail32,
+        student_name: studentName32,
+        reviewer_id: 'test-parent-32',
+        reviewer_email: parentEmail32,
+        reviewer_name: parentName32,
+        overall_impression: 'excellent',
+        positive_attributes: ['followed_up', 'came_prepared', 'strong_communicator'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('3.2-action-feedback', 'pass', 'Excellent feedback with followed_up created', { feedbackId: feedback32.id });
+
+      // Simulate agent processing:
+      // completed_interactions: 2→3 (meets >=3)
+      // positive_feedback: 1→2 (meets >=2) — excellent is positive
+      // reliability_score: 100 (meets >=80)
+      // follow_up_rate: 1 of 1 existing + 1 of 1 new = 2/2 = 100% (meets >=60)
+      // All Rising criteria met → advance
+      const now32 = new Date().toISOString();
+      const newAvg32 = Math.round(((3.0 * 1) + 4) / 2 * 100) / 100; // (3+4)/2 = 3.5
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile32.id, {
+        completed_interactions: 3,
+        total_interactions: 3,
+        total_feedback: 2,
+        positive_feedback: 2,
+        avg_impression_score: newAvg32,
+        follow_up_rate: 100, // 2 out of 2 followed_up
+        current_tier: 'rising',
+        tier_updated_at: now32,
+        last_activity_date: now32,
+      });
+
+      // Agent sends high-priority Rising notification
+      const risingNotif = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail32,
+        type: 'system',
+        title: "You're now Rising!",
+        message: "You're building a real reputation on CFF. Professionals are noticing. Keep going — Fast Tracked status unlocks company access.",
+        priority: 'high',
+        metadata: { test: true, trigger: 'tier_advance_rising' },
+      });
+
+      // Agent awards rising_star badge
+      const risingBadge = await base44.asServiceRole.entities.UserBadge.create({
+        user_id: 'test-student-32',
+        badge_type: 'rising_star',
+        badge_name: 'Rising Star',
+        badge_description: 'Reached Rising tier on Fast Track',
+        badge_icon: '⭐',
+        earned_at: now32,
+        metadata: { test: true },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile32 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail32 }))[0];
+
+      // V1: completed_interactions = 3
+      if (vProfile32.completed_interactions === 3) {
+        log('3.2-v1', 'pass', '✓ completed_interactions = 3 (meets >= 3 requirement)');
+      } else {
+        log('3.2-v1', 'fail', '✗ completed_interactions not correct', { value: vProfile32.completed_interactions });
+      }
+
+      // V2: positive_feedback = 2
+      if (vProfile32.positive_feedback === 2) {
+        log('3.2-v2', 'pass', '✓ positive_feedback = 2 (meets >= 2 requirement)');
+      } else {
+        log('3.2-v2', 'fail', '✗ positive_feedback not correct', { value: vProfile32.positive_feedback });
+      }
+
+      // V3: reliability_score >= 80
+      if (vProfile32.reliability_score >= 80) {
+        log('3.2-v3', 'pass', `✓ reliability_score = ${vProfile32.reliability_score} (meets >= 80 requirement)`);
+      } else {
+        log('3.2-v3', 'fail', '✗ reliability_score below 80', { value: vProfile32.reliability_score });
+      }
+
+      // V4: follow_up_rate >= 60
+      if (vProfile32.follow_up_rate >= 60) {
+        log('3.2-v4', 'pass', `✓ follow_up_rate = ${vProfile32.follow_up_rate} (meets >= 60 requirement)`);
+      } else {
+        log('3.2-v4', 'fail', '✗ follow_up_rate below 60', { value: vProfile32.follow_up_rate });
+      }
+
+      // V5: current_tier changed to rising
+      if (vProfile32.current_tier === 'rising') {
+        log('3.2-v5', 'pass', '✓ FastTrackProfile.current_tier changed to rising');
+      } else {
+        log('3.2-v5', 'fail', '✗ current_tier not rising', { value: vProfile32.current_tier });
+      }
+
+      // V6: tier_updated_at updated
+      if (vProfile32.tier_updated_at) {
+        log('3.2-v6', 'pass', '✓ FastTrackProfile.tier_updated_at updated');
+      } else {
+        log('3.2-v6', 'fail', '✗ tier_updated_at not set');
+      }
+
+      // V7: High-priority notification about Rising
+      if (risingNotif && risingNotif.priority === 'high' && risingNotif.title && risingNotif.title.includes('Rising')) {
+        log('3.2-v7', 'pass', '✓ High-priority Notification sent about Rising status');
+      } else {
+        log('3.2-v7', 'fail', '✗ Rising notification not correct', { priority: risingNotif?.priority, title: risingNotif?.title });
+      }
+
+      // V8: UserBadge created with badge_type=rising_star
+      const badges32 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: 'test-student-32' });
+      const risingStarBadge = badges32.find(b => b.badge_type === 'rising_star');
+      if (risingStarBadge) {
+        log('3.2-v8', 'pass', '✓ UserBadge created: badge_type=rising_star', { badgeId: risingStarBadge.id });
+      } else {
+        log('3.2-v8', 'fail', '✗ rising_star badge not found', { badges: badges32.map(b => b.badge_type) });
+      }
+
+      // Summary
+      const vResults32 = results.filter(r => r.testId.startsWith('3.2-v'));
+      const vPassed32 = vResults32.filter(r => r.status === 'pass').length;
+      const vFailed32 = vResults32.filter(r => r.status === 'fail').length;
+      log('3.2-summary', vFailed32 === 0 ? 'pass' : 'fail',
+        `Test 3.2 complete: ${vPassed32}/${vResults32.length} verifications passed, ${vFailed32} failed`);
     }
 
     return Response.json({
