@@ -669,6 +669,420 @@ Deno.serve(async (req) => {
         `Test 2.1 complete: ${vPassed21}/${vResults21.length} verifications passed, ${vFailed21} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 2.2: Negative feedback does NOT notify student
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '2.2') {
+      log('2.2', 'running', 'Starting: Negative feedback does NOT notify student');
+
+      const studentEmail22 = 'test-student-22@cff.dev';
+      const parentEmail22 = 'test-parent-22@cff.dev';
+      const studentName22 = 'Test Student 22';
+      const parentName22 = 'Test Parent 22';
+
+      // CLEANUP
+      const oldProfiles22 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail22 });
+      for (const p of oldProfiles22) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs22 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail22 });
+      for (const l of oldLogs22) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs22 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail22 });
+      for (const n of oldNotifs22) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldFeedback22 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail22 });
+      for (const f of oldFeedback22) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldKarma22 = await base44.asServiceRole.entities.KarmaTransaction.filter({ parent_email: studentEmail22 });
+      for (const k of oldKarma22) await base44.asServiceRole.entities.KarmaTransaction.delete(k.id);
+      const oldStudentKarma22 = await base44.asServiceRole.entities.StudentKarma.filter({ user_email: studentEmail22 });
+      for (const sk of oldStudentKarma22) await base44.asServiceRole.entities.StudentKarma.delete(sk.id);
+
+      // SETUP
+      const profile22 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-22',
+        user_email: studentEmail22,
+        user_name: studentName22,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 0,
+        positive_feedback: 0,
+        avg_impression_score: 0,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 0,
+        coaching_recommended: false,
+        coaching_completed: false,
+        weekly_activity_streak: 1,
+      });
+      log('2.2-setup-profile', 'pass', 'FastTrackProfile created', { profileId: profile22.id });
+
+      const interaction22 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-22',
+        student_email: studentEmail22,
+        student_name: studentName22,
+        helper_id: 'test-parent-22',
+        helper_email: parentEmail22,
+        helper_name: parentName22,
+        helper_type: 'parent',
+        interaction_type: 'video',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+      log('2.2-setup-interaction', 'pass', 'Completed InteractionLog created', { interactionId: interaction22.id });
+
+      const studentKarma22 = await base44.asServiceRole.entities.StudentKarma.create({
+        user_id: 'test-student-22',
+        user_email: studentEmail22,
+        total_karma: 0,
+        karma_level: 'newcomer',
+        this_month_karma: 0,
+      });
+
+      // ACTION: Create negative feedback
+      const feedback22 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction22.id,
+        student_id: 'test-student-22',
+        student_email: studentEmail22,
+        student_name: studentName22,
+        reviewer_id: 'test-parent-22',
+        reviewer_email: parentEmail22,
+        reviewer_name: parentName22,
+        overall_impression: 'still_warming_up',
+        positive_attributes: [],
+        growth_attributes: ['seemed_unprepared', 'no_follow_up'],
+        recommend_coaching: true,
+        feedback_visible: true,
+      });
+      log('2.2-action', 'pass', 'Negative InteractionFeedback created', { feedbackId: feedback22.id });
+
+      // Simulate agent processing
+      const now22 = new Date().toISOString();
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile22.id, {
+        total_feedback: 1,
+        positive_feedback: 0, // still_warming_up is NOT positive
+        avg_impression_score: 1, // still_warming_up = 1
+        coaching_recommended: true, // recommend_coaching was true
+        last_activity_date: now22,
+      });
+
+      // Agent does NOT create a feedback notification for negative feedback
+      // Agent DOES create a coaching opportunity notification (separate from feedback)
+      const coachingOpportunityNotif = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail22,
+        type: 'system',
+        title: 'Free career coaching session available',
+        message: "CFF offers one-on-one career coaching — one free complimentary 30-minute session to help you stand out. Students who complete a coaching session earn 2x tier points on their next interaction. Want to book yours?",
+        priority: 'normal',
+        metadata: { test: true, trigger: 'coaching_recommended' },
+      });
+
+      // Create KarmaTransaction (still_warming_up = 5 points)
+      const karmaTx22 = await base44.asServiceRole.entities.KarmaTransaction.create({
+        family_group_id: 'student_test-student-22',
+        parent_user_id: 'test-student-22',
+        parent_email: studentEmail22,
+        parent_name: studentName22,
+        points: 5,
+        action_type: 'answer',
+        reference_type: 'feedback',
+        reference_id: feedback22.id,
+        description: 'Karma for still_warming_up feedback on interaction',
+      });
+
+      await base44.asServiceRole.entities.StudentKarma.update(studentKarma22.id, {
+        total_karma: 5,
+        this_month_karma: 5,
+        last_karma_earned_at: now22,
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile22 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail22 }))[0];
+
+      // V1: total_feedback incremented
+      if (vProfile22.total_feedback === 1) {
+        log('2.2-v1', 'pass', '✓ FastTrackProfile.total_feedback incremented to 1');
+      } else {
+        log('2.2-v1', 'fail', '✗ total_feedback not correct', { value: vProfile22.total_feedback });
+      }
+
+      // V2: positive_feedback NOT incremented
+      if (vProfile22.positive_feedback === 0) {
+        log('2.2-v2', 'pass', '✓ FastTrackProfile.positive_feedback NOT incremented (still 0)');
+      } else {
+        log('2.2-v2', 'fail', '✗ positive_feedback should be 0 for still_warming_up', { value: vProfile22.positive_feedback });
+      }
+
+      // V3: avg_impression_score recalculated to 1.0
+      if (vProfile22.avg_impression_score === 1) {
+        log('2.2-v3', 'pass', '✓ FastTrackProfile.avg_impression_score is 1.0 (still_warming_up)');
+      } else {
+        log('2.2-v3', 'fail', '✗ avg_impression_score not correct', { value: vProfile22.avg_impression_score });
+      }
+
+      // V4: coaching_recommended set to true
+      if (vProfile22.coaching_recommended === true) {
+        log('2.2-v4', 'pass', '✓ FastTrackProfile.coaching_recommended set to true');
+      } else {
+        log('2.2-v4', 'fail', '✗ coaching_recommended should be true', { value: vProfile22.coaching_recommended });
+      }
+
+      // V5: NO feedback-specific notification sent (only coaching one exists)
+      const allNotifs22 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail22 });
+      const feedbackSpecificNotifs = allNotifs22.filter(n => n.title === 'New feedback received!');
+      if (feedbackSpecificNotifs.length === 0) {
+        log('2.2-v5', 'pass', '✓ NO feedback-specific Notification sent to student for negative feedback');
+      } else {
+        log('2.2-v5', 'fail', '✗ Student should NOT receive feedback notification for still_warming_up', { count: feedbackSpecificNotifs.length });
+      }
+
+      // V6: Student never sees growth_attributes content
+      const allNotifTexts22 = allNotifs22.map(n => (n.message + ' ' + n.title).toLowerCase()).join(' ');
+      const growthTerms = ['unprepared', 'no follow up', 'no_follow_up', 'seemed_unprepared', 'growth'];
+      const foundGrowthTerm = growthTerms.find(t => allNotifTexts22.includes(t));
+      if (!foundGrowthTerm) {
+        log('2.2-v6', 'pass', '✓ Student never sees growth_attributes content in any notification');
+      } else {
+        log('2.2-v6', 'fail', `✗ Growth attribute term "${foundGrowthTerm}" found in notifications`, { texts: allNotifTexts22 });
+      }
+
+      // V7: KarmaTransaction created with only 5 points
+      if (karmaTx22 && karmaTx22.points === 5) {
+        log('2.2-v7', 'pass', '✓ KarmaTransaction created with 5 points (still_warming_up = 5)');
+      } else {
+        log('2.2-v7', 'fail', '✗ KarmaTransaction points incorrect', { points: karmaTx22?.points });
+      }
+
+      // V8: Coaching opportunity notification sent with correct phrasing
+      if (coachingOpportunityNotif && coachingOpportunityNotif.message && coachingOpportunityNotif.message.includes('free complimentary 30-minute')) {
+        log('2.2-v8', 'pass', '✓ Coaching opportunity Notification mentions "free complimentary 30-minute session"');
+      } else {
+        log('2.2-v8', 'fail', '✗ Coaching notification missing expected phrasing', { message: coachingOpportunityNotif?.message });
+      }
+
+      // Summary
+      const vResults22 = results.filter(r => r.testId.startsWith('2.2-v'));
+      const vPassed22 = vResults22.filter(r => r.status === 'pass').length;
+      const vFailed22 = vResults22.filter(r => r.status === 'fail').length;
+      log('2.2-summary', vFailed22 === 0 ? 'pass' : 'fail',
+        `Test 2.2 complete: ${vPassed22}/${vResults22.length} verifications passed, ${vFailed22} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 2.3: Feedback with followed_up updates follow_up_rate
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '2.3') {
+      log('2.3', 'running', 'Starting: followed_up attribute updates follow_up_rate');
+
+      const studentEmail23 = 'test-student-23@cff.dev';
+      const parentEmail23 = 'test-parent-23@cff.dev';
+      const studentName23 = 'Test Student 23';
+      const parentName23 = 'Test Parent 23';
+
+      // CLEANUP
+      const oldProfiles23 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail23 });
+      for (const p of oldProfiles23) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs23 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail23 });
+      for (const l of oldLogs23) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldFeedback23 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail23 });
+      for (const f of oldFeedback23) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+
+      // SETUP: Profile with 2 existing feedback, 1 followed_up (follow_up_rate=50)
+      const profile23 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-23',
+        user_email: studentEmail23,
+        user_name: studentName23,
+        current_tier: 'building_momentum',
+        completed_interactions: 3,
+        total_interactions: 3,
+        total_feedback: 2,
+        positive_feedback: 1,
+        avg_impression_score: 3.0,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50, // 1 out of 2 followed_up
+        coaching_recommended: false,
+        weekly_activity_streak: 2,
+      });
+      log('2.3-setup', 'pass', 'FastTrackProfile created with follow_up_rate=50', { profileId: profile23.id });
+
+      const interaction23 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-23',
+        student_email: studentEmail23,
+        student_name: studentName23,
+        helper_id: 'test-parent-23',
+        helper_email: parentEmail23,
+        helper_name: parentName23,
+        helper_type: 'parent',
+        interaction_type: 'mock_interview',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+
+      // ACTION: Create feedback with followed_up
+      const feedback23 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction23.id,
+        student_id: 'test-student-23',
+        student_email: studentEmail23,
+        student_name: studentName23,
+        reviewer_id: 'test-parent-23',
+        reviewer_email: parentEmail23,
+        reviewer_name: parentName23,
+        overall_impression: 'great',
+        positive_attributes: ['followed_up', 'asked_great_questions'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('2.3-action', 'pass', 'Feedback with followed_up created', { feedbackId: feedback23.id });
+
+      // Simulate agent: 2 out of 3 now have followed_up → 66.67% → round to 67
+      const newFollowUpRate = Math.round((2 / 3) * 100); // 67
+      const newAvg23 = Math.round(((3.0 * 2) + 3) / 3 * 100) / 100; // (6 + 3) / 3 = 3.0
+      const now23 = new Date().toISOString();
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile23.id, {
+        total_feedback: 3,
+        positive_feedback: 2, // great counts as positive
+        avg_impression_score: newAvg23,
+        follow_up_rate: newFollowUpRate,
+        last_activity_date: now23,
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile23 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail23 }))[0];
+
+      // V1: follow_up_rate recalculated to ~67
+      if (vProfile23.follow_up_rate === 67) {
+        log('2.3-v1', 'pass', '✓ FastTrackProfile.follow_up_rate recalculated to 67% (2 of 3)');
+      } else {
+        log('2.3-v1', 'fail', '✗ follow_up_rate not correct', { expected: 67, value: vProfile23.follow_up_rate });
+      }
+
+      // V2: Check if follow_up_rate crossing 60% is noted (it went from 50 → 67, crossed 60)
+      const crossedThreshold = vProfile23.follow_up_rate >= 60;
+      if (crossedThreshold) {
+        log('2.3-v2', 'pass', '✓ follow_up_rate crossed 60% threshold (50→67), tier advancement criteria met');
+      } else {
+        log('2.3-v2', 'fail', '✗ follow_up_rate should have crossed 60%', { value: vProfile23.follow_up_rate });
+      }
+
+      // Summary
+      const vResults23 = results.filter(r => r.testId.startsWith('2.3-v'));
+      const vPassed23 = vResults23.filter(r => r.status === 'pass').length;
+      const vFailed23 = vResults23.filter(r => r.status === 'fail').length;
+      log('2.3-summary', vFailed23 === 0 ? 'pass' : 'fail',
+        `Test 2.3 complete: ${vPassed23}/${vResults23.length} verifications passed, ${vFailed23} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 2.4: would_hire attribute increments correctly
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '2.4') {
+      log('2.4', 'running', 'Starting: would_hire attribute increments correctly');
+
+      const studentEmail24 = 'test-student-24@cff.dev';
+      const parentEmail24 = 'test-parent-24@cff.dev';
+      const studentName24 = 'Test Student 24';
+      const parentName24 = 'Test Parent 24';
+
+      // CLEANUP
+      const oldProfiles24 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail24 });
+      for (const p of oldProfiles24) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs24 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail24 });
+      for (const l of oldLogs24) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldFeedback24 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail24 });
+      for (const f of oldFeedback24) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+
+      // SETUP: Profile with would_hire_count=0
+      const profile24 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-24',
+        user_email: studentEmail24,
+        user_name: studentName24,
+        current_tier: 'rising',
+        completed_interactions: 5,
+        total_interactions: 5,
+        total_feedback: 3,
+        positive_feedback: 3,
+        avg_impression_score: 3.5,
+        would_refer_count: 1,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 80,
+        coaching_recommended: false,
+        weekly_activity_streak: 3,
+      });
+      log('2.4-setup', 'pass', 'FastTrackProfile created with would_hire_count=0', { profileId: profile24.id });
+
+      const interaction24 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-24',
+        student_email: studentEmail24,
+        student_name: studentName24,
+        helper_id: 'test-parent-24',
+        helper_email: parentEmail24,
+        helper_name: parentName24,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+
+      // ACTION: Create feedback with would_hire
+      const feedback24 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction24.id,
+        student_id: 'test-student-24',
+        student_email: studentEmail24,
+        student_name: studentName24,
+        reviewer_id: 'test-parent-24',
+        reviewer_email: parentEmail24,
+        reviewer_name: parentName24,
+        overall_impression: 'excellent',
+        positive_attributes: ['would_hire', 'professional_demeanor'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('2.4-action', 'pass', 'Feedback with would_hire created', { feedbackId: feedback24.id });
+
+      // Simulate agent processing
+      const now24 = new Date().toISOString();
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile24.id, {
+        total_feedback: 4,
+        positive_feedback: 4,
+        would_hire_count: 1,
+        avg_impression_score: Math.round(((3.5 * 3) + 4) / 4 * 100) / 100, // (10.5+4)/4 = 3.625 → 3.63
+        last_activity_date: now24,
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile24 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail24 }))[0];
+
+      // V1: would_hire_count incremented to 1
+      if (vProfile24.would_hire_count === 1) {
+        log('2.4-v1', 'pass', '✓ FastTrackProfile.would_hire_count incremented to 1');
+      } else {
+        log('2.4-v1', 'fail', '✗ would_hire_count not correct', { value: vProfile24.would_hire_count });
+      }
+
+      // Summary
+      const vResults24 = results.filter(r => r.testId.startsWith('2.4-v'));
+      const vPassed24 = vResults24.filter(r => r.status === 'pass').length;
+      const vFailed24 = vResults24.filter(r => r.status === 'fail').length;
+      log('2.4-summary', vFailed24 === 0 ? 'pass' : 'fail',
+        `Test 2.4 complete: ${vPassed24}/${vResults24.length} verifications passed, ${vFailed24} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,

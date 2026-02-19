@@ -102,7 +102,28 @@ export default function FastTrackTestRunner() {
             disabled={isRunning}
             className="bg-purple-600 hover:bg-purple-700"
           >
-            <Play className="w-4 h-4 mr-2" /> Run Test 2.1: Feedback
+            <Play className="w-4 h-4 mr-2" /> 2.1: Positive
+          </Button>
+          <Button
+            onClick={() => runTests('2.2')}
+            disabled={isRunning}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 2.2: Negative
+          </Button>
+          <Button
+            onClick={() => runTests('2.3')}
+            disabled={isRunning}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 2.3: Follow-Up
+          </Button>
+          <Button
+            onClick={() => runTests('2.4')}
+            disabled={isRunning}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 2.4: Would Hire
           </Button>
 
           <Button
