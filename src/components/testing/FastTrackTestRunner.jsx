@@ -167,6 +167,27 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 4.1: Report Card
           </Button>
+          <Button
+            onClick={() => runTests('4.2')}
+            disabled={isRunning}
+            className="bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 4.2: Urgency Tiers
+          </Button>
+          <Button
+            onClick={() => runTests('4.3')}
+            disabled={isRunning}
+            className="bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 4.3: Cold App Calc
+          </Button>
+          <Button
+            onClick={() => runTests('4.4')}
+            disabled={isRunning}
+            className="bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 4.4: Email Cap
+          </Button>
 
           <Button
             onClick={cleanupTestData}

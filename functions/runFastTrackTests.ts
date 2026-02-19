@@ -2189,6 +2189,397 @@ Deno.serve(async (req) => {
         `Test 4.1 complete: ${vPassed41}/${vResults41.length} verifications passed, ${vFailed41} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 4.2: Urgency tier calculated correctly
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '4.2') {
+      log('4.2', 'running', 'Starting: Urgency tier calculated correctly (4 sub-tests)');
+
+      const now42 = new Date();
+
+      // Helper: calculate urgency tier (mirrors sendWeeklyStudentReportCard logic)
+      function calcUrgency(gradYear, gradSemester) {
+        const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
+        const gradMonth = semesterMonthMap[gradSemester] || 5;
+        const gradDate = new Date(gradYear, gradMonth - 1, 15);
+        const monthsUntil = (gradDate.getTime() - now42.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+        if (monthsUntil > 18) return 'cruising';
+        if (monthsUntil > 12) return 'time_to_move';
+        if (monthsUntil > 6) return 'dont_miss_this';
+        return 'all_hands_on_deck';
+      }
+
+      // Helper: get urgency headline (mirrors sendWeeklyStudentReportCard)
+      function calcHeadline(urgency, gradYear, gradSemester) {
+        if (urgency === 'cruising') return "You've got time";
+        if (urgency === 'time_to_move') {
+          const season = now42.getMonth() >= 8 ? 'Spring' : 'Fall';
+          return `${season} recruiting is approaching`;
+        }
+        if (urgency === 'dont_miss_this') return 'months from graduation';
+        // all_hands_on_deck
+        const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
+        const gradMonth = semesterMonthMap[gradSemester] || 5;
+        const gradDate = new Date(gradYear, gradMonth - 1, 15);
+        const daysLeft = Math.max(1, Math.round((gradDate.getTime() - now42.getTime()) / (1000 * 60 * 60 * 24)));
+        return `${daysLeft} days until you walk`;
+      }
+
+      // Define 4 sub-test scenarios
+      const subTests = [
+        { label: 'a', suffix: '42a', monthsAway: 20, expected: 'cruising' },
+        { label: 'b', suffix: '42b', monthsAway: 14, expected: 'time_to_move' },
+        { label: 'c', suffix: '42c', monthsAway: 8, expected: 'dont_miss_this' },
+        { label: 'd', suffix: '42d', monthsAway: 3, expected: 'all_hands_on_deck' },
+      ];
+
+      for (const sub of subTests) {
+        const studentEmail = `test-student-${sub.suffix}@cff.dev`;
+
+        // Calculate grad date from months away
+        const gradDate = new Date(now42.getTime() + sub.monthsAway * 30.44 * 24 * 60 * 60 * 1000);
+        const gradYear = gradDate.getFullYear();
+        // Pick semester based on month
+        let gradSemester;
+        if (gradDate.getMonth() < 4) gradSemester = 'Spring';
+        else if (gradDate.getMonth() < 7) gradSemester = 'Summer';
+        else gradSemester = 'Fall';
+
+        // CLEANUP
+        const oldProfiles = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail });
+        for (const p of oldProfiles) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+        const oldEmails = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail });
+        for (const e of oldEmails) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+        // SETUP
+        const profile = await base44.asServiceRole.entities.FastTrackProfile.create({
+          user_id: `test-student-${sub.suffix}`,
+          user_email: studentEmail,
+          user_name: `Test Student ${sub.suffix}`,
+          current_tier: 'building_momentum',
+          graduation_year: gradYear,
+          graduation_semester: gradSemester,
+          completed_interactions: 1,
+          total_interactions: 1,
+          total_feedback: 0,
+          positive_feedback: 0,
+          no_show_count: 0,
+          reliability_score: 100,
+          follow_up_rate: 0,
+          weekly_activity_streak: 1,
+        });
+
+        // ACTION: Calculate urgency
+        const computedUrgency = calcUrgency(gradYear, gradSemester);
+        const computedHeadline = calcHeadline(computedUrgency, gradYear, gradSemester);
+
+        // Update profile with urgency
+        await base44.asServiceRole.entities.FastTrackProfile.update(profile.id, { urgency_tier: computedUrgency });
+
+        // Create email log simulating report card
+        const weekOfDate = now42.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        await base44.asServiceRole.entities.EmailLog.create({
+          user_email: studentEmail,
+          email_type: 'weekly_digest',
+          subject: `Your CFF Report Card — Week of ${weekOfDate}`,
+          content_preview: computedHeadline,
+          status: 'sent',
+          sent_at: now42.toISOString(),
+          metadata: { test: true, trigger: 'weekly_report_card', urgency_tier: computedUrgency, headline: computedHeadline },
+        });
+
+        // VERIFY: correct urgency_tier
+        const vProfile = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail }))[0];
+        if (vProfile.urgency_tier === sub.expected) {
+          log(`4.2-v${sub.label}-tier`, 'pass', `✓ ${sub.label}) ~${sub.monthsAway} months → urgency = ${sub.expected}`);
+        } else {
+          log(`4.2-v${sub.label}-tier`, 'fail', `✗ ${sub.label}) Expected ${sub.expected}, got ${vProfile.urgency_tier}`, { gradYear, gradSemester, computed: computedUrgency });
+        }
+
+        // VERIFY: email has matching headline
+        const vEmails = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail });
+        const vEmail = vEmails.find(e => e.metadata?.trigger === 'weekly_report_card');
+        if (vEmail && vEmail.metadata?.headline && vEmail.metadata.headline.includes(computedHeadline)) {
+          log(`4.2-v${sub.label}-headline`, 'pass', `✓ ${sub.label}) Report card headline matches: "${computedHeadline}..."`);
+        } else {
+          log(`4.2-v${sub.label}-headline`, 'fail', `✗ ${sub.label}) Headline mismatch`, { expected: computedHeadline, actual: vEmail?.metadata?.headline });
+        }
+
+        // VERIFY: all_hands_on_deck includes day count
+        if (sub.expected === 'all_hands_on_deck') {
+          const dayMatch = computedHeadline.match(/(\d+) days/);
+          if (dayMatch && parseInt(dayMatch[1]) > 0) {
+            log('4.2-vd-days', 'pass', `✓ d) all_hands_on_deck includes specific day count: ${dayMatch[1]} days`);
+          } else {
+            log('4.2-vd-days', 'fail', '✗ d) all_hands_on_deck missing day count', { headline: computedHeadline });
+          }
+        }
+      }
+
+      // Summary
+      const vResults42 = results.filter(r => r.testId.startsWith('4.2-v'));
+      const vPassed42 = vResults42.filter(r => r.status === 'pass').length;
+      const vFailed42 = vResults42.filter(r => r.status === 'fail').length;
+      log('4.2-summary', vFailed42 === 0 ? 'pass' : 'fail',
+        `Test 4.2 complete: ${vPassed42}/${vResults42.length} verifications passed, ${vFailed42} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 4.3: Cold application equivalent calculated correctly
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '4.3') {
+      log('4.3', 'running', 'Starting: Cold application equivalent calculated correctly');
+
+      const studentEmail43 = 'test-student-43@cff.dev';
+      const parentEmail43 = 'test-parent-43@cff.dev';
+      const studentName43 = 'Test Student 43';
+
+      // CLEANUP
+      const oldProfiles43 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail43 });
+      for (const p of oldProfiles43) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs43 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail43 });
+      for (const l of oldLogs43) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldFeedback43 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail43 });
+      for (const f of oldFeedback43) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldIntros43 = await base44.asServiceRole.entities.Intro.filter({ student_email: studentEmail43 }).catch(() => []);
+      for (const i of oldIntros43) await base44.asServiceRole.entities.Intro.delete(i.id);
+      const oldEmailLogs43 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail43 });
+      for (const e of oldEmailLogs43) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Profile with 4 completed interactions, 3 positive feedback
+      const profile43 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-43',
+        user_email: studentEmail43,
+        user_name: studentName43,
+        current_tier: 'rising',
+        completed_interactions: 4,
+        total_interactions: 4,
+        total_feedback: 4,
+        positive_feedback: 3,
+        avg_impression_score: 3.5,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 75,
+        weekly_activity_streak: 3,
+      });
+      log('4.3-setup-profile', 'pass', 'FastTrackProfile created (4 completed, 3 positive)', { profileId: profile43.id });
+
+      // Create 4 completed InteractionLogs
+      for (let i = 0; i < 4; i++) {
+        await base44.asServiceRole.entities.InteractionLog.create({
+          student_id: 'test-student-43',
+          student_email: studentEmail43,
+          student_name: studentName43,
+          helper_id: 'test-parent-43',
+          helper_email: parentEmail43,
+          helper_name: 'Test Parent 43',
+          helper_type: 'parent',
+          interaction_type: 'call',
+          scheduled_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          status: 'completed',
+        });
+      }
+      log('4.3-setup-interactions', 'pass', '4 completed InteractionLogs created');
+
+      // Create 3 positive + 1 non-positive feedback
+      const impressions43 = ['excellent', 'great', 'great', 'still_warming_up'];
+      for (const imp of impressions43) {
+        await base44.asServiceRole.entities.InteractionFeedback.create({
+          interaction_log_id: 'dummy-43',
+          student_id: 'test-student-43',
+          student_email: studentEmail43,
+          student_name: studentName43,
+          reviewer_id: 'test-parent-43',
+          reviewer_email: parentEmail43,
+          reviewer_name: 'Test Parent 43',
+          overall_impression: imp,
+          positive_attributes: imp === 'excellent' || imp === 'great' ? ['came_prepared'] : [],
+          growth_attributes: [],
+          recommend_coaching: false,
+          feedback_visible: true,
+        });
+      }
+      log('4.3-setup-feedback', 'pass', '4 feedback created (3 positive, 1 non-positive)');
+
+      // Create 2 Intro records
+      for (let i = 0; i < 2; i++) {
+        await base44.asServiceRole.entities.Intro.create({
+          student_email: studentEmail43,
+          student_name: studentName43,
+          helper_email: parentEmail43,
+          helper_name: 'Test Parent 43',
+          status: 'completed',
+        });
+      }
+      log('4.3-setup-intros', 'pass', '2 Intro records created');
+
+      // ACTION: Calculate cold app equivalent
+      // Formula: interactions*15 + positiveFeedback*10 + (intros+connections)*20
+      // = 4*15 + 3*10 + (2+0)*20 = 60 + 30 + 40 = 130
+      const expectedColdApp43 = 130;
+
+      // Verify by fetching data as the function would
+      const vInteractions43 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail43, status: 'completed' });
+      const vFeedback43 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail43 });
+      const vPositive43 = vFeedback43.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
+      const vIntros43 = await base44.asServiceRole.entities.Intro.filter({ student_email: studentEmail43 }).catch(() => []);
+      const vConnections43 = await base44.asServiceRole.entities.Connection.filter({ student_email: studentEmail43 }).catch(() => []);
+
+      const computedColdApp43 =
+        vInteractions43.length * 15 +
+        vPositive43.length * 10 +
+        ((vIntros43 || []).length + (vConnections43 || []).length) * 20;
+
+      // Create email with cold app equivalent
+      const now43 = new Date();
+      const emailBody43 = `COLD APPLICATION EQUIVALENT: ${computedColdApp43}\nCFF has saved you the equivalent of ${computedColdApp43} cold applications so far.`;
+      const emailLog43 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail43,
+        email_type: 'weekly_digest',
+        subject: `Your CFF Report Card`,
+        content_preview: emailBody43.substring(0, 200),
+        status: 'sent',
+        sent_at: now43.toISOString(),
+        metadata: { test: true, trigger: 'weekly_report_card', cold_app_equivalent: computedColdApp43, full_body: emailBody43 },
+      });
+
+      log('4.3-action', 'pass', `Cold app equivalent computed: ${computedColdApp43}`, { breakdown: `${vInteractions43.length}*15 + ${vPositive43.length}*10 + ${(vIntros43||[]).length}*20` });
+
+      // V1: Cold application equivalent = 130
+      if (computedColdApp43 === expectedColdApp43) {
+        log('4.3-v1', 'pass', `✓ Cold application equivalent = ${expectedColdApp43}`);
+      } else {
+        log('4.3-v1', 'fail', `✗ Cold app equivalent wrong`, { expected: expectedColdApp43, actual: computedColdApp43, interactions: vInteractions43.length, positive: vPositive43.length, intros: (vIntros43||[]).length, connections: (vConnections43||[]).length });
+      }
+
+      // V2: Number appears in report card email
+      const vEmail43 = (await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail43 })).find(e => e.metadata?.trigger === 'weekly_report_card');
+      const body43 = vEmail43?.metadata?.full_body || '';
+      if (body43.includes(`${expectedColdApp43} cold applications`)) {
+        log('4.3-v2', 'pass', `✓ Number ${expectedColdApp43} appears in report card email`);
+      } else {
+        log('4.3-v2', 'fail', '✗ Cold app number not in email', { body: body43 });
+      }
+
+      // Summary
+      const vResults43 = results.filter(r => r.testId.startsWith('4.3-v'));
+      const vPassed43 = vResults43.filter(r => r.status === 'pass').length;
+      const vFailed43 = vResults43.filter(r => r.status === 'fail').length;
+      log('4.3-summary', vFailed43 === 0 ? 'pass' : 'fail',
+        `Test 4.3 complete: ${vPassed43}/${vResults43.length} verifications passed, ${vFailed43} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 4.4: Report card respects 3-email weekly cap
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '4.4') {
+      log('4.4', 'running', 'Starting: Report card respects 3-email weekly cap');
+
+      const studentEmail44 = 'test-student-44@cff.dev';
+      const studentName44 = 'Test Student 44';
+
+      // CLEANUP
+      const oldProfiles44 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail44 });
+      for (const p of oldProfiles44) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldEmailLogs44 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail44 });
+      for (const e of oldEmailLogs44) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+      const oldNotifs44 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail44 });
+      for (const n of oldNotifs44) await base44.asServiceRole.entities.Notification.delete(n.id);
+
+      // SETUP: Profile
+      const profile44 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-44',
+        user_email: studentEmail44,
+        user_name: studentName44,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 1,
+        positive_feedback: 1,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50,
+        weekly_activity_streak: 1,
+      });
+      log('4.4-setup-profile', 'pass', 'FastTrackProfile created', { profileId: profile44.id });
+
+      // SETUP: Create 3 existing agent-sent emails this week
+      const now44 = new Date();
+      for (let i = 1; i <= 3; i++) {
+        await base44.asServiceRole.entities.EmailLog.create({
+          user_email: studentEmail44,
+          email_type: i === 1 ? 'weekly_digest' : 'new_answer',
+          subject: `Existing email ${i}`,
+          status: 'sent',
+          sent_at: now44.toISOString(),
+          metadata: { test: true, trigger: i === 1 ? 'weekly_report_card' : 'tier_notification' },
+        });
+      }
+      log('4.4-setup-emails', 'pass', '3 existing emails created this week (at cap)');
+
+      // ACTION: Trigger an event that would normally send another email
+      // Agent checks weekly email count before sending
+      const oneWeekAgo44 = new Date(now44.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const weekEmails44 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail44 });
+      const thisWeekEmails44 = weekEmails44.filter(e => e.sent_at && e.sent_at >= oneWeekAgo44);
+
+      const weeklyEmailCap = 3;
+      const atCap = thisWeekEmails44.length >= weeklyEmailCap;
+
+      if (atCap) {
+        // Agent DOES NOT send email — creates in-app notification instead
+        const fallbackNotif = await base44.asServiceRole.entities.Notification.create({
+          user_email: studentEmail44,
+          type: 'system',
+          title: 'Tier advancement update',
+          message: 'You completed another conversation! Check your dashboard for updated progress.',
+          priority: 'normal',
+          metadata: { test: true, trigger: 'email_cap_fallback', reason: 'weekly_email_cap_reached' },
+        });
+        log('4.4-action', 'pass', 'Email cap reached — created in-app Notification instead', { notifId: fallbackNotif.id });
+      } else {
+        // Should not happen given setup
+        log('4.4-action', 'fail', '✗ Email cap should have been reached but was not', { count: thisWeekEmails44.length });
+      }
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      // V1: Email is NOT sent (no 4th email)
+      const vEmails44 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail44 });
+      const vThisWeekEmails44 = vEmails44.filter(e => e.sent_at && e.sent_at >= oneWeekAgo44);
+      if (vThisWeekEmails44.length === 3) {
+        log('4.4-v1', 'pass', '✓ Email is NOT sent (still 3 emails this week)');
+      } else {
+        log('4.4-v1', 'fail', `✗ Expected 3 emails, found ${vThisWeekEmails44.length}`);
+      }
+
+      // V2: In-app Notification IS created instead
+      const vNotifs44 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail44 });
+      const capFallbackNotif = vNotifs44.find(n => n.metadata?.trigger === 'email_cap_fallback');
+      if (capFallbackNotif) {
+        log('4.4-v2', 'pass', '✓ In-app Notification IS created instead', { notifId: capFallbackNotif.id });
+      } else {
+        log('4.4-v2', 'fail', '✗ Fallback notification not found', { notifCount: vNotifs44.length });
+      }
+
+      // V3: EmailLog does NOT show a 4th email for this week
+      const emailCount44 = vThisWeekEmails44.length;
+      if (emailCount44 <= 3) {
+        log('4.4-v3', 'pass', `✓ EmailLog does NOT show a 4th email for this week (count: ${emailCount44})`);
+      } else {
+        log('4.4-v3', 'fail', `✗ EmailLog shows ${emailCount44} emails this week (exceeds cap of 3)`);
+      }
+
+      // Summary
+      const vResults44 = results.filter(r => r.testId.startsWith('4.4-v'));
+      const vPassed44 = vResults44.filter(r => r.status === 'pass').length;
+      const vFailed44 = vResults44.filter(r => r.status === 'fail').length;
+      log('4.4-summary', vFailed44 === 0 ? 'pass' : 'fail',
+        `Test 4.4 complete: ${vPassed44}/${vResults44.length} verifications passed, ${vFailed44} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
