@@ -4338,8 +4338,9 @@ Thank you for showing up for these students. You're making a difference.
       log('10.2-v2', vP102.total_feedback === 2 && vP102.positive_feedback === 2 ? 'pass' : 'fail',
         vP102.total_feedback === 2 ? '✓ FastTrackProfile updated after EACH submission (total=2, positive=2)' : `✗ total=${vP102.total_feedback}, positive=${vP102.positive_feedback}`);
 
-      // V3: Max 1 notification for feedback
-      const fbNotifs102 = vN102.filter(n => n.title && n.title.toLowerCase().includes('feedback'));
+      // V3: Max 1 notification for feedback — use list + manual filter to avoid RLS issues
+      const allN102raw = await base44.asServiceRole.entities.Notification.list('-created_date', 100);
+      const fbNotifs102 = allN102raw.filter(n => n.user_email === studentEmail102 && n.title && n.title.toLowerCase().includes('feedback'));
       log('10.2-v3', fbNotifs102.length === 1 ? 'pass' : 'fail',
         fbNotifs102.length === 1 ? '✓ Student receives max 1 notification for feedback (not 2 separate)' : `✗ Found ${fbNotifs102.length} feedback notifications`);
 
