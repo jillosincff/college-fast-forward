@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
         // STEP 4 — Grades
         const activityGrade = newInteractions >= 3 ? 'A' : newInteractions === 2 ? 'B' : newInteractions === 1 ? 'C' : 'D';
-        const reviewsGrade = positiveWeekReviews.length >= 2 ? 'A' : positiveWeekReviews.length === 1 ? 'B' : newReviews >= 1 ? 'C' : 'D';
+        const reviewsGrade = positiveWeekReviews.length >= 2 ? 'A' : positiveWeekReviews.length === 1 ? 'B' : newReviews >= 1 ? 'C' : 'D'; // "reviewsGrade" is internal var name only
 
         // STEP 5 — Build email
         const studentName = profile.user_name || profile.user_email.split('@')[0];
@@ -117,8 +117,8 @@ Here's your weekly CFF Report Card:
 NETWORK ACTIVITY: ${activityGrade}
 ${newInteractions} conversation${newInteractions !== 1 ? 's' : ''} this week. ${messagesSent} message${messagesSent !== 1 ? 's' : ''} sent.
 
-YOUR REVIEWS: ${reviewsGrade}
-${newReviews} new review${newReviews !== 1 ? 's' : ''} received.${reviewQuote}
+YOUR FEEDBACK: ${reviewsGrade}
+${newReviews} new feedback response${newReviews !== 1 ? 's' : ''} received.${reviewQuote}
 
 YOUR TIER: ${tierDisplayNames[profile.current_tier] || 'Just Getting Started'}
 ${tierGap}
@@ -213,7 +213,7 @@ function getTierGap(profile) {
   if (tier === 'building_momentum') {
     const gaps = [];
     if (completed < 3) gaps.push(`${3 - completed} more conversation${3 - completed !== 1 ? 's' : ''}`);
-    if (positiveReviews < 2) gaps.push(`${2 - positiveReviews} more positive review${2 - positiveReviews !== 1 ? 's' : ''}`);
+    if (positiveReviews < 2) gaps.push(`${2 - positiveReviews} more positive feedback${2 - positiveReviews !== 1 ? ' responses' : ' response'}`);
     if (reliability < 80) gaps.push('improve your reliability score to 80%');
     if (followUp < 60) gaps.push('improve your follow-up rate to 60%');
     return gaps.length > 0 ? `You're ${gaps.join(' and ')} away from Rising.` : 'You're close to Rising! Keep it up.';
@@ -221,7 +221,7 @@ function getTierGap(profile) {
   if (tier === 'rising') {
     const gaps = [];
     if (completed < 6) gaps.push(`${6 - completed} more conversation${6 - completed !== 1 ? 's' : ''}`);
-    if (positiveReviews < 5) gaps.push(`${5 - positiveReviews} more positive review${5 - positiveReviews !== 1 ? 's' : ''}`);
+    if (positiveReviews < 5) gaps.push(`${5 - positiveReviews} more positive feedback${5 - positiveReviews !== 1 ? ' responses' : ' response'}`);
     if (reliability < 90) gaps.push('a 90%+ reliability score');
     if (followUp < 80) gaps.push('an 80%+ follow-up rate');
     if (wouldRefer < 2) gaps.push(`${2 - wouldRefer} more "would refer" endorsement${2 - wouldRefer !== 1 ? 's' : ''}`);
