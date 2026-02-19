@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
 
     function log(testId, status, message, details = null) {
       results.push({ testId, status, message, details });
-      console.log(`[${status}] ${testId}: ${message}`);
+      console.log(`[${status}] ${testId}: ${message}`); // v2
     }
 
     // ═══════════════════════════════════════════════════════════════
