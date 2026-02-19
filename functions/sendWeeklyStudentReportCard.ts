@@ -247,14 +247,14 @@ function getThisWeeksMove(profile) {
   // Find biggest gap to next tier
   if (tier === 'building_momentum') {
     if (completed < 3) return `${3 - completed} parents in ${industries} are active this week. Claim a conversation.`;
-    if (positiveReviews < 2) return 'Focus on preparation before your next call. Review the parent\'s background and come with 3 questions.';
+    if (positiveReviews < 2) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
     if (followUp < 60) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
     return 'Keep connecting — you\'re close to Rising!';
   }
 
   if (tier === 'rising') {
     if (completed < 6) return `Schedule your next conversation this week. ${6 - completed} more to reach Fast Tracked.`;
-    if (positiveReviews < 5) return 'Focus on preparation before your next call. Review the parent\'s background and come with 3 questions.';
+    if (positiveReviews < 5) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
     if (followUp < 80) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
     if (streak < 4) return `Log in and connect this week to keep your streak alive. You're at ${streak} week${streak !== 1 ? 's' : ''}.`;
     return 'You\'re almost Fast Tracked. One more strong week could do it.';
