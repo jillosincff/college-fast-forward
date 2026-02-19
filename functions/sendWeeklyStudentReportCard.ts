@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
         if (!profile.user_email) continue;
 
         // STEP 1 — Fetch weekly data
-        const [interactions, reviews, messages, helpRequests] = await Promise.all([
+        const [interactions, feedback, messages, helpRequests] = await Promise.all([
           base44.asServiceRole.entities.InteractionLog.filter({
             student_email: profile.user_email,
             status: 'completed'
@@ -44,14 +44,14 @@ Deno.serve(async (req) => {
         ]);
 
         const weekInteractions = (interactions || []).filter(i => i.completed_at && i.completed_at >= oneWeekAgoISO);
-        const weekReviews = (reviews || []).filter(r => r.created_date && r.created_date >= oneWeekAgoISO);
+        const weekFeedback = (feedback || []).filter(r => r.created_date && r.created_date >= oneWeekAgoISO);
         const weekMessages = (messages || []).filter(m => m.created_date && m.created_date >= oneWeekAgoISO);
         const weekHelpRequests = (helpRequests || []).filter(h => h.created_date && h.created_date >= oneWeekAgoISO);
 
         const newInteractions = weekInteractions.length;
-        const newReviews = weekReviews.length;
+        const newFeedbackCount = weekFeedback.length;
         const messagesSent = weekMessages.length;
-        const positiveWeekReviews = weekReviews.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
+        const positiveWeekFeedback = weekFeedback.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
 
         // STEP 2 — Urgency tier
         const urgencyTier = calculateUrgencyTier(profile, now);
@@ -61,18 +61,18 @@ Deno.serve(async (req) => {
 
         // STEP 3 — Cold app equivalent (cumulative)
         const allInteractions = (interactions || []).filter(i => i.status === 'completed');
-        const allPositiveReviews = (reviews || []).filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
+        const allPositiveFeedback = (feedback || []).filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
         const intros = await base44.asServiceRole.entities.Intro.filter({ student_email: profile.user_email }).catch(() => []);
         const connections = await base44.asServiceRole.entities.Connection.filter({ student_email: profile.user_email }).catch(() => []);
 
         const coldAppEquivalent =
           allInteractions.length * 15 +
-          allPositiveReviews.length * 10 +
+          allPositiveFeedback.length * 10 +
           ((intros || []).length + (connections || []).length) * 20;
 
         // STEP 4 — Grades
         const activityGrade = newInteractions >= 3 ? 'A' : newInteractions === 2 ? 'B' : newInteractions === 1 ? 'C' : 'D';
-        const reviewsGrade = positiveWeekReviews.length >= 2 ? 'A' : positiveWeekReviews.length === 1 ? 'B' : newReviews >= 1 ? 'C' : 'D'; // "reviewsGrade" is internal var name only
+        const feedbackGrade = positiveWeekFeedback.length >= 2 ? 'A' : positiveWeekFeedback.length === 1 ? 'B' : newFeedbackCount >= 1 ? 'C' : 'D';
 
         // STEP 5 — Build email
         const studentName = profile.user_name || profile.user_email.split('@')[0];
@@ -87,10 +87,10 @@ Deno.serve(async (req) => {
         const tierGap = getTierGap(profile);
         const thisWeeksMove = getThisWeeksMove(profile);
 
-        // Positive review quote
-        let reviewQuote = '';
-        if (positiveWeekReviews.length > 0) {
-          const topReview = positiveWeekReviews[0];
+        // Positive feedback quote
+        let feedbackQuote = '';
+        if (positiveWeekFeedback.length > 0) {
+          const topFeedback = positiveWeekFeedback[0];
           const attrMap = {
             came_prepared: 'Came prepared',
             asked_great_questions: 'Asked great questions',
@@ -100,10 +100,10 @@ Deno.serve(async (req) => {
             would_refer: 'Would refer you',
             would_hire: 'Would hire you'
           };
-          const attr = (topReview.positive_attributes || [])[0];
+          const attr = (topFeedback.positive_attributes || [])[0];
           const attrPhrase = attr ? attrMap[attr] || attr : 'Great interaction';
-          const reviewerName = topReview.reviewer_name ? topReview.reviewer_name.split(' ')[0] : 'A mentor';
-          reviewQuote = `\n"${attrPhrase}" — ${reviewerName}`;
+          const mentorName = topFeedback.reviewer_name ? topFeedback.reviewer_name.split(' ')[0] : 'A mentor';
+          feedbackQuote = `\n"${attrPhrase}" — ${mentorName}`;
         }
 
         const emailBody = `${urgencyHeadline}
@@ -117,8 +117,8 @@ Here's your weekly CFF Report Card:
 NETWORK ACTIVITY: ${activityGrade}
 ${newInteractions} conversation${newInteractions !== 1 ? 's' : ''} this week. ${messagesSent} message${messagesSent !== 1 ? 's' : ''} sent.
 
-YOUR FEEDBACK: ${reviewsGrade}
-${newReviews} new feedback received.${reviewQuote}
+YOUR FEEDBACK: ${feedbackGrade}
+${newFeedbackCount} new feedback received.${feedbackQuote}
 
 YOUR TIER: ${tierDisplayNames[profile.current_tier] || 'Just Getting Started'}
 ${tierGap}
@@ -201,7 +201,7 @@ function getUrgencyHeadline(urgencyTier, profile, now) {
 function getTierGap(profile) {
   const tier = profile.current_tier || 'just_getting_started';
   const completed = profile.completed_interactions || 0;
-  const positiveReviews = profile.positive_reviews || 0;
+  const positiveFeedback = profile.positive_feedback || 0;
   const reliability = profile.reliability_score || 100;
   const followUp = profile.follow_up_rate || 0;
   const wouldRefer = profile.would_refer_count || 0;
@@ -213,7 +213,7 @@ function getTierGap(profile) {
   if (tier === 'building_momentum') {
     const gaps = [];
     if (completed < 3) gaps.push(`${3 - completed} more conversation${3 - completed !== 1 ? 's' : ''}`);
-    if (positiveReviews < 2) gaps.push(`${2 - positiveReviews} more positive feedback`);
+    if (positiveFeedback < 2) gaps.push(`${2 - positiveFeedback} more positive feedback`);
     if (reliability < 80) gaps.push('improve your reliability score to 80%');
     if (followUp < 60) gaps.push('improve your follow-up rate to 60%');
     return gaps.length > 0 ? `You're ${gaps.join(' and ')} away from Rising.` : 'You're close to Rising! Keep it up.';
@@ -221,7 +221,7 @@ function getTierGap(profile) {
   if (tier === 'rising') {
     const gaps = [];
     if (completed < 6) gaps.push(`${6 - completed} more conversation${6 - completed !== 1 ? 's' : ''}`);
-    if (positiveReviews < 5) gaps.push(`${5 - positiveReviews} more positive feedback`);
+    if (positiveFeedback < 5) gaps.push(`${5 - positiveFeedback} more positive feedback`);
     if (reliability < 90) gaps.push('a 90%+ reliability score');
     if (followUp < 80) gaps.push('an 80%+ follow-up rate');
     if (wouldRefer < 2) gaps.push(`${2 - wouldRefer} more "would refer" endorsement${2 - wouldRefer !== 1 ? 's' : ''}`);
@@ -235,7 +235,7 @@ function getTierGap(profile) {
 function getThisWeeksMove(profile) {
   const tier = profile.current_tier || 'just_getting_started';
   const completed = profile.completed_interactions || 0;
-  const positiveReviews = profile.positive_reviews || 0;
+  const positiveFeedback = profile.positive_feedback || 0;
   const followUp = profile.follow_up_rate || 0;
   const streak = profile.weekly_activity_streak || 0;
   const industries = (profile.target_industries || []).join(', ') || 'your target industry';
@@ -247,14 +247,14 @@ function getThisWeeksMove(profile) {
   // Find biggest gap to next tier
   if (tier === 'building_momentum') {
     if (completed < 3) return `${3 - completed} parents in ${industries} are active this week. Claim a conversation.`;
-    if (positiveReviews < 2) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
+    if (positiveFeedback < 2) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
     if (followUp < 60) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
     return 'Keep connecting — you\'re close to Rising!';
   }
 
   if (tier === 'rising') {
     if (completed < 6) return `Schedule your next conversation this week. ${6 - completed} more to reach Fast Tracked.`;
-    if (positiveReviews < 5) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
+    if (positiveFeedback < 5) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
     if (followUp < 80) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
     if (streak < 4) return `Log in and connect this week to keep your streak alive. You're at ${streak} week${streak !== 1 ? 's' : ''}.`;
     return 'You\'re almost Fast Tracked. One more strong week could do it.';
