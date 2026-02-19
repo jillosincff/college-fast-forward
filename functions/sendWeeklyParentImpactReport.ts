@@ -31,41 +31,41 @@ Deno.serve(async (req) => {
       try {
         if (!parent.email) continue;
 
-        // Fetch all reviews by this parent
-        const allReviews = await base44.asServiceRole.entities.InteractionFeedback.filter({
+        // Fetch all feedback by this parent
+        const allFeedback = await base44.asServiceRole.entities.InteractionFeedback.filter({
           reviewer_email: parent.email
         });
 
-        if (!allReviews || allReviews.length === 0) continue;
+        if (!allFeedback || allFeedback.length === 0) continue;
 
-        const weekReviews = allReviews.filter(r => r.created_date && r.created_date >= oneWeekAgoISO);
-        const totalReviews = allReviews.length;
+        const weekFeedback = allFeedback.filter(r => r.created_date && r.created_date >= oneWeekAgoISO);
+        const totalFeedback = allFeedback.length;
 
-        // Calculate average response time (hours between interaction completion and review)
+        // Calculate average response time (hours between interaction completion and feedback)
         let avgResponseHours = null;
-        const reviewsWithTiming = [];
-        for (const review of allReviews) {
-          if (review.interaction_log_id && review.created_date) {
+        const feedbackWithTiming = [];
+        for (const fb of allFeedback) {
+          if (fb.interaction_log_id && fb.created_date) {
             try {
               const logs = await base44.asServiceRole.entities.InteractionLog.filter({
-                id: review.interaction_log_id
+                id: fb.interaction_log_id
               });
               const log = logs && logs.length > 0 ? logs[0] : null;
               if (log && log.completed_at) {
                 const completedAt = new Date(log.completed_at);
-                const reviewedAt = new Date(review.created_date);
-                const hours = (reviewedAt - completedAt) / (1000 * 60 * 60);
+                const feedbackAt = new Date(fb.created_date);
+                const hours = (feedbackAt - completedAt) / (1000 * 60 * 60);
                 if (hours >= 0 && hours < 720) { // ignore outliers > 30 days
-                  reviewsWithTiming.push(hours);
+                  feedbackWithTiming.push(hours);
                 }
               }
             } catch (e) {
-              // skip timing for this review
+              // skip timing for this feedback
             }
           }
         }
-        if (reviewsWithTiming.length > 0) {
-          avgResponseHours = Math.round(reviewsWithTiming.reduce((a, b) => a + b, 0) / reviewsWithTiming.length);
+        if (feedbackWithTiming.length > 0) {
+          avgResponseHours = Math.round(feedbackWithTiming.reduce((a, b) => a + b, 0) / feedbackWithTiming.length);
         }
 
         // Calculate karma percentile
@@ -81,12 +81,12 @@ Deno.serve(async (req) => {
 
         // Find a recent positive feedback quote
         let feedbackQuote = '';
-        const visiblePositiveReviews = allReviews
+        const visiblePositiveFeedback = allFeedback
           .filter(r => r.feedback_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
           .sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
 
-        if (visiblePositiveReviews.length > 0) {
-          const topFeedback = visiblePositiveReviews[0];
+        if (visiblePositiveFeedback.length > 0) {
+          const topFeedback = visiblePositiveFeedback[0];
           const studentFirstName = topFeedback.student_name ? topFeedback.student_name.split(' ')[0] : 'A student';
           feedbackQuote = `\nA STUDENT SAID:\n"${topFeedback.open_feedback}"\n— ${studentFirstName}\n`;
         }
@@ -100,8 +100,8 @@ Deno.serve(async (req) => {
 
 Here's what your mentorship accomplished this week:
 
-STUDENTS HELPED THIS WEEK: ${weekReviews.length}
-ALL-TIME STUDENTS HELPED: ${totalReviews}
+STUDENTS HELPED THIS WEEK: ${weekFeedback.length}
+ALL-TIME STUDENTS HELPED: ${totalFeedback}
 ${responseTimeText}
 YOUR KARMA RANK AT UF: Top ${percentile}%
 ${feedbackQuote}
