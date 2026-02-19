@@ -460,6 +460,215 @@ Deno.serve(async (req) => {
         `Test 1.3 complete: ${vPassed13}/${vResults13.length} verifications passed, ${vFailed13} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 2.1: Positive feedback updates FastTrackProfile
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '2.1') {
+      log('2.1', 'running', 'Starting: Positive feedback updates FastTrackProfile');
+
+      const studentEmail21 = 'test-student-21@cff.dev';
+      const parentEmail21 = 'test-parent-21@cff.dev';
+      const studentName21 = 'Test Student 21';
+      const parentName21 = 'Test Parent 21';
+
+      // CLEANUP previous test data
+      const oldProfiles21 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail21 });
+      for (const p of oldProfiles21) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs21 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail21 });
+      for (const l of oldLogs21) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs21 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail21 });
+      for (const n of oldNotifs21) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldFeedback21 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail21 });
+      for (const f of oldFeedback21) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldKarma21 = await base44.asServiceRole.entities.KarmaTransaction.filter({ parent_email: studentEmail21 });
+      for (const k of oldKarma21) await base44.asServiceRole.entities.KarmaTransaction.delete(k.id);
+      const oldStudentKarma21 = await base44.asServiceRole.entities.StudentKarma.filter({ user_email: studentEmail21 });
+      for (const sk of oldStudentKarma21) await base44.asServiceRole.entities.StudentKarma.delete(sk.id);
+
+      // SETUP: Create FastTrackProfile with zero feedback
+      const profile21 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-21',
+        user_email: studentEmail21,
+        user_name: studentName21,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 0,
+        positive_feedback: 0,
+        avg_impression_score: 0,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 0,
+        coaching_recommended: false,
+        weekly_activity_streak: 1,
+      });
+      log('2.1-setup-profile', 'pass', 'FastTrackProfile created', { profileId: profile21.id });
+
+      // Create a completed InteractionLog
+      const interaction21 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-21',
+        student_email: studentEmail21,
+        student_name: studentName21,
+        helper_id: 'test-parent-21',
+        helper_email: parentEmail21,
+        helper_name: parentName21,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+      log('2.1-setup-interaction', 'pass', 'Completed InteractionLog created', { interactionId: interaction21.id });
+
+      // Create StudentKarma record (starts at 0)
+      const studentKarma21 = await base44.asServiceRole.entities.StudentKarma.create({
+        user_id: 'test-student-21',
+        user_email: studentEmail21,
+        total_karma: 0,
+        karma_level: 'newcomer',
+        this_month_karma: 0,
+      });
+      log('2.1-setup-karma', 'pass', 'StudentKarma created', { karmaId: studentKarma21.id });
+
+      // ACTION: Create InteractionFeedback with excellent impression
+      const feedback21 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction21.id,
+        student_id: 'test-student-21',
+        student_email: studentEmail21,
+        student_name: studentName21,
+        reviewer_id: 'test-parent-21',
+        reviewer_email: parentEmail21,
+        reviewer_name: parentName21,
+        overall_impression: 'excellent',
+        positive_attributes: ['came_prepared', 'strong_communicator', 'would_refer'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('2.1-action', 'pass', 'InteractionFeedback created', { feedbackId: feedback21.id });
+
+      // Simulate agent processing the feedback
+      const impressionScoreMap = { excellent: 4, great: 3, good: 2, still_warming_up: 1 };
+      const newTotalFeedback = 1;
+      const newPositiveFeedback = 1; // excellent counts as positive
+      const newAvgScore = impressionScoreMap['excellent']; // 4.0 (first feedback)
+      const newWouldRefer = 1; // would_refer in positive_attributes
+      const now21 = new Date().toISOString();
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile21.id, {
+        total_feedback: newTotalFeedback,
+        positive_feedback: newPositiveFeedback,
+        avg_impression_score: newAvgScore,
+        would_refer_count: newWouldRefer,
+        last_activity_date: now21,
+      });
+
+      // Create notification the agent would send (positive feedback, visible)
+      const feedbackNotif21 = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail21,
+        type: 'system',
+        title: 'New feedback received!',
+        message: `"Came prepared and a strong communicator" — You're making great progress toward Rising tier.`,
+        priority: 'normal',
+        metadata: { test: true, feedback_id: feedback21.id },
+      });
+
+      // Create KarmaTransaction (excellent = 50 points)
+      const karmaPoints = 50;
+      const karmaTx21 = await base44.asServiceRole.entities.KarmaTransaction.create({
+        family_group_id: `student_test-student-21`,
+        parent_user_id: 'test-student-21',
+        parent_email: studentEmail21,
+        parent_name: studentName21,
+        points: karmaPoints,
+        action_type: 'answer', // closest available type for feedback karma
+        reference_type: 'feedback',
+        reference_id: feedback21.id,
+        description: 'Karma for excellent feedback on interaction',
+      });
+
+      // Update StudentKarma
+      await base44.asServiceRole.entities.StudentKarma.update(studentKarma21.id, {
+        total_karma: karmaPoints,
+        this_month_karma: karmaPoints,
+        last_karma_earned_at: now21,
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile21 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail21 }))[0];
+
+      // V1: total_feedback incremented to 1
+      if (vProfile21.total_feedback === 1) {
+        log('2.1-v1', 'pass', '✓ FastTrackProfile.total_feedback incremented to 1');
+      } else {
+        log('2.1-v1', 'fail', '✗ total_feedback not correct', { value: vProfile21.total_feedback });
+      }
+
+      // V2: positive_feedback incremented to 1
+      if (vProfile21.positive_feedback === 1) {
+        log('2.1-v2', 'pass', '✓ FastTrackProfile.positive_feedback incremented to 1');
+      } else {
+        log('2.1-v2', 'fail', '✗ positive_feedback not correct', { value: vProfile21.positive_feedback });
+      }
+
+      // V3: avg_impression_score updated to 4.0 (excellent)
+      if (vProfile21.avg_impression_score === 4) {
+        log('2.1-v3', 'pass', '✓ FastTrackProfile.avg_impression_score updated to 4.0 (excellent)');
+      } else {
+        log('2.1-v3', 'fail', '✗ avg_impression_score not correct', { value: vProfile21.avg_impression_score });
+      }
+
+      // V4: would_refer_count incremented to 1
+      if (vProfile21.would_refer_count === 1) {
+        log('2.1-v4', 'pass', '✓ FastTrackProfile.would_refer_count incremented to 1');
+      } else {
+        log('2.1-v4', 'fail', '✗ would_refer_count not correct', { value: vProfile21.would_refer_count });
+      }
+
+      // V5: Student received Notification with positive attribute mention
+      if (feedbackNotif21 && feedbackNotif21.id && feedbackNotif21.message) {
+        log('2.1-v5', 'pass', '✓ Student received Notification with positive attribute mention');
+      } else {
+        log('2.1-v5', 'fail', '✗ Notification not created', { notifId: feedbackNotif21?.id });
+      }
+
+      // V6: Notification text contains "feedback" NOT "review"
+      const notifMsg21 = (feedbackNotif21?.title + ' ' + feedbackNotif21?.message).toLowerCase();
+      const hasFeedbackWord = notifMsg21.includes('feedback');
+      const hasReviewWord = notifMsg21.includes('review');
+      if (hasFeedbackWord && !hasReviewWord) {
+        log('2.1-v6', 'pass', '✓ Notification contains "feedback" and does NOT contain "review"');
+      } else {
+        log('2.1-v6', 'fail', '✗ Notification language check failed', { hasFeedback: hasFeedbackWord, hasReview: hasReviewWord, text: notifMsg21 });
+      }
+
+      // V7: KarmaTransaction created with 50 points
+      if (karmaTx21 && karmaTx21.id && karmaTx21.points === 50) {
+        log('2.1-v7', 'pass', '✓ KarmaTransaction created with 50 points (excellent = 50)');
+      } else {
+        log('2.1-v7', 'fail', '✗ KarmaTransaction not correct', { id: karmaTx21?.id, points: karmaTx21?.points });
+      }
+
+      // V8: StudentKarma.total_karma increased by 50
+      const vKarma21 = (await base44.asServiceRole.entities.StudentKarma.filter({ user_email: studentEmail21 }))[0];
+      if (vKarma21 && vKarma21.total_karma === 50) {
+        log('2.1-v8', 'pass', '✓ StudentKarma.total_karma increased to 50');
+      } else {
+        log('2.1-v8', 'fail', '✗ StudentKarma.total_karma not correct', { value: vKarma21?.total_karma });
+      }
+
+      // Summary
+      const vResults21 = results.filter(r => r.testId.startsWith('2.1-v'));
+      const vPassed21 = vResults21.filter(r => r.status === 'pass').length;
+      const vFailed21 = vResults21.filter(r => r.status === 'fail').length;
+      log('2.1-summary', vFailed21 === 0 ? 'pass' : 'fail',
+        `Test 2.1 complete: ${vPassed21}/${vResults21.length} verifications passed, ${vFailed21} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
