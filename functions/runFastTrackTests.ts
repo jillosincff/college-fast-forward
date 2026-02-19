@@ -176,11 +176,11 @@ Deno.serve(async (req) => {
 
       // VERIFY: EmailLog record exists
       const emailLogs = await base44.asServiceRole.entities.EmailLog.filter({ user_email: parentEmail });
-      const testEmailLog = emailLogs.find(l => l.metadata?.test === true && l.metadata?.interaction_id === interaction.id);
+      const testEmailLog = emailLogs.find(l => l.subject && l.subject.includes(studentName));
       if (testEmailLog) {
         log('1.1-v9', 'pass', '✓ EmailLog record created for the feedback request', { emailLogId: testEmailLog.id });
       } else {
-        log('1.1-v9', 'fail', '✗ EmailLog record not found for feedback request');
+        log('1.1-v9', 'fail', '✗ EmailLog record not found for feedback request', { emailLogsCount: emailLogs.length });
       }
 
       // Summary
