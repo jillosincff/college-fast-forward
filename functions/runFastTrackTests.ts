@@ -184,10 +184,11 @@ Deno.serve(async (req) => {
       }
 
       // Summary
-      const passed = results.filter(r => r.status === 'pass').length;
-      const failed = results.filter(r => r.status === 'fail').length;
-      log('1.1-summary', passed === results.filter(r => r.testId.startsWith('1.1-v')).length ? 'pass' : 'fail',
-        `Test 1.1 complete: ${passed} passed, ${failed} failed`);
+      const verifyResults = results.filter(r => r.testId.startsWith('1.1-v'));
+      const verifyPassed = verifyResults.filter(r => r.status === 'pass').length;
+      const verifyFailed = verifyResults.filter(r => r.status === 'fail').length;
+      log('1.1-summary', verifyFailed === 0 ? 'pass' : 'fail',
+        `Test 1.1 complete: ${verifyPassed}/${verifyResults.length} verifications passed, ${verifyFailed} failed`);
 
       // CLEANUP (leave test data with test- prefix for easy filtering)
       // Optionally clean up here or leave for inspection
