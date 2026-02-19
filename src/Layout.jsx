@@ -123,6 +123,7 @@ const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
 const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const Insights = React.lazy(() => import('./pages/Insights'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
+const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -769,6 +770,7 @@ const getPageComponent = (pageName) => {
     case 'MatchesReview': return MatchesReview;
       case 'Insights': return Insights;
       case 'ParentPledge': return ParentPledge;
+    case 'SubmitFeedback': return SubmitFeedback;
       default: return LandingPage;
   }
 };
