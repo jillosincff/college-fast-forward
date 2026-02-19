@@ -118,7 +118,7 @@ NETWORK ACTIVITY: ${activityGrade}
 ${newInteractions} conversation${newInteractions !== 1 ? 's' : ''} this week. ${messagesSent} message${messagesSent !== 1 ? 's' : ''} sent.
 
 YOUR FEEDBACK: ${reviewsGrade}
-${newReviews} new feedback response${newReviews !== 1 ? 's' : ''} received.${reviewQuote}
+${newReviews} new feedback received.${reviewQuote}
 
 YOUR TIER: ${tierDisplayNames[profile.current_tier] || 'Just Getting Started'}
 ${tierGap}
