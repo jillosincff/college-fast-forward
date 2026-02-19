@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle, XCircle, AlertTriangle, Users, TrendingUp, Lock, Shield } from 'lucide-react';
+import FastTrackTestRunner from '@/components/testing/FastTrackTestRunner';
 
 export default function TestingDashboard() {
   const [results, setResults] = useState([]);
@@ -739,6 +740,9 @@ export default function TestingDashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Fast Track System Tests */}
+        <FastTrackTestRunner />
 
         {/* Manual Testing Instructions */}
         <Card className="mt-8 bg-blue-50 border-blue-200">
