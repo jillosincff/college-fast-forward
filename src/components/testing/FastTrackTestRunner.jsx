@@ -80,8 +80,22 @@ export default function FastTrackTestRunner() {
             {isRunning ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running...</>
             ) : (
-              <><Play className="w-4 h-4 mr-2" /> Run Test 1.1: Interaction Logging</>
+              <><Play className="w-4 h-4 mr-2" /> Run Test 1.1: Completion</>
             )}
+          </Button>
+          <Button
+            onClick={() => runTests('1.2')}
+            disabled={isRunning}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> Run Test 1.2: No-Show
+          </Button>
+          <Button
+            onClick={() => runTests('1.3')}
+            disabled={isRunning}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> Run Test 1.3: 3rd No-Show
           </Button>
 
           <Button
