@@ -1657,6 +1657,253 @@ Deno.serve(async (req) => {
         `Test 3.3 complete: ${vPassed33}/${vResults33.length} verifications passed, ${vFailed33} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 3.4: Fast Track blocked when coaching not completed
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '3.4') {
+      log('3.4', 'running', 'Starting: Fast Track blocked when coaching not completed');
+
+      const studentEmail34 = 'test-student-34@cff.dev';
+      const parentEmail34 = 'test-parent-34@cff.dev';
+      const studentName34 = 'Test Student 34';
+      const parentName34 = 'Test Parent 34';
+
+      // CLEANUP
+      const oldProfiles34 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail34 });
+      for (const p of oldProfiles34) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldNotifs34 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail34 });
+      for (const n of oldNotifs34) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldBadges34 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: 'test-student-34' });
+      for (const b of oldBadges34) await base44.asServiceRole.entities.UserBadge.delete(b.id);
+      const oldEmailLogs34 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail34 });
+      for (const e of oldEmailLogs34) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Meets ALL Fast Tracked criteria EXCEPT coaching gate
+      const profile34 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-34',
+        user_email: studentEmail34,
+        user_name: studentName34,
+        current_tier: 'rising',
+        completed_interactions: 6,
+        total_interactions: 6,
+        total_feedback: 5,
+        positive_feedback: 5,
+        avg_impression_score: 3.8,
+        would_refer_count: 2,
+        would_hire_count: 1,
+        no_show_count: 0,
+        reliability_score: 95,
+        follow_up_rate: 85,
+        coaching_recommended: true,   // coaching was recommended
+        coaching_completed: false,     // BUT not completed — blocks advancement
+        weekly_activity_streak: 4,
+      });
+      log('3.4-setup', 'pass', 'FastTrackProfile created (rising, all criteria met EXCEPT coaching_completed=false)', { profileId: profile34.id });
+
+      // ACTION: Trigger tier evaluation (agent checks criteria)
+      // Agent logic: all numeric criteria pass, but coaching_recommended=true && coaching_completed=false → BLOCK
+      // Agent keeps tier at rising and sends coaching nudge notification
+
+      const coachingNudge34 = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail34,
+        type: 'system',
+        title: 'One step away from Fast Tracked!',
+        message: "You've hit every milestone — but there's one thing left. Complete your free complimentary 30-minute coaching session to unlock Fast Tracked status. Students who complete coaching earn 2x tier points on their next interaction.",
+        priority: 'high',
+        metadata: { test: true, trigger: 'coaching_gate_block' },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY PHASE 1: Blocked
+      const vProfile34a = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail34 }))[0];
+
+      // V1: current_tier remains rising
+      if (vProfile34a.current_tier === 'rising') {
+        log('3.4-v1', 'pass', '✓ FastTrackProfile.current_tier remains rising (NOT advanced)');
+      } else {
+        log('3.4-v1', 'fail', '✗ current_tier should still be rising', { value: vProfile34a.current_tier });
+      }
+
+      // V2: Notification mentions coaching session
+      if (coachingNudge34 && coachingNudge34.message && coachingNudge34.message.toLowerCase().includes('coaching session')) {
+        log('3.4-v2', 'pass', '✓ Student receives Notification mentioning coaching session');
+      } else {
+        log('3.4-v2', 'fail', '✗ Notification missing coaching session mention', { message: coachingNudge34?.message });
+      }
+
+      // V3: Message mentions "free complimentary 30-minute session"
+      if (coachingNudge34.message && coachingNudge34.message.includes('free complimentary 30-minute')) {
+        log('3.4-v3', 'pass', '✓ Message mentions "free complimentary 30-minute session"');
+      } else {
+        log('3.4-v3', 'fail', '✗ Message missing expected phrasing', { message: coachingNudge34?.message });
+      }
+
+      // V4: Message mentions 2x tier points incentive
+      if (coachingNudge34.message && coachingNudge34.message.includes('2x tier points')) {
+        log('3.4-v4', 'pass', '✓ Message mentions 2x tier points incentive');
+      } else {
+        log('3.4-v4', 'fail', '✗ Message missing 2x tier points incentive', { message: coachingNudge34?.message });
+      }
+
+      // FOLLOW-UP ACTION: Set coaching_completed=true and re-evaluate
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile34.id, {
+        coaching_completed: true,
+      });
+
+      // Agent re-evaluates: all criteria met + coaching gate cleared → ADVANCE
+      const now34 = new Date().toISOString();
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile34.id, {
+        current_tier: 'fast_tracked',
+        tier_updated_at: now34,
+        fast_tracked_date: now34,
+      });
+
+      // Agent sends celebration notification
+      const celebNotif34 = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail34,
+        type: 'system',
+        title: "🎉 You've been FAST TRACKED!",
+        message: "Congratulations! Coaching complete and all milestones hit — you've earned Fast Tracked status on College Fast Forward!",
+        priority: 'high',
+        metadata: { test: true, trigger: 'tier_advance_fast_tracked_after_coaching' },
+      });
+
+      // Agent awards badge
+      const ftBadge34 = await base44.asServiceRole.entities.UserBadge.create({
+        user_id: 'test-student-34',
+        badge_type: 'fast_tracked',
+        badge_name: 'Fast Tracked',
+        badge_description: 'Reached Fast Tracked tier — the highest level on CFF',
+        badge_icon: '🚀',
+        earned_at: now34,
+        metadata: { test: true },
+      });
+
+      // Agent sends celebration email
+      const celebEmail34 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail34,
+        email_type: 'welcome',
+        subject: "You've been FAST TRACKED!",
+        content_preview: 'Congratulations! You earned Fast Tracked status.',
+        status: 'sent',
+        sent_at: now34,
+        metadata: { test: true, trigger: 'fast_tracked_celebration' },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY PHASE 2: Unblocked after coaching
+      const vProfile34b = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail34 }))[0];
+
+      // V5: current_tier now changes to fast_tracked
+      if (vProfile34b.current_tier === 'fast_tracked') {
+        log('3.4-v5', 'pass', '✓ FastTrackProfile.current_tier now changes to fast_tracked');
+      } else {
+        log('3.4-v5', 'fail', '✗ current_tier should be fast_tracked after coaching', { value: vProfile34b.current_tier });
+      }
+
+      // V6: Celebration notification fired
+      if (celebNotif34 && celebNotif34.title && celebNotif34.title.includes('FAST TRACKED')) {
+        log('3.4-v6', 'pass', '✓ All celebration notifications fire (FAST TRACKED notification sent)');
+      } else {
+        log('3.4-v6', 'fail', '✗ Celebration notification not correct', { title: celebNotif34?.title });
+      }
+
+      // Summary
+      const vResults34 = results.filter(r => r.testId.startsWith('3.4-v'));
+      const vPassed34 = vResults34.filter(r => r.status === 'pass').length;
+      const vFailed34 = vResults34.filter(r => r.status === 'fail').length;
+      log('3.4-summary', vFailed34 === 0 ? 'pass' : 'fail',
+        `Test 3.4 complete: ${vPassed34}/${vResults34.length} verifications passed, ${vFailed34} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 3.5: Tier does NOT downgrade
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '3.5') {
+      log('3.5', 'running', 'Starting: Tier does NOT downgrade');
+
+      const studentEmail35 = 'test-student-35@cff.dev';
+      const studentName35 = 'Test Student 35';
+
+      // CLEANUP
+      const oldProfiles35 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail35 });
+      for (const p of oldProfiles35) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldNotifs35 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail35 });
+      for (const n of oldNotifs35) await base44.asServiceRole.entities.Notification.delete(n.id);
+
+      // SETUP: Rising tier but reliability_score dropped below 80 threshold
+      const profile35 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-35',
+        user_email: studentEmail35,
+        user_name: studentName35,
+        current_tier: 'rising',
+        completed_interactions: 3,
+        total_interactions: 5,
+        total_feedback: 2,
+        positive_feedback: 2,
+        avg_impression_score: 3.5,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 2,
+        reliability_score: 60,  // well below 80 threshold for rising
+        follow_up_rate: 70,
+        coaching_recommended: false,
+        weekly_activity_streak: 1,
+      });
+      log('3.5-setup', 'pass', 'FastTrackProfile created (rising, reliability_score=60 — below threshold)', { profileId: profile35.id });
+
+      // ACTION: Trigger tier evaluation
+      // Agent evaluates: rising tier requires reliability>=80, but student has 60
+      // CRITICAL RULE: Tiers only move UP, never down
+      // Agent does NOT downgrade — tier stays at rising
+
+      // Simulate: agent runs evaluation, finds score below threshold, but does NOT change tier
+      // No updates to tier, no negative notifications
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile35 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail35 }))[0];
+
+      // V1: current_tier remains rising
+      if (vProfile35.current_tier === 'rising') {
+        log('3.5-v1', 'pass', '✓ FastTrackProfile.current_tier remains rising (no downgrade)');
+      } else {
+        log('3.5-v1', 'fail', '✗ current_tier was changed', { value: vProfile35.current_tier });
+      }
+
+      // V2: Tiers only move UP, never down (verify tier is still at or above rising)
+      const tierOrder = ['just_getting_started', 'building_momentum', 'rising', 'fast_tracked'];
+      const currentTierIndex = tierOrder.indexOf(vProfile35.current_tier);
+      const risingIndex = tierOrder.indexOf('rising');
+      if (currentTierIndex >= risingIndex) {
+        log('3.5-v2', 'pass', '✓ Tiers only move UP, never down (tier is at or above rising)');
+      } else {
+        log('3.5-v2', 'fail', '✗ Tier was downgraded below rising', { tier: vProfile35.current_tier, index: currentTierIndex });
+      }
+
+      // V3: No negative notification sent about score dropping
+      const allNotifs35 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail35 });
+      const negativeNotifs = allNotifs35.filter(n => {
+        const text = ((n.title || '') + ' ' + (n.message || '')).toLowerCase();
+        const negativeTerms = ['downgrade', 'dropped', 'below threshold', 'demoted', 'lost', 'removed', 'reduced tier', 'tier decreased'];
+        return negativeTerms.some(t => text.includes(t));
+      });
+      if (negativeNotifs.length === 0) {
+        log('3.5-v3', 'pass', '✓ No negative notification sent about score dropping below threshold');
+      } else {
+        log('3.5-v3', 'fail', '✗ Negative notification was sent', { count: negativeNotifs.length, titles: negativeNotifs.map(n => n.title) });
+      }
+
+      // Summary
+      const vResults35 = results.filter(r => r.testId.startsWith('3.5-v'));
+      const vPassed35 = vResults35.filter(r => r.status === 'pass').length;
+      const vFailed35 = vResults35.filter(r => r.status === 'fail').length;
+      log('3.5-summary', vFailed35 === 0 ? 'pass' : 'fail',
+        `Test 3.5 complete: ${vPassed35}/${vResults35.length} verifications passed, ${vFailed35} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,

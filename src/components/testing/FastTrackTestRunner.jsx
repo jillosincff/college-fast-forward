@@ -146,6 +146,20 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 3.3: → Fast Tracked
           </Button>
+          <Button
+            onClick={() => runTests('3.4')}
+            disabled={isRunning}
+            className="bg-amber-600 hover:bg-amber-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 3.4: Coaching Gate
+          </Button>
+          <Button
+            onClick={() => runTests('3.5')}
+            disabled={isRunning}
+            className="bg-amber-600 hover:bg-amber-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 3.5: No Downgrade
+          </Button>
 
           <Button
             onClick={cleanupTestData}
