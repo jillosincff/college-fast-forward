@@ -209,6 +209,27 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 6.1: Dormant 14d
           </Button>
+          <Button
+            onClick={() => runTests('6.2')}
+            disabled={isRunning}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 6.2: Dormant 30d
+          </Button>
+          <Button
+            onClick={() => runTests('6.3')}
+            disabled={isRunning}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 6.3: No Post-30d
+          </Button>
+          <Button
+            onClick={() => runTests('6.4')}
+            disabled={isRunning}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 6.4: FT Exclusion
+          </Button>
 
           <Button
             onClick={cleanupTestData}

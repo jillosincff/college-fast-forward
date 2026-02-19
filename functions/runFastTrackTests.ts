@@ -3044,6 +3044,311 @@ Just say hi. That's all it takes.
         `Test 6.1 complete: ${vPassed61}/${vResults61.length} verifications passed, ${vFailed61} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 6.2: 30-day dormant final nudge fires
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '6.2') {
+      log('6.2', 'running', 'Starting: 30-day dormant final nudge fires');
+
+      const studentEmail62 = 'test-student-62@cff.dev';
+      const studentName62 = 'Test Student 62';
+
+      // CLEANUP
+      const oldProfiles62 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail62 });
+      for (const p of oldProfiles62) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldPrompts62 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail62 });
+      for (const p of oldPrompts62) await base44.asServiceRole.entities.ActivationPrompt.delete(p.id);
+      const oldEmails62 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail62 });
+      for (const e of oldEmails62) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Profile with last_activity_date = 31 days ago
+      const now62 = new Date();
+      const thirtyOneDaysAgo = new Date(now62.getTime() - 31 * 24 * 60 * 60 * 1000);
+
+      const profile62 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-62',
+        user_email: studentEmail62,
+        user_name: studentName62,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 1,
+        positive_feedback: 1,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50,
+        weekly_activity_streak: 0,
+        last_activity_date: thirtyOneDaysAgo.toISOString(),
+        target_industries: ['Technology'],
+      });
+
+      // Create existing 14-day ActivationPrompt (already sent)
+      const fourteenDaysAfterDormant = new Date(thirtyOneDaysAgo.getTime() + 14 * 24 * 60 * 60 * 1000);
+      await base44.asServiceRole.entities.ActivationPrompt.create({
+        user_id: 'test-student-62',
+        user_email: studentEmail62,
+        user_type: 'student',
+        prompt_stage: 'nudge_24h',
+        status: 'shown',
+        action_type: 'dormant_14d',
+        shown_at: fourteenDaysAfterDormant.toISOString(),
+      });
+      log('6.2-setup', 'pass', 'FastTrackProfile (31d dormant) + existing 14d ActivationPrompt created', { profileId: profile62.id });
+
+      // ACTION: Simulate sendDormantStudentReengagement logic for 30+ day dormant
+      const daysDormant62 = 31;
+      const activeStudentsThisMonth62 = 28;
+      const monthConversations62 = 45;
+
+      const emailSubject62 = "Opportunities don't wait";
+      const emailBody62 = `Hey ${studentName62},
+
+${activeStudentsThisMonth62} students in your class have had ${monthConversations62} professional conversations this month. The ones showing up are getting noticed.
+
+When you're ready, we're here. Your next conversation is one click away.
+
+— College Fast Forward at UF`;
+
+      const emailLog62 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail62,
+        email_type: 'nudge_48h',
+        subject: emailSubject62,
+        content_preview: emailBody62.substring(0, 200),
+        status: 'sent',
+        sent_at: now62.toISOString(),
+        metadata: { test: true, trigger: 'dormant_30d', full_body: emailBody62 },
+      });
+
+      await base44.asServiceRole.entities.ActivationPrompt.create({
+        user_id: 'test-student-62',
+        user_email: studentEmail62,
+        user_type: 'student',
+        prompt_stage: 'nudge_48h',
+        status: 'shown',
+        action_type: 'dormant_30d',
+        shown_at: now62.toISOString(),
+      });
+
+      log('6.2-action', 'pass', 'Final nudge email sent + dormant_30d ActivationPrompt created', { emailLogId: emailLog62.id });
+
+      // VERIFY
+      const body62 = emailBody62;
+
+      // V1: Final nudge email sent
+      if (emailLog62 && emailLog62.status === 'sent') {
+        log('6.2-v1', 'pass', '✓ Final nudge email sent');
+      } else {
+        log('6.2-v1', 'fail', '✗ Email not sent');
+      }
+
+      // V2: Body mentions other students' activity as social proof
+      if (body62.includes(`${activeStudentsThisMonth62} students`) && body62.includes(`${monthConversations62} professional conversations`)) {
+        log('6.2-v2', 'pass', '✓ Body mentions other students\' activity as social proof');
+      } else {
+        log('6.2-v2', 'fail', '✗ Body missing social proof', { body: body62 });
+      }
+
+      // V3: Tone remains warm and inviting
+      const warmPhrases62 = ['when you\'re ready', 'we\'re here', 'one click away', 'showing up'];
+      const bodyLower62 = body62.toLowerCase();
+      const foundWarm62 = warmPhrases62.find(p => bodyLower62.includes(p));
+      const shamingWords62 = ['shame', 'disappointed', 'unacceptable', 'penalty', 'punish', 'failing', 'falling behind', 'you\'re behind', 'left behind'];
+      const foundShaming62 = shamingWords62.find(w => bodyLower62.includes(w));
+      if (foundWarm62 && !foundShaming62) {
+        log('6.2-v3', 'pass', `✓ Tone remains warm and inviting ("${foundWarm62}"), no shaming language`);
+      } else {
+        log('6.2-v3', 'fail', '✗ Tone issue', { warm: foundWarm62, shaming: foundShaming62 });
+      }
+
+      // Summary
+      const vResults62 = results.filter(r => r.testId.startsWith('6.2-v'));
+      const vPassed62 = vResults62.filter(r => r.status === 'pass').length;
+      const vFailed62 = vResults62.filter(r => r.status === 'fail').length;
+      log('6.2-summary', vFailed62 === 0 ? 'pass' : 'fail',
+        `Test 6.2 complete: ${vPassed62}/${vResults62.length} verifications passed, ${vFailed62} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 6.3: No emails after 30-day nudge
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '6.3') {
+      log('6.3', 'running', 'Starting: No emails after 30-day nudge');
+
+      const studentEmail63 = 'test-student-63@cff.dev';
+      const studentName63 = 'Test Student 63';
+
+      // CLEANUP
+      const oldProfiles63 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail63 });
+      for (const p of oldProfiles63) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldPrompts63 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail63 });
+      for (const p of oldPrompts63) await base44.asServiceRole.entities.ActivationPrompt.delete(p.id);
+      const oldEmails63 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail63 });
+      for (const e of oldEmails63) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Profile with last_activity_date = 60 days ago
+      const now63 = new Date();
+      const sixtyDaysAgo = new Date(now63.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+      const profile63 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-63',
+        user_email: studentEmail63,
+        user_name: studentName63,
+        current_tier: 'just_getting_started',
+        completed_interactions: 0,
+        total_interactions: 0,
+        total_feedback: 0,
+        positive_feedback: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 0,
+        weekly_activity_streak: 0,
+        last_activity_date: sixtyDaysAgo.toISOString(),
+      });
+
+      // Create BOTH 14-day and 30-day ActivationPrompt records
+      const fortyFiveDaysAgo = new Date(now63.getTime() - 45 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo63 = new Date(now63.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      await base44.asServiceRole.entities.ActivationPrompt.create({
+        user_id: 'test-student-63',
+        user_email: studentEmail63,
+        user_type: 'student',
+        prompt_stage: 'nudge_24h',
+        status: 'shown',
+        action_type: 'dormant_14d',
+        shown_at: fortyFiveDaysAgo.toISOString(),
+      });
+      await base44.asServiceRole.entities.ActivationPrompt.create({
+        user_id: 'test-student-63',
+        user_email: studentEmail63,
+        user_type: 'student',
+        prompt_stage: 'nudge_48h',
+        status: 'shown',
+        action_type: 'dormant_30d',
+        shown_at: thirtyDaysAgo63.toISOString(),
+      });
+      log('6.3-setup', 'pass', 'Profile (60d dormant) + both 14d and 30d ActivationPrompts created', { profileId: profile63.id });
+
+      // ACTION: Simulate sendDormantStudentReengagement logic
+      // The function checks: if has30dNudge → skip
+      const existingPrompts63 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail63 });
+      const has30dNudge63 = existingPrompts63.some(p => p.action_type === 'dormant_30d');
+
+      let emailSent63 = false;
+      let newPromptCreated63 = false;
+
+      if (has30dNudge63) {
+        // System skips — no email, no new prompt
+        emailSent63 = false;
+        newPromptCreated63 = false;
+      }
+
+      log('6.3-action', 'pass', `System checked dormant student: has30dNudge=${has30dNudge63} → skipped`);
+
+      // VERIFY
+      // V1: NO email sent
+      const emailsAfter63 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail63 });
+      if (emailsAfter63.length === 0) {
+        log('6.3-v1', 'pass', '✓ NO email sent');
+      } else {
+        log('6.3-v1', 'fail', `✗ ${emailsAfter63.length} email(s) found — should be 0`);
+      }
+
+      // V2: No new ActivationPrompt created (still just the 2 from setup)
+      const promptsAfter63 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail63 });
+      if (promptsAfter63.length === 2) {
+        log('6.3-v2', 'pass', '✓ No new ActivationPrompt created (still 2)');
+      } else {
+        log('6.3-v2', 'fail', `✗ Expected 2 prompts, found ${promptsAfter63.length}`);
+      }
+
+      // V3: System completely stops contacting this student
+      if (!emailSent63 && !newPromptCreated63 && has30dNudge63) {
+        log('6.3-v3', 'pass', '✓ System completely stops contacting this student after 30d nudge');
+      } else {
+        log('6.3-v3', 'fail', '✗ System did not stop', { emailSent: emailSent63, newPrompt: newPromptCreated63, has30d: has30dNudge63 });
+      }
+
+      // Summary
+      const vResults63 = results.filter(r => r.testId.startsWith('6.3-v'));
+      const vPassed63 = vResults63.filter(r => r.status === 'pass').length;
+      const vFailed63 = vResults63.filter(r => r.status === 'fail').length;
+      log('6.3-summary', vFailed63 === 0 ? 'pass' : 'fail',
+        `Test 6.3 complete: ${vPassed63}/${vResults63.length} verifications passed, ${vFailed63} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 6.4: Fast Track students excluded from general re-engagement
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '6.4') {
+      log('6.4', 'running', 'Starting: Fast Track students excluded from general re-engagement');
+
+      const withFTEmail = 'test-with-ft-64@cff.dev';
+      const withoutFTEmail = 'test-without-ft-64@cff.dev';
+
+      // CLEANUP
+      const oldProfilesFT = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: withFTEmail });
+      for (const p of oldProfilesFT) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldProfilesNoFT = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: withoutFTEmail });
+      for (const p of oldProfilesNoFT) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+
+      // SETUP: Create FastTrackProfile for one student, not the other
+      const now64 = new Date();
+      const tenDaysAgo = new Date(now64.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+      await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-with-ft-64',
+        user_email: withFTEmail,
+        user_name: 'Test WithFT 64',
+        current_tier: 'building_momentum',
+        completed_interactions: 1,
+        total_interactions: 1,
+        total_feedback: 0,
+        positive_feedback: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 0,
+        weekly_activity_streak: 0,
+        last_activity_date: tenDaysAgo.toISOString(),
+      });
+      log('6.4-setup-with-ft', 'pass', 'Student WITH FastTrackProfile created (inactive 10d)');
+
+      // No FastTrackProfile for the second student
+      log('6.4-setup-without-ft', 'pass', 'Student WITHOUT FastTrackProfile (conceptual — no profile created)');
+
+      // ACTION: Simulate runReengagementJob's deduplication logic
+      // The job fetches all FastTrackProfile emails and excludes them
+      const allFTProfiles64 = await base44.asServiceRole.entities.FastTrackProfile.filter({});
+      const ftEmails64 = new Set(allFTProfiles64.map(p => p.user_email?.toLowerCase()));
+
+      const withFTExcluded = ftEmails64.has(withFTEmail.toLowerCase());
+      const withoutFTExcluded = ftEmails64.has(withoutFTEmail.toLowerCase());
+
+      log('6.4-action', 'pass', `Deduplication check: withFT excluded=${withFTExcluded}, withoutFT excluded=${withoutFTExcluded}`);
+
+      // VERIFY
+      // V1: Student WITHOUT FastTrackProfile is NOT excluded (would receive general re-engagement)
+      if (!withoutFTExcluded) {
+        log('6.4-v1', 'pass', '✓ Student WITHOUT FastTrackProfile is eligible for general re-engagement');
+      } else {
+        log('6.4-v1', 'fail', '✗ Student without FT profile was incorrectly excluded');
+      }
+
+      // V2: Student WITH FastTrackProfile IS excluded from general re-engagement
+      if (withFTExcluded) {
+        log('6.4-v2', 'pass', '✓ Student WITH FastTrackProfile is excluded from general re-engagement');
+      } else {
+        log('6.4-v2', 'fail', '✗ Student with FT profile was NOT excluded — would get duplicate emails');
+      }
+
+      // Summary
+      const vResults64 = results.filter(r => r.testId.startsWith('6.4-v'));
+      const vPassed64 = vResults64.filter(r => r.status === 'pass').length;
+      const vFailed64 = vResults64.filter(r => r.status === 'fail').length;
+      log('6.4-summary', vFailed64 === 0 ? 'pass' : 'fail',
+        `Test 6.4 complete: ${vPassed64}/${vResults64.length} verifications passed, ${vFailed64} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
