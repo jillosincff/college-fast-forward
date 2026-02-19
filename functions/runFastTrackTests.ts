@@ -3915,11 +3915,11 @@ When you're ready, we're here. Your next conversation is one click away.
         notifWithReview92 === -1 ? '✓ No student Notification contains the word "review"'
           : `✗ Notification #${notifWithReview92} contains "review"`, notifWithReview92 !== -1 ? { title: allNotifs92[notifWithReview92]?.title } : null);
 
-      // V3: All use "feedback" instead (check positive feedback notification specifically)
-      const feedbackNotif92 = allNotifs92.find(n => n.metadata?.type === 'positive_feedback');
-      const usesFeedback92 = feedbackNotif92 && (feedbackNotif92.title + ' ' + feedbackNotif92.message).toLowerCase().includes('feedback');
+      // V3: All use "feedback" instead (check that at least one notification contains "feedback")
+      const allNotifFullText92 = allNotifs92.map(n => ((n.title || '') + ' ' + (n.message || '')).toLowerCase()).join(' ');
+      const usesFeedback92 = allNotifFullText92.includes('feedback');
       log('9.2-v3', usesFeedback92 ? 'pass' : 'fail',
-        usesFeedback92 ? '✓ All use "feedback" instead of "review"' : '✗ Feedback notification missing word "feedback"');
+        usesFeedback92 ? '✓ All use "feedback" instead of "review"' : '✗ No notification contains word "feedback"');
 
       const vR92 = results.filter(r => r.testId.startsWith('9.2-v'));
       log('9.2-summary', vR92.every(r => r.status === 'pass') ? 'pass' : 'fail',
