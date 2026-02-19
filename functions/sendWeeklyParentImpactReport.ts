@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
         if (!parent.email) continue;
 
         // Fetch all reviews by this parent
-        const allReviews = await base44.asServiceRole.entities.InteractionReview.filter({
+        const allReviews = await base44.asServiceRole.entities.InteractionFeedback.filter({
           reviewer_email: parent.email
         });
 
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
         // Find a recent positive feedback quote
         let feedbackQuote = '';
         const visiblePositiveReviews = allReviews
-          .filter(r => r.review_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
+          .filter(r => r.feedback_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
           .sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
 
         if (visiblePositiveReviews.length > 0) {

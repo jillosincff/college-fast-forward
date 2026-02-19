@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
             student_email: profile.user_email,
             status: 'completed'
           }),
-          base44.asServiceRole.entities.InteractionReview.filter({
+          base44.asServiceRole.entities.InteractionFeedback.filter({
             student_email: profile.user_email
           }),
           base44.asServiceRole.entities.Message.filter({
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         const newInteractions = weekInteractions.length;
         const newReviews = weekReviews.length;
         const messagesSent = weekMessages.length;
-        const positiveWeekReviews = weekReviews.filter(r => r.overall_impression === 'exceptional' || r.overall_impression === 'strong');
+        const positiveWeekReviews = weekReviews.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
 
         // STEP 2 — Urgency tier
         const urgencyTier = calculateUrgencyTier(profile, now);
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
         // STEP 3 — Cold app equivalent (cumulative)
         const allInteractions = (interactions || []).filter(i => i.status === 'completed');
-        const allPositiveReviews = (reviews || []).filter(r => r.overall_impression === 'exceptional' || r.overall_impression === 'strong');
+        const allPositiveReviews = (reviews || []).filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
         const intros = await base44.asServiceRole.entities.Intro.filter({ student_email: profile.user_email }).catch(() => []);
         const connections = await base44.asServiceRole.entities.Connection.filter({ student_email: profile.user_email }).catch(() => []);
 
