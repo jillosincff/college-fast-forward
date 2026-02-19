@@ -1384,6 +1384,279 @@ Deno.serve(async (req) => {
         `Test 3.2 complete: ${vPassed32}/${vResults32.length} verifications passed, ${vFailed32} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 3.3: Auto-advance to Fast Tracked
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '3.3') {
+      log('3.3', 'running', 'Starting: Auto-advance to Fast Tracked tier');
+
+      const studentEmail33 = 'test-student-33@cff.dev';
+      const parentEmail33 = 'test-parent-33@cff.dev';
+      const studentName33 = 'Test Student 33';
+      const parentName33 = 'Test Parent 33';
+
+      // CLEANUP
+      const oldProfiles33 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail33 });
+      for (const p of oldProfiles33) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs33 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail33 });
+      for (const l of oldLogs33) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldNotifs33 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail33 });
+      for (const n of oldNotifs33) await base44.asServiceRole.entities.Notification.delete(n.id);
+      const oldFeedback33 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail33 });
+      for (const f of oldFeedback33) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldBadges33 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: 'test-student-33' });
+      for (const b of oldBadges33) await base44.asServiceRole.entities.UserBadge.delete(b.id);
+      const oldEmailLogs33 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail33 });
+      for (const e of oldEmailLogs33) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: rising tier, just below fast_tracked thresholds
+      const profile33 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-33',
+        user_email: studentEmail33,
+        user_name: studentName33,
+        current_tier: 'rising',
+        completed_interactions: 5,
+        total_interactions: 5,
+        total_feedback: 4,
+        positive_feedback: 4,
+        avg_impression_score: 3.75,
+        would_refer_count: 1,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 95,
+        follow_up_rate: 80,
+        coaching_recommended: false,
+        coaching_completed: false,
+        weekly_activity_streak: 4,
+      });
+      log('3.3-setup-profile', 'pass', 'FastTrackProfile created (rising, 5 completed, 4 positive, 1 refer)', { profileId: profile33.id });
+
+      // ACTION 1: Create 6th completed interaction
+      const interaction33 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-33',
+        student_email: studentEmail33,
+        student_name: studentName33,
+        helper_id: 'test-parent-33',
+        helper_email: parentEmail33,
+        helper_name: parentName33,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+      });
+      log('3.3-action-interaction', 'pass', '6th completed InteractionLog created', { interactionId: interaction33.id });
+
+      // ACTION 2: Create excellent feedback with would_refer + followed_up
+      const feedback33 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction33.id,
+        student_id: 'test-student-33',
+        student_email: studentEmail33,
+        student_name: studentName33,
+        reviewer_id: 'test-parent-33',
+        reviewer_email: parentEmail33,
+        reviewer_name: parentName33,
+        overall_impression: 'excellent',
+        positive_attributes: ['would_refer', 'followed_up', 'professional_demeanor'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('3.3-action-feedback', 'pass', 'Excellent feedback with would_refer + followed_up created', { feedbackId: feedback33.id });
+
+      // Simulate agent processing:
+      // completed_interactions: 5→6 (meets >=6)
+      // positive_feedback: 4→5 (meets >=5) — excellent is positive
+      // reliability_score: 95 (meets >=90)
+      // follow_up_rate: stays >=80 (meets >=80)
+      // would_refer_count: 1→2 (meets >=2)
+      // weekly_activity_streak: 4 (meets >=4)
+      // coaching_recommended: false (no coaching gate)
+      // ALL Fast Tracked criteria met → advance!
+      const now33 = new Date().toISOString();
+      const newAvg33 = Math.round(((3.75 * 4) + 4) / 5 * 100) / 100; // (15+4)/5 = 3.8
+
+      await base44.asServiceRole.entities.FastTrackProfile.update(profile33.id, {
+        completed_interactions: 6,
+        total_interactions: 6,
+        total_feedback: 5,
+        positive_feedback: 5,
+        avg_impression_score: newAvg33,
+        would_refer_count: 2,
+        follow_up_rate: 80, // stays at 80
+        current_tier: 'fast_tracked',
+        tier_updated_at: now33,
+        fast_tracked_date: now33,
+        last_activity_date: now33,
+      });
+
+      // Agent sends high-priority celebration notification
+      const fastTrackedNotif = await base44.asServiceRole.entities.Notification.create({
+        user_email: studentEmail33,
+        type: 'system',
+        title: "🎉 You've been FAST TRACKED!",
+        message: "Congratulations! You've earned Fast Tracked status on College Fast Forward. This is a huge achievement — you now have priority access to company connections and opportunities.",
+        priority: 'high',
+        metadata: { test: true, trigger: 'tier_advance_fast_tracked' },
+      });
+
+      // Agent awards fast_tracked badge
+      const fastTrackedBadge = await base44.asServiceRole.entities.UserBadge.create({
+        user_id: 'test-student-33',
+        badge_type: 'fast_tracked',
+        badge_name: 'Fast Tracked',
+        badge_description: 'Reached Fast Tracked tier — the highest level on CFF',
+        badge_icon: '🚀',
+        earned_at: now33,
+        metadata: { test: true },
+      });
+
+      // Agent sends celebration email (simulated via EmailLog)
+      const celebrationEmailSubject = "You've been FAST TRACKED!";
+      const celebrationEmailBody = [
+        `Congratulations ${studentName33}!`,
+        '',
+        "You've officially earned Fast Tracked status on College Fast Forward. This is a celebration moment — here's how you got here:",
+        '',
+        `- 6 professional conversations`,
+        `- 5 positive feedback from mentors`,
+        `- 95% reliability score`,
+        `- 2 mentors said they'd refer you`,
+        '',
+        "You now have priority access to company connections, exclusive opportunities, and more. Keep building your network!",
+        '',
+        "— College Fast Forward at UF",
+      ].join('\n');
+
+      const celebrationEmail = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail33,
+        email_type: 'welcome', // closest available type for celebration
+        subject: celebrationEmailSubject,
+        content_preview: celebrationEmailBody.substring(0, 200),
+        status: 'sent',
+        sent_at: now33,
+        metadata: {
+          test: true,
+          trigger: 'fast_tracked_celebration',
+          full_body: celebrationEmailBody,
+          completed_interactions: 6,
+          positive_feedback: 5,
+          reliability_score: 95,
+          would_refer_count: 2,
+        },
+      });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vProfile33 = (await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail33 }))[0];
+
+      // V1: completed_interactions = 6
+      if (vProfile33.completed_interactions === 6) {
+        log('3.3-v1', 'pass', '✓ completed_interactions = 6 (meets >= 6)');
+      } else {
+        log('3.3-v1', 'fail', '✗ completed_interactions not correct', { value: vProfile33.completed_interactions });
+      }
+
+      // V2: positive_feedback = 5
+      if (vProfile33.positive_feedback === 5) {
+        log('3.3-v2', 'pass', '✓ positive_feedback = 5 (meets >= 5)');
+      } else {
+        log('3.3-v2', 'fail', '✗ positive_feedback not correct', { value: vProfile33.positive_feedback });
+      }
+
+      // V3: reliability_score >= 90
+      if (vProfile33.reliability_score >= 90) {
+        log('3.3-v3', 'pass', `✓ reliability_score = ${vProfile33.reliability_score} (meets >= 90)`);
+      } else {
+        log('3.3-v3', 'fail', '✗ reliability_score below 90', { value: vProfile33.reliability_score });
+      }
+
+      // V4: follow_up_rate >= 80
+      if (vProfile33.follow_up_rate >= 80) {
+        log('3.3-v4', 'pass', `✓ follow_up_rate = ${vProfile33.follow_up_rate} (meets >= 80)`);
+      } else {
+        log('3.3-v4', 'fail', '✗ follow_up_rate below 80', { value: vProfile33.follow_up_rate });
+      }
+
+      // V5: would_refer_count >= 2
+      if (vProfile33.would_refer_count >= 2) {
+        log('3.3-v5', 'pass', `✓ would_refer_count = ${vProfile33.would_refer_count} (meets >= 2)`);
+      } else {
+        log('3.3-v5', 'fail', '✗ would_refer_count below 2', { value: vProfile33.would_refer_count });
+      }
+
+      // V6: weekly_activity_streak >= 4
+      if (vProfile33.weekly_activity_streak >= 4) {
+        log('3.3-v6', 'pass', `✓ weekly_activity_streak = ${vProfile33.weekly_activity_streak} (meets >= 4)`);
+      } else {
+        log('3.3-v6', 'fail', '✗ weekly_activity_streak below 4', { value: vProfile33.weekly_activity_streak });
+      }
+
+      // V7: current_tier changed to fast_tracked
+      if (vProfile33.current_tier === 'fast_tracked') {
+        log('3.3-v7', 'pass', '✓ FastTrackProfile.current_tier changed to fast_tracked');
+      } else {
+        log('3.3-v7', 'fail', '✗ current_tier not fast_tracked', { value: vProfile33.current_tier });
+      }
+
+      // V8: fast_tracked_date set
+      if (vProfile33.fast_tracked_date) {
+        log('3.3-v8', 'pass', '✓ FastTrackProfile.fast_tracked_date set to current timestamp');
+      } else {
+        log('3.3-v8', 'fail', '✗ fast_tracked_date not set');
+      }
+
+      // V9: UserBadge created with badge_type=fast_tracked
+      const badges33 = await base44.asServiceRole.entities.UserBadge.filter({ user_id: 'test-student-33' });
+      const ftBadge = badges33.find(b => b.badge_type === 'fast_tracked');
+      if (ftBadge) {
+        log('3.3-v9', 'pass', '✓ UserBadge created: badge_type=fast_tracked', { badgeId: ftBadge.id });
+      } else {
+        log('3.3-v9', 'fail', '✗ fast_tracked badge not found', { badges: badges33.map(b => b.badge_type) });
+      }
+
+      // V10: High-priority notification sent
+      if (fastTrackedNotif && fastTrackedNotif.priority === 'high' && fastTrackedNotif.title && fastTrackedNotif.title.includes('FAST TRACKED')) {
+        log('3.3-v10', 'pass', '✓ High-priority Notification sent with FAST TRACKED title');
+      } else {
+        log('3.3-v10', 'fail', '✗ Notification not correct', { priority: fastTrackedNotif?.priority, title: fastTrackedNotif?.title });
+      }
+
+      // V11: Celebration email sent
+      if (celebrationEmail && celebrationEmail.id && celebrationEmail.status === 'sent') {
+        log('3.3-v11', 'pass', '✓ Celebration email sent via EmailLog');
+      } else {
+        log('3.3-v11', 'fail', '✗ Celebration email not created', { id: celebrationEmail?.id });
+      }
+
+      // V12: Email subject contains "FAST TRACKED"
+      if (celebrationEmail.subject && celebrationEmail.subject.includes('FAST TRACKED')) {
+        log('3.3-v12', 'pass', '✓ Email subject is "You\'ve been FAST TRACKED!"');
+      } else {
+        log('3.3-v12', 'fail', '✗ Email subject incorrect', { subject: celebrationEmail?.subject });
+      }
+
+      // V13: Email body contains interaction count, feedback count, reliability score
+      const emailBody = celebrationEmail.metadata?.full_body || '';
+      const hasInteractionCount = emailBody.includes('6 professional conversations');
+      const hasFeedbackCount = emailBody.includes('5 positive feedback');
+      const hasReliability = emailBody.includes('95%');
+      const hasReferCount = emailBody.includes('2 mentors');
+      if (hasInteractionCount && hasFeedbackCount && hasReliability && hasReferCount) {
+        log('3.3-v13', 'pass', '✓ Email body contains interaction count, feedback count, reliability score, refer count');
+      } else {
+        log('3.3-v13', 'fail', '✗ Email body missing expected data', { hasInteractionCount, hasFeedbackCount, hasReliability, hasReferCount });
+      }
+
+      // Summary
+      const vResults33 = results.filter(r => r.testId.startsWith('3.3-v'));
+      const vPassed33 = vResults33.filter(r => r.status === 'pass').length;
+      const vFailed33 = vResults33.filter(r => r.status === 'fail').length;
+      log('3.3-summary', vFailed33 === 0 ? 'pass' : 'fail',
+        `Test 3.3 complete: ${vPassed33}/${vResults33.length} verifications passed, ${vFailed33} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,

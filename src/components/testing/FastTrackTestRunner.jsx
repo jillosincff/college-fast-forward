@@ -139,6 +139,13 @@ export default function FastTrackTestRunner() {
           >
             <Play className="w-4 h-4 mr-2" /> 3.2: → Rising
           </Button>
+          <Button
+            onClick={() => runTests('3.3')}
+            disabled={isRunning}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Play className="w-4 h-4 mr-2" /> 3.3: → Fast Tracked
+          </Button>
 
           <Button
             onClick={cleanupTestData}
