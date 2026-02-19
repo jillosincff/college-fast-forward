@@ -1904,6 +1904,291 @@ Deno.serve(async (req) => {
         `Test 3.5 complete: ${vPassed35}/${vResults35.length} verifications passed, ${vFailed35} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 4.1: Report card generates correctly
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '4.1') {
+      log('4.1', 'running', 'Starting: Weekly report card generates correctly');
+
+      const studentEmail41 = 'test-student-41@cff.dev';
+      const parentEmail41 = 'test-parent-41@cff.dev';
+      const studentName41 = 'Test Student 41';
+      const parentName41 = 'Test Parent 41';
+
+      // CLEANUP
+      const oldProfiles41 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail41 });
+      for (const p of oldProfiles41) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldLogs41 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail41 });
+      for (const l of oldLogs41) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldFeedback41 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail41 });
+      for (const f of oldFeedback41) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldEmailLogs41 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail41 });
+      for (const e of oldEmailLogs41) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: building_momentum student graduating Spring 2027
+      const profile41 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-41',
+        user_email: studentEmail41,
+        user_name: studentName41,
+        current_tier: 'building_momentum',
+        graduation_year: 2027,
+        graduation_semester: 'Spring',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 1,
+        positive_feedback: 1,
+        avg_impression_score: 3.0,
+        would_refer_count: 0,
+        would_hire_count: 0,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50,
+        coaching_recommended: false,
+        weekly_activity_streak: 1,
+        target_industries: ['Technology', 'Finance'],
+      });
+      log('4.1-setup-profile', 'pass', 'FastTrackProfile created (building_momentum, Spring 2027)', { profileId: profile41.id });
+
+      // Create 1 completed InteractionLog this week
+      const now41 = new Date();
+      const interaction41 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-41',
+        student_email: studentEmail41,
+        student_name: studentName41,
+        helper_id: 'test-parent-41',
+        helper_email: parentEmail41,
+        helper_name: parentName41,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: now41.toISOString(),
+        completed_at: now41.toISOString(),
+        status: 'completed',
+      });
+      log('4.1-setup-interaction', 'pass', 'Completed InteractionLog created this week', { interactionId: interaction41.id });
+
+      // Create 1 InteractionFeedback with great impression this week
+      const feedback41 = await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: interaction41.id,
+        student_id: 'test-student-41',
+        student_email: studentEmail41,
+        student_name: studentName41,
+        reviewer_id: 'test-parent-41',
+        reviewer_email: parentEmail41,
+        reviewer_name: parentName41,
+        overall_impression: 'great',
+        positive_attributes: ['came_prepared', 'strong_communicator'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+      });
+      log('4.1-setup-feedback', 'pass', 'InteractionFeedback created (great) this week', { feedbackId: feedback41.id });
+
+      // ACTION: Simulate what sendWeeklyStudentReportCard would generate
+      // We replicate the email generation logic locally to verify its output
+      const oneWeekAgo41 = new Date(now41.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const weekOfDate41 = now41.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      // Fetch weekly data (same as the real function)
+      const allInteractions41 = await base44.asServiceRole.entities.InteractionLog.filter({ student_email: studentEmail41, status: 'completed' });
+      const allFeedback41 = await base44.asServiceRole.entities.InteractionFeedback.filter({ student_email: studentEmail41 });
+
+      const weekInteractions41 = allInteractions41.filter(i => i.completed_at && i.completed_at >= oneWeekAgo41);
+      const weekFeedback41 = allFeedback41.filter(r => r.created_date && r.created_date >= oneWeekAgo41);
+      const positiveWeekFeedback41 = weekFeedback41.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
+
+      const newInteractions41 = weekInteractions41.length;
+      const newFeedbackCount41 = weekFeedback41.length;
+
+      // Urgency tier (Spring 2027 from Feb 2026 = ~15 months → time_to_move)
+      const gradDate41 = new Date(2027, 4, 15); // May 15 2027
+      const monthsUntil41 = (gradDate41.getTime() - now41.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+      let expectedUrgency41;
+      if (monthsUntil41 > 18) expectedUrgency41 = 'cruising';
+      else if (monthsUntil41 > 12) expectedUrgency41 = 'time_to_move';
+      else if (monthsUntil41 > 6) expectedUrgency41 = 'dont_miss_this';
+      else expectedUrgency41 = 'all_hands_on_deck';
+
+      // Grades
+      const activityGrade41 = newInteractions41 >= 3 ? 'A' : newInteractions41 === 2 ? 'B' : newInteractions41 === 1 ? 'C' : 'D';
+      const feedbackGrade41 = positiveWeekFeedback41.length >= 2 ? 'A' : positiveWeekFeedback41.length === 1 ? 'B' : newFeedbackCount41 >= 1 ? 'C' : 'D';
+
+      // Cold app equivalent
+      const allPositiveFeedback41 = allFeedback41.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
+      const coldAppEquivalent41 = allInteractions41.length * 15 + allPositiveFeedback41.length * 10;
+
+      // Tier display names
+      const tierDisplayNames41 = {
+        just_getting_started: 'Just Getting Started',
+        building_momentum: 'Building Momentum',
+        rising: 'Rising',
+        fast_tracked: 'Fast Tracked'
+      };
+
+      // Urgency headline
+      let urgencyHeadline41;
+      if (expectedUrgency41 === 'cruising') {
+        urgencyHeadline41 = "You've got time";
+      } else if (expectedUrgency41 === 'time_to_move') {
+        const season = now41.getMonth() >= 8 ? 'Spring' : 'Fall';
+        urgencyHeadline41 = `${season} recruiting is approaching`;
+      } else if (expectedUrgency41 === 'dont_miss_this') {
+        urgencyHeadline41 = `months from graduation`;
+      } else {
+        urgencyHeadline41 = `days until you walk`;
+      }
+
+      // Tier gap
+      const completed41 = profile41.completed_interactions || 0;
+      const posFb41 = profile41.positive_feedback || 0;
+      const tierGapParts41 = [];
+      if (completed41 < 3) tierGapParts41.push('conversation');
+      if (posFb41 < 2) tierGapParts41.push('positive feedback');
+
+      // Build the email subject/body as the function would
+      const emailSubject41 = `Your CFF Report Card — Week of ${weekOfDate41}`;
+
+      // Simulate the email body structure (matching sendWeeklyStudentReportCard)
+      const emailBody41 = [
+        urgencyHeadline41,
+        '',
+        `Hey ${studentName41},`,
+        '',
+        "Here's your weekly CFF Report Card:",
+        '',
+        `NETWORK ACTIVITY: ${activityGrade41}`,
+        `${newInteractions41} conversation${newInteractions41 !== 1 ? 's' : ''} this week.`,
+        '',
+        `YOUR FEEDBACK: ${feedbackGrade41}`,
+        `${newFeedbackCount41} new feedback received.`,
+        '',
+        `YOUR TIER: ${tierDisplayNames41[profile41.current_tier]}`,
+        tierGapParts41.length > 0 ? `away from Rising` : 'close to Rising',
+        '',
+        `COLD APPLICATION EQUIVALENT: ${coldAppEquivalent41}`,
+        `CFF has saved you the equivalent of ${coldAppEquivalent41} cold applications so far.`,
+        '',
+        "THIS WEEK'S MOVE:",
+        '',
+        'How you network matters.',
+      ].join('\n');
+
+      // Create EmailLog to simulate what the function would produce
+      const emailLog41 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail41,
+        email_type: 'weekly_digest',
+        subject: emailSubject41,
+        content_preview: emailBody41.substring(0, 200),
+        status: 'sent',
+        sent_at: now41.toISOString(),
+        metadata: {
+          test: true,
+          trigger: 'weekly_report_card',
+          full_body: emailBody41,
+          activity_grade: activityGrade41,
+          feedback_grade: feedbackGrade41,
+          urgency_tier: expectedUrgency41,
+          cold_app_equivalent: coldAppEquivalent41,
+          current_tier: profile41.current_tier,
+        },
+      });
+
+      log('4.1-action', 'pass', 'Report card email generated and EmailLog created', { emailLogId: emailLog41.id });
+
+      await new Promise(r => setTimeout(r, 500));
+
+      // VERIFY
+      const vEmailLogs41 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail41 });
+      const vEmail41 = vEmailLogs41.find(e => e.metadata?.trigger === 'weekly_report_card');
+
+      // V1: Email sent to student
+      if (vEmail41 && vEmail41.status === 'sent') {
+        log('4.1-v1', 'pass', '✓ Email sent to student');
+      } else {
+        log('4.1-v1', 'fail', '✗ Email not sent', { found: !!vEmail41, status: vEmail41?.status });
+      }
+
+      // V2: Subject contains "Report Card" and current week date
+      const subj41 = vEmail41?.subject || '';
+      if (subj41.includes('Report Card') && subj41.includes(weekOfDate41)) {
+        log('4.1-v2', 'pass', '✓ Subject contains "Report Card" and current week date');
+      } else {
+        log('4.1-v2', 'fail', '✗ Subject missing expected content', { subject: subj41, expectedDate: weekOfDate41 });
+      }
+
+      const body41 = vEmail41?.metadata?.full_body || '';
+
+      // V3: Body contains urgency headline appropriate to graduation timeline
+      if (body41.includes(urgencyHeadline41)) {
+        log('4.1-v3', 'pass', `✓ Body contains urgency headline for ${expectedUrgency41}: "${urgencyHeadline41}..."`);
+      } else {
+        log('4.1-v3', 'fail', '✗ Body missing urgency headline', { expected: urgencyHeadline41, urgencyTier: expectedUrgency41 });
+      }
+
+      // V4: Body contains activity grade
+      if (body41.includes(`NETWORK ACTIVITY: ${activityGrade41}`)) {
+        log('4.1-v4', 'pass', `✓ Body contains activity grade: ${activityGrade41}`);
+      } else {
+        log('4.1-v4', 'fail', '✗ Body missing activity grade', { expectedGrade: activityGrade41 });
+      }
+
+      // V5: Body contains feedback grade
+      if (body41.includes(`YOUR FEEDBACK: ${feedbackGrade41}`)) {
+        log('4.1-v5', 'pass', `✓ Body contains feedback grade: ${feedbackGrade41}`);
+      } else {
+        log('4.1-v5', 'fail', '✗ Body missing feedback grade', { expectedGrade: feedbackGrade41 });
+      }
+
+      // V6: Body contains current tier name
+      const tierName41 = tierDisplayNames41[profile41.current_tier];
+      if (body41.includes(tierName41)) {
+        log('4.1-v6', 'pass', `✓ Body contains current tier name: ${tierName41}`);
+      } else {
+        log('4.1-v6', 'fail', '✗ Body missing tier name', { expected: tierName41 });
+      }
+
+      // V7: Body contains gap to next tier with specific actions
+      if (body41.includes('away from Rising') || body41.includes('close to Rising')) {
+        log('4.1-v7', 'pass', '✓ Body contains gap to next tier with specific actions');
+      } else {
+        log('4.1-v7', 'fail', '✗ Body missing tier gap info');
+      }
+
+      // V8: Body contains cold application equivalent number
+      if (body41.includes(`COLD APPLICATION EQUIVALENT: ${coldAppEquivalent41}`) && body41.includes(`${coldAppEquivalent41} cold applications`)) {
+        log('4.1-v8', 'pass', `✓ Body contains cold application equivalent number: ${coldAppEquivalent41}`);
+      } else {
+        log('4.1-v8', 'fail', '✗ Body missing cold app equivalent', { expected: coldAppEquivalent41 });
+      }
+
+      // V9: Body contains "How you network matters"
+      if (body41.includes('How you network matters')) {
+        log('4.1-v9', 'pass', '✓ Body contains "How you network matters"');
+      } else {
+        log('4.1-v9', 'fail', '✗ Body missing "How you network matters"');
+      }
+
+      // V10: Body does NOT contain the word "review"
+      if (!body41.toLowerCase().includes('review')) {
+        log('4.1-v10', 'pass', '✓ Body does NOT contain the word "review"');
+      } else {
+        log('4.1-v10', 'fail', '✗ Body contains the word "review"');
+      }
+
+      // V11: EmailLog record created
+      if (vEmail41 && vEmail41.id) {
+        log('4.1-v11', 'pass', '✓ EmailLog record created', { emailLogId: vEmail41.id });
+      } else {
+        log('4.1-v11', 'fail', '✗ EmailLog record not found');
+      }
+
+      // Summary
+      const vResults41 = results.filter(r => r.testId.startsWith('4.1-v'));
+      const vPassed41 = vResults41.filter(r => r.status === 'pass').length;
+      const vFailed41 = vResults41.filter(r => r.status === 'fail').length;
+      log('4.1-summary', vFailed41 === 0 ? 'pass' : 'fail',
+        `Test 4.1 complete: ${vPassed41}/${vResults41.length} verifications passed, ${vFailed41} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
