@@ -295,13 +295,12 @@ Deno.serve(async (req) => {
       }
 
       // V3: Notification created with gentle message
-      // We just created the notification above, so verify it directly
-      const gentleNotif = noShowNotif;
-      if (gentleNotif) {
+      if (noShowNotif && noShowNotif.id && noShowNotif.message && noShowNotif.message.includes('Life happens')) {
         log('1.2-v3', 'pass', '✓ Notification created for student with gentle "life happens" message');
       } else {
-        log('1.2-v3', 'fail', '✗ Gentle no-show Notification not found', { notifCount: notifs12.length });
+        log('1.2-v3', 'fail', '✗ Gentle no-show Notification not found or missing "Life happens"', { notifId: noShowNotif?.id, message: noShowNotif?.message });
       }
+      const gentleNotif = noShowNotif;
 
       // V4: Notification does NOT contain shaming language
       const shamingWords = ['shame', 'disappointed', 'unacceptable', 'penalty', 'punish', 'failing', 'falling behind', 'missing out'];
@@ -427,12 +426,11 @@ Deno.serve(async (req) => {
       }
 
       // V3: Notification mentions "free complimentary 30-minute session"
-      // We just created the notification above, so verify it directly
       const coachNotif = coachingNotif;
-      if (coachNotif) {
+      if (coachNotif && coachNotif.id && coachNotif.message && coachNotif.message.includes('free complimentary 30-minute')) {
         log('1.3-v3', 'pass', '✓ Notification mentions "free complimentary 30-minute session"');
       } else {
-        log('1.3-v3', 'fail', '✗ Coaching notification not found with expected phrasing', { notifCount: notifs13.length, messages: notifs13.map(n => n.message?.substring(0, 50)) });
+        log('1.3-v3', 'fail', '✗ Coaching notification not found with expected phrasing', { notifId: coachNotif?.id, message: coachNotif?.message });
       }
 
       // V4: Notification does NOT use "required" or "mandatory"
