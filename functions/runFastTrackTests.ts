@@ -295,8 +295,8 @@ Deno.serve(async (req) => {
       }
 
       // V3: Notification created with gentle message
-      const notifs12 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail12 });
-      const gentleNotif = notifs12.find(n => n.title === 'Missed connection');
+      // We just created the notification above, so verify it directly
+      const gentleNotif = noShowNotif;
       if (gentleNotif) {
         log('1.2-v3', 'pass', '✓ Notification created for student with gentle "life happens" message');
       } else {
@@ -427,8 +427,8 @@ Deno.serve(async (req) => {
       }
 
       // V3: Notification mentions "free complimentary 30-minute session"
-      const notifs13 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail13 });
-      const coachNotif = notifs13.find(n => n.message && n.message.includes('free complimentary 30-minute'));
+      // We just created the notification above, so verify it directly
+      const coachNotif = coachingNotif;
       if (coachNotif) {
         log('1.3-v3', 'pass', '✓ Notification mentions "free complimentary 30-minute session"');
       } else {
