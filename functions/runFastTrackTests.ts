@@ -2402,14 +2402,20 @@ Deno.serve(async (req) => {
       }
       log('4.3-setup-feedback', 'pass', '4 feedback created (3 positive, 1 non-positive)');
 
-      // Create 2 Intro records
+      // Create 2 Intro records (Intro entity requires many fields)
       for (let i = 0; i < 2; i++) {
         await base44.asServiceRole.entities.Intro.create({
+          request_id: `test-request-43-${i}`,
+          student_id: 'test-student-43',
+          helper_user_id: 'test-parent-43',
+          recipient_name: 'Test Recipient',
+          recipient_email: `test-recipient-43-${i}@cff.dev`,
+          ask_type: 'warm_intro',
+          status: 'sent',
           student_email: studentEmail43,
           student_name: studentName43,
           helper_email: parentEmail43,
           helper_name: 'Test Parent 43',
-          status: 'completed',
         });
       }
       log('4.3-setup-intros', 'pass', '2 Intro records created');
@@ -2556,7 +2562,9 @@ Deno.serve(async (req) => {
       }
 
       // V2: In-app Notification IS created instead
-      const vNotifs44 = await base44.asServiceRole.entities.Notification.filter({ user_email: studentEmail44 });
+      // Notification RLS reads by user_email or recipient_email — use service role list + filter
+      const allNotifs44raw = await base44.asServiceRole.entities.Notification.list('-created_date', 50);
+      const vNotifs44 = allNotifs44raw.filter(n => n.user_email === studentEmail44);
       const capFallbackNotif = vNotifs44.find(n => n.metadata?.trigger === 'email_cap_fallback');
       if (capFallbackNotif) {
         log('4.4-v2', 'pass', '✓ In-app Notification IS created instead', { notifId: capFallbackNotif.id });
