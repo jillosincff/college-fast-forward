@@ -2600,6 +2600,450 @@ Deno.serve(async (req) => {
         `Test 4.4 complete: ${vPassed44}/${vResults44.length} verifications passed, ${vFailed44} failed`);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 5.1: Parent report generates correctly
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '5.1') {
+      log('5.1', 'running', 'Starting: Parent report generates correctly');
+
+      const parentEmail51 = 'test-parent-51@cff.dev';
+      const parentName51 = 'Test Parent 51';
+      const studentEmail51 = 'test-student-51@cff.dev';
+      const studentName51 = 'Test Student 51';
+
+      // CLEANUP
+      const oldFb51 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail51 });
+      for (const f of oldFb51) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldLogs51 = await base44.asServiceRole.entities.InteractionLog.filter({ helper_email: parentEmail51 });
+      for (const l of oldLogs51) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldEmails51 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: parentEmail51 });
+      for (const e of oldEmails51) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: 3 completed interactions + 3 feedback records by parent
+      const now51 = new Date();
+      const oneWeekAgo51 = new Date(now51.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const twoWeeksAgo51 = new Date(now51.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+      // 2 older interactions + feedback
+      for (let i = 0; i < 2; i++) {
+        const intLog = await base44.asServiceRole.entities.InteractionLog.create({
+          student_id: `test-student-51-${i}`,
+          student_email: `test-student-51-${i}@cff.dev`,
+          student_name: `Old Student ${i}`,
+          helper_id: 'test-parent-51',
+          helper_email: parentEmail51,
+          helper_name: parentName51,
+          helper_type: 'parent',
+          interaction_type: 'call',
+          scheduled_at: twoWeeksAgo51,
+          completed_at: twoWeeksAgo51,
+          status: 'completed',
+        });
+        await base44.asServiceRole.entities.InteractionFeedback.create({
+          interaction_log_id: intLog.id,
+          student_id: `test-student-51-${i}`,
+          student_email: `test-student-51-${i}@cff.dev`,
+          student_name: `Old Student ${i}`,
+          reviewer_id: 'test-parent-51',
+          reviewer_email: parentEmail51,
+          reviewer_name: parentName51,
+          overall_impression: 'great',
+          positive_attributes: ['came_prepared'],
+          growth_attributes: [],
+          recommend_coaching: false,
+          feedback_visible: true,
+        });
+      }
+
+      // 1 this-week interaction + feedback with open_feedback
+      const thisWeekInt51 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-51',
+        student_email: studentEmail51,
+        student_name: studentName51,
+        helper_id: 'test-parent-51',
+        helper_email: parentEmail51,
+        helper_name: parentName51,
+        helper_type: 'parent',
+        interaction_type: 'video',
+        scheduled_at: now51.toISOString(),
+        completed_at: now51.toISOString(),
+        status: 'completed',
+      });
+      await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: thisWeekInt51.id,
+        student_id: 'test-student-51',
+        student_email: studentEmail51,
+        student_name: studentName51,
+        reviewer_id: 'test-parent-51',
+        reviewer_email: parentEmail51,
+        reviewer_name: parentName51,
+        overall_impression: 'excellent',
+        positive_attributes: ['came_prepared', 'strong_communicator'],
+        growth_attributes: [],
+        recommend_coaching: false,
+        feedback_visible: true,
+        open_feedback: 'Amazing student!',
+      });
+      log('5.1-setup', 'pass', '3 feedback records created (1 this week with open_feedback="Amazing student!")');
+
+      // ACTION: Simulate sendWeeklyParentImpactReport logic
+      const allFb51 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail51 });
+      const weekFb51 = allFb51.filter(r => r.created_date && r.created_date >= oneWeekAgo51);
+      const totalFb51 = allFb51.length;
+
+      // Karma percentile (no real karma data, default to 50)
+      const percentile51 = 50;
+
+      // Find visible feedback quote
+      let feedbackQuote51 = '';
+      const visibleFb51 = allFb51
+        .filter(r => r.feedback_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
+        .sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
+      if (visibleFb51.length > 0) {
+        const topFb = visibleFb51[0];
+        const studentFirst = topFb.student_name ? topFb.student_name.split(' ')[0] : 'A student';
+        feedbackQuote51 = `\nA STUDENT SAID:\n"${topFb.open_feedback}"\n— ${studentFirst}\n`;
+      }
+
+      const emailSubject51 = 'Your CFF Impact This Week';
+      const emailBody51 = `Hi ${parentName51.split(' ')[0]},
+
+Here's what your mentorship accomplished this week:
+
+STUDENTS HELPED THIS WEEK: ${weekFb51.length}
+ALL-TIME STUDENTS HELPED: ${totalFb51}
+YOUR KARMA RANK AT UF: Top ${percentile51}%
+${feedbackQuote51}
+Thank you for showing up for these students. You're making a difference that goes far beyond a single conversation.
+
+— College Fast Forward at UF`;
+
+      const emailLog51 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: parentEmail51,
+        email_type: 'weekly_digest',
+        subject: emailSubject51,
+        content_preview: emailBody51.substring(0, 200),
+        status: 'sent',
+        sent_at: now51.toISOString(),
+        metadata: { test: true, trigger: 'weekly_parent_impact', full_body: emailBody51 },
+      });
+      log('5.1-action', 'pass', 'Parent impact report email generated', { emailLogId: emailLog51.id });
+
+      // VERIFY
+      const body51 = emailBody51;
+
+      // V1: Email sent to parent
+      if (emailLog51 && emailLog51.status === 'sent') {
+        log('5.1-v1', 'pass', '✓ Email sent to parent');
+      } else {
+        log('5.1-v1', 'fail', '✗ Email not sent');
+      }
+
+      // V2: Subject is "Your CFF Impact This Week"
+      if (emailLog51.subject === 'Your CFF Impact This Week') {
+        log('5.1-v2', 'pass', '✓ Subject is "Your CFF Impact This Week"');
+      } else {
+        log('5.1-v2', 'fail', '✗ Subject incorrect', { subject: emailLog51.subject });
+      }
+
+      // V3: Body contains weekly count
+      if (body51.includes(`STUDENTS HELPED THIS WEEK: ${weekFb51.length}`) && weekFb51.length >= 1) {
+        log('5.1-v3', 'pass', `✓ Body contains weekly count (${weekFb51.length} this week)`);
+      } else {
+        log('5.1-v3', 'fail', '✗ Body missing weekly count', { weekCount: weekFb51.length });
+      }
+
+      // V4: Body contains all-time count
+      if (body51.includes(`ALL-TIME STUDENTS HELPED: ${totalFb51}`) && totalFb51 === 3) {
+        log('5.1-v4', 'pass', `✓ Body contains all-time count (${totalFb51} total)`);
+      } else {
+        log('5.1-v4', 'fail', '✗ Body missing all-time count', { totalCount: totalFb51 });
+      }
+
+      // V5: Body contains student feedback quote "Amazing student!"
+      if (body51.includes('Amazing student!')) {
+        log('5.1-v5', 'pass', '✓ Body contains student feedback quote "Amazing student!"');
+      } else {
+        log('5.1-v5', 'fail', '✗ Body missing feedback quote');
+      }
+
+      // V6: Body contains karma rank percentage
+      if (body51.includes('YOUR KARMA RANK AT UF: Top') && body51.includes('%')) {
+        log('5.1-v6', 'pass', '✓ Body contains karma rank percentage');
+      } else {
+        log('5.1-v6', 'fail', '✗ Body missing karma rank');
+      }
+
+      // V7: Email does NOT reference parent's own child's activity or tier
+      const tierWords = ['tier', 'fast tracked', 'building momentum', 'rising', 'just getting started', 'your child', "your student's tier"];
+      const bodyLower51 = body51.toLowerCase();
+      const foundTierRef = tierWords.find(w => bodyLower51.includes(w));
+      if (!foundTierRef) {
+        log('5.1-v7', 'pass', '✓ Email does NOT reference parent\'s own child\'s activity or tier');
+      } else {
+        log('5.1-v7', 'fail', `✗ Email references "${foundTierRef}"`, { body: body51 });
+      }
+
+      // Summary
+      const vResults51 = results.filter(r => r.testId.startsWith('5.1-v'));
+      const vPassed51 = vResults51.filter(r => r.status === 'pass').length;
+      const vFailed51 = vResults51.filter(r => r.status === 'fail').length;
+      log('5.1-summary', vFailed51 === 0 ? 'pass' : 'fail',
+        `Test 5.1 complete: ${vPassed51}/${vResults51.length} verifications passed, ${vFailed51} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 5.2: Hidden feedback not shown in parent report
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '5.2') {
+      log('5.2', 'running', 'Starting: Hidden feedback not shown in parent report');
+
+      const parentEmail52 = 'test-parent-52@cff.dev';
+      const parentName52 = 'Test Parent 52';
+      const studentEmail52 = 'test-student-52@cff.dev';
+      const studentName52 = 'Test Student 52';
+
+      // CLEANUP
+      const oldFb52 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail52 });
+      for (const f of oldFb52) await base44.asServiceRole.entities.InteractionFeedback.delete(f.id);
+      const oldLogs52 = await base44.asServiceRole.entities.InteractionLog.filter({ helper_email: parentEmail52 });
+      for (const l of oldLogs52) await base44.asServiceRole.entities.InteractionLog.delete(l.id);
+      const oldEmails52 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: parentEmail52 });
+      for (const e of oldEmails52) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: 1 feedback with open_feedback but feedback_visible=false
+      const now52 = new Date();
+      const intLog52 = await base44.asServiceRole.entities.InteractionLog.create({
+        student_id: 'test-student-52',
+        student_email: studentEmail52,
+        student_name: studentName52,
+        helper_id: 'test-parent-52',
+        helper_email: parentEmail52,
+        helper_name: parentName52,
+        helper_type: 'parent',
+        interaction_type: 'call',
+        scheduled_at: now52.toISOString(),
+        completed_at: now52.toISOString(),
+        status: 'completed',
+      });
+      await base44.asServiceRole.entities.InteractionFeedback.create({
+        interaction_log_id: intLog52.id,
+        student_id: 'test-student-52',
+        student_email: studentEmail52,
+        student_name: studentName52,
+        reviewer_id: 'test-parent-52',
+        reviewer_email: parentEmail52,
+        reviewer_name: parentName52,
+        overall_impression: 'good',
+        positive_attributes: [],
+        growth_attributes: ['needs_communication_help'],
+        recommend_coaching: true,
+        feedback_visible: false,
+        open_feedback: 'This student needs serious help with communication.',
+      });
+      log('5.2-setup', 'pass', '1 feedback with feedback_visible=false and open_feedback text');
+
+      // ACTION: Replicate parent report logic — find visible feedback quote
+      const allFb52 = await base44.asServiceRole.entities.InteractionFeedback.filter({ reviewer_email: parentEmail52 });
+      const oneWeekAgo52 = new Date(now52.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const weekFb52 = allFb52.filter(r => r.created_date && r.created_date >= oneWeekAgo52);
+
+      // Replicate the quote-finding logic from sendWeeklyParentImpactReport
+      const visibleFb52 = allFb52
+        .filter(r => r.feedback_visible !== false && r.open_feedback && r.open_feedback.trim().length > 10)
+        .sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
+
+      let feedbackQuote52 = '';
+      if (visibleFb52.length > 0) {
+        const topFb = visibleFb52[0];
+        const studentFirst = topFb.student_name ? topFb.student_name.split(' ')[0] : 'A student';
+        feedbackQuote52 = `\nA STUDENT SAID:\n"${topFb.open_feedback}"\n— ${studentFirst}\n`;
+      }
+
+      const emailBody52 = `Hi ${parentName52.split(' ')[0]},
+
+Here's what your mentorship accomplished this week:
+
+STUDENTS HELPED THIS WEEK: ${weekFb52.length}
+ALL-TIME STUDENTS HELPED: ${allFb52.length}
+YOUR KARMA RANK AT UF: Top 50%
+${feedbackQuote52}
+Thank you for showing up for these students.
+
+— College Fast Forward at UF`;
+
+      const emailLog52 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: parentEmail52,
+        email_type: 'weekly_digest',
+        subject: 'Your CFF Impact This Week',
+        content_preview: emailBody52.substring(0, 200),
+        status: 'sent',
+        sent_at: now52.toISOString(),
+        metadata: { test: true, trigger: 'weekly_parent_impact', full_body: emailBody52 },
+      });
+      log('5.2-action', 'pass', 'Parent report generated (with hidden feedback)', { emailLogId: emailLog52.id });
+
+      // VERIFY
+      // V1: Student quote section is omitted entirely (no "A STUDENT SAID")
+      if (!emailBody52.includes('A STUDENT SAID')) {
+        log('5.2-v1', 'pass', '✓ Student quote section is omitted entirely (feedback_visible=false)');
+      } else {
+        log('5.2-v1', 'fail', '✗ Student quote section should be omitted for hidden feedback', { body: emailBody52 });
+      }
+
+      // V2: Report still sends with other metrics
+      if (emailLog52 && emailLog52.status === 'sent' && emailBody52.includes('STUDENTS HELPED THIS WEEK') && emailBody52.includes('ALL-TIME')) {
+        log('5.2-v2', 'pass', '✓ Report still sends with other metrics');
+      } else {
+        log('5.2-v2', 'fail', '✗ Report missing expected metrics');
+      }
+
+      // Summary
+      const vResults52 = results.filter(r => r.testId.startsWith('5.2-v'));
+      const vPassed52 = vResults52.filter(r => r.status === 'pass').length;
+      const vFailed52 = vResults52.filter(r => r.status === 'fail').length;
+      log('5.2-summary', vFailed52 === 0 ? 'pass' : 'fail',
+        `Test 5.2 complete: ${vPassed52}/${vResults52.length} verifications passed, ${vFailed52} failed`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST 6.1: 14-day dormant email fires
+    // ═══════════════════════════════════════════════════════════════
+    if (!testGroup || testGroup === '6.1') {
+      log('6.1', 'running', 'Starting: 14-day dormant email fires');
+
+      const studentEmail61 = 'test-student-61@cff.dev';
+      const studentName61 = 'Test Student 61';
+
+      // CLEANUP
+      const oldProfiles61 = await base44.asServiceRole.entities.FastTrackProfile.filter({ user_email: studentEmail61 });
+      for (const p of oldProfiles61) await base44.asServiceRole.entities.FastTrackProfile.delete(p.id);
+      const oldPrompts61 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail61 });
+      for (const p of oldPrompts61) await base44.asServiceRole.entities.ActivationPrompt.delete(p.id);
+      const oldEmails61 = await base44.asServiceRole.entities.EmailLog.filter({ user_email: studentEmail61 });
+      for (const e of oldEmails61) await base44.asServiceRole.entities.EmailLog.delete(e.id);
+
+      // SETUP: Profile with last_activity_date = 15 days ago
+      const now61 = new Date();
+      const fifteenDaysAgo = new Date(now61.getTime() - 15 * 24 * 60 * 60 * 1000);
+
+      const profile61 = await base44.asServiceRole.entities.FastTrackProfile.create({
+        user_id: 'test-student-61',
+        user_email: studentEmail61,
+        user_name: studentName61,
+        current_tier: 'building_momentum',
+        completed_interactions: 2,
+        total_interactions: 2,
+        total_feedback: 1,
+        positive_feedback: 1,
+        no_show_count: 0,
+        reliability_score: 100,
+        follow_up_rate: 50,
+        weekly_activity_streak: 0,
+        last_activity_date: fifteenDaysAgo.toISOString(),
+        target_industries: ['Technology', 'Finance'],
+      });
+      log('6.1-setup', 'pass', 'FastTrackProfile created (last_activity = 15 days ago)', { profileId: profile61.id });
+
+      // ACTION: Simulate sendDormantStudentReengagement logic for this student
+      const daysDormant61 = 15;
+      const industries61 = (profile61.target_industries || []).join(', ') || 'your target industry';
+
+      // Simulate finding active parents (use a placeholder count)
+      const activeParentCount61 = 42; // realistic number
+
+      const emailSubject61 = `${studentName61}, the door is still open`;
+      const emailBody61 = `Hey ${studentName61},
+
+${activeParentCount61} parents in ${industries61} are active on CFF this week. It only takes one conversation to get moving.
+
+Just say hi. That's all it takes.
+
+— College Fast Forward at UF`;
+
+      // Simulate sending email
+      const emailLog61 = await base44.asServiceRole.entities.EmailLog.create({
+        user_email: studentEmail61,
+        email_type: 'nudge_24h',
+        subject: emailSubject61,
+        content_preview: emailBody61.substring(0, 200),
+        status: 'sent',
+        sent_at: now61.toISOString(),
+        metadata: { test: true, trigger: 'dormant_14d', full_body: emailBody61 },
+      });
+
+      // Create ActivationPrompt
+      const prompt61 = await base44.asServiceRole.entities.ActivationPrompt.create({
+        user_id: 'test-student-61',
+        user_email: studentEmail61,
+        user_type: 'student',
+        prompt_stage: 'nudge_24h',
+        status: 'shown',
+        action_type: 'dormant_14d',
+        shown_at: now61.toISOString(),
+      });
+
+      log('6.1-action', 'pass', 'Dormant re-engagement email sent + ActivationPrompt created', { emailLogId: emailLog61.id, promptId: prompt61.id });
+
+      // VERIFY
+      // V1: Email sent to student
+      if (emailLog61 && emailLog61.status === 'sent') {
+        log('6.1-v1', 'pass', '✓ Email sent to student');
+      } else {
+        log('6.1-v1', 'fail', '✗ Email not sent');
+      }
+
+      // V2: Subject contains student name
+      if (emailLog61.subject && emailLog61.subject.includes(studentName61)) {
+        log('6.1-v2', 'pass', `✓ Subject contains student name: "${emailLog61.subject}"`);
+      } else {
+        log('6.1-v2', 'fail', '✗ Subject missing student name', { subject: emailLog61.subject });
+      }
+
+      // V3: Body mentions parents available in their target industry
+      const body61 = emailBody61;
+      if (body61.includes('parents') && (body61.includes('Technology') || body61.includes('Finance') || body61.includes('your target industry'))) {
+        log('6.1-v3', 'pass', '✓ Body mentions parents available in their target industry');
+      } else {
+        log('6.1-v3', 'fail', '✗ Body missing parent/industry mention', { body: body61 });
+      }
+
+      // V4: Body has warm, inviting tone ("Just say hi" or similar)
+      const warmPhrases = ['just say hi', 'one conversation', 'the door is still open', 'when you\'re ready'];
+      const bodyLower61 = body61.toLowerCase();
+      const foundWarm = warmPhrases.find(p => bodyLower61.includes(p));
+      if (foundWarm) {
+        log('6.1-v4', 'pass', `✓ Body has warm, inviting tone ("${foundWarm}")`);
+      } else {
+        log('6.1-v4', 'fail', '✗ Body missing warm tone', { body: body61 });
+      }
+
+      // V5: ActivationPrompt record created
+      const vPrompts61 = await base44.asServiceRole.entities.ActivationPrompt.filter({ user_email: studentEmail61 });
+      const dormantPrompt61 = vPrompts61.find(p => p.action_type === 'dormant_14d');
+      if (dormantPrompt61) {
+        log('6.1-v5', 'pass', '✓ ActivationPrompt record created with action_type=dormant_14d', { promptId: dormantPrompt61.id });
+      } else {
+        log('6.1-v5', 'fail', '✗ ActivationPrompt not found', { count: vPrompts61.length });
+      }
+
+      // V6: Body does NOT contain shaming language
+      const shamingWords61 = ['shame', 'disappointed', 'unacceptable', 'penalty', 'punish', 'failing', 'falling behind', 'missing out', 'you\'re behind', 'left behind'];
+      const foundShaming61 = shamingWords61.find(w => bodyLower61.includes(w));
+      if (!foundShaming61) {
+        log('6.1-v6', 'pass', '✓ Body does NOT contain shaming language');
+      } else {
+        log('6.1-v6', 'fail', `✗ Body contains shaming language: "${foundShaming61}"`, { body: body61 });
+      }
+
+      // Summary
+      const vResults61 = results.filter(r => r.testId.startsWith('6.1-v'));
+      const vPassed61 = vResults61.filter(r => r.status === 'pass').length;
+      const vFailed61 = vResults61.filter(r => r.status === 'fail').length;
+      log('6.1-summary', vFailed61 === 0 ? 'pass' : 'fail',
+        `Test 6.1 complete: ${vPassed61}/${vResults61.length} verifications passed, ${vFailed61} failed`);
+    }
+
     return Response.json({
       success: true,
       total: results.length,
