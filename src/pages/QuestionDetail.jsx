@@ -20,6 +20,7 @@ import LightweightAnswerComposer from '@/components/answers/LightweightAnswerCom
 import ResolveQuestionButton from '@/components/questions/ResolveQuestionButton';
 import { useToast } from '@/components/ui/use-toast';
 import { trackEvent } from '@/components/utils/analytics';
+import MobileBackHeader from '@/components/navigation/MobileBackHeader';
 import moment from 'moment';
 
 export default function QuestionDetailPage() {
@@ -584,9 +585,13 @@ export default function QuestionDetailPage() {
 
   return (
     <div className="question-detail-page overflow-x-hidden">
-      {/* Back Navigation - only show for logged-in users */}
+      {/* Mobile Back Header */}
       {!isPublicView && (
-        <div className="nav-header">
+        <MobileBackHeader title="Question" onBack={() => navigate('Connections')} />
+      )}
+      {/* Desktop Back Navigation */}
+      {!isPublicView && (
+        <div className="nav-header hidden md:block">
           <Button
             variant="ghost"
             onClick={() => navigate('Connections')}
