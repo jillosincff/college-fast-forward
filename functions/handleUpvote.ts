@@ -52,7 +52,9 @@ Deno.serve(async (req) => {
 
     if (action === 'add') {
       // Can't upvote own answer
-      if (answer.answerer_user_id === user.id) {
+      const answerAuthorId = answer.answerer_user_id || answer.responder_id;
+      const answerAuthorEmail = answer.answerer_email || answer.responder_email;
+      if (answerAuthorId === user.id) {
         return Response.json({ error: "Can't upvote your own answer" }, { status: 400 });
       }
 
@@ -113,7 +115,9 @@ Deno.serve(async (req) => {
 
       // Award karma to the answer author (parents/alumni only)
       try {
-        const author = await base44.asServiceRole.entities.User.get(answer.answerer_user_id);
+        const authorId = answerAuthorId;
+        const authorEmail = answerAuthorEmail;
+        const author = authorId ? await base44.asServiceRole.entities.User.get(authorId) : null;
         if (author) {
           const isParentOrAlumni = author.persona === 'parent' || author.persona === 'alumni' || 
                                    author.roles?.includes('parent') || author.roles?.includes('alumni');
@@ -121,8 +125,8 @@ Deno.serve(async (req) => {
           if (isParentOrAlumni) {
             await base44.functions.invoke('awardKarma', {
               familyGroupId: author.family_group_id || null,
-              parentUserId: answer.answerer_user_id,
-              parentEmail: answer.answerer_email,
+              parentUserId: authorId,
+              parentEmail: authorEmail,
               actionType: 'upvote_received',
               referenceId: answerId,
               description: 'Answer upvoted'
