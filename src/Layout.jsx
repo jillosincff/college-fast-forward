@@ -1375,6 +1375,12 @@ function AppContent() {
     }
   }, [user, isLoading, currentPage]);
 
+  // Pull-to-refresh handler (must be above any early returns for hooks rules)
+  const handleGlobalRefresh = React.useCallback(async () => {
+    document.dispatchEvent(new CustomEvent('cff:pull-refresh'));
+    await new Promise(r => setTimeout(r, 600));
+  }, []);
+
   if (!resolvedPage) {
     return <PageLoader />;
   }
@@ -1396,14 +1402,6 @@ function AppContent() {
     'MyRequests', 'MyApplications', 'Favorites', 'Notifications'
   ];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
-
-  // Pull-to-refresh simply reloads data by re-mounting the page
-  const handleGlobalRefresh = React.useCallback(async () => {
-    // Dispatch a custom event that pages can listen to for refreshing their data
-    document.dispatchEvent(new CustomEvent('cff:pull-refresh'));
-    // Small delay so the spinner shows
-    await new Promise(r => setTimeout(r, 600));
-  }, []);
 
   return (
     <AppErrorBoundary name="MainApp">
