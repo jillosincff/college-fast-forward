@@ -54,7 +54,7 @@ export default function AlumniHeroSection({
         <div className="relative inline-block mb-2">
           <div 
             className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
-            style={{ backgroundColor: '#FA4616' }}
+            style={{ backgroundColor: 'var(--uf-orange, #FA4616)' }}
           />
           <span className="relative text-4xl font-black text-white">
             {karma}
@@ -114,7 +114,7 @@ export default function AlumniHeroSection({
           <div className="relative inline-block mb-2">
             <div 
               className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
-              style={{ backgroundColor: '#FA4616' }}
+              style={{ backgroundColor: 'var(--uf-orange, #FA4616)' }}
             />
             <span className="relative text-4xl font-black text-white">
               {karma}
