@@ -20,7 +20,7 @@ import ResumeUpload from '@/components/profile/ResumeUpload';
 import ShareableProfile from '@/components/profile/ShareableProfile';
 import ExpertiseTagSelector from '@/components/profile/ExpertiseTagSelector';
 import AlumniIntentSwitcher from '@/components/profile/AlumniIntentSwitcher';
-
+import AccountDeletionModal from '@/components/profile/AccountDeletionModal';
 
 import {
   ArrowLeft,
@@ -34,6 +34,7 @@ import {
   CheckCircle,
   Loader2,
   Globe,
+  AlertTriangle,
   CheckCircle2,
   Sparkles,
   Clock,
@@ -162,6 +163,7 @@ export default function ProfileEdit() {
 
   const [linkedStudents, setLinkedStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [profileCompletion, setProfileCompletion] = useState(0);
 
@@ -674,6 +676,26 @@ export default function ProfileEdit() {
             </CardContent>
           </Card>
 
+          {/* Delete Account */}
+          <Card className="border-red-200">
+            <CardHeader>
+              <CardTitle className="text-red-600 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription>Permanently delete your account and all associated data.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full sm:w-auto"
+              >
+                Delete My Account
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Save Button */}
           <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-3 sm:p-4 border">
             <div className="flex gap-2 sm:gap-3">
@@ -705,6 +727,11 @@ export default function ProfileEdit() {
           </div>
         </div>
       </div>
+
+      <AccountDeletionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 }
