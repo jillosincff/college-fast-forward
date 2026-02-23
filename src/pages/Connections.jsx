@@ -24,6 +24,7 @@ import SalaryBrowse from '@/components/community/SalaryBrowse';
 import InterviewBrowse from '@/components/community/InterviewBrowse';
 import AICareerAdvisor from '@/components/ai-advisor/AICareerAdvisor';
 import DataSubmissionModal from '@/components/ai-advisor/DataSubmissionModal';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function QuestionsPage() {
   const { user } = useAuth();
@@ -426,9 +427,15 @@ export default function QuestionsPage() {
   const questionsWithProfiles = displayedProfiles.filter(p => p.request);
   const totalQuestionsFiltered = sortedProfiles.filter(p => p.request).length;
 
+  const handlePullRefresh = async () => {
+    await loadData();
+    await loadUserLikes();
+    await loadLikeCounts();
+  };
+
   return (
     <>
-      <div className="questions-page">
+      <PullToRefresh onRefresh={handlePullRefresh} className="questions-page">
         {/* HEADER - Community Hub */}
         <div className="page-header">
           <div className="header-content">
@@ -755,7 +762,7 @@ export default function QuestionsPage() {
         </div>
         </>
         )}
-      </div>
+      </PullToRefresh>
 
       {showHelpModal && (
         <MessageAndHelpModal
