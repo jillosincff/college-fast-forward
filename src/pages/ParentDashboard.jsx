@@ -25,6 +25,7 @@ import LiveActivityTicker from '@/components/dashboard/parent/LiveActivityTicker
 import YouGotResponseBanner from '@/components/dashboard/parent/YouGotResponseBanner';
 import PledgeReminderBanner from '@/components/dashboard/parent/PledgeReminderBanner';
 import SkippedPledgeQuestionBanner from '@/components/dashboard/parent/SkippedPledgeQuestionBanner';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -179,7 +180,7 @@ export default function ParentDashboard() {
         <WelcomeModal userName={firstName} onClose={() => setShowWelcomeModal(false)} />
       )}
 
-      <div className="min-h-screen bg-gray-100 overflow-x-hidden">
+      <PullToRefresh onRefresh={refresh} className="min-h-screen bg-gray-100 overflow-x-hidden">
         <style>{`
           @keyframes nudgePulse {
             0% { box-shadow: 0 0 0 0 rgba(232, 77, 32, 0.6); transform: scale(1); }
@@ -190,7 +191,7 @@ export default function ParentDashboard() {
         
         {/* ========== HERO SECTION ========== */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0021A5 0%, #001878 50%, #0021A5 100%)' }}>
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, var(--uf-blue, #0021A5) 0%, #001878 50%, var(--uf-blue, #0021A5) 100%)' }}>
             <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(250, 70, 22, 0.15)' }} />
             <div className="absolute inset-0 opacity-10" style={{
@@ -204,7 +205,7 @@ export default function ParentDashboard() {
               
               {/* Dynamic headline based on student link status */}
               <div className="text-center text-white mb-8 sm:mb-10">
-                <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase mb-2 sm:mb-3" style={{ color: '#FA4616' }}>
+                <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase mb-2 sm:mb-3" style={{ color: 'var(--uf-orange, #FA4616)' }}>
                   {showStudentLinking && hasLinkedStudent ? "You're Powering" : "Join the Network"}
                 </p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-white">
@@ -570,7 +571,7 @@ export default function ParentDashboard() {
 
         </div>
         
-      </div>
+      </PullToRefresh>
 
       {/* Search Modal — Parents only */}
       {showStudentLinking && (
