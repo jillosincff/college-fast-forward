@@ -38,6 +38,7 @@ import YouGotResponseBanner from '@/components/dashboard/student/YouGotResponseB
 import StudentHelpRequestPreview from '@/components/dashboard/student/StudentHelpRequestPreview';
 import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
 import ExploreSection from '@/components/dashboard/student/ExploreSection';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -290,8 +291,13 @@ export default function Dashboard() {
     return fn.split(/\s+/)[0] || 'Gator';
   })();
 
+  const handlePullRefresh = async () => {
+    loadStartedRef.current = false;
+    await loadDashboardData();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8 overflow-x-hidden">
+    <PullToRefresh onRefresh={handlePullRefresh} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8 overflow-x-hidden">
       
       {/* Founding Member Banner */}
       <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
@@ -491,12 +497,11 @@ export default function Dashboard() {
             navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
           }}
           onBrowse={() => {
-            // Scroll to matches section
             document.querySelector('[class*="MatchesSection"]')?.scrollIntoView({ behavior: 'smooth' });
           }}
           onClose={() => setShowFirstMessageNudge(false)}
         />
       )}
-    </div>
+    </PullToRefresh>
   );
 }
