@@ -9,14 +9,28 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { answerId, action } = await req.json();
+    const { answerId, action, answerType } = await req.json();
 
     if (!answerId) {
       return Response.json({ error: 'answerId is required' }, { status: 400 });
     }
 
-    // Get the answer
-    const answer = await base44.asServiceRole.entities.Answer.get(answerId);
+    // Get the answer - try Answer entity first, then JobAnswer
+    let answer = null;
+    let answerEntityType = 'Answer';
+    
+    try {
+      answer = await base44.asServiceRole.entities.Answer.get(answerId);
+    } catch (e) {
+      // Not found in Answer, try JobAnswer
+      try {
+        answer = await base44.asServiceRole.entities.JobAnswer.get(answerId);
+        answerEntityType = 'JobAnswer';
+      } catch (e2) {
+        return Response.json({ error: 'Answer not found' }, { status: 404 });
+      }
+    }
+    
     if (!answer) {
       return Response.json({ error: 'Answer not found' }, { status: 404 });
     }
