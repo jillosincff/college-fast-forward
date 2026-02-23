@@ -677,6 +677,8 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
 const adminPages = ['TestingDashboard'];
+// Pages that show bottom nav on mobile
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Opportunities', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
@@ -1319,6 +1321,8 @@ function AppContent() {
                      !onboardingPages.includes(resolvedPage) && 
                      !newUserFlowPages.includes(resolvedPage);
 
+  const showBottomNav = user && bottomNavPages.includes(resolvedPage);
+
   return (
     <AppErrorBoundary name="MainApp">
       <div className="min-h-screen flex flex-col bg-surface-subtle text-ink">
@@ -1328,13 +1332,17 @@ function AppContent() {
           </AppErrorBoundary>
         )}
 
-        <main className="flex-grow">
+        <main className={`flex-grow ${showBottomNav ? 'pb-16 md:pb-0' : ''}`}>
           <AppErrorBoundary name={`Page-${resolvedPage}`}>
             <Suspense fallback={<PageLoader />}>
               <PageComponent />
             </Suspense>
           </AppErrorBoundary>
         </main>
+
+        {showBottomNav && (
+          <MobileBottomNav user={user} currentPage={resolvedPage} />
+        )}
 
         {resolvedPage !== 'LandingPage' && (
           <footer className="bg-slate-100 border-t border-slate-200 mt-12">
