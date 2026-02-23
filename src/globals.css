@@ -322,6 +322,16 @@ html, body {
   overscroll-behavior-y: none;
 }
 
+/* Prevent accidental text selection on nav bars */
+nav,
+header,
+footer,
+[role="navigation"],
+.mobile-bottom-nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;

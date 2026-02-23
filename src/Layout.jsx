@@ -29,6 +29,7 @@ import ErrorLogger from './components/debug/ErrorLogger';
 import MobileBottomNav from './components/navigation/MobileBottomNav';
 import AccountDeletionModal from './components/profile/AccountDeletionModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import PullToRefresh from './components/common/PullToRefresh';
 
 // Child/detail pages that show a back button instead of the logo on mobile
 const childPages = [
@@ -1388,6 +1389,22 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
+  // Pages that support pull-to-refresh (main feed / list pages)
+  const pullRefreshPages = [
+    'Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections',
+    'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights',
+    'MyRequests', 'MyApplications', 'Favorites', 'Notifications'
+  ];
+  const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
+
+  // Pull-to-refresh simply reloads data by re-mounting the page
+  const handleGlobalRefresh = React.useCallback(async () => {
+    // Dispatch a custom event that pages can listen to for refreshing their data
+    document.dispatchEvent(new CustomEvent('cff:pull-refresh'));
+    // Small delay so the spinner shows
+    await new Promise(r => setTimeout(r, 600));
+  }, []);
+
   return (
     <AppErrorBoundary name="MainApp">
       <div className="min-h-screen flex flex-col bg-surface-subtle text-ink">
@@ -1398,22 +1415,43 @@ function AppContent() {
         )}
 
         <main className={`flex-grow ${showBottomNav ? 'pb-16 md:pb-0' : ''}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={resolvedPage}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={pageTransition}
-            >
-              <AppErrorBoundary name={`Page-${resolvedPage}`}>
-                <Suspense fallback={<PageLoader />}>
-                  <PageComponent />
-                </Suspense>
-              </AppErrorBoundary>
-            </motion.div>
-          </AnimatePresence>
+          {supportsPullRefresh ? (
+            <PullToRefresh onRefresh={handleGlobalRefresh}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={resolvedPage}
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={pageTransition}
+                >
+                  <AppErrorBoundary name={`Page-${resolvedPage}`}>
+                    <Suspense fallback={<PageLoader />}>
+                      <PageComponent />
+                    </Suspense>
+                  </AppErrorBoundary>
+                </motion.div>
+              </AnimatePresence>
+            </PullToRefresh>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={resolvedPage}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={pageTransition}
+              >
+                <AppErrorBoundary name={`Page-${resolvedPage}`}>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageComponent />
+                  </Suspense>
+                </AppErrorBoundary>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </main>
 
         {showBottomNav && (
