@@ -6,9 +6,10 @@ import {
   MapPin, Briefcase, GraduationCap, Linkedin, Mail, 
   FileText, Sparkles, Loader2
 } from 'lucide-react';
-import { useParams } from '@/components/utils/navigation';
+import { useParams, navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import UserAvatar from '@/components/common/UserAvatar';
+import MobileBackHeader from '@/components/navigation/MobileBackHeader';
 
 export default function PublicProfile() {
   const params = useParams();
@@ -115,7 +116,9 @@ export default function PublicProfile() {
   const isStudent = profile.persona === 'gator';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <MobileBackHeader title={profile.full_name || 'Profile'} onBack={() => window.history.length > 1 ? window.history.back() : navigate('GatorDirectory')} />
+      <div className="py-8 sm:py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Card */}
         <Card className="mb-6 overflow-hidden">
@@ -312,6 +315,7 @@ export default function PublicProfile() {
         <div className="mt-8 text-center text-slate-500 text-sm">
           <p>Profile powered by College Fast Forward 🧡💙</p>
         </div>
+      </div>
       </div>
     </div>
   );
