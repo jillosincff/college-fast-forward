@@ -94,11 +94,11 @@ import ReferralAnswer from './pages/ReferralAnswer';
 import RequestInvite from './pages/RequestInvite';
 import ShareExpertise from './pages/ShareExpertise';
 import StudentOnboarding from './pages/StudentOnboarding';
+import SubmitFeedback from './pages/SubmitFeedback';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
 import WelcomeRole from './pages/WelcomeRole';
-import SubmitFeedback from './pages/SubmitFeedback';
 import __Layout from './Layout.jsx';
 
 
@@ -150,11 +150,11 @@ export const PAGES = {
     "RequestInvite": RequestInvite,
     "ShareExpertise": ShareExpertise,
     "StudentOnboarding": StudentOnboarding,
+    "SubmitFeedback": SubmitFeedback,
     "Terms": Terms,
     "TestingDashboard": TestingDashboard,
     "UnsubscribeReengagement": UnsubscribeReengagement,
     "WelcomeRole": WelcomeRole,
-    "SubmitFeedback": SubmitFeedback,
 }
 
 export const pagesConfig = {

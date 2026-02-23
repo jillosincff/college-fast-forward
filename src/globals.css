@@ -317,6 +317,11 @@ button {
   padding-right: env(safe-area-inset-right);
 }
 
+/* Disable iOS rubber-banding on body */
+html, body {
+  overscroll-behavior-y: none;
+}
+
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;

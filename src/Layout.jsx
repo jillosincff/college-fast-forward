@@ -26,6 +26,7 @@ import NotificationBell from './components/notifications/NotificationBell';
 import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
 import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
+import MobileBottomNav from './components/navigation/MobileBottomNav';
 
 const APP_VERSION = 'v1.1.7';
 

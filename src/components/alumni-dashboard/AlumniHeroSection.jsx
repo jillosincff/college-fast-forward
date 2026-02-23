@@ -183,7 +183,7 @@ export default function AlumniHeroSection({
       {/* Gradient background */}
       <div 
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(135deg, #0021A5 0%, #001878 50%, #0021A5 100%)' }}
+        style={{ background: 'linear-gradient(135deg, var(--uf-blue, #0021A5) 0%, #001878 50%, var(--uf-blue, #0021A5) 100%)' }}
       >
         <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
         <div 
@@ -206,7 +206,7 @@ export default function AlumniHeroSection({
           <div className="text-center text-white mb-10">
             <p 
               className="text-sm font-semibold tracking-widest uppercase mb-3"
-              style={{ color: '#FA4616' }}
+              style={{ color: 'var(--uf-orange, #FA4616)' }}
             >
               {isSeekerMode ? 'Your Career Network' : 'Give Back. Get Ahead.'}
             </p>
@@ -229,7 +229,7 @@ export default function AlumniHeroSection({
           {/* Motivational nudge */}
           <div className="mt-8 text-center">
             <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
-              <span style={{ color: '#FA4616' }}>✨</span>
+              <span style={{ color: 'var(--uf-orange, #FA4616)' }}>✨</span>
               <span className="text-sm">{getNudgeMessage()}</span>
               <span className="text-white/50">→</span>
             </div>
