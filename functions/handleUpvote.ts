@@ -73,7 +73,11 @@ Deno.serve(async (req) => {
 
       // Update answer count
       const newCount = (answer.upvote_count || 0) + 1;
-      await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
+      if (answerEntityType === 'JobAnswer') {
+        await base44.asServiceRole.entities.JobAnswer.update(answerId, { upvote_count: newCount });
+      } else {
+        await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
+      }
 
       // Update question total upvotes - try based on question_type, fallback to both
       try {
@@ -183,7 +187,11 @@ Deno.serve(async (req) => {
 
       // Update answer count
       const newCount = Math.max(0, (answer.upvote_count || 0) - 1);
-      await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
+      if (answerEntityType === 'JobAnswer') {
+        await base44.asServiceRole.entities.JobAnswer.update(answerId, { upvote_count: newCount });
+      } else {
+        await base44.asServiceRole.entities.Answer.update(answerId, { upvote_count: newCount });
+      }
 
       // Update question total upvotes
       try {
