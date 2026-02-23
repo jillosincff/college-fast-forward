@@ -1,9 +1,9 @@
-import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
 import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb, ArrowLeft, Trash2 } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
@@ -27,6 +27,27 @@ import { perfMonitor, reportWebVitals } from './components/utils/performanceMoni
 import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
 import MobileBottomNav from './components/navigation/MobileBottomNav';
+import AccountDeletionModal from './components/profile/AccountDeletionModal';
+import { AnimatePresence, motion } from 'framer-motion';
+
+// Child/detail pages that show a back button instead of the logo on mobile
+const childPages = [
+  'QuestionDetail', 'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
+  'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches'
+];
+
+const childPageTitles = {
+  QuestionDetail: 'Question',
+  ProfileEdit: 'Edit Profile',
+  MessageComposer: 'New Message',
+  PostRequest: 'Post Request',
+  PostOpportunity: 'Post Opportunity',
+  CompanyProfile: 'Company',
+  PublicProfile: 'Profile',
+  SubmitFeedback: 'Feedback',
+  Notifications: 'Notifications',
+  MyMatches: 'My Matches',
+};
 
 const APP_VERSION = 'v1.1.7';
 
@@ -134,6 +155,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   const [payItForwardNotifications, setPayItForwardNotifications] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const isChildPage = childPages.includes(currentPage);
+  const childPageTitle = childPageTitles[currentPage] || '';
 
   useEffect(() => {
     const publicPages = ['LandingPage', 'AdminSetup', 'Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'Pricing', 'PublicProfile'];
@@ -387,13 +412,33 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-24 items-center justify-between">
+          <div className="flex h-16 md:h-24 items-center justify-between">
             <div className="flex items-center space-x-4 md:space-x-8">
-                <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="flex items-center cursor-pointer">
+                {/* Mobile: show back button on child pages, logo on main pages */}
+                {isChildPage ? (
+                  <button
+                    onClick={() => window.history.back()}
+                    className="flex md:hidden items-center gap-2 text-slate-700 hover:text-slate-900 transition-colors"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                    <span className="text-sm font-semibold truncate max-w-[150px]">{childPageTitle}</span>
+                  </button>
+                ) : (
+                  <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="flex md:hidden items-center cursor-pointer">
                     <img
                       src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
                       alt="College Fast Forward"
-                      className="h-16 w-auto md:h-20 object-contain"
+                      className="h-12 w-auto object-contain"
+                    />
+                  </div>
+                )}
+                {/* Desktop: always show logo */}
+                <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="hidden md:flex items-center cursor-pointer">
+                    <img
+                      src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                      alt="College Fast Forward"
+                      className="h-20 w-auto object-contain"
                     />
                 </div>
                 {user && (
@@ -663,6 +708,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowDeleteModal(true)} className="text-red-600 focus:bg-red-50 focus:text-red-700">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Account
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -670,6 +719,13 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
           </div>
         </div>
       </header>
+
+      {showDeleteModal && (
+        <AccountDeletionModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      )}
     </>
   );
 }
@@ -827,10 +883,19 @@ function captureUTMParams(user) {
   }
 }
 
+// Minimal page transition variants – quick fade for snappy feel
+const pageVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+const pageTransition = { duration: 0.15, ease: 'easeInOut' };
+
 function AppContent() {
   const { user, isLoading, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState(null);
   const [resolvedPage, setResolvedPage] = useState(null);
+  const prevResolvedPageRef = useRef(null);
 
   // Capture UTM params on initial load (runs once)
   const utmCapturedRef = React.useRef(false);
@@ -1333,11 +1398,22 @@ function AppContent() {
         )}
 
         <main className={`flex-grow ${showBottomNav ? 'pb-16 md:pb-0' : ''}`}>
-          <AppErrorBoundary name={`Page-${resolvedPage}`}>
-            <Suspense fallback={<PageLoader />}>
-              <PageComponent />
-            </Suspense>
-          </AppErrorBoundary>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={resolvedPage}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <AppErrorBoundary name={`Page-${resolvedPage}`}>
+                <Suspense fallback={<PageLoader />}>
+                  <PageComponent />
+                </Suspense>
+              </AppErrorBoundary>
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {showBottomNav && (
