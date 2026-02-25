@@ -299,13 +299,13 @@ export default function AnswerComposer({
     <div className="answer-composer">
       <h3 className="composer-title">{headerText}</h3>
       
-      <Textarea
-        ref={textareaRef}
+      <MentionInput
         value={answerText}
-        onChange={(e) => setAnswerText(e.target.value.slice(0, MAX_CHARS))}
-        placeholder="Short and real is perfect. What have you seen work in real life?"
+        onChange={setAnswerText}
+        placeholder="Short and real is perfect. Type @ to tag someone who can help."
         rows={5}
         className="composer-textarea"
+        maxLength={MAX_CHARS}
       />
 
       <div className="composer-meta">
