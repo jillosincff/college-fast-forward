@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Notify users who were @mentioned in answers
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
