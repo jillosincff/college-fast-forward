@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
-    console.log('Sending email via SendGrid to:', inviteeEmail);
+    console.log('SENDGRID: Sending email to:', inviteeEmail, 'with key length:', sendGridApiKey.length);
     const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
