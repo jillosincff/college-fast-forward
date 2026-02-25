@@ -199,12 +199,33 @@ Deno.serve(async (req) => {
       `.trim();
     }
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: inviteeEmail,
-      subject: emailSubject,
-      body: emailBody,
-      from_name: 'College Fast Forward'
+    // Use SendGrid for external emails since Core.SendEmail only works for app users
+    const sendGridApiKey = Deno.env.get('SENDGRID_API_KEY');
+    if (!sendGridApiKey) {
+      console.error('SENDGRID_API_KEY not set');
+      return Response.json({ error: 'Email service not configured' }, { status: 500 });
+    }
+
+    const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendGridApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: inviteeEmail }] }],
+        from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
+        subject: emailSubject,
+        content: [{ type: 'text/html', value: emailBody }]
+      })
     });
+
+    if (!sgResponse.ok) {
+      const sgError = await sgResponse.text();
+      console.error('SendGrid error:', sgResponse.status, sgError);
+      return Response.json({ error: 'Failed to send email' }, { status: 500 });
+    }
+    console.log('✅ External referral email sent via SendGrid to:', inviteeEmail);
 
     // Award karma for giving a referral (+50 pts)
     try {
