@@ -67,11 +67,35 @@ export default function PostRequestPage() { // Renamed from PostRequest
     }
   }, [editId, entityType, toast]);
 
-  const handleSubmit = async (values) => { // Changed requestData param to values for clarity with outline
+  const handleSubmit = async (values) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
     try {
+      // DUPLICATE GUARD: Check if user already posted a very similar question recently (within 5 minutes)
+      if (!editId && user?.email) {
+        const recentRequests = await JobRequest.filter(
+          { poster_email: user.email, status: 'active' },
+          '-created_date',
+          5
+        );
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const duplicate = recentRequests.find(r => {
+          const isRecent = new Date(r.created_date) > fiveMinAgo;
+          const descMatch = r.description?.trim().toLowerCase() === values.description?.trim().toLowerCase();
+          return isRecent && descMatch;
+        });
+        if (duplicate) {
+          toast({
+            title: "Looks like a duplicate",
+            description: "You already posted a very similar question. Check your existing requests.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // CRITICAL: Validate email exists before submission
       let userEmail = user?.email;
       
