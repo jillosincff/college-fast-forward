@@ -250,6 +250,18 @@ export default function AnswerComposer({
         console.log('📧 ⚠️ Skipping notification - posterEmail:', posterEmail, 'currentUser:', currentUser.email);
       }
 
+      // Notify tagged users (fire and forget)
+      const mentions = extractMentions(answerText);
+      if (mentions.length > 0) {
+        notifyTaggedUsers({
+          mentionedNames: mentions,
+          questionId: question.id,
+          questionTitle: question.title || question.role || 'a question',
+          answerPreview: answerText.trim().slice(0, 200),
+          taggerName: currentUser.full_name || currentUser.email.split('@')[0]
+        }).catch(err => console.log('Mention notification failed (non-critical):', err.message));
+      }
+
       // Clear form
       setAnswerText('');
 
