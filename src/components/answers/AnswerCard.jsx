@@ -436,6 +436,14 @@ export default function AnswerCard({
           margin-bottom: 16px;
         }
 
+        .mention-highlight {
+          color: #0021A5;
+          font-weight: 600;
+          background: rgba(0, 33, 165, 0.08);
+          padding: 1px 4px;
+          border-radius: 4px;
+        }
+
         .answer-actions {
           display: flex;
           flex-wrap: wrap;
