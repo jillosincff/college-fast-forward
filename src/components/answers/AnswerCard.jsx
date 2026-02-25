@@ -206,7 +206,11 @@ export default function AnswerCard({
 
           {/* Answer Text */}
           <div className="answer-text">
-            {answer.answer_text}
+            {answer.answer_text?.split(/(@[\w\s]+?)(?=\s@|\s[^@]|$)/g).map((part, i) => 
+              part.startsWith('@') ? (
+                <span key={i} className="mention-highlight">{part}</span>
+              ) : part
+            )}
           </div>
 
           {/* Actions */}
