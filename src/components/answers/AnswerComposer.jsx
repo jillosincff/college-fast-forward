@@ -11,6 +11,8 @@ import { base44 } from '@/api/base44Client';
 import { showKarmaToast, showTierUpToast } from '@/components/karma/KarmaToast';
 import ReferralSection from './ReferralSection';
 import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
+import MentionInput, { extractMentions } from './MentionInput';
+import { notifyTaggedUsers } from '@/functions/notifyTaggedUsers';
 
 const MAX_CHARS = 5000;
 
