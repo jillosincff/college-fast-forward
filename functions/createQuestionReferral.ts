@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    // Support both old (friendName, friendEmail) and new (inviteeEmail) formats
     const questionId = body.questionId;
     const inviteeEmail = (body.inviteeEmail || body.friendEmail || '').toLowerCase().trim();
     const personalNote = body.personalNote || '';
@@ -49,14 +48,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    // Check if invitee already has an account on CFF
-    // ALWAYS treat as external invite - send the magic link email
-    // This ensures the email is always sent, regardless of account status
-    let existingUser = null;
+    // Always treat as external invite
+    const existingUser = null;
     console.log('Processing referral for:', inviteeEmail, '- treating as external invite');
 
-    const isInternalTag = false; // Always send external invite email with magic link
-    const friendName = existingUser?.full_name || inviteeEmail.split('@')[0] || 'there';
+    const isInternalTag = false;
+    const friendName = inviteeEmail.split('@')[0] || 'there';
 
     // Create referral token
     const tokenPayload = {
@@ -65,12 +62,11 @@ Deno.serve(async (req) => {
       rn: referrerName || user.full_name,
       re: referrerEmail || user.email,
       fe: inviteeEmail,
-      exp: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+      exp: Date.now() + (30 * 24 * 60 * 60 * 1000)
     };
 
     const token = encodeToken(tokenPayload);
     
-    // Generate referral link
     const baseUrl = Deno.env.get('APP_BASE_URL') || 'https://getgatorshired.com';
     const referralLink = `${baseUrl}/#ReferralAnswer?token=${token}`;
 
@@ -89,34 +85,7 @@ Deno.serve(async (req) => {
       expires_at: new Date(tokenPayload.exp).toISOString()
     };
     
-    // Only add optional fields if they have values
-    if (existingUser?.id) {
-      referralData.referred_user_id = existingUser.id;
-    }
-    
     await base44.asServiceRole.entities.Referral.create(referralData);
-
-    // For internal tags, create an in-app notification
-    if (isInternalTag) {
-      try {
-        await base44.asServiceRole.entities.Notification.create({
-          recipient_email: inviteeEmail,
-          type: 'student_request_match',
-          title: `${referrerName?.split(' ')[0] || 'Someone'} thinks you can help`,
-          message: `${referrerName?.split(' ')[0] || 'Someone'} thinks you might be able to help a student with a career question.`,
-          action_url: `QuestionDetail?id=${questionId}`,
-          action_label: 'View Question',
-          priority: 'normal',
-          metadata: {
-            question_id: questionId,
-            referrer_name: referrerName,
-            referrer_id: user.id
-          }
-        });
-      } catch (notifErr) {
-        console.log('Failed to create notification (non-critical):', notifErr.message);
-      }
-    }
 
     // Parse student name
     let studentFirstName = 'A student';
@@ -129,51 +98,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send email - different templates for internal vs external
+    // Build email
     const referrerFirstName = referrerName?.split(' ')[0] || 'Someone';
     const emailSubject = `${referrerFirstName} thinks you can help a student`;
     
-    let emailBody;
-    
-    if (isInternalTag) {
-      // Internal tag: user has account, link directly to question
-      const questionUrl = `https://collegefastforward.com/#QuestionDetail?id=${questionId}`;
-      emailBody = `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-  <p>Hi ${friendName?.split(' ')[0] || 'there'},</p>
-  
-  <p><strong>${referrerName}</strong> thinks you might be able to help a student with a career question.</p>
-  
-  <div style="background: #f8f9fa; border-left: 4px solid #0021A5; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
-    <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; text-transform: uppercase;">
-      ${studentFirstName}${question.student_major ? ` • ${question.student_major}` : ''}
-    </p>
-    <p style="font-size: 16px; color: #1a1a1a; margin: 0; line-height: 1.5;">
-      "${(question.description || question.title || '').substring(0, 200)}${(question.description || '').length > 200 ? '...' : ''}"
-    </p>
-    ${question.help_types?.length > 0 ? `
-    <p style="font-size: 13px; color: #666; margin: 12px 0 0 0;">
-      Looking for help with: ${question.help_types.map(t => t.replace(/_/g, ' ')).join(', ')}
-    </p>
-    ` : ''}
-  </div>
-  
-  <div style="text-align: center; margin: 32px 0;">
-    <a href="${questionUrl}" style="display: inline-block; background: #0021A5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600;">
-      View Question & Respond →
-    </a>
-  </div>
-  
-  <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-  
-  <p style="font-size: 13px; color: #999;">
-    Takes 2-3 minutes. Could change their career.
-  </p>
-</div>
-      `.trim();
-    } else {
-      // External invite: magic link for no-account response
-      emailBody = `
+    const emailBody = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
   <p>Hi,</p>
   
@@ -210,16 +139,17 @@ Deno.serve(async (req) => {
     Takes 2-3 minutes. Could change their career.
   </p>
 </div>
-      `.trim();
-    }
+    `.trim();
 
-    // Use SendGrid for external emails since Core.SendEmail only works for app users
+    // CRITICAL: Use SendGrid directly for external emails
+    // Core.SendEmail only works for registered app users
     const sendGridApiKey = Deno.env.get('SENDGRID_API_KEY');
     if (!sendGridApiKey) {
       console.error('SENDGRID_API_KEY not set');
       return Response.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
+    console.log('Sending email via SendGrid to:', inviteeEmail);
     const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
@@ -239,9 +169,9 @@ Deno.serve(async (req) => {
       console.error('SendGrid error:', sgResponse.status, sgError);
       return Response.json({ error: 'Failed to send email' }, { status: 500 });
     }
-    console.log('✅ External referral email sent via SendGrid to:', inviteeEmail);
+    console.log('Email sent successfully via SendGrid to:', inviteeEmail);
 
-    // Award karma for giving a referral (+50 pts)
+    // Award karma for giving a referral
     try {
       const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
                                user.roles?.includes('parent') || user.roles?.includes('alumni');
@@ -255,7 +185,7 @@ Deno.serve(async (req) => {
           referenceId: questionId,
           description: `Referred ${inviteeEmail} to help a student`
         });
-        console.log('✅ Referral karma awarded');
+        console.log('Referral karma awarded');
       }
     } catch (karmaErr) {
       console.log('Referral karma failed (non-critical):', karmaErr.message);
@@ -276,12 +206,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      type: isInternalTag ? 'tagged' : 'invited',
-      userName: isInternalTag ? existingUser.full_name : null,
-      referralLink: isInternalTag ? null : referralLink,
-      message: isInternalTag 
-        ? `${existingUser.full_name} has been notified`
-        : `Invitation sent to your contact`
+      type: 'invited',
+      userName: null,
+      referralLink: referralLink,
+      message: 'Invitation sent to your contact'
     });
 
   } catch (error) {
