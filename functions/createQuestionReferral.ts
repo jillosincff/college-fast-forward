@@ -27,13 +27,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields: questionId and inviteeEmail' }, { status: 400 });
     }
 
-    // Get the question details
-    const questions = await base44.entities.JobRequest.filter({ id: questionId });
-    if (!questions || questions.length === 0) {
+    // Get the question details - try JobRequest first, then HelpRequest
+    let question = null;
+    try {
+      const jobRequests = await base44.asServiceRole.entities.JobRequest.filter({ id: questionId });
+      if (jobRequests && jobRequests.length > 0) question = jobRequests[0];
+    } catch (e) {
+      console.log('Not found in JobRequest, trying HelpRequest');
+    }
+    
+    if (!question) {
+      try {
+        const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({ id: questionId });
+        if (helpRequests && helpRequests.length > 0) question = helpRequests[0];
+      } catch (e) {
+        console.log('Not found in HelpRequest either');
+      }
+    }
+    
+    if (!question) {
       return Response.json({ error: 'Question not found' }, { status: 404 });
     }
-
-    const question = questions[0];
 
     // Check if invitee already has an account on CFF
     // ALWAYS treat as external invite - send the magic link email
