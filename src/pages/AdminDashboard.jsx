@@ -2513,35 +2513,12 @@ const CleanupDraftNames = () => {
   );
 };
 
-// Persona Audit Section Component
-const PersonaAuditSection = () => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const [filter, setFilter] = useState('mismatched'); // Default to showing only issues
-  const [updating, setUpdating] = useState(null);
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      // Fetch all users to audit personas
-      const allUsers = await base44.entities.User.filter({}, '-created_date', 500);
-      setUsers(allUsers || []);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load users for audit",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+// Extracted to components/admin/PersonaAuditTab.jsx and OpportunitiesManagementTab.jsx
+const PersonaAuditSection_REMOVED = null;
+const PLACEHOLDER_START = () => {
+  // This block is replaced by imports
+  return null;
+};
 
   // Identify potentially mislabeled users
   const analyzeMislabeling = (user) => {
