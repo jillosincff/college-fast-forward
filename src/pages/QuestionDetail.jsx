@@ -132,10 +132,19 @@ export default function QuestionDetailPage() {
   useEffect(() => {
     if (questionId) {
       loadQuestion();
+    } else {
+      // questionId not yet available — try parsing directly as fallback
+      const fallbackId = new URLSearchParams(window.location.hash.split('?')[1] || '').get('id');
+      if (fallbackId) {
+        loadQuestion(fallbackId);
+      }
     }
   }, [questionId]);
 
-  const loadQuestion = async () => {
+  const loadQuestion = async (overrideId) => {
+    const effectiveId = overrideId || questionId;
+    if (!effectiveId) return;
+    
     setIsLoading(true);
     try {
       // Try to get from HelpRequest first, then JobRequest
@@ -143,7 +152,7 @@ export default function QuestionDetailPage() {
       let questionSource = null;
       
       try {
-        const helpRequests = await HelpRequest.filter({ id: questionId });
+        const helpRequests = await HelpRequest.filter({ id: effectiveId });
         if (helpRequests && helpRequests.length > 0) {
           q = helpRequests[0];
           questionSource = 'HelpRequest';
@@ -154,7 +163,7 @@ export default function QuestionDetailPage() {
       
       if (!q) {
         try {
-          const jobRequests = await JobRequest.filter({ id: questionId });
+          const jobRequests = await JobRequest.filter({ id: effectiveId });
           if (jobRequests && jobRequests.length > 0) {
             q = jobRequests[0];
             questionSource = 'JobRequest';
@@ -171,11 +180,11 @@ export default function QuestionDetailPage() {
           JobRequest.list('-created_date', 500)
         ]);
         
-        q = helpRequests.find(item => item.id === questionId);
+        q = helpRequests.find(item => item.id === effectiveId);
         if (q) {
           questionSource = 'HelpRequest';
         } else {
-          q = jobRequests.find(item => item.id === questionId);
+          q = jobRequests.find(item => item.id === effectiveId);
           if (q) questionSource = 'JobRequest';
         }
       }
@@ -192,8 +201,8 @@ export default function QuestionDetailPage() {
       // Load answers FIRST so we can get accurate count
       // Load from both Answer (for HelpRequests) and JobAnswer (for JobRequests)
       const [regularAnswers, jobAnswers] = await Promise.all([
-        Answer.filter({ question_id: questionId }).catch(() => []),
-        JobAnswer.filter({ job_request_id: questionId }).catch(() => [])
+        Answer.filter({ question_id: effectiveId }).catch(() => []),
+        JobAnswer.filter({ job_request_id: effectiveId }).catch(() => [])
       ]);
       
       // Normalize JobAnswer format to match Answer format
@@ -237,10 +246,10 @@ export default function QuestionDetailPage() {
       setQuestion(normalizedQuestion);
 
       // Track view in session storage to avoid counting multiple views from same user
-      const viewKey = `viewed_${questionId}`;
+      const viewKey = `viewed_${effectiveId}`;
       const hasViewed = sessionStorage.getItem(viewKey);
 
-      console.log('View tracking check:', { viewKey, hasViewed, questionId, questionSource });
+      console.log('View tracking check:', { viewKey, hasViewed, questionId: effectiveId, questionSource });
 
       // Only track if user hasn't viewed this question in this session
       if (hasViewed) {
@@ -252,7 +261,7 @@ export default function QuestionDetailPage() {
       
       // Use backend function to increment view count (bypasses RLS)
       base44.functions.invoke('trackQuestionView', {
-        questionId: questionId,
+        questionId: effectiveId,
         questionType: questionSource
       }).then(response => {
         console.log('trackQuestionView response:', response);
