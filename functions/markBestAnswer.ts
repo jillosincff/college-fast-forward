@@ -196,6 +196,23 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Award student karma for thanking/marking best answer (+5 pts)
+    try {
+      const isGator = user.persona === 'gator' || user.roles?.includes('gator');
+      if (isGator) {
+        await base44.functions.invoke('awardStudentKarma', {
+          userId: user.id,
+          userEmail: user.email,
+          actionType: 'thanked_answer',
+          referenceId: answerId,
+          description: 'Marked an answer as best/helpful'
+        });
+        console.log('Awarded +5 student karma for thanked_answer to:', user.email);
+      }
+    } catch (studentKarmaErr) {
+      console.log('Student karma for thanked_answer failed (non-critical):', studentKarmaErr.message);
+    }
+
     // Mark activation for the student who marked a best answer
     try {
       const studentPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
