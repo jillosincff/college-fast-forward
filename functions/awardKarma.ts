@@ -237,6 +237,19 @@ Deno.serve(async (req) => {
     
     const nextTier = getNextTier(newFamilyTotal);
     
+    // Try to get position data for the toast
+    let positionData = null;
+    try {
+      if (boostResult.count > 0) {
+        const posRes = await base44.asServiceRole.functions.invoke('getStudentPositionData', { parentUserId });
+        if (posRes?.success || posRes?.current_position) {
+          positionData = posRes;
+        }
+      }
+    } catch (e) {
+      console.log('Position data fetch failed (non-critical):', e.message);
+    }
+
     return Response.json({
       success: true,
       points_awarded: points,
@@ -248,7 +261,8 @@ Deno.serve(async (req) => {
       next_tier: nextTier,
       boosted_students: boostResult.boostedStudents,
       boosted_count: boostResult.count,
-      alumni_career_requests_boosted: alumniCareerRequestsBoosted
+      alumni_career_requests_boosted: alumniCareerRequestsBoosted,
+      position_data: positionData
     });
     
   } catch (error) {
