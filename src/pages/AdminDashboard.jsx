@@ -1148,249 +1148,32 @@ const SignUpDiagnostics = React.lazy(() => import('@/components/admin/SignUpDiag
 // Manual User Creation Component
 const ManualUserCreation = React.lazy(() => import('@/components/admin/ManualUserCreation'));
 
-// Component to show recent approved/rejected requests
+// Inline small helper components
 const InviteRequestHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const requests = await base44.entities.InviteRequest.filter(
-          { status: { $in: ['approved', 'rejected'] } },
-          '-updated_date',
-          20
-        );
-        setHistory(requests || []);
-      } catch (error) {
-        console.error('Failed to load history:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadHistory();
-  }, []);
-
-  if (loading) {
-    return <div className="text-center text-slate-500 py-4">Loading history...</div>;
-  }
-
-  if (history.length === 0) {
-    return <div className="text-center text-slate-500 py-4">No recent actions</div>;
-  }
-
-  return (
-    <div className="space-y-2">
-      {history.map((request) => (
-        <div key={request.id} className="flex items-center justify-between py-2 border-b last:border-0">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-slate-900">{request.email}</p>
-            <p className="text-xs text-slate-500">
-              {request.status === 'approved' ? '✅ Approved' : '❌ Rejected'} by {request.approved_by || 'Admin'} 
-              {' · '}{new Date(request.updated_date).toLocaleDateString()}
-            </p>
-          </div>
-          {request.invite_code_generated && (
-            <span className="text-xs font-mono bg-slate-100 px-2 py-1 rounded">
-              {request.invite_code_generated}
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  useEffect(() => { base44.entities.InviteRequest.filter({ status: { $in: ['approved', 'rejected'] } }, '-updated_date', 20).then(r => setHistory(r || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="text-center text-slate-500 py-4">Loading...</div>;
+  if (!history.length) return <div className="text-center text-slate-500 py-4">No recent actions</div>;
+  return (<div className="space-y-2">{history.map(r => (<div key={r.id} className="flex items-center justify-between py-2 border-b last:border-0"><div className="flex-1"><p className="text-sm font-medium text-slate-900">{r.email}</p><p className="text-xs text-slate-500">{r.status === 'approved' ? '✅' : '❌'} {new Date(r.updated_date).toLocaleDateString()}</p></div>{r.invite_code_generated && <span className="text-xs font-mono bg-slate-100 px-2 py-1 rounded">{r.invite_code_generated}</span>}</div>))}</div>);
 };
-
-// Reusable Metric Card Component
 const MetricCard = ({ title, value, change, percentage, status, icon: Icon, color, isPercentage = false }) => {
-  const colors = {
-    blue: 'text-blue-600 bg-blue-100',
-    green: 'text-green-600 bg-green-100',
-    purple: 'text-purple-600 bg-purple-100',
-    orange: 'text-orange-600 bg-orange-100',
-    red: 'text-red-600 bg-red-100'
-  };
-
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div className={`p-2 rounded-lg ${colors[color]}`}>
-            <Icon className="w-4 h-4" />
-          </div>
-          {status && (
-            <div className={`w-3 h-3 rounded-full ${
-              status === 'good' ? 'bg-green-500' : 'bg-yellow-500'
-            }`} />
-          )}
-        </div>
-        <div className="mt-4">
-          <p className="text-sm text-slate-600">{title}</p>
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
-          {change !== undefined && (
-            <p className={`text-sm mt-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {change >= 0 ? '+' : ''}{change}{isPercentage ? '%' : ''} this week
-            </p>
-          )}
-          {percentage !== undefined && (
-            <p className="text-sm text-slate-500 mt-1">{percentage}% of total</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const c = { blue: 'text-blue-600 bg-blue-100', green: 'text-green-600 bg-green-100', purple: 'text-purple-600 bg-purple-100', orange: 'text-orange-600 bg-orange-100', red: 'text-red-600 bg-red-100' };
+  return (<Card><CardContent className="pt-6"><div className="flex items-center justify-between"><div className={`p-2 rounded-lg ${c[color]}`}><Icon className="w-4 h-4" /></div>{status && <div className={`w-3 h-3 rounded-full ${status === 'good' ? 'bg-green-500' : 'bg-yellow-500'}`} />}</div><div className="mt-4"><p className="text-sm text-slate-600">{title}</p><p className="text-2xl font-bold text-slate-900">{value}</p>{change !== undefined && <p className={`text-sm mt-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>{change >= 0 ? '+' : ''}{change}{isPercentage ? '%' : ''} this week</p>}{percentage !== undefined && <p className="text-sm text-slate-500 mt-1">{percentage}% of total</p>}</div></CardContent></Card>);
 };
+const GrowthChart = ({ data }) => (<Card><CardHeader><CardTitle className="text-lg">Daily Sign-ups (Last 30 Days)</CardTitle></CardHeader><CardContent><div className="h-64 flex items-end justify-between space-x-1">{data.slice(-30).map((d, i) => { const mx = Math.max(...data.map(x => x.count), 1); return <div key={i} className="flex-1 flex flex-col items-center"><div className="w-full bg-blue-200 rounded-t hover:bg-blue-300 cursor-pointer" style={{ height: `${Math.max((d.count / mx) * 200, 4)}px` }} title={`${d.date}: ${d.count}`} /><span className="text-xs text-slate-500 mt-1">{new Date(d.date).getDate()}</span></div>; })}</div></CardContent></Card>);
+const UserBreakdownChart = ({ data }) => { const d = { ...data }; if (d.student && d.gator) { d.gator += d.student; delete d.student; } else if (d.student) { d.gator = d.student; delete d.student; } const t = Object.values(d).reduce((s, c) => s + c, 0); return (<Card><CardHeader><CardTitle className="text-lg">User Types</CardTitle></CardHeader><CardContent><div className="space-y-4">{Object.entries(d).map(([k, v]) => { const p = t > 0 ? (v / t) * 100 : 0; return <div key={k} className="space-y-2"><div className="flex justify-between"><span className="text-sm font-medium capitalize">{k}</span><span className="text-sm text-slate-600">{v} ({Math.round(p)}%)</span></div><div className="w-full bg-slate-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{ width: `${p}%` }} /></div></div>; })}</div></CardContent></Card>); };
+const FeatureUsageTable = ({ data }) => (<Card><CardHeader><CardTitle className="text-lg">Most Popular Features</CardTitle></CardHeader><CardContent><div className="space-y-2">{data.map((f, i) => <div key={i} className="flex justify-between items-center py-2 border-b"><span className="font-medium">{f.name}</span><div><span className="font-bold">{f.usage}</span><span className="text-sm text-slate-500 ml-2">uses</span></div></div>)}</div></CardContent></Card>);
+const PerformanceChart = ({ data }) => (<Card><CardHeader><CardTitle className="text-lg">Performance Over Time</CardTitle></CardHeader><CardContent><div className="h-48 flex items-end space-x-2">{data.slice(-24).map((p, i) => { const mx = Math.max(...data.map(d => d.responseTime), 1); return <div key={i} className="flex-1 flex flex-col items-center"><div className="w-full bg-green-200 rounded-t" style={{ height: `${Math.max((p.responseTime / mx) * 150, 2)}px` }} title={`${p.hour}:00 - ${p.responseTime}ms`} /><span className="text-xs text-slate-500 mt-1">{p.hour}</span></div>; })}</div></CardContent></Card>);
+const DatabaseBreakdownTable = ({ data }) => (<Card><CardHeader><CardTitle className="text-lg">Database Entity Breakdown</CardTitle></CardHeader><CardContent><div className="space-y-2">{data.map((e, i) => <div key={i} className="flex justify-between items-center py-2 border-b"><div><span className="font-medium">{e.name}</span><span className="text-sm text-slate-500 ml-2">({e.avgQueryTime}ms)</span></div><span className="font-bold">{e.count} records</span></div>)}</div></CardContent></Card>);
 
-// Growth Chart Component
-const GrowthChart = ({ data }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">Daily Sign-ups (Last 30 Days)</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="h-64 flex items-end justify-between space-x-1">
-        {data.slice(-30).map((day, index) => {
-          const maxCount = data.length > 0 ? Math.max(...data.map(d => d.count)) : 0;
-          const height = maxCount > 0 ? Math.max((day.count / maxCount) * 200, 4) : 4;
-          
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div 
-                className="w-full bg-blue-200 rounded-t hover:bg-blue-300 transition-colors cursor-pointer"
-                style={{ height: `${height}px` }}
-                title={`${day.date}: ${day.count} signups`}
-              />
-              <span className="text-xs text-slate-500 mt-1">
-                {new Date(day.date).getDate()}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-);
+// Extracted lazy components
+const BackfillStudentRequests = React.lazy(() => import('@/components/admin/BackfillSection'));
+const ExportUsersSection = React.lazy(() => import('@/components/admin/ExportUsersSection'));
+const FixMissingPersonasSection = React.lazy(() => import('@/components/admin/FixMissingPersonasTab'));
 
-// User Breakdown Chart
-const UserBreakdownChart = ({ data }) => {
-  // Combine student and gator counts since they're the same
-  const combinedData = { ...data };
-  if (combinedData.student && combinedData.gator) {
-    combinedData.gator = (combinedData.gator || 0) + (combinedData.student || 0);
-    delete combinedData.student;
-  } else if (combinedData.student && !combinedData.gator) {
-    combinedData.gator = combinedData.student;
-    delete combinedData.student;
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">User Types</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {Object.entries(combinedData).map(([type, count]) => {
-            const total = Object.values(combinedData).reduce((sum, c) => sum + c, 0);
-            const percentage = total > 0 ? (count / total) * 100 : 0;
-            
-            return (
-              <div key={type} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium capitalize">{type}</span>
-                  <span className="text-sm text-slate-600">{count} ({Math.round(percentage)}%)</span>
-                </div>
-                <div className="w-full bg-blue-600 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all" 
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Feature Usage Table
-const FeatureUsageTable = ({ data }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">Most Popular Features</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-2">
-        {data.map((feature, index) => (
-          <div key={index} className="flex justify-between items-center py-2 border-b">
-            <div>
-              <span className="font-medium">{feature.name}</span>
-            </div>
-            <div className="text-right">
-              <span className="font-bold">{feature.usage}</span>
-              <span className="text-sm text-slate-500 ml-2">uses</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-// Performance Chart
-const PerformanceChart = ({ data }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">Performance Over Time</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="h-48 flex items-end space-x-2">
-        {data.slice(-24).map((point, index) => {
-          const maxTime = data.length > 0 ? Math.max(...data.map(d => d.responseTime)) : 0;
-          const height = maxTime > 0 ? Math.max((point.responseTime / maxTime) * 150, 2) : 2;
-          
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div 
-                className="w-full bg-green-200 rounded-t"
-                style={{ height: `${height}px` }}
-                title={`${point.hour}:00 - ${point.responseTime}ms`}
-              />
-              <span className="text-xs text-slate-500 mt-1">{point.hour}</span>
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-// Database Breakdown Table
-const DatabaseBreakdownTable = ({ data }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">Database Entity Breakdown</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-2">
-        {data.map((entity, index) => (
-          <div key={index} className="flex justify-between items-center py-2 border-b">
-            <div>
-              <span className="font-medium">{entity.name}</span>
-              <span className="text-sm text-slate-500 ml-2">({entity.avgQueryTime}ms avg)</span>
-            </div>
-            <span className="font-bold">{entity.count} records</span>
-          </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-// Backfill Student Requests Component
-const BackfillStudentRequests = () => {
+// REMOVED: BackfillStudentRequests inline (now in BackfillSection)
+const _PLACEHOLDER_BackfillStudentRequests = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
