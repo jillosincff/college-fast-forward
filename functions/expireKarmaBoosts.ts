@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     
     // Admin check for manual triggers
     const user = await base44.auth.me().catch(() => null);
-    if (user && user.role !== 'admin') {
+    if (user && user.role !== 'admin' && !user.roles?.includes('admin')) {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
     
@@ -61,12 +61,35 @@ Deno.serve(async (req) => {
       }
     }
     
-    console.log(`Expired ${expiredCount} student boosts and ${questionsExpired} question boosts`);
+    // Also expire boosts on HelpRequests
+    let helpRequestsExpired = 0;
+    try {
+      const boostedHelpRequests = await base44.asServiceRole.entities.HelpRequest.filter({
+        karma_boost: { $gt: 0 }
+      });
+      for (const hr of boostedHelpRequests) {
+        if (hr.boosted_until) {
+          const expiresAt = new Date(hr.boosted_until);
+          if (expiresAt < now) {
+            await base44.asServiceRole.entities.HelpRequest.update(hr.id, {
+              karma_boost: 0,
+              boosted_until: null
+            });
+            helpRequestsExpired++;
+          }
+        }
+      }
+    } catch (e) {
+      console.log('HelpRequest expiry check failed (non-critical):', e.message);
+    }
+
+    console.log(`Expired ${expiredCount} student boosts, ${questionsExpired} question boosts, ${helpRequestsExpired} help request boosts`);
     
     return Response.json({
       success: true,
       expired_students: expiredCount,
       expired_questions: questionsExpired,
+      expired_help_requests: helpRequestsExpired,
       checked_at: now.toISOString()
     });
     
