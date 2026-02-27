@@ -41,6 +41,8 @@ import ExploreSection from '@/components/dashboard/student/ExploreSection';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import FastTrackProgressCard from '@/components/dashboard/student/FastTrackProgressCard';
 import RecentFeedbackCard from '@/components/dashboard/student/RecentFeedbackCard';
+import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
+import StudentKarmaExplainer from '@/components/karma/StudentKarmaExplainer';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -406,6 +408,9 @@ export default function Dashboard() {
         <FastTrackProgressCard user={user} />
         <RecentFeedbackCard user={user} />
 
+        {/* Student Karma Explainer (first visit) */}
+        <StudentKarmaExplainer user={user} />
+
         {/* Student Karma Card */}
         <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />
 
@@ -442,6 +447,11 @@ export default function Dashboard() {
         {/* Family Karma (if applicable) */}
         {(user?.family_karma > 0 || linkedParents.length > 0) && (
           <FamilyKarmaCard user={user} viewMode="student" />
+        )}
+
+        {/* Family Leaderboard */}
+        {(user?.family_group_id || linkedParents.length > 0) && (
+          <FamilyLeaderboard user={user} />
         )}
 
         {/* 10. MORE TOOLS */}

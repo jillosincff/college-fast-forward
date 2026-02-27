@@ -26,6 +26,7 @@ import YouGotResponseBanner from '@/components/dashboard/parent/YouGotResponseBa
 import PledgeReminderBanner from '@/components/dashboard/parent/PledgeReminderBanner';
 import SkippedPledgeQuestionBanner from '@/components/dashboard/parent/SkippedPledgeQuestionBanner';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -476,6 +477,9 @@ export default function ParentDashboard() {
 
           {/* ========== KARMA EXPLAINER (dismissible) ========== */}
           <KarmaExplainerCard />
+
+          {/* ========== FAMILY LEADERBOARD ========== */}
+          <FamilyLeaderboard user={user} />
 
           {/* ========== QUICK ACTIONS ========== */}
           <section className="grid grid-cols-1 gap-3 sm:gap-4">
