@@ -60,7 +60,7 @@ export default function FamilyKarmaBoostBadge({
     }  // Champion Family
   };
   
-  const style = levelStyles[boostLevel] || levelStyles[3] || levelStyles[1];
+  const closestLevel = levelStyles[boostLevel] || levelStyles[Math.max(...Object.keys(levelStyles).map(Number).filter(k => k <= boostLevel))] || levelStyles[1];
   const levelName = boostLevel >= 5 ? 'Champion Family' : boostLevel >= 3 ? 'Priority Family' : boostLevel >= 2 ? 'Engaged Family' : 'Active Family';
   
   if (compact) {

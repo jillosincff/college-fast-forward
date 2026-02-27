@@ -75,7 +75,7 @@ export default function FamilyLeaderboard({ user }) {
               </span>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-semibold truncate ${isMe ? 'text-blue-700' : 'text-gray-800'}`}>
-                  {fam.family_group_id?.replace(/_/g, ' ') || `Family #${rank}`}
+                  {isMe ? 'Your Family' : `Family #${rank}`}
                   {isMe && <span className="ml-1 text-xs text-blue-500">(You)</span>}
                 </p>
               </div>
@@ -93,7 +93,7 @@ export default function FamilyLeaderboard({ user }) {
               <span className="w-7 text-center font-bold text-sm text-gray-400">#{myRank}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate text-blue-700">
-                  {myFamily.family_group_id?.replace(/_/g, ' ') || 'Your Family'}
+                  Your Family
                   <span className="ml-1 text-xs text-blue-500">(You)</span>
                 </p>
               </div>

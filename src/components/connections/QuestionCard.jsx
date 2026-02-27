@@ -794,6 +794,12 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
           border: 1px solid #F59E0B;
         }
 
+        .karma-boost-badge.level-4 {
+          background: linear-gradient(90deg, #FEF3C7 0%, #FCD34D 100%);
+          color: #92400E;
+          border: 1px solid #F59E0B;
+        }
+
         .karma-boost-badge.level-5 {
           background: linear-gradient(90deg, #FFEDD5 0%, #FB923C 100%);
           color: #9A3412;

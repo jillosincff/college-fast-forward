@@ -237,17 +237,42 @@ Deno.serve(async (req) => {
     
     const nextTier = getNextTier(newFamilyTotal);
     
-    // Try to get position data for the toast
+    // Inline position data calculation for the toast (avoids server-to-server auth issues)
     let positionData = null;
     try {
-      if (boostResult.count > 0) {
-        const posRes = await base44.asServiceRole.functions.invoke('getStudentPositionData', { parentUserId });
-        if (posRes?.success || posRes?.current_position) {
-          positionData = posRes;
+      if (boostResult.count > 0 && boostResult.boostedStudents.length > 0) {
+        const studentEmails = boostResult.boostedStudents.map(s => s.email);
+        const allRequests = await base44.asServiceRole.entities.JobRequest.filter(
+          { status: 'active' },
+          '-priority_score',
+          200
+        );
+        
+        for (let i = 0; i < allRequests.length; i++) {
+          const r = allRequests[i];
+          if (studentEmails.includes(r.created_by) || studentEmails.includes(r.poster_email)) {
+            const currentPosition = i + 1;
+            const originalBoost = r.karma_boost || 0;
+            const unboostedPriority = (r.priority_score || 0) - (originalBoost * 100);
+            
+            const tempRequests = allRequests.map(req => ({
+              id: req.id,
+              _sortScore: req.id === r.id ? unboostedPriority : (req.priority_score || 0)
+            }));
+            tempRequests.sort((a, b) => b._sortScore - a._sortScore);
+            const posWithout = tempRequests.findIndex(t => t.id === r.id) + 1;
+            
+            positionData = {
+              current_position: currentPosition,
+              total_requests: allRequests.length,
+              slots_gained: posWithout - currentPosition
+            };
+            break;
+          }
         }
       }
     } catch (e) {
-      console.log('Position data fetch failed (non-critical):', e.message);
+      console.log('Position data calc failed (non-critical):', e.message);
     }
 
     return Response.json({

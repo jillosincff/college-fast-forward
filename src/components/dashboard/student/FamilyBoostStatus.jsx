@@ -16,7 +16,9 @@ export default function FamilyBoostStatus({
   const [positionData, setPositionData] = useState(null);
 
   useEffect(() => {
-    loadPositionData();
+    if (boostLevel > 0 && !isExpired) {
+      loadPositionData();
+    }
   }, [boostLevel]);
 
   const loadPositionData = async () => {
@@ -30,9 +32,8 @@ export default function FamilyBoostStatus({
     }
   };
 
-  const now = new Date();
   const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
-  const isExpired = expiresAt && expiresAt <= now;
+  const isExpired = expiresAt && expiresAt <= new Date();
   const isActive = boostLevel > 0 && !isExpired;
   
   // Derive parent name from multiple sources

@@ -211,6 +211,33 @@ Deno.serve(async (req) => {
           month_reset_date: nextMonthStartFK.toISOString(),
         });
 
+        // Propagate boost to linked students' questions (same as awardKarma)
+        if (familyTier.boost > 0) {
+          try {
+            const familyMembers = await base44.asServiceRole.entities.User.filter({ family_group_id: familyGroupId });
+            const studentMemberEmails = familyMembers
+              .filter(m => m.persona === 'gator' || m.persona === 'student')
+              .map(m => m.email);
+
+            for (const sEmail of studentMemberEmails) {
+              const questions = await base44.asServiceRole.entities.JobRequest.filter({
+                created_by: sEmail,
+                status: 'active'
+              });
+              for (const q of questions) {
+                await base44.asServiceRole.entities.JobRequest.update(q.id, {
+                  karma_boost: familyTier.boost,
+                  boosted_until: boostExpiresAt.toISOString(),
+                  priority_score: (q.is_boosted ? 999 : 0) + (familyTier.boost * 100)
+                });
+              }
+            }
+            console.log(`Propagated boost ${familyTier.boost} to ${studentMemberEmails.length} students' questions`);
+          } catch (boostErr) {
+            console.log('Question boost propagation failed (non-critical):', boostErr.message);
+          }
+        }
+
         familyRollUp = { total: newFamilyTotal, level: familyTier.name, boost: familyTier.boost };
         console.log(`Rolled up ${points} student karma to family ${familyGroupId}, new total: ${newFamilyTotal}`);
       }

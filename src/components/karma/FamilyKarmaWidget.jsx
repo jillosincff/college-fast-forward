@@ -95,8 +95,7 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
     );
   }
 
-  const rawLevel = karmaData?.karma_level || 'none';
-  const level = rawLevel || 'none';
+  const level = karmaData?.karma_level || 'none';
   const tierStyle = TIER_STYLES[level] || TIER_STYLES.none;
   const totalKarma = karmaData?.total_karma || 0;
   const nextLevel = karmaData?.next_level;

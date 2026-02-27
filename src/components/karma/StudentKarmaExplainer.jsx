@@ -5,7 +5,9 @@ import { navigate } from '@/components/utils/navigation';
 const DISMISSED_KEY = 'cff_student_karma_explainer_dismissed';
 
 export default function StudentKarmaExplainer({ user }) {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState(() => {
+    try { return !!localStorage.getItem(DISMISSED_KEY); } catch { return false; }
+  });
   const [expanded, setExpanded] = useState(false);
 
   const studentKarma = user?.student_karma || 0;
