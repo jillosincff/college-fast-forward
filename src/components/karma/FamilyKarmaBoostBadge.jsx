@@ -35,27 +35,33 @@ export default function FamilyKarmaBoostBadge({
   // Silver: #C0C0C0, Gold: #FFD700, Platinum: #E5E4E2
   const levelStyles = {
     1: { 
-      bg: 'linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #A8A8A8 100%)', 
-      text: '#4A4A4A', 
-      iconBg: '#C0C0C0',
-      border: '#B0B0B0'
-    }, // Silver
+      bg: 'linear-gradient(135deg, #DBEAFE 0%, #93C5FD 50%, #60A5FA 100%)', 
+      text: '#1E40AF', 
+      iconBg: '#93C5FD',
+      border: '#60A5FA'
+    }, // Active Family
     2: { 
-      bg: 'linear-gradient(135deg, #FFE066 0%, #FFD700 50%, #DAA520 100%)', 
-      text: '#6B4D00', 
-      iconBg: '#FFD700',
-      border: '#DAA520'
-    }, // Gold
+      bg: 'linear-gradient(135deg, #EDE9FE 0%, #C4B5FD 50%, #A78BFA 100%)', 
+      text: '#5B21B6', 
+      iconBg: '#C4B5FD',
+      border: '#A78BFA'
+    }, // Engaged Family
     3: { 
-      bg: 'linear-gradient(135deg, #F5F5F5 0%, #E5E4E2 50%, #D4D4D4 100%)', 
-      text: '#4A4A4A', 
-      iconBg: '#E5E4E2',
-      border: '#C0C0C0'
-    }  // Platinum
+      bg: 'linear-gradient(135deg, #FEF3C7 0%, #FCD34D 50%, #F59E0B 100%)', 
+      text: '#92400E', 
+      iconBg: '#FCD34D',
+      border: '#F59E0B'
+    }, // Priority Family
+    5: { 
+      bg: 'linear-gradient(135deg, #FFEDD5 0%, #FB923C 50%, #F97316 100%)', 
+      text: '#9A3412', 
+      iconBg: '#FB923C',
+      border: '#F97316'
+    }  // Champion Family
   };
   
-  const style = levelStyles[boostLevel] || levelStyles[1];
-  const levelName = boostLevel >= 3 ? 'Platinum' : boostLevel >= 2 ? 'Gold' : 'Silver';
+  const style = levelStyles[Math.min(boostLevel, 3)] || levelStyles[1];
+  const levelName = boostLevel >= 5 ? 'Champion Family' : boostLevel >= 3 ? 'Priority Family' : boostLevel >= 2 ? 'Engaged Family' : 'Active Family';
   
   if (compact) {
     return (
@@ -66,7 +72,7 @@ export default function FamilyKarmaBoostBadge({
           color: style.text,
           border: `1px solid ${style.border}`
         }}
-        title={`Boosted by Family Karma (${levelName}) - ${timeRemaining}`}
+        title={`Boosted by ${levelName} - ${timeRemaining}`}
       >
         <Zap className="w-3 h-3" style={{ color: style.text }} />
         {levelName}
@@ -90,7 +96,7 @@ export default function FamilyKarmaBoostBadge({
       </div>
       <div className="flex flex-col">
         <span className="text-xs font-bold" style={{ color: style.text }}>
-          ⚡ {levelName} Family Boost
+          ⚡ {levelName} Boost
         </span>
         <span className="text-[10px] opacity-75" style={{ color: style.text }}>
           Pinned to Top • {timeRemaining}

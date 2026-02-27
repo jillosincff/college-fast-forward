@@ -11,10 +11,10 @@ const TIER_LABELS = {
 
 const TIER_BOOSTS = {
   none: '0x',
-  active: '+0.5x',
-  engaged: '+1x',
-  priority: '+2x',
-  champion: '+3x'
+  active: '+1x',
+  engaged: '+2x',
+  priority: '+3x',
+  champion: '+5x'
 };
 
 export function showKarmaToast(toast, karmaResult) {
