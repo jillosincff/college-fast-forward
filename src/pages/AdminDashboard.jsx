@@ -2513,49 +2513,12 @@ const CleanupDraftNames = () => {
   );
 };
 
-// Extracted to components/admin/PersonaAuditTab.jsx and OpportunitiesManagementTab.jsx
-const PersonaAuditSection_REMOVED = null;
-const PLACEHOLDER_START = () => {
-  // This block is replaced by imports
-  return null;
-};
+const PersonaAuditSection = React.lazy(() => import('@/components/admin/PersonaAuditTab'));
+const OpportunitiesManagement = React.lazy(() => import('@/components/admin/OpportunitiesManagementTab'));
+const EngagementAnalytics = React.lazy(() => import('@/components/admin/EngagementAnalyticsTab'));
+const TopStudentsSection = React.lazy(() => import('@/components/admin/TopStudentsTab'));
 
-  // Identify potentially mislabeled users
-  const analyzeMislabeling = (user) => {
-    const email = user.email?.toLowerCase() || '';
-    const persona = user.persona;
-    const issues = [];
-
-    // UFL email should be gator/student
-    if (email.endsWith('@ufl.edu') && persona && persona !== 'gator' && persona !== 'student') {
-      issues.push(`@ufl.edu email but persona is "${persona}" (expected: gator)`);
-    }
-
-    // Non-UFL email labeled as gator might be wrong (unless they're actually a student with personal email)
-    if (!email.endsWith('@ufl.edu') && (persona === 'gator' || persona === 'student')) {
-      issues.push(`Non-UFL email but persona is "${persona}" - verify if correct`);
-    }
-
-    // Alumni with very recent graduation year might actually be a current student
-    if (persona === 'alumni' && user.graduation_year && user.graduation_year >= new Date().getFullYear()) {
-      issues.push(`Alumni with graduation year ${user.graduation_year} - might be current student`);
-    }
-
-    // Parent without any student links might be alumni instead
-    if (persona === 'parent' && 
-        (!user.student_emails || user.student_emails.length === 0) && 
-        (!user.student_ids || user.student_ids.length === 0) &&
-        !user.student_email) {
-      // Check if they have alumni-like fields
-      if (user.graduation_year || user.major) {
-        issues.push(`Parent with no linked students but has graduation year/major - might be alumni`);
-      }
-    }
-
-    return issues;
-  };
-
-  const handleUpdatePersona = async (userId, newPersona) => {
+const _REMOVED = async (userId, newPersona) => {
     setUpdating(userId);
     try {
       const response = await base44.functions.invoke('fixUserAccount', {
