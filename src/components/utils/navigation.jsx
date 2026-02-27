@@ -18,25 +18,31 @@ export const navigate = (page, params = {}) => {
   window.location.hash = hash;
 };
 
+function parseHashParams() {
+  try {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const searchParams = new URLSearchParams(hashPart);
+    const paramsObj = {};
+    for (const [key, value] of searchParams) {
+      paramsObj[key] = value;
+    }
+    return paramsObj;
+  } catch (error) {
+    console.error('Error parsing URL params:', error);
+    return {};
+  }
+}
+
 export const useParams = () => {
-  const [params, setParams] = React.useState({});
+  // Initialize synchronously from URL to avoid blank-screen race condition
+  const [params, setParams] = React.useState(() => parseHashParams());
   
   React.useEffect(() => {
     const updateParams = () => {
-      try {
-        const hashPart = window.location.hash.split('?')[1] || '';
-        const searchParams = new URLSearchParams(hashPart);
-        const paramsObj = {};
-        for (const [key, value] of searchParams) {
-          paramsObj[key] = value;
-        }
-        setParams(paramsObj);
-      } catch (error) {
-        console.error('Error parsing URL params:', error);
-        setParams({});
-      }
+      setParams(parseHashParams());
     };
     
+    // Re-parse in case hash changed between initial render and effect
     updateParams();
     window.addEventListener('hashchange', updateParams);
     return () => window.removeEventListener('hashchange', updateParams);
