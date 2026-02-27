@@ -28,8 +28,20 @@ export function showKarmaToast(toast, karmaResult) {
   // If parent has linked students with boosts applied, show the impactful boost toast
   if (boosted_count > 0 && boosted_students?.length > 0) {
     const studentName = boosted_students[0].name || 'your student';
-    // Estimate position jump based on boost multiplier
-    const estimatedJump = Math.max(1, Math.round(40 * 0.2 * (boost_multiplier || 0.5)));
+
+    // Try to get real position data
+    if (karmaResult.position_data) {
+      const pd = karmaResult.position_data;
+      toast({
+        title: `🔥 ${studentName}'s help request jumped to #${pd.current_position} of ${pd.total_requests}!`,
+        description: `+${points_awarded} Family Karma • +${pd.slots_gained} slots from your help`,
+        duration: 4000,
+      });
+      return;
+    }
+
+    // Fallback: estimate
+    const estimatedJump = Math.max(1, Math.round(40 * 0.2 * (boost_multiplier || 1)));
     
     toast({
       title: `🔥 Your help just moved ${studentName}'s question up ~${estimatedJump} spots!`,
