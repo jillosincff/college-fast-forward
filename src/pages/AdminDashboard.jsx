@@ -1172,13 +1172,8 @@ const BackfillStudentRequests = React.lazy(() => import('@/components/admin/Back
 const ExportUsersSection = React.lazy(() => import('@/components/admin/ExportUsersSection'));
 const FixMissingPersonasSection = React.lazy(() => import('@/components/admin/FixMissingPersonasTab'));
 
-// REMOVED: BackfillStudentRequests inline (now in BackfillSection)
-const _PLACEHOLDER_BackfillStudentRequests = () => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [progress, setProgress] = useState(null);
-
+const _SKIP = () => {
+  // All below code is dead — components extracted to separate files
   const runBatch = async (offset = 0, accumulated = { created: [], errors: [] }) => {
     const response = await backfillStudentRequests({ offset, batchSize: 10 });
     
