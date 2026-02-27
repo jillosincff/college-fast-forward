@@ -1172,80 +1172,14 @@ const BackfillStudentRequests = React.lazy(() => import('@/components/admin/Back
 const ExportUsersSection = React.lazy(() => import('@/components/admin/ExportUsersSection'));
 const FixMissingPersonasSection = React.lazy(() => import('@/components/admin/FixMissingPersonasTab'));
 
-const _SKIP = () => {
-  // All below code is dead — components extracted to separate files
-  const runBatch = async (offset = 0, accumulated = { created: [], errors: [] }) => {
-    const response = await backfillStudentRequests({ offset, batchSize: 10 });
-    
-    if (!response.data?.success) {
-      throw new Error(response.data?.error || 'Backfill failed');
-    }
-
-    const newAccumulated = {
-      created: [...accumulated.created, ...response.data.created],
-      errors: [...accumulated.errors, ...response.data.errors]
-    };
-
-    setProgress({
-      processed: offset + response.data.summary.processedInBatch,
-      total: response.data.summary.studentsWithoutRequests,
-      created: newAccumulated.created.length,
-      errors: newAccumulated.errors.length
-    });
-
-    if (response.data.pagination.hasMore) {
-      // Continue with next batch
-      return runBatch(response.data.pagination.nextOffset, newAccumulated);
-    }
-
-    // All done
-    return {
-      ...response.data,
-      created: newAccumulated.created,
-      errors: newAccumulated.errors,
-      summary: {
-        ...response.data.summary,
-        created: newAccumulated.created.length,
-        errors: newAccumulated.errors.length
-      }
-    };
-  };
-
-  const handleBackfill = async () => {
-    if (!confirm('This will create draft JobRequest entries for all students who don\'t have one. Continue?')) {
-      return;
-    }
-
-    setLoading(true);
-    setResult(null);
-    setProgress(null);
-
-    try {
-      const finalResult = await runBatch(0);
-      setResult(finalResult);
-      toast({
-        title: "✅ Backfill Complete!",
-        description: `Created ${finalResult.summary.created} draft requests`,
-      });
-    } catch (error) {
-      console.error('Backfill error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Backfill failed",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-      setProgress(null);
-    }
-  };
-
+// Dead code removed - BackfillStudentRequests extracted
+const _DEAD_CODE = () => {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <Database className="w-5 h-5 text-purple-600" />
-          Backfill Student Requests
+          DEAD CODE
         </CardTitle>
         <p className="text-sm text-slate-600 mt-2">
           Create draft JobRequest entries for students who are in the directory but don't have a help request yet.
