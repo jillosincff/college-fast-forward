@@ -1954,17 +1954,9 @@ const ExportUsersSection = () => {
   );
 };
 
-// Fix Missing Personas Section Component
-const FixMissingPersonasSection = ({ usersWithoutPersona, onComplete }) => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [updating, setUpdating] = useState(null);
+const FixMissingPersonasSection = React.lazy(() => import('@/components/admin/FixMissingPersonasTab'));
 
-  // Categorize users directly from the prop
-  const students = usersWithoutPersona.filter(u => u.email?.toLowerCase().endsWith('@ufl.edu'));
-  const parents = usersWithoutPersona.filter(u => !u.email?.toLowerCase().endsWith('@ufl.edu'));
-
-  const handleUpdateSingle = async (user, newPersona) => {
+const _REMOVED_FixMissing = async (user, newPersona) => {
     setUpdating(user.id);
     try {
       await base44.entities.User.update(user.id, {
