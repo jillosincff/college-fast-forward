@@ -39,6 +39,8 @@ import StudentHelpRequestPreview from '@/components/dashboard/student/StudentHel
 import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
 import ExploreSection from '@/components/dashboard/student/ExploreSection';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import FastTrackProgressCard from '@/components/dashboard/student/FastTrackProgressCard';
+import RecentFeedbackCard from '@/components/dashboard/student/RecentFeedbackCard';
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -399,6 +401,10 @@ export default function Dashboard() {
             onInviteParent={() => setShowInviteModal(true)}
           />
         )}
+
+        {/* Fast Track Progress */}
+        <FastTrackProgressCard user={user} />
+        <RecentFeedbackCard user={user} />
 
         {/* Student Karma Card */}
         <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />

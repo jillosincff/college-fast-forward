@@ -10,6 +10,7 @@ import { useParams, navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import UserAvatar from '@/components/common/UserAvatar';
 import MobileBackHeader from '@/components/navigation/MobileBackHeader';
+import PublicFastTrackSection from '@/components/profile/PublicFastTrackSection';
 
 export default function PublicProfile() {
   const params = useParams();
@@ -205,6 +206,11 @@ export default function PublicProfile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Fast Track / Professional Network section for students */}
+        {isStudent && (
+          <PublicFastTrackSection profileUserId={profile.id} profileEmail={profile.email} />
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Academic/Professional Info */}
