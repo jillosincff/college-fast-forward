@@ -95,19 +95,8 @@ export default function FamilyKarmaWidget({ user, compact = false, onSearchStude
     );
   }
 
-  // Map old tier names to new ones for backwards compatibility
-  const mapTierName = (tier) => {
-    const mapping = {
-      bronze: 'none',
-      silver: 'active',
-      gold: 'engaged',
-      platinum: 'priority'
-    };
-    return mapping[tier] || tier || 'none';
-  };
-
   const rawLevel = karmaData?.karma_level || 'none';
-  const level = mapTierName(rawLevel);
+  const level = rawLevel || 'none';
   const tierStyle = TIER_STYLES[level] || TIER_STYLES.none;
   const totalKarma = karmaData?.total_karma || 0;
   const nextLevel = karmaData?.next_level;
