@@ -1141,20 +1141,10 @@ const AdminDashboard = () => {
   );
 };
 
-// Sign-up Diagnostics Component
-const SignUpDiagnostics = () => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [pendingAttempts, setPendingAttempts] = useState([]);
-  const [expiredAttempts, setExpiredAttempts] = useState([]);
-  const [usersWithoutPersona, setUsersWithoutPersona] = useState([]);
-  const [deletingExpired, setDeletingExpired] = useState(false);
+const SignUpDiagnostics = React.lazy(() => import('@/components/admin/SignUpDiagnosticsTab'));
 
-  useEffect(() => {
-    loadDiagnostics();
-  }, []);
-
-  const loadDiagnostics = async () => {
+const _REMOVED_SignUpDiagnostics = () => null;
+const _REMOVED_loadDiagnostics = async () => {
     setLoading(true);
     try {
       // Load pending registration attempts (not verified yet)
