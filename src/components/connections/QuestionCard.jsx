@@ -483,7 +483,7 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
       {/* Karma Boost Badge - only show if not expired */}
       {question.karma_boost > 0 && (!question.boosted_until || new Date(question.boosted_until) > new Date()) && (
         <div className={`karma-boost-badge level-${question.karma_boost}`}>
-          ⚡ {question.karma_boost >= 3 ? 'Platinum' : question.karma_boost >= 2 ? 'Gold' : 'Silver'} Family Boost — Pinned to Top
+          ⚡ {question.karma_boost >= 5 ? 'Champion Family' : question.karma_boost >= 3 ? 'Priority Family' : question.karma_boost >= 2 ? 'Engaged Family' : 'Active Family'} Boost — Pinned to Top
         </div>
       )}
 

@@ -1,14 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 const STUDENT_KARMA_VALUES = {
-  answer_question: 5,
-  share_story: 10,
+  answer_question: 10,
+  share_story: 15,
   post_job_gig: 10,
-  share_salary: 25,
-  invite_parent_joined: 50,
+  share_salary: 20,
+  invite_parent_joined: 25,
   upvote_answer: 2,
   complete_profile: 15,
   post_question: 5,
+  thanked_answer: 5,
   interview_question_submitted: 15,
   interview_question_confirmed: 3,
 };
