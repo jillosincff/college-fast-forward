@@ -36,11 +36,7 @@ import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { exportUsers } from '@/functions/exportUsers';
 import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
 import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
-import { Opportunity } from '@/entities/Opportunity';
-import { JobRequest } from '@/entities/JobRequest';
-import { Answer } from '@/entities/Answer';
-import { Message } from '@/entities/Message';
-import { Trash2, BarChart3 } from 'lucide-react';
+import { Trash2, BarChart3, Trophy } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
