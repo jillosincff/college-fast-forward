@@ -22,6 +22,24 @@ const STUDENT_KARMA_TIERS = [
   { name: 'legend', threshold: 500 },
 ];
 
+// Family karma tiers — STANDARD across all files
+const FAMILY_KARMA_TIERS = [
+  { name: 'none', threshold: 0, boost: 0 },
+  { name: 'active', threshold: 100, boost: 1 },
+  { name: 'engaged', threshold: 300, boost: 2 },
+  { name: 'priority', threshold: 500, boost: 3 },
+  { name: 'champion', threshold: 1000, boost: 5 },
+];
+
+function getFamilyKarmaLevel(totalKarma) {
+  let current = FAMILY_KARMA_TIERS[0];
+  for (const tier of FAMILY_KARMA_TIERS) {
+    if (totalKarma >= tier.threshold) current = tier;
+    else break;
+  }
+  return current;
+}
+
 function getStudentKarmaLevel(totalKarma) {
   let current = STUDENT_KARMA_TIERS[0];
   for (const tier of STUDENT_KARMA_TIERS) {
@@ -143,6 +161,63 @@ Deno.serve(async (req) => {
 
     const nextTier = getNextTier(newTotal);
 
+    // ========== ROLL UP TO FAMILY KARMA ==========
+    let familyRollUp = null;
+    try {
+      // Look up student's user record for family_group_id
+      let studentUser = null;
+      try {
+        const users = await base44.asServiceRole.entities.User.filter({ id: effectiveUserId });
+        if (users.length > 0) studentUser = users[0];
+      } catch (e) {
+        console.log('Could not look up student user:', e.message);
+      }
+
+      const familyGroupId = studentUser?.family_group_id;
+      if (familyGroupId) {
+        // Find or create FamilyKarma
+        const existingFK = await base44.asServiceRole.entities.FamilyKarma.filter({ family_group_id: familyGroupId });
+        let fk = existingFK.length > 0 ? existingFK[0] : null;
+        if (!fk) {
+          fk = await base44.asServiceRole.entities.FamilyKarma.create({
+            family_group_id: familyGroupId,
+            total_karma: 0,
+            karma_level: 'none',
+            boost_multiplier: 0,
+            school_id: 'uf',
+          });
+        }
+
+        const newFamilyTotal = (fk.total_karma || 0) + points;
+        const familyTier = getFamilyKarmaLevel(newFamilyTotal);
+
+        // Monthly karma handling
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        let fkMonthKarma = (fk.this_month_karma || 0) + points;
+        if (fk.month_reset_date && new Date(fk.month_reset_date) < monthStart) {
+          fkMonthKarma = points;
+        }
+        const nextMonthStartFK = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+        const boostExpiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+        await base44.asServiceRole.entities.FamilyKarma.update(fk.id, {
+          total_karma: newFamilyTotal,
+          karma_level: familyTier.name,
+          boost_multiplier: familyTier.boost,
+          last_karma_earned_at: now.toISOString(),
+          boost_expires_at: boostExpiresAt.toISOString(),
+          this_month_karma: fkMonthKarma,
+          month_reset_date: nextMonthStartFK.toISOString(),
+        });
+
+        familyRollUp = { total: newFamilyTotal, level: familyTier.name, boost: familyTier.boost };
+        console.log(`Rolled up ${points} student karma to family ${familyGroupId}, new total: ${newFamilyTotal}`);
+      }
+    } catch (e) {
+      console.log('Family karma roll-up failed (non-critical):', e.message);
+    }
+
     return Response.json({
       success: true,
       points_awarded: points,
@@ -151,6 +226,7 @@ Deno.serve(async (req) => {
       this_month_karma: thisMonthKarma,
       next_tier: nextTier,
       tier_unlocked: karmaRecord.karma_level !== newLevel ? newLevel : null,
+      family_roll_up: familyRollUp,
     });
   } catch (error) {
     console.error('awardStudentKarma error:', error);
