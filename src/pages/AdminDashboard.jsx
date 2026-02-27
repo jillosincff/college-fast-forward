@@ -31,11 +31,7 @@ import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircle
 import ReengagementSettings from '@/components/admin/ReengagementSettings';
 import AmbassadorManager from '@/components/admin/AmbassadorManager';
 import EmailTestPanel from '@/components/admin/EmailTestPanel';
-import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
-import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
-import { exportUsers } from '@/functions/exportUsers';
-import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
-import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
+// backfillStudentRequests, cleanupDraftNames, exportUsers, backfillPosterEmails — now in extracted components
 import { Trash2, BarChart3, Trophy } from 'lucide-react';
 
 const AdminDashboard = () => {
