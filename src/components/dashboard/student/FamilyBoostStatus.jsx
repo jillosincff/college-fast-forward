@@ -20,10 +20,10 @@ export default function FamilyBoostStatus({
   const isActive = boostLevel > 0 && !isExpired;
 
   useEffect(() => {
-    if (isActive) {
+    if (boostLevel > 0 && boostExpiresAt && new Date(boostExpiresAt) > new Date()) {
       loadPositionData();
     }
-  }, [boostLevel, isActive]);
+  }, [boostLevel, boostExpiresAt]);
 
   const loadPositionData = async () => {
     try {

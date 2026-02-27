@@ -405,12 +405,23 @@ async function updateFamilyQuestionBoosts(base44, familyGroupId, boost, boostExp
     if (studentEmails.length === 0) return;
     
     for (const email of studentEmails) {
-      const questions = await base44.asServiceRole.entities.JobRequest.filter({
+      // Boost JobRequests by created_by
+      const questionsByCreator = await base44.asServiceRole.entities.JobRequest.filter({
         created_by: email,
         status: 'active'
       });
-      
-      for (const q of questions) {
+      // Also boost JobRequests by poster_email (handles anonymous posts)
+      const questionsByPoster = await base44.asServiceRole.entities.JobRequest.filter({
+        poster_email: email,
+        status: 'active'
+      });
+      // Dedupe
+      const seenQIds = new Set();
+      const allQuestions = [];
+      for (const q of [...questionsByCreator, ...questionsByPoster]) {
+        if (!seenQIds.has(q.id)) { seenQIds.add(q.id); allQuestions.push(q); }
+      }
+      for (const q of allQuestions) {
         await base44.asServiceRole.entities.JobRequest.update(q.id, {
           karma_boost: boost,
           boosted_until: boostExpiresAt.toISOString(),

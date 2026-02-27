@@ -220,19 +220,51 @@ Deno.serve(async (req) => {
               .map(m => m.email);
 
             for (const sEmail of studentMemberEmails) {
-              const questions = await base44.asServiceRole.entities.JobRequest.filter({
+              // Boost JobRequests by created_by
+              const questionsByCreator = await base44.asServiceRole.entities.JobRequest.filter({
                 created_by: sEmail,
                 status: 'active'
               });
-              for (const q of questions) {
+              // Also boost JobRequests by poster_email (handles anonymous posts)
+              const questionsByPoster = await base44.asServiceRole.entities.JobRequest.filter({
+                poster_email: sEmail,
+                status: 'active'
+              });
+              // Dedupe
+              const seenIds = new Set();
+              const allQuestions = [];
+              for (const q of [...questionsByCreator, ...questionsByPoster]) {
+                if (!seenIds.has(q.id)) { seenIds.add(q.id); allQuestions.push(q); }
+              }
+              for (const q of allQuestions) {
                 await base44.asServiceRole.entities.JobRequest.update(q.id, {
                   karma_boost: familyTier.boost,
                   boosted_until: boostExpiresAt.toISOString(),
                   priority_score: (q.is_boosted ? 999 : 0) + (familyTier.boost * 100)
                 });
               }
+
+              // Also boost HelpRequests
+              const helpRequests = await base44.asServiceRole.entities.HelpRequest.filter({
+                student_email: sEmail,
+                status: 'active'
+              });
+              for (const hr of helpRequests) {
+                await base44.asServiceRole.entities.HelpRequest.update(hr.id, {
+                  karma_boost: familyTier.boost,
+                  boosted_until: boostExpiresAt.toISOString()
+                });
+              }
             }
-            console.log(`Propagated boost ${familyTier.boost} to ${studentMemberEmails.length} students' questions`);
+            console.log(`Propagated boost ${familyTier.boost} to ${studentMemberEmails.length} students' questions & help requests`);
+
+            // Sync cached karma on all family members
+            for (const member of familyMembers) {
+              await base44.asServiceRole.entities.User.update(member.id, {
+                family_karma: newFamilyTotal,
+                karma_tier: familyTier.name
+              });
+            }
           } catch (boostErr) {
             console.log('Question boost propagation failed (non-critical):', boostErr.message);
           }
