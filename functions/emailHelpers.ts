@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
         reengagement_7d: 'reengagement_emails',
         reengagement_21d: 'reengagement_emails',
         reengagement_45d: 'reengagement_emails',
+        feedback_request: 'answer_notifications',
       };
 
       const prefField = prefMap[emailType];
