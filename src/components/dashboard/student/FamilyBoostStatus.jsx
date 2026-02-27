@@ -15,11 +15,15 @@ export default function FamilyBoostStatus({
 }) {
   const [positionData, setPositionData] = useState(null);
 
+  const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
+  const isExpired = expiresAt && expiresAt <= new Date();
+  const isActive = boostLevel > 0 && !isExpired;
+
   useEffect(() => {
-    if (boostLevel > 0 && !isExpired) {
+    if (isActive) {
       loadPositionData();
     }
-  }, [boostLevel]);
+  }, [boostLevel, isActive]);
 
   const loadPositionData = async () => {
     try {
@@ -31,10 +35,6 @@ export default function FamilyBoostStatus({
       console.log('Position data unavailable:', e.message);
     }
   };
-
-  const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
-  const isExpired = expiresAt && expiresAt <= new Date();
-  const isActive = boostLevel > 0 && !isExpired;
   
   // Derive parent name from multiple sources
   const parentDisplayName = boostedByParentName || 
