@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Zap, Clock, TrendingUp, Star } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 /**
  * Component for student dashboard showing their boost status from parent karma
@@ -12,6 +13,23 @@ export default function FamilyBoostStatus({
   parentKarma = 0,
   linkedParents = []
 }) {
+  const [positionData, setPositionData] = useState(null);
+
+  useEffect(() => {
+    loadPositionData();
+  }, [boostLevel]);
+
+  const loadPositionData = async () => {
+    try {
+      const res = await base44.functions.invoke('getStudentPositionData', {});
+      if (res?.data?.success && res.data.current_position) {
+        setPositionData(res.data);
+      }
+    } catch (e) {
+      console.log('Position data unavailable:', e.message);
+    }
+  };
+
   const now = new Date();
   const expiresAt = boostExpiresAt ? new Date(boostExpiresAt) : null;
   const isExpired = expiresAt && expiresAt <= now;
@@ -81,7 +99,7 @@ export default function FamilyBoostStatus({
   }
   
   // Active boost!
-  const tierName = boostLevel >= 3 ? 'Champion' : boostLevel >= 2 ? 'Priority' : boostLevel >= 1 ? 'Engaged' : 'Active';
+  const tierName = boostLevel >= 5 ? 'Champion Family' : boostLevel >= 3 ? 'Priority Family' : boostLevel >= 2 ? 'Engaged Family' : 'Active Family';
   
   return (
     <div className="rounded-xl border-2 p-4 relative overflow-hidden"
@@ -120,6 +138,19 @@ export default function FamilyBoostStatus({
             {parentDisplayName} earned <strong>{effectiveKarma} Family Karma</strong> — your questions are <strong>+{boostLevel}x boosted</strong> in the feed. You're more likely to get help faster!
           </p>
           
+          {positionData && (
+            <div className="bg-white/80 rounded-lg border border-slate-200 p-3 mb-2">
+              <p className="text-sm font-semibold text-slate-800">
+                Your help request is at position <span className="text-blue-600">#{positionData.current_position}</span> of {positionData.total_requests}
+              </p>
+              {positionData.slots_gained > 0 && (
+                <p className="text-xs text-green-600 mt-1 font-medium">
+                  +{positionData.slots_gained} slots from Family Karma
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center gap-4 text-xs flex-wrap">
             <div className="flex items-center gap-1 text-green-600 font-medium">
               <TrendingUp className="w-3.5 h-3.5" />
