@@ -143,7 +143,10 @@ export default function QuestionDetailPage() {
 
   const loadQuestion = async (overrideId) => {
     const effectiveId = overrideId || questionId;
-    if (!effectiveId) return;
+    if (!effectiveId) {
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
