@@ -8,20 +8,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { message, conversation_history } = await req.json();
+    const body = await req.json();
+    const message = body.message;
+    const conversation_history = body.conversation_history || '';
+
     if (!message) {
       return Response.json({ error: 'Message is required' }, { status: 400 });
     }
 
     // Load FastTrackProProfile
-    const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
-    const profile = profiles?.[0] || {};
+    let profile = {};
+    try {
+      const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
+      profile = profiles?.[0] || {};
+    } catch (e) {
+      console.log('Profile load failed (ok for new users):', e.message);
+    }
 
-    const systemPrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students. You combine real-time company intelligence, alumni discovery, and personalized coaching.
+    const systemPrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students.
 
 STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
-- Email: ${user.email}
 - Major: ${user.major || 'undeclared'}
 - Graduation: ${user.graduation_year || 'unknown'}
 - Target Industry: ${profile.target_industry || 'not specified'}
@@ -30,71 +37,47 @@ STUDENT PROFILE:
 - Current Stage: ${profile.current_stage || 'not set'}
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}
 
-CAPABILITIES & WHEN TO USE EACH message_type:
-1. "company_intel" — When the student asks about a specific company (hiring, roles, salary, culture, news). Payload must include: company (string), hiring_signal (hot/warm/cool), summary (string), open_roles (array of strings), salary_range (string), recent_news (array of strings), interview_tips (array of strings).
-2. "alumni_card" — When the student asks to find alumni or connections at a company. Payload must include: alumni (array of objects with name, role_title, company, match_score 0-100, degree_info, location, connection_reason).
-3. "outreach_draft" — When the student asks to draft a message, email, or LinkedIn outreach. Payload must include: recipient (string), channel (LinkedIn/Email/Cold Email), subject (string, optional), message (string).
-4. "roadmap" — When the student asks for a career plan, action plan, or roadmap. Payload must include: title (string), weeks (array of objects with week_number, focus, tasks array of strings).
-5. "text" — For all other conversational responses (advice, encouragement, clarifications, follow-ups).
-
-RULES:
-- Always be specific to UF and reference the student's actual profile data.
-- For company_intel, use your web search knowledge to provide real, current information.
-- For alumni_card, generate plausible UF alumni based on web search results. Use realistic names and titles.
-- Be confident, strategic, and actionable. You're an elite career advisor, not a generic chatbot.
-- Keep the "response" field as a conversational summary. The rich data goes in "payload".
+CAPABILITIES & message_type RULES:
+1. "company_intel" — When student asks about a specific company. Payload: { company, hiring_signal (hot/warm/cool), summary, open_roles (string array), salary_range, recent_news (string array), interview_tips (string array) }
+2. "alumni_card" — When student asks to find alumni. Payload: { alumni: [{ name, role_title, company, match_score, degree_info, location, connection_reason }] }
+3. "outreach_draft" — When student asks to draft a message. Payload: { recipient, channel, subject, message }
+4. "roadmap" — When student asks for a plan. Payload: { title, weeks: [{ week_number, focus, tasks: string[] }] }
+5. "text" — All other responses. Payload can be null or empty object.
 
 CONVERSATION HISTORY:
 ${conversation_history || 'No previous messages.'}
 
 STUDENT'S MESSAGE: ${message}
 
-Respond with the appropriate message_type and structured payload.`;
+Be specific to UF, reference the student's profile data, and be strategic and actionable.`;
 
-    // Call LLM with JSON schema
-    console.log('Calling LLM...');
-    let result;
-    try {
-      result = await base44.integrations.Core.InvokeLLM({
-        prompt: systemPrompt,
-        add_context_from_internet: true,
-        response_json_schema: {
+    console.log('Calling InvokeLLM...');
+    
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: systemPrompt,
+      add_context_from_internet: true,
+      response_json_schema: {
         type: "object",
         properties: {
-          response: {
-            type: "string",
-            description: "Conversational text response to show the student"
-          },
-          message_type: {
-            type: "string",
-            enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"],
-            description: "Type of response for rich card rendering"
-          },
-          payload: {
-            type: "object",
-            description: "Structured data for the rich card. Shape depends on message_type."
-          }
+          response: { type: "string" },
+          message_type: { type: "string", enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"] },
+          payload: { type: "object" }
         },
         required: ["response", "message_type"]
       }
-      });
-    } catch (llmErr) {
-      console.error('LLM call error:', llmErr.message, llmErr.stack);
-      return Response.json({ success: false, error: 'LLM call failed: ' + llmErr.message }, { status: 500 });
-    }
+    });
 
-    console.log('LLM result:', JSON.stringify(result).substring(0, 2000));
-
-    const resp = result || {};
+    console.log('Raw result type:', typeof result);
+    console.log('Raw result:', JSON.stringify(result)?.substring(0, 3000));
 
     return Response.json({
       success: true,
-      response: resp.response || 'I could not process that request.',
-      message_type: resp.message_type || 'text',
-      payload: resp.payload || null
+      response: result?.response || String(result || 'No response generated.'),
+      message_type: result?.message_type || 'text',
+      payload: result?.payload || null
     });
   } catch (error) {
-    console.error('fastTrackProAgent error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('fastTrackProAgent error:', error.message, error.stack);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
