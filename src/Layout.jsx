@@ -345,7 +345,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
-              { name: 'Fast Track', page: 'FastTrackPro', icon: Lightbulb, roles: ['gator'] },
+              { name: 'Fast Track', page: 'FastTrackPro', icon: Zap, roles: ['gator'] },
         { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent', 'alumni'] },
             ], []);
 
