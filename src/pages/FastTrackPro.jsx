@@ -4,9 +4,9 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { Zap, Building2, Users, MessageSquare, Map, ChevronRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import FastTrackHero from '@/components/fasttrack/FastTrackHero';
-import FastTrackQuickActions from '@/components/fasttrack/FastTrackQuickActions';
-import FastTrackChat from '@/components/fasttrack/FastTrackChat';
+import FastTrackHero from '../components/fasttrack/FastTrackHero';
+import FastTrackQuickActions from '../components/fasttrack/FastTrackQuickActions';
+import FastTrackChat from '../components/fasttrack/FastTrackChat';
 
 export default function FastTrackPro() {
   const { user } = useAuth();
