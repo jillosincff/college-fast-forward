@@ -104,10 +104,10 @@ STUDENT PROFILE:
 - Email: ${user?.email || ''}
 - Major: ${user?.major || 'undeclared'}
 - Graduation: ${user?.graduation_year || 'unknown'}
-- Target Role: ${profile?.dream_role || 'not set'}
+- Target Industry: ${profile?.target_industry || user?.industries_interested?.join(', ') || 'not specified'}
 - Target Companies: ${profile?.target_companies?.join(', ') || 'none'}
-- Target Industries: ${profile?.target_industries?.join(', ') || user?.industries_interested?.join(', ') || 'not specified'}
-- Timeline: ${profile?.job_search_timeline || 'not set'}
+- Timeline: ${profile?.career_timeline || user?.target_timeline || 'not set'}
+- Current Stage: ${profile?.current_stage || 'not set'}
 - Biggest Challenge: ${profile?.biggest_challenge || 'not set'}
 - Skills: ${user?.skills || ''}
 - LinkedIn: ${user?.linkedin_url || ''}

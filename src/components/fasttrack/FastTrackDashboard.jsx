@@ -61,7 +61,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">Fast Track Pro</p>
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome back, {firstName}</h1>
           <p className="text-white/70 text-sm">
-            Targeting <span className="text-[#FA4616] font-semibold">{profile.dream_role || 'your dream role'}</span>
+            Targeting <span className="text-[#FA4616] font-semibold">{profile.target_industry || 'your target industry'}</span>
             {profile.target_companies?.length > 0 && ` at ${profile.target_companies.length} companies`}
           </p>
         </div>
