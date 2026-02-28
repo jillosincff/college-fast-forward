@@ -1,22 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-  if (!user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const { message, conversation_history } = await req.json();
-  if (!message) {
-    return Response.json({ error: 'Message is required' }, { status: 400 });
-  }
+    const { message, conversation_history } = await req.json();
+    if (!message) {
+      return Response.json({ error: 'Message is required' }, { status: 400 });
+    }
 
-  // Load FastTrackProProfile
-  const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
-  const profile = profiles?.[0] || {};
+    // Load FastTrackProProfile
+    const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
+    const profile = profiles?.[0] || {};
 
-  const systemPrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students. You combine real-time company intelligence, alumni discovery, and personalized coaching.
+    const systemPrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students. You combine real-time company intelligence, alumni discovery, and personalized coaching.
 
 STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
@@ -74,10 +75,14 @@ Respond with the appropriate message_type and structured payload.`;
     }
   });
 
-  return Response.json({
-    success: true,
-    response: result.response,
-    message_type: result.message_type,
-    payload: result.payload || null
-  });
+    return Response.json({
+      success: true,
+      response: result.response,
+      message_type: result.message_type,
+      payload: result.payload || null
+    });
+  } catch (error) {
+    console.error('fastTrackProAgent error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
