@@ -51,10 +51,17 @@ STUDENT'S MESSAGE: ${message}
 
 Respond with the appropriate message_type and structured payload.`;
 
-  console.log('Calling InvokeLLM for:', message.substring(0, 50));
-  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: systemPrompt,
+  // First call with web search for context (no JSON schema - not supported together)
+  const webContext = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt: `Search the web and provide current information about this request from a UF student: "${message}". Include hiring data, recent news, salary info, alumni connections if relevant. Be thorough.`,
     add_context_from_internet: true,
+  });
+
+  // Second call with JSON schema using the web context
+  const enrichedPrompt = systemPrompt + `\n\nWEB RESEARCH CONTEXT:\n${typeof webContext === 'string' ? webContext : JSON.stringify(webContext)}\n\nRespond with the appropriate message_type and structured payload.`;
+
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt: enrichedPrompt,
     response_json_schema: {
       type: "object",
       properties: {
@@ -76,15 +83,12 @@ Respond with the appropriate message_type and structured payload.`;
     }
   });
 
-    console.log('LLM result type:', typeof result, 'keys:', result ? Object.keys(result) : 'null');
-    console.log('LLM result preview:', JSON.stringify(result).substring(0, 500));
-
-    return Response.json({
-      success: true,
-      response: result?.response || (typeof result === 'string' ? result : 'I could not process that request.'),
-      message_type: result?.message_type || 'text',
-      payload: result?.payload || null
-    });
+  return Response.json({
+    success: true,
+    response: result?.response || 'I could not process that request.',
+    message_type: result?.message_type || 'text',
+    payload: result?.payload || null
+  });
   } catch (error) {
     console.error('fastTrackProAgent error:', error);
     return Response.json({ error: error.message }, { status: 500 });
