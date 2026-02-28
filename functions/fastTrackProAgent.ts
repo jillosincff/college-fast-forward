@@ -22,12 +22,10 @@ Deno.serve(async (req) => {
       const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
       profile = profiles?.[0] || {};
     } catch (e) {
-      console.log('Profile load failed (ok for new users):', e.message);
+      console.log('Profile load failed:', e.message);
     }
 
-    const systemPrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students.
-
-STUDENT PROFILE:
+    const profileContext = `STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
 - Major: ${user.major || 'undeclared'}
 - Graduation: ${user.graduation_year || 'unknown'}
@@ -35,43 +33,64 @@ STUDENT PROFILE:
 - Target Companies: ${(profile.target_companies || []).join(', ') || 'none set'}
 - Timeline: ${profile.career_timeline || 'not set'}
 - Current Stage: ${profile.current_stage || 'not set'}
-- Biggest Challenge: ${profile.biggest_challenge || 'not set'}
+- Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
-CAPABILITIES & message_type RULES:
-1. "company_intel" — When student asks about a specific company. Payload: { company, hiring_signal (hot/warm/cool), summary, open_roles (string array), salary_range, recent_news (string array), interview_tips (string array) }
-2. "alumni_card" — When student asks to find alumni. Payload: { alumni: [{ name, role_title, company, match_score, degree_info, location, connection_reason }] }
-3. "outreach_draft" — When student asks to draft a message. Payload: { recipient, channel, subject, message }
-4. "roadmap" — When student asks for a plan. Payload: { title, weeks: [{ week_number, focus, tasks: string[] }] }
-5. "text" — All other responses. Payload can be null or empty object.
+    // Step 1: Web search for real-time context
+    const webPrompt = `You are a career research assistant for a University of Florida student. Research the following request and provide detailed, factual information:
 
-CONVERSATION HISTORY:
-${conversation_history || 'No previous messages.'}
+${profileContext}
 
-STUDENT'S MESSAGE: ${message}
+Student's request: "${message}"
 
-Be specific to UF, reference the student's profile data, and be strategic and actionable.`;
+${conversation_history ? 'Conversation context:\n' + conversation_history : ''}
 
-    console.log('Calling InvokeLLM...');
-    
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: systemPrompt,
+Provide detailed findings including: company hiring status, open roles, salary data, alumni info, or whatever is relevant to the student's request. Be thorough and factual.`;
+
+    const webResult = await base44.integrations.Core.InvokeLLM({
+      prompt: webPrompt,
       add_context_from_internet: true,
+    });
+
+    const webContext = typeof webResult === 'string' ? webResult : JSON.stringify(webResult);
+
+    // Step 2: Structure the response with JSON schema
+    const structurePrompt = `You are Fast Track Pro — an elite AI career agent for University of Florida (UF) students.
+
+${profileContext}
+
+Based on the following research, create a structured response for the student.
+
+RESEARCH FINDINGS:
+${webContext.substring(0, 4000)}
+
+STUDENT'S ORIGINAL REQUEST: "${message}"
+
+RESPONSE RULES:
+- Pick the BEST message_type for the content:
+  * "company_intel" — company research (payload: company, hiring_signal hot/warm/cool, summary, open_roles array, salary_range, recent_news array, interview_tips array)
+  * "alumni_card" — alumni discovery (payload: alumni array with name, role_title, company, match_score 0-100, degree_info, location, connection_reason)
+  * "outreach_draft" — message drafting (payload: recipient, channel, subject, message)
+  * "roadmap" — career plan (payload: title, weeks array with week_number, focus, tasks array)
+  * "text" — general advice (payload can be null)
+- The "response" field should be a brief conversational summary (2-4 sentences max). The detailed data goes in payload.
+- Reference the student's UF background and profile data.
+- Be confident and strategic.`;
+
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: structurePrompt,
       response_json_schema: {
         type: "object",
         properties: {
-          response: { type: "string" },
+          response: { type: "string", description: "Brief conversational summary for the student" },
           message_type: { type: "string", enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"] },
-          payload: { type: "object" }
+          payload: { type: "object", description: "Structured data matching the message_type schema" }
         },
         required: ["response", "message_type"]
       }
     });
 
-    // InvokeLLM with response_json_schema returns a dict directly
-    const resultStr = JSON.stringify(result);
-    console.log('LLM returned:', resultStr.substring(0, 2000));
+    console.log('Structured result:', JSON.stringify(result).substring(0, 1500));
 
-    // Handle both dict result and edge cases
     if (result && typeof result === 'object' && result.response) {
       return Response.json({
         success: true,
@@ -81,15 +100,15 @@ Be specific to UF, reference the student's profile data, and be strategic and ac
       });
     }
 
-    // Fallback: if result is a string somehow
+    // Fallback
     return Response.json({
       success: true,
-      response: typeof result === 'string' ? result : 'I processed your request but got an unexpected format.',
+      response: typeof result === 'string' ? result : webContext.substring(0, 2000),
       message_type: 'text',
       payload: null
     });
   } catch (error) {
-    console.error('fastTrackProAgent error:', error.message, error.stack);
+    console.error('fastTrackProAgent error:', error.message);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
