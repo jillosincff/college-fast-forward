@@ -832,6 +832,7 @@ const getPageComponent = (pageName) => {
       case 'Insights': return Insights;
       case 'ParentPledge': return ParentPledge;
     case 'SubmitFeedback': return SubmitFeedback;
+    case 'FastTrackPro': return FastTrackPro;
       default: return LandingPage;
   }
 };
