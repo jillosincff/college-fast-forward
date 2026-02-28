@@ -57,8 +57,11 @@ Respond with the appropriate message_type and structured payload.`;
     add_context_from_internet: true,
   });
 
+  console.log('Web context type:', typeof webContext, 'length:', String(webContext).length);
+
   // Second call with JSON schema using the web context
-  const enrichedPrompt = systemPrompt + `\n\nWEB RESEARCH CONTEXT:\n${typeof webContext === 'string' ? webContext : JSON.stringify(webContext)}\n\nRespond with the appropriate message_type and structured payload.`;
+  const webContextStr = typeof webContext === 'string' ? webContext : JSON.stringify(webContext);
+  const enrichedPrompt = systemPrompt + `\n\nWEB RESEARCH CONTEXT:\n${webContextStr.substring(0, 3000)}\n\nRespond with the appropriate message_type and structured payload.`;
 
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
     prompt: enrichedPrompt,
@@ -82,6 +85,8 @@ Respond with the appropriate message_type and structured payload.`;
       required: ["response", "message_type"]
     }
   });
+
+  console.log('Structured result:', JSON.stringify(result).substring(0, 1000));
 
   return Response.json({
     success: true,
