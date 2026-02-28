@@ -51,20 +51,10 @@ STUDENT'S MESSAGE: ${message}
 
 Respond with the appropriate message_type and structured payload.`;
 
-  // First call with web search for context (no JSON schema - not supported together)
-  const webContext = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `Search the web and provide current information about this request from a UF student: "${message}". Include hiring data, recent news, salary info, alumni connections if relevant. Be thorough.`,
-    add_context_from_internet: true,
-  });
-
-  console.log('Web context type:', typeof webContext, 'length:', String(webContext).length);
-
-  // Second call with JSON schema using the web context
-  const webContextStr = typeof webContext === 'string' ? webContext : JSON.stringify(webContext);
-  const enrichedPrompt = systemPrompt + `\n\nWEB RESEARCH CONTEXT:\n${webContextStr.substring(0, 3000)}\n\nRespond with the appropriate message_type and structured payload.`;
-
+  // Use single LLM call with both web search and JSON schema
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: enrichedPrompt,
+    prompt: systemPrompt,
+    add_context_from_internet: true,
     response_json_schema: {
       type: "object",
       properties: {
@@ -86,15 +76,8 @@ Respond with the appropriate message_type and structured payload.`;
     }
   });
 
-  console.log('Result type:', typeof result);
-  console.log('Result is null:', result === null);
-  console.log('Result is undefined:', result === undefined);
-  if (result) {
-    console.log('Result keys:', Object.keys(result));
-    console.log('Result stringify:', JSON.stringify(result).substring(0, 2000));
-  }
+  console.log('LLM result:', JSON.stringify(result).substring(0, 2000));
 
-  // InvokeLLM with response_json_schema returns a dict directly
   const resp = result || {};
 
   return Response.json({
