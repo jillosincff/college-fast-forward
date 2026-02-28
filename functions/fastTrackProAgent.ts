@@ -86,13 +86,22 @@ Respond with the appropriate message_type and structured payload.`;
     }
   });
 
-  console.log('Structured result:', JSON.stringify(result).substring(0, 1000));
+  console.log('Result type:', typeof result);
+  console.log('Result is null:', result === null);
+  console.log('Result is undefined:', result === undefined);
+  if (result) {
+    console.log('Result keys:', Object.keys(result));
+    console.log('Result stringify:', JSON.stringify(result).substring(0, 2000));
+  }
+
+  // InvokeLLM with response_json_schema returns a dict directly
+  const resp = result || {};
 
   return Response.json({
     success: true,
-    response: result?.response || 'I could not process that request.',
-    message_type: result?.message_type || 'text',
-    payload: result?.payload || null
+    response: resp.response || 'I could not process that request.',
+    message_type: resp.message_type || 'text',
+    payload: resp.payload || null
   });
   } catch (error) {
     console.error('fastTrackProAgent error:', error);
