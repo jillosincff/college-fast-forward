@@ -51,6 +51,7 @@ STUDENT'S MESSAGE: ${message}
 
 Respond with the appropriate message_type and structured payload.`;
 
+  console.log('Calling InvokeLLM for:', message.substring(0, 50));
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
     prompt: systemPrompt,
     add_context_from_internet: true,
@@ -75,11 +76,14 @@ Respond with the appropriate message_type and structured payload.`;
     }
   });
 
+    console.log('LLM result type:', typeof result, 'keys:', result ? Object.keys(result) : 'null');
+    console.log('LLM result preview:', JSON.stringify(result).substring(0, 500));
+
     return Response.json({
       success: true,
-      response: result.response,
-      message_type: result.message_type,
-      payload: result.payload || null
+      response: result?.response || (typeof result === 'string' ? result : 'I could not process that request.'),
+      message_type: result?.message_type || 'text',
+      payload: result?.payload || null
     });
   } catch (error) {
     console.error('fastTrackProAgent error:', error);
