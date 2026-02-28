@@ -51,12 +51,14 @@ STUDENT'S MESSAGE: ${message}
 
 Respond with the appropriate message_type and structured payload.`;
 
-    // Call LLM with web search and JSON schema
+    // Call LLM with JSON schema
     console.log('Calling LLM...');
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: systemPrompt,
-      add_context_from_internet: true,
-      response_json_schema: {
+    let result;
+    try {
+      result = await base44.integrations.Core.InvokeLLM({
+        prompt: systemPrompt,
+        add_context_from_internet: true,
+        response_json_schema: {
         type: "object",
         properties: {
           response: {
@@ -75,7 +77,11 @@ Respond with the appropriate message_type and structured payload.`;
         },
         required: ["response", "message_type"]
       }
-    });
+      });
+    } catch (llmErr) {
+      console.error('LLM call error:', llmErr.message, llmErr.stack);
+      return Response.json({ success: false, error: 'LLM call failed: ' + llmErr.message }, { status: 500 });
+    }
 
     console.log('LLM result:', JSON.stringify(result).substring(0, 2000));
 
