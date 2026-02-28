@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb, ArrowLeft, Trash2 } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb, ArrowLeft, Trash2, Zap } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
