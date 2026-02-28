@@ -67,14 +67,26 @@ Be specific to UF, reference the student's profile data, and be strategic and ac
       }
     });
 
-    console.log('Raw result type:', typeof result);
-    console.log('Raw result:', JSON.stringify(result)?.substring(0, 3000));
+    // InvokeLLM with response_json_schema returns a dict directly
+    const resultStr = JSON.stringify(result);
+    console.log('LLM returned:', resultStr.substring(0, 2000));
 
+    // Handle both dict result and edge cases
+    if (result && typeof result === 'object' && result.response) {
+      return Response.json({
+        success: true,
+        response: result.response,
+        message_type: result.message_type || 'text',
+        payload: result.payload || null
+      });
+    }
+
+    // Fallback: if result is a string somehow
     return Response.json({
       success: true,
-      response: result?.response || String(result || 'No response generated.'),
-      message_type: result?.message_type || 'text',
-      payload: result?.payload || null
+      response: typeof result === 'string' ? result : 'I processed your request but got an unexpected format.',
+      message_type: 'text',
+      payload: null
     });
   } catch (error) {
     console.error('fastTrackProAgent error:', error.message, error.stack);
