@@ -5,7 +5,7 @@ import { Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProAssessment from '../components/fast-track-pro/ProAssessment';
 import FastTrackDashboard from '../components/fasttrack/FastTrackDashboard';
-import FastTrackAgentChat from '../components/fasttrack/FastTrackAgentChat';
+import ProAgentChat from '../components/fast-track-pro/ProAgentChat';
 
 export default function FastTrackPro() {
   const { user } = useAuth();
@@ -73,7 +73,7 @@ export default function FastTrackPro() {
   }
 
   if (view === 'chat') {
-    return <FastTrackAgentChat user={user} profile={profile} initialMessage={chatInitialMessage} onBack={handleBackFromChat} />;
+    return <ProAgentChat user={user} profile={profile} initialMessage={chatInitialMessage} onBack={handleBackFromChat} />;
   }
 
   return <FastTrackDashboard user={user} profile={profile} onOpenChat={handleOpenChat} />;
