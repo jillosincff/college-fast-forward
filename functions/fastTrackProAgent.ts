@@ -51,41 +51,42 @@ STUDENT'S MESSAGE: ${message}
 
 Respond with the appropriate message_type and structured payload.`;
 
-  // Use single LLM call with both web search and JSON schema
-  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: systemPrompt,
-    add_context_from_internet: true,
-    response_json_schema: {
-      type: "object",
-      properties: {
-        response: {
-          type: "string",
-          description: "Conversational text response to show the student"
+    // Call LLM with web search and JSON schema
+    console.log('Calling LLM...');
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: systemPrompt,
+      add_context_from_internet: true,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          response: {
+            type: "string",
+            description: "Conversational text response to show the student"
+          },
+          message_type: {
+            type: "string",
+            enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"],
+            description: "Type of response for rich card rendering"
+          },
+          payload: {
+            type: "object",
+            description: "Structured data for the rich card. Shape depends on message_type."
+          }
         },
-        message_type: {
-          type: "string",
-          enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"],
-          description: "Type of response for rich card rendering"
-        },
-        payload: {
-          type: "object",
-          description: "Structured data for the rich card. Shape depends on message_type."
-        }
-      },
-      required: ["response", "message_type"]
-    }
-  });
+        required: ["response", "message_type"]
+      }
+    });
 
-  console.log('LLM result:', JSON.stringify(result).substring(0, 2000));
+    console.log('LLM result:', JSON.stringify(result).substring(0, 2000));
 
-  const resp = result || {};
+    const resp = result || {};
 
-  return Response.json({
-    success: true,
-    response: resp.response || 'I could not process that request.',
-    message_type: resp.message_type || 'text',
-    payload: resp.payload || null
-  });
+    return Response.json({
+      success: true,
+      response: resp.response || 'I could not process that request.',
+      message_type: resp.message_type || 'text',
+      payload: resp.payload || null
+    });
   } catch (error) {
     console.error('fastTrackProAgent error:', error);
     return Response.json({ error: error.message }, { status: 500 });
