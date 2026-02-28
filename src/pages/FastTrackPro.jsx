@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import FastTrackAssessment from '../components/fasttrack/FastTrackAssessment';
+import ProAssessment from '../components/fast-track-pro/ProAssessment';
 import FastTrackDashboard from '../components/fasttrack/FastTrackDashboard';
 import FastTrackAgentChat from '../components/fasttrack/FastTrackAgentChat';
 
@@ -11,7 +11,7 @@ export default function FastTrackPro() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('loading'); // 'loading' | 'assessment' | 'dashboard' | 'chat'
+  const [view, setView] = useState('loading');
   const [chatInitialMessage, setChatInitialMessage] = useState('');
 
   useEffect(() => {
@@ -21,8 +21,8 @@ export default function FastTrackPro() {
 
   const loadProfile = async () => {
     setLoading(true);
-    const profiles = await base44.entities.FastTrackProProfile.filter({ user_id: user.id });
-    if (profiles.length > 0 && profiles[0].assessment_completed) {
+    const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
+    if (profiles.length > 0 && profiles[0].assessment_complete) {
       setProfile(profiles[0]);
       setView('dashboard');
     } else {
@@ -44,7 +44,6 @@ export default function FastTrackPro() {
   const handleBackFromChat = () => {
     setChatInitialMessage('');
     setView('dashboard');
-    // Refresh profile to update stats
     loadProfile();
   };
 
@@ -54,7 +53,7 @@ export default function FastTrackPro() {
         <div className="text-center">
           <Zap className="w-12 h-12 text-[#FA4616] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Sign in to access Fast Track Pro</h2>
-          <p className="text-slate-600 mb-4">AI-powered career intelligence for UF students</p>
+          <p className="text-slate-600 mb-4">AI-powered career intelligence for UF Gators</p>
           <Button onClick={() => base44.auth.redirectToLogin()}>Sign In</Button>
         </div>
       </div>
@@ -70,7 +69,7 @@ export default function FastTrackPro() {
   }
 
   if (view === 'assessment') {
-    return <FastTrackAssessment user={user} onComplete={handleAssessmentComplete} />;
+    return <ProAssessment user={user} onComplete={handleAssessmentComplete} />;
   }
 
   if (view === 'chat') {
