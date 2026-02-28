@@ -147,6 +147,7 @@ const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const Insights = React.lazy(() => import('./pages/Insights'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
+const FastTrackPro = React.lazy(() => import('./pages/FastTrackPro'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
