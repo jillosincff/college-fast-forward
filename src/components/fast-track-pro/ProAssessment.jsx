@@ -38,6 +38,15 @@ const STAGES = [
   { value: 'have_offers', label: 'Have offers', emoji: '🎉' },
 ];
 
+const INDUSTRY_COMPANIES = {
+  'Technology': ['Google', 'Apple', 'Amazon', 'Microsoft', 'Meta', 'NVIDIA', 'Salesforce', 'Oracle'],
+  'Finance & Banking': ['JPMorgan', 'Goldman Sachs', 'Morgan Stanley', 'Citadel', 'Deloitte', 'PwC', 'Bank of America', 'Raymond James'],
+  'Consulting': ['McKinsey', 'BCG', 'Bain', 'Deloitte', 'Accenture', 'EY', 'KPMG', 'Booz Allen'],
+  'Healthcare': ['Mayo Clinic', 'UF Health', 'HCA', 'UnitedHealth', 'Johnson & Johnson', 'Medtronic', 'CVS Health', 'Baptist Health'],
+  'Engineering': ['Lockheed Martin', 'Boeing', 'L3Harris', 'Raytheon', 'SpaceX', 'Tesla', 'Siemens', 'GE'],
+};
+const GENERIC_COMPANIES = ['Google', 'Amazon', 'Deloitte', 'JPMorgan', 'Lockheed Martin', 'UF Health', 'Disney', 'PwC'];
+
 const CHALLENGES = [
   { value: 'dont_know_where_to_start', label: "Don't know where to start", emoji: '🤔' },
   { value: 'cant_get_responses', label: "Can't get responses", emoji: '📭' },
