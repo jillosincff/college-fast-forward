@@ -244,6 +244,36 @@ export default function ProAssessment({ user, onComplete }) {
                 {data.target_companies.length > 0 && (
                   <p className="text-white/40 text-xs mt-3">{data.target_companies.length}/3 companies</p>
                 )}
+
+                {/* Suggested companies based on selected industries */}
+                {data.target_companies.length < 3 && (() => {
+                  const primaryIndustry = data.target_industry[0];
+                  const suggestions = (INDUSTRY_COMPANIES[primaryIndustry] || GENERIC_COMPANIES)
+                    .filter(c => !data.target_companies.includes(c));
+                  if (suggestions.length === 0) return null;
+                  return (
+                    <div className="mt-5">
+                      <p className="text-white/50 text-xs font-medium mb-2">Popular with UF students:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {suggestions.slice(0, 8).map(c => (
+                          <button
+                            key={c}
+                            onClick={() => {
+                              if (data.target_companies.length < 3 && !data.target_companies.includes(c)) {
+                                setData(prev => ({ ...prev, target_companies: [...prev.target_companies, c] }));
+                              }
+                            }}
+                            disabled={data.target_companies.length >= 3}
+                            className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 transition-all disabled:opacity-40"
+                            style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                          >
+                            + {c}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
