@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Users, Mail, Map, CheckCircle2, Briefcase, DollarSign, Newspaper, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Building2, Users, Mail, Map, CheckCircle2, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function CompanyIntelCard({ data }) {
   if (!data) return null;
