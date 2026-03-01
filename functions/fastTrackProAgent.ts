@@ -249,6 +249,7 @@ Deno.serve(async (req) => {
       const cachedAlumni = await getCachedAlumni(base44, alumniCompany);
       if (cachedAlumni) {
         console.log('Alumni cache HIT — returning', cachedAlumni.length, 'cached alumni');
+        trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
         return Response.json({
           success: true,
           response: `Here are UF alumni I found at ${alumniCompany}:`,
@@ -327,6 +328,8 @@ Rules for match_score (0-100):
         saveAlumniCache(base44, alumni);
       }
 
+      trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
+
       return Response.json({
         success: true,
         response: alumniResult.response || `Here are UF alumni I found at ${alumniCompany}:`,
@@ -383,6 +386,8 @@ RULES:
           required: ["response", "title", "steps"]
         }
       });
+
+      trackActivity(base44, user.email, profile.id, 'roadmap_created', roadmapResult.title || 'Career Plan');
 
       return Response.json({
         success: true,
@@ -466,6 +471,8 @@ RULES:
         }
       });
 
+      trackActivity(base44, user.email, profile.id, 'message_draft', recipientName);
+
       return Response.json({
         success: true,
         response: outreachResult.response || `Here's a draft ${channel} message to ${recipientName}:`,
@@ -492,6 +499,7 @@ RULES:
       const cached = await getCachedCompanyIntel(base44, detectedCompany);
       if (cached) {
         console.log('Cache HIT — returning cached data for', detectedCompany);
+        trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
         return Response.json({
           success: true,
           response: `Here's the latest intel on ${detectedCompany} (cached):`,
@@ -563,6 +571,8 @@ Rules:
         open_roles_count: companyIntel.open_roles_count,
         salary_range: companyIntel.salary_range,
       });
+
+      trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
 
       return Response.json({
         success: true,
