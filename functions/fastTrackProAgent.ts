@@ -1,5 +1,65 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Detect if user is asking about a specific company
+function detectCompanyQuery(message) {
+  const lower = message.toLowerCase();
+  const companyPatterns = [
+    /(?:research|tell me about|look into|check|what about|how is|is)\s+(\w[\w\s&.''-]{1,40}?)(?:\s+hiring|\s+jobs|\s+careers|\s+salary|\s+for me|\s*\?|$)/i,
+    /(?:hiring|jobs|careers|openings|roles)\s+(?:at|for)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(\w[\w\s&.''-]{1,30}?)\s+(?:hiring|jobs|careers|openings|internships)/i,
+  ];
+  for (const pattern of companyPatterns) {
+    const match = message.match(pattern);
+    if (match) {
+      return match[1].trim().replace(/\s+/g, ' ');
+    }
+  }
+  return null;
+}
+
+// Check CompanyIntelCache, return valid cache or null
+async function getCachedCompanyIntel(base44, companyName) {
+  try {
+    const cached = await base44.entities.CompanyIntelCache.filter({ 
+      company_name: companyName 
+    });
+    if (cached && cached.length > 0) {
+      const entry = cached[0];
+      const expiresAt = new Date(entry.expires_at);
+      if (expiresAt > new Date()) {
+        console.log('Cache HIT for', companyName, '- expires', entry.expires_at);
+        return entry;
+      }
+      console.log('Cache EXPIRED for', companyName);
+      // Delete expired entry
+      try { await base44.entities.CompanyIntelCache.delete(entry.id); } catch (e) {}
+    }
+  } catch (e) {
+    console.log('Cache lookup failed:', e.message);
+  }
+  return null;
+}
+
+// Save company intel to cache with 24h TTL
+async function saveCompanyIntelCache(base44, companyName, intelData) {
+  try {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await base44.asServiceRole.entities.CompanyIntelCache.create({
+      company_name: companyName,
+      school_code: 'UF',
+      hiring_score: intelData.hiring_score || 0,
+      hiring_signal: intelData.hiring_signal || 'cool',
+      intel_summary: intelData.summary || '',
+      open_roles_count: intelData.open_roles_count || 0,
+      salary_range: intelData.salary_range || '',
+      expires_at: expiresAt,
+    });
+    console.log('Cached company intel for', companyName, 'until', expiresAt);
+  } catch (e) {
+    console.log('Cache save failed:', e.message);
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -35,6 +95,130 @@ Deno.serve(async (req) => {
 - Current Stage: ${profile.current_stage || 'not set'}
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
+    // --- COMPANY INTEL FLOW: detect company → check cache → research → cache → return ---
+    const detectedCompany = detectCompanyQuery(message);
+
+    if (detectedCompany) {
+      console.log('Company query detected:', detectedCompany);
+
+      // Check cache first
+      const cached = await getCachedCompanyIntel(base44, detectedCompany);
+      if (cached) {
+        // Build response from cache
+        const cacheResponse = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are Fast Track Pro, an elite career agent for UF students.
+${profileContext}
+
+The student asked: "${message}"
+
+We have cached company intelligence for ${detectedCompany}:
+- Hiring Signal: ${cached.hiring_signal}
+- Hiring Score: ${cached.hiring_score}/100
+- Summary: ${cached.intel_summary}
+- Open Roles Count: ${cached.open_roles_count}
+- Salary Range: ${cached.salary_range}
+
+Write a brief 2-3 sentence conversational response referencing their UF background and profile.`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              response: { type: "string" }
+            },
+            required: ["response"]
+          }
+        });
+
+        return Response.json({
+          success: true,
+          response: cacheResponse.response || `Here's what I know about ${detectedCompany}:`,
+          message_type: 'company_intel',
+          payload: {
+            company: detectedCompany,
+            hiring_score: cached.hiring_score,
+            hiring_signal: cached.hiring_signal,
+            summary: cached.intel_summary,
+            open_roles_count: cached.open_roles_count,
+            salary_range: cached.salary_range,
+            open_roles: [],
+            recent_news: [],
+            interview_tips: [],
+            cached: true,
+          }
+        });
+      }
+
+      // Cache miss — research via web search
+      console.log('Cache MISS for', detectedCompany, '- researching...');
+
+      const webResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Research "${detectedCompany}" hiring in 2025-2026. Find: current open roles, salary ranges, hiring status, recent company news about hiring/layoffs, and any tips for applying. Be thorough and factual. Include specific numbers when available.`,
+        add_context_from_internet: true,
+      });
+
+      const webContext = typeof webResult === 'string' ? webResult : JSON.stringify(webResult);
+
+      // Synthesize into structured company briefing
+      const companyIntel = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite career agent for UF students.
+
+${profileContext}
+
+Based on this research about ${detectedCompany}, create a structured company briefing.
+
+RESEARCH:
+${webContext.substring(0, 4000)}
+
+STUDENT'S REQUEST: "${message}"
+
+Rules:
+- hiring_score: 0-100 (80+ = hot, 50-79 = warm, below 50 = cool)
+- hiring_signal: must match the score (hot/warm/cool)
+- open_roles: array of specific role titles found
+- salary_range: e.g. "$80K-$150K"
+- recent_news: array of 1-3 recent headlines about hiring
+- interview_tips: array of 2-3 actionable tips
+- summary: 2-3 sentence overview of hiring landscape
+- response: brief conversational 2-3 sentence message to the student referencing their UF profile`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief conversational message to the student" },
+            hiring_score: { type: "number", description: "0-100 hiring health score" },
+            hiring_signal: { type: "string", enum: ["hot", "warm", "cool"] },
+            summary: { type: "string", description: "2-3 sentence hiring overview" },
+            open_roles: { type: "array", items: { type: "string" }, description: "Specific open role titles" },
+            open_roles_count: { type: "number", description: "Total number of open roles found" },
+            salary_range: { type: "string", description: "Salary range string e.g. $80K-$150K" },
+            recent_news: { type: "array", items: { type: "string" }, description: "Recent hiring news" },
+            interview_tips: { type: "array", items: { type: "string" }, description: "Actionable interview tips" }
+          },
+          required: ["response", "hiring_score", "hiring_signal", "summary"]
+        }
+      });
+
+      // Save to cache (async, don't block response)
+      saveCompanyIntelCache(base44, detectedCompany, companyIntel);
+
+      return Response.json({
+        success: true,
+        response: companyIntel.response || `Here's the latest intel on ${detectedCompany}:`,
+        message_type: 'company_intel',
+        payload: {
+          company: detectedCompany,
+          hiring_score: companyIntel.hiring_score,
+          hiring_signal: companyIntel.hiring_signal,
+          summary: companyIntel.summary,
+          open_roles: companyIntel.open_roles || [],
+          open_roles_count: companyIntel.open_roles_count || (companyIntel.open_roles?.length || 0),
+          salary_range: companyIntel.salary_range || 'Not available',
+          recent_news: companyIntel.recent_news || [],
+          interview_tips: companyIntel.interview_tips || [],
+          cached: false,
+        }
+      });
+    }
+
+    // --- GENERAL FLOW (non-company queries) ---
     // Step 1: Web search for real-time context
     const webPrompt = `You are a career research assistant for a University of Florida student. Research the following request and provide detailed, factual information:
 
@@ -67,7 +251,6 @@ STUDENT'S ORIGINAL REQUEST: "${message}"
 
 RESPONSE RULES:
 - Pick the BEST message_type for the content:
-  * "company_intel" — company research (payload: company, hiring_signal hot/warm/cool, summary, open_roles array, salary_range, recent_news array, interview_tips array)
   * "alumni_card" — alumni discovery (payload: alumni array with name, role_title, company, match_score 0-100, degree_info, location, connection_reason)
   * "outreach_draft" — message drafting (payload: recipient, channel, subject, message)
   * "roadmap" — career plan (payload: title, weeks array with week_number, focus, tasks array)
@@ -82,14 +265,14 @@ RESPONSE RULES:
         type: "object",
         properties: {
           response: { type: "string", description: "Brief conversational summary for the student" },
-          message_type: { type: "string", enum: ["text", "company_intel", "alumni_card", "outreach_draft", "roadmap"] },
+          message_type: { type: "string", enum: ["text", "alumni_card", "outreach_draft", "roadmap"] },
           payload: { type: "object", description: "Structured data matching the message_type schema" }
         },
         required: ["response", "message_type"]
       }
     });
 
-    console.log('Structured result:', JSON.stringify(result).substring(0, 1500));
+    // Result logged for debugging
 
     if (result && typeof result === 'object' && result.response) {
       return Response.json({
