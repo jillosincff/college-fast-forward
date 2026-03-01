@@ -1,5 +1,72 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Detect if user is asking about alumni/connections at a company
+function detectAlumniQuery(message) {
+  const alumniPatterns = [
+    /(?:find|show|who|any|look for|search|discover)\s+(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:alumni|gators?|connections?|people|grads?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:who|anyone)\s+(?:works?|is)\s+at\s+(\w[\w\s&.''-]{1,40})\s+(?:from uf|from university of florida|who went to uf)/i,
+    /(?:uf|university of florida)\s+(?:alumni|grads?|people)\s+(?:at|from)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:know anyone|connections?)\s+at\s+(\w[\w\s&.''-]{1,40})/i,
+  ];
+  for (const pattern of alumniPatterns) {
+    const match = message.match(pattern);
+    if (match) {
+      return match[1].trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
+    }
+  }
+  return null;
+}
+
+// Check DiscoveredAlumni cache for a company
+async function getCachedAlumni(base44, companyName) {
+  try {
+    const cached = await base44.entities.DiscoveredAlumni.filter({
+      company: companyName,
+      school_code: 'UF'
+    });
+    if (cached && cached.length > 0) {
+      // Filter to only non-expired entries
+      const now = new Date();
+      const valid = cached.filter(a => new Date(a.expires_at) > now);
+      if (valid.length > 0) {
+        console.log('Alumni cache HIT for', companyName, '-', valid.length, 'alumni');
+        return valid;
+      }
+      console.log('Alumni cache EXPIRED for', companyName);
+      // Cleanup expired entries
+      for (const a of cached) {
+        try { await base44.asServiceRole.entities.DiscoveredAlumni.delete(a.id); } catch (e) {}
+      }
+    }
+  } catch (e) {
+    console.log('Alumni cache lookup failed:', e.message);
+  }
+  return null;
+}
+
+// Save alumni to DiscoveredAlumni entities with 24h TTL
+async function saveAlumniCache(base44, alumni) {
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  for (const a of alumni) {
+    try {
+      await base44.asServiceRole.entities.DiscoveredAlumni.create({
+        name: a.name,
+        role_title: a.role_title,
+        company: a.company,
+        school_code: 'UF',
+        match_score: a.match_score || 0,
+        degree_info: a.degree_info || '',
+        location: a.location || '',
+        expires_at: expiresAt,
+      });
+    } catch (e) {
+      console.log('Failed to cache alumni:', a.name, e.message);
+    }
+  }
+  console.log('Cached', alumni.length, 'alumni until', expiresAt);
+}
+
 // Detect if user is asking about a specific company
 function detectCompanyQuery(message) {
   const lower = message.toLowerCase();
