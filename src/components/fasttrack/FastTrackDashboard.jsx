@@ -46,7 +46,10 @@ function titleCase(str) {
 }
 
 export default function FastTrackDashboard({ user, profile, onOpenChat }) {
-  const firstName = user?.full_name?.split(' ')[0] || 'Gator';
+  const rawName = user?.full_name || 'Gator';
+  const firstName = rawName.includes(',')
+    ? rawName.split(',')[1]?.trim().split(' ')[0]
+    : rawName.split(' ')[0];
   const stats = [
     { icon: Building2, label: 'Companies Researched', value: profile.companies_researched || 0, color: 'bg-blue-100 text-blue-600' },
     { icon: Users, label: 'Alumni Discovered', value: profile.alumni_discovered || 0, color: 'bg-purple-100 text-purple-600' },
