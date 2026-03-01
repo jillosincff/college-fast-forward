@@ -108,18 +108,122 @@ export function AlumniListCard({ data }) {
 }
 
 export function OutreachDraftCard({ data }) {
+  const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedMessage, setEditedMessage] = useState(data?.message || '');
+  const [editedSubject, setEditedSubject] = useState(data?.subject || '');
+
   if (!data) return null;
+
+  const currentMessage = isEditing ? editedMessage : (data.message || '');
+  const currentSubject = isEditing ? editedSubject : (data.subject || '');
+
+  const handleCopy = () => {
+    const fullText = currentSubject
+      ? `Subject: ${currentSubject}\n\n${currentMessage}`
+      : currentMessage;
+    navigator.clipboard.writeText(fullText);
+    setCopied(true);
+    toast.success('Message copied to clipboard!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveEdit = () => {
+    data.message = editedMessage;
+    data.subject = editedSubject;
+    setIsEditing(false);
+  };
+
   return (
     <Card className="p-4 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 mt-2 mb-1">
       <div className="flex items-center gap-2 mb-3">
         <Mail className="w-4 h-4 text-[#FA4616]" />
         <p className="font-semibold text-slate-900 text-sm">Draft Message</p>
-        {data.channel && <Badge variant="outline" className="text-xs ml-auto">{data.channel}</Badge>}
+        {data.channel && <Badge variant="outline" className="text-xs">{data.channel}</Badge>}
+        {data.ask_type && <Badge className="bg-orange-100 text-orange-700 text-[10px] border-0">{data.ask_type}</Badge>}
       </div>
-      {data.recipient && <p className="text-xs text-slate-500 mb-2">To: {data.recipient}</p>}
-      {data.subject && <p className="text-xs text-slate-600 mb-2 font-medium">Subject: {data.subject}</p>}
-      <div className="bg-white rounded-lg p-3 border border-orange-200">
-        <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">{data.message}</p>
+
+      {data.recipient && (
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs text-slate-500">To:</span>
+          <span className="text-xs font-medium text-slate-700">{data.recipient}</span>
+          {data.recipient_title && <span className="text-xs text-slate-400">· {data.recipient_title}</span>}
+          {data.recipient_company && <span className="text-xs text-slate-400">at {data.recipient_company}</span>}
+        </div>
+      )}
+
+      {isEditing ? (
+        <div className="space-y-2 mb-3">
+          {data.channel === 'Email' && (
+            <input
+              value={editedSubject}
+              onChange={(e) => setEditedSubject(e.target.value)}
+              className="w-full text-xs border border-orange-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="Subject line..."
+            />
+          )}
+          <textarea
+            value={editedMessage}
+            onChange={(e) => setEditedMessage(e.target.value)}
+            rows={8}
+            className="w-full text-sm border border-orange-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 resize-y leading-relaxed"
+          />
+        </div>
+      ) : (
+        <>
+          {currentSubject && <p className="text-xs text-slate-600 mb-2 font-medium">Subject: {currentSubject}</p>}
+          <div className="bg-white rounded-lg p-3 border border-orange-200 mb-3">
+            <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">{currentMessage}</p>
+          </div>
+        </>
+      )}
+
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={handleCopy}
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-2 border-orange-300 hover:bg-orange-100 text-orange-700"
+          style={{ minHeight: 'auto' }}
+        >
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? 'Copied!' : 'Copy to Clipboard'}
+        </Button>
+        {isEditing ? (
+          <>
+            <Button
+              onClick={handleSaveEdit}
+              size="sm"
+              className="gap-1.5 bg-orange-600 hover:bg-orange-700 text-white"
+              style={{ minHeight: 'auto' }}
+            >
+              <Check className="w-3.5 h-3.5" /> Save
+            </Button>
+            <Button
+              onClick={() => {
+                setEditedMessage(data.message || '');
+                setEditedSubject(data.subject || '');
+                setIsEditing(false);
+              }}
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-slate-500"
+              style={{ minHeight: 'auto' }}
+            >
+              <X className="w-3.5 h-3.5" /> Cancel
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={() => setIsEditing(true)}
+            variant="outline"
+            size="sm"
+            className="gap-1.5 border-slate-300 hover:bg-slate-100 text-slate-600"
+            style={{ minHeight: 'auto' }}
+          >
+            <Pencil className="w-3.5 h-3.5" /> Edit
+          </Button>
+        )}
       </div>
     </Card>
   );
