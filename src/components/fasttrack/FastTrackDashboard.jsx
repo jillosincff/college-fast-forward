@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, MessageSquare, Map, Sparkles, TrendingUp, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ProActivityFeed from './ProActivityFeed';
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -105,6 +106,12 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
             </div>
           </div>
         )}
+
+        {/* Recent Activity */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Recent Activity</h2>
+          <ProActivityFeed userEmail={user?.email} />
+        </div>
 
         {/* Quick Actions */}
         <div>
