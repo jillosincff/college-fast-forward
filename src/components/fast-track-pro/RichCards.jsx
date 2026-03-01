@@ -7,80 +7,94 @@ import { toast } from 'sonner';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
-  if (typeof val === 'string' && val.trim()) return [val];
+  if (typeof val === 'string' && val.trim()) {
+    // Split multi-line or comma-separated strings
+    const lines = val.split(/\n|(?:,\s*)/).map(s => s.trim()).filter(Boolean);
+    return lines.length > 0 ? lines : [val.trim()];
+  }
   return [];
 }
 
 export function CompanyIntelCard({ data }) {
-  if (!data) return null;
-  const openRoles = toArray(data.open_roles);
-  const recentNews = toArray(data.recent_news);
-  const interviewTips = toArray(data.interview_tips);
-  const signal = data.hiring_signal || 'warm';
-  const signalConfig = {
-    hot: { emoji: '🟢', label: 'Hot', bg: 'bg-green-100 text-green-700' },
-    warm: { emoji: '🟡', label: 'Warm', bg: 'bg-yellow-100 text-yellow-700' },
-    cool: { emoji: '🔴', label: 'Cool', bg: 'bg-red-100 text-red-700' },
-  };
-  const s = signalConfig[signal] || signalConfig.warm;
+  if (!data || typeof data !== 'object') return null;
 
-  return (
-    <Card className="p-4 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 mt-2 mb-1">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-[#0021A5] rounded-xl flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <p className="font-bold text-slate-900">{data.company}</p>
-          <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
-        </div>
-      </div>
-      {data.summary && <p className="text-sm text-slate-700 mb-3">{data.summary}</p>}
-      {openRoles.length > 0 && (
-        <div className="mb-3">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Briefcase className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-xs font-semibold text-slate-500 uppercase">Open Roles</span>
+  try {
+    const openRoles = toArray(data.open_roles);
+    const recentNews = toArray(data.recent_news);
+    const interviewTips = toArray(data.interview_tips);
+    const signal = (typeof data.hiring_signal === 'string' ? data.hiring_signal : 'warm');
+    const signalConfig = {
+      hot: { emoji: '🟢', label: 'Hot', bg: 'bg-green-100 text-green-700' },
+      warm: { emoji: '🟡', label: 'Warm', bg: 'bg-yellow-100 text-yellow-700' },
+      cool: { emoji: '🔴', label: 'Cool', bg: 'bg-red-100 text-red-700' },
+    };
+    const s = signalConfig[signal] || signalConfig.warm;
+
+    return (
+      <Card className="p-4 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 mt-2 mb-1">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-[#0021A5] rounded-xl flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-white" />
           </div>
-          <div className="flex flex-wrap gap-1">
-            {openRoles.slice(0, 6).map((r, i) => <Badge key={i} variant="outline" className="text-xs">{r}</Badge>)}
+          <div>
+            <p className="font-bold text-slate-900">{String(data.company || '')}</p>
+            <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
           </div>
         </div>
-      )}
-      {data.salary_range && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <DollarSign className="w-3.5 h-3.5 text-green-600" />
-          <span className="text-xs text-slate-600">Salary range: <strong>{data.salary_range}</strong></span>
-        </div>
-      )}
-      {recentNews.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-blue-200">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Newspaper className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-xs font-semibold text-slate-500 uppercase">Recent News</span>
+        {data.summary && <p className="text-sm text-slate-700 mb-3">{String(data.summary)}</p>}
+        {openRoles.length > 0 && (
+          <div className="mb-3">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Briefcase className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs font-semibold text-slate-500 uppercase">Open Roles</span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {openRoles.slice(0, 6).map((r, i) => <Badge key={i} variant="outline" className="text-xs">{String(r)}</Badge>)}
+            </div>
           </div>
-          <ul className="space-y-1">
-            {recentNews.slice(0, 3).map((n, i) => (
-              <li key={i} className="text-xs text-slate-600">• {n}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {interviewTips.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-blue-200">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-xs font-semibold text-slate-500 uppercase">Interview Tips</span>
+        )}
+        {data.salary_range && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <DollarSign className="w-3.5 h-3.5 text-green-600" />
+            <span className="text-xs text-slate-600">Salary range: <strong>{String(data.salary_range)}</strong></span>
           </div>
-          <ul className="space-y-1">
-            {interviewTips.slice(0, 3).map((t, i) => (
-              <li key={i} className="text-xs text-slate-600">• {t}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </Card>
-  );
+        )}
+        {recentNews.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Newspaper className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs font-semibold text-slate-500 uppercase">Recent News</span>
+            </div>
+            <ul className="space-y-1">
+              {recentNews.slice(0, 3).map((n, i) => (
+                <li key={i} className="text-xs text-slate-600">• {String(n)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {interviewTips.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs font-semibold text-slate-500 uppercase">Interview Tips</span>
+            </div>
+            <ul className="space-y-1">
+              {interviewTips.slice(0, 3).map((t, i) => (
+                <li key={i} className="text-xs text-slate-600">• {String(t)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
+    );
+  } catch (err) {
+    console.error('CompanyIntelCard render error:', err);
+    return (
+      <Card className="p-4 border-2 border-blue-200 bg-blue-50 mt-2 mb-1">
+        <p className="text-sm text-slate-700">Company intel loaded — see the summary above for details.</p>
+      </Card>
+    );
+  }
 }
 
 export function AlumniListCard({ data }) {
