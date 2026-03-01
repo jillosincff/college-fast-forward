@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Zap, Building2, Users, FileText, ArrowRight, Loader2 } from 'lucide-react';
+import { Zap, Building2, Users, FileText, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
@@ -20,64 +20,71 @@ export default function FastTrackProCard({ user }) {
   if (loading) return null;
 
   const hasProfile = profile?.assessment_complete;
-  const companiesResearched = profile?.companies_researched || 0;
-  const alumniDiscovered = profile?.alumni_discovered || 0;
-  const messagesDrafted = profile?.messages_drafted || 0;
+
+  if (!hasProfile) {
+    return (
+      <Card className="overflow-hidden border-0 shadow-xl">
+        <div className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] p-6 sm:p-8">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-white/80 text-xs font-semibold uppercase tracking-wider">AI-Powered</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+            Fast Track Pro: Your AI Career Agent
+          </h3>
+          <p className="text-white/85 text-sm sm:text-base leading-relaxed mb-6">
+            Get insider intel on companies, discover UF alumni connections, and get personalized outreach messages.
+          </p>
+          <Button
+            onClick={() => navigate('FastTrackPro')}
+            className="bg-white text-[#0021A5] hover:bg-white/90 font-bold px-6 h-11 text-sm shadow-lg"
+          >
+            Get Started <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="border-2 border-indigo-100 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/30 shadow-lg overflow-hidden">
+    <Card className="border-2 border-slate-100 shadow-lg overflow-hidden">
       <CardContent className="pt-5 pb-5 px-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Fast Track Pro</h3>
-              <p className="text-xs text-slate-500">AI Career Intelligence</p>
-            </div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0021A5] to-[#FA4616] flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">Fast Track Pro</h3>
+            <p className="text-xs text-slate-500">AI Career Intelligence</p>
           </div>
         </div>
 
-        {hasProfile ? (
-          <>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white rounded-lg border border-slate-200 p-3 text-center">
-                <Building2 className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-slate-900">{companiesResearched}</p>
-                <p className="text-[10px] text-slate-500 leading-tight">Companies</p>
-              </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-3 text-center">
-                <Users className="w-4 h-4 text-purple-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-slate-900">{alumniDiscovered}</p>
-                <p className="text-[10px] text-slate-500 leading-tight">Alumni Found</p>
-              </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-3 text-center">
-                <FileText className="w-4 h-4 text-green-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-slate-900">{messagesDrafted}</p>
-                <p className="text-[10px] text-slate-500 leading-tight">Drafts</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => navigate('FastTrackPro')}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold"
-            >
-              Open Fast Track Pro <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-slate-600 mb-4">
-              Get AI-powered company intel, discover UF alumni at your target companies, and draft personalized outreach — all in one place.
-            </p>
-            <Button
-              onClick={() => navigate('FastTrackPro')}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold"
-            >
-              Get Started <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </>
-        )}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="bg-blue-50 rounded-xl p-3 text-center">
+            <Building2 className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-slate-900">{profile.companies_researched || 0}</p>
+            <p className="text-[10px] text-slate-500 leading-tight">Companies</p>
+          </div>
+          <div className="bg-purple-50 rounded-xl p-3 text-center">
+            <Users className="w-4 h-4 text-purple-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-slate-900">{profile.alumni_discovered || 0}</p>
+            <p className="text-[10px] text-slate-500 leading-tight">Alumni Found</p>
+          </div>
+          <div className="bg-orange-50 rounded-xl p-3 text-center">
+            <FileText className="w-4 h-4 text-orange-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-slate-900">{profile.messages_drafted || 0}</p>
+            <p className="text-[10px] text-slate-500 leading-tight">Drafts</p>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => navigate('FastTrackPro')}
+          className="w-full bg-gradient-to-r from-[#0021A5] to-[#FA4616] hover:opacity-90 text-white font-semibold h-11"
+        >
+          Open Fast Track Pro <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
       </CardContent>
     </Card>
   );
