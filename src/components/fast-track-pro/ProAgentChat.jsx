@@ -5,7 +5,8 @@ import { Send, Sparkles, Loader2, ArrowLeft, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
-import { CompanyIntelCard, AlumniListCard, OutreachDraftCard, RoadmapCard } from './RichCards';
+import { CompanyIntelCard, AlumniListCard, OutreachDraftCard } from './RichCards';
+import RoadmapTimelineCard from './RoadmapTimelineCard';
 
 const SUGGESTED_PROMPTS = [
   { icon: '🏢', text: "Research my #1 target company — are they hiring?" },
@@ -14,13 +15,13 @@ const SUGGESTED_PROMPTS = [
   { icon: '🗺️', text: "Create a 4-week career action plan for me" },
 ];
 
-function RichCardRenderer({ message_type, payload }) {
+function RichCardRenderer({ message_type, payload, profileId }) {
   if (!payload) return null;
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} />;
     case 'alumni_card': return <AlumniListCard data={payload} />;
     case 'outreach_draft': return <OutreachDraftCard data={payload} />;
-    case 'roadmap': return <RoadmapCard data={payload} />;
+    case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     default: return null;
   }
 }
@@ -177,7 +178,7 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
                 </div>
                 {/* Rich Card below the text bubble */}
                 {msg.role === 'assistant' && msg.message_type !== 'text' && (
-                  <RichCardRenderer message_type={msg.message_type} payload={msg.payload} />
+                  <RichCardRenderer message_type={msg.message_type} payload={msg.payload} profileId={profile?.id} />
                 )}
               </div>
               {msg.role === 'user' && (
