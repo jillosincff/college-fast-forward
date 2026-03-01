@@ -114,11 +114,13 @@ export default function ProAssessment({ user, onComplete }) {
     }));
   };
 
+  const titleCase = (str) => str.replace(/\b\w/g, c => c.toUpperCase());
+
   const handleFinish = async () => {
     setSaving(true);
     const profile = await base44.entities.FastTrackProProfile.create({
       user_email: user.email,
-      target_companies: data.target_companies,
+      target_companies: data.target_companies.map(titleCase),
       target_industry: data.target_industry.join(', '),
       career_timeline: data.career_timeline,
       biggest_challenge: data.biggest_challenge,

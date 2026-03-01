@@ -41,6 +41,10 @@ function CompanyCard({ name, onResearch }) {
   );
 }
 
+function titleCase(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export default function FastTrackDashboard({ user, profile, onOpenChat }) {
   const firstName = user?.full_name?.split(' ')[0] || 'Gator';
   const stats = [
@@ -60,7 +64,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       <div className="bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0A1045] text-white px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">Fast Track Pro</p>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome back, {firstName}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{firstName}'s Career Command Center</h1>
           <p className="text-white/70 text-sm">
             Targeting <span className="text-[#FA4616] font-semibold">{profile.target_industry || 'your target industry'}</span>
             {profile.target_companies?.length > 0 && ` at ${profile.target_companies.length} companies`}
@@ -101,7 +105,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Target Companies</h2>
             <div className="space-y-2">
               {profile.target_companies.map(c => (
-                <CompanyCard key={c} name={c} onResearch={handleResearchCompany} />
+                <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
               ))}
             </div>
           </div>
