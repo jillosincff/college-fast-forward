@@ -5,8 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
 
+function toArray(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string' && val.trim()) return [val];
+  return [];
+}
+
 export function CompanyIntelCard({ data }) {
   if (!data) return null;
+  const openRoles = toArray(data.open_roles);
+  const recentNews = toArray(data.recent_news);
+  const interviewTips = toArray(data.interview_tips);
   const signal = data.hiring_signal || 'warm';
   const signalConfig = {
     hot: { emoji: '🟢', label: 'Hot', bg: 'bg-green-100 text-green-700' },
@@ -27,14 +36,14 @@ export function CompanyIntelCard({ data }) {
         </div>
       </div>
       {data.summary && <p className="text-sm text-slate-700 mb-3">{data.summary}</p>}
-      {data.open_roles?.length > 0 && (
+      {openRoles.length > 0 && (
         <div className="mb-3">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Briefcase className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-xs font-semibold text-slate-500 uppercase">Open Roles</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {data.open_roles.slice(0, 6).map((r, i) => <Badge key={i} variant="outline" className="text-xs">{r}</Badge>)}
+            {openRoles.slice(0, 6).map((r, i) => <Badge key={i} variant="outline" className="text-xs">{r}</Badge>)}
           </div>
         </div>
       )}
@@ -44,27 +53,27 @@ export function CompanyIntelCard({ data }) {
           <span className="text-xs text-slate-600">Salary range: <strong>{data.salary_range}</strong></span>
         </div>
       )}
-      {data.recent_news?.length > 0 && (
+      {recentNews.length > 0 && (
         <div className="mt-3 pt-3 border-t border-blue-200">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Newspaper className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-xs font-semibold text-slate-500 uppercase">Recent News</span>
           </div>
           <ul className="space-y-1">
-            {data.recent_news.slice(0, 3).map((n, i) => (
+            {recentNews.slice(0, 3).map((n, i) => (
               <li key={i} className="text-xs text-slate-600">• {n}</li>
             ))}
           </ul>
         </div>
       )}
-      {data.interview_tips?.length > 0 && (
+      {interviewTips.length > 0 && (
         <div className="mt-3 pt-3 border-t border-blue-200">
           <div className="flex items-center gap-1.5 mb-1.5">
             <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-xs font-semibold text-slate-500 uppercase">Interview Tips</span>
           </div>
           <ul className="space-y-1">
-            {data.interview_tips.slice(0, 3).map((t, i) => (
+            {interviewTips.slice(0, 3).map((t, i) => (
               <li key={i} className="text-xs text-slate-600">• {t}</li>
             ))}
           </ul>
@@ -75,7 +84,7 @@ export function CompanyIntelCard({ data }) {
 }
 
 export function AlumniListCard({ data }) {
-  const alumni = data?.alumni || [];
+  const alumni = toArray(data?.alumni);
   if (!alumni.length) return null;
   return (
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
