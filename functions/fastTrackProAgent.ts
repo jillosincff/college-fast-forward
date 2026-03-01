@@ -299,6 +299,63 @@ Rules for match_score (0-100):
       });
     }
 
+    // --- ROADMAP FLOW: detect roadmap query → generate week-by-week plan → return ---
+    if (detectRoadmapQuery(message)) {
+      console.log('Roadmap query detected');
+
+      const roadmapResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite AI career agent for University of Florida (UF) students.
+
+${profileContext}
+
+Generate a detailed week-by-week career action plan tailored to this student.
+
+RULES:
+- Generate 4-8 steps (weeks), each with a clear focus area
+- Each step has: week_number (integer starting at 1), title (short 3-6 word title), description (1-2 sentences explaining the focus), action_items (array of 2-4 concrete, actionable task strings)
+- Tailor the plan to the student's target industry (${profile.target_industry || 'general'}), target companies (${(profile.target_companies || []).join(', ') || 'not set'}), current stage (${profile.current_stage || 'exploring'}), timeline (${profile.career_timeline || 'flexible'}), and biggest challenge (${profile.biggest_challenge || 'not specified'})
+- Start with foundational tasks (resume, LinkedIn, research) and progress to active outreach and applications
+- Reference specific companies from their target list when possible
+- Be specific and actionable — no vague advice
+- response: brief 2-3 sentence conversational note introducing the plan`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief intro note to the student" },
+            title: { type: "string", description: "Plan title e.g. 'Your 6-Week Finance Career Plan'" },
+            steps: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  week_number: { type: "integer", description: "Week number starting at 1" },
+                  title: { type: "string", description: "Short title for this week" },
+                  description: { type: "string", description: "1-2 sentence description of the focus" },
+                  action_items: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "2-4 concrete action items"
+                  }
+                },
+                required: ["week_number", "title", "description", "action_items"]
+              }
+            }
+          },
+          required: ["response", "title", "steps"]
+        }
+      });
+
+      return Response.json({
+        success: true,
+        response: roadmapResult.response || "Here's your personalized career action plan:",
+        message_type: 'roadmap',
+        payload: {
+          title: roadmapResult.title || 'Your Career Action Plan',
+          steps: roadmapResult.steps || [],
+        }
+      });
+    }
+
     // --- OUTREACH DRAFT FLOW: detect outreach request → find alumni → generate message ---
     const outreachTarget = detectOutreachQuery(message);
 
