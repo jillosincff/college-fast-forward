@@ -75,27 +75,43 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
     setInput('');
     setIsLoading(true);
 
-    const res = await fastTrackProAgent({
-      message: text,
-      conversation_history: buildConversationHistory(userMessage),
-    });
+    try {
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 45000)
+      );
+      const call = fastTrackProAgent({
+        message: text,
+        conversation_history: buildConversationHistory(userMessage),
+      });
+      const res = await Promise.race([call, timeout]);
 
-    const data = res.data;
-    if (data?.success) {
+      const data = res.data;
+      if (data?.success) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data.response,
+          message_type: data.message_type || 'text',
+          payload: data.payload,
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data?.error || 'Something went wrong. Please try again.',
+          message_type: 'text',
+        }]);
+      }
+    } catch (err) {
+      const errorMsg = err.message === 'timeout'
+        ? 'Research is taking longer than expected. Try asking about a specific company or topic.'
+        : 'Something went wrong. Please try again.';
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.response,
-        message_type: data.message_type || 'text',
-        payload: data.payload,
-      }]);
-    } else {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data?.error || 'Something went wrong. Please try again.',
+        content: errorMsg,
         message_type: 'text',
       }]);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleKeyDown = (e) => {
@@ -169,7 +185,7 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
                     : 'bg-white border border-slate-200 shadow-sm'
                 }`}>
                   {msg.role === 'user' ? (
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                    <p className="text-sm leading-relaxed text-white">{msg.content}</p>
                   ) : (
                     <div className="prose prose-sm prose-slate max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                       <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
