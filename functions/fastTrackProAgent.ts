@@ -67,6 +67,27 @@ async function saveAlumniCache(base44, alumni) {
   console.log('Cached', alumni.length, 'alumni until', expiresAt);
 }
 
+// Detect if user is asking to draft outreach to an alumni
+function detectOutreachQuery(message) {
+  const outreachPatterns = [
+    /(?:draft|write|compose|create|help me write|send)\s+(?:a\s+)?(?:message|email|linkedin message|outreach|note|dm|intro)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:reach out|message|email|contact)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:outreach|message|email)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:cold email|cold message|introduction|intro message)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+  ];
+  for (const pattern of outreachPatterns) {
+    const match = message.match(pattern);
+    if (match) {
+      const name = match[1].trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
+      // Filter out generic words that aren't names
+      const skipWords = ['a', 'an', 'the', 'someone', 'them', 'anyone', 'recruiter', 'hiring manager'];
+      if (skipWords.includes(name.toLowerCase())) return null;
+      return name;
+    }
+  }
+  return null;
+}
+
 // Detect if user is asking about a specific company
 function detectCompanyQuery(message) {
   const lower = message.toLowerCase();
