@@ -16,9 +16,12 @@ const STEPS = [
 ];
 
 const INDUSTRIES = [
-  'Technology', 'Finance & Banking', 'Consulting', 'Healthcare', 'Marketing',
-  'Engineering', 'Law & Legal', 'Real Estate', 'Media & Entertainment', 'Education',
-  'Non-Profit', 'Government', 'Retail', 'Manufacturing', 'Hospitality',
+  'Technology', 'Finance & Banking', 'Consulting', 'Healthcare',
+  'Pharmaceuticals & Biotech', 'Engineering', 'Marketing', 'Accounting & Tax',
+  'Law & Legal', 'Data & Analytics', 'Sports & Athletics', 'Media & Entertainment',
+  'Startups & Entrepreneurship', 'Aerospace & Defense', 'Real Estate', 'Education',
+  'Government', 'Supply Chain & Logistics', 'Insurance', 'Agriculture & Food Science',
+  'Non-Profit', 'Retail', 'Manufacturing', 'Hospitality',
 ];
 
 const TIMELINES = [
