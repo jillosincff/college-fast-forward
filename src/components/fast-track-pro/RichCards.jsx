@@ -229,38 +229,6 @@ export function OutreachDraftCard({ data }) {
   );
 }
 
-export function RoadmapCard({ data }) {
-  if (!data) return null;
-  const weeks = data.weeks || [];
-  return (
-    <Card className="p-4 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 mt-2 mb-1">
-      <div className="flex items-center gap-2 mb-3">
-        <Map className="w-4 h-4 text-green-600" />
-        <p className="font-semibold text-slate-900 text-sm">{data.title || 'Career Roadmap'}</p>
-      </div>
-      <div className="space-y-4">
-        {weeks.slice(0, 6).map((w, i) => (
-          <div key={i} className="relative pl-6">
-            <div className="absolute left-0 top-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-[8px] font-bold">{w.week_number || i + 1}</span>
-            </div>
-            {i < weeks.length - 1 && <div className="absolute left-[7px] top-5 w-0.5 h-full bg-green-200" />}
-            <div>
-              <p className="text-sm font-semibold text-slate-900">{w.focus}</p>
-              {w.tasks?.length > 0 && (
-                <ul className="mt-1 space-y-0.5">
-                  {w.tasks.map((t, j) => (
-                    <li key={j} className="flex items-start gap-1.5 text-xs text-slate-600">
-                      <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
+// RoadmapCard moved to RoadmapTimelineCard.jsx with interactive checkboxes
+// Re-export for backward compatibility
+export { default as RoadmapCard } from './RoadmapTimelineCard';
