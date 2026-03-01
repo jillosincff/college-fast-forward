@@ -282,6 +282,93 @@ Rules for match_score (0-100):
       });
     }
 
+    // --- OUTREACH DRAFT FLOW: detect outreach request → find alumni → generate message ---
+    const outreachTarget = detectOutreachQuery(message);
+
+    if (outreachTarget) {
+      console.log('Outreach query detected for:', outreachTarget);
+
+      // Try to find the alumni in DiscoveredAlumni cache
+      let alumniRecord = null;
+      try {
+        const allAlumni = await base44.entities.DiscoveredAlumni.filter({ school_code: 'UF' });
+        const now = new Date();
+        const valid = (allAlumni || []).filter(a => new Date(a.expires_at) > now);
+        alumniRecord = valid.find(a =>
+          a.name.toLowerCase().includes(outreachTarget.toLowerCase()) ||
+          outreachTarget.toLowerCase().includes(a.name.toLowerCase().split(' ')[0])
+        );
+      } catch (e) {
+        console.log('Alumni lookup for outreach failed:', e.message);
+      }
+
+      const recipientName = alumniRecord?.name || outreachTarget;
+      const recipientTitle = alumniRecord?.role_title || '';
+      const recipientCompany = alumniRecord?.company || '';
+      const recipientDegree = alumniRecord?.degree_info || '';
+
+      // Determine ask type from message context
+      let askType = 'informational interview';
+      const lower = message.toLowerCase();
+      if (lower.includes('referral') || lower.includes('refer')) askType = 'referral';
+      else if (lower.includes('advice') || lower.includes('guidance')) askType = 'career advice';
+      else if (lower.includes('coffee') || lower.includes('chat')) askType = 'coffee chat';
+
+      // Determine channel from message context
+      let channel = 'LinkedIn';
+      if (lower.includes('email')) channel = 'Email';
+
+      const outreachResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite career agent for UF students. Draft a personalized ${channel} outreach message.
+
+${profileContext}
+
+RECIPIENT INFO:
+- Name: ${recipientName}
+- Current Role: ${recipientTitle || 'unknown'}
+- Company: ${recipientCompany || 'unknown'}
+- UF Degree: ${recipientDegree || 'Fellow Gator'}
+
+ASK TYPE: ${askType}
+
+RULES:
+- Open with the shared UF connection — mention being a fellow Gator
+- Reference their current role at ${recipientCompany || 'their company'} specifically
+- Mention the student's target industry (${profile.target_industry || 'their field'}) and current stage (${profile.current_stage || 'career exploration'})
+- Make a specific ask: ${askType} (e.g. "15-minute call", "quick question about your path", etc.)
+- Keep it professional but warm, 100-150 words max
+- Do NOT use brackets or placeholders — use real details from the profile
+- If channel is Email, include a subject line. If LinkedIn, no subject needed.
+- response: a brief 1-2 sentence conversational note to the student about the draft`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief note to the student about this draft" },
+            recipient: { type: "string", description: "Full name of recipient" },
+            channel: { type: "string", description: "LinkedIn or Email" },
+            subject: { type: "string", description: "Email subject line (empty for LinkedIn)" },
+            message_body: { type: "string", description: "The full outreach message text" }
+          },
+          required: ["response", "recipient", "channel", "message_body"]
+        }
+      });
+
+      return Response.json({
+        success: true,
+        response: outreachResult.response || `Here's a draft ${channel} message to ${recipientName}:`,
+        message_type: 'outreach_draft',
+        payload: {
+          recipient: outreachResult.recipient || recipientName,
+          recipient_title: recipientTitle,
+          recipient_company: recipientCompany,
+          channel: outreachResult.channel || channel,
+          subject: outreachResult.subject || '',
+          message: outreachResult.message_body || '',
+          ask_type: askType,
+        }
+      });
+    }
+
     // --- COMPANY INTEL FLOW: detect company → check cache → research → cache → return ---
     const detectedCompany = detectCompanyQuery(message);
 
