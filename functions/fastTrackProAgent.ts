@@ -145,6 +145,45 @@ async function getCachedCompanyIntel(base44, companyName) {
   return null;
 }
 
+// Track activity: increment profile counter + log activity
+async function trackActivity(base44, userEmail, profileId, actionType, targetName) {
+  const ts = new Date().toISOString();
+  // Log activity
+  try {
+    await base44.entities.ProActivityLog.create({
+      user_email: userEmail,
+      action_type: actionType,
+      target_name: targetName || '',
+      timestamp: ts,
+    });
+  } catch (e) {
+    console.log('Activity log failed:', e.message);
+  }
+  // Increment profile counter
+  if (profileId) {
+    const fieldMap = {
+      company_search: 'companies_researched',
+      alumni_view: 'alumni_discovered',
+      message_draft: 'messages_drafted',
+      roadmap_created: 'roadmaps_generated',
+    };
+    const field = fieldMap[actionType];
+    if (field) {
+      try {
+        const profiles = await base44.entities.FastTrackProProfile.filter({ id: profileId });
+        const p = profiles?.[0];
+        if (p) {
+          await base44.entities.FastTrackProProfile.update(profileId, {
+            [field]: (p[field] || 0) + 1,
+          });
+        }
+      } catch (e) {
+        console.log('Profile counter update failed:', e.message);
+      }
+    }
+  }
+}
+
 // Save company intel to cache with 24h TTL
 async function saveCompanyIntelCache(base44, companyName, intelData) {
   try {
