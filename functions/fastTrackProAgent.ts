@@ -88,6 +88,23 @@ function detectOutreachQuery(message) {
   return null;
 }
 
+// Detect if user is asking for a career roadmap / plan
+function detectRoadmapQuery(message) {
+  const lower = message.toLowerCase();
+  const roadmapPatterns = [
+    /(?:create|build|make|give me|generate|plan)\s+(?:a\s+)?(?:career|job search|action|weekly|4.week|8.week|roadmap|plan|timeline|strategy)/i,
+    /(?:career|job search|action|weekly)\s+(?:roadmap|plan|timeline|strategy)/i,
+    /(?:what should i do|next steps|week.by.week|step.by.step)\s+(?:to|for|in)\s+(?:get|find|land|my|a)\s+(?:job|career|internship|role)/i,
+    /(?:roadmap|plan|action plan|game plan|strategy)\s+(?:for|to)\s+(?:my|the|a)?\s*(?:career|job|internship|search)/i,
+  ];
+  for (const pattern of roadmapPatterns) {
+    if (pattern.test(message)) return true;
+  }
+  // Keyword combos
+  const keywords = ['roadmap', 'action plan', 'career plan', 'week by week', 'step by step', 'game plan'];
+  return keywords.some(k => lower.includes(k));
+}
+
 // Detect if user is asking about a specific company
 function detectCompanyQuery(message) {
   const lower = message.toLowerCase();
