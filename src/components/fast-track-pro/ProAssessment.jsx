@@ -296,7 +296,7 @@ export default function ProAssessment({ user, onComplete }) {
             <Button
               variant="outline"
               onClick={() => setStep(step - 1)}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/30 text-white hover:bg-white/10 bg-white/10"
               style={{ minHeight: 'auto', width: 'auto' }}
             >
               <ChevronLeft className="w-4 h-4" />
