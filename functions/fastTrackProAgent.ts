@@ -162,6 +162,105 @@ Deno.serve(async (req) => {
 - Current Stage: ${profile.current_stage || 'not set'}
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
+    // --- ALUMNI DISCOVERY FLOW: detect alumni query → check cache → research → cache → return ---
+    const alumniCompany = detectAlumniQuery(message);
+
+    if (alumniCompany) {
+      console.log('Alumni query detected for:', alumniCompany);
+
+      // Check cache first
+      const cachedAlumni = await getCachedAlumni(base44, alumniCompany);
+      if (cachedAlumni) {
+        console.log('Alumni cache HIT — returning', cachedAlumni.length, 'cached alumni');
+        return Response.json({
+          success: true,
+          response: `Here are UF alumni I found at ${alumniCompany}:`,
+          message_type: 'alumni_card',
+          payload: {
+            alumni: cachedAlumni.map(a => ({
+              name: a.name,
+              role_title: a.role_title,
+              company: a.company,
+              match_score: a.match_score,
+              degree_info: a.degree_info,
+              location: a.location,
+            })),
+            cached: true,
+          }
+        });
+      }
+
+      // Cache miss — Step 1: web research
+      console.log('Alumni cache MISS for', alumniCompany, '- researching...');
+
+      const webResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Find University of Florida alumni who currently work at ${alumniCompany}. For each person found, provide their full name, current job title, degree info if available, and location.`,
+        add_context_from_internet: true,
+      });
+
+      const webContext = typeof webResult === 'string' ? webResult : JSON.stringify(webResult);
+
+      // Step 2: Parse into structured alumni profiles
+      const alumniResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite career agent for UF students.
+
+${profileContext}
+
+Parse the following research into structured alumni profiles for UF alumni at ${alumniCompany}.
+
+RESEARCH:
+${webContext.substring(0, 4000)}
+
+Rules for match_score (0-100):
+- Higher if alumni's role aligns with student's target_industry: "${profile.target_industry || 'not specified'}"
+- Higher if alumni's seniority matches student's current_stage: "${profile.current_stage || 'not set'}"
+- 90+ = perfect match, 70-89 = strong, 50-69 = moderate, below 50 = loose connection
+- response: brief 2-3 sentence conversational message to the student about these alumni connections`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief conversational message to the student" },
+            alumni: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string", description: "Full name" },
+                  role_title: { type: "string", description: "Current job title" },
+                  company: { type: "string", description: "Company name" },
+                  degree_info: { type: "string", description: "UF degree info if available" },
+                  location: { type: "string", description: "Current location" },
+                  match_score: { type: "integer", description: "0-100 relevance score" }
+                },
+                required: ["name", "role_title", "company", "match_score"]
+              }
+            }
+          },
+          required: ["response", "alumni"]
+        }
+      });
+
+      const alumni = (alumniResult.alumni || []).map(a => ({
+        ...a,
+        company: a.company || alumniCompany,
+      }));
+
+      // Save to cache with 24h TTL
+      if (alumni.length > 0) {
+        saveAlumniCache(base44, alumni);
+      }
+
+      return Response.json({
+        success: true,
+        response: alumniResult.response || `Here are UF alumni I found at ${alumniCompany}:`,
+        message_type: 'alumni_card',
+        payload: {
+          alumni,
+          cached: false,
+        }
+      });
+    }
+
     // --- COMPANY INTEL FLOW: detect company → check cache → research → cache → return ---
     const detectedCompany = detectCompanyQuery(message);
 
