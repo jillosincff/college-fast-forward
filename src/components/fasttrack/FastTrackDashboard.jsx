@@ -49,12 +49,13 @@ function StatCard({ config, value, delay }) {
   );
 }
 
-function CompanyCard({ name, intel, alumniCount, onResearch, onView }) {
+function CompanyCard({ name, intel, alumniCount, onResearch, onView, onFindAlumni }) {
   const researched = !!intel;
-  const hasAlumni = alumniCount > 0;
+  const score = intel?.hiring_score;
+  const isHot = score && score >= 80;
 
-  if (researched) {
-    const score = intel.hiring_score || '—';
+  if (researched && alumniCount > 0) {
+    // Fully complete: intel + alumni
     return (
       <div
         className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-green-500/30 group"
@@ -65,21 +66,62 @@ function CompanyCard({ name, intel, alumniCount, onResearch, onView }) {
           <div className="flex items-center gap-3">
             <div className="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
             <div>
-              <p className="font-semibold text-white text-sm">{name}</p>
+              <p className="font-semibold text-white text-sm flex items-center gap-2">
+                {name}
+                {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">🔥 HOT</span>}
+              </p>
               <p className="text-[11px] text-slate-400">
-                Hiring score: {score} • {alumniCount} UF alumni found
+                Hiring score: {score || '—'} • {alumniCount} UF alumni found
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1 text-green-400 opacity-60 group-hover:opacity-100 transition-opacity">
-            <span className="text-[11px] font-semibold">View intel</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-semibold">View intel →</span>
           </div>
         </div>
       </div>
     );
   }
 
+  if (researched && alumniCount === 0) {
+    // Researched but no alumni scanned — incomplete mission
+    return (
+      <div
+        className="rounded-lg overflow-hidden transition-all duration-150 hover:border-orange-500/30 group"
+        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="p-4 cursor-pointer" onClick={onView}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
+              <div>
+                <p className="font-semibold text-white text-sm flex items-center gap-2">
+                  {name}
+                  {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">🔥 HOT</span>}
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  Hiring score: {score || '—'} • 0 UF alumni found
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-green-400 opacity-60 group-hover:opacity-100 transition-opacity">
+              <span className="text-[11px] font-semibold">View intel →</span>
+            </div>
+          </div>
+        </div>
+        {/* Urgency CTA */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onFindAlumni(name); }}
+          className="w-full px-4 py-2.5 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-orange-400 transition-all hover:text-orange-300 hover:bg-orange-500/5"
+          style={{ borderTop: '1px solid rgba(250,70,22,0.15)', background: 'rgba(250,70,22,0.04)', minHeight: 'auto' }}
+        >
+          🔍 Alumni not scanned yet — Find insiders →
+        </button>
+      </div>
+    );
+  }
+
+  // Not researched at all
   return (
     <div
       className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-orange-500/30 group"
@@ -165,10 +207,14 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
     onOpenChat(`Show me the latest intel on ${company} — hiring score, open roles, alumni connections, and interview tips.`);
   };
 
+  const handleFindAlumni = (company) => {
+    onOpenChat(`Find UF Gator alumni who work at ${company} — I need insider connections to get my foot in the door.`);
+  };
+
   return (
     <motion.div
       className="min-h-screen"
-      style={{ background: '#0B1121' }}
+      style={{ background: '#0F172A' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
@@ -257,6 +303,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                     alumniCount={count}
                     onResearch={handleResearchCompany}
                     onView={() => handleViewIntel(titleCase(c))}
+                    onFindAlumni={handleFindAlumni}
                   />
                 );
               })}
