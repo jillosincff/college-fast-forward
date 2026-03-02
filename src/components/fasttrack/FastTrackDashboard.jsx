@@ -274,16 +274,18 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
         </motion.div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
-
-        {/* Value Proposition */}
-        <div className="pt-8">
+      {/* Light Value Prop Section */}
+      <div style={{ background: '#F8FAFC' }}>
+        <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
           <FastIQValueProp />
         </div>
+      </div>
+
+      {/* Dark Dashboard Content */}
+      <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
         {/* Stats */}
-        <div>
+        <div className="pt-8">
           <SectionLabel>Your Progress</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             {STAT_CONFIG.map((cfg, i) => (
