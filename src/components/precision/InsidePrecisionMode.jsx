@@ -11,10 +11,10 @@ export default function InsidePrecisionMode({ onUpgrade }) {
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-[13px] text-slate-400 uppercase tracking-[0.18em] font-semibold mb-3">
-            Inside Precision Mode
+            Inside FASTIQ™
           </h2>
           <p className="text-[15px] sm:text-[16px] text-slate-600 max-w-[620px] mx-auto leading-[1.7]">
-            Precision Mode turns the network into a targeted entry system — powered by data, context, and structured outreach.
+            FASTIQ turns the network into a targeted entry system — powered by data, context, and structured outreach.
           </p>
         </div>
 
@@ -36,7 +36,7 @@ export default function InsidePrecisionMode({ onUpgrade }) {
               letterSpacing: '0.02em',
             }}
           >
-            Unlock Precision Mode
+            Unlock FASTIQ™
           </button>
           <p className="text-[12px] text-slate-400 mt-3 tracking-wide">
             Annual Family Access — $249
