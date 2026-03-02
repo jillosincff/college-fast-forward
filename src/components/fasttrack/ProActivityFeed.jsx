@@ -37,7 +37,7 @@ export default function ProActivityFeed({ userEmail, darkMode }) {
     return (
       <div className="space-y-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className={`h-14 rounded-xl animate-pulse ${darkMode ? 'bg-white/5' : 'bg-slate-100'}`} />
+          <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: darkMode ? 'rgba(255,255,255,0.03)' : '#f1f5f9' }} />
         ))}
       </div>
     );
@@ -45,11 +45,15 @@ export default function ProActivityFeed({ userEmail, darkMode }) {
 
   if (activities.length === 0) {
     return (
-      <div className={`p-6 text-center rounded-2xl border-2 border-dashed ${
-        darkMode ? 'border-white/10' : 'border-slate-200'
-      }`}>
-        <Clock className={`w-8 h-8 mx-auto mb-2 ${darkMode ? 'text-white/20' : 'text-slate-300'}`} />
-        <p className={`text-sm ${darkMode ? 'text-white/30' : 'text-slate-500'}`}>No activity yet. Start chatting with your AI agent!</p>
+      <div
+        className="p-6 text-center rounded-xl"
+        style={darkMode
+          ? { border: '1px dashed rgba(255,255,255,0.08)' }
+          : { border: '2px dashed #e2e8f0' }
+        }
+      >
+        <Clock className={`w-7 h-7 mx-auto mb-2 ${darkMode ? 'text-white/15' : 'text-slate-300'}`} />
+        <p className={`text-sm ${darkMode ? 'text-white/25' : 'text-slate-500'}`}>No activity yet. Start chatting with your AI agent!</p>
       </div>
     );
   }
@@ -62,30 +66,36 @@ export default function ProActivityFeed({ userEmail, darkMode }) {
         const timeAgo = moment(a.timestamp || a.created_date).fromNow();
 
         return (
-          <div key={a.id}
-            className={`p-3 rounded-xl border transition-colors ${
-              darkMode
-                ? 'border-white/8 hover:border-white/12'
-                : 'border-slate-100 hover:border-slate-200'
-            }`}
-            style={darkMode ? { background: 'rgba(255,255,255,0.04)' } : {}}
+          <div
+            key={a.id}
+            className="p-3 rounded-lg transition-colors"
+            style={darkMode
+              ? { background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }
+              : { border: '1px solid #e2e8f0' }
+            }
           >
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                darkMode ? 'bg-white/8' : 'bg-blue-50'
-              }`}>
-                <Icon className={`w-4 h-4 ${darkMode ? 'text-white/50' : 'text-blue-600'}`} />
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={darkMode ? { background: 'rgba(255,255,255,0.05)' } : { background: '#eff6ff' }}
+              >
+                <Icon className={`w-3.5 h-3.5 ${darkMode ? 'text-white/35' : 'text-blue-600'}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm ${darkMode ? 'text-white/60' : 'text-slate-700'}`}>
+                <p className={`text-sm ${darkMode ? 'text-white/50' : 'text-slate-700'}`}>
                   <span className="font-medium">{config.label}</span>
-                  {a.target_name && <span className={`font-semibold ${darkMode ? 'text-white/80' : 'text-slate-900'}`}> {a.target_name}</span>}
+                  {a.target_name && (
+                    <span className={`font-semibold ${darkMode ? 'text-white/70' : 'text-slate-900'}`}> {a.target_name}</span>
+                  )}
                 </p>
-                <p className={`text-xs ${darkMode ? 'text-white/25' : 'text-slate-400'}`}>{timeAgo}</p>
+                <p className={`text-[10px] ${darkMode ? 'text-white/18' : 'text-slate-400'}`}>{timeAgo}</p>
               </div>
-              <Badge variant="outline" className={`text-[10px] flex-shrink-0 border-0 ${
-                darkMode ? 'bg-white/8 text-white/40' : 'bg-blue-50 text-blue-700'
-              }`}>
+              <Badge
+                variant="outline"
+                className={`text-[9px] flex-shrink-0 border-0 uppercase tracking-wider font-medium ${
+                  darkMode ? 'bg-white/5 text-white/30' : 'bg-blue-50 text-blue-700'
+                }`}
+              >
                 {config.badgeLabel || a.action_type.replace('_', ' ')}
               </Badge>
             </div>

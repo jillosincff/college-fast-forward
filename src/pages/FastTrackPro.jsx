@@ -49,12 +49,18 @@ export default function FastTrackPro() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #0B1220 0%, #0E1A2B 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(180deg, #060A12 0%, #0C1624 100%)' }}>
         <div className="text-center">
-          <Zap className="w-12 h-12 text-white/40 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Sign in to access FASTIQ™</h2>
-          <p className="text-white/40 mb-4 text-sm">Your intelligent networking engine</p>
-          <Button onClick={() => base44.auth.redirectToLogin()} className="bg-white/10 hover:bg-white/15 text-white border border-white/15">Sign In</Button>
+          <Zap className="w-10 h-10 text-white/25 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-white/90 mb-2 tracking-tight">Sign in to access FASTIQ™</h2>
+          <p className="text-white/30 mb-5 text-sm">Your intelligent networking engine</p>
+          <Button
+            onClick={() => base44.auth.redirectToLogin()}
+            className="text-white border text-sm font-medium px-6"
+            style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)' }}
+          >
+            Sign In
+          </Button>
         </div>
       </div>
     );
@@ -62,8 +68,8 @@ export default function FastTrackPro() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0B1220 0%, #0E1A2B 100%)' }}>
-        <Loader2 className="w-8 h-8 text-white/40 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #060A12 0%, #0C1624 100%)' }}>
+        <Loader2 className="w-7 h-7 text-white/25 animate-spin" />
       </div>
     );
   }
