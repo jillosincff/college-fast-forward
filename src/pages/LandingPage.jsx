@@ -29,6 +29,9 @@ export default function LandingPage() {
   });
 
   useEffect(() => {
+    // Clear any stale OAuth state that could block navigation
+    sessionStorage.removeItem('oauth_redirect_in_progress');
+    
     const loadStats = async () => {
       try {
         const response = await base44.functions.invoke('getFoundingStats');
