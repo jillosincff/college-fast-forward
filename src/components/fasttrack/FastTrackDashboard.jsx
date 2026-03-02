@@ -10,22 +10,23 @@ function StatCard({ icon: Icon, label, value, delay, highlight }) {
   return (
     <motion.div {...fade} transition={{ duration: 0.25, delay }}>
       <div
-        className="rounded-xl p-4"
+        className="rounded-xl p-4 bg-white"
         style={{
-          background: highlight ? 'rgba(26,75,255,0.08)' : 'rgba(255,255,255,0.08)',
-          border: highlight ? '1px solid rgba(26,75,255,0.30)' : '1px solid rgba(255,255,255,0.18)',
-          boxShadow: highlight ? '0 0 24px rgba(26,75,255,0.12)' : 'none',
+          border: highlight ? '1.5px solid #2563EB' : '1px solid #E2E8F0',
+          boxShadow: highlight
+            ? '0 4px 20px rgba(37,99,235,0.10)'
+            : '0 1px 3px rgba(0,0,0,0.04)',
         }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-            <Icon className="w-[18px] h-[18px] text-white/60" />
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${highlight ? 'bg-blue-50' : 'bg-slate-50'}`}>
+            <Icon className={`w-[18px] h-[18px] ${highlight ? 'text-blue-600' : 'text-slate-500'}`} />
           </div>
           <div>
-            <p className="text-[24px] font-bold text-white tracking-tight leading-none mb-0.5" style={{ textShadow: '0 0 20px rgba(255,255,255,0.08)' }}>
+            <p className="text-[24px] font-bold text-slate-900 tracking-tight leading-none mb-0.5">
               <AnimatedCounter value={value} />
             </p>
-            <p className="text-[10px] uppercase tracking-[0.1em] font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-[0.1em] font-medium">{label}</p>
           </div>
         </div>
       </div>
@@ -36,28 +37,33 @@ function StatCard({ icon: Icon, label, value, delay, highlight }) {
 function CompanyCard({ name, onResearch }) {
   return (
     <div
-      className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:bg-white/[0.12]"
-      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)' }}
+      className="rounded-xl p-4 bg-white cursor-pointer transition-all duration-150 hover:shadow-md hover:border-slate-300"
+      style={{ border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
       onClick={() => onResearch(name)}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-            <Building2 className="w-[18px] h-[18px] text-white/60" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-50">
+            <Building2 className="w-[18px] h-[18px] text-slate-500" />
           </div>
           <div>
-            <p className="font-medium text-white text-sm">{name}</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Tap to map your warm path</p>
+            <p className="font-medium text-slate-900 text-sm">{name}</p>
+            <p className="text-[11px] text-slate-400">Tap to map your warm path</p>
           </div>
         </div>
-        <ChevronRight className="w-4 h-4 text-white/30" />
+        <ChevronRight className="w-4 h-4 text-slate-300" />
       </div>
     </div>
   );
 }
 
-function SectionDivider() {
-  return <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />;
+function SectionLabel({ children, sub }) {
+  return (
+    <div className="mb-3">
+      <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.15em]">{children}</h2>
+      {sub && <p className="text-[11px] text-slate-400 mt-0.5">{sub}</p>}
+    </div>
+  );
 }
 
 function titleCase(str) {
@@ -79,97 +85,84 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
   return (
     <motion.div
       className="min-h-screen"
-      style={{ background: 'linear-gradient(180deg, #060A12 0%, #0C1624 100%)' }}
+      style={{ background: '#F8FAFC' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
       {/* Hero */}
-      <div className="relative overflow-hidden px-4 pt-14 pb-16 sm:pt-20 sm:pb-20">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 35%, rgba(26,75,255,0.08) 0%, transparent 70%)' }}
-        />
-        <motion.div {...fade} transition={{ duration: 0.3 }} className="max-w-2xl mx-auto text-center relative z-10">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
+      <div className="px-4 pt-16 pb-14 sm:pt-24 sm:pb-20">
+        <motion.div {...fade} transition={{ duration: 0.3 }} className="max-w-2xl mx-auto text-center">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-5">
             FASTIQ™ by College Fast Forward
           </p>
           <h1
-            className="text-[28px] sm:text-[38px] font-bold text-white mb-4"
+            className="text-[32px] sm:text-[42px] font-bold text-slate-900 mb-5"
             style={{ letterSpacing: '-0.035em', lineHeight: 1.1 }}
           >
             Because applying isn't a strategy.
           </h1>
-          <p className="text-sm sm:text-[15px] max-w-md mx-auto mb-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+          <p className="text-[15px] sm:text-base text-slate-600 max-w-md mx-auto mb-2.5 leading-relaxed">
             Stop competing with 500 applicants. Enter through the warm path instead.
           </p>
-          <p className="text-xs max-w-sm mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
             FASTIQ analyzes targets, identifies alumni leverage, and gives you the exact next move.
           </p>
         </motion.div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pb-16 space-y-10">
+      <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
-        {/* FASTIQ Card */}
+        {/* FASTIQ Feature Card — dark & dominant */}
         <motion.div {...fade} transition={{ duration: 0.3, delay: 0.08 }}>
           <div
-            className="rounded-[18px] p-6"
+            className="rounded-[20px] p-6"
             style={{
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(18px)',
-              WebkitBackdropFilter: 'blur(18px)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
             }}
           >
             <div className="flex items-start gap-4">
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, rgba(26,75,255,0.5) 0%, rgba(26,75,255,0.2) 100%)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.5) 0%, rgba(37,99,235,0.2) 100%)' }}
               >
-                <Sparkles className="w-5 h-5 text-white/90" />
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2.5 mb-1.5">
                   <h3 className="font-semibold text-white text-[15px] tracking-tight">FASTIQ™</h3>
-                  <span
-                    className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-[0.1em]"
-                    style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.6)' }}
-                  >
+                  <span className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-[0.1em] bg-white/10 text-white/50">
                     PRO
                   </span>
                 </div>
-                <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                <p className="text-[13px] text-slate-400 mb-5 leading-relaxed">
                   Pick a target. Find leverage. Draft outreach. Move first.
                 </p>
                 <div>
                   <button
                     onClick={() => onOpenChat()}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition-all duration-150 hover:scale-[1.03] active:scale-[0.98]"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all duration-150 hover:scale-[1.03] active:scale-[0.98]"
                     style={{
-                      background: 'linear-gradient(135deg, #1A4BFF 0%, #003BFF 100%)',
-                      boxShadow: '0 0 30px rgba(0,75,255,0.3)',
+                      background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                      boxShadow: '0 0 24px rgba(37,99,235,0.30)',
                       minHeight: 'auto',
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 36px rgba(0,75,255,0.45)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 30px rgba(0,75,255,0.3)'; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 32px rgba(37,99,235,0.45)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 24px rgba(37,99,235,0.30)'; }}
                   >
                     <Sparkles className="w-4 h-4" /> Activate FASTIQ
                   </button>
-                  <p className="text-[10px] mt-2.5" style={{ color: 'rgba(255,255,255,0.45)' }}>Start with a company. FASTIQ maps the warm path.</p>
+                  <p className="text-[10px] text-slate-500 mt-3">Start with a company. FASTIQ maps the warm path.</p>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <SectionDivider />
-
         {/* Stats Grid */}
         <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Your Progress</h2>
-          <p className="text-[10px] mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>Warm paths outperform cold applications.</p>
+          <SectionLabel sub="Warm paths outperform cold applications.">Your Progress</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             {stats.map((s, i) => (
               <StatCard key={s.label} {...s} delay={0.12 + i * 0.05} />
@@ -177,34 +170,27 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           </div>
         </div>
 
-        <SectionDivider />
-
         {/* Target Companies */}
         {profile.target_companies?.length > 0 && (
-          <>
-            <div>
-              <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Target Companies</h2>
-              <div className="space-y-2">
-                {profile.target_companies.map(c => (
-                  <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
-                ))}
-              </div>
+          <div>
+            <SectionLabel>Target Companies</SectionLabel>
+            <div className="space-y-2">
+              {profile.target_companies.map(c => (
+                <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
+              ))}
             </div>
-            <SectionDivider />
-          </>
+          </div>
         )}
 
         {/* Recent Activity */}
         <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Recent Activity</h2>
-          <ProActivityFeed userEmail={user?.email} darkMode />
+          <SectionLabel>Recent Activity</SectionLabel>
+          <ProActivityFeed userEmail={user?.email} />
         </div>
-
-        <SectionDivider />
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Quick Actions</h2>
+          <SectionLabel>Quick Actions</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: Users, label: 'Find Leverage', prompt: 'Find UF alumni at my target companies' },
@@ -215,16 +201,16 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <button
                 key={label}
                 onClick={() => onOpenChat(prompt)}
-                className="flex flex-col items-center gap-2 py-5 rounded-xl transition-all duration-150 hover:bg-white/[0.10] active:scale-[0.97]"
+                className="flex flex-col items-center gap-2 py-5 rounded-xl bg-white transition-all duration-150 hover:shadow-md hover:border-slate-300 active:scale-[0.97]"
                 style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.18)',
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                   width: '100%',
                   minHeight: 'auto',
                 }}
               >
-                <Icon className="w-[18px] h-[18px] text-white/60" />
-                <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{label}</span>
+                <Icon className="w-[18px] h-[18px] text-slate-500" />
+                <span className="text-[11px] font-medium text-slate-600">{label}</span>
               </button>
             ))}
           </div>
