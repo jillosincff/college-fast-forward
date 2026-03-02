@@ -20,7 +20,6 @@ const SCHOOL_NAME = "UF";
 const FOUNDING_LIMIT = 1000;
 
 export default function LandingPage() {
-  const { user } = useAuth();
   const [stats, setStats] = useState({ 
     spots_left: 51, 
     total_families: 949,
