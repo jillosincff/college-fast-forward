@@ -18,7 +18,7 @@ export default function MobileBottomNav({ user, currentPage }) {
   const tabs = useMemo(() => [
     { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
     { name: 'Community', icon: MessageSquare, page: 'Connections' },
-    { name: 'Fast Track', icon: Zap, page: 'FastTrackPro' },
+    { name: 'FASTIQ', icon: Zap, page: 'FastTrackPro' },
     { name: 'Directory', icon: Users, page: 'GatorDirectory' },
     { name: 'Messages', icon: Mail, page: 'MyMessages' },
   ], [user]);

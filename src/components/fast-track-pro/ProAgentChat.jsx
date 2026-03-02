@@ -132,10 +132,10 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
           <Sparkles className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h2 className="text-white font-bold text-sm">Fast Track Pro Agent</h2>
-          <p className="text-white/60 text-xs">AI-powered career intelligence</p>
+          <h2 className="text-white font-bold text-sm">FASTIQ™</h2>
+          <p className="text-white/60 text-xs">Intelligent networking engine</p>
         </div>
-        <Badge className="ml-auto bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white px-3 py-1 rounded-full text-xs font-bold border-0">PRO</Badge>
+        <Badge className="ml-auto bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white px-3 py-1 rounded-full text-xs font-bold border-0">FASTIQ</Badge>
       </div>
 
       {/* Messages */}
@@ -145,9 +145,9 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
             <div className="w-16 h-16 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-8 h-8 text-[#0021A5]" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Your AI Career Agent</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">You don't have to figure this out alone anymore.</h3>
             <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-              Research companies, discover Gator alumni, draft outreach, and build your career roadmap.
+              FASTIQ is your personal networking engine. Every week, I find companies hiring in your field, discover UF alumni who can help — even ones NOT on CFF — and write you a message to reach out. No other tool does this.
             </p>
             <div className="space-y-2 max-w-sm mx-auto">
               {SUGGESTED_PROMPTS.map((p, i) => (
@@ -161,6 +161,9 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
                   <span className="text-sm text-slate-700">{p.text}</span>
                 </button>
               ))}
+            </div>
+            <div className="mt-6 mx-auto max-w-sm bg-amber-50 border border-amber-200 rounded-xl p-3">
+              <p className="text-xs text-amber-800 leading-relaxed">💡 CFF connects you with parents and alumni who've signed up. FASTIQ goes further — searching the entire web to find UF alumni at ANY company. That's your unfair advantage.</p>
             </div>
           </div>
         )}
@@ -214,7 +217,7 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
             <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-[#0021A5] animate-spin" />
-                <span className="text-sm text-slate-500">Researching...</span>
+                <span className="text-sm text-slate-500">FASTIQ is researching...</span>
               </div>
             </div>
           </motion.div>
@@ -249,7 +252,7 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[10px] text-slate-400 text-center mt-2">Fast Track Pro uses AI with web search. Verify important information independently.</p>
+        <p className="text-[10px] text-slate-400 text-center mt-2">FASTIQ uses AI with web search. Verify important information independently.</p>
       </div>
     </div>
   );

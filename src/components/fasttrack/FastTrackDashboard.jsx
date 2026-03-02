@@ -66,11 +66,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       {/* Hero */}
       <div className="bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0A1045] text-white px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">Fast Track Pro</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{firstName}'s Career Command Center</h1>
-          <p className="text-white/70 text-sm">
-            Targeting <span className="text-[#FA4616] font-semibold">{profile.target_industry || 'your target industry'}</span>
-            {profile.target_companies?.length > 0 && ` at ${profile.target_companies.length} companies`}
+          <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">FASTIQ™ by College Fast Forward</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Because applying isn't a strategy.</h1>
+          <p className="text-white/70 text-sm max-w-xl">
+            FASTIQ is your intelligent networking engine. It finds the warm path into any company — and tells you exactly how to use it.
           </p>
         </div>
       </div>
@@ -84,10 +83,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-slate-900 mb-1">Your AI Career Agent</h3>
+                <h3 className="font-bold text-slate-900 mb-1">FASTIQ™</h3>
                 <p className="text-sm text-slate-600 mb-3">Research companies, discover alumni, draft outreach, and build your roadmap — all in one conversation.</p>
                 <Button onClick={() => onOpenChat()} className="bg-[#0021A5] hover:bg-[#001580]">
-                  <Sparkles className="w-4 h-4 mr-2" /> Chat with Agent
+                  <Sparkles className="w-4 h-4 mr-2" /> Open FASTIQ
                 </Button>
               </div>
             </div>

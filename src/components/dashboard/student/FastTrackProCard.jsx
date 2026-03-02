@@ -29,19 +29,19 @@ export default function FastTrackProCard({ user }) {
             <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-white/80 text-xs font-semibold uppercase tracking-wider">AI-Powered</span>
+            <span className="text-white/80 text-xs font-semibold uppercase tracking-wider">FASTIQ™</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-            Fast Track Pro: Your AI Career Agent
+            Stop cold applying. Start using FASTIQ.
           </h3>
           <p className="text-white/85 text-sm sm:text-base leading-relaxed mb-6">
-            Get insider intel on companies, discover UF alumni connections, and get personalized outreach messages.
+            The intelligent networking engine that finds UF alumni at your target companies — even outside CFF — and helps you reach out.
           </p>
           <Button
             onClick={() => navigate('FastTrackPro')}
             className="bg-white text-[#0021A5] hover:bg-white/90 font-bold px-6 h-11 text-sm shadow-lg"
           >
-            Get Started <ArrowRight className="w-4 h-4 ml-2" />
+            Activate FASTIQ → <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </Card>
@@ -56,8 +56,8 @@ export default function FastTrackProCard({ user }) {
             <Zap className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Fast Track Pro</h3>
-            <p className="text-xs text-slate-500">AI Career Intelligence</p>
+            <h3 className="text-lg font-bold text-slate-900">FASTIQ™</h3>
+            <p className="text-xs text-slate-500">Intelligent networking engine</p>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ export default function FastTrackProCard({ user }) {
           onClick={() => navigate('FastTrackPro')}
           className="w-full bg-gradient-to-r from-[#0021A5] to-[#FA4616] hover:opacity-90 text-white font-semibold h-11"
         >
-          Open Fast Track Pro <ArrowRight className="w-4 h-4 ml-2" />
+          Open FASTIQ <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
     </Card>

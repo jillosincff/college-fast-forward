@@ -164,7 +164,7 @@ export default function ProAssessment({ user, onComplete }) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-[#FA4616]" />
-            <span className="text-white/80 text-sm font-semibold">Fast Track Pro Setup</span>
+            <span className="text-white/80 text-sm font-semibold">FASTIQ™ Setup</span>
           </div>
           <span className="text-white/60 text-xs">{step + 1} of {STEPS.length}</span>
         </div>
@@ -310,7 +310,7 @@ export default function ProAssessment({ user, onComplete }) {
             className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-12 font-semibold"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-            {step === STEPS.length - 1 ? (saving ? 'Setting up...' : 'Launch Fast Track Pro') : 'Continue'}
+            {step === STEPS.length - 1 ? (saving ? 'Setting up...' : 'Activate FASTIQ') : 'Continue'}
             {!saving && step < STEPS.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
             {!saving && step === STEPS.length - 1 && <Sparkles className="w-4 h-4 ml-1" />}
           </Button>

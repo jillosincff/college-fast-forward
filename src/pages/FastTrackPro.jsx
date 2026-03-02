@@ -52,8 +52,8 @@ export default function FastTrackPro() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="text-center">
           <Zap className="w-12 h-12 text-[#FA4616] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Sign in to access Fast Track Pro</h2>
-          <p className="text-slate-600 mb-4">AI-powered career intelligence for UF Gators</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Sign in to access FASTIQ™</h2>
+          <p className="text-slate-600 mb-4">Your intelligent networking engine</p>
           <Button onClick={() => base44.auth.redirectToLogin()}>Sign In</Button>
         </div>
       </div>
