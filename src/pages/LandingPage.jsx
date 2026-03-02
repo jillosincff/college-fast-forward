@@ -54,22 +54,22 @@ export default function LandingPage() {
 
   const handleGetInside = () => {
     trackEvent('cta_claim_free_spot_clicked');
-    navigate('GatorAuth');
+    window.location.hash = 'GatorAuth';
   };
 
   const handleSignIn = () => {
     trackEvent('cta_signin_clicked');
-    navigate('GatorAuth');
+    window.location.hash = 'GatorAuth';
   };
 
   const handlePrecisionUpgrade = () => {
     trackEvent('cta_precision_mode_clicked');
-    navigate('GatorAuth');
+    window.location.hash = 'GatorAuth';
   };
 
   const handleFastIQCTA = () => {
     trackEvent('cta_fastiq_clicked');
-    navigate('GatorAuth');
+    window.location.hash = 'GatorAuth';
   };
 
   const fadeInUp = {
