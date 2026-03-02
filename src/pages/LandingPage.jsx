@@ -9,6 +9,7 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import InsidePrecisionMode from '@/components/precision/InsidePrecisionMode';
+import PricingTiers from '@/components/home/PricingTiers';
 import {
   Accordion,
   AccordionContent,
@@ -63,6 +64,11 @@ export default function LandingPage() {
 
   const handlePrecisionUpgrade = () => {
     trackEvent('cta_precision_mode_clicked');
+    navigate('GatorAuth');
+  };
+
+  const handleFastIQCTA = () => {
+    trackEvent('cta_fastiq_clicked');
     navigate('GatorAuth');
   };
 
@@ -252,7 +258,7 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* INSIDE PRECISION MODE — bridges pain → solution sophistication      */}
+        {/* INSIDE FASTIQ — bridges pain → solution sophistication              */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         <section id="precision-mode">
           <InsidePrecisionMode onUpgrade={handlePrecisionUpgrade} />
@@ -659,122 +665,14 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* PRICE COMPARISON - "What This Would Cost"                           */}
+        {/* PRICING TIERS                                                       */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-4xl mx-auto">
-            <motion.h2 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-12"
-            >
-              What This Would Cost Anywhere Else
-            </motion.h2>
-
-            {/* Cost Comparison Table */}
-            <motion.div 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="max-w-lg mx-auto mb-8"
-            >
-              <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
-                {[
-                  { item: 'Career coach with industry connections', cost: '$200–400/hour' },
-                  { item: 'Professional resume rewrite', cost: '$300–500' },
-                  { item: 'Mock interview coaching', cost: '$150–200/session' },
-                  { item: 'LinkedIn Premium (cold outreach)', cost: '$60/month' },
-                ].map((row, i) => (
-                  <div key={i} className={`flex justify-between items-center px-6 py-4 ${i < 3 ? 'border-b border-slate-200' : ''}`}>
-                    <span className="text-slate-700 text-sm md:text-base">{row.item}</span>
-                    <span className="text-slate-900 font-semibold text-sm md:text-base whitespace-nowrap ml-4">{row.cost}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-center px-6 py-4 bg-slate-900 text-white">
-                  <span className="font-bold text-base md:text-lg">Total</span>
-                  <span className="font-extrabold text-base md:text-lg">$750 – $1,500+</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.p
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center text-lg text-slate-700 mb-12 max-w-2xl mx-auto"
-            >
-              Or... join a community of <strong className="text-slate-900">{stats.total_families} parents</strong> who do this for each other because they care. <strong className="text-slate-900">For free.</strong>
-            </motion.p>
-
-            {/* Pricing Tier Cards */}
-            <motion.div 
-              variants={staggerChildren}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-3 gap-6 mb-10"
-            >
-              {/* Founding */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-400 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden h-full">
-                  <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    YOU'RE HERE
-                  </div>
-                  <div className="text-3xl mb-2">🎉</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">FOUNDING</h3>
-                  <p className="text-sm text-slate-500 mb-3">First 1,000 families</p>
-                  <div className="text-4xl md:text-5xl font-extrabold text-green-600 mb-1">FREE</div>
-                  <p className="text-green-700 font-semibold text-sm mb-4">FOREVER</p>
-                  <div className="pt-4 border-t border-green-300">
-                    <p className="text-green-700 font-bold">⚡ {stats.spots_left} spots left</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Growth */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 md:p-8 text-center h-full">
-                  <div className="text-3xl mb-2">🚀</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">GROWTH</h3>
-                  <p className="text-sm text-slate-500 mb-3">After 1,000 families</p>
-                  <div className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-1">$9</div>
-                  <p className="text-slate-500 font-semibold text-sm mb-4">/month per family</p>
-                  <div className="pt-4 border-t border-slate-200">
-                    <p className="text-slate-500 text-sm">Everything in Founding</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Scale */}
-              <motion.div variants={fadeInUp}>
-                <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 md:p-8 text-center h-full">
-                  <div className="text-3xl mb-2">⭐</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">SCALE</h3>
-                  <p className="text-sm text-slate-500 mb-3">After 5,000 families</p>
-                  <div className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-1">$19</div>
-                  <p className="text-slate-500 font-semibold text-sm mb-4">/month per family</p>
-                  <div className="pt-4 border-t border-slate-200">
-                    <p className="text-slate-500 text-sm">Everything in Growth</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            <motion.p
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center text-slate-600"
-            >
-              {stats.total_families} families already claimed their free spot. <strong className="text-slate-900">Your price locks in forever.</strong>
-            </motion.p>
-          </div>
-        </section>
+        <PricingTiers
+          spotsLeft={stats.spots_left}
+          onFoundingCTA={handleGetInside}
+          onCFFCTA={handleGetInside}
+          onFastIQCTA={handleFastIQCTA}
+        />
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* HOW IT WORKS                                                        */}
