@@ -1003,10 +1003,17 @@ function AppContent() {
       return;
     }
 
-    // Skip routing if OAuth redirect is in progress or transitioning
+    // Skip routing if OAuth redirect is in progress or transitioning (but not for more than 30 seconds)
     if (sessionStorage.getItem('oauth_redirect_in_progress') === 'true') {
-      console.log('⏸️ [Layout Routing] OAuth redirect in progress, skipping routing');
-      return;
+      const redirectStartTime = parseInt(sessionStorage.getItem('oauth_redirect_start') || '0');
+      if (Date.now() - redirectStartTime < 30000) {
+        console.log('⏸️ [Layout Routing] OAuth redirect in progress, skipping routing');
+        return;
+      }
+      // Stale flag — clear it
+      console.log('🧹 [Layout Routing] Clearing stale oauth_redirect_in_progress flag');
+      sessionStorage.removeItem('oauth_redirect_in_progress');
+      sessionStorage.removeItem('oauth_redirect_start');
     }
 
     // Skip routing if on GatorAuth - let GatorAuth handle all routing decisions
