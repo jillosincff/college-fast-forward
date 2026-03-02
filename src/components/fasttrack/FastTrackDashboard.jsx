@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
+import FastIQValueProp from './FastIQValueProp';
 
 const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
 
@@ -276,8 +277,13 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
-        {/* Stats */}
+        {/* Value Proposition */}
         <div className="pt-8">
+          <FastIQValueProp />
+        </div>
+
+        {/* Stats */}
+        <div>
           <SectionLabel>Your Progress</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             {STAT_CONFIG.map((cfg, i) => (
