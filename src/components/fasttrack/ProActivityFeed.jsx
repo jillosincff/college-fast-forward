@@ -6,10 +6,10 @@ import { base44 } from '@/api/base44Client';
 import moment from 'moment';
 
 const ACTION_CONFIG = {
-  company_search: { icon: Building2, label: 'Researched', color: 'bg-blue-100 text-blue-600', badgeColor: 'bg-blue-50 text-blue-700' },
-  alumni_view: { icon: Users, label: 'Discovered alumni at', color: 'bg-purple-100 text-purple-600', badgeColor: 'bg-purple-50 text-purple-700' },
-  message_draft: { icon: MessageSquare, label: 'Drafted message to', color: 'bg-orange-100 text-orange-600', badgeColor: 'bg-orange-50 text-orange-700' },
-  roadmap_created: { icon: Map, label: 'Created roadmap', color: 'bg-green-100 text-green-600', badgeColor: 'bg-green-50 text-green-700' },
+  company_search: { icon: Building2, label: 'Researched', color: 'bg-blue-100 text-blue-600', badgeColor: 'bg-blue-50 text-blue-700', badgeLabel: 'target intel' },
+  alumni_view: { icon: Users, label: 'Discovered alumni at', color: 'bg-purple-100 text-purple-600', badgeColor: 'bg-purple-50 text-purple-700', badgeLabel: 'leverage found' },
+  message_draft: { icon: MessageSquare, label: 'Drafted message to', color: 'bg-orange-100 text-orange-600', badgeColor: 'bg-orange-50 text-orange-700', badgeLabel: 'outreach' },
+  roadmap_created: { icon: Map, label: 'Created roadmap', color: 'bg-green-100 text-green-600', badgeColor: 'bg-green-50 text-green-700', badgeLabel: 'warm path' },
 };
 
 export default function ProActivityFeed({ userEmail }) {
@@ -74,7 +74,7 @@ export default function ProActivityFeed({ userEmail }) {
                 <p className="text-xs text-slate-400">{timeAgo}</p>
               </div>
               <Badge variant="outline" className={`text-[10px] flex-shrink-0 ${config.badgeColor} border-0`}>
-                {a.action_type.replace('_', ' ')}
+                {config.badgeLabel || a.action_type.replace('_', ' ')}
               </Badge>
             </div>
           </Card>

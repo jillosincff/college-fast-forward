@@ -69,10 +69,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">FASTIQ™ by College Fast Forward</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Because applying isn't a strategy.</h1>
           <p className="text-white/80 text-sm sm:text-base max-w-xl mb-1">
-            FASTIQ finds your inside lane into any company — and gives you the exact moves to make.
+            FASTIQ finds your inside lane into any company — and shows you the exact moves to make.
           </p>
           <p className="text-white/50 text-xs max-w-lg">
-            Research targets, identify alumni leverage, and deploy outreach before you ever hit Apply.
+            Analyze targets, identify alumni leverage, and deploy outreach before you ever hit Apply.
           </p>
         </div>
       </div>
@@ -88,14 +88,14 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-slate-900">FASTIQ™</h3>
-                  <Badge className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white text-[10px] px-2 py-0 border-0 font-bold">PRO</Badge>
+                  <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">PRO</span>
                 </div>
                 <p className="text-sm text-slate-600 mb-3">Pick a target. Find leverage. Draft outreach. Move first.</p>
                 <div>
                   <Button onClick={() => onOpenChat()} className="bg-[#0021A5] hover:bg-[#001580] shadow-md">
                     <Sparkles className="w-4 h-4 mr-2" /> Activate FASTIQ
                   </Button>
-                  <p className="text-[11px] text-slate-400 mt-2">Start with a company. FASTIQ returns the warm path.</p>
+                  <p className="text-[11px] text-slate-400 mt-2">Start with a company. FASTIQ maps the warm path.</p>
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
         {/* Stats Grid */}
         <div>
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Your Progress</h2>
-          <p className="text-xs text-slate-400 mb-3">Win rate improves when you lead with warm paths — not cold applications.</p>
+          <p className="text-xs text-slate-400 mb-3">Warm paths beat cold applications — every time.</p>
           <div className="grid grid-cols-2 gap-3">
             {stats.map(s => <StatCard key={s.label} {...s} />)}
           </div>
