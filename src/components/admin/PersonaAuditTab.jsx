@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Users, AlertTriangle, Loader2, RefreshCw, CheckCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
-import { fixMissingPersonas } from '@/functions/fixMissingPersonas';
+// fixMissingPersonas invoked via base44.functions below
 
 export default function PersonaAuditTab() {
   const { toast } = useToast();
