@@ -56,22 +56,22 @@ export default function LandingPage() {
   }, []);
 
   const handleGetInside = () => {
-    try { trackEvent('cta_claim_free_spot_clicked'); } catch(e) {}
+    trackEvent('cta_claim_free_spot_clicked');
     navigate('GatorAuth');
   };
 
   const handleSignIn = () => {
-    try { trackEvent('cta_signin_clicked'); } catch(e) {}
+    trackEvent('cta_signin_clicked');
     navigate('GatorAuth');
   };
 
   const handlePrecisionUpgrade = () => {
-    try { trackEvent('cta_precision_mode_clicked'); } catch(e) {}
+    trackEvent('cta_precision_mode_clicked');
     navigate('GatorAuth');
   };
 
   const handleFastIQCTA = () => {
-    try { trackEvent('cta_fastiq_clicked'); } catch(e) {}
+    trackEvent('cta_fastiq_clicked');
     navigate('GatorAuth');
   };
 
