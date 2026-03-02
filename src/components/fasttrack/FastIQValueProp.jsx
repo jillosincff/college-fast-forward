@@ -8,7 +8,7 @@ const PILLARS = [
   {
     icon: Users,
     title: 'Find Insiders',
-    body: 'Identifies alumni and warm connections tied to your target company — before you submit an application.',
+    body: 'Identifies alumni leverage tied to your target company — before your application is ever seen.',
     color: '#2563EB',
     bg: '#EFF6FF',
   },
@@ -22,7 +22,7 @@ const PILLARS = [
   {
     icon: Map,
     title: 'Map the Warm Path',
-    body: 'Outlines your exact entry sequence: who first, what next, and when to follow up.',
+    body: 'Outlines your precise entry sequence: who first, what next, and when to follow up.',
     color: '#16A34A',
     bg: '#F0FDF4',
   },
@@ -35,9 +35,10 @@ const COLD_ITEMS = [
 ];
 
 const INSIDER_ITEMS = [
-  'Lead with warm paths',
-  'Reach out with a plan',
-  'Move first — with precision',
+  'Enter through alumni leverage',
+  'Reach out with context',
+  'Move before the applicant pile',
+  'Strategic entry before public competition',
 ];
 
 export default function FastIQValueProp() {
@@ -73,7 +74,7 @@ export default function FastIQValueProp() {
         className="text-[14px] sm:text-[13px] text-slate-600 text-center max-w-[600px] mx-auto"
         style={{ lineHeight: 1.75 }}
       >
-        FASTIQ analyzes your target company, surfaces alumni leverage, and shows you how to enter through the warm path — instead of the applicant pool.
+        FASTIQ analyzes your target company, surfaces alumni leverage, and shows you how to enter through the warm path — before public competition begins.
       </motion.p>
 
       {/* C) Comparison strip */}

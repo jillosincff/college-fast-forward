@@ -246,7 +246,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
             Because applying isn't a strategy.
           </h1>
           <p className="text-[15px] text-white/60 max-w-md mx-auto mb-6 leading-relaxed">
-            The strongest candidates don't apply cold. They enter through relationships.
+            The strongest candidates never enter through the applicant pool.
           </p>
 
           {/* CTA with pulse */}
@@ -270,7 +270,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           >
             <Sparkles className="w-5 h-5" /> Activate FASTIQ
           </motion.button>
-          <p className="text-[10px] text-white/35 mt-3">Reserved for students who move with leverage.</p>
+          <p className="text-[10px] text-white/35 mt-3">FASTIQ continuously scans your targets for alumni leverage.</p>
         </motion.div>
       </div>
 
