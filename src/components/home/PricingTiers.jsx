@@ -70,7 +70,7 @@ function CFFTier({ onCTA }) {
         <h3 className="text-lg font-bold text-slate-900 mb-1">CFF MEMBERSHIP</h3>
         <p className="text-sm text-slate-500 mb-4">Your network, activated</p>
         <div className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-1">$9</div>
-        <p className="text-slate-500 font-semibold text-sm mb-6">/month per family</p>
+        <p className="text-slate-500 font-semibold text-sm mb-6">/month</p>
 
         <ul className="text-left space-y-2.5 mb-6 flex-1">
           {[
@@ -128,7 +128,7 @@ function FastIQTier({ onCTA }) {
         </div>
         <p className="text-[#FA4616] font-semibold text-sm mb-6">or $149/year — save 35%</p>
 
-        <p className="text-left text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">
+        <p className="text-left text-sm text-slate-700 font-bold mb-3">
           Everything in CFF Membership, plus:
         </p>
         <ul className="text-left space-y-2.5 mb-6 flex-1">

@@ -59,7 +59,7 @@ export default function TargetIntelligencePanel() {
 
       {/* Caption */}
       <p className="text-[12px] text-slate-500 leading-[1.7] mt-4 px-1">
-        Precision Mode identifies alumni leverage and evaluates warm-path strength before your student applies.
+        FASTIQ identifies alumni leverage and evaluates warm-path strength before your student applies.
       </p>
     </div>
   );
