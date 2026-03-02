@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import InsidePrecisionMode from '@/components/precision/InsidePrecisionMode';
 import {
   Accordion,
   AccordionContent,
@@ -59,6 +60,11 @@ export default function LandingPage() {
 
   const handleSignIn = () => {
     trackEvent('cta_signin_clicked');
+    navigate('GatorAuth');
+  };
+
+  const handlePrecisionUpgrade = () => {
+    trackEvent('cta_precision_mode_clicked');
     navigate('GatorAuth');
   };
 
@@ -245,6 +251,13 @@ export default function LandingPage() {
               </p>
             </motion.div>
           </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* INSIDE PRECISION MODE — bridges pain → solution sophistication      */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <section id="precision-mode">
+          <InsidePrecisionMode onUpgrade={handlePrecisionUpgrade} />
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
