@@ -1,20 +1,21 @@
-import React from 'react';
-import { Building2, Users, MessageSquare, Map, Sparkles, TrendingUp, ChevronRight, Search, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Building2, Users, MessageSquare, Map, Sparkles, TrendingUp, Search, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
 import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
 
 const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
 
 const STAT_CONFIG = [
-  { icon: Building2, label: 'TARGETS LOCKED', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.25)' },
-  { icon: Users, label: 'INSIDERS FOUND', color: '#FA4616', bg: 'rgba(250,70,22,0.12)', border: 'rgba(250,70,22,0.25)' },
-  { icon: MessageSquare, label: 'MESSAGES DEPLOYED', color: '#22C55E', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.25)' },
-  { icon: Map, label: 'WARM PATHS MAPPED', color: '#A855F7', bg: 'rgba(168,85,247,0.12)', border: 'rgba(168,85,247,0.25)' },
+  { icon: Building2, label: 'TARGETS LOCKED', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+  { icon: Users, label: 'INSIDERS FOUND', color: '#FA4616', bg: 'rgba(250,70,22,0.12)' },
+  { icon: MessageSquare, label: 'MESSAGES DEPLOYED', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
+  { icon: Map, label: 'WARM PATHS MAPPED', color: '#A855F7', bg: 'rgba(168,85,247,0.12)' },
 ];
 
 function StatCard({ config, value, delay }) {
-  const { icon: Icon, label, color, bg, border } = config;
+  const { icon: Icon, label, color, bg } = config;
   const hasValue = value > 0;
   return (
     <motion.div {...fade} transition={{ duration: 0.25, delay }}>
@@ -22,10 +23,8 @@ function StatCard({ config, value, delay }) {
         className="rounded-lg p-4"
         style={{
           background: '#1E293B',
-          borderLeft: `3px solid ${border}`,
-          border: `1px solid rgba(255,255,255,0.06)`,
-          borderLeftColor: color,
-          borderLeftWidth: 3,
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderLeft: `3px solid ${color}`,
         }}
       >
         <div className="flex items-center gap-3">
@@ -50,7 +49,37 @@ function StatCard({ config, value, delay }) {
   );
 }
 
-function CompanyCard({ name, onResearch }) {
+function CompanyCard({ name, intel, alumniCount, onResearch, onView }) {
+  const researched = !!intel;
+  const hasAlumni = alumniCount > 0;
+
+  if (researched) {
+    const score = intel.hiring_score || '—';
+    return (
+      <div
+        className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-green-500/30 group"
+        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
+        onClick={onView}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
+            <div>
+              <p className="font-semibold text-white text-sm">{name}</p>
+              <p className="text-[11px] text-slate-400">
+                Hiring score: {score} • {alumniCount} UF alumni found
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-green-400 opacity-60 group-hover:opacity-100 transition-opacity">
+            <span className="text-[11px] font-semibold">View intel</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-orange-500/30 group"
@@ -59,7 +88,7 @@ function CompanyCard({ name, onResearch }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-slate-500 flex-shrink-0" />
+          <div className="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0" />
           <div>
             <p className="font-semibold text-white text-sm">{name}</p>
             <p className="text-[11px] text-slate-500">Not researched yet</p>
@@ -82,9 +111,7 @@ const QUICK_ACTIONS = [
 ];
 
 function SectionLabel({ children }) {
-  return (
-    <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">{children}</h2>
-  );
+  return <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">{children}</h2>;
 }
 
 function titleCase(str) {
@@ -92,6 +119,37 @@ function titleCase(str) {
 }
 
 export default function FastTrackDashboard({ user, profile, onOpenChat }) {
+  const [companyIntel, setCompanyIntel] = useState({});
+  const [alumniCounts, setAlumniCounts] = useState({});
+
+  // Fetch intel cache and alumni for target companies
+  useEffect(() => {
+    if (!profile?.target_companies?.length) return;
+
+    const loadIntel = async () => {
+      const companies = profile.target_companies.map(c => titleCase(c));
+
+      // Fetch all cached intel
+      const allIntel = await base44.entities.CompanyIntelCache.filter({}, '-created_date', 50);
+      const intelMap = {};
+      allIntel.forEach(item => {
+        intelMap[item.company_name?.toLowerCase()] = item;
+      });
+      setCompanyIntel(intelMap);
+
+      // Fetch all discovered alumni
+      const allAlumni = await base44.entities.DiscoveredAlumni.filter({}, '-created_date', 100);
+      const countMap = {};
+      allAlumni.forEach(item => {
+        const key = item.company?.toLowerCase();
+        if (key) countMap[key] = (countMap[key] || 0) + 1;
+      });
+      setAlumniCounts(countMap);
+    };
+
+    loadIntel();
+  }, [profile?.target_companies]);
+
   const statValues = [
     profile.companies_researched || 0,
     profile.alumni_discovered || 0,
@@ -103,10 +161,14 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
     onOpenChat(`Research ${company} for me — are they hiring? What roles, salary ranges, and interview process should I know about?`);
   };
 
+  const handleViewIntel = (company) => {
+    onOpenChat(`Show me the latest intel on ${company} — hiring score, open roles, alumni connections, and interview tips.`);
+  };
+
   return (
     <motion.div
       className="min-h-screen"
-      style={{ background: '#0F172A' }}
+      style={{ background: '#0B1121' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
@@ -116,7 +178,6 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
         className="relative overflow-hidden px-4 pt-14 pb-12 sm:pt-20 sm:pb-16"
         style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 100%)' }}
       >
-        {/* Glow */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, rgba(250,70,22,0.06) 0%, transparent 70%)' }} />
 
         <motion.div
@@ -141,17 +202,24 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
             Move faster than the applicant pile.
           </p>
 
-          {/* CTA */}
+          {/* CTA with pulse */}
           <motion.button
             onClick={() => onOpenChat()}
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all duration-150 hover:scale-[1.03] active:scale-[0.98]"
+            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
             style={{
               background: '#FA4616',
               boxShadow: '0 0 30px rgba(250,70,22,0.35), 0 4px 15px rgba(250,70,22,0.25)',
               minHeight: 'auto',
             }}
-            animate={{ boxShadow: ['0 0 20px rgba(250,70,22,0.25), 0 4px 15px rgba(250,70,22,0.2)', '0 0 35px rgba(250,70,22,0.45), 0 4px 15px rgba(250,70,22,0.3)', '0 0 20px rgba(250,70,22,0.25), 0 4px 15px rgba(250,70,22,0.2)'] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            animate={{
+              scale: [1, 1.04, 1],
+              boxShadow: [
+                '0 0 20px rgba(250,70,22,0.25), 0 4px 15px rgba(250,70,22,0.2)',
+                '0 0 40px rgba(250,70,22,0.5), 0 4px 20px rgba(250,70,22,0.35)',
+                '0 0 20px rgba(250,70,22,0.25), 0 4px 15px rgba(250,70,22,0.2)',
+              ],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
             <Sparkles className="w-5 h-5" /> Activate FASTIQ
           </motion.button>
@@ -160,7 +228,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       </div>
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10 -mt-1" style={{ background: '#0F172A' }}>
+      <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
         {/* Stats */}
         <div className="pt-8">
@@ -177,9 +245,21 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           <div>
             <SectionLabel>Target Companies</SectionLabel>
             <div className="space-y-2">
-              {profile.target_companies.map(c => (
-                <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
-              ))}
+              {profile.target_companies.map(c => {
+                const key = c.toLowerCase();
+                const intel = companyIntel[key] || null;
+                const count = alumniCounts[key] || 0;
+                return (
+                  <CompanyCard
+                    key={c}
+                    name={titleCase(c)}
+                    intel={intel}
+                    alumniCount={count}
+                    onResearch={handleResearchCompany}
+                    onView={() => handleViewIntel(titleCase(c))}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -198,16 +278,18 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <button
                 key={label}
                 onClick={() => onOpenChat(prompt)}
-                className="flex flex-col items-center gap-2.5 py-5 rounded-lg transition-all duration-150 hover:scale-[1.02] active:scale-[0.97]"
+                className="flex flex-col items-center gap-2.5 py-5 rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] group"
                 style={{
                   background: '#1E293B',
                   border: '1px solid rgba(255,255,255,0.08)',
                   width: '100%',
                   minHeight: 'auto',
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px ${color}25`; e.currentTarget.style.borderColor = `${color}30`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
               >
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: bg }}>
-                  <Icon className="w-[18px] h-[18px]" style={{ color }} />
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center transition-shadow duration-200" style={{ background: bg }}>
+                  <Icon className="w-5 h-5" style={{ color }} />
                 </div>
                 <span className="text-[11px] font-semibold text-slate-300">{emoji} {label}</span>
               </button>
