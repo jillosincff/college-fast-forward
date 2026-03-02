@@ -39,7 +39,7 @@ export default function InsidePrecisionMode({ onUpgrade }) {
             Unlock FASTIQ™
           </button>
           <p className="text-[12px] text-slate-400 mt-3 tracking-wide">
-            Annual Family Access — $249
+            Starting at $19/month • 7-day free trial
           </p>
         </div>
 
