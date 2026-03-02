@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
 
-const fade = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
+const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
+const rise = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
 
 function StatCard({ icon: Icon, label, value, delay, highlight }) {
   return (
     <motion.div {...fade} transition={{ duration: 0.25, delay }}>
       <div
-        className="rounded-xl p-4 bg-white"
+        className="rounded-lg p-4 bg-white"
         style={{
           border: highlight ? '1.5px solid #2563EB' : '1px solid #E2E8F0',
           boxShadow: highlight
@@ -37,7 +38,7 @@ function StatCard({ icon: Icon, label, value, delay, highlight }) {
 function CompanyCard({ name, onResearch }) {
   return (
     <div
-      className="rounded-xl p-4 bg-white cursor-pointer transition-all duration-150 hover:shadow-md hover:border-slate-300"
+      className="rounded-lg p-4 bg-white cursor-pointer transition-all duration-150 hover:shadow-md hover:border-slate-300"
       style={{ border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
       onClick={() => onResearch(name)}
     >
@@ -92,21 +93,26 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
     >
       {/* Hero */}
       <div className="px-4 pt-16 pb-14 sm:pt-24 sm:pb-20">
-        <motion.div {...fade} transition={{ duration: 0.3 }} className="max-w-2xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-2xl mx-auto"
+        >
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-5">
             FASTIQ™ by College Fast Forward
           </p>
           <h1
-            className="text-[32px] sm:text-[42px] font-bold text-slate-900 mb-5"
-            style={{ letterSpacing: '-0.035em', lineHeight: 1.1 }}
+            className="text-[34px] sm:text-[46px] font-bold text-slate-900 mb-5"
+            style={{ letterSpacing: '-0.035em', lineHeight: 1.08 }}
           >
             Because applying isn't a strategy.
           </h1>
-          <p className="text-[15px] sm:text-base text-slate-600 max-w-md mx-auto mb-2.5 leading-relaxed">
-            Stop competing with 500 applicants. Enter through the warm path instead.
+          <p className="text-[15px] sm:text-base text-slate-600 max-w-lg mb-2.5 leading-relaxed">
+            Move faster than the applicant pile.
           </p>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            FASTIQ analyzes targets, identifies alumni leverage, and gives you the exact next move.
+          <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+            FASTIQ analyzes targets, identifies alumni leverage, and gives you the next precise move.
           </p>
         </motion.div>
       </div>
@@ -114,9 +120,9 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
         {/* FASTIQ Feature Card — dark & dominant */}
-        <motion.div {...fade} transition={{ duration: 0.3, delay: 0.08 }}>
+        <motion.div {...rise} transition={{ duration: 0.35, delay: 0.08 }}>
           <div
-            className="rounded-[20px] p-6"
+            className="rounded-2xl p-6"
             style={{
               background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
               boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
@@ -137,7 +143,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                   </span>
                 </div>
                 <p className="text-[13px] text-slate-400 mb-5 leading-relaxed">
-                  Pick a target. Find leverage. Draft outreach. Move first.
+                  Target. Leverage. Execute.
                 </p>
                 <div>
                   <button
@@ -153,7 +159,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                   >
                     <Sparkles className="w-4 h-4" /> Activate FASTIQ
                   </button>
-                  <p className="text-[10px] text-slate-500 mt-3">Start with a company. FASTIQ maps the warm path.</p>
+                  <p className="text-[10px] text-slate-500 mt-3">Accelerate with precision.</p>
                 </div>
               </div>
             </div>
@@ -201,7 +207,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <button
                 key={label}
                 onClick={() => onOpenChat(prompt)}
-                className="flex flex-col items-center gap-2 py-5 rounded-xl bg-white transition-all duration-150 hover:shadow-md hover:border-slate-300 active:scale-[0.97]"
+                className="flex flex-col items-center gap-2 py-5 rounded-lg bg-white transition-all duration-150 hover:shadow-md hover:border-slate-300 active:scale-[0.97]"
                 style={{
                   border: '1px solid #E2E8F0',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
