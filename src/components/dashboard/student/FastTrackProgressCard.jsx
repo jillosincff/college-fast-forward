@@ -77,7 +77,7 @@ export default function FastTrackProgressCard({ user }) {
       <CardContent className="pt-5 pb-5 px-5">
         <div className="flex items-center gap-2 mb-4">
           <Zap className="w-5 h-5 text-yellow-500" />
-          <h3 className="text-lg font-bold text-slate-900">Your Fast Track Progress</h3>
+          <h3 className="text-lg font-bold text-slate-900">Your FASTIQ Progress</h3>
         </div>
 
         {/* Current Tier */}

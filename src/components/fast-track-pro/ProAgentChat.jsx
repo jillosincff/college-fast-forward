@@ -234,7 +234,7 @@ export default function ProAgentChat({ user, profile, initialMessage, onBack }) 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask your career agent anything..."
+            placeholder="Ask FASTIQ anything..."
             rows={1}
             className="flex-1 resize-none text-sm px-2 py-2 outline-none bg-transparent max-h-32"
             style={{ minHeight: '40px' }}
