@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, MessageSquare, Map, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import moment from 'moment';
 
 const ACTION_CONFIG = {
-  company_search: { icon: Building2, label: 'Researched', color: 'bg-blue-100 text-blue-600', badgeColor: 'bg-blue-50 text-blue-700', badgeLabel: 'target intel' },
-  alumni_view: { icon: Users, label: 'Discovered alumni at', color: 'bg-purple-100 text-purple-600', badgeColor: 'bg-purple-50 text-purple-700', badgeLabel: 'leverage found' },
-  message_draft: { icon: MessageSquare, label: 'Drafted message to', color: 'bg-orange-100 text-orange-600', badgeColor: 'bg-orange-50 text-orange-700', badgeLabel: 'outreach' },
-  roadmap_created: { icon: Map, label: 'Created roadmap', color: 'bg-green-100 text-green-600', badgeColor: 'bg-green-50 text-green-700', badgeLabel: 'warm path' },
+  company_search: { icon: Building2, label: 'Researched', badgeLabel: 'target intel' },
+  alumni_view: { icon: Users, label: 'Discovered alumni at', badgeLabel: 'leverage found' },
+  message_draft: { icon: MessageSquare, label: 'Drafted message to', badgeLabel: 'outreach' },
+  roadmap_created: { icon: Map, label: 'Created roadmap', badgeLabel: 'warm path' },
 };
 
-export default function ProActivityFeed({ userEmail }) {
+export default function ProActivityFeed({ userEmail, darkMode }) {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +37,7 @@ export default function ProActivityFeed({ userEmail }) {
     return (
       <div className="space-y-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />
+          <div key={i} className={`h-14 rounded-xl animate-pulse ${darkMode ? 'bg-white/5' : 'bg-slate-100'}`} />
         ))}
       </div>
     );
@@ -46,10 +45,12 @@ export default function ProActivityFeed({ userEmail }) {
 
   if (activities.length === 0) {
     return (
-      <Card className="p-6 text-center border-2 border-dashed border-slate-200">
-        <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-        <p className="text-sm text-slate-500">No activity yet. Start chatting with your AI agent!</p>
-      </Card>
+      <div className={`p-6 text-center rounded-2xl border-2 border-dashed ${
+        darkMode ? 'border-white/10' : 'border-slate-200'
+      }`}>
+        <Clock className={`w-8 h-8 mx-auto mb-2 ${darkMode ? 'text-white/20' : 'text-slate-300'}`} />
+        <p className={`text-sm ${darkMode ? 'text-white/30' : 'text-slate-500'}`}>No activity yet. Start chatting with your AI agent!</p>
+      </div>
     );
   }
 
@@ -61,23 +62,34 @@ export default function ProActivityFeed({ userEmail }) {
         const timeAgo = moment(a.timestamp || a.created_date).fromNow();
 
         return (
-          <Card key={a.id} className="p-3 border border-slate-100 hover:border-slate-200 transition-colors">
+          <div key={a.id}
+            className={`p-3 rounded-xl border transition-colors ${
+              darkMode
+                ? 'border-white/8 hover:border-white/12'
+                : 'border-slate-100 hover:border-slate-200'
+            }`}
+            style={darkMode ? { background: 'rgba(255,255,255,0.04)' } : {}}
+          >
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${config.color}`}>
-                <Icon className="w-4 h-4" />
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                darkMode ? 'bg-white/8' : 'bg-blue-50'
+              }`}>
+                <Icon className={`w-4 h-4 ${darkMode ? 'text-white/50' : 'text-blue-600'}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-700">
+                <p className={`text-sm ${darkMode ? 'text-white/60' : 'text-slate-700'}`}>
                   <span className="font-medium">{config.label}</span>
-                  {a.target_name && <span className="font-semibold text-slate-900"> {a.target_name}</span>}
+                  {a.target_name && <span className={`font-semibold ${darkMode ? 'text-white/80' : 'text-slate-900'}`}> {a.target_name}</span>}
                 </p>
-                <p className="text-xs text-slate-400">{timeAgo}</p>
+                <p className={`text-xs ${darkMode ? 'text-white/25' : 'text-slate-400'}`}>{timeAgo}</p>
               </div>
-              <Badge variant="outline" className={`text-[10px] flex-shrink-0 ${config.badgeColor} border-0`}>
+              <Badge variant="outline" className={`text-[10px] flex-shrink-0 border-0 ${
+                darkMode ? 'bg-white/8 text-white/40' : 'bg-blue-50 text-blue-700'
+              }`}>
                 {config.badgeLabel || a.action_type.replace('_', ' ')}
               </Badge>
             </div>
-          </Card>
+          </div>
         );
       })}
     </div>
