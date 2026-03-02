@@ -12,20 +12,20 @@ function StatCard({ icon: Icon, label, value, delay, highlight }) {
       <div
         className="rounded-xl p-4"
         style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: highlight ? '1px solid rgba(26,75,255,0.25)' : '1px solid rgba(255,255,255,0.07)',
-          boxShadow: highlight ? '0 0 20px rgba(26,75,255,0.08)' : 'none',
+          background: highlight ? 'rgba(26,75,255,0.08)' : 'rgba(255,255,255,0.08)',
+          border: highlight ? '1px solid rgba(26,75,255,0.30)' : '1px solid rgba(255,255,255,0.18)',
+          boxShadow: highlight ? '0 0 24px rgba(26,75,255,0.12)' : 'none',
         }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <Icon className="w-[18px] h-[18px] text-white/40" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <Icon className="w-[18px] h-[18px] text-white/60" />
           </div>
           <div>
-            <p className="text-[22px] font-bold text-white/95 tracking-tight leading-none mb-0.5">
+            <p className="text-[24px] font-bold text-white tracking-tight leading-none mb-0.5" style={{ textShadow: '0 0 20px rgba(255,255,255,0.08)' }}>
               <AnimatedCounter value={value} />
             </p>
-            <p className="text-[10px] text-white/30 uppercase tracking-[0.1em] font-medium">{label}</p>
+            <p className="text-[10px] uppercase tracking-[0.1em] font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</p>
           </div>
         </div>
       </div>
@@ -36,24 +36,28 @@ function StatCard({ icon: Icon, label, value, delay, highlight }) {
 function CompanyCard({ name, onResearch }) {
   return (
     <div
-      className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:bg-white/[0.05]"
-      style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}
+      className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:bg-white/[0.12]"
+      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)' }}
       onClick={() => onResearch(name)}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <Building2 className="w-[18px] h-[18px] text-white/40" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <Building2 className="w-[18px] h-[18px] text-white/60" />
           </div>
           <div>
-            <p className="font-medium text-white/85 text-sm">{name}</p>
-            <p className="text-[10px] text-white/25">Tap to map your warm path</p>
+            <p className="font-medium text-white text-sm">{name}</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Tap to map your warm path</p>
           </div>
         </div>
-        <ChevronRight className="w-4 h-4 text-white/15" />
+        <ChevronRight className="w-4 h-4 text-white/30" />
       </div>
     </div>
   );
+}
+
+function SectionDivider() {
+  return <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />;
 }
 
 function titleCase(str) {
@@ -82,13 +86,12 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
     >
       {/* Hero */}
       <div className="relative overflow-hidden px-4 pt-14 pb-16 sm:pt-20 sm:pb-20">
-        {/* Radial glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 35%, rgba(26,75,255,0.08) 0%, transparent 70%)' }}
         />
         <motion.div {...fade} transition={{ duration: 0.3 }} className="max-w-2xl mx-auto text-center relative z-10">
-          <p className="text-white/25 text-[10px] font-semibold uppercase tracking-[0.25em] mb-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
             FASTIQ™ by College Fast Forward
           </p>
           <h1
@@ -97,10 +100,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           >
             Because applying isn't a strategy.
           </h1>
-          <p className="text-white/50 text-sm sm:text-[15px] max-w-md mx-auto mb-2 leading-relaxed">
+          <p className="text-sm sm:text-[15px] max-w-md mx-auto mb-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
             Stop competing with 500 applicants. Enter through the warm path instead.
           </p>
-          <p className="text-white/25 text-xs max-w-sm mx-auto leading-relaxed">
+          <p className="text-xs max-w-sm mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
             FASTIQ analyzes targets, identifies alumni leverage, and gives you the exact next move.
           </p>
         </motion.div>
@@ -113,10 +116,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           <div
             className="rounded-[18px] p-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgba(255,255,255,0.08)',
               backdropFilter: 'blur(18px)',
               WebkitBackdropFilter: 'blur(18px)',
-              border: '1px solid rgba(255,255,255,0.10)',
+              border: '1px solid rgba(255,255,255,0.18)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
             }}
           >
@@ -125,19 +128,19 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                 className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, rgba(26,75,255,0.5) 0%, rgba(26,75,255,0.2) 100%)' }}
               >
-                <Sparkles className="w-5 h-5 text-white/80" />
+                <Sparkles className="w-5 h-5 text-white/90" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2.5 mb-1.5">
                   <h3 className="font-semibold text-white text-[15px] tracking-tight">FASTIQ™</h3>
                   <span
                     className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-[0.1em]"
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }}
+                    style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.6)' }}
                   >
                     PRO
                   </span>
                 </div>
-                <p className="text-[13px] text-white/35 mb-4 leading-relaxed">
+                <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   Pick a target. Find leverage. Draft outreach. Move first.
                 </p>
                 <div>
@@ -154,17 +157,19 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                   >
                     <Sparkles className="w-4 h-4" /> Activate FASTIQ
                   </button>
-                  <p className="text-[10px] text-white/18 mt-2.5">Start with a company. FASTIQ maps the warm path.</p>
+                  <p className="text-[10px] mt-2.5" style={{ color: 'rgba(255,255,255,0.45)' }}>Start with a company. FASTIQ maps the warm path.</p>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
+        <SectionDivider />
+
         {/* Stats Grid */}
         <div>
-          <h2 className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.2em] mb-1">Your Progress</h2>
-          <p className="text-[10px] text-white/15 mb-4">Warm paths outperform cold applications.</p>
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Your Progress</h2>
+          <p className="text-[10px] mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>Warm paths outperform cold applications.</p>
           <div className="grid grid-cols-2 gap-3">
             {stats.map((s, i) => (
               <StatCard key={s.label} {...s} delay={0.12 + i * 0.05} />
@@ -172,27 +177,34 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
           </div>
         </div>
 
+        <SectionDivider />
+
         {/* Target Companies */}
         {profile.target_companies?.length > 0 && (
-          <div>
-            <h2 className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.2em] mb-3">Target Companies</h2>
-            <div className="space-y-2">
-              {profile.target_companies.map(c => (
-                <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
-              ))}
+          <>
+            <div>
+              <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Target Companies</h2>
+              <div className="space-y-2">
+                {profile.target_companies.map(c => (
+                  <CompanyCard key={c} name={titleCase(c)} onResearch={handleResearchCompany} />
+                ))}
+              </div>
             </div>
-          </div>
+            <SectionDivider />
+          </>
         )}
 
         {/* Recent Activity */}
         <div>
-          <h2 className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.2em] mb-3">Recent Activity</h2>
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Recent Activity</h2>
           <ProActivityFeed userEmail={user?.email} darkMode />
         </div>
 
+        <SectionDivider />
+
         {/* Quick Actions */}
         <div>
-          <h2 className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.2em] mb-3">Quick Actions</h2>
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: Users, label: 'Find Leverage', prompt: 'Find UF alumni at my target companies' },
@@ -203,16 +215,16 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <button
                 key={label}
                 onClick={() => onOpenChat(prompt)}
-                className="flex flex-col items-center gap-2 py-5 rounded-xl transition-all duration-150 hover:bg-white/[0.04] active:scale-[0.97]"
+                className="flex flex-col items-center gap-2 py-5 rounded-xl transition-all duration-150 hover:bg-white/[0.10] active:scale-[0.97]"
                 style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.18)',
                   width: '100%',
                   minHeight: 'auto',
                 }}
               >
-                <Icon className="w-[18px] h-[18px] text-white/30" />
-                <span className="text-[11px] font-medium text-white/40">{label}</span>
+                <Icon className="w-[18px] h-[18px] text-white/60" />
+                <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{label}</span>
               </button>
             ))}
           </div>
