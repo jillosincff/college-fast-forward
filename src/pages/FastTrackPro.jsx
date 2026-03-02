@@ -49,15 +49,15 @@ export default function FastTrackPro() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F8FAFC' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0F172A' }}>
         <div className="text-center">
-          <Zap className="w-10 h-10 text-slate-300 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-slate-900 mb-2 tracking-tight">Sign in to access FASTIQ™</h2>
+          <Zap className="w-10 h-10 text-orange-400 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-white mb-2 tracking-tight">Sign in to access FASTIQ™</h2>
           <p className="text-slate-400 mb-5 text-sm">Your intelligent networking engine</p>
           <Button
             onClick={() => base44.auth.redirectToLogin()}
-            className="text-white text-sm font-medium px-6"
-            style={{ background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)' }}
+            className="text-white text-sm font-bold px-6"
+            style={{ background: '#FA4616' }}
           >
             Sign In
           </Button>
@@ -68,8 +68,8 @@ export default function FastTrackPro() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F8FAFC' }}>
-        <Loader2 className="w-7 h-7 text-slate-400 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
+        <Loader2 className="w-7 h-7 text-orange-400 animate-spin" />
       </div>
     );
   }
