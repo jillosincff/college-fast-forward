@@ -32,7 +32,7 @@ function CompanyCard({ name, onResearch }) {
           </div>
           <div>
             <p className="font-semibold text-slate-900">{name}</p>
-            <p className="text-xs text-slate-500">Tap to get intel</p>
+            <p className="text-xs text-slate-500">Tap to map your warm path</p>
           </div>
         </div>
         <ChevronRight className="w-5 h-5 text-slate-400" />
@@ -51,10 +51,10 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
     ? rawName.split(',')[1]?.trim().split(' ')[0]
     : rawName.split(' ')[0];
   const stats = [
-    { icon: Building2, label: 'Companies Researched', value: profile.companies_researched || 0, color: 'bg-blue-100 text-blue-600' },
-    { icon: Users, label: 'Alumni Discovered', value: profile.alumni_discovered || 0, color: 'bg-purple-100 text-purple-600' },
-    { icon: MessageSquare, label: 'Messages Drafted', value: profile.messages_drafted || 0, color: 'bg-orange-100 text-orange-600' },
-    { icon: Map, label: 'Roadmaps Generated', value: profile.roadmaps_generated || 0, color: 'bg-green-100 text-green-600' },
+    { icon: Building2, label: 'Targets Analyzed', value: profile.companies_researched || 0, color: 'bg-blue-100 text-blue-600' },
+    { icon: Users, label: 'Leverage Found', value: profile.alumni_discovered || 0, color: 'bg-purple-100 text-purple-600' },
+    { icon: MessageSquare, label: 'Outreach Deployed', value: profile.messages_drafted || 0, color: 'bg-orange-100 text-orange-600' },
+    { icon: Map, label: 'Warm Paths Created', value: profile.roadmaps_generated || 0, color: 'bg-green-100 text-green-600' },
   ];
 
   const handleResearchCompany = (company) => {
@@ -68,8 +68,11 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
         <div className="max-w-4xl mx-auto">
           <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">FASTIQ™ by College Fast Forward</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Because applying isn't a strategy.</h1>
-          <p className="text-white/70 text-sm max-w-xl">
-            FASTIQ is your intelligent networking engine. It finds the warm path into any company — and tells you exactly how to use it.
+          <p className="text-white/80 text-sm sm:text-base max-w-xl mb-1">
+            FASTIQ finds your inside lane into any company — and gives you the exact moves to make.
+          </p>
+          <p className="text-white/50 text-xs max-w-lg">
+            Research targets, identify alumni leverage, and deploy outreach before you ever hit Apply.
           </p>
         </div>
       </div>
@@ -83,11 +86,17 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-slate-900 mb-1">FASTIQ™</h3>
-                <p className="text-sm text-slate-600 mb-3">Research companies, discover alumni, draft outreach, and build your roadmap — all in one conversation.</p>
-                <Button onClick={() => onOpenChat()} className="bg-[#0021A5] hover:bg-[#001580]">
-                  <Sparkles className="w-4 h-4 mr-2" /> Open FASTIQ
-                </Button>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-bold text-slate-900">FASTIQ™</h3>
+                  <Badge className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white text-[10px] px-2 py-0 border-0 font-bold">PRO</Badge>
+                </div>
+                <p className="text-sm text-slate-600 mb-3">Pick a target. Find leverage. Draft outreach. Move first.</p>
+                <div>
+                  <Button onClick={() => onOpenChat()} className="bg-[#0021A5] hover:bg-[#001580] shadow-md">
+                    <Sparkles className="w-4 h-4 mr-2" /> Activate FASTIQ
+                  </Button>
+                  <p className="text-[11px] text-slate-400 mt-2">Start with a company. FASTIQ returns the warm path.</p>
+                </div>
               </div>
             </div>
           </Card>
@@ -95,7 +104,8 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
 
         {/* Stats Grid */}
         <div>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Progress</h2>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Your Progress</h2>
+          <p className="text-xs text-slate-400 mb-3">Win rate improves when you lead with warm paths — not cold applications.</p>
           <div className="grid grid-cols-2 gap-3">
             {stats.map(s => <StatCard key={s.label} {...s} />)}
           </div>
@@ -123,21 +133,21 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
         <div>
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => onOpenChat("Find UF alumni at my target companies")} className="h-auto py-4 flex-col gap-2 border-2" style={{ width: '100%' }}>
+            <Button variant="outline" onClick={() => onOpenChat("Find UF alumni at my target companies")} className="h-auto py-4 flex-col gap-2 border-2 hover:border-purple-300 hover:bg-purple-50/50" style={{ width: '100%' }}>
               <Users className="w-5 h-5 text-purple-600" />
-              <span className="text-xs">Find Alumni</span>
+              <span className="text-xs font-medium">Find Leverage</span>
             </Button>
-            <Button variant="outline" onClick={() => onOpenChat("Draft a LinkedIn message to a recruiter")} className="h-auto py-4 flex-col gap-2 border-2" style={{ width: '100%' }}>
+            <Button variant="outline" onClick={() => onOpenChat("Draft a LinkedIn message to a recruiter")} className="h-auto py-4 flex-col gap-2 border-2 hover:border-orange-300 hover:bg-orange-50/50" style={{ width: '100%' }}>
               <MessageSquare className="w-5 h-5 text-orange-600" />
-              <span className="text-xs">Draft Message</span>
+              <span className="text-xs font-medium">Deploy Outreach</span>
             </Button>
-            <Button variant="outline" onClick={() => onOpenChat("Create a 4-week career action plan for me")} className="h-auto py-4 flex-col gap-2 border-2" style={{ width: '100%' }}>
+            <Button variant="outline" onClick={() => onOpenChat("Create a 4-week career action plan for me")} className="h-auto py-4 flex-col gap-2 border-2 hover:border-green-300 hover:bg-green-50/50" style={{ width: '100%' }}>
               <Map className="w-5 h-5 text-green-600" />
-              <span className="text-xs">Build Roadmap</span>
+              <span className="text-xs font-medium">Map Warm Path</span>
             </Button>
-            <Button variant="outline" onClick={() => onOpenChat("What company should I target next?")} className="h-auto py-4 flex-col gap-2 border-2" style={{ width: '100%' }}>
+            <Button variant="outline" onClick={() => onOpenChat("What company should I target next?")} className="h-auto py-4 flex-col gap-2 border-2 hover:border-blue-300 hover:bg-blue-50/50" style={{ width: '100%' }}>
               <TrendingUp className="w-5 h-5 text-blue-600" />
-              <span className="text-xs">Get Advice</span>
+              <span className="text-xs font-medium">Strategy Check</span>
             </Button>
           </div>
         </div>
