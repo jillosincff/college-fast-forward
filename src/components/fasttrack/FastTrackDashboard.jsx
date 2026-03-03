@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
 import FastIQValueProp from './FastIQValueProp';
+import PipelineSection from './PipelineSection';
 import titleCase from '@/components/utils/titleCase';
 
 const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
@@ -291,6 +292,16 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
               <StatCard key={cfg.label} config={cfg} value={statValues[i]} delay={0.1 + i * 0.05} />
             ))}
           </div>
+        </div>
+
+        {/* YOUR PIPELINE */}
+        <div>
+          <SectionLabel>Your Pipeline</SectionLabel>
+          <PipelineSection
+            userEmail={user?.email}
+            companyIntel={companyIntel}
+            onOpenChat={onOpenChat}
+          />
         </div>
 
         {/* Target Companies */}
