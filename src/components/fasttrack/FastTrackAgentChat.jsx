@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Send, Sparkles, Loader2, ArrowLeft, Building2, Users, Mail, ThumbsUp, ThumbsDown, Bot, User } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import titleCase from '@/components/utils/titleCase';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -23,7 +24,7 @@ function CompanyIntelCard({ data }) {
           <Building2 className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="font-bold text-slate-900">{data.company}</p>
+          <p className="font-bold text-slate-900">{titleCase(data.company)}</p>
           <Badge className={`text-xs ${data.hiring_health === 'hot' ? 'bg-green-100 text-green-700' : data.hiring_health === 'warm' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
             {data.hiring_health === 'hot' ? '🟢 Hot' : data.hiring_health === 'warm' ? '🟡 Warm' : '🔴 Cool'} Hiring
           </Badge>
@@ -49,7 +50,7 @@ function AlumniCard({ data }) {
         </div>
         <div>
           <p className="font-bold text-slate-900">{data.name}</p>
-          <p className="text-xs text-slate-500">{data.title} at {data.company}</p>
+          <p className="text-xs text-slate-500">{data.title} at {titleCase(data.company)}</p>
         </div>
         {data.relevance_score && (
           <Badge className="ml-auto bg-purple-100 text-purple-700 text-xs">{data.relevance_score}% match</Badge>
