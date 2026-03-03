@@ -335,6 +335,118 @@ Deno.serve(async (req) => {
       }
     }
 
+    // --- ALUMNI DISCOVERY FLOW (checked FIRST to prevent outreach misclassification) ---
+    let alumniCompanyEarly = detectAlumniQuery(resolvedMessage);
+
+    // Resolve "there" / pronouns from conversation context
+    if (alumniCompanyEarly === 'RESOLVE_FROM_CONTEXT') {
+      const resolved = resolveCompanyFromContext(conversation_history);
+      if (resolved) {
+        console.log('Resolved "there" → company from context:', resolved);
+        alumniCompanyEarly = resolved;
+      } else {
+        console.log('Could not resolve "there" from context, falling through');
+        alumniCompanyEarly = null;
+      }
+    }
+
+    if (alumniCompanyEarly) {
+      console.log('Alumni query detected (early check) for:', alumniCompanyEarly);
+
+      // Check cache first
+      const cachedAlumni = await getCachedAlumni(base44, alumniCompanyEarly);
+      if (cachedAlumni) {
+        console.log('Alumni cache HIT — returning', cachedAlumni.length, 'cached alumni');
+        trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
+        return Response.json({
+          success: true,
+          response: `Here are UF alumni I found at ${alumniCompanyEarly}:`,
+          message_type: 'alumni_card',
+          payload: {
+            alumni: cachedAlumni.map(a => ({
+              name: a.name,
+              role_title: a.role_title,
+              company: a.company,
+              match_score: a.match_score,
+              degree_info: a.degree_info,
+              location: a.location,
+            })),
+            cached: true,
+          }
+        });
+      }
+
+      // Cache miss — web research
+      console.log('Alumni cache MISS for', alumniCompanyEarly, '- researching...');
+
+      const webResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Find University of Florida alumni who currently work at ${alumniCompanyEarly}. For each person found, provide their full name, current job title, degree info if available, and location.`,
+        add_context_from_internet: true,
+      });
+
+      const webContext = typeof webResult === 'string' ? webResult : JSON.stringify(webResult);
+
+      const alumniResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite career agent for UF students.
+
+${profileContext}
+
+Parse the following research into structured alumni profiles for UF alumni at ${alumniCompanyEarly}.
+
+RESEARCH:
+${webContext.substring(0, 4000)}
+
+Rules for match_score (0-100):
+- Higher if alumni's role aligns with student's target_industry: "${profile.target_industry || 'not specified'}"
+- Higher if alumni's seniority matches student's current_stage: "${profile.current_stage || 'not set'}"
+- 90+ = perfect match, 70-89 = strong, 50-69 = moderate, below 50 = loose connection
+- response: brief 2-3 sentence conversational message to the student about these alumni connections`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief conversational message to the student" },
+            alumni: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string", description: "Full name" },
+                  role_title: { type: "string", description: "Current job title" },
+                  company: { type: "string", description: "Company name" },
+                  degree_info: { type: "string", description: "UF degree info if available" },
+                  location: { type: "string", description: "Current location" },
+                  match_score: { type: "integer", description: "0-100 relevance score" }
+                },
+                required: ["name", "role_title", "company", "match_score"]
+              }
+            }
+          },
+          required: ["response", "alumni"]
+        }
+      });
+
+      const alumni = (alumniResult.alumni || []).map(a => ({
+        ...a,
+        company: a.company || alumniCompanyEarly,
+      }));
+
+      if (alumni.length > 0) {
+        saveAlumniCache(base44, alumni);
+      }
+
+      trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
+
+      return Response.json({
+        success: true,
+        response: alumniResult.response || `Here are UF alumni I found at ${alumniCompanyEarly}:`,
+        message_type: 'alumni_card',
+        payload: {
+          alumni,
+          cached: false,
+        }
+      });
+    }
+
     // --- OPPORTUNITY DISCOVERY FLOW: detect "find me companies" / "where should I apply" queries ---
     const isOpportunityDiscovery = detectOpportunityDiscovery(resolvedMessage);
 
