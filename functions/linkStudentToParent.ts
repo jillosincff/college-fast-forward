@@ -48,21 +48,18 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Missing studentEmailAddress' }, { status: 400 });
       }
 
-      // Check for pending Family records where this student email is listed but not yet linked
       const families = await base44.asServiceRole.entities.Family.filter({
         student_email: studentEmailAddress.toLowerCase()
       });
 
-      const pendingFamily = families.find(f => !f.linked || !f.student_user_id);
+      const pendingFamily = families.find(f => !f.linked);
 
       if (!pendingFamily) {
         return Response.json({ success: true, linked: false, message: 'No pending family link found' });
       }
 
-      // Complete the link
       const familyGroupId = pendingFamily.family_group_id || `family_${pendingFamily.primary_parent_id}_${Date.now()}`;
       
-      // Update Family record
       const studentIds = pendingFamily.student_ids || [];
       if (studentUserId && !studentIds.includes(studentUserId)) {
         studentIds.push(studentUserId);
@@ -74,7 +71,6 @@ Deno.serve(async (req) => {
         linked_at: new Date().toISOString()
       });
 
-      // Update student User record
       if (studentUserId) {
         await base44.asServiceRole.entities.User.update(studentUserId, {
           family_group_id: familyGroupId,
@@ -82,7 +78,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Apply existing karma boost
       const existingKarma = await base44.asServiceRole.entities.FamilyKarma.filter({
         family_group_id: familyGroupId
       });
@@ -93,7 +88,6 @@ Deno.serve(async (req) => {
         const { boost } = getKarmaLevel(fk.total_karma || 0);
         boostResult = { boost, totalKarma: fk.total_karma || 0 };
 
-        // Boost student's active questions
         if (boost > 0 && studentEmailAddress) {
           const boostExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
           const studentQuestions = await base44.asServiceRole.entities.JobRequest.filter({
@@ -110,7 +104,6 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Notify parent
       try {
         const parentUsers = await base44.asServiceRole.entities.User.filter({ id: pendingFamily.primary_parent_id });
         if (parentUsers.length > 0) {
@@ -118,41 +111,32 @@ Deno.serve(async (req) => {
           const studentName = user.full_name || studentEmailAddress.split('@')[0];
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: parent.email,
-            subject: `🎉 ${studentName} just joined CFF! Your Karma is now boosting them.`,
+            subject: `${studentName} just joined CFF! Your Karma is now boosting them.`,
             body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #0021A5;">Great news!</h2>
               <p>${studentName} just signed up on College Fast Forward and your accounts are now linked.</p>
               ${boostResult.totalKarma > 0 ? `<p style="background: #f0f7ff; padding: 16px; border-radius: 8px;">
-                <strong>🔥 Your ${boostResult.totalKarma} Family Karma points are now active!</strong><br>
+                <strong>Your ${boostResult.totalKarma} Family Karma points are now active!</strong><br>
                 ${studentName}'s questions will get a <strong>${boostResult.boost}x boost</strong> in the feed.
               </p>` : ''}
               <p>Keep helping students to boost ${studentName} even higher!</p>
             </div>`
           });
 
-          // Also send email to the student about the link
-          const parentName = parent.full_name?.split(',').reverse().map(s => s.trim()).join(' ') || parent.email.split('@')[0];
+          const parentName = parent.full_name || parent.email.split('@')[0];
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: studentEmailAddress,
-            subject: '🎉 Your parent just connected their CFF account!',
+            subject: 'Your parent just connected their CFF account!',
             body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #0021A5;">Great news, Gator!</h2>
               <p><strong>${parentName}</strong> just connected their College Fast Forward account to yours.</p>
               <p style="background: linear-gradient(135deg, #f0f7ff 0%, #eff6ff 100%); padding: 16px; border-radius: 12px; border-left: 4px solid #0021A5;">
-                <strong>⚡ Their Family Karma is now boosting your questions in the feed!</strong><br>
-                Every time ${parentName} helps a student on CFF, YOUR questions move higher — making it more likely you'll get help faster.
-              </p>
-              ${boostResult.totalKarma > 0 ? `<p>They've already earned <strong>${boostResult.totalKarma} Karma</strong> — that's a <strong>${boostResult.boost}x boost</strong> on your questions!</p>` : ''}
-              <p style="margin-top: 24px;">
-                <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.collegefastforward.com'}/#PostRequest" 
-                   style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-                  Post a Question to Get Boosted →
-                </a>
+                <strong>Their Family Karma is now boosting your questions in the feed!</strong><br>
+                Every time ${parentName} helps a student on CFF, YOUR questions move higher.
               </p>
             </div>`
           });
 
-          // Create in-app notification for student
           try {
             await base44.asServiceRole.entities.Notification.create({
               user_id: studentUserId,
@@ -160,7 +144,7 @@ Deno.serve(async (req) => {
               recipient_email: studentEmailAddress,
               type: 'family_linked',
               title: `${parentName} connected their CFF account!`,
-              message: `Their Family Karma (${boostResult.totalKarma || 0} pts, ${boostResult.boost || 0}x boost) is now boosting your questions in the feed.`,
+              message: `Their Family Karma is now boosting your questions in the feed.`,
               is_read: false,
               action_url: '#PostRequest',
               action_label: 'Post a Question'
@@ -173,7 +157,6 @@ Deno.serve(async (req) => {
         console.log('Parent notification email failed (non-critical):', emailErr.message);
       }
 
-      // Award student karma for having a parent join (+50)
       if (studentUserId) {
         try {
           await base44.functions.invoke('awardStudentKarma', {
@@ -182,7 +165,6 @@ Deno.serve(async (req) => {
             actionType: 'invite_parent_joined',
             description: 'Parent joined and linked to your account'
           });
-          console.log('✅ Student karma awarded for parent joining');
         } catch (skErr) {
           console.log('Student karma for parent join failed (non-critical):', skErr.message);
         }
@@ -265,7 +247,7 @@ Deno.serve(async (req) => {
       student_ids: studentUser ? [...new Set([...(user.student_ids || []), studentUser.id])] : user.student_ids || []
     });
 
-    // Ensure FamilyKarma record exists BEFORE student notifications (they reference it)
+    // Ensure FamilyKarma record exists
     const existingFamilyKarma = await base44.asServiceRole.entities.FamilyKarma.filter({
       family_group_id: familyGroupId
     });
@@ -295,34 +277,24 @@ Deno.serve(async (req) => {
         linked_parent_ids: [...new Set([...(studentUser.linked_parent_ids || []), user.id])]
       });
 
-      // Send email to student
-      const parentName = user.full_name?.split(',').reverse().map(s => s.trim()).join(' ') || user.email.split('@')[0];
+      const parentName = user.full_name || user.email.split('@')[0];
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: normalizedEmail,
-          subject: '🎉 Your parent just connected their CFF account!',
+          subject: 'Your parent just connected their CFF account!',
           body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #0021A5;">Great news, Gator!</h2>
             <p><strong>${parentName}</strong> just connected their College Fast Forward account to yours.</p>
             <p style="background: linear-gradient(135deg, #f0f7ff 0%, #eff6ff 100%); padding: 16px; border-radius: 12px; border-left: 4px solid #0021A5;">
-              <strong>⚡ Their Family Karma is now boosting your questions in the feed!</strong><br>
-              Every time ${parentName} helps a student on CFF, YOUR questions move higher — making it more likely you'll get help faster.
+              <strong>Their Family Karma is now boosting your questions in the feed!</strong><br>
+              Every time ${parentName} helps a student on CFF, YOUR questions move higher.
             </p>
-            ${familyKarma.total_karma > 0 ? `<p>They've already earned <strong>${familyKarma.total_karma} Karma</strong> — that's a <strong>${familyKarma.boost_multiplier}x boost</strong> on your questions right now!</p>` : ''}
-            <p style="margin-top: 24px;">
-              <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.collegefastforward.com'}/#PostRequest" 
-                 style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-                Post a Question to Get Boosted →
-              </a>
-            </p>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 16px;">The more questions you post, the more ${parentName}'s karma can help you!</p>
           </div>`
         });
       } catch (emailErr) {
         console.log('Student link notification email failed (non-critical):', emailErr.message);
       }
 
-      // Create in-app notification for student
       try {
         await base44.asServiceRole.entities.Notification.create({
           user_id: studentUser.id,
@@ -330,7 +302,7 @@ Deno.serve(async (req) => {
           recipient_email: normalizedEmail,
           type: 'family_linked',
           title: `${parentName} connected their CFF account!`,
-          message: `Their Family Karma (${familyKarma.total_karma || 0} pts, ${familyKarma.boost_multiplier || 0}x boost) is now boosting your questions in the feed.`,
+          message: `Their Family Karma is now boosting your questions in the feed.`,
           is_read: false,
           action_url: '#PostRequest',
           action_label: 'Post a Question'
@@ -340,7 +312,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If student exists AND has active questions, apply boost immediately
+    // Apply boost if student exists and has active questions
     let boostApplied = 0;
     let questionsBosted = 0;
     if (studentUser && familyKarma.boost_multiplier > 0) {
@@ -377,7 +349,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Award student karma for parent linking (+50)
+    // Award student karma for parent linking
     if (studentUser) {
       try {
         await base44.functions.invoke('awardStudentKarma', {
@@ -386,13 +358,12 @@ Deno.serve(async (req) => {
           actionType: 'invite_parent_joined',
           description: 'Parent linked to your account'
         });
-        console.log('✅ Student karma awarded for parent manual link');
       } catch (skErr) {
         console.log('Student karma for parent link failed (non-critical):', skErr.message);
       }
     }
 
-    // Mark activation for the parent who linked a student
+    // Mark activation
     try {
       const parentPrompts = await base44.asServiceRole.entities.ActivationPrompt.filter({
         user_id: user.id,
