@@ -30,8 +30,14 @@ export function CompanyIntelCard({ data }) {
     };
     const s = signalConfig[signal] || signalConfig.warm;
 
+    const hiringScore = typeof data.hiring_score === 'number' ? data.hiring_score : null;
+    const openRolesCount = typeof data.open_roles_count === 'number' ? data.open_roles_count : null;
+    const companySummary = data.company_summary || data.summary || '';
+    const interviewProcess = data.interview_process || '';
+
     return (
       <Card className="p-4 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 mt-2 mb-1">
+        {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-[#0021A5] rounded-xl flex items-center justify-center">
             <Building2 className="w-5 h-5 text-white" />
@@ -41,7 +47,36 @@ export function CompanyIntelCard({ data }) {
             <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
           </div>
         </div>
-        {data.summary && <p className="text-sm text-slate-700 mb-3">{String(data.summary)}</p>}
+
+        {/* Key stats row */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {hiringScore !== null && (
+            <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
+              <TrendingUp className="w-3.5 h-3.5 mx-auto mb-0.5 text-blue-600" />
+              <p className="text-lg font-bold text-slate-900">{hiringScore}</p>
+              <p className="text-[10px] text-slate-500 uppercase">Hiring Score</p>
+            </div>
+          )}
+          {openRolesCount !== null && (
+            <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
+              <Briefcase className="w-3.5 h-3.5 mx-auto mb-0.5 text-indigo-600" />
+              <p className="text-lg font-bold text-slate-900">{openRolesCount.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-500 uppercase">Open Roles</p>
+            </div>
+          )}
+          {data.salary_range && (
+            <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
+              <DollarSign className="w-3.5 h-3.5 mx-auto mb-0.5 text-green-600" />
+              <p className="text-sm font-bold text-slate-900">{String(data.salary_range)}</p>
+              <p className="text-[10px] text-slate-500 uppercase">Salary Range</p>
+            </div>
+          )}
+        </div>
+
+        {/* Company summary */}
+        {companySummary && <p className="text-sm text-slate-700 mb-3">{String(companySummary)}</p>}
+
+        {/* Open roles list (if provided as array) */}
         {openRoles.length > 0 && (
           <div className="mb-3">
             <div className="flex items-center gap-1.5 mb-1.5">
@@ -53,12 +88,8 @@ export function CompanyIntelCard({ data }) {
             </div>
           </div>
         )}
-        {data.salary_range && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <DollarSign className="w-3.5 h-3.5 text-green-600" />
-            <span className="text-xs text-slate-600">Salary range: <strong>{String(data.salary_range)}</strong></span>
-          </div>
-        )}
+
+        {/* Recent news */}
         {recentNews.length > 0 && (
           <div className="mt-3 pt-3 border-t border-blue-200">
             <div className="flex items-center gap-1.5 mb-1.5">
@@ -66,12 +97,25 @@ export function CompanyIntelCard({ data }) {
               <span className="text-xs font-semibold text-slate-500 uppercase">Recent News</span>
             </div>
             <ul className="space-y-1">
-              {recentNews.slice(0, 3).map((n, i) => (
+              {recentNews.slice(0, 4).map((n, i) => (
                 <li key={i} className="text-xs text-slate-600">• {String(n)}</li>
               ))}
             </ul>
           </div>
         )}
+
+        {/* Interview process */}
+        {interviewProcess && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <ClipboardList className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs font-semibold text-slate-500 uppercase">Interview Process</span>
+            </div>
+            <p className="text-xs text-slate-600">{String(interviewProcess)}</p>
+          </div>
+        )}
+
+        {/* Interview tips (legacy) */}
         {interviewTips.length > 0 && (
           <div className="mt-3 pt-3 border-t border-blue-200">
             <div className="flex items-center gap-1.5 mb-1.5">
