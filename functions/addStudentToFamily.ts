@@ -13,7 +13,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Only parents can add students' }, { status: 403 });
     }
 
-    const { student_email, action } = await req.json();
+    const body = await req.json();
+    const { student_email, action, code } = body;
 
     console.log('👨‍👩‍👧‍👦 Parent adding student:', student_email, 'action:', action);
 
