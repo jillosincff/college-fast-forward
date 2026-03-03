@@ -95,6 +95,16 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
     setEditing(false);
   };
 
+  const addCompanyDirect = async () => {
+    const name = titleCase(newCompany.trim());
+    if (!name || !profile?.id) return;
+    const updated = [...companies, name];
+    await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
+    setCompanies(updated);
+    setNewCompany('');
+    if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
+  };
+
   const industry = profile?.target_industry || '—';
   const timeline = TIMELINE_LABELS[profile?.career_timeline] || profile?.career_timeline || '—';
   const stage = STAGE_LABELS[profile?.current_stage] || profile?.current_stage || '—';
@@ -219,31 +229,17 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
                 <Input
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
-                  onKeyDown={async (e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      const name = titleCase(newCompany.trim());
-                      if (!name || !profile?.id) return;
-                      const updated = [name];
-                      await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
-                      setCompanies(updated);
-                      setNewCompany('');
-                      if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
+                      addCompanyDirect();
                     }
                   }}
                   placeholder="Add a company..."
                   className="h-8 text-xs"
                 />
                 <button
-                  onClick={async () => {
-                    const name = titleCase(newCompany.trim());
-                    if (!name || !profile?.id) return;
-                    const updated = [...companies, name];
-                    await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
-                    setCompanies(updated);
-                    setNewCompany('');
-                    if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
-                  }}
+                  onClick={addCompanyDirect}
                   disabled={!newCompany.trim()}
                   className="w-8 h-8 rounded-md bg-[#0021A5] text-white flex items-center justify-center disabled:opacity-40 flex-shrink-0"
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
