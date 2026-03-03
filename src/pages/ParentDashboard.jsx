@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Loader2, AlertCircle, HelpCircle, ArrowRight, Link2 } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
+import LinkStudentModal from '@/components/dashboard/parent/LinkStudentModal';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import WelcomeModal from '@/components/WelcomeModal';
