@@ -11,6 +11,7 @@ function detectAlumniQuery(message) {
     /find\s+(?:me\s+)?(?:uf\s+)?(?:alumni|people|insiders?|gators?)\s+(?:who\s+)?work\s+there/i,
     /(?:who works?|anyone)\s+there\s+(?:from uf|from university of florida|who went to uf|that went to uf)/i,
     /(?:find|show|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|insiders?|gators?)\s+there/i,
+    /find\s+(?:me\s+)?uf\s+alumni/i,
   ];
   for (const pattern of alumniPatterns) {
     const match = message.match(pattern);
