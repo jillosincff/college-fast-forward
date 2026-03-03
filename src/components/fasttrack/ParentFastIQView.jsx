@@ -60,9 +60,18 @@ function ActiveStudentView({ studentProfile, studentName, onOpenChat }) {
           <h1 className="text-[26px] sm:text-[34px] font-extrabold text-white mb-2 tracking-tight" style={{ lineHeight: 1.15 }}>
             {studentName ? `${studentName}'s FASTIQ™ is active.` : "Your student's FASTIQ™ is active."}
           </h1>
-          <p className="text-[15px] text-white/55 max-w-md mx-auto leading-relaxed">
+          <p className="text-[15px] text-white/55 max-w-md mx-auto leading-relaxed mb-6">
             They're building insider access to their dream companies — here's their progress.
           </p>
+          {onOpenChat && (
+            <motion.button
+              onClick={() => onOpenChat()}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
+              style={{ background: '#FA4616', boxShadow: '0 0 30px rgba(250,70,22,0.35)', minHeight: 'auto' }}
+            >
+              <Sparkles className="w-5 h-5" /> Try FASTIQ Chat
+            </motion.button>
+          )}
         </motion.div>
       </div>
 
