@@ -79,6 +79,9 @@ export default function ProAssessment({ user, onComplete }) {
     biggest_challenge: '',
   });
   const [companyInput, setCompanyInput] = useState('');
+  const [explorerMode, setExplorerMode] = useState(false);
+  const [companySizePref, setCompanySizePref] = useState('');
+  const [locationPref, setLocationPref] = useState('');
 
   const currentStep = STEPS[step];
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -86,7 +89,7 @@ export default function ProAssessment({ user, onComplete }) {
   const canProceed = () => {
     switch (currentStep.id) {
       case 'industry': return data.target_industry.length > 0;
-      case 'companies': return data.target_companies.length > 0;
+      case 'companies': return explorerMode ? companySizePref !== '' : data.target_companies.length > 0;
       case 'timeline': return data.career_timeline !== '';
       case 'stage': return data.current_stage !== '';
       case 'challenge': return data.biggest_challenge !== '';
@@ -120,16 +123,21 @@ export default function ProAssessment({ user, onComplete }) {
 
   const handleFinish = async () => {
     setSaving(true);
-    const profile = await base44.entities.FastTrackProProfile.create({
+    const profileData = {
       user_email: user.email,
-      target_companies: data.target_companies.map(titleCase),
+      target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
       target_industry: data.target_industry.join(', '),
       career_timeline: data.career_timeline,
       biggest_challenge: data.biggest_challenge,
       current_stage: data.current_stage,
       assessment_complete: true,
       pro_tier: 'free_trial',
-    });
+    };
+    if (explorerMode) {
+      profileData.company_size_preference = companySizePref;
+      profileData.location_preference = locationPref;
+    }
+    const profile = await base44.entities.FastTrackProProfile.create(profileData);
     setSaving(false);
     onComplete(profile);
   };
@@ -216,68 +224,147 @@ export default function ProAssessment({ user, onComplete }) {
             {/* Step 2: Dream Companies */}
             {currentStep.id === 'companies' && (
               <div>
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    value={companyInput}
-                    onChange={(e) => setCompanyInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCompany(); } }}
-                    placeholder="Type a company name..."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
-                    autoFocus
-                  />
-                  <Button
-                    onClick={addCompany}
-                    disabled={!companyInput.trim() || data.target_companies.length >= 5}
-                    variant="secondary"
-                    className="h-12 px-4"
-                    style={{ minHeight: 'auto', width: 'auto' }}
-                  >
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {data.target_companies.map(c => (
-                    <Badge key={c} className="bg-white/10 text-white border-white/20 px-3 py-1.5 text-sm gap-2">
-                      <Building2 className="w-3 h-3" /> {c}
-                      <button onClick={() => removeCompany(c)} style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                {data.target_companies.length > 0 && (
-                  <p className="text-white/40 text-xs mt-3">{data.target_companies.length}/5 companies</p>
-                )}
+                {!explorerMode ? (
+                  <>
+                    <div className="flex gap-2 mb-4">
+                      <Input
+                        value={companyInput}
+                        onChange={(e) => setCompanyInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCompany(); } }}
+                        placeholder="Type a company name..."
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                        autoFocus
+                      />
+                      <Button
+                        onClick={addCompany}
+                        disabled={!companyInput.trim() || data.target_companies.length >= 5}
+                        variant="secondary"
+                        className="h-12 px-4"
+                        style={{ minHeight: 'auto', width: 'auto' }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {data.target_companies.map(c => (
+                        <Badge key={c} className="bg-white/10 text-white border-white/20 px-3 py-1.5 text-sm gap-2">
+                          <Building2 className="w-3 h-3" /> {c}
+                          <button onClick={() => removeCompany(c)} style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}>
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                    {data.target_companies.length > 0 && (
+                      <p className="text-white/40 text-xs mt-3">{data.target_companies.length}/5 companies</p>
+                    )}
 
-                {/* Suggested companies based on selected industries */}
-                {data.target_companies.length < 5 && (() => {
-                  const primaryIndustry = data.target_industry[0];
-                  const suggestions = (INDUSTRY_COMPANIES[primaryIndustry] || GENERIC_COMPANIES)
-                    .filter(c => !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase()));
-                  if (suggestions.length === 0) return null;
-                  return (
-                    <div className="mt-5">
-                      <p className="text-white/50 text-xs font-medium mb-2">Popular with UF students:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {suggestions.slice(0, 8).map(c => (
+                    {/* Suggested companies based on selected industries */}
+                    {data.target_companies.length < 5 && (() => {
+                      const primaryIndustry = data.target_industry[0];
+                      const suggestions = (INDUSTRY_COMPANIES[primaryIndustry] || GENERIC_COMPANIES)
+                        .filter(c => !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase()));
+                      if (suggestions.length === 0) return null;
+                      return (
+                        <div className="mt-5">
+                          <p className="text-white/50 text-xs font-medium mb-2">Popular with UF students:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestions.slice(0, 8).map(c => (
+                              <button
+                                key={c}
+                                onClick={() => {
+                                  if (data.target_companies.length < 5 && !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase())) {
+                                    setData(prev => ({ ...prev, target_companies: [...prev.target_companies, c] }));
+                                  }
+                                }}
+                                disabled={data.target_companies.length >= 5}
+                                className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 transition-all disabled:opacity-40"
+                                style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                              >
+                                + {c}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Explorer mode toggle */}
+                    <button
+                      onClick={() => setExplorerMode(true)}
+                      className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-white/20 text-white/70 hover:text-white hover:border-white/40 hover:bg-white/5 transition-all"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      <Sparkles className="w-4 h-4 text-orange-400" />
+                      <span className="text-sm font-medium">I'm not sure yet — help me find companies</span>
+                    </button>
+                  </>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Company size preference */}
+                    <div>
+                      <p className="text-white/70 text-sm font-medium mb-3">What kind of company?</p>
+                      <div className="space-y-2">
+                        {[
+                          { value: 'large', label: 'Large corporation', emoji: '🏢' },
+                          { value: 'mid_size', label: 'Mid-size company', emoji: '🏗️' },
+                          { value: 'startup', label: 'Startup', emoji: '🚀' },
+                          { value: 'no_preference', label: "Don't care", emoji: '🤷' },
+                        ].map(opt => (
                           <button
-                            key={c}
-                            onClick={() => {
-                              if (data.target_companies.length < 5 && !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase())) {
-                                setData(prev => ({ ...prev, target_companies: [...prev.target_companies, c] }));
-                              }
-                            }}
-                            disabled={data.target_companies.length >= 5}
-                            className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 transition-all disabled:opacity-40"
-                            style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                            key={opt.value}
+                            onClick={() => setCompanySizePref(opt.value)}
+                            className={`w-full flex items-center gap-4 p-3.5 rounded-xl text-left transition-all ${
+                              companySizePref === opt.value
+                                ? 'bg-[#FA4616] text-white shadow-lg scale-[1.02]'
+                                : 'bg-white/10 text-white/80 hover:bg-white/15 border border-white/10'
+                            }`}
+                            style={{ minHeight: 'auto' }}
                           >
-                            + {c}
+                            <span className="text-xl">{opt.emoji}</span>
+                            <span className="font-semibold text-sm">{opt.label}</span>
                           </button>
                         ))}
                       </div>
                     </div>
-                  );
-                })()}
+
+                    {/* Location preference */}
+                    <div>
+                      <p className="text-white/70 text-sm font-medium mb-3">Where do you want to work?</p>
+                      <Input
+                        value={locationPref}
+                        onChange={(e) => setLocationPref(e.target.value)}
+                        placeholder="e.g. New York, Remote, Florida..."
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12 mb-3"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        {['New York', 'San Francisco', 'Remote', 'Florida', 'Austin', 'Chicago', 'Anywhere'].map(loc => (
+                          <button
+                            key={loc}
+                            onClick={() => setLocationPref(loc)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                              locationPref === loc
+                                ? 'bg-[#FA4616] text-white'
+                                : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/10'
+                            }`}
+                            style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                          >
+                            {loc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Back to company input */}
+                    <button
+                      onClick={() => setExplorerMode(false)}
+                      className="text-white/50 text-xs hover:text-white/70 underline"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      ← I actually have specific companies in mind
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

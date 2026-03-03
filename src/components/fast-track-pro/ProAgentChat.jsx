@@ -7,23 +7,39 @@ import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
 import { CompanyIntelCard, AlumniListCard, OutreachDraftCard } from './RichCards';
 import RoadmapTimelineCard from './RoadmapTimelineCard';
+import CompanySuggestionsCard from './CompanySuggestionsCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 
-const SUGGESTED_PROMPTS = [
-  { icon: '🏢', text: "Research my #1 target company — are they hiring?" },
-  { icon: '🔍', text: "Find UF Gator alumni at my dream companies" },
-  { icon: '📝', text: "Draft a LinkedIn message to a recruiter" },
-  { icon: '🗺️', text: "Create a 4-week career action plan for me" },
-];
+function getSuggestedPrompts(profile) {
+  const hasTargets = (profile?.target_companies || []).length > 0;
+  const industry = profile?.target_industry;
 
-function RichCardRenderer({ message_type, payload, profileId }) {
+  const prompts = [];
+
+  if (hasTargets) {
+    prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?" });
+    prompts.push({ icon: '🔍', text: "Find UF Gator alumni at my dream companies" });
+  } else {
+    const industryText = industry ? `in ${industry}` : 'that are right for me';
+    prompts.push({ icon: '🔍', text: `Help me find companies ${industryText}` });
+    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at for entry-level roles?" });
+  }
+
+  prompts.push({ icon: '📝', text: "Draft a LinkedIn message to a recruiter" });
+  prompts.push({ icon: '🗺️', text: "Create a 4-week career action plan for me" });
+
+  return prompts;
+}
+
+function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated }) {
   if (!payload) return null;
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} />;
     case 'alumni_card': return <AlumniListCard data={payload} />;
     case 'outreach_draft': return <OutreachDraftCard data={payload} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
+    case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} />;
     default: return null;
   }
 }
@@ -197,7 +213,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                   FASTIQ is your personal networking engine. Every week, I find companies hiring in your field, discover UF alumni who can help — even ones NOT on CFF — and write you a message to reach out. No other tool does this.
                 </p>
                 <div className="space-y-2 max-w-sm mx-auto">
-                  {SUGGESTED_PROMPTS.map((p, i) => (
+                  {getSuggestedPrompts(currentProfile).map((p, i) => (
                     <button
                       key={i}
                       onClick={() => sendMessage(p.text)}
@@ -244,7 +260,14 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                     </div>
                     {/* Rich Card below the text bubble */}
                     {msg.role === 'assistant' && msg.message_type !== 'text' && (
-                      <RichCardRenderer message_type={msg.message_type} payload={msg.payload} profileId={currentProfile?.id} />
+                      <RichCardRenderer
+                        message_type={msg.message_type}
+                        payload={msg.payload}
+                        profileId={currentProfile?.id}
+                        onResearchCompany={handleResearchCompany}
+                        profile={currentProfile}
+                        onProfileUpdated={setCurrentProfile}
+                      />
                     )}
                   </div>
                   {msg.role === 'user' && (

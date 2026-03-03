@@ -212,7 +212,46 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
           )}
 
           {!editing && companies.length === 0 && (
-            <p className="text-xs text-slate-400 italic">No targets yet</p>
+            <div className="space-y-2">
+              <p className="text-xs text-slate-500 font-medium">No targets yet</p>
+              <p className="text-[11px] text-slate-400">Ask FASTIQ to help you find companies, or add them below.</p>
+              <div className="flex gap-1.5">
+                <Input
+                  value={newCompany}
+                  onChange={(e) => setNewCompany(e.target.value)}
+                  onKeyDown={async (e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const name = titleCase(newCompany.trim());
+                      if (!name || !profile?.id) return;
+                      const updated = [name];
+                      await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
+                      setCompanies(updated);
+                      setNewCompany('');
+                      if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
+                    }
+                  }}
+                  placeholder="Add a company..."
+                  className="h-8 text-xs"
+                />
+                <button
+                  onClick={async () => {
+                    const name = titleCase(newCompany.trim());
+                    if (!name || !profile?.id) return;
+                    const updated = [...companies, name];
+                    await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
+                    setCompanies(updated);
+                    setNewCompany('');
+                    if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
+                  }}
+                  disabled={!newCompany.trim()}
+                  className="w-8 h-8 rounded-md bg-[#0021A5] text-white flex items-center justify-center disabled:opacity-40 flex-shrink-0"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           )}
         </div>
 

@@ -105,6 +105,23 @@ function detectRoadmapQuery(message) {
   return keywords.some(k => lower.includes(k));
 }
 
+// Detect opportunity discovery queries (students who don't know what companies to target)
+function detectOpportunityDiscovery(message) {
+  const lower = message.toLowerCase();
+  const patterns = [
+    /(?:find|suggest|recommend|show)\s+(?:me\s+)?companies/i,
+    /(?:where|what)\s+(?:should|can|could)\s+(?:i|we)\s+(?:apply|look|work|target)/i,
+    /(?:don'?t|do not)\s+know\s+(?:where|what)\s+to\s+(?:apply|look|target)/i,
+    /(?:help me find|looking for)\s+companies/i,
+    /(?:what|which)\s+(?:companies|employers|firms)\s+(?:should|are|would|could)/i,
+    /(?:companies|employers)\s+(?:hiring|that hire|looking for)\s+(?:in|for|at)/i,
+    /(?:mid.?size|startup|large)\s+companies\s+(?:in|for|hiring)/i,
+    /(?:not sure|unsure|no idea)\s+(?:where|what)\s+(?:to apply|companies)/i,
+    /(?:explore|discover)\s+(?:companies|employers|opportunities)/i,
+  ];
+  return patterns.some(p => p.test(message));
+}
+
 // Detect if user is asking about a specific company
 function detectCompanyQuery(message) {
   const lower = message.toLowerCase();
@@ -235,6 +252,8 @@ Deno.serve(async (req) => {
 - Graduation: ${user.graduation_year || 'unknown'}
 - Target Industry: ${profile.target_industry || 'not specified'}
 - Target Companies: ${(profile.target_companies || []).join(', ') || 'none set'}
+- Company Size Preference: ${profile.company_size_preference || 'not set'}
+- Location Preference: ${profile.location_preference || 'not set'}
 - Timeline: ${profile.career_timeline || 'not set'}
 - Current Stage: ${profile.current_stage || 'not set'}
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
@@ -281,6 +300,86 @@ Deno.serve(async (req) => {
         // Index out of bounds — user asked for a company they haven't set
         console.log(`Target company #${resolvedIdx + 1} requested but only ${targetCompanies.length} set`);
       }
+    }
+
+    // --- OPPORTUNITY DISCOVERY FLOW: detect "find me companies" / "where should I apply" queries ---
+    const isOpportunityDiscovery = detectOpportunityDiscovery(resolvedMessage);
+
+    if (isOpportunityDiscovery) {
+      console.log('Opportunity discovery query detected');
+
+      const sizeLabel = { large: 'large corporation', mid_size: 'mid-size company', startup: 'startup', no_preference: '' };
+      const sizePref = sizeLabel[profile.company_size_preference] || '';
+      const locPref = profile.location_preference || '';
+      const industry = profile.target_industry || 'any industry';
+
+      const searchQuery = `${industry} companies hiring entry level ${sizePref} ${locPref} 2026`.trim();
+
+      const webResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Search for companies matching these criteria and provide detailed results:
+- Industry: ${industry}
+- Company size preference: ${sizePref || 'any'}
+- Location: ${locPref || 'any location'}
+- Role type: entry-level / new grad
+- Student's request: "${resolvedMessage}"
+
+Find 5-8 real companies that are actively hiring or likely to hire entry-level roles in this space. For each, explain why it's a good fit, estimate size, and note hiring status.`,
+        add_context_from_internet: true,
+      });
+
+      const webContext = typeof webResult === 'string' ? webResult : JSON.stringify(webResult);
+
+      const suggestionsResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are Fast Track Pro, an elite AI career agent for University of Florida students.
+
+${profileContext}
+
+Based on the following research, suggest 5-8 companies for this student to target.
+
+RESEARCH:
+${webContext.substring(0, 4000)}
+
+STUDENT'S REQUEST: "${resolvedMessage}"
+
+Rules:
+- Each suggestion must be a real company that hires entry-level talent
+- company_name: official company name
+- reason: 1-2 sentences explaining why it's a good fit for THIS student (reference their industry, major, or preferences)
+- size: one of "large", "mid_size", "startup"
+- hiring_status: one of "actively_hiring", "some_openings", "unknown"
+- response: brief 2-3 sentence conversational intro to the student`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief conversational message to the student" },
+            suggestions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  company_name: { type: "string" },
+                  reason: { type: "string" },
+                  size: { type: "string", enum: ["large", "mid_size", "startup"] },
+                  hiring_status: { type: "string", enum: ["actively_hiring", "some_openings", "unknown"] }
+                },
+                required: ["company_name", "reason", "size", "hiring_status"]
+              }
+            }
+          },
+          required: ["response", "suggestions"]
+        }
+      });
+
+      trackActivity(base44, user.email, profile.id, 'company_search', 'opportunity_discovery');
+
+      return Response.json({
+        success: true,
+        response: suggestionsResult.response || "Here are some companies that could be a great fit for you:",
+        message_type: 'company_suggestions',
+        payload: {
+          suggestions: suggestionsResult.suggestions || [],
+        }
+      });
     }
 
     // --- ALUMNI DISCOVERY FLOW: detect alumni query → check cache → research → cache → return ---
