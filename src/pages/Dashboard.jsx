@@ -40,6 +40,7 @@ import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard'
 import ExploreSection from '@/components/dashboard/student/ExploreSection';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import FastIQBanner from '@/components/dashboard/student/FastIQBanner';
+import FastIQWeeklyBrief from '@/components/dashboard/student/FastIQWeeklyBrief';
 import RecentFeedbackCard from '@/components/dashboard/student/RecentFeedbackCard';
 import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
 import StudentKarmaExplainer from '@/components/karma/StudentKarmaExplainer';
@@ -332,6 +333,9 @@ export default function Dashboard() {
         
         {/* Activation Banner (if applicable) */}
         <ActivationWelcomeBannerStudent user={user} />
+
+        {/* FASTIQ Weekly Scout Brief */}
+        <FastIQWeeklyBrief user={user} />
 
         {/* New user state gets its own welcome flow */}
         {userState === 'new_user' && (
