@@ -65,8 +65,9 @@ export default function FastTrackAssessment({ user, onComplete }) {
   };
 
   const addCompany = () => {
-    const name = companyInput.trim();
-    if (name && data.target_companies.length < 5 && !data.target_companies.includes(name)) {
+    const raw = companyInput.trim();
+    const name = titleCase(raw);
+    if (name && data.target_companies.length < 5 && !data.target_companies.map(c => c.toLowerCase()).includes(name.toLowerCase())) {
       setData(prev => ({ ...prev, target_companies: [...prev.target_companies, name] }));
       setCompanyInput('');
     }
@@ -93,7 +94,7 @@ export default function FastTrackAssessment({ user, onComplete }) {
       user_name: user.full_name || '',
       assessment_completed: true,
       dream_role: data.dream_role,
-      target_companies: data.target_companies,
+      target_companies: data.target_companies.map(titleCase),
       target_industries: data.target_industries,
       job_search_timeline: data.job_search_timeline,
       biggest_challenge: data.biggest_challenge,
