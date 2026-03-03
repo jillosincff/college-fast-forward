@@ -145,6 +145,32 @@ export default function ParentDashboard() {
     }
   };
 
+  const handleHeroLinkStudent = async () => {
+    if (!linkStudentEmail.trim()) return;
+    setLinkStudentLoading(true);
+    try {
+      const res = await base44.functions.invoke('linkStudentToParent', { studentEmail: linkStudentEmail.trim() });
+      const data = res.data;
+      if (data.already_linked) {
+        toast({ title: 'Already linked!', description: 'This student is already connected to your account.' });
+      } else if (data.linked) {
+        const studentName = data.student_name || linkStudentEmail.split('@')[0];
+        toast({ title: `🎉 ${studentName} is now linked!`, description: 'Start helping students to earn Karma and boost their questions!' });
+      } else if (data.pending) {
+        toast({ title: '✅ Link saved!', description: `We'll auto-connect when ${linkStudentEmail.split('@')[0]} joins.` });
+      }
+      setShowLinkStudentModal(false);
+      setLinkStudentEmail('');
+      await refreshUser();
+      await refresh();
+    } catch (error) {
+      console.error('Link failed:', error);
+      toast({ title: 'Link failed', description: error?.response?.data?.error || 'Please try again.', variant: 'destructive' });
+    } finally {
+      setLinkStudentLoading(false);
+    }
+  };
+
   const handleLinkStudent = async (student) => {
     try {
       await base44.functions.invoke('linkStudentsToParent', { studentEmailsOrNames: [student.email] });
