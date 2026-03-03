@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Zap, Building2, ChevronRight, ChevronLeft, Loader2, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import titleCase from '@/components/utils/titleCase';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
@@ -115,7 +116,7 @@ export default function ProAssessment({ user, onComplete }) {
     }));
   };
 
-  const titleCase = (str) => str.replace(/\b\w/g, c => c.toUpperCase());
+  // titleCase imported from @/components/utils/titleCase
 
   const handleFinish = async () => {
     setSaving(true);

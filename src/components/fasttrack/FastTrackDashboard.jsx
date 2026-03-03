@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
 import FastIQValueProp from './FastIQValueProp';
+import titleCase from '@/components/utils/titleCase';
 
 const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
 
@@ -157,9 +158,7 @@ function SectionLabel({ children }) {
   return <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">{children}</h2>;
 }
 
-function titleCase(str) {
-  return str.replace(/\b\w/g, c => c.toUpperCase());
-}
+// titleCase imported from @/components/utils/titleCase
 
 export default function FastTrackDashboard({ user, profile, onOpenChat }) {
   const [companyIntel, setCompanyIntel] = useState({});

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Zap, Briefcase, Building2, Clock, Target, ChevronRight, ChevronLeft, Loader2, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import titleCase from '@/components/utils/titleCase';
 
 const STEPS = [
   { id: 'dream_role', title: "What's your dream role?", subtitle: 'Be specific — our AI tailors everything to this.' },
