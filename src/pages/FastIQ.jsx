@@ -15,6 +15,10 @@ export default function FastIQ() {
   const [view, setView] = useState('loading');
   const [chatInitialMessage, setChatInitialMessage] = useState('');
 
+  // Check for ?view=alerts URL param
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const highlightAlerts = urlParams.get('view') === 'alerts';
+
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
 
   useEffect(() => {
@@ -98,5 +102,5 @@ export default function FastIQ() {
     );
   }
 
-  return <FastTrackDashboard user={user} profile={profile} onOpenChat={handleOpenChat} />;
+  return <FastTrackDashboard user={user} profile={profile} onOpenChat={handleOpenChat} highlightAlerts={highlightAlerts} />;
 }

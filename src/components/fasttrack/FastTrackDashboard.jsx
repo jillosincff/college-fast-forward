@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Building2, Users, MessageSquare, Map, Sparkles, TrendingUp, Search, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -162,9 +162,19 @@ function SectionLabel({ children }) {
 
 // titleCase imported from @/components/utils/titleCase
 
-export default function FastTrackDashboard({ user, profile, onOpenChat }) {
+export default function FastTrackDashboard({ user, profile, onOpenChat, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
   const [alumniCounts, setAlumniCounts] = useState({});
+  const alertsRef = useRef(null);
+
+  // Auto-scroll to alerts when highlightAlerts is set
+  useEffect(() => {
+    if (highlightAlerts && alertsRef.current) {
+      setTimeout(() => {
+        alertsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 400);
+    }
+  }, [highlightAlerts]);
 
   // Fetch intel cache and alumni for target companies
   useEffect(() => {
@@ -286,10 +296,11 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
         {/* SCOUTED ALERTS — top of dashboard */}
-        <div className="pt-8">
+        <div className="pt-8" ref={alertsRef}>
           <ScoutedAlerts
             userEmail={user?.email}
             onOpenChat={onOpenChat}
+            forceOpen={highlightAlerts}
           />
         </div>
 
