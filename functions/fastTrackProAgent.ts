@@ -240,32 +240,46 @@ Deno.serve(async (req) => {
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
     // --- RESOLVE TARGET COMPANY REFERENCES ---
-    // If user says "my #1 target company" or "my top company", resolve the entire
-    // reference phrase (including surrounding words like "are they hiring?") into
-    // a clean query like "Research Disney — hiring?"
+    // BEFORE any intent detection, check if the user is referencing a target company
+    // by ordinal (e.g. "my #1 target company", "my top company", "my second target").
+    // If so, resolve it to the actual company name from the profile and rewrite the
+    // entire message so downstream regex never sees phrases like "are they".
     let resolvedMessage = message;
     const targetCompanies = profile.target_companies || [];
     if (targetCompanies.length > 0) {
-      // Each entry: [pattern, companyIndex]
-      // Patterns match the FULL phrase so we replace cleanly
-      const targetCompanyRefs = [
-        [/(?:my\s+)?#?1\s*(?:st)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 0],
-        [/(?:my\s+)?(?:top|first|primary|main|dream)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 0],
-        [/(?:my\s+)?#?2\s*(?:nd)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 1],
-        [/(?:my\s+)?(?:second)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 1],
-        [/(?:my\s+)?#?3\s*(?:rd)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 2],
-        [/(?:my\s+)?(?:third)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 2],
-      ];
-      for (const [pattern, idx] of targetCompanyRefs) {
-        const match = resolvedMessage.match(pattern);
-        if (match) {
-          const company = targetCompanies[Math.min(idx, targetCompanies.length - 1)];
-          // Replace the matched phrase with just the company name
-          // e.g. "Research my #1 target company — are they hiring?" → "Research Disney hiring?"
-          resolvedMessage = resolvedMessage.replace(match[0], company);
-          console.log(`Resolved "${match[0]}" → "${company}" from profile. New message: "${resolvedMessage}"`);
-          break;
-        }
+      const lower = message.toLowerCase();
+      let resolvedIdx = -1;
+
+      // Check for #1 / first / top / primary / main / dream
+      if (/#1\s*target/i.test(lower) || /\b(?:first|top|primary|main|dream|#1)\s+(?:target\s+)?company/i.test(lower) || /my\s+(?:target\s+)?company/i.test(lower) || /my\s+#1/i.test(lower)) {
+        resolvedIdx = 0;
+      }
+      // Check for #2 / second
+      else if (/#2\s*target/i.test(lower) || /\b(?:second|#2)\s+(?:target\s+)?company/i.test(lower) || /my\s+#2/i.test(lower)) {
+        resolvedIdx = 1;
+      }
+      // Check for #3 / third
+      else if (/#3\s*target/i.test(lower) || /\b(?:third|#3)\s+(?:target\s+)?company/i.test(lower) || /my\s+#3/i.test(lower)) {
+        resolvedIdx = 2;
+      }
+      // Check for #4 / fourth
+      else if (/#4\s*target/i.test(lower) || /\b(?:fourth|#4)\s+(?:target\s+)?company/i.test(lower) || /my\s+#4/i.test(lower)) {
+        resolvedIdx = 3;
+      }
+      // Check for #5 / fifth
+      else if (/#5\s*target/i.test(lower) || /\b(?:fifth|#5)\s+(?:target\s+)?company/i.test(lower) || /my\s+#5/i.test(lower)) {
+        resolvedIdx = 4;
+      }
+
+      if (resolvedIdx >= 0 && resolvedIdx < targetCompanies.length) {
+        const company = targetCompanies[resolvedIdx];
+        // Rewrite the ENTIRE message to a clean research query with just the company name.
+        // This avoids any downstream regex picking up stray words like "are they".
+        resolvedMessage = `Research ${company} hiring`;
+        console.log(`Resolved target company reference (#${resolvedIdx + 1}) → "${company}". Rewritten message: "${resolvedMessage}"`);
+      } else if (resolvedIdx >= 0) {
+        // Index out of bounds — user asked for a company they haven't set
+        console.log(`Target company #${resolvedIdx + 1} requested but only ${targetCompanies.length} set`);
       }
     }
 
