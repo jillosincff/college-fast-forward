@@ -39,7 +39,7 @@ import StudentHelpRequestPreview from '@/components/dashboard/student/StudentHel
 import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
 import ExploreSection from '@/components/dashboard/student/ExploreSection';
 import PullToRefresh from '@/components/common/PullToRefresh';
-import FastTrackProCard from '@/components/dashboard/student/FastTrackProCard';
+import FastIQBanner from '@/components/dashboard/student/FastIQBanner';
 import RecentFeedbackCard from '@/components/dashboard/student/RecentFeedbackCard';
 import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
 import StudentKarmaExplainer from '@/components/karma/StudentKarmaExplainer';
