@@ -127,8 +127,13 @@ export default function GatorInviteCode() {
           localStorage.setItem('pending_invite_code_id', response.data.codeId);
         }
         
-        // Navigate to GatorWelcome to complete setup
-        navigate('GatorWelcome');
+        // If user is already authenticated, go to GatorWelcome to apply role
+        // If not authenticated yet, go to GatorAuth which will show Google sign-in
+        if (user) {
+          navigate('GatorWelcome');
+        } else {
+          navigate('GatorAuth');
+        }
       } else {
         const errorMsg = response.data?.error || 'Invalid invite code. Please check and try again.';
         console.error('❌ Code verification failed:', errorMsg);
