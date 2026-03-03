@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, AlertCircle, HelpCircle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, HelpCircle, ArrowRight, Link2 } from 'lucide-react';
 import { trackEvent } from '@/components/utils/analytics';
 import AddStudentModal from '@/components/dashboard/AddStudentModal';
 import { base44 } from '@/api/base44Client';
