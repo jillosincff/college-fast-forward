@@ -38,6 +38,9 @@ export default function ParentDashboard() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [showLinkStudentModal, setShowLinkStudentModal] = useState(false);
+  const [linkStudentEmail, setLinkStudentEmail] = useState('');
+  const [linkStudentLoading, setLinkStudentLoading] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   // Determine user type for conditional rendering
