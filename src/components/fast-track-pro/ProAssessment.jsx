@@ -55,33 +55,39 @@ const CHALLENGES = [
   { value: 'negotiating', label: 'Negotiating offers', emoji: '💰' },
 ];
 
-export default function ProAssessment({ user, onComplete }) {
+export default function ProAssessment({ user, existingProfile, onComplete }) {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
-  // Pre-fill from user fields
+  // Pre-fill from existing profile first, then user fields
   const initialIndustries = useMemo(() => {
+    if (existingProfile?.target_industry) {
+      return existingProfile.target_industry.split(', ').filter(i => INDUSTRIES.includes(i));
+    }
     if (user?.industries_interested?.length) return user.industries_interested.filter(i => INDUSTRIES.includes(i));
     return [];
-  }, [user]);
+  }, [user, existingProfile]);
 
   const initialTimeline = useMemo(() => {
+    if (existingProfile?.career_timeline) return existingProfile.career_timeline;
     const t = user?.target_timeline;
     if (t && TIMELINES.some(tl => tl.value === t)) return t;
     return '';
-  }, [user]);
+  }, [user, existingProfile]);
 
   const [data, setData] = useState({
     target_industry: initialIndustries,
-    target_companies: [],
+    target_companies: (existingProfile?.target_companies || []).map(titleCase),
     career_timeline: initialTimeline,
-    current_stage: '',
-    biggest_challenge: '',
+    current_stage: existingProfile?.current_stage || '',
+    biggest_challenge: existingProfile?.biggest_challenge || '',
   });
   const [companyInput, setCompanyInput] = useState('');
-  const [explorerMode, setExplorerMode] = useState(false);
-  const [companySizePref, setCompanySizePref] = useState('');
-  const [locationPref, setLocationPref] = useState('');
+  const [explorerMode, setExplorerMode] = useState(
+    existingProfile ? (existingProfile.target_companies || []).length === 0 && !!existingProfile.company_size_preference : false
+  );
+  const [companySizePref, setCompanySizePref] = useState(existingProfile?.company_size_preference || '');
+  const [locationPref, setLocationPref] = useState(existingProfile?.location_preference || '');
 
   const currentStep = STEPS[step];
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -124,20 +130,32 @@ export default function ProAssessment({ user, onComplete }) {
   const handleFinish = async () => {
     setSaving(true);
     const profileData = {
-      user_email: user.email,
       target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
       target_industry: data.target_industry.join(', '),
       career_timeline: data.career_timeline,
       biggest_challenge: data.biggest_challenge,
       current_stage: data.current_stage,
       assessment_complete: true,
-      pro_tier: 'free_trial',
     };
     if (explorerMode) {
       profileData.company_size_preference = companySizePref;
       profileData.location_preference = locationPref;
+    } else {
+      profileData.company_size_preference = '';
+      profileData.location_preference = '';
     }
-    const profile = await base44.entities.FastTrackProProfile.create(profileData);
+
+    let profile;
+    if (existingProfile?.id) {
+      await base44.entities.FastTrackProProfile.update(existingProfile.id, profileData);
+      profile = { ...existingProfile, ...profileData };
+    } else {
+      profile = await base44.entities.FastTrackProProfile.create({
+        user_email: user.email,
+        pro_tier: 'free_trial',
+        ...profileData,
+      });
+    }
     setSaving(false);
     onComplete(profile);
   };

@@ -84,7 +84,7 @@ export default function FastTrackPro() {
   }
 
   if (view === 'assessment') {
-    return <ProAssessment user={user} onComplete={handleAssessmentComplete} />;
+    return <ProAssessment user={user} existingProfile={profile} onComplete={handleAssessmentComplete} />;
   }
 
   if (view === 'chat') {
