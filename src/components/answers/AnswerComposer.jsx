@@ -91,70 +91,22 @@ export default function AnswerComposer({
       // Create the answer - use JobAnswer entity for JobRequests to avoid RLS issues
       let newAnswer;
       
-      if (question._source === 'JobRequest') {
-        // Use JobAnswer entity (no RLS conflict since user owns their own answers)
-        newAnswer = await JobAnswer.create({
-          job_request_id: question.id,
-          responder_id: currentUser.id,
-          responder_email: currentUser.email,
-          responder_name: currentUser.full_name || currentUser.email.split('@')[0],
-          responder_title: currentUser.current_position || currentUser.current_role,
-          responder_company: currentUser.current_company,
-          responder_type: currentUser.persona || 'parent',
-          message: answerText.trim(),
-          is_read: false,
-          is_helpful: false,
-          upvote_count: 0
-        });
-        // Map to expected format for downstream code
-        newAnswer = {
-          ...newAnswer,
-          question_id: question.id,
-          answerer_user_id: currentUser.id,
-          answerer_email: currentUser.email,
-          answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
-          answerer_title: currentUser.current_position || currentUser.current_role,
-          answerer_company: currentUser.current_company,
-          answerer_persona: currentUser.persona,
-          answer_text: answerText.trim()
-        };
-        
-        // ALSO create an Answer record so best-answer and upvotes work consistently
-        try {
-          await Answer.create({
-            question_id: question.id,
-            question_type: 'JobRequest',
-            answerer_user_id: currentUser.id,
-            answerer_email: currentUser.email,
-            answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
-            answerer_title: currentUser.current_position || currentUser.current_role,
-            answerer_company: currentUser.current_company,
-            answerer_years_experience: currentUser.years_experience,
-            answerer_persona: currentUser.persona,
-            answer_text: answerText.trim(),
-            upvote_count: 0,
-            is_best_answer: false
-          });
-        } catch (dupeErr) {
-          console.log('Dual Answer record creation failed (non-critical):', dupeErr.message);
-        }
-      } else {
-        // Use Answer entity for HelpRequests
-        newAnswer = await Answer.create({
-          question_id: question.id,
-          question_type: 'HelpRequest',
-          answerer_user_id: currentUser.id,
-          answerer_email: currentUser.email,
-          answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
-          answerer_title: currentUser.current_position || currentUser.current_role,
-          answerer_company: currentUser.current_company,
-          answerer_years_experience: currentUser.years_experience,
-          answerer_persona: currentUser.persona,
-          answer_text: answerText.trim(),
-          upvote_count: 0,
-          is_best_answer: false
-        });
-      }
+      // Use Answer entity as the single source of truth for ALL question types.
+      // This eliminates the duplicate Answer/JobAnswer problem.
+      newAnswer = await Answer.create({
+        question_id: question.id,
+        question_type: question._source || 'HelpRequest',
+        answerer_user_id: currentUser.id,
+        answerer_email: currentUser.email,
+        answerer_name: currentUser.full_name || currentUser.email.split('@')[0],
+        answerer_title: currentUser.current_position || currentUser.current_role,
+        answerer_company: currentUser.current_company,
+        answerer_years_experience: currentUser.years_experience,
+        answerer_persona: currentUser.persona,
+        answer_text: answerText.trim(),
+        upvote_count: 0,
+        is_best_answer: false
+      });
 
       // NOTE: We no longer try to update answer_count on JobRequest/HelpRequest
       // because RLS prevents non-creators from updating. The answer count is now

@@ -87,6 +87,24 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // === DEDUPLICATION GUARD ===
+    try {
+      const recentTx = await base44.asServiceRole.entities.KarmaTransaction.filter(
+        { parent_user_id: effectiveUserId, action_type: actionType },
+        '-created_date', 3
+      );
+      if (recentTx.length > 0) {
+        const txAge = now.getTime() - new Date(recentTx[0].created_date).getTime();
+        const sameRef = referenceId && recentTx[0].reference_id === referenceId;
+        if (sameRef || txAge < 60000) {
+          console.log(`Dedup: skipping duplicate ${actionType} for ${effectiveUserId}`);
+          return Response.json({ success: true, points_awarded: 0, deduplicated: true });
+        }
+      }
+    } catch (e) {
+      console.log('Dedup check failed (proceeding):', e.message);
+    }
+
     // Get or create StudentKarma record
     let karmaRecord = null;
     const existing = await base44.asServiceRole.entities.StudentKarma.filter({
