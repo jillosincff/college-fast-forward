@@ -39,7 +39,7 @@ function ParentStatCard({ config, value, delay }) {
 }
 
 // ── Active student view ──
-function ActiveStudentView({ studentProfile, studentName }) {
+function ActiveStudentView({ studentProfile, studentName, onOpenChat }) {
   const statValues = [
     studentProfile.companies_researched || 0,
     studentProfile.alumni_discovered || 0,
