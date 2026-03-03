@@ -223,7 +223,17 @@ export default function QuestionDetailPage() {
         is_best_answer: ja.is_helpful || false
       }));
       
-      const allAnswers = [...regularAnswers, ...normalizedJobAnswers];
+      // Deduplicate: if Answer and JobAnswer have the same answerer + same text, keep only one
+      const seenKeys = new Set();
+      const deduped = [];
+      for (const a of [...regularAnswers, ...normalizedJobAnswers]) {
+        const key = `${a.answerer_email || a.responder_email}_${(a.answer_text || a.message || '').trim().substring(0, 100)}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          deduped.push(a);
+        }
+      }
+      const allAnswers = deduped;
       const sorted = sortAnswers(allAnswers, sortBy);
       setAnswers(sorted);
       
