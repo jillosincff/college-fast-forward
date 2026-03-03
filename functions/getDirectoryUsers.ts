@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       PAGE_SIZE
     );
     allUsers = batch1 || [];
-    console.log(`📊 Batch 1: ${allUsers.length} users`);
+    console.log(`Batch 1: ${allUsers.length} users`);
     
     // If we got exactly 500, there may be more - fetch batch 2
     if (allUsers.length >= PAGE_SIZE) {
@@ -36,23 +36,21 @@ Deno.serve(async (req) => {
           PAGE_SIZE
         );
         if (batch2 && batch2.length > 0) {
-          // Deduplicate by id
           const existingIds = new Set(allUsers.map(u => u.id));
           const newUsers = batch2.filter(u => !existingIds.has(u.id));
           allUsers = allUsers.concat(newUsers);
-          console.log(`📊 Batch 2: ${batch2.length} users (${newUsers.length} new)`);
+          console.log(`Batch 2: ${batch2.length} users (${newUsers.length} new)`);
         }
       }
     }
 
-    console.log(`📊 Total users with onboarding_completed=true: ${allUsers.length}`);
+    console.log(`Total users with onboarding_completed=true: ${allUsers.length}`);
 
     // Filter and format users for directory
     const directoryUsers = [];
     let filteredCount = 0;
     
     for (const u of allUsers) {
-      // Must have some form of name
       const hasValidName = (u.first_name && u.last_name) || 
                           (u.full_name && u.full_name.trim() !== '' && !u.full_name.includes('@'));
       
@@ -61,7 +59,6 @@ Deno.serve(async (req) => {
         continue;
       }
       
-      // Must have persona/role OR substantive profile content
       const hasPersonaOrRole = (u.persona && ['student', 'alumni', 'parent', 'gator'].includes(u.persona)) ||
                                (u.roles && Array.isArray(u.roles) && u.roles.some(r => ['student', 'alumni', 'parent', 'gator'].includes(r)));
       
@@ -73,7 +70,6 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Build name
       let fullName = u.full_name;
       let firstName = u.first_name;
       let lastName = u.last_name;
@@ -89,7 +85,6 @@ Deno.serve(async (req) => {
                  : firstName || lastName || u.email.split('@')[0];
       }
 
-      // Determine display persona
       let displayPersona = u.persona;
       if (displayPersona === 'gator') displayPersona = 'student';
       if (!displayPersona) {
@@ -126,7 +121,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`✅ Directory: Returning ${directoryUsers.length} users (filtered out: ${filteredCount})`);
+    console.log(`Directory: Returning ${directoryUsers.length} users (filtered out: ${filteredCount})`);
 
     return Response.json({
       success: true,
@@ -135,7 +130,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('❌ getDirectoryUsers error:', error);
+    console.error('getDirectoryUsers error:', error);
     return Response.json({
       error: 'Failed to load directory',
       details: error.message
