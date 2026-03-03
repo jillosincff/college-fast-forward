@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Send, Sparkles, Loader2, ArrowLeft, User, PanelLeft, PanelRightOpen } from 'lucide-react';
+import { Send, Sparkles, Loader2, ArrowLeft, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
@@ -153,7 +153,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
             style={{ minHeight: 'auto', minWidth: 'auto' }}
             title={sidebarOpen ? 'Hide targets' : 'Show targets'}
           >
-            {sidebarOpen ? <PanelLeft className="w-4 h-4 text-white" /> : <PanelRightOpen className="w-4 h-4 text-white" />}
+            {sidebarOpen ? <ChevronLeft className="w-4 h-4 text-white" /> : <ChevronRight className="w-4 h-4 text-white" />}
           </button>
           <Badge className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white px-3 py-1 rounded-full text-xs font-bold border-0">FASTIQ</Badge>
         </div>
