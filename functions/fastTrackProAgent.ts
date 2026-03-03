@@ -468,19 +468,181 @@ Rules for match_score (0-100):
 
       if (alumni.length > 0) {
         saveAlumniCache(base44, alumni);
-        // Auto-add to NetworkingPipeline
         saveToPipeline(base44, user.email, alumniCompanyEarly, alumni);
+
+        trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
+
+        return Response.json({
+          success: true,
+          response: alumniResult.response || `Here are UF alumni I found at ${alumniCompanyEarly}:`,
+          message_type: 'alumni_card',
+          payload: { alumni, cached: false },
+        });
       }
+
+      // ═══════════════════════════════════════════════════════════
+      //  WARM PATH FALLBACK — zero direct alumni found
+      // ═══════════════════════════════════════════════════════════
+      console.log('Zero alumni at', alumniCompanyEarly, '— running warm-path fallback');
+
+      const industry = profile.target_industry || 'the same industry';
+      const location = profile.location_preference || '';
+      const companyName = alumniCompanyEarly;
+
+      // --- Fallback Layer 1: Nearby Alumni (similar companies) ---
+      let nearbyAlumni = [];
+      try {
+        const nearbyResult = await base44.integrations.Core.InvokeLLM({
+          prompt: `I could not find University of Florida alumni at ${companyName}. Find UF alumni who work at similar companies in the same space (${industry}${location ? ' in or near ' + location : ''}). Look for competitors, companies in the same niche, or adjacent firms. Return 3-5 alumni with their name, job title, company, UF degree info if available, location, and a 1-sentence note explaining how they could help the student get into ${companyName}.`,
+          add_context_from_internet: true,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              alumni: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    role_title: { type: "string" },
+                    company: { type: "string" },
+                    degree_info: { type: "string" },
+                    location: { type: "string" },
+                    match_score: { type: "integer" },
+                    connection_note: { type: "string", description: "How this person can help the student reach the target company" }
+                  },
+                  required: ["name", "role_title", "company"]
+                }
+              }
+            },
+            required: ["alumni"]
+          }
+        });
+        nearbyAlumni = nearbyResult?.alumni || [];
+        if (nearbyAlumni.length > 0) {
+          saveAlumniCache(base44, nearbyAlumni);
+          for (const a of nearbyAlumni) {
+            saveToPipeline(base44, user.email, a.company, [a]);
+          }
+        }
+      } catch (e) { console.log('Nearby alumni fallback error:', e.message); }
+
+      // --- Fallback Layer 2: CFF Insiders (ParentExpertise + User) ---
+      let cffInsiders = [];
+      try {
+        const expertise = await base44.entities.ParentExpertise.filter({ industry, available: true }, '-last_active_at', 10);
+        cffInsiders = (expertise || []).slice(0, 4).map(p => ({
+          name: p.parent_name || 'CFF Member',
+          role: p.current_role || '',
+          company: p.current_company || '',
+          email: p.parent_email || '',
+          industry: p.industry || industry,
+        }));
+      } catch (e) { console.log('CFF insider lookup error:', e.message); }
+
+      // --- Fallback Layer 3: Partner/Client Alumni ---
+      let partnerAlumni = [];
+      try {
+        const partnerResult = await base44.integrations.Core.InvokeLLM({
+          prompt: `Find the top 3-4 major clients, partners, or vendors of ${companyName}. Then search for University of Florida alumni who work at those partner companies. For each alumni found, explain the business relationship between their company and ${companyName}, and how an introduction through them could help a student get into ${companyName}.`,
+          add_context_from_internet: true,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              alumni: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    role_title: { type: "string" },
+                    company: { type: "string" },
+                    degree_info: { type: "string" },
+                    location: { type: "string" },
+                    match_score: { type: "integer" },
+                    connection_note: { type: "string", description: "How this partner connection leads back to the target company" }
+                  },
+                  required: ["name", "role_title", "company"]
+                }
+              }
+            },
+            required: ["alumni"]
+          }
+        });
+        partnerAlumni = partnerResult?.alumni || [];
+        if (partnerAlumni.length > 0) {
+          saveAlumniCache(base44, partnerAlumni);
+        }
+      } catch (e) { console.log('Partner alumni fallback error:', e.message); }
+
+      // --- Fallback Layer 4: Recruiters ---
+      let recruiters = [];
+      try {
+        const recruiterResult = await base44.integrations.Core.InvokeLLM({
+          prompt: `Find 2-3 recruiting firms or staffing agencies that place candidates at ${companyName} or specialize in ${industry} hiring. For each, provide the firm name, their specialization, and a tip on how a student should approach them.`,
+          add_context_from_internet: true,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              recruiters: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    firm_name: { type: "string" },
+                    specialization: { type: "string" },
+                    contact_tip: { type: "string" }
+                  },
+                  required: ["firm_name", "specialization"]
+                }
+              }
+            },
+            required: ["recruiters"]
+          }
+        });
+        recruiters = recruiterResult?.recruiters || [];
+      } catch (e) { console.log('Recruiter fallback error:', e.message); }
+
+      // --- Fallback Layer 5: LinkedIn Strategy ---
+      let linkedinStrategy = null;
+      try {
+        const stratResult = await base44.integrations.Core.InvokeLLM({
+          prompt: `Create a specific action plan for a UF student who wants to build connections at ${companyName} but has no direct alumni contacts there.
+The student's profile: ${industry} industry, ${profile.current_stage || 'exploring'} stage.
+Include:
+1. 3-4 concrete steps (reference the nearby alumni and partner connections found above if applicable)
+2. 2-3 LinkedIn groups where ${companyName} employees are active
+3. Any upcoming events where ${companyName} recruits (career fairs, conferences, etc.)
+End with an encouraging note that warm paths sometimes take two hops.`,
+          add_context_from_internet: true,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              steps: { type: "array", items: { type: "string" }, description: "3-4 action steps" },
+              groups: { type: "array", items: { type: "string" }, description: "LinkedIn groups" },
+              events: { type: "array", items: { type: "string" }, description: "Upcoming events" }
+            },
+            required: ["steps"]
+          }
+        });
+        linkedinStrategy = stratResult;
+      } catch (e) { console.log('LinkedIn strategy fallback error:', e.message); }
 
       trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
 
+      const totalPaths = nearbyAlumni.length + cffInsiders.length + partnerAlumni.length + recruiters.length + (linkedinStrategy ? 1 : 0);
+
       return Response.json({
         success: true,
-        response: alumniResult.response || `Here are UF alumni I found at ${alumniCompanyEarly}:`,
-        message_type: 'alumni_card',
+        response: `I didn't find UF alumni directly at ${companyName} — but FASTIQ never hits a dead end. I found ${totalPaths} warm paths into this company. Here's your comprehensive strategy:`,
+        message_type: 'warm_path',
         payload: {
-          alumni,
-          cached: false,
+          target_company: companyName,
+          nearby_alumni: nearbyAlumni,
+          cff_insiders: cffInsiders,
+          partner_alumni: partnerAlumni,
+          recruiters,
+          linkedin_strategy: linkedinStrategy,
         }
       });
     }
