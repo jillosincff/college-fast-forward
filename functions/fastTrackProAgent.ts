@@ -319,11 +319,11 @@ Deno.serve(async (req) => {
         prompt: `Search for companies matching these criteria and provide detailed results:
 - Industry: ${industry}
 - Company size preference: ${sizePref || 'any'}
-- Location: ${locPref || 'any location'}
+- Preferred location: ${locPref || 'any location'}
 - Role type: entry-level / new grad
 - Student's request: "${resolvedMessage}"
 
-Find 5-8 real companies that are actively hiring or likely to hire entry-level roles in this space. For each, explain why it's a good fit, estimate size, and note hiring status.`,
+Find 5-8 real companies that are actively hiring or likely to hire entry-level roles in this space.${locPref ? ` IMPORTANT: Prioritize companies that have offices, headquarters, or remote-friendly roles in or near "${locPref}". Mention location/office info for each company.` : ''} For each, explain why it's a good fit, estimate size, and note hiring status.`,
         add_context_from_internet: true,
       });
 
@@ -344,9 +344,10 @@ STUDENT'S REQUEST: "${resolvedMessage}"
 Rules:
 - Each suggestion must be a real company that hires entry-level talent
 - company_name: official company name
-- reason: 1-2 sentences explaining why it's a good fit for THIS student (reference their industry, major, or preferences)
+- reason: 1-2 sentences explaining why it's a good fit for THIS student (reference their industry, major, or preferences)${locPref ? ` Mention if the company has offices in or near "${locPref}" or offers remote work.` : ''}
 - size: one of "large", "mid_size", "startup"
 - hiring_status: one of "actively_hiring", "some_openings", "unknown"
+- location: city/state where relevant roles are based (if known)${locPref ? `\n- IMPORTANT: Rank companies closer to "${locPref}" higher in the list. If a company has no presence near the student's preferred location, note that clearly.` : ''}
 - response: brief 2-3 sentence conversational intro to the student`,
         response_json_schema: {
           type: "object",
@@ -360,7 +361,8 @@ Rules:
                   company_name: { type: "string" },
                   reason: { type: "string" },
                   size: { type: "string", enum: ["large", "mid_size", "startup"] },
-                  hiring_status: { type: "string", enum: ["actively_hiring", "some_openings", "unknown"] }
+                  hiring_status: { type: "string", enum: ["actively_hiring", "some_openings", "unknown"] },
+                  location: { type: "string", description: "City/state where relevant roles are based" }
                 },
                 required: ["company_name", "reason", "size", "hiring_status"]
               }

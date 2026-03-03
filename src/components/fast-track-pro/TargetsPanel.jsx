@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
@@ -105,9 +105,24 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
     if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
   };
 
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
+  const [savingLocation, setSavingLocation] = useState(false);
+
   const industry = profile?.target_industry || '—';
   const timeline = TIMELINE_LABELS[profile?.career_timeline] || profile?.career_timeline || '—';
   const stage = STAGE_LABELS[profile?.current_stage] || profile?.current_stage || '—';
+  const location = profile?.location_preference || '';
+
+  const saveLocation = async () => {
+    if (!profile?.id) return;
+    setSavingLocation(true);
+    const val = locationInput.trim();
+    await base44.entities.FastTrackProProfile.update(profile.id, { location_preference: val });
+    setSavingLocation(false);
+    setEditingLocation(false);
+    if (onProfileUpdated) onProfileUpdated({ ...profile, location_preference: val });
+  };
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -278,6 +293,44 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
             <div className="flex items-center gap-2">
               <span className="text-[11px] text-slate-400 w-16 flex-shrink-0">Stage</span>
               <span className="text-[12px] text-slate-700 font-medium">{stage}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-400 w-16 flex-shrink-0">Location</span>
+              {editingLocation ? (
+                <div className="flex items-center gap-1 flex-1 min-w-0">
+                  <Input
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); saveLocation(); } if (e.key === 'Escape') setEditingLocation(false); }}
+                    placeholder="e.g. New York, NY"
+                    className="h-6 text-[11px] px-1.5 py-0"
+                    autoFocus
+                  />
+                  <button onClick={saveLocation} disabled={savingLocation} className="w-5 h-5 text-green-600 flex items-center justify-center flex-shrink-0" style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                    <Check className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => setEditingLocation(false)} className="w-5 h-5 text-slate-400 flex items-center justify-center flex-shrink-0" style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : location ? (
+                <button
+                  onClick={() => { setLocationInput(location); setEditingLocation(true); }}
+                  className="text-[12px] text-slate-700 font-medium truncate hover:text-[#0021A5] transition-colors flex items-center gap-1"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                  {location}
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setLocationInput(''); setEditingLocation(true); }}
+                  className="text-[11px] text-[#0021A5] font-semibold hover:underline"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  + Add
+                </button>
+              )}
             </div>
           </div>
         </div>
