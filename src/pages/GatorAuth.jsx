@@ -226,6 +226,8 @@ export default function GatorAuth() {
               // Route to correct onboarding
               if (pendingRole === 'gator') {
                 navigate('StudentOnboarding');
+              } else if (pendingRole === 'parent') {
+                navigate('ParentOnboarding');
               } else {
                 navigate('Onboarding');
               }
@@ -244,6 +246,8 @@ export default function GatorAuth() {
               
               if (pendingRole === 'gator') {
                 navigate('StudentOnboarding');
+              } else if (pendingRole === 'parent') {
+                navigate('ParentOnboarding');
               } else {
                 navigate('Onboarding');
               }
@@ -405,6 +409,8 @@ export default function GatorAuth() {
       
       if (selectedRole === 'gator') {
         navigate('StudentOnboarding');
+      } else if (selectedRole === 'parent') {
+        navigate('ParentOnboarding');
       } else {
         navigate('Onboarding');
       }
