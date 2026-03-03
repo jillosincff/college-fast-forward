@@ -73,12 +73,14 @@ function getBenefitLabel(tierName) {
 
 Deno.serve(async (req) => {
   try {
+    // CRITICAL: Clone request before consuming body, since createClientFromRequest may also read it
+    const clonedReq = req.clone();
     const base44 = createClientFromRequest(req);
     
     // Auth check - allow system calls too
     const user = await base44.auth.me().catch(() => null);
     
-    const body = await req.json();
+    const body = await clonedReq.json();
     const { familyGroupId, parentUserId, parentEmail, parentName, actionType, referenceType, referenceId, description } = body;
     
     console.log('awardKarma called:', { familyGroupId, parentUserId, parentEmail, actionType, referenceId });
