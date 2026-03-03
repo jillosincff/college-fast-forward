@@ -1,4 +1,4 @@
-import { Base44 } from 'npm:@base44/sdk@0.8.4';
+import { createClient } from 'npm:@base44/sdk@0.8.6';
 
 const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
 
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const base44 = new Base44({ appId, serviceRoleKey });
+    const base44 = createClient({ appId, serviceRoleKey });
 
     console.log('Searching for user with email:', email);
     
