@@ -20,7 +20,7 @@ function getSuggestedPrompts(profile) {
 
   if (hasTargets) {
     prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?" });
-    prompts.push({ icon: '🔍', text: "Find UF Gator alumni at my dream companies" });
+    prompts.push({ icon: '🔍', text: "Find UF alumni at my dream companies" });
   } else {
     const industryText = industry ? `in ${industry}` : 'that are right for me';
     prompts.push({ icon: '🔍', text: `Help me find companies ${industryText}` });
