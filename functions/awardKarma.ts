@@ -96,6 +96,34 @@ Deno.serve(async (req) => {
     const now = new Date();
     const boostExpiresAt = new Date(now.getTime() + BOOST_DURATION_HOURS * 60 * 60 * 1000);
     
+    // === DEDUPLICATION GUARD ===
+    // Prevent duplicate transactions within 60 seconds for same user + action + reference
+    try {
+      const recentTxFilter = { parent_user_id: parentUserId, action_type: actionType };
+      const recentTx = await base44.asServiceRole.entities.KarmaTransaction.filter(
+        recentTxFilter, '-created_date', 5
+      );
+      
+      if (recentTx.length > 0) {
+        const latestTx = recentTx[0];
+        const txAge = now.getTime() - new Date(latestTx.created_date).getTime();
+        const sameReference = referenceId && latestTx.reference_id === referenceId;
+        
+        // Skip if same reference OR same action within 60 seconds
+        if (sameReference || txAge < 60000) {
+          console.log(`Dedup: skipping duplicate ${actionType} for ${parentUserId} (age: ${Math.round(txAge/1000)}s, sameRef: ${sameReference})`);
+          return Response.json({
+            success: true,
+            points_awarded: 0,
+            deduplicated: true,
+            message: 'Duplicate transaction prevented'
+          });
+        }
+      }
+    } catch (e) {
+      console.log('Dedup check failed (proceeding):', e.message);
+    }
+    
     // Get parent user to find their linked students and family
     let parentUser = null;
     let effectiveFamilyGroupId = familyGroupId;
@@ -108,6 +136,24 @@ Deno.serve(async (req) => {
       }
     } catch (e) {
       console.log('Could not fetch parent user:', e.message);
+    }
+    
+    // === ORPHAN PREVENTION ===
+    // If no family_group_id found on user, check the Family entity
+    if (!effectiveFamilyGroupId && parentUser) {
+      try {
+        const families = await base44.asServiceRole.entities.Family.filter({ primary_parent_id: parentUserId });
+        if (families.length > 0) {
+          effectiveFamilyGroupId = families[0].family_group_id;
+          // Fix the user record so future calls don't need this lookup
+          await base44.asServiceRole.entities.User.update(parentUserId, {
+            family_group_id: effectiveFamilyGroupId
+          });
+          console.log(`Fixed orphan: set family_group_id ${effectiveFamilyGroupId} on user ${parentUserId}`);
+        }
+      } catch (e) {
+        console.log('Family lookup failed:', e.message);
+      }
     }
     
     // Create karma transaction (always, even without family group, for tracking)
