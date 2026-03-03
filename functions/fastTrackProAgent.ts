@@ -239,8 +239,36 @@ Deno.serve(async (req) => {
 - Current Stage: ${profile.current_stage || 'not set'}
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
+    // --- RESOLVE TARGET COMPANY REFERENCES ---
+    // If user says "my #1 target company" or "my top company", resolve from profile
+    let resolvedMessage = message;
+    const targetCompanyRefs = [
+      /(?:my\s+)?#?1\s*(?:st)?\s*(?:target\s+)?company/i,
+      /(?:my\s+)?(?:top|first|primary|main|dream)\s+(?:target\s+)?company/i,
+      /(?:my\s+)?#?2\s*(?:nd)?\s*(?:target\s+)?company/i,
+      /(?:my\s+)?#?3\s*(?:rd)?\s*(?:target\s+)?company/i,
+      /(?:my\s+)?(?:second)\s+(?:target\s+)?company/i,
+      /(?:my\s+)?(?:third)\s+(?:target\s+)?company/i,
+    ];
+    const targetCompanies = profile.target_companies || [];
+    if (targetCompanies.length > 0) {
+      for (const pattern of targetCompanyRefs) {
+        const match = resolvedMessage.match(pattern);
+        if (match) {
+          let companyIndex = 0; // default to first
+          const matchText = match[0].toLowerCase();
+          if (matchText.includes('#2') || matchText.includes('second')) companyIndex = 1;
+          if (matchText.includes('#3') || matchText.includes('third')) companyIndex = 2;
+          const company = targetCompanies[Math.min(companyIndex, targetCompanies.length - 1)];
+          resolvedMessage = resolvedMessage.replace(match[0], company);
+          console.log(`Resolved "${match[0]}" → "${company}" from profile`);
+          break;
+        }
+      }
+    }
+
     // --- ALUMNI DISCOVERY FLOW: detect alumni query → check cache → research → cache → return ---
-    const alumniCompany = detectAlumniQuery(message);
+    const alumniCompany = detectAlumniQuery(resolvedMessage);
 
     if (alumniCompany) {
       console.log('Alumni query detected for:', alumniCompany);
