@@ -391,6 +391,8 @@ Deno.serve(async (req) => {
       const cachedAlumni = await getCachedAlumni(base44, alumniCompanyEarly);
       if (cachedAlumni) {
         console.log('Alumni cache HIT — returning', cachedAlumni.length, 'cached alumni');
+        // Also ensure pipeline entries exist for cached alumni
+        saveToPipeline(base44, user.email, alumniCompanyEarly, cachedAlumni);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
         return Response.json({
           success: true,
