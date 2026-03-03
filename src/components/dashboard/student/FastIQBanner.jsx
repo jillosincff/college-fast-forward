@@ -3,6 +3,10 @@ import { Zap, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
+function plural(count, singular, pluralForm) {
+  return count === 1 ? singular : pluralForm;
+}
+
 export default function FastIQBanner({ user }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,11 +24,12 @@ export default function FastIQBanner({ user }) {
   const isActive = profile?.assessment_complete;
 
   if (isActive) {
+    const targets = profile.companies_researched || 0;
+    const insiders = profile.alumni_discovered || 0;
+    const messages = profile.messages_drafted || 0;
+
     return (
-      <div
-        className="w-full cursor-pointer"
-        onClick={() => navigate('FastTrackPro')}
-      >
+      <div className="w-full cursor-pointer" onClick={() => navigate('FastTrackPro')}>
         <div
           className="flex items-center justify-between gap-3 px-4 py-2.5 sm:px-6"
           style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 100%)' }}
@@ -39,27 +44,27 @@ export default function FastIQBanner({ user }) {
             </div>
           </div>
 
-          {/* Center: Quick stats */}
+          {/* Center: Quick stats — desktop */}
           <div className="hidden sm:flex items-center gap-1 text-[12px] text-white/60 font-medium">
-            <span className="text-white font-bold">{profile.companies_researched || 0}</span> Targets
+            <span className="text-white font-bold">{targets}</span> {plural(targets, 'Target', 'Targets')}
             <span className="text-white/30 mx-1">|</span>
-            <span className="text-white font-bold">{profile.alumni_discovered || 0}</span> Insiders
+            <span className="text-white font-bold">{insiders}</span> {plural(insiders, 'Insider', 'Insiders')}
             <span className="text-white/30 mx-1">|</span>
-            <span className="text-white font-bold">{profile.messages_drafted || 0}</span> Messages
+            <span className="text-white font-bold">{messages}</span> {plural(messages, 'Message', 'Messages')}
           </div>
           {/* Mobile: abbreviated stats */}
           <div className="flex sm:hidden items-center gap-1 text-[11px] text-white/60 font-medium">
-            <span className="text-white font-bold">{profile.companies_researched || 0}</span>T
+            <span className="text-white font-bold">{targets}</span>T
             <span className="text-white/30 mx-0.5">·</span>
-            <span className="text-white font-bold">{profile.alumni_discovered || 0}</span>I
+            <span className="text-white font-bold">{insiders}</span>I
             <span className="text-white/30 mx-0.5">·</span>
-            <span className="text-white font-bold">{profile.messages_drafted || 0}</span>M
+            <span className="text-white font-bold">{messages}</span>M
           </div>
 
           {/* Right: CTA */}
           <button
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white flex-shrink-0 transition-all hover:brightness-110"
-            style={{ background: '#FA4616', minHeight: 'auto', minWidth: 'auto' }}
+            style={{ background: '#FA4616' }}
           >
             Open FASTIQ <ArrowRight className="w-3 h-3" />
           </button>
@@ -70,29 +75,23 @@ export default function FastIQBanner({ user }) {
 
   // Not active — upsell banner
   return (
-    <div
-      className="w-full cursor-pointer"
-      onClick={() => navigate('FastTrackPro')}
-    >
+    <div className="w-full cursor-pointer" onClick={() => navigate('FastTrackPro')}>
       <div
         className="flex items-center justify-between gap-3 px-4 py-2.5 sm:px-6"
         style={{ background: 'linear-gradient(135deg, #0021A5 0%, #FA4616 100%)' }}
       >
-        {/* Left: Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Zap className="w-4 h-4 text-white" />
           <span className="text-white font-bold text-xs sm:text-sm tracking-wide">FASTIQ™</span>
         </div>
 
-        {/* Center: Pitch */}
         <p className="text-[11px] sm:text-[12px] text-white/85 font-medium truncate">
           Your AI career agent — find alumni, draft outreach, land interviews
         </p>
 
-        {/* Right: CTA */}
         <button
           className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white flex-shrink-0 transition-all hover:brightness-110"
-          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', minHeight: 'auto', minWidth: 'auto' }}
+          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}
         >
           Activate <ArrowRight className="w-3 h-3" />
         </button>
