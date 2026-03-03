@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
 import AnimatedCounter from './AnimatedCounter';
+import ProAgentChat from '../fast-track-pro/ProAgentChat';
 
 const fade = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
 
