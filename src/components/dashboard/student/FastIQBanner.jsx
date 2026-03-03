@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Zap, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import titleCase from '@/components/utils/titleCase';
 
 function plural(count, singular, pluralForm) {
   return count === 1 ? singular : pluralForm;

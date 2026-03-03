@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
+import titleCase from '@/components/utils/titleCase';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
@@ -43,7 +44,7 @@ export function CompanyIntelCard({ data }) {
             <Building2 className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-bold text-slate-900">{String(data.company || '')}</p>
+            <p className="font-bold text-slate-900">{titleCase(String(data.company || ''))}</p>
             <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
           </div>
         </div>
@@ -163,7 +164,7 @@ export function AlumniListCard({ data }) {
                   <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0">{a.match_score}%</Badge>
                 )}
               </div>
-              <p className="text-xs text-slate-500 truncate">{a.role_title} at {a.company}</p>
+              <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
               {a.degree_info && <p className="text-[11px] text-purple-600 mt-0.5">🐊 {a.degree_info}</p>}
               {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
             </div>
