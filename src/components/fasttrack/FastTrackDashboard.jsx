@@ -220,7 +220,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
   };
 
   const handleFindAlumni = (company) => {
-    onOpenChat(`Find UF Gator alumni who work at ${company} — I need insider connections to get my foot in the door.`);
+    onOpenChat(`Find UF alumni who work at ${company} — I need insider connections to get my foot in the door.`);
   };
 
   return (
