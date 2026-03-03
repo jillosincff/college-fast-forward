@@ -668,48 +668,16 @@ export default function ParentDashboard() {
         />
       )}
 
-      {/* Quick Link Student Modal (from hero card) */}
+      {/* Link Student Modal (search by name or email) */}
       {showStudentLinking && (
-        <Dialog open={showLinkStudentModal} onOpenChange={setShowLinkStudentModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg, #0021A5, #003DCE)' }}>
-                <Link2 className="w-7 h-7 text-white" />
-              </div>
-              <DialogTitle className="text-2xl text-center">Link Your Student</DialogTitle>
-              <p className="text-center text-gray-500 text-sm mt-1">
-                Enter your student's @ufl.edu email to connect and start boosting their visibility.
-              </p>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div>
-                <Label className="text-sm font-medium text-slate-700 mb-2 block">Student Email</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    value={linkStudentEmail}
-                    onChange={(e) => setLinkStudentEmail(e.target.value)}
-                    placeholder="student@ufl.edu"
-                    onKeyDown={(e) => e.key === 'Enter' && linkStudentEmail.trim() && !linkStudentLoading && handleHeroLinkStudent()}
-                    disabled={linkStudentLoading}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleHeroLinkStudent}
-                disabled={linkStudentLoading || !linkStudentEmail.trim()}
-                className="w-full text-white font-semibold"
-                style={{ backgroundColor: '#0021A5' }}
-              >
-                {linkStudentLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ArrowRight className="w-4 h-4 mr-2" />}
-                {linkStudentLoading ? 'Linking...' : 'Link Student'}
-              </Button>
-              <p className="text-xs text-gray-400 text-center">
-                Your student will be notified. If they haven't signed up yet, we'll auto-connect when they join.
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <LinkStudentModal
+          open={showLinkStudentModal}
+          onOpenChange={setShowLinkStudentModal}
+          onLinked={async () => {
+            await refreshUser();
+            await refresh();
+          }}
+        />
       )}
     </>
   );
