@@ -70,6 +70,11 @@ export default function FastTrackPro() {
     );
   }
 
+  // Parents get their own dedicated view
+  if (isParent) {
+    return <ParentFastIQView user={user} />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
