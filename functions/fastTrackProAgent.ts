@@ -234,6 +234,40 @@ async function trackActivity(base44, userEmail, profileId, actionType, targetNam
   }
 }
 
+// Save discovered alumni to the NetworkingPipeline entity (deduplicated)
+async function saveToPipeline(base44, userEmail, companyName, alumni) {
+  try {
+    // Check existing pipeline entries for this user + company to avoid duplicates
+    const existing = await base44.entities.NetworkingPipeline.filter({
+      user_email: userEmail,
+      company: companyName,
+    });
+    const existingNames = new Set((existing || []).map(e => e.alumni_name?.toLowerCase()));
+    const now = new Date().toISOString();
+
+    for (const a of alumni) {
+      if (existingNames.has(a.name?.toLowerCase())) continue;
+      try {
+        await base44.entities.NetworkingPipeline.create({
+          user_email: userEmail,
+          company: companyName,
+          alumni_name: a.name,
+          alumni_role: a.role_title || '',
+          alumni_source: 'fastiq',
+          status: 'identified',
+          status_date: now,
+          identified_date: now,
+        });
+      } catch (e) {
+        console.log('Pipeline create failed for', a.name, e.message);
+      }
+    }
+    console.log('Saved alumni to pipeline for', companyName);
+  } catch (e) {
+    console.log('Pipeline save failed:', e.message);
+  }
+}
+
 // Save company intel to cache with 24h TTL
 async function saveCompanyIntelCache(base44, companyName, intelData) {
   try {
@@ -432,6 +466,8 @@ Rules for match_score (0-100):
 
       if (alumni.length > 0) {
         saveAlumniCache(base44, alumni);
+        // Auto-add to NetworkingPipeline
+        saveToPipeline(base44, user.email, alumniCompanyEarly, alumni);
       }
 
       trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompanyEarly);
