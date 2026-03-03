@@ -53,6 +53,24 @@ export default function GatorParentInvite() {
     const code = inviteCode.trim().toUpperCase();
     
     try {
+      // Verify the invite code FIRST before proceeding
+      console.log('📞 [GatorParentInvite] Verifying invite code:', code);
+      const response = await base44.functions.invoke('verifyInviteCode', { code });
+      
+      if (!response.data?.success) {
+        const errorMsg = response.data?.error || 'Invalid invite code. Please check and try again.';
+        console.error('❌ [GatorParentInvite] Code verification failed:', errorMsg);
+        toast({
+          title: "Invalid Code",
+          description: errorMsg,
+          variant: "destructive"
+        });
+        setIsVerifyingCode(false);
+        return;
+      }
+      
+      console.log('✅ [GatorParentInvite] Code verified successfully');
+      
       // Store role (alumni or parent) and code for after OAuth
       // CRITICAL: uf_alumni -> 'alumni', uf_parent -> 'parent'
       const role = codeUserType === 'uf_alumni' ? 'alumni' : 'parent';
@@ -64,10 +82,10 @@ export default function GatorParentInvite() {
       // Redirect to GatorAuth which will handle the OAuth flow
       navigate('GatorAuth');
     } catch (error) {
-      console.error('Failed to initiate login:', error);
+      console.error('Failed to verify/initiate login:', error);
       toast({
         title: "Error",
-        description: "Failed to initiate login. Please try again.",
+        description: "Failed to verify invite code. Please try again.",
         variant: "destructive"
       });
       setIsVerifyingCode(false);
