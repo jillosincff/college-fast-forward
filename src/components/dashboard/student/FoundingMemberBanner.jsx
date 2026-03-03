@@ -2,7 +2,7 @@ import React from 'react';
 
 const UF_ORANGE = '#FA4616';
 
-export default function FoundingMemberBanner({ spotsLeft = 774 }) {
+export default function FoundingMemberBanner({ spotsLeft = 0 }) {
   if (spotsLeft <= 0 || spotsLeft > 1000) return null;
   
   return (

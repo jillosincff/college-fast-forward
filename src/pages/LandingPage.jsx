@@ -22,8 +22,8 @@ const FOUNDING_LIMIT = 1000;
 
 export default function LandingPage() {
   const [stats, setStats] = useState({ 
-    spots_left: 51, 
-    total_families: 949,
+    spots_left: 46, 
+    total_families: 954,
     salary_data_points: 847,
     interview_questions: 523
   });

@@ -56,9 +56,9 @@ export default function Dashboard() {
   const [helpRequest, setHelpRequest] = useState(null);
   const [matches, setMatches] = useState([]);
   const [networkStats, setNetworkStats] = useState({
-    totalUsers: 226,
+    totalUsers: 0,
     activeRequests: 0,
-    spotsLeft: 774
+    spotsLeft: 0
   });
   const [myActiveQuestions, setMyActiveQuestions] = useState(0);
   const [linkedParents, setLinkedParents] = useState([]);
