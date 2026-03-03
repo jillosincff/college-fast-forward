@@ -551,7 +551,7 @@ RULES:
       console.log('Cache MISS for', detectedCompany, '- researching...');
 
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Research ${detectedCompany}: current hiring activity, open roles, salary ranges for entry-level and mid-level positions, recent company news, and interview process.`,
+        prompt: `Research ${detectedCompany} as of March 2026. Find: 1) Are they actively hiring entry-level and intern roles? 2) How many open positions approximately? 3) Salary range for entry-level roles. 4) Any recent company news about hiring, layoffs, growth, or partnerships. 5) What is their interview process like? Be specific with numbers and data.`,
         add_context_from_internet: true,
       });
 
