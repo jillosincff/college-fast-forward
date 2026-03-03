@@ -9,15 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    console.log(`[searchGatorStudents] User: ${user.email}, persona: ${user.persona}, roles: ${JSON.stringify(user.roles)}`);
-    
     // Parents, alumni, or admins can search for students
     const isParent = user.persona === 'parent' || user.roles?.includes('parent');
     const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
     const isAdmin = user.role === 'admin' || user.roles?.includes('admin');
     
     if (!isParent && !isAlumni && !isAdmin) {
-      console.log(`[searchGatorStudents] Access denied - not a parent, alumni, or admin`);
       return Response.json({ error: 'Only parents and alumni can search for students' }, { status: 403 });
     }
     
@@ -30,33 +27,36 @@ Deno.serve(async (req) => {
     const searchTerm = query.trim().toLowerCase();
     const searchWords = searchTerm.split(/\s+/).filter(w => w.length > 0);
     
-    // Get all users with service role - fetch more to ensure we get everyone
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+    // Fetch users in batches to cover the full database
+    let allUsers = [];
+    let offset = 0;
+    const batchSize = 500;
     
-    console.log(`[searchGatorStudents] Total users fetched: ${allUsers.length}`);
-    console.log(`[searchGatorStudents] Search term: "${searchTerm}", words: ${JSON.stringify(searchWords)}`);
+    while (true) {
+      const batch = await base44.asServiceRole.entities.User.list('-created_date', batchSize, offset);
+      if (!batch || batch.length === 0) break;
+      allUsers = allUsers.concat(batch);
+      if (batch.length < batchSize) break;
+      offset += batchSize;
+      // Safety limit
+      if (allUsers.length >= 5000) break;
+    }
     
-    // DEBUG: Log first few users to see data structure
-    console.log(`[searchGatorStudents] Sample users:`, allUsers.slice(0, 3).map(u => ({
-      email: u.email,
-      full_name: u.full_name,
-      persona: u.persona,
-      roles: u.roles
-    })));
+    console.log(`[searchGatorStudents] Total users fetched: ${allUsers.length}, query: "${searchTerm}"`);
     
-    // Filter for students matching the search - search ALL users, no persona filter
+    // Filter for students matching the search
     const results = allUsers.filter(u => {
       // Only skip if explicitly a parent or alumni
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
-      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
-      if (isParent || isAlumni) return false;
+      const uIsParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      const uIsAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      if (uIsParent || uIsAlumni) return false;
       
       const email = (u.email || '').toLowerCase();
       const fullName = (u.full_name || '').toLowerCase();
       const firstName = (u.first_name || '').toLowerCase();
       const lastName = (u.last_name || '').toLowerCase();
       
-      // Also try to extract name parts from full_name
+      // Also try to extract name parts from full_name (handles "Last, First" format)
       const nameParts = fullName.split(/[\s,]+/).filter(p => p.length > 0);
       
       // Match exact phrase anywhere
@@ -77,20 +77,21 @@ Deno.serve(async (req) => {
       if (anyWordMatch) return true;
       
       // Match all words across any fields (for multi-word names)
-      const allWordsMatch = searchWords.length > 1 && searchWords.every(word => 
-        email.includes(word) || 
-        fullName.includes(word) || 
-        firstName.includes(word) || 
-        lastName.includes(word) ||
-        nameParts.some(part => part.includes(word))
-      );
-      
-      if (allWordsMatch) return true;
+      if (searchWords.length > 1) {
+        const allWordsMatch = searchWords.every(word => 
+          email.includes(word) || 
+          fullName.includes(word) || 
+          firstName.includes(word) || 
+          lastName.includes(word) ||
+          nameParts.some(part => part.includes(word))
+        );
+        if (allWordsMatch) return true;
+      }
       
       return false;
     });
     
-    console.log(`[searchGatorStudents] Found ${results.length} matches`);
+    console.log(`[searchGatorStudents] Found ${results.length} matches for "${searchTerm}"`);
     
     // Return only safe fields
     const safeResults = results.map(u => ({
