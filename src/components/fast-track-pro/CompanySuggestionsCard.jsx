@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Search, Plus, Check, Sparkles } from 'lucide-react';
+import { Building2, Search, Plus, Check, Sparkles, MapPin } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
@@ -69,6 +69,13 @@ export default function CompanySuggestionsCard({ data, onResearchCompany, profil
                   </Badge>
                 )}
               </div>
+
+              {s.location && (
+                <div className="flex items-center gap-1 mb-1">
+                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                  <span className="text-[11px] text-slate-500">{s.location}</span>
+                </div>
+              )}
 
               {s.reason && (
                 <p className="text-xs text-slate-600 mb-2 leading-relaxed">{s.reason}</p>
