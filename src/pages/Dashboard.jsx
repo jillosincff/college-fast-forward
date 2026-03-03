@@ -407,8 +407,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Fast Track Pro */}
-        <FastTrackProCard user={user} />
+        {/* Recent Feedback */}
         <RecentFeedbackCard user={user} />
 
         {/* Student Karma Explainer (first visit) */}
