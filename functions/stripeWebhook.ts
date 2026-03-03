@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.4';
+import { createClient } from 'npm:@base44/sdk@0.8.6';
 import Stripe from 'npm:stripe@14.21.0';
 
 const base44 = createClient({
