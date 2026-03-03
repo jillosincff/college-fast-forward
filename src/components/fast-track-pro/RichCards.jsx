@@ -149,7 +149,7 @@ export function AlumniListCard({ data }) {
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-purple-600" />
-        <span className="text-xs font-semibold text-purple-700 uppercase">UF Gator Alumni Found</span>
+        <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni Found</span>
       </div>
       <div className="space-y-3">
         {alumni.slice(0, 5).map((a, i) => (

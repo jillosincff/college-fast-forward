@@ -416,7 +416,11 @@ Deno.serve(async (req) => {
       console.log('Alumni cache MISS for', alumniCompanyEarly, '- researching...');
 
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Find University of Florida alumni who currently work at ${alumniCompanyEarly}. For each person found, provide their full name, current job title, degree info if available, and location.`,
+        prompt: `Find alumni of the University of Florida (UF, in Gainesville, Florida) who currently work at ${alumniCompanyEarly}. 
+
+CRITICAL: Only include people who attended the University of Florida (UF) in Gainesville. Do NOT include alumni from Florida International University (FIU), Florida State University (FSU), University of Central Florida (UCF), University of South Florida (USF), or any other Florida school. "UF" means ONLY the University of Florida in Gainesville.
+
+For each confirmed UF alumni found, provide their full name, current job title, UF degree info, and location.`,
         add_context_from_internet: true,
       });
 
@@ -429,13 +433,22 @@ ${profileContext}
 
 Parse the following research into structured alumni profiles for UF alumni at ${alumniCompanyEarly}.
 
+CRITICAL FILTERING RULES:
+- ONLY include people who attended the University of Florida (UF) in Gainesville, Florida.
+- Do NOT include alumni from Florida International University (FIU), Florida State University (FSU), University of Central Florida (UCF), University of South Florida (USF), or any other school.
+- If you cannot confirm the person attended UF (University of Florida in Gainesville), do NOT include them.
+- "UF" means ONLY the University of Florida in Gainesville. Not FIU, not FSU, not any other Florida school.
+- DEDUPLICATE: If multiple people have the same name and title, only include them once.
+- Do NOT include anyone with a match_score of 0 — they must have at least some relevance.
+
 RESEARCH:
 ${webContext.substring(0, 4000)}
 
-Rules for match_score (0-100):
+Rules for match_score (1-100):
 - Higher if alumni's role aligns with student's target_industry: "${profile.target_industry || 'not specified'}"
 - Higher if alumni's seniority matches student's current_stage: "${profile.current_stage || 'not set'}"
-- 90+ = perfect match, 70-89 = strong, 50-69 = moderate, below 50 = loose connection
+- 90+ = perfect match, 70-89 = strong, 50-69 = moderate, 30-49 = loose connection
+- Minimum score is 10 (if they are confirmed UF alumni at the target company)
 - response: brief 2-3 sentence conversational message to the student about these alumni connections`,
         response_json_schema: {
           type: "object",
@@ -461,10 +474,35 @@ Rules for match_score (0-100):
         }
       });
 
-      const alumni = (alumniResult.alumni || []).map(a => ({
+      // Post-process: filter out non-UF alumni, dedup, remove 0-score
+      const rawAlumni = (alumniResult.alumni || []).map(a => ({
         ...a,
         company: a.company || alumniCompanyEarly,
       }));
+
+      // Filter: remove non-UF schools
+      const nonUFSchools = ['fiu', 'florida international', 'fsu', 'florida state', 'ucf', 'central florida', 'usf', 'south florida', 'famu', 'fgcu'];
+      const filteredAlumni = rawAlumni.filter(a => {
+        const degreeInfo = (a.degree_info || '').toLowerCase();
+        // Reject if degree explicitly mentions a non-UF school
+        for (const school of nonUFSchools) {
+          if (degreeInfo.includes(school)) return false;
+        }
+        // Reject 0 match score
+        if (!a.match_score || a.match_score <= 0) return false;
+        return true;
+      });
+
+      // Dedup by name+title
+      const seenKeys = new Set();
+      const alumni = filteredAlumni.filter(a => {
+        const key = `${(a.name || '').toLowerCase()}_${(a.role_title || '').toLowerCase()}`;
+        if (seenKeys.has(key)) return false;
+        seenKeys.add(key);
+        return true;
+      });
+
+      console.log(`Alumni post-filter: ${rawAlumni.length} raw → ${alumni.length} after filtering`);
 
       if (alumni.length > 0) {
         saveAlumniCache(base44, alumni);
@@ -493,7 +531,9 @@ Rules for match_score (0-100):
       let nearbyAlumni = [];
       try {
         const nearbyResult = await base44.integrations.Core.InvokeLLM({
-          prompt: `I could not find University of Florida alumni at ${companyName}. Find UF alumni who work at similar companies in the same space (${industry}${location ? ' in or near ' + location : ''}). Look for competitors, companies in the same niche, or adjacent firms. Return 3-5 alumni with their name, job title, company, UF degree info if available, location, and a 1-sentence note explaining how they could help the student get into ${companyName}.`,
+          prompt: `I could not find University of Florida alumni at ${companyName}. Find UF alumni who work at similar companies in the same space (${industry}${location ? ' in or near ' + location : ''}). Look for competitors, companies in the same niche, or adjacent firms. Return 3-5 alumni with their name, job title, company, UF degree info if available, location, and a 1-sentence note explaining how they could help the student get into ${companyName}.
+
+CRITICAL: Only include people who attended the University of Florida (UF) in Gainesville. Do NOT include alumni from FIU, FSU, UCF, USF, or any other school.`,
           add_context_from_internet: true,
           response_json_schema: {
             type: "object",
@@ -544,7 +584,9 @@ Rules for match_score (0-100):
       let partnerAlumni = [];
       try {
         const partnerResult = await base44.integrations.Core.InvokeLLM({
-          prompt: `Find the top 3-4 major clients, partners, or vendors of ${companyName}. Then search for University of Florida alumni who work at those partner companies. For each alumni found, explain the business relationship between their company and ${companyName}, and how an introduction through them could help a student get into ${companyName}.`,
+          prompt: `Find the top 3-4 major clients, partners, or vendors of ${companyName}. Then search for University of Florida (UF, Gainesville) alumni who work at those partner companies. For each alumni found, explain the business relationship between their company and ${companyName}, and how an introduction through them could help a student get into ${companyName}.
+
+CRITICAL: Only include people who attended the University of Florida (UF) in Gainesville. Do NOT include alumni from FIU, FSU, UCF, USF, or any other school.`,
           add_context_from_internet: true,
           response_json_schema: {
             type: "object",
@@ -658,17 +700,21 @@ End with an encouraging note that warm paths sometimes take two hops.`,
       const locPref = profile.location_preference || '';
       const industry = profile.target_industry || 'any industry';
 
+      const studentMajor = user.major || 'their field';
       const searchQuery = `${industry} companies hiring entry level ${sizePref} ${locPref} 2026`.trim();
 
       const webResult = await base44.integrations.Core.InvokeLLM({
         prompt: `Search for companies matching these criteria and provide detailed results:
 - Industry: ${industry}
+- Student's major: ${studentMajor}
 - Company size preference: ${sizePref || 'any'}
 - Preferred location: ${locPref || 'any location'}
 - Role type: entry-level / new grad
 - Student's request: "${resolvedMessage}"
 
-Find 5-8 real companies that are actively hiring or likely to hire entry-level roles in this space.${locPref ? ` IMPORTANT: Prioritize companies that have offices, headquarters, or remote-friendly roles in or near "${locPref}". Mention location/office info for each company.` : ''} For each, explain why it's a good fit, estimate size, and note hiring status.`,
+IMPORTANT: The student's major is ${studentMajor}. Suggest companies that have ${studentMajor}-related roles, not just companies in the ${industry} industry. For example, a Marketing major interested in Finance should see marketing roles at financial companies (like Marketing Manager at JPMorgan), NOT non-marketing roles at random companies.
+
+Find 5-8 real companies that are actively hiring or likely to hire entry-level ${studentMajor} roles.${locPref ? ` IMPORTANT: Prioritize companies that have offices, headquarters, or remote-friendly roles in or near "${locPref}". Mention location/office info for each company.` : ''} For each, explain why it's a good fit for a ${studentMajor} major, estimate size, and note hiring status.`,
         add_context_from_internet: true,
       });
 
@@ -686,14 +732,18 @@ ${webContext.substring(0, 4000)}
 
 STUDENT'S REQUEST: "${resolvedMessage}"
 
+CRITICAL: The student's major is ${studentMajor}. Every company you suggest MUST have roles relevant to ${studentMajor}. Do NOT suggest companies where the student would need a completely different degree (e.g., don't suggest a law firm for a marketing major unless they specifically have marketing roles). Each company must be a realistic target for a ${studentMajor} graduate.
+
 Rules:
-- Each suggestion must be a real company that hires entry-level talent
+- Each suggestion must be a real company that hires entry-level ${studentMajor} talent
 - company_name: official company name
-- reason: 1-2 sentences explaining why it's a good fit for THIS student (reference their industry, major, or preferences)${locPref ? ` Mention if the company has offices in or near "${locPref}" or offers remote work.` : ''}
+- reason: 1-2 sentences explaining why it's a good fit for THIS student's ${studentMajor} background (reference specific roles they hire for)${locPref ? ` Mention if the company has offices in or near "${locPref}" or offers remote work.` : ''}
 - size: one of "large", "mid_size", "startup"
 - hiring_status: one of "actively_hiring", "some_openings", "unknown"
 - location: city/state where relevant roles are based (if known)${locPref ? `\n- IMPORTANT: Rank companies closer to "${locPref}" higher in the list. If a company has no presence near the student's preferred location, note that clearly.` : ''}
-- response: brief 2-3 sentence conversational intro to the student`,
+- response: brief 2-3 sentence conversational intro to the student
+
+YOU MUST return structured data in the JSON schema. Do NOT return plain text or bullet points.`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -717,7 +767,7 @@ Rules:
         }
       });
 
-      trackActivity(base44, user.email, profile.id, 'company_search', 'opportunity_discovery');
+      trackActivity(base44, user.email, profile.id, 'company_search', profile.target_industry || 'companies');
 
       return Response.json({
         success: true,
