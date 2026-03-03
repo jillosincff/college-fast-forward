@@ -147,7 +147,7 @@ const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const Insights = React.lazy(() => import('./pages/Insights'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
-const FastTrackPro = React.lazy(() => import('./pages/FastTrackPro'));
+const FastIQ = React.lazy(() => import('./pages/FastIQ'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -345,7 +345,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
-              { name: 'FASTIQ', page: 'FastTrackPro', icon: Zap, roles: ['gator', 'parent'] },
+              { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator', 'parent'] },
         { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent', 'alumni'] },
             ], []);
 
@@ -737,7 +737,7 @@ const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Opportunities', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastTrackPro'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Opportunities', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
@@ -833,7 +833,7 @@ const getPageComponent = (pageName) => {
       case 'Insights': return Insights;
       case 'ParentPledge': return ParentPledge;
     case 'SubmitFeedback': return SubmitFeedback;
-    case 'FastTrackPro': return FastTrackPro;
+    case 'FastIQ': return FastIQ;
       default: return LandingPage;
   }
 };

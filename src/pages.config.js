@@ -58,7 +58,6 @@ import CompanyProfile from './pages/CompanyProfile';
 import Connections from './pages/Connections';
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
-import FastTrackPro from './pages/FastTrackPro';
 import Favorites from './pages/Favorites';
 import GatorAuth from './pages/GatorAuth';
 import GatorDirectory from './pages/GatorDirectory';
@@ -116,7 +115,6 @@ export const PAGES = {
     "Connections": Connections,
     "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
-    "FastTrackPro": FastTrackPro,
     "Favorites": Favorites,
     "GatorAuth": GatorAuth,
     "GatorDirectory": GatorDirectory,
