@@ -610,6 +610,11 @@ Rules:
 
       trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
 
+      // Normalize recent_news to always be an array
+      const recentNews = Array.isArray(companyIntel.recent_news) 
+        ? companyIntel.recent_news 
+        : (companyIntel.recent_news ? [companyIntel.recent_news] : []);
+
       return Response.json({
         success: true,
         response: companyIntel.response || `Here's the latest intel on ${detectedCompany}:`,
@@ -621,7 +626,8 @@ Rules:
           company_summary: companyIntel.company_summary,
           open_roles_count: companyIntel.open_roles_count,
           salary_range: companyIntel.salary_range,
-          recent_news: companyIntel.recent_news,
+          recent_news: recentNews,
+          interview_process: companyIntel.interview_process || '',
           cached: false,
         }
       });
