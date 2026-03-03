@@ -269,11 +269,14 @@ export default function ParentDashboard() {
                         <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>No active request yet</p>
                       </>
                     ) : (
-                      <>
+                      <button
+                        onClick={() => setShowAddStudentModal(true)}
+                        className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                      >
                         <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🔗</div>
                         <p className="text-xs sm:text-sm font-medium" style={{ color: '#FFA07A' }}>Link Student</p>
                         <p className="text-xs mt-1 sm:mt-2 hidden sm:block" style={{ color: 'rgba(255, 160, 122, 0.7)' }}>to activate boosts</p>
-                      </>
+                      </button>
                     )}
                   </div>
                 ) : (
