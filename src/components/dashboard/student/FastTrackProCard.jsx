@@ -38,7 +38,7 @@ export default function FastTrackProCard({ user }) {
             The intelligent networking engine that finds UF alumni at your target companies — even outside CFF — and helps you reach out.
           </p>
           <Button
-            onClick={() => navigate('FastTrackPro')}
+            onClick={() => navigate('FastIQ')}
             className="bg-white text-[#0021A5] hover:bg-white/90 font-bold px-6 h-11 text-sm shadow-lg"
           >
             Activate FASTIQ → <ArrowRight className="w-4 h-4 ml-2" />
@@ -80,7 +80,7 @@ export default function FastTrackProCard({ user }) {
         </div>
 
         <Button
-          onClick={() => navigate('FastTrackPro')}
+          onClick={() => navigate('FastIQ')}
           className="w-full bg-gradient-to-r from-[#0021A5] to-[#FA4616] hover:opacity-90 text-white font-semibold h-11"
         >
           Open FASTIQ <ArrowRight className="w-4 h-4 ml-2" />

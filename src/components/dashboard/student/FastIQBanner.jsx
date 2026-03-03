@@ -31,7 +31,7 @@ export default function FastIQBanner({ user }) {
     const newAlerts = profile.new_alerts_count || 0;
 
     return (
-      <div className="w-full cursor-pointer" onClick={() => navigate('FastTrackPro')}>
+      <div className="w-full cursor-pointer" onClick={() => navigate('FastIQ')}>
         <div
           className="flex items-center justify-between gap-3 px-4 py-2.5 sm:px-6"
           style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 100%)' }}
@@ -84,7 +84,7 @@ export default function FastIQBanner({ user }) {
 
   // Not active — upsell banner
   return (
-    <div className="w-full cursor-pointer" onClick={() => navigate('FastTrackPro')}>
+    <div className="w-full cursor-pointer" onClick={() => navigate('FastIQ')}>
       <div
         className="flex items-center justify-between gap-3 px-4 py-2.5 sm:px-6"
         style={{ background: 'linear-gradient(135deg, #0021A5 0%, #FA4616 100%)' }}

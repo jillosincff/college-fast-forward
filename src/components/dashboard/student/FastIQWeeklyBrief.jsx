@@ -29,7 +29,7 @@ export default function FastIQWeeklyBrief({ user }) {
         background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 100%)',
         border: '1px solid rgba(250,70,22,0.2)',
       }}
-      onClick={() => navigate('FastTrackPro')}
+      onClick={() => navigate('FastIQ')}
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(250,70,22,0.15)' }}>

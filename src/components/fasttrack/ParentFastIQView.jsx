@@ -121,8 +121,8 @@ function ActivateForStudentView({ user, studentName, familyId }) {
       const baseUrl = window.location.origin;
       const res = await base44.functions.invoke('createCheckoutSession', {
         priceId: 'price_1SUJ2g873TV7WMcTBYvmzGYU', // $19/month standard
-        successUrl: `${baseUrl}/#FastTrackPro?checkout=success`,
-        cancelUrl: `${baseUrl}/#FastTrackPro?checkout=cancel`,
+        successUrl: `${baseUrl}/#FastIQ?checkout=success`,
+        cancelUrl: `${baseUrl}/#FastIQ?checkout=cancel`,
         metadata: { subscriptionType: 'parent_fastiq', family_id: familyId }
       });
       if (res.data?.url) {
