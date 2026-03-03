@@ -566,7 +566,7 @@ Synthesize the following research about ${detectedCompany} into a structured com
 RESEARCH:
 ${webContext.substring(0, 4000)}
 
-STUDENT'S REQUEST: "${message}"
+STUDENT'S REQUEST: "${resolvedMessage}"
 
 Rules:
 - hiring_score: integer 0-100 (80+ means hot, 50-79 warm, below 50 cool)
@@ -625,7 +625,7 @@ Rules:
 
 ${profileContext}
 
-Student's request: "${message}"
+Student's request: "${resolvedMessage}"
 
 ${conversation_history ? 'Conversation context:\n' + conversation_history : ''}
 
@@ -648,7 +648,7 @@ Based on the following research, create a structured response for the student.
 RESEARCH FINDINGS:
 ${webContext.substring(0, 4000)}
 
-STUDENT'S ORIGINAL REQUEST: "${message}"
+STUDENT'S ORIGINAL REQUEST: "${resolvedMessage}"
 
 RESPONSE RULES:
 - Pick the BEST message_type for the content:
