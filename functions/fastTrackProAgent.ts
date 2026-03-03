@@ -240,28 +240,30 @@ Deno.serve(async (req) => {
 - Biggest Challenge: ${profile.biggest_challenge || 'not set'}`;
 
     // --- RESOLVE TARGET COMPANY REFERENCES ---
-    // If user says "my #1 target company" or "my top company", resolve from profile
+    // If user says "my #1 target company" or "my top company", resolve the entire
+    // reference phrase (including surrounding words like "are they hiring?") into
+    // a clean query like "Research Disney — hiring?"
     let resolvedMessage = message;
-    const targetCompanyRefs = [
-      /(?:my\s+)?#?1\s*(?:st)?\s*(?:target\s+)?company/i,
-      /(?:my\s+)?(?:top|first|primary|main|dream)\s+(?:target\s+)?company/i,
-      /(?:my\s+)?#?2\s*(?:nd)?\s*(?:target\s+)?company/i,
-      /(?:my\s+)?#?3\s*(?:rd)?\s*(?:target\s+)?company/i,
-      /(?:my\s+)?(?:second)\s+(?:target\s+)?company/i,
-      /(?:my\s+)?(?:third)\s+(?:target\s+)?company/i,
-    ];
     const targetCompanies = profile.target_companies || [];
     if (targetCompanies.length > 0) {
-      for (const pattern of targetCompanyRefs) {
+      // Each entry: [pattern, companyIndex]
+      // Patterns match the FULL phrase so we replace cleanly
+      const targetCompanyRefs = [
+        [/(?:my\s+)?#?1\s*(?:st)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 0],
+        [/(?:my\s+)?(?:top|first|primary|main|dream)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 0],
+        [/(?:my\s+)?#?2\s*(?:nd)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 1],
+        [/(?:my\s+)?(?:second)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 1],
+        [/(?:my\s+)?#?3\s*(?:rd)?\s*(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 2],
+        [/(?:my\s+)?(?:third)\s+(?:target\s+)?company\s*(?:—\s*)?(?:are they|is it)?/i, 2],
+      ];
+      for (const [pattern, idx] of targetCompanyRefs) {
         const match = resolvedMessage.match(pattern);
         if (match) {
-          let companyIndex = 0; // default to first
-          const matchText = match[0].toLowerCase();
-          if (matchText.includes('#2') || matchText.includes('second')) companyIndex = 1;
-          if (matchText.includes('#3') || matchText.includes('third')) companyIndex = 2;
-          const company = targetCompanies[Math.min(companyIndex, targetCompanies.length - 1)];
+          const company = targetCompanies[Math.min(idx, targetCompanies.length - 1)];
+          // Replace the matched phrase with just the company name
+          // e.g. "Research my #1 target company — are they hiring?" → "Research Disney hiring?"
           resolvedMessage = resolvedMessage.replace(match[0], company);
-          console.log(`Resolved "${match[0]}" → "${company}" from profile`);
+          console.log(`Resolved "${match[0]}" → "${company}" from profile. New message: "${resolvedMessage}"`);
           break;
         }
       }
