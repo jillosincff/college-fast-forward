@@ -8,6 +8,7 @@ import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
 import { CompanyIntelCard, AlumniListCard, OutreachDraftCard } from './RichCards';
 import RoadmapTimelineCard from './RoadmapTimelineCard';
 import CompanySuggestionsCard from './CompanySuggestionsCard';
+import WarmPathCard from './WarmPathCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 
@@ -32,7 +33,7 @@ function getSuggestedPrompts(profile) {
   return prompts;
 }
 
-function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated }) {
+function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated, onSendMessage }) {
   if (!payload) return null;
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} />;
@@ -40,6 +41,7 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'outreach_draft': return <OutreachDraftCard data={payload} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} />;
+    case 'warm_path': return <WarmPathCard data={payload} onOpenChat={onSendMessage} />;
     default: return null;
   }
 }
@@ -267,6 +269,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                         onResearchCompany={handleResearchCompany}
                         profile={currentProfile}
                         onProfileUpdated={setCurrentProfile}
+                        onSendMessage={sendMessage}
                       />
                     )}
                   </div>
