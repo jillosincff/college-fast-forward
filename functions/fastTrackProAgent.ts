@@ -3,17 +3,42 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 // Detect if user is asking about alumni/connections at a company
 function detectAlumniQuery(message) {
   const alumniPatterns = [
-    /(?:find|show|who|any|look for|search|discover)\s+(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
-    /(?:alumni|gators?|connections?|people|grads?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:find|show|who|any|look for|search|discover)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at|who work there)\s*(\w[\w\s&.''-]{1,40})?/i,
+    /(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
     /(?:who|anyone)\s+(?:works?|is)\s+at\s+(\w[\w\s&.''-]{1,40})\s+(?:from uf|from university of florida|who went to uf)/i,
     /(?:uf|university of florida)\s+(?:alumni|grads?|people)\s+(?:at|from)\s+(\w[\w\s&.''-]{1,40})/i,
     /(?:know anyone|connections?)\s+at\s+(\w[\w\s&.''-]{1,40})/i,
+    /find\s+(?:me\s+)?(?:uf\s+)?(?:alumni|people|insiders?|gators?)\s+(?:who\s+)?work\s+there/i,
+    /(?:who works?|anyone)\s+there\s+(?:from uf|from university of florida|who went to uf|that went to uf)/i,
+    /(?:find|show|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|insiders?|gators?)\s+there/i,
   ];
   for (const pattern of alumniPatterns) {
     const match = message.match(pattern);
     if (match) {
-      return match[1].trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
+      const company = match[1]?.trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
+      // Return company name or 'RESOLVE_FROM_CONTEXT' if "there" / no company specified
+      return company || 'RESOLVE_FROM_CONTEXT';
     }
+  }
+  return null;
+}
+
+// Extract the last discussed company from conversation history
+function resolveCompanyFromContext(conversationHistory) {
+  if (!conversationHistory) return null;
+  // Look for company names mentioned in agent messages (company intel cards, suggestions, etc.)
+  // Pattern: find lines like "Research X", "intel on X", "at X", company names after common prefixes
+  const lines = conversationHistory.split('\n').reverse();
+  for (const line of lines) {
+    // Match "intel on CompanyName" or "Research CompanyName"
+    let m = line.match(/(?:intel on|researching|research)\s+([A-Z][\w\s&.''-]{1,40}?)(?:\s*[\(:]|\s*$)/i);
+    if (m) return m[1].trim();
+    // Match "at CompanyName" in agent responses
+    m = line.match(/(?:alumni.*?at|work.*?at|hired at|hiring at)\s+([A-Z][\w\s&.''-]{1,40}?)(?:\s*[\(:.!?]|\s*$)/i);
+    if (m) return m[1].trim();
+    // Match explicit company research queries from student
+    m = line.match(/Student:\s*(?:Research|Tell me about|Look into|Check)\s+([A-Z][\w\s&.''-]{1,40}?)(?:\s+hiring|\s*$)/i);
+    if (m) return m[1].trim();
   }
   return null;
 }
@@ -68,18 +93,26 @@ async function saveAlumniCache(base44, alumni) {
 }
 
 // Detect if user is asking to draft outreach to an alumni
+// IMPORTANT: This should ONLY match explicit message drafting requests, NOT alumni discovery
 function detectOutreachQuery(message) {
+  const lower = message.toLowerCase();
+  
+  // First, check if this is actually an alumni discovery query (takes priority)
+  // If the message contains alumni discovery keywords, do NOT treat as outreach
+  const alumniKeywords = /\b(?:find|show|discover|search for|look for|who works?|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|insiders?|connections?|people|grads?)/i;
+  if (alumniKeywords.test(message)) return null;
+  
+  // Only match explicit drafting/writing intent
   const outreachPatterns = [
-    /(?:draft|write|compose|create|help me write|send)\s+(?:a\s+)?(?:message|email|linkedin message|outreach|note|dm|intro)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
-    /(?:reach out|message|email|contact)\s+(\w[\w\s.''-]{1,40})/i,
-    /(?:outreach|message|email)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
-    /(?:cold email|cold message|introduction|intro message)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:draft|write|compose|create|help me write)\s+(?:a\s+)?(?:message|email|linkedin message|outreach|note|dm|intro)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:draft|write|compose)\s+(?:a\s+)?(?:cold email|cold message|introduction|outreach)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:help me reach out|help me contact)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:draft outreach|write outreach)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
   ];
   for (const pattern of outreachPatterns) {
     const match = message.match(pattern);
     if (match) {
       const name = match[1].trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
-      // Filter out generic words that aren't names
       const skipWords = ['a', 'an', 'the', 'someone', 'them', 'anyone', 'recruiter', 'hiring manager'];
       if (skipWords.includes(name.toLowerCase())) return null;
       return name;
