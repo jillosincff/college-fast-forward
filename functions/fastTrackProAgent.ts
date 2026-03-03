@@ -571,23 +571,29 @@ ${webContext.substring(0, 4000)}
 STUDENT'S REQUEST: "${resolvedMessage}"
 
 Rules:
-- hiring_score: integer 0-100 (80+ means hot, 50-79 warm, below 50 cool)
+- hiring_score: integer 0-100 based on actual data (80+ = actively hiring many roles = "hot", 50-79 = some openings = "warm", below 50 = few/no openings or layoffs = "cool"). Be honest — if data is sparse, score lower.
 - hiring_signal: must be "hot", "warm", or "cool" matching the score
-- salary_range: string like "$70K-$130K" covering entry to mid-level
-- open_roles_count: integer, best estimate of total open roles
-- company_summary: 2-3 sentence overview of the company's current hiring landscape
-- recent_news: 1-2 sentence summary of recent relevant company news
-- response: brief 2-3 sentence conversational message to the student referencing their UF background`,
+- salary_range: specific string like "$65K-$95K" for entry-level. Use real salary data, not generic ranges.
+- open_roles_count: integer, best estimate of TOTAL open positions company-wide. If unknown, estimate based on company size and hiring signals. Must be a real number, not 0.
+- company_summary: 2-3 sentence overview mentioning specific departments hiring, role types available, and relevance to the student's target industry.
+- recent_news: array of 2-4 specific, factual news items about the company (e.g., "Announced 500 new engineering hires in Q1 2026", "Opened new Orlando office"). Each item should be a complete sentence with specifics.
+- interview_process: 1-2 sentence description of their typical interview process (e.g., "Usually 3 rounds: phone screen, technical, and team fit interview. Takes 2-4 weeks.")
+- response: brief 2-3 sentence conversational message to the student referencing their UF background and the company name "${detectedCompany}"`,
         response_json_schema: {
           type: "object",
           properties: {
             response: { type: "string", description: "Brief conversational message to the student" },
             hiring_score: { type: "integer", description: "0-100 hiring health score" },
             hiring_signal: { type: "string", enum: ["hot", "warm", "cool"] },
-            salary_range: { type: "string", description: "Salary range e.g. $70K-$130K" },
+            salary_range: { type: "string", description: "Salary range e.g. $65K-$95K" },
             open_roles_count: { type: "integer", description: "Total open roles found" },
             company_summary: { type: "string", description: "2-3 sentence hiring overview" },
-            recent_news: { type: "string", description: "1-2 sentence recent company news" }
+            recent_news: { 
+              type: "array", 
+              items: { type: "string" },
+              description: "2-4 specific recent news items about the company" 
+            },
+            interview_process: { type: "string", description: "1-2 sentence description of interview process" }
           },
           required: ["response", "hiring_score", "hiring_signal", "salary_range", "open_roles_count", "company_summary", "recent_news"]
         }
