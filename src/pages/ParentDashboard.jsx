@@ -270,7 +270,7 @@ export default function ParentDashboard() {
                       </>
                     ) : (
                       <button
-                        onClick={() => setShowAddStudentModal(true)}
+                        onClick={() => setShowLinkStudentModal(true)}
                         className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform"
                       >
                         <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🔗</div>
