@@ -258,7 +258,9 @@ export default function ParentFastIQView({ user }) {
         setStudentProfile(profiles[0]);
         setState('active');
       } else {
-        setState('upsell');
+        // Bypass payment for testing — show active view with empty profile
+        setStudentProfile(profiles[0] || { companies_researched: 0, alumni_discovered: 0, messages_drafted: 0, roadmaps_generated: 0, target_companies: [] });
+        setState('active');
       }
     } catch (err) {
       console.error('Error loading parent FASTIQ data:', err);
