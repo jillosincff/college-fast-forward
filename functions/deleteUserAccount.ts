@@ -1,27 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-const base44 = createClient({
-  appId: Deno.env.get('BASE44_APP_ID'),
-});
-
 Deno.serve(async (req) => {
   try {
-    // 1. Authenticate the request
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    const token = authHeader.split(' ')[1];
-    base44.auth.setToken(token);
-
-    // 2. Get the current user - THIS IS THE FIX
-    // The previous code used a non-existent function. `auth.me()` is the correct method.
-    const user = await base44.auth.me(); 
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
     if (!user) {
-      return new Response(JSON.stringify({ error: 'User not found or token invalid' }), {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
