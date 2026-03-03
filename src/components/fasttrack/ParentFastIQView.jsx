@@ -270,6 +270,16 @@ export default function ParentFastIQView({ user }) {
     }
   };
 
+  const handleOpenChat = (initialMessage) => {
+    setChatInitialMessage(initialMessage || '');
+    setState('chat');
+  };
+
+  const handleBackFromChat = () => {
+    setChatInitialMessage('');
+    setState('active');
+  };
+
   if (state === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
@@ -278,8 +288,12 @@ export default function ParentFastIQView({ user }) {
     );
   }
 
+  if (state === 'chat') {
+    return <ProAgentChat user={user} profile={studentProfile} initialMessage={chatInitialMessage} onBack={handleBackFromChat} />;
+  }
+
   if (state === 'active') {
-    return <ActiveStudentView studentProfile={studentProfile} studentName={studentName} />;
+    return <ActiveStudentView studentProfile={studentProfile} studentName={studentName} onOpenChat={handleOpenChat} />;
   }
 
   if (state === 'upsell') {
