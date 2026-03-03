@@ -89,7 +89,6 @@ College Fast Forward Team`
     }
 
     if (action === 'verify') {
-      const { code } = await req.json();
 
       // Check verification code
       if (student.pending_parent_verification_code !== code) {
