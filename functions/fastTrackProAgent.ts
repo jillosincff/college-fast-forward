@@ -803,7 +803,7 @@ RESPONSE RULES:
         type: "object",
         properties: {
           response: { type: "string", description: "Brief conversational summary for the student" },
-          message_type: { type: "string", enum: ["text", "alumni_card", "outreach_draft", "roadmap"] },
+          message_type: { type: "string", enum: ["text", "alumni_card", "outreach_draft", "roadmap", "company_suggestions"] },
           payload: { type: "object", description: "Structured data matching the message_type schema" }
         },
         required: ["response", "message_type"]
