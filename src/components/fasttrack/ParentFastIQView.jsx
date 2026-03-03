@@ -197,10 +197,11 @@ function LinkStudentFirstView() {
 
 // ── Main parent component ──
 export default function ParentFastIQView({ user }) {
-  const [state, setState] = useState('loading'); // loading | active | upsell | no_student
+  const [state, setState] = useState('loading'); // loading | active | upsell | no_student | chat
   const [studentProfile, setStudentProfile] = useState(null);
   const [studentName, setStudentName] = useState('');
   const [familyId, setFamilyId] = useState('');
+  const [chatInitialMessage, setChatInitialMessage] = useState('');
 
   useEffect(() => {
     if (!user) return;
