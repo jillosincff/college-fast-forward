@@ -119,7 +119,7 @@ export default function WarmPathCard({ data, onOpenChat }) {
           <Section
             icon={Users}
             title="UF Alumni at Similar Companies"
-            subtitle={`${nearby_alumni.length} Gators in the same space who can give you insider knowledge`}
+            subtitle={`${nearby_alumni.length} UF alumni in the same space who can give you insider knowledge`}
             color="#7C3AED"
             count={nearby_alumni.length}
             defaultOpen={true}
