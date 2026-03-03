@@ -370,7 +370,7 @@ Rules for match_score (0-100):
     }
 
     // --- ROADMAP FLOW: detect roadmap query → generate week-by-week plan → return ---
-    if (detectRoadmapQuery(message)) {
+    if (detectRoadmapQuery(resolvedMessage)) {
       console.log('Roadmap query detected');
 
       const roadmapResult = await base44.integrations.Core.InvokeLLM({
@@ -429,7 +429,7 @@ RULES:
     }
 
     // --- OUTREACH DRAFT FLOW: detect outreach request → find alumni → generate message ---
-    const outreachTarget = detectOutreachQuery(message);
+    const outreachTarget = detectOutreachQuery(resolvedMessage);
 
     if (outreachTarget) {
       console.log('Outreach query detected for:', outreachTarget);
@@ -518,7 +518,7 @@ RULES:
     }
 
     // --- COMPANY INTEL FLOW: detect company → check cache → research → cache → return ---
-    const detectedCompany = detectCompanyQuery(message);
+    const detectedCompany = detectCompanyQuery(resolvedMessage);
 
     if (detectedCompany) {
       console.log('Company query detected:', detectedCompany);
