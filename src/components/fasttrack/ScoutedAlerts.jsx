@@ -140,7 +140,7 @@ export default function ScoutedAlerts({ userEmail, onOpenChat, onAlertsCountChan
   };
 
   const handleFindAlumni = (company) => {
-    onOpenChat(`Find UF Gator alumni who work at ${company} — I need insider connections to get my foot in the door.`);
+    onOpenChat(`Find UF alumni who work at ${company} — I need insider connections to get my foot in the door.`);
   };
 
   if (loading || alerts.length === 0) return null;
