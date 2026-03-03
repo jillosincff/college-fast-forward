@@ -6,6 +6,7 @@ import ProActivityFeed from './ProActivityFeed';
 import AnimatedCounter from './AnimatedCounter';
 import FastIQValueProp from './FastIQValueProp';
 import PipelineSection from './PipelineSection';
+import ScoutedAlerts from './ScoutedAlerts';
 import titleCase from '@/components/utils/titleCase';
 
 const fade = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 } };
@@ -284,8 +285,16 @@ export default function FastTrackDashboard({ user, profile, onOpenChat }) {
       {/* Dark Dashboard Content */}
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
-        {/* Stats */}
+        {/* SCOUTED ALERTS — top of dashboard */}
         <div className="pt-8">
+          <ScoutedAlerts
+            userEmail={user?.email}
+            onOpenChat={onOpenChat}
+          />
+        </div>
+
+        {/* Stats */}
+        <div>
           <SectionLabel>Your Progress</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             {STAT_CONFIG.map((cfg, i) => (
