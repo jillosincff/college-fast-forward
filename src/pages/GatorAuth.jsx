@@ -153,7 +153,13 @@ export default function GatorAuth() {
       // Mid-onboarding (explicitly false)
       if (user.persona && user.onboarding_completed === false) {
         console.log('🔄 [GatorAuth] Returning user mid-onboarding, continuing...');
-        navigate(user.persona === 'gator' ? 'StudentOnboarding' : 'Onboarding');
+        if (user.persona === 'gator') {
+          navigate('StudentOnboarding');
+        } else if (user.persona === 'parent') {
+          navigate('ParentOnboarding');
+        } else {
+          navigate('Onboarding');
+        }
         return;
       }
 
