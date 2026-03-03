@@ -11,11 +11,12 @@ Deno.serve(async (req) => {
     
     let students = [];
     
-    // Method 1: Load by linked_students IDs
-    if (user.linked_students && user.linked_students.length > 0) {
-      console.log('Loading students by linked_students IDs:', user.linked_students);
+    // Method 1: Load by linked_students or student_ids
+    const studentIdsList = user.linked_students || user.student_ids || [];
+    if (studentIdsList.length > 0) {
+      console.log('Loading students by IDs:', studentIdsList);
       
-      for (const studentId of user.linked_students) {
+      for (const studentId of studentIdsList) {
         try {
           const matches = await base44.asServiceRole.entities.User.filter({ id: studentId });
           if (matches && matches.length > 0) {
