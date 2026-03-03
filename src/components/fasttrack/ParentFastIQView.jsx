@@ -306,7 +306,7 @@ export default function ParentFastIQView({ user }) {
   }
 
   if (state === 'upsell') {
-    return <ActivateForStudentView user={user} studentName={studentName} familyId={familyId} />;
+    return <ParentFastIQSalesPage user={user} studentName={studentName} familyId={familyId} />;
   }
 
   return <LinkStudentFirstView />;
