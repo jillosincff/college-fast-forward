@@ -569,8 +569,7 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {(analytics || loading) && (
-          <Tabs defaultValue="growth" className="space-y-6">
+        <Tabs defaultValue="growth" className="space-y-6">
           <TabsList className="flex w-full gap-2 h-auto p-2 bg-white border border-slate-200 overflow-x-auto flex-nowrap" style={{ scrollbarWidth: 'thin' }}>
             <TabsTrigger 
               value="growth" 
