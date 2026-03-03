@@ -79,10 +79,15 @@ function OpportunityCard({ opp, onResearch, onFindAlumni, onDismiss }) {
   );
 }
 
-export default function ScoutedAlerts({ userEmail, onOpenChat, onAlertsCountChange }) {
+export default function ScoutedAlerts({ userEmail, onOpenChat, onAlertsCountChange, forceOpen }) {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+
+  // When forceOpen changes to true, expand the section
+  useEffect(() => {
+    if (forceOpen) setCollapsed(false);
+  }, [forceOpen]);
 
   const loadAlerts = useCallback(async () => {
     if (!userEmail) return;
