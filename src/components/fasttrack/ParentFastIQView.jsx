@@ -231,7 +231,16 @@ export default function ParentFastIQView({ user }) {
           const students = await base44.entities.User.filter({ id: family.student_ids[0] });
           if (students.length > 0) {
             studentEmail = students[0].email;
-            setStudentName(students[0].full_name?.split(' ')[0] || '');
+            // Handle "Last, First M." format from UF
+            const fullName = students[0].full_name || '';
+            let firstName = '';
+            if (fullName.includes(',')) {
+              // "Osinoff, Lindsey M." → "Lindsey"
+              firstName = fullName.split(',')[1]?.trim().split(' ')[0] || '';
+            } else {
+              firstName = fullName.split(' ')[0] || '';
+            }
+            setStudentName(firstName);
           }
         } catch (e) {
           console.log('Could not fetch student user, using student_email');
