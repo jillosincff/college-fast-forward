@@ -3,13 +3,50 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Users, MessageSquare, Map, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import moment from 'moment';
+import titleCase from '@/components/utils/titleCase';
 
 const ACTION_CONFIG = {
   company_search: { icon: Building2, label: 'Researched', badgeLabel: 'target intel', color: '#3B82F6' },
-  alumni_view: { icon: Users, label: 'Discovered alumni at', badgeLabel: 'insider found', color: '#FA4616' },
-  message_draft: { icon: MessageSquare, label: 'Drafted message to', badgeLabel: 'outreach', color: '#22C55E' },
-  roadmap_created: { icon: Map, label: 'Created roadmap', badgeLabel: 'warm path', color: '#A855F7' },
+  alumni_view: { icon: Users, label: 'Found alumni at', badgeLabel: 'insider found', color: '#FA4616' },
+  message_draft: { icon: MessageSquare, label: 'Drafted outreach for', badgeLabel: 'outreach', color: '#22C55E' },
+  roadmap_created: { icon: Map, label: 'Created career roadmap', badgeLabel: 'warm path', color: '#A855F7' },
 };
+
+// Clean up target_name to be human-readable
+function cleanTargetName(actionType, rawName) {
+  if (!rawName) return '';
+  // Strip raw function/intent names
+  const rawIntents = ['company_search', 'alumni_view', 'message_draft', 'roadmap_created', 'opportunity_discovery'];
+  if (rawIntents.includes(rawName.toLowerCase())) {
+    if (rawName.toLowerCase() === 'opportunity_discovery') return 'your target companies';
+    return '';
+  }
+  // If target name looks like a user prompt (long sentence), extract company name or simplify
+  if (rawName.length > 40) {
+    // Try to find "at [Company]" pattern
+    const atMatch = rawName.match(/at\s+([A-Z][a-zA-Z\s&]+)/);
+    if (atMatch) return titleCase(atMatch[1].trim());
+    // Try to find company-like words at the start
+    const words = rawName.split(/\s+/).slice(0, 3).join(' ');
+    return titleCase(words);
+  }
+  return titleCase(rawName);
+}
+
+// Deduplicate: same action_type + target within 30 minutes = show once
+function deduplicateActivities(logs) {
+  const seen = new Map();
+  return logs.filter(a => {
+    const key = `${a.action_type}_${(a.target_name || '').toLowerCase()}`;
+    const time = new Date(a.timestamp || a.created_date).getTime();
+    if (seen.has(key)) {
+      const prevTime = seen.get(key);
+      if (Math.abs(time - prevTime) < 30 * 60 * 1000) return false; // within 30 min
+    }
+    seen.set(key, time);
+    return true;
+  });
+}
 
 export default function ProActivityFeed({ userEmail }) {
   const [activities, setActivities] = useState([]);
@@ -22,9 +59,9 @@ export default function ProActivityFeed({ userEmail }) {
         const logs = await base44.entities.ProActivityLog.filter(
           { user_email: userEmail },
           '-created_date',
-          10
+          20
         );
-        setActivities(logs || []);
+        setActivities(deduplicateActivities(logs || []).slice(0, 10));
       } catch (e) {
         console.log('Failed to load activity log:', e.message);
       } finally {
@@ -81,9 +118,10 @@ export default function ProActivityFeed({ userEmail }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-slate-300">
                   <span className="font-medium">{config.label}</span>
-                  {a.target_name && (
-                    <span className="font-semibold text-white"> {a.target_name}</span>
-                  )}
+                  {(() => {
+                    const cleaned = cleanTargetName(a.action_type, a.target_name);
+                    return cleaned ? <span className="font-semibold text-white"> {cleaned}</span> : null;
+                  })()}
                 </p>
                 <p className="text-[10px] text-slate-500">{timeAgo}</p>
               </div>

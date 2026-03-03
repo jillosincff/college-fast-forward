@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Search, ArrowRight } from 'lucide-react';
 import PipelineFunnel from './PipelineFunnel';
 import PipelineCompanyRow from './PipelineCompanyRow';
 import titleCase from '@/components/utils/titleCase';
@@ -58,8 +59,17 @@ export default function PipelineSection({ userEmail, companyIntel, onOpenChat })
         className="rounded-lg p-6 text-center"
         style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <p className="text-[13px] text-slate-400 mb-1">No contacts in your pipeline yet.</p>
-        <p className="text-[11px] text-slate-500">Use FASTIQ to discover alumni at your target companies — they'll automatically appear here.</p>
+        <p className="text-[13px] text-slate-400 mb-1 font-medium">No contacts in your pipeline yet.</p>
+        <p className="text-[11px] text-slate-500 max-w-xs mx-auto mb-4 leading-relaxed">
+          Start by researching a target company → FASTIQ will find alumni → then you'll see them here as you reach out.
+        </p>
+        <button
+          onClick={() => onOpenChat('What company should I target next? Help me find one that matches my interests.')}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-bold text-white transition-all hover:brightness-110"
+          style={{ background: '#FA4616', minHeight: 'auto' }}
+        >
+          <Search className="w-3.5 h-3.5" /> Research a company <ArrowRight className="w-3 h-3" />
+        </button>
       </div>
     );
   }
