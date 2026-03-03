@@ -534,7 +534,17 @@ RULES:
     }
 
     // --- COMPANY INTEL FLOW: detect company → check cache → research → cache → return ---
-    const detectedCompany = detectCompanyQuery(resolvedMessage);
+    let detectedCompany = detectCompanyQuery(resolvedMessage);
+
+    // Guard: reject suspiciously short or generic "company names" that are really
+    // fragments of the user's question (e.g. "are they", "is it", "my", "the").
+    if (detectedCompany) {
+      const badNames = ['are they', 'is it', 'my', 'the', 'a', 'it', 'they', 'this', 'that', 'are', 'is'];
+      if (detectedCompany.length < 2 || badNames.includes(detectedCompany.toLowerCase())) {
+        console.log('Rejected bad company name:', detectedCompany);
+        detectedCompany = null;
+      }
+    }
 
     if (detectedCompany) {
       console.log('Company query detected:', detectedCompany);
