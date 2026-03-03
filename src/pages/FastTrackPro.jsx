@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import ProAssessment from '../components/fast-track-pro/ProAssessment';
 import FastTrackDashboard from '../components/fasttrack/FastTrackDashboard';
 import ProAgentChat from '../components/fast-track-pro/ProAgentChat';
+import ParentFastIQView from '../components/fasttrack/ParentFastIQView';
 
 export default function FastTrackPro() {
   const { user } = useAuth();
@@ -14,8 +15,11 @@ export default function FastTrackPro() {
   const [view, setView] = useState('loading');
   const [chatInitialMessage, setChatInitialMessage] = useState('');
 
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+
   useEffect(() => {
     if (!user) { setLoading(false); return; }
+    if (isParent) { setLoading(false); return; } // Parents use their own view
     loadProfile();
   }, [user]);
 
