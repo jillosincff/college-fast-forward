@@ -28,6 +28,7 @@ export default function FastIQBanner({ user }) {
     const targets = profile.companies_researched || 0;
     const insiders = profile.alumni_discovered || 0;
     const messages = profile.messages_drafted || 0;
+    const newAlerts = profile.new_alerts_count || 0;
 
     return (
       <div className="w-full cursor-pointer" onClick={() => navigate('FastTrackPro')}>
@@ -45,29 +46,36 @@ export default function FastIQBanner({ user }) {
             </div>
           </div>
 
-          {/* Center: Quick stats — desktop */}
-          <div className="hidden sm:flex items-center gap-1 text-[12px] text-white/60 font-medium">
-            <span className="text-white font-bold">{targets}</span> {plural(targets, 'Target', 'Targets')}
-            <span className="text-white/30 mx-1">|</span>
-            <span className="text-white font-bold">{insiders}</span> {plural(insiders, 'Insider', 'Insiders')}
-            <span className="text-white/30 mx-1">|</span>
-            <span className="text-white font-bold">{messages}</span> {plural(messages, 'Message', 'Messages')}
-          </div>
-          {/* Mobile: abbreviated stats */}
-          <div className="flex sm:hidden items-center gap-1 text-[11px] text-white/60 font-medium">
-            <span className="text-white font-bold">{targets}</span>T
-            <span className="text-white/30 mx-0.5">·</span>
-            <span className="text-white font-bold">{insiders}</span>I
-            <span className="text-white/30 mx-0.5">·</span>
-            <span className="text-white font-bold">{messages}</span>M
-          </div>
+          {/* Center: alerts or stats */}
+          {newAlerts > 0 ? (
+            <div className="flex items-center gap-1 text-[12px] font-bold" style={{ color: '#FA4616' }}>
+              <span>🔔 {newAlerts} new {plural(newAlerts, 'opportunity', 'opportunities')} found</span>
+            </div>
+          ) : (
+            <>
+              <div className="hidden sm:flex items-center gap-1 text-[12px] text-white/60 font-medium">
+                <span className="text-white font-bold">{targets}</span> {plural(targets, 'Target', 'Targets')}
+                <span className="text-white/30 mx-1">|</span>
+                <span className="text-white font-bold">{insiders}</span> {plural(insiders, 'Insider', 'Insiders')}
+                <span className="text-white/30 mx-1">|</span>
+                <span className="text-white font-bold">{messages}</span> {plural(messages, 'Message', 'Messages')}
+              </div>
+              <div className="flex sm:hidden items-center gap-1 text-[11px] text-white/60 font-medium">
+                <span className="text-white font-bold">{targets}</span>T
+                <span className="text-white/30 mx-0.5">·</span>
+                <span className="text-white font-bold">{insiders}</span>I
+                <span className="text-white/30 mx-0.5">·</span>
+                <span className="text-white font-bold">{messages}</span>M
+              </div>
+            </>
+          )}
 
           {/* Right: CTA */}
           <button
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white flex-shrink-0 transition-all hover:brightness-110"
             style={{ background: '#FA4616' }}
           >
-            Open FASTIQ <ArrowRight className="w-3 h-3" />
+            {newAlerts > 0 ? 'View Now' : 'Open FASTIQ'} <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       </div>
