@@ -1142,7 +1142,6 @@ const AdminDashboard = () => {
               <TopStudentsSection />
             </TabsContent>
           </Tabs>
-        )}
       </div>
     </div>
   );
