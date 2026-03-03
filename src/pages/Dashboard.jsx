@@ -306,6 +306,9 @@ export default function Dashboard() {
       {/* Founding Member Banner */}
       <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
 
+      {/* FASTIQ Banner — always visible at top */}
+      <FastIQBanner user={user} />
+
       {/* 1. HERO: Welcome + UF · Major · Class Year + Stats */}
       {userState !== 'new_user' && (
         <DashboardHeader 
