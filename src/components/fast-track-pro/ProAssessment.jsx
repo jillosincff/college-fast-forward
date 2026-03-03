@@ -9,7 +9,7 @@ import { base44 } from '@/api/base44Client';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
-  { id: 'companies', title: 'Name up to 3 dream companies', subtitle: 'We\'ll research them and find Gator alumni inside.' },
+  { id: 'companies', title: 'Name up to 5 dream companies', subtitle: 'We\'ll research them and find Gator alumni inside.' },
   { id: 'timeline', title: 'When do you want to start?', subtitle: 'This sets your urgency level.' },
   { id: 'stage', title: 'Where are you in your search?', subtitle: 'We\'ll calibrate your roadmap to this.' },
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
@@ -94,8 +94,9 @@ export default function ProAssessment({ user, onComplete }) {
   };
 
   const addCompany = () => {
-    const name = companyInput.trim();
-    if (name && data.target_companies.length < 3 && !data.target_companies.includes(name)) {
+    const raw = companyInput.trim();
+    const name = titleCase(raw);
+    if (name && data.target_companies.length < 5 && !data.target_companies.map(c => c.toLowerCase()).includes(name.toLowerCase())) {
       setData(prev => ({ ...prev, target_companies: [...prev.target_companies, name] }));
       setCompanyInput('');
     }
@@ -225,7 +226,7 @@ export default function ProAssessment({ user, onComplete }) {
                   />
                   <Button
                     onClick={addCompany}
-                    disabled={!companyInput.trim() || data.target_companies.length >= 3}
+                    disabled={!companyInput.trim() || data.target_companies.length >= 5}
                     variant="secondary"
                     className="h-12 px-4"
                     style={{ minHeight: 'auto', width: 'auto' }}
@@ -244,14 +245,14 @@ export default function ProAssessment({ user, onComplete }) {
                   ))}
                 </div>
                 {data.target_companies.length > 0 && (
-                  <p className="text-white/40 text-xs mt-3">{data.target_companies.length}/3 companies</p>
+                  <p className="text-white/40 text-xs mt-3">{data.target_companies.length}/5 companies</p>
                 )}
 
                 {/* Suggested companies based on selected industries */}
-                {data.target_companies.length < 3 && (() => {
+                {data.target_companies.length < 5 && (() => {
                   const primaryIndustry = data.target_industry[0];
                   const suggestions = (INDUSTRY_COMPANIES[primaryIndustry] || GENERIC_COMPANIES)
-                    .filter(c => !data.target_companies.includes(c));
+                    .filter(c => !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase()));
                   if (suggestions.length === 0) return null;
                   return (
                     <div className="mt-5">
@@ -261,11 +262,11 @@ export default function ProAssessment({ user, onComplete }) {
                           <button
                             key={c}
                             onClick={() => {
-                              if (data.target_companies.length < 3 && !data.target_companies.includes(c)) {
+                              if (data.target_companies.length < 5 && !data.target_companies.map(tc => tc.toLowerCase()).includes(c.toLowerCase())) {
                                 setData(prev => ({ ...prev, target_companies: [...prev.target_companies, c] }));
                               }
                             }}
-                            disabled={data.target_companies.length >= 3}
+                            disabled={data.target_companies.length >= 5}
                             className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 transition-all disabled:opacity-40"
                             style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
                           >

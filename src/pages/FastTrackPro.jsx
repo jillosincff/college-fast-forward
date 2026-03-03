@@ -88,7 +88,15 @@ export default function FastTrackPro() {
   }
 
   if (view === 'chat') {
-    return <ProAgentChat user={user} profile={profile} initialMessage={chatInitialMessage} onBack={handleBackFromChat} />;
+    return (
+      <ProAgentChat
+        user={user}
+        profile={profile}
+        initialMessage={chatInitialMessage}
+        onBack={handleBackFromChat}
+        onRerunAssessment={() => { setChatInitialMessage(''); setView('assessment'); }}
+      />
+    );
   }
 
   return <FastTrackDashboard user={user} profile={profile} onOpenChat={handleOpenChat} />;
