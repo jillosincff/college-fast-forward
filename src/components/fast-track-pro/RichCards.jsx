@@ -162,7 +162,7 @@ export function CompanyIntelCard({ data }) {
   }
 }
 
-export function AlumniListCard({ data }) {
+export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
   const alumni = toArray(data?.alumni);
   if (!alumni.length) return null;
   const cffCount = alumni.filter(a => a.is_cff_member).length;
