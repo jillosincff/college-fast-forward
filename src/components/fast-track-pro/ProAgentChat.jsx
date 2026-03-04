@@ -291,6 +291,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           onResearchCompany={handleResearchCompany}
           onRerunAssessment={onRerunAssessment}
           onProfileUpdated={setCurrentProfile}
+          onOpenChat={(msg) => sendMessage(msg)}
         />
       </div>
 
@@ -304,6 +305,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
               onResearchCompany={handleResearchCompany}
               onRerunAssessment={onRerunAssessment}
               onProfileUpdated={setCurrentProfile}
+              onOpenChat={(msg) => sendMessage(msg)}
             />
           </div>
         )}
