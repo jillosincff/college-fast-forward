@@ -677,13 +677,63 @@ Deno.serve(async (req) => {
       console.log('Intent: company_intel for', detectedCompany);
       detectedCompany = titleCase(detectedCompany);
 
+      // Helper: run personalized analysis on intel results
+      const runPersonalizedAnalysis = async (companyName, intelData) => {
+        try {
+          const analysisResult = await base44.integrations.Core.InvokeLLM({
+            prompt: `You are FASTIQ, an elite AI career center for UF students. You just researched ${companyName} for this student. Now ANALYZE what the research means specifically for them.
+
+${profileContext}
+
+COMPANY INTEL:
+- Company: ${companyName}
+- Hiring Score: ${intelData.hiring_score}/100 (${intelData.hiring_signal})
+- Open Roles: ${intelData.open_roles_count}
+- Salary Range: ${intelData.salary_range || 'unknown'}
+- Summary: ${intelData.company_summary || ''}
+- Recent News: ${(intelData.recent_news || []).join('; ')}
+- Interview Process: ${intelData.interview_process || 'unknown'}
+
+INSTRUCTIONS:
+Based on the student's profile (major, graduation year, career stage, target industry, location preference, career timeline) and the company intel, write a SHORT personalized assessment (3-5 sentences max).
+
+Consider these scenarios:
+- If roles are too senior: flag it and suggest finding entry-level pipelines via alumni or suggest similar companies hiring entry-level
+- If it's a great match: say so and suggest immediate next steps (find alumni, draft cover letter, etc.)
+- If there's a hiring freeze/layoffs: warn them and suggest alternatives or watchlisting
+- If location doesn't match: highlight which roles might work and which don't
+- If industry alignment is weak: note the gap and suggest how to bridge it
+
+End with exactly 2 concrete suggested next actions formatted as arrows (→). Each action should be specific and actionable, like "Find UF alumni at ${companyName} who could give you a warm intro" or "Research similar companies that are hiring entry-level right now".
+
+Be direct, warm, and strategic. Never dump data — always tell them what it MEANS for them.`,
+            response_json_schema: {
+              type: "object",
+              properties: {
+                assessment: { type: "string", description: "The personalized analysis paragraph (3-5 sentences)" },
+                next_actions: { type: "array", items: { type: "string" }, description: "Exactly 2 suggested next actions starting with →" },
+                match_level: { type: "string", enum: ["strong_match", "moderate_match", "weak_match", "caution"], description: "How well this company fits the student" }
+              },
+              required: ["assessment", "next_actions", "match_level"]
+            }
+          });
+          return analysisResult;
+        } catch (e) {
+          console.log('Personalized analysis error:', e.message);
+          return null;
+        }
+      };
+
       const cached = await getCachedCompanyIntel(base44, detectedCompany);
       if (cached) {
         trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
+        const cachedIntelData = { hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, recent_news: [], interview_process: '' };
+        const analysis = await runPersonalizedAnalysis(detectedCompany, cachedIntelData);
         return Response.json({
-          success: true, response: `Here's intel on ${detectedCompany}:`,
+          success: true,
+          response: analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`,
           message_type: 'company_intel',
-          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, cached: true }
+          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null }
         });
       }
 
@@ -709,10 +759,14 @@ Deno.serve(async (req) => {
       trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
 
       const news = Array.isArray(intel.recent_news) ? intel.recent_news : (intel.recent_news ? [intel.recent_news] : []);
+      const intelForAnalysis = { ...intel, recent_news: news };
+      const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis);
+
       return Response.json({
-        success: true, response: intel.response || `Here's intel on ${detectedCompany}:`,
+        success: true,
+        response: analysis ? analysis.assessment : (intel.response || `Here's intel on ${detectedCompany}:`),
         message_type: 'company_intel',
-        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false }
+        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null }
       });
     }
 
