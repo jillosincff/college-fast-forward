@@ -289,8 +289,8 @@ input, select, textarea {
     box-sizing: border-box;
   }
 
-  /* Full-width buttons on mobile (except inline small buttons) */
-  button:not(.btn-sm):not([class*="h-8"]):not([class*="h-9"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]):not([class*="rounded-full"]):not([data-state]) {
+  /* Full-width buttons on mobile (except inline small buttons, chips, and grid items) */
+  button:not(.btn-sm):not(.chip-btn):not([class*="h-8"]):not([class*="h-9"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]):not([class*="rounded-full"]):not([data-state]):not([data-chip]) {
     width: 100%;
   }
 }

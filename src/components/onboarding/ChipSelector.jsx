@@ -38,9 +38,10 @@ export default function ChipSelector({
           <button
             key={option.id}
             type="button"
+            data-chip="true"
             onClick={() => handleClick(option.id)}
             className={`
-              flex items-center gap-2 px-4 py-3 rounded-xl text-left
+              chip-btn flex items-center gap-2 px-4 py-3 rounded-xl text-left
               transition-all duration-200 border-2
               ${isSelected 
                 ? 'bg-orange-50 border-[#FA4616] text-slate-800 shadow-sm' 
