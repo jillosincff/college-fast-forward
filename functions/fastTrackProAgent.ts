@@ -782,10 +782,9 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
         saveAlumniCache(base44, enrichedAlumni);
         saveToPipeline(base44, user.email, alumniCompany, enrichedAlumni);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
-        const cffCount = enrichedAlumni.filter(a => a.is_cff_member).length;
-        const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message ${cffCount === 1 ? 'them' : 'them'} directly on CFF!` : '';
+        const guidance = await generateAlumniGuidance(base44, enrichedAlumni, alumniCompany, profileContext);
         return Response.json({
-          success: true, response: (alumniResult.response || `Here are UF alumni at ${alumniCompany}:`) + cffNote,
+          success: true, response: guidance,
           message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false }
         });
       }
