@@ -172,6 +172,79 @@ function isLikelyCompanyName(name) {
   return true;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  LAYER 2 — WELL-KNOWN COMPANY LIST (for confirmation gate)
+// ═══════════════════════════════════════════════════════════
+
+const WELL_KNOWN_COMPANIES = new Set([
+  // Big Tech
+  'apple','google','alphabet','microsoft','amazon','meta','facebook','netflix','nvidia','tesla',
+  'ibm','oracle','salesforce','adobe','intel','amd','qualcomm','cisco','hp','dell',
+  'uber','lyft','airbnb','spotify','snap','pinterest','twitter','x','tiktok','bytedance',
+  'palantir','snowflake','databricks','stripe','plaid','square','block','shopify','zoom','slack',
+  'dropbox','twilio','cloudflare','datadog','mongodb','elastic','confluent','okta','crowdstrike',
+  // Finance
+  'jpmorgan','goldman sachs','morgan stanley','bank of america','citigroup','wells fargo',
+  'blackrock','vanguard','fidelity','charles schwab','td ameritrade','citadel','two sigma',
+  'jane street','bridgewater','kkr','blackstone','carlyle','apollo','bain capital',
+  'visa','mastercard','american express','paypal','robinhood','coinbase','sofi',
+  // Consulting
+  'mckinsey','bain','bcg','boston consulting','deloitte','ey','ernst young','pwc','kpmg',
+  'accenture','booz allen','oliver wyman','strategy&','a.t. kearney','roland berger',
+  // Healthcare / Pharma
+  'johnson & johnson','j&j','pfizer','merck','abbvie','amgen','gilead','moderna','eli lilly',
+  'unitedhealth','cvs','anthem','cigna','humana','medtronic','abbott','stryker','baxter',
+  // Consumer / Retail
+  'walmart','target','costco','home depot','lowes','nike','adidas','starbucks','coca cola',
+  'pepsi','pepsico','procter gamble','p&g','unilever','nestle','kraft heinz','general mills',
+  'disney','warner bros','paramount','comcast','nbcuniversal','fox','viacom',
+  // Industrial / Aerospace / Defense
+  'boeing','lockheed martin','raytheon','northrop grumman','general dynamics','l3harris',
+  'ge','general electric','honeywell','3m','caterpillar','john deere','siemens',
+  'spacex','blue origin','virgin galactic',
+  // Auto
+  'ford','gm','general motors','toyota','honda','bmw','mercedes','volkswagen','rivian','lucid',
+  // Energy
+  'exxon','exxonmobil','chevron','shell','bp','conocophillips','duke energy','nextera',
+  // Telecom
+  'at&t','verizon','t-mobile','comcast',
+  // Other notable
+  'bloomberg','reuters','mckinsey','mit','nasa','world bank','un','united nations',
+  'wegmans','publix','chick-fil-a','raising canes','ernst & young',
+  // Common startups / unicorns
+  'doordash','instacart','figma','notion','airtable','canva','vercel','linear','ramp',
+  'brex','scale ai','openai','anthropic','cohere','hugging face','anduril','flexport',
+  'rippling','gusto','lattice','deel','remote','loom','miro','asana','monday',
+]);
+
+function isWellKnownCompany(name) {
+  if (!name) return false;
+  const lower = name.toLowerCase().trim();
+  // Direct match
+  if (WELL_KNOWN_COMPANIES.has(lower)) return true;
+  // Check if any well-known name is contained in the input or vice versa
+  for (const known of WELL_KNOWN_COMPANIES) {
+    if (lower.includes(known) || known.includes(lower)) return true;
+  }
+  return false;
+}
+
+// Determine if we should ask for confirmation before researching a company
+// Returns false if company is trusted (in targets or well-known), true if we should confirm
+function shouldConfirmCompany(companyName, targetCompanies) {
+  if (!companyName) return true;
+  const lower = companyName.toLowerCase().trim();
+  // Check target companies
+  if ((targetCompanies || []).some(tc => tc.toLowerCase().trim() === lower || lower.includes(tc.toLowerCase().trim()) || tc.toLowerCase().trim().includes(lower))) {
+    return false; // In targets — trusted
+  }
+  // Check well-known list
+  if (isWellKnownCompany(companyName)) {
+    return false; // Well-known — trusted
+  }
+  return true; // Unknown — ask for confirmation
+}
+
 function detectCompanyQuery(message) {
   // Skip if this is a batch target command — not a single company query
   if (detectBatchTargetCommand(message)) return null;
