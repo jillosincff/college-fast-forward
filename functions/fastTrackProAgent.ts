@@ -307,6 +307,7 @@ function titleCase(str) {
 }
 
 // Generate contextual guidance after showing alumni results
+// Returns { guidance, top_match, recommendation_reason }
 async function generateAlumniGuidance(base44, alumni, company, profileContext) {
   try {
     const alumniSummary = alumni.slice(0, 5).map(a =>
@@ -325,25 +326,60 @@ CFF Members: ${cffCount}
 
 INSTRUCTIONS:
 1. Note the pattern in roles (e.g. "These are mostly senior engineering roles" or "Good mix of levels")
-2. Recommend ONE specific person to reach out to FIRST, using their FIRST NAME only. Explain why (e.g. seniority for referrals, CFF member for easy contact, similar background)
+2. Recommend ONE specific person to reach out to FIRST, using their FIRST NAME only. Explain why (e.g. seniority for referrals, CFF member for easy contact, similar background, their role bridges the student's major with the company)
 3. If there are CFF members, highlight that they can be messaged directly on the platform
 4. End with a specific prompt like "Want me to draft that message?" or "Want me to draft a warm intro to [first name]?"
+5. CRITICAL: In recommended_full_name, return the FULL NAME (exactly as it appears in the alumni list) of the person you recommend. In recommendation_reason, explain the SPECIFIC strategic reason — e.g. "As a Marketing student, Jessica's role as Hardware Engineering Manager gives you a unique angle to ask how marketing and engineering teams collaborate at Apple."
 
-Be warm, strategic, and direct. Use first names only. Max 4 sentences.`,
+Be warm, strategic, and direct. Use first names only in the guidance text. Max 4 sentences.`,
       response_json_schema: {
         type: "object",
         properties: {
-          guidance: { type: "string" }
+          guidance: { type: "string" },
+          recommended_full_name: { type: "string", description: "The EXACT full name of the recommended person from the alumni list" },
+          recommendation_reason: { type: "string", description: "The specific strategic reason for recommending this person, referencing the student's background and the alumni's role" }
         },
-        required: ["guidance"]
+        required: ["guidance", "recommended_full_name", "recommendation_reason"]
       }
     });
-    return result.guidance || `Here are UF alumni I found at ${company}:`;
+
+    const topMatch = result.recommended_full_name || '';
+    const reason = result.recommendation_reason || '';
+
+    // Validate recommended name exists in alumni list
+    let validatedTopMatch = topMatch;
+    if (topMatch) {
+      const found = alumni.find(a => a.name?.toLowerCase() === topMatch.toLowerCase());
+      if (!found) {
+        // Fuzzy match: check if first name matches
+        const firstName = topMatch.split(' ')[0].toLowerCase();
+        const fuzzy = alumni.find(a => a.name?.toLowerCase().startsWith(firstName));
+        validatedTopMatch = fuzzy ? fuzzy.name : '';
+      }
+    }
+
+    // Fallback to highest match_score if no valid recommendation
+    if (!validatedTopMatch && alumni.length > 0) {
+      const sorted = [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+      validatedTopMatch = sorted[0].name;
+    }
+
+    return {
+      guidance: result.guidance || `Here are UF alumni I found at ${company}:`,
+      top_match: validatedTopMatch,
+      recommendation_reason: reason
+    };
   } catch (e) {
     console.log('Alumni guidance generation error:', e.message);
     const cffCount = alumni.filter(a => a.is_cff_member).length;
     const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message them directly on CFF!` : '';
-    return `Here are UF alumni I found at ${company}:` + cffNote;
+    // Fallback top_match to highest score
+    const fallbackTop = alumni.length > 0 ? [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0))[0].name : '';
+    return {
+      guidance: `Here are UF alumni I found at ${company}:` + cffNote,
+      top_match: fallbackTop,
+      recommendation_reason: ''
+    };
   }
 }
 
@@ -758,11 +794,11 @@ Deno.serve(async (req) => {
         })));
         saveToPipeline(base44, user.email, alumniCompany, enrichedCached);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
-        const guidance = await generateAlumniGuidance(base44, enrichedCached, alumniCompany, profileContext);
+        const guidanceResult = await generateAlumniGuidance(base44, enrichedCached, alumniCompany, profileContext);
         return Response.json({
-          success: true, response: guidance,
+          success: true, response: guidanceResult.guidance,
           message_type: 'alumni_card',
-          payload: { alumni: enrichedCached, cached: true }
+          payload: { alumni: enrichedCached, cached: true, top_match: guidanceResult.top_match, recommendation_reason: guidanceResult.recommendation_reason }
         });
       }
 
@@ -831,10 +867,10 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
         saveAlumniCache(base44, enrichedAlumni);
         saveToPipeline(base44, user.email, alumniCompany, enrichedAlumni);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
-        const guidance = await generateAlumniGuidance(base44, enrichedAlumni, alumniCompany, profileContext);
+        const guidanceResult = await generateAlumniGuidance(base44, enrichedAlumni, alumniCompany, profileContext);
         return Response.json({
-          success: true, response: guidance,
-          message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false }
+          success: true, response: guidanceResult.guidance,
+          message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false, top_match: guidanceResult.top_match, recommendation_reason: guidanceResult.recommendation_reason }
         });
       }
 
@@ -960,8 +996,44 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       else if (lower.includes('coffee')) askType = 'coffee chat';
       let channel = lower.includes('email') ? 'Email' : 'LinkedIn';
 
+      // Look for recommendation_reason from recent conversation context
+      let recommendationReason = '';
+      try {
+        const recentAssistant = [...recentDbMessages].reverse().find(m => m.role === 'assistant' && m.message_type === 'alumni_card');
+        if (recentAssistant?.payload) {
+          const parsed = typeof recentAssistant.payload === 'string' ? JSON.parse(recentAssistant.payload) : recentAssistant.payload;
+          if (parsed?.recommendation_reason) recommendationReason = parsed.recommendation_reason;
+        }
+      } catch(e) {}
+
+      // Also check the conversation_history for contextual clues about why this person was recommended
+      let conversationContext = '';
+      if (conversation_history) {
+        const recentLines = conversation_history.split('\n').slice(-6).join('\n');
+        conversationContext = recentLines;
+      }
+
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a ${channel} ${askType} outreach message.\n\n${profileContext}\n\nTo: ${recipientName}, ${recipientTitle} at ${recipientCompany}\nAsk: ${askType}\n\nOpen with shared UF connection. Reference their role. Keep it 100-150 words. No placeholders.`,
+        prompt: `You are FASTIQ. Draft a ${channel} ${askType} outreach message.
+
+${profileContext}
+
+To: ${recipientName}, ${recipientTitle} at ${recipientCompany}
+Ask: ${askType}
+
+${recommendationReason ? `WHY THIS PERSON WAS RECOMMENDED:\n${recommendationReason}\n` : ''}
+${conversationContext ? `RECENT CONVERSATION CONTEXT:\n${conversationContext}\n` : ''}
+
+CRITICAL INSTRUCTIONS FOR THE MESSAGE:
+- Do NOT use generic openers like "I noticed we share a common educational background" or "I came across your profile"
+- Instead, write as if the student did real research on this person
+- Reference the SPECIFIC reason they're reaching out: what about this person's role, background, or position makes them uniquely valuable to talk to
+- If there's a recommendation_reason above, weave that angle into the message naturally. For example, if the student is a Marketing major reaching out to an Engineering Manager, the message should mention their curiosity about how marketing and engineering teams collaborate
+- The message should feel like the student thought carefully about WHY this specific person, not just that they went to the same school
+- Open by mentioning UF, but quickly pivot to the specific angle/question
+- Keep it 100-150 words. Be genuine, specific, and show intellectual curiosity
+- No placeholders like [Your Name] — use the student's actual name from the profile
+- End with a clear, specific ask (15-min call, coffee chat, etc.)`,
         response_json_schema: {
           type: "object",
           properties: {

@@ -227,14 +227,22 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
         ))}
       </div>
       {/* Bottom actions */}
-      {alumni.length > 0 && onDraftMessage && (
+      {alumni.length > 0 && onDraftMessage && (() => {
+        // Use top_match from agent recommendation, fallback to highest score
+        let topMatchName = data?.top_match;
+        if (!topMatchName) {
+          const sorted = [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+          topMatchName = sorted[0]?.name;
+        }
+        const topFirstName = getFirstName(topMatchName);
+        return (
         <div className="mt-3 pt-3 border-t border-purple-200 flex flex-wrap gap-2">
           <button
-            onClick={() => onDraftMessage(alumni[0]?.name)}
+            onClick={() => onDraftMessage(topMatchName)}
             className="text-xs bg-[#0021A5] text-white px-3 py-1.5 rounded-lg hover:bg-[#001580] transition-colors font-medium"
             style={{ minHeight: 'auto', minWidth: 'auto' }}
           >
-            ✉️ Draft outreach to top match
+            ✉️ Draft outreach to {topFirstName}
           </button>
           {alumni[0]?.company && (
             <button
@@ -246,7 +254,8 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
             </button>
           )}
         </div>
-      )}
+        );
+      })()}
     </Card>
   );
 }
