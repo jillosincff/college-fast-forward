@@ -115,6 +115,9 @@ function isLikelyCompanyName(name) {
 }
 
 function detectCompanyQuery(message) {
+  // Skip if this is a batch target command — not a single company query
+  if (detectBatchTargetCommand(message)) return null;
+
   const patterns = [
     /(?:research|tell me about|look into|check|what about|how is|is)\s+(\w[\w\s&.''-]{1,40}?)(?:\s+hiring|\s+jobs|\s+careers|\s+salary|\s+for me|\s*\?|$)/i,
     /(?:hiring|jobs|careers|openings|roles)\s+(?:at|for)\s+(\w[\w\s&.''-]{1,40})/i,
@@ -124,7 +127,15 @@ function detectCompanyQuery(message) {
   ];
   for (const p of patterns) {
     const m = message.match(p);
-    if (m) return m[1].trim().replace(/\s+/g, ' ');
+    if (m) {
+      const candidate = m[1].trim().replace(/\s+/g, ' ');
+      // Guard: reject full sentences disguised as company names
+      if (!isLikelyCompanyName(candidate)) {
+        console.log(`Rejected "${candidate}" as company name (too many words or sentence-like)`);
+        return null;
+      }
+      return candidate;
+    }
   }
   return null;
 }
