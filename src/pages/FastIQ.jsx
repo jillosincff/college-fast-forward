@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProAssessment from '../components/fast-track-pro/ProAssessment';
-import FastTrackDashboard from '../components/fasttrack/FastTrackDashboard';
+import FastIQCommandCenter from '../components/fastiq/FastIQCommandCenter';
 import ProAgentChat from '../components/fast-track-pro/ProAgentChat';
 import ParentFastIQView from '../components/fasttrack/ParentFastIQView';
 
