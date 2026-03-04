@@ -59,65 +59,54 @@ function CompanyCard({ name, intel, alumniCount, onResearch, onView, onFindAlumn
   const isHot = score && score >= 80;
 
   if (researched && alumniCount > 0) {
-    // Fully complete: intel + alumni
     return (
       <div
-        className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-green-500/30 group"
-        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
+        className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:shadow-md hover:border-green-300 group bg-white border border-slate-200"
         onClick={onView}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
             <div>
-              <p className="font-semibold text-white text-sm flex items-center gap-2">
+              <p className="font-semibold text-slate-900 text-sm flex items-center gap-2">
                 {name}
-                {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">🔥 HOT</span>}
+                {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">🔥 HOT</span>}
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 Hiring score: {score || '—'} • {alumniCount} UF alumni found
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-green-400 opacity-60 group-hover:opacity-100 transition-opacity">
-            <span className="text-[11px] font-semibold">View intel →</span>
-          </div>
+          <span className="text-[11px] font-semibold text-green-600 opacity-60 group-hover:opacity-100">View intel →</span>
         </div>
       </div>
     );
   }
 
   if (researched && alumniCount === 0) {
-    // Researched but no alumni scanned — incomplete mission
     return (
-      <div
-        className="rounded-lg overflow-hidden transition-all duration-150 hover:border-orange-500/30 group"
-        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
-      >
+      <div className="rounded-xl overflow-hidden transition-all duration-150 hover:shadow-md hover:border-orange-300 group bg-white border border-slate-200">
         <div className="p-4 cursor-pointer" onClick={onView}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-white text-sm flex items-center gap-2">
+                <p className="font-semibold text-slate-900 text-sm flex items-center gap-2">
                   {name}
-                  {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">🔥 HOT</span>}
+                  {isHot && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">🔥 HOT</span>}
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   Hiring score: {score || '—'} • 0 UF alumni found
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-green-400 opacity-60 group-hover:opacity-100 transition-opacity">
-              <span className="text-[11px] font-semibold">View intel →</span>
-            </div>
+            <span className="text-[11px] font-semibold text-green-600 opacity-60 group-hover:opacity-100">View intel →</span>
           </div>
         </div>
-        {/* Urgency CTA */}
         <button
           onClick={(e) => { e.stopPropagation(); onFindAlumni(name); }}
-          className="w-full px-4 py-2.5 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-orange-400 transition-all hover:text-orange-300 hover:bg-orange-500/5"
-          style={{ borderTop: '1px solid rgba(250,70,22,0.15)', background: 'rgba(250,70,22,0.04)', minHeight: 'auto' }}
+          className="w-full px-4 py-2.5 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-orange-600 transition-all hover:bg-orange-50"
+          style={{ borderTop: '1px solid #E2E8F0', minHeight: 'auto' }}
         >
           🔍 Alumni not scanned yet — Find insiders →
         </button>
@@ -125,22 +114,20 @@ function CompanyCard({ name, intel, alumniCount, onResearch, onView, onFindAlumn
     );
   }
 
-  // Not researched at all
   return (
     <div
-      className="rounded-lg p-4 cursor-pointer transition-all duration-150 hover:border-orange-500/30 group"
-      style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
+      className="rounded-xl p-4 cursor-pointer transition-all duration-150 hover:shadow-md hover:border-orange-300 group bg-white border border-slate-200"
       onClick={() => onResearch(name)}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0" />
+          <div className="w-2.5 h-2.5 rounded-full bg-slate-300 flex-shrink-0" />
           <div>
-            <p className="font-semibold text-white text-sm">{name}</p>
-            <p className="text-[11px] text-slate-500">Not researched yet</p>
+            <p className="font-semibold text-slate-900 text-sm">{name}</p>
+            <p className="text-[11px] text-slate-400">Not researched yet</p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-orange-400 opacity-60 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 text-orange-500 opacity-60 group-hover:opacity-100 transition-opacity">
           <span className="text-[11px] font-semibold">⚡ Research now</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </div>
@@ -157,7 +144,7 @@ const QUICK_ACTIONS = [
 ];
 
 function SectionLabel({ children }) {
-  return <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">{children}</h2>;
+  return <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.15em] mb-3">{children}</h2>;
 }
 
 // titleCase imported from @/components/utils/titleCase
@@ -226,12 +213,12 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
   return (
     <motion.div
       className="min-h-screen"
-      style={{ background: '#0F172A' }}
+      style={{ background: '#F8FAFC' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Hero */}
+      {/* Hero — dark gradient kept */}
       <div
         className="relative overflow-hidden px-4 pt-14 pb-12 sm:pt-20 sm:pb-16"
         style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 100%)' }}
@@ -260,7 +247,6 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
             The strongest candidates never enter through the applicant pool.
           </p>
 
-          {/* CTA with pulse */}
           <motion.button
             onClick={() => onOpenChat()}
             className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
@@ -292,7 +278,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
         </div>
       </div>
 
-      {/* Dark Dashboard Content */}
+      {/* Light Dashboard Content */}
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-10">
 
         {/* SCOUTED ALERTS — top of dashboard */}
@@ -304,7 +290,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
           />
         </div>
 
-        {/* Stats */}
+        {/* Stats — keep dark cards */}
         <div>
           <SectionLabel>Your Progress</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
@@ -355,7 +341,7 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
           <ProActivityFeed userEmail={user?.email} />
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions — light background */}
         <div>
           <SectionLabel>Quick Actions</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
@@ -363,20 +349,13 @@ export default function FastTrackDashboard({ user, profile, onOpenChat, highligh
               <button
                 key={label}
                 onClick={() => onOpenChat(prompt)}
-                className="flex flex-col items-center gap-2.5 py-5 rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] group"
-                style={{
-                  background: '#1E293B',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  width: '100%',
-                  minHeight: 'auto',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px ${color}25`; e.currentTarget.style.borderColor = `${color}30`; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                className="flex flex-col items-center gap-2.5 py-5 rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.97] group bg-white border border-slate-200"
+                style={{ width: '100%', minHeight: 'auto' }}
               >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center transition-shadow duration-200" style={{ background: bg }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: bg }}>
                   <Icon className="w-5 h-5" style={{ color }} />
                 </div>
-                <span className="text-[11px] font-semibold text-slate-300">{emoji} {label}</span>
+                <span className="text-[12px] font-semibold text-slate-700">{emoji} {label}</span>
               </button>
             ))}
           </div>

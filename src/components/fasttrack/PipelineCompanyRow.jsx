@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 
 const STATUS_CONFIG = {
-  identified:   { emoji: '🔍', label: 'Identified',   color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', next: 'reached_out' },
-  reached_out:  { emoji: '📧', label: 'Reached Out',  color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', next: 'replied' },
-  replied:      { emoji: '✅', label: 'Replied',       color: '#22C55E', bg: 'rgba(34,197,94,0.12)', next: 'interview' },
-  interview:    { emoji: '📅', label: 'Interview',     color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', next: 'offer' },
-  offer:        { emoji: '🎉', label: 'Offer',         color: '#EAB308', bg: 'rgba(234,179,8,0.15)', next: null },
+  identified:   { emoji: '🔍', label: 'Identified',   color: '#64748B', bg: '#F1F5F9', next: 'reached_out' },
+  reached_out:  { emoji: '📧', label: 'Reached Out',  color: '#3B82F6', bg: '#EFF6FF', next: 'replied' },
+  replied:      { emoji: '✅', label: 'Replied',       color: '#22C55E', bg: '#F0FDF4', next: 'interview' },
+  interview:    { emoji: '📅', label: 'Interview',     color: '#F59E0B', bg: '#FFFBEB', next: 'offer' },
+  offer:        { emoji: '🎉', label: 'Offer',         color: '#EAB308', bg: '#FEF9C3', next: null },
 };
 
 const ACTION_CONFIG = {
@@ -24,9 +24,9 @@ function HiringBadge({ score }) {
   if (!score && score !== 0) return null;
   const isHot = score >= 80;
   const isWarm = score >= 50 && score < 80;
-  if (isHot) return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">🔥 Hot</span>;
-  if (isWarm) return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">🟡 Warm</span>;
-  return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-400">❄️ Cool</span>;
+  if (isHot) return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">🔥 Hot</span>;
+  if (isWarm) return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">🟡 Warm</span>;
+  return <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">❄️ Cool</span>;
 }
 
 function StatusBadge({ status, onClick }) {
@@ -34,7 +34,7 @@ function StatusBadge({ status, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all hover:brightness-125 active:scale-95"
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all hover:brightness-95 active:scale-95"
       style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}30`, minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
       title={cfg.next ? `Advance to ${STATUS_CONFIG[cfg.next]?.label}` : 'Final stage'}
     >
@@ -80,14 +80,11 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
   };
 
   return (
-    <div
-      className="rounded-lg overflow-hidden transition-all"
-      style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)' }}
-    >
+    <div className="rounded-xl overflow-hidden transition-all bg-white border border-slate-200">
       {/* Collapsed header */}
       <button
         onClick={() => setExpanded(prev => !prev)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left"
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
         style={{ minHeight: 'auto' }}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -96,14 +93,14 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-white text-sm">{company}</span>
+              <span className="font-semibold text-slate-900 text-sm">{company}</span>
               <HiringBadge score={hiringScore} />
             </div>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-slate-500">
                 {alumniFound} alumni found{contacted > 0 ? ` • ${contacted} contacted` : ''}{replies > 0 ? ` • ${replies} ${replies === 1 ? 'reply' : 'replies'}` : ''}
               </span>
-              {lastActivityText && <span className="text-[10px] text-slate-500">• {lastActivityText}</span>}
+              {lastActivityText && <span className="text-[10px] text-slate-400">• {lastActivityText}</span>}
             </div>
           </div>
         </div>
@@ -119,43 +116,43 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-3 space-y-1.5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="px-4 pb-3 space-y-0" style={{ borderTop: '1px solid #E2E8F0' }}>
               {/* Table header */}
-              <div className="grid grid-cols-12 gap-2 py-2 text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
+              <div className="grid grid-cols-12 gap-2 py-2.5 text-[9px] text-slate-400 font-semibold uppercase tracking-wider">
                 <div className="col-span-4">Alumni</div>
                 <div className="col-span-3">Status</div>
                 <div className="col-span-2">Date</div>
                 <div className="col-span-3 text-right">Action</div>
               </div>
 
-              {contacts.map((contact) => {
+              {contacts.map((contact, idx) => {
                 const statusCfg = STATUS_CONFIG[contact.status] || STATUS_CONFIG.identified;
                 const actionCfg = ACTION_CONFIG[contact.status];
                 const dateStr = contact.status_date
                   ? new Date(contact.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                   : '—';
+                const isEven = idx % 2 === 0;
 
                 return (
                   <div
                     key={contact.id}
-                    className="grid grid-cols-12 gap-2 items-center py-2 rounded-md px-1 hover:bg-white/[0.03] transition-colors"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                    className={`grid grid-cols-12 gap-2 items-center py-2.5 rounded-md px-1 transition-colors ${isEven ? 'bg-slate-50' : 'bg-white'} hover:bg-slate-100`}
                   >
                     <div className="col-span-4 min-w-0">
-                      <p className="text-[12px] text-white font-medium truncate">{contact.alumni_name}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{contact.alumni_role || '—'}</p>
+                      <p className="text-[12px] text-slate-900 font-medium truncate">{contact.alumni_name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{contact.alumni_role || '—'}</p>
                     </div>
                     <div className="col-span-3">
                       <StatusBadge status={contact.status} onClick={() => advanceStatus(contact)} />
                     </div>
                     <div className="col-span-2">
-                      <span className="text-[10px] text-slate-400">{dateStr}</span>
+                      <span className="text-[10px] text-slate-500">{dateStr}</span>
                     </div>
                     <div className="col-span-3 text-right">
                       {actionCfg && (
                         <button
                           onClick={() => handleAction(contact)}
-                          className="text-[10px] font-semibold transition-colors hover:brightness-125"
+                          className="text-[10px] font-semibold transition-colors hover:brightness-90"
                           style={{ color: statusCfg.color, minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
                         >
                           {actionCfg.label}
@@ -167,7 +164,7 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
               })}
 
               {contacts.length === 0 && (
-                <p className="text-[11px] text-slate-500 py-3 text-center">No contacts tracked yet at this company.</p>
+                <p className="text-[11px] text-slate-400 py-3 text-center">No contacts tracked yet at this company.</p>
               )}
             </div>
           </motion.div>

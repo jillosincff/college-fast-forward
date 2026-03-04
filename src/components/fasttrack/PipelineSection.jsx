@@ -24,8 +24,8 @@ export default function PipelineSection({ userEmail, companyIntel, onOpenChat })
 
   if (loading) {
     return (
-      <div className="rounded-lg p-6 text-center" style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="w-5 h-5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin mx-auto" />
+      <div className="rounded-xl p-6 text-center bg-white border border-slate-200">
+        <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto" />
       </div>
     );
   }
@@ -55,12 +55,9 @@ export default function PipelineSection({ userEmail, companyIntel, onOpenChat })
 
   if (total === 0) {
     return (
-      <div
-        className="rounded-lg p-6 text-center"
-        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        <p className="text-[13px] text-slate-400 mb-1 font-medium">No contacts in your pipeline yet.</p>
-        <p className="text-[11px] text-slate-500 max-w-xs mx-auto mb-4 leading-relaxed">
+      <div className="rounded-xl p-6 text-center bg-white border border-slate-200">
+        <p className="text-[13px] text-slate-600 mb-1 font-medium">No contacts in your pipeline yet.</p>
+        <p className="text-[11px] text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed">
           Start by researching a target company → FASTIQ will find alumni → then you'll see them here as you reach out.
         </p>
         <button
@@ -76,11 +73,8 @@ export default function PipelineSection({ userEmail, companyIntel, onOpenChat })
 
   return (
     <div className="space-y-4">
-      {/* Funnel */}
-      <div
-        className="rounded-lg px-4 py-5"
-        style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}
-      >
+      {/* Funnel — horizontal flow */}
+      <div className="rounded-xl px-4 py-4 bg-white border border-slate-200 overflow-x-auto">
         <PipelineFunnel counts={counts} />
       </div>
 
