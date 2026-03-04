@@ -11,7 +11,7 @@ function guessDomain(companyName) {
   return `${name}.com`;
 }
 
-function OpportunityCard({ opp, onResearch, onDismiss, delay }) {
+function OpportunityCard({ opp, onResearch, onTailor, onDismiss, delay }) {
   const domain = guessDomain(opp.company_name);
   const timeAgo = opp.scouted_date ? moment(opp.scouted_date).fromNow() : 'Recently';
   const [logoError, setLogoError] = React.useState(false);
@@ -65,7 +65,7 @@ function OpportunityCard({ opp, onResearch, onDismiss, delay }) {
             padding: '8px 14px', borderRadius: 10, border: 'none', background: '#0021A5',
             color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
           }}>Research →</button>
-          <button onClick={() => onResearch(`Tailor my resume for ${opp.role_title} at ${opp.company_name}`)} style={{
+          <button onClick={() => onTailor(opp)} style={{
             padding: '8px 14px', borderRadius: 10, border: '1.5px solid #8B5CF6',
             background: 'rgba(139,92,246,0.06)', color: '#8B5CF6', fontSize: 11, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
           }}>Tailor Resume →</button>
@@ -107,6 +107,7 @@ export default function OpportunitiesSection({ opportunities, onOpenChat, onDism
           key={opp.id}
           opp={opp}
           onResearch={(company) => onOpenChat(`Research ${company} for me — are they hiring?`)}
+          onTailor={(o) => onOpenChat(`Tailor my resume for ${o.role_title} at ${o.company_name}`)}
           onDismiss={onDismiss}
           delay={0.4 + i * 0.1}
         />
