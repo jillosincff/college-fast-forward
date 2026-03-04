@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList } from 'lucide-react';
+import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
 
@@ -128,6 +128,26 @@ export function CompanyIntelCard({ data }) {
                 <li key={i} className="text-xs text-slate-600">• {String(t)}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Personalized Analysis */}
+        {data.personalized_analysis && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#FA4616]" />
+              <span className="text-xs font-semibold text-[#FA4616] uppercase">What This Means For You</span>
+            </div>
+            {data.personalized_analysis.next_actions && data.personalized_analysis.next_actions.length > 0 && (
+              <div className="space-y-1.5">
+                {data.personalized_analysis.next_actions.map((action, i) => (
+                  <div key={i} className="flex items-start gap-2 bg-white rounded-lg px-3 py-2 border border-blue-100">
+                    <ArrowRight className="w-3.5 h-3.5 text-[#0021A5] mt-0.5 flex-shrink-0" />
+                    <span className="text-xs text-slate-700 font-medium">{String(action).replace(/^→\s*/, '')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </Card>
