@@ -4,7 +4,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 // Updates application status and cancels reminders
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
-    const serviceRoleClient = base44.asServiceRole();
+    const serviceRoleClient = base44.asServiceRole;
 
     try {
         const { applicationId, messageContent, senderId } = await req.json();
