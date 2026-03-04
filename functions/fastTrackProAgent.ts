@@ -1014,27 +1014,27 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
         conversationContext = recentLines;
       }
 
+      const studentName = user.full_name || 'Gator Student';
+      const studentMajor = user.major || 'undeclared';
+      const gradYear = user.graduation_year || 'upcoming';
+      const targetIndustry = profile.target_industry || 'their target industry';
+
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a ${channel} ${askType} outreach message.
+        prompt: `Draft a ${channel} message from ${studentName}, a ${studentMajor} major at the University of Florida (class of ${gradYear}), to ${recipientName}, ${recipientTitle} at ${recipientCompany}.
 
-${profileContext}
+Context: The student is interested in ${targetIndustry} and chose to reach out to this person because ${recommendationReason || 'they are a fellow UF alum in a role relevant to the student\'s career goals'}.
 
-To: ${recipientName}, ${recipientTitle} at ${recipientCompany}
-Ask: ${askType}
-
-${recommendationReason ? `WHY THIS PERSON WAS RECOMMENDED:\n${recommendationReason}\n` : ''}
 ${conversationContext ? `RECENT CONVERSATION CONTEXT:\n${conversationContext}\n` : ''}
 
-CRITICAL INSTRUCTIONS FOR THE MESSAGE:
-- Do NOT use generic openers like "I noticed we share a common educational background" or "I came across your profile"
-- Instead, write as if the student did real research on this person
-- Reference the SPECIFIC reason they're reaching out: what about this person's role, background, or position makes them uniquely valuable to talk to
-- If there's a recommendation_reason above, weave that angle into the message naturally. For example, if the student is a Marketing major reaching out to an Engineering Manager, the message should mention their curiosity about how marketing and engineering teams collaborate
-- The message should feel like the student thought carefully about WHY this specific person, not just that they went to the same school
-- Open by mentioning UF, but quickly pivot to the specific angle/question
-- Keep it 100-150 words. Be genuine, specific, and show intellectual curiosity
-- No placeholders like [Your Name] — use the student's actual name from the profile
-- End with a clear, specific ask (15-min call, coffee chat, etc.)`,
+Rules:
+1. Reference something SPECIFIC about the alumni's role or background — never generic
+2. Connect the student's major/interests to the alumni's work in a specific way
+3. Ask ONE clear, specific question — not "any advice" but something like "I'd love to hear how your team approaches X" or "I'm curious whether a background in Y translates well into Z"
+4. Keep it under 100 words — busy people don't read essays
+5. Tone: confident but not arrogant, curious but not needy, specific but not stalkerish
+6. Sign off with full name, university, and graduation year
+7. Do NOT use "I hope this message finds you well" or any other cliche opener
+8. No placeholders — use real names and details from above`,
         response_json_schema: {
           type: "object",
           properties: {
