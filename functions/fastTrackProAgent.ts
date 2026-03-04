@@ -1103,6 +1103,17 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
 
       const alumni = filterAndDedupAlumni(alumniResult.alumni || [], alumniCompany);
 
+      // LAYER 3: Graceful recovery for alumni — if 0 real alumni AND the response text suggests confusion
+      if (alumni.length === 0 && !alumniResult.response?.toLowerCase().includes('alumni')) {
+        console.log(`[Layer3] Alumni search for "${alumniCompany}" returned 0 results and confused response — recovering`);
+        return Response.json({
+          success: true,
+          response: `Hmm, I might have misunderstood. It looks like **"${alumniCompany}"** isn't matching a real company. Did you mean something else?\n\nYou can try:\n→ Naming a specific company like **"Find alumni at Apple"** or **"Find alumni at ${targetCompanies[0] || 'Google'}"**\n→ Or asking me to **"find internships at my target companies"**`,
+          message_type: 'text',
+          payload: {}
+        });
+      }
+
       if (alumni.length > 0) {
         // Cross-reference against CFF member database
         const enrichedAlumni = await crossReferenceCFF(base44, alumni);
