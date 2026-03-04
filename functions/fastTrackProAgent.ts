@@ -627,13 +627,13 @@ CRITICAL RULES:
   - If assistant suggested "Want me to find UF alumni there?" and user says "yes" or "sure" → intent is "alumni_discovery" with company from previous context
 - If the message is a standalone request, classify normally.
 
-Possible intents: alumni_discovery, company_intel, outreach_draft, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
+Possible intents: alumni_discovery, company_intel, outreach_draft, follow_up, reply_help, thank_you, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
 
 Return the intent and any extracted entity (company name, person name, etc).`,
     response_json_schema: {
       type: "object",
       properties: {
-        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
+        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "follow_up", "reply_help", "thank_you", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
         company: { type: "string", description: "Company name if relevant, empty string if not" },
         person: { type: "string", description: "Person name if relevant (for outreach), empty string if not" },
         confidence: { type: "string", enum: ["high", "medium", "low"] },
@@ -793,6 +793,15 @@ Deno.serve(async (req) => {
             } else if (contextOverrideIntent === 'interview_prep' && contextOverrideCompany) {
               resolvedMessage = `Prepare me for an interview at ${contextOverrideCompany}`;
               console.log(`Context override: interview_prep → "${resolvedMessage}"`);
+            } else if (contextOverrideIntent === 'follow_up' && contextOverrideCompany) {
+              resolvedMessage = `Draft a follow-up message — I haven't heard back from my outreach at ${contextOverrideCompany}`;
+              console.log(`Context override: follow_up → "${resolvedMessage}"`);
+            } else if (contextOverrideIntent === 'reply_help') {
+              resolvedMessage = `They replied to my outreach. Help me craft a response.`;
+              console.log(`Context override: reply_help`);
+            } else if (contextOverrideIntent === 'thank_you') {
+              resolvedMessage = `Draft a thank-you note after my interview`;
+              console.log(`Context override: thank_you`);
             } else if (contextOverrideIntent === 'roadmap') {
               resolvedMessage = `Create a career roadmap for me`;
             } else if (contextOverrideIntent === 'opportunity_discovery') {
