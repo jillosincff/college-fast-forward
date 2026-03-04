@@ -102,5 +102,5 @@ export default function FastIQ() {
     );
   }
 
-  return <FastTrackDashboard user={user} profile={profile} onOpenChat={handleOpenChat} highlightAlerts={highlightAlerts} />;
+  return <FastIQCommandCenter user={user} profile={profile} onOpenChat={handleOpenChat} highlightAlerts={highlightAlerts} />;
 }
