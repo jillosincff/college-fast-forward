@@ -1038,8 +1038,9 @@ Deno.serve(async (req) => {
       if (cached) {
         const enrichedCached = await crossReferenceCFF(base44, cached.map(a => ({
           name: a.name, role_title: a.role_title, company: a.company,
-          match_score: Math.max(a.match_score || 50, 50), // Enforce minimum 50
-          degree_info: a.degree_info, location: a.location
+          match_score: Math.max(a.match_score || 50, 50),
+          degree_info: a.degree_info, location: a.location,
+          linkedin_url: a.linkedin_url || '', verified: a.verified || false
         })));
         saveToPipeline(base44, user.email, alumniCompany, enrichedCached);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
