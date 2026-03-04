@@ -36,6 +36,7 @@ function getSuggestedPrompts(profile) {
   }
   prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
   prompts.push({ icon: '📬', text: "Draft follow-up messages for stale outreach", category: 'find' });
+  prompts.push({ icon: '🎉', text: "I got a reply from a contact — help me respond", category: 'find' });
   prompts.push({ icon: '📄', text: "Review my resume", category: 'tools' });
   prompts.push({ icon: '✨', text: "Tailor my resume for a job", category: 'tools' });
   prompts.push({ icon: '💼', text: "Prep me for an interview", category: 'tools' });
