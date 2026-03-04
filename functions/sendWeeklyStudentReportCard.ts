@@ -156,7 +156,7 @@ How you network matters. Show up, and we'll bend over backwards for you.
       errors: errors.length > 0 ? errors : undefined
     });
   } catch (error) {
-    console.error('Weekly report card error:', error);
+    console.error('Weekly report card error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
