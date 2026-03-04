@@ -34,7 +34,7 @@ const CHALLENGE_LABELS = {
   unsure_what_i_want: 'Exploring options',
 };
 
-export default function TargetsPanel({ profile, onResearchCompany, onRerunAssessment, onProfileUpdated }) {
+export default function TargetsPanel({ profile, onResearchCompany, onRerunAssessment, onProfileUpdated, onOpenChat }) {
   const [editing, setEditing] = useState(false);
   const [companies, setCompanies] = useState([]);
   const [newCompany, setNewCompany] = useState('');
@@ -351,15 +351,9 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
                 </span>
               </div>
               <button
-                onClick={() => onResearchCompany && false}
+                onClick={() => onOpenChat?.('Review my resume')}
                 className="text-[11px] text-[#0021A5] font-semibold hover:underline"
                 style={{ minHeight: 'auto', minWidth: 'auto' }}
-                onClick={() => {
-                  // Trigger resume review via chat
-                  if (onResearchCompany) {
-                    // Hack: use a special handler - we'll wire this properly
-                  }
-                }}
               >
                 Update
               </button>
@@ -368,6 +362,7 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
             <div className="flex items-center justify-between">
               <span className="text-[12px] text-slate-500">Not uploaded yet</span>
               <button
+                onClick={() => onOpenChat?.('Help me build a resume')}
                 className="text-[11px] text-[#FA4616] font-bold hover:underline flex items-center gap-1"
                 style={{ minHeight: 'auto', minWidth: 'auto' }}
               >
