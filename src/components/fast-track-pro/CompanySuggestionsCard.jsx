@@ -5,10 +5,11 @@ import { Building2, Search, Plus, Check, Sparkles, MapPin } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
+import SuggestedActions from './SuggestedActions';
 
 const SIZE_LABELS = { large: 'Large', mid_size: 'Mid-size', startup: 'Startup', enterprise: 'Enterprise' };
 
-export default function CompanySuggestionsCard({ data, onResearchCompany, profile, onProfileUpdated }) {
+export default function CompanySuggestionsCard({ data, onResearchCompany, profile, onProfileUpdated, onSendMessage }) {
   const [addedSet, setAddedSet] = useState(new Set());
   const suggestions = Array.isArray(data?.suggestions) ? data.suggestions : [];
 
@@ -106,6 +107,8 @@ export default function CompanySuggestionsCard({ data, onResearchCompany, profil
           );
         })}
       </div>
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-emerald-200" />
     </Card>
   );
 }
