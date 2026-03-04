@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Send, Sparkles, Loader2, ArrowLeft, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Send, Sparkles, Loader2, ArrowLeft, User, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
+import { base44 } from '@/api/base44Client';
 import { CompanyIntelCard, AlumniListCard, OutreachDraftCard } from './RichCards';
 import RoadmapTimelineCard from './RoadmapTimelineCard';
 import CompanySuggestionsCard from './CompanySuggestionsCard';
@@ -87,8 +88,10 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentProfile, setCurrentProfile] = useState(initialProfile);
+  const [isUploading, setIsUploading] = useState(false);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const sentInitialRef = useRef(false);
 
   // Keep profile in sync
@@ -192,6 +195,27 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset input so user can re-upload same file
+    e.target.value = '';
+    setIsUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const fileName = file.name || 'resume';
+      sendMessage(`Here's my resume: [${fileName}](${file_url})\n\nPlease review it and give me feedback.`);
+    } catch (err) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, the file upload failed. Please try again or paste your resume text directly.',
+        message_type: 'text',
+      }]);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -389,6 +413,22 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           {/* Input */}
           <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-4 safe-area-bottom">
             <div className="max-w-4xl mx-auto flex items-end gap-2 bg-white border-2 border-slate-200 focus-within:border-[#0021A5] rounded-2xl p-2 transition-colors shadow-sm">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading || isLoading}
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all hover:bg-slate-100 text-slate-400 hover:text-[#0021A5]"
+                style={{ minHeight: 'auto', minWidth: 'auto', width: '40px' }}
+                title="Upload resume or file"
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
