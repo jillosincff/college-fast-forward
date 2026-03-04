@@ -799,6 +799,54 @@ RULES:
 }
 
 // ═══════════════════════════════════════════════════════════
+//  REPLY HELP HANDLER
+// ═══════════════════════════════════════════════════════════
+
+async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext) {
+  console.log('Intent: reply_help');
+  let contactName = '', contactCompany = '', pipelineRecord = null;
+  const nameMatch = resolvedMessage.match(/(?:from|to|with)\s+(\w[\w\s.''-]{1,30}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
+  if (nameMatch) { contactName = nameMatch[1]?.trim() || ''; contactCompany = nameMatch[2]?.trim() || ''; }
+  if (contactName && pipelineData.length > 0) {
+    pipelineRecord = pipelineData.find(p => (p.status === 'replied' || p.status === 'reached_out') && (p.alumni_name?.toLowerCase().includes(contactName.toLowerCase()) || contactName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')));
+  }
+  if (!pipelineRecord) pipelineRecord = pipelineData.find(p => p.status === 'replied') || pipelineData.find(p => p.status === 'reached_out');
+  contactName = pipelineRecord?.alumni_name || contactName || 'the contact';
+  contactCompany = pipelineRecord?.company || contactCompany || '';
+
+  const replyContent = resolvedMessage.replace(/^.*?(?:here'?s?\s+(?:what\s+)?(?:they|their|the)\s+(?:said|reply|response|wrote)|they\s+(?:replied|responded|wrote\s+back|said)|got a reply from[\w\s.''-]*?[!.:])\s*/i, '').trim();
+  if (replyContent.length < 30 || /^(?:i got a reply|they replied|they responded|here'?s)/i.test(replyContent)) {
+    if (pipelineRecord?.id && pipelineRecord.status !== 'replied') base44.entities.NetworkingPipeline.update(pipelineRecord.id, { status: 'replied', replied_date: new Date().toISOString(), status_date: new Date().toISOString() }).catch(() => {});
+    return Response.json({ success: true, response: `That's great news! 🎉 Paste **${contactName}**'s reply below and I'll analyze it and draft your perfect response.`, message_type: 'text', payload: {} });
+  }
+
+  let originalMessage = '';
+  if (pipelineRecord?.outreach_message_id) { try { const c = await base44.entities.ProAgentConversation.filter({ id: pipelineRecord.outreach_message_id }); if (c?.[0]?.content) originalMessage = c[0].content.substring(0, 500); } catch(e) {} }
+
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are FASTIQ. A student received a reply from an alumni contact. Analyze it and draft the perfect response.\n\n${profileContext}\n\nCONTACT: ${contactName}${pipelineRecord?.alumni_role ? ', ' + pipelineRecord.alumni_role : ''} at ${contactCompany}\n${originalMessage ? 'ORIGINAL OUTREACH:\n' + originalMessage + '\n' : ''}THEIR REPLY:\n"${replyContent}"\n\nCLASSIFY into exactly ONE type:\nA) positive — meeting/call offered → suggest 2-3 time slots, offer coffee/phone/video, reiterate one topic\nB) warm — vague openness → propose specific day/time, make it easy to say yes\nC) referral — suggested another person → draft thank-you to original + message to referred person mentioning the referral\nD) advice — answered question but no meeting → thank specifically, mention what you'll act on, ask one follow-up\nE) declined — too busy/can't help → thank graciously, leave door open\n\nRULES: Under 100 words per draft. Be specific. Student: ${user.full_name || 'Gator Student'}, ${user.major || 'undeclared'} at UF, class of ${user.graduation_year || 'upcoming'}. No clichés.`,
+    response_json_schema: { type: "object", properties: { analysis: { type: "string" }, reply_classification: { type: "string", enum: ["positive","warm","referral","advice","declined"] }, reply_draft: { type: "string" }, reply_subject: { type: "string" }, referred_person_name: { type: "string" }, referral_draft: { type: "string" }, referral_subject: { type: "string" }, suggested_actions: { type: "array", items: { type: "string" } }, prep_offer: { type: "string" } }, required: ["analysis","reply_classification","reply_draft","suggested_actions"] }
+  });
+
+  if (pipelineRecord?.id) {
+    const updates = { status: 'replied', replied_date: new Date().toISOString(), status_date: new Date().toISOString(), notes: (pipelineRecord.notes || '') + `\nReplied (${result.reply_classification}) on ${new Date().toLocaleDateString()}` };
+    if (result.reply_classification === 'positive') { updates.status = 'interview'; updates.interview_date = new Date().toISOString(); }
+    base44.entities.NetworkingPipeline.update(pipelineRecord.id, updates).catch(() => {});
+  }
+  if (result.reply_classification === 'referral' && result.referred_person_name) {
+    base44.entities.NetworkingPipeline.create({ user_email: user.email, company: contactCompany, alumni_name: result.referred_person_name, alumni_source: 'fastiq', status: 'identified', status_date: new Date().toISOString(), identified_date: new Date().toISOString(), notes: `Referred by ${contactName} on ${new Date().toLocaleDateString()}` }).catch(() => {});
+  }
+  trackActivity(base44, user.email, profile.id, 'message_draft', contactName);
+
+  const labels = { positive: `**${contactName}** wants to connect! Here's a response that locks in the meeting:`, warm: `Good sign — **${contactName}** is open! The key is turning this into a specific time:`, referral: `Even better — a warm referral from **${contactName}**!`, advice: `**${contactName}** gave you great insight! Here's a response that keeps the door open:`, declined: `That's okay — not every door opens on the first try:` };
+  let responseText = (result.analysis || '') + '\n\n' + (labels[result.reply_classification] || '');
+  if (result.reply_classification === 'positive' && result.prep_offer) responseText += '\n\n' + result.prep_offer;
+  if (result.reply_classification === 'declined') responseText += `\n\nWant me to find other UF alumni at ${contactCompany}? Or try a different company?`;
+
+  return Response.json({ success: true, response: responseText, message_type: 'reply_response', payload: { reply_classification: result.reply_classification, reply_draft: result.reply_draft || '', reply_subject: result.reply_subject || '', referred_person_name: result.referred_person_name || '', referral_draft: result.referral_draft || '', referral_subject: result.referral_subject || '', suggested_actions: result.suggested_actions || [], contact_name: contactName, contact_company: contactCompany } });
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN HANDLER
 // ═══════════════════════════════════════════════════════════
 
