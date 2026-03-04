@@ -724,12 +724,52 @@ Deno.serve(async (req) => {
       });
 
       const alumniResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Parse research into structured alumni profiles for UF alumni at ${alumniCompany}.\n\n${profileContext}\n\n${UF_FILTER}\n- DEDUPLICATE same name+title\n- Minimum match_score of 10\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}`,
+        prompt: `Parse research into structured alumni profiles for UF alumni at ${alumniCompany}.
+
+${profileContext}
+
+${UF_FILTER}
+- DEDUPLICATE same name+title
+
+MATCH SCORE ALGORITHM (0-100):
+Score each alumni based on how useful they are for THIS specific student. Add points from each factor:
+
+1. COMPANY MATCH (0-40 points):
+   - Works at student's target company: +40
+   - Works at competitor/partner in same industry: +20
+   - Works in same industry but different company: +10
+
+2. INDUSTRY/FIELD ALIGNMENT (0-25 points):
+   - Role is directly in student's target industry (${profile.target_industry || 'their field'}): +25
+   - Role is adjacent (e.g. student wants finance, alumni is in consulting at a bank): +15
+   - Role is in a different field at the target company: +8
+
+3. ROLE RELEVANCE to student's major (${user.major || 'their major'}) (0-20 points):
+   - Role directly uses skills from student's major: +20
+   - Role somewhat related to student's major: +10
+   - Role unrelated but at a target company: +5
+
+4. SENIORITY / NETWORKING VALUE (0-15 points):
+   - VP/Director/C-suite (great for warm intros and referrals): +15
+   - Senior/Manager (great for career advice and internal referrals): +12
+   - Mid-level/experienced (great for realistic advice): +8
+   - Entry-level/recent grad (great for realistic expectations, interview tips): +5
+
+EXAMPLES:
+- UF alum who is VP of Engineering at student's #1 target company, student is CS major → 40+25+20+15 = 100
+- UF alum who is Marketing Manager at student's target company, student is Marketing major → 40+25+20+12 = 97
+- UF alum who is Software Engineer at a competitor, student is CS major → 20+15+20+8 = 63
+- UF alum who is HR Coordinator at target company, student is Finance major → 40+8+5+5 = 58
+
+CRITICAL: An alum at the student's TARGET COMPANY in a related role should score 60-90+. Do NOT give 10-20% to someone at a target company.
+
+RESEARCH:
+${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}`,
         response_json_schema: {
           type: "object",
           properties: {
             response: { type: "string" },
-            alumni: { type: "array", items: { type: "object", properties: { name: { type: "string" }, role_title: { type: "string" }, company: { type: "string" }, degree_info: { type: "string" }, location: { type: "string" }, match_score: { type: "integer" } }, required: ["name","role_title","company","match_score"] } }
+            alumni: { type: "array", items: { type: "object", properties: { name: { type: "string" }, role_title: { type: "string" }, company: { type: "string" }, degree_info: { type: "string" }, location: { type: "string" }, match_score: { type: "integer" }, seniority_level: { type: "string", enum: ["entry","mid","senior","director","vp_plus"] } }, required: ["name","role_title","company","match_score"] } }
           },
           required: ["response","alumni"]
         }
