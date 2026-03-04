@@ -345,7 +345,11 @@ function detectReplyHelp(message) {
     /(?:help me|craft|write)\s+(?:a\s+)?(?:response|reply)/i.test(message) ||
     /(?:here'?s?\s+(?:what|their)\s+(?:they|reply|response)|paste[d]?\s+(?:their|the)\s+reply)/i.test(message) ||
     /(?:replied to my|responded to my)\s+(?:outreach|message|email)/i.test(message) ||
-    lower.includes('they replied') || lower.includes('got a reply') || lower.includes('they responded');
+    /(?:got a reply|got a response|received a reply|received a response)\s+(?:from|back)/i.test(message) ||
+    /(?:i got a reply|i received a reply)/i.test(message) ||
+    lower.includes('they replied') || lower.includes('got a reply') || lower.includes('they responded') ||
+    lower.includes('here\'s what they said') || lower.includes('here is what they said') ||
+    lower.includes('they wrote back') || lower.includes('replied!');
 }
 
 function detectThankYouNote(message) {
