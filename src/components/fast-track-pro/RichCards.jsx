@@ -141,6 +141,19 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           </div>
         )}
 
+        {/* Tailor Resume Button */}
+        {data.company && onSendMessage && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <button
+              onClick={() => onSendMessage(`Tailor my resume for a role at ${titleCase(String(data.company))}`)}
+              className="w-full flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm"
+              style={{ minHeight: 'auto' }}
+            >
+              ✨ Tailor Resume for {titleCase(String(data.company))} →
+            </button>
+          </div>
+        )}
+
         {/* Personalized Analysis */}
         {data.personalized_analysis && (
           <div className="mt-3 pt-3 border-t border-blue-200">

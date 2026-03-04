@@ -95,6 +95,19 @@ export default function ResumeReviewCard({ data, onSendMessage }) {
       )}
 
       <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-yellow-200" />
+
+      {/* Tailor for specific role CTA */}
+      {onSendMessage && (
+        <div className="mt-3 pt-3 border-t border-yellow-200">
+          <button
+            onClick={() => onSendMessage('Tailor my resume for a specific role')}
+            className="w-full flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm"
+            style={{ minHeight: 'auto' }}
+          >
+            ✨ Tailor for a specific role
+          </button>
+        </div>
+      )}
     </Card>
   );
 }
