@@ -60,13 +60,14 @@ export default function FollowUpNudgeBanner({ userEmail, onSendMessage }) {
   };
 
   const handleTheyReplied = () => {
-    onSendMessage(`${contact.alumni_name} at ${contact.company} replied! Great! What did they say? Paste their reply and I'll help you respond.`);
-    // Also update pipeline status
+    // Update pipeline status to replied
     base44.entities.NetworkingPipeline.update(contact.id, {
       status: 'replied',
       replied_date: new Date().toISOString(),
       status_date: new Date().toISOString(),
     }).catch(() => {});
+    // Prompt user to paste the reply for response drafting
+    onSendMessage(`I got a reply from ${contact.alumni_name} at ${contact.company}! Here's what they said:`);
     handleDismiss();
   };
 

@@ -17,6 +17,7 @@ import SalaryIntelCard from './SalaryIntelCard';
 import CoverLetterCard from './CoverLetterCard';
 import LinkedInReviewCard from './LinkedInReviewCard';
 import BatchTargetScanCard from './BatchTargetScanCard';
+import ReplyResponseCard from './ReplyResponseCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
@@ -67,6 +68,7 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'cover_letter': return <CoverLetterCard data={payload} onSendMessage={onSendMessage} />;
     case 'linkedin_review': return <LinkedInReviewCard data={payload} onSendMessage={onSendMessage} />;
     case 'batch_target_scan': return <BatchTargetScanCard data={payload} onResearchCompany={onResearchCompany} onSendMessage={onSendMessage} />;
+    case 'reply_response': return <ReplyResponseCard data={payload} onSendMessage={onSendMessage} />;
     case 'career_advice': {
       const actions = payload?.suggested_actions || payload?.suggested_next_steps || payload?.next_steps || [];
       return actions.length > 0 ? (
