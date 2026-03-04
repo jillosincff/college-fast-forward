@@ -334,7 +334,6 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
             </div>
           </div>
         </div>
-      </div>
 
         {/* Divider */}
         <div className="border-t border-slate-100" />
