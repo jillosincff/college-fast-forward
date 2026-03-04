@@ -40,7 +40,7 @@ export default function LiveTickerBar({ items = [] }) {
         <span style={{ fontSize: 10, fontWeight: 700, color: '#34D399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>LIVE</span>
       </div>
       <div style={{
-        display: 'flex', animation: 'fiq-ticker 30s linear infinite', whiteSpace: 'nowrap',
+        display: 'flex', animation: 'fiq-ticker 90s linear infinite', whiteSpace: 'nowrap',
       }}>
         {[...displayItems, ...displayItems].map((item, i) => (
           <span key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 500, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}>
