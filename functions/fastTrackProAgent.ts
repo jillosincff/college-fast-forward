@@ -1012,6 +1012,17 @@ Deno.serve(async (req) => {
       alumniCompany = resolveCompanyFromContext(conversation_history) || null;
     }
 
+    // LAYER 2: Confirmation gate for unknown companies (alumni path)
+    if (alumniCompany && shouldConfirmCompany(alumniCompany, targetCompanies)) {
+      console.log(`[Layer2] Unknown company "${alumniCompany}" in alumni query — asking confirmation`);
+      return Response.json({
+        success: true,
+        response: `Just to make sure — did you want me to find UF alumni at a company called **"${titleCase(alumniCompany)}"**? Or were you asking me to do something else?\n\nYou can say:\n→ **"Yes, research ${titleCase(alumniCompany)}"** to continue\n→ Or tell me the specific company name you meant`,
+        message_type: 'text',
+        payload: {}
+      });
+    }
+
     if (alumniCompany) {
       console.log('Intent: alumni_discovery for', alumniCompany);
       alumniCompany = titleCase(alumniCompany);
