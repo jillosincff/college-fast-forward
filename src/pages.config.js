@@ -58,6 +58,7 @@ import CompanyProfile from './pages/CompanyProfile';
 import Connections from './pages/Connections';
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
+import FastIQ from './pages/FastIQ';
 import Favorites from './pages/Favorites';
 import GatorAuth from './pages/GatorAuth';
 import GatorDirectory from './pages/GatorDirectory';
@@ -99,7 +100,6 @@ import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
 import WelcomeRole from './pages/WelcomeRole';
-import FastIQ from './pages/FastIQ';
 import __Layout from './Layout.jsx';
 
 
@@ -115,6 +115,7 @@ export const PAGES = {
     "Connections": Connections,
     "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
+    "FastIQ": FastIQ,
     "Favorites": Favorites,
     "GatorAuth": GatorAuth,
     "GatorDirectory": GatorDirectory,
@@ -156,7 +157,6 @@ export const PAGES = {
     "TestingDashboard": TestingDashboard,
     "UnsubscribeReengagement": UnsubscribeReengagement,
     "WelcomeRole": WelcomeRole,
-    "FastIQ": FastIQ,
 }
 
 export const pagesConfig = {

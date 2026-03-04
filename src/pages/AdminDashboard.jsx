@@ -62,19 +62,20 @@ const AdminDashboard = () => {
     
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      // Force cache bypass with timestamp
-      const response = await base44.functions.invoke('getAdminAnalytics', {
-        _cacheBust: Date.now()
-      }, {
-        signal: controller.signal
-      }).catch((err) => {
-        if (err.message?.includes('Network Error') || err.name === 'AbortError') {
+      let response;
+      try {
+        response = await base44.functions.invoke('getAdminAnalytics', {
+          _cacheBust: Date.now()
+        });
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.message?.includes('Network Error') || err.name === 'AbortError' || err.message?.includes('timeout')) {
           throw new Error('SILENT_NETWORK_ERROR');
         }
         throw err;
-      });
+      }
 
       clearTimeout(timeoutId);
       const data = response?.data;
