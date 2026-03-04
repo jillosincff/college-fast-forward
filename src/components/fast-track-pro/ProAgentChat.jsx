@@ -20,20 +20,23 @@ import titleCase from '@/components/utils/titleCase';
 function getSuggestedPrompts(profile) {
   const hasTargets = (profile?.target_companies || []).length > 0;
   const industry = profile?.target_industry;
-
   const prompts = [];
 
   if (hasTargets) {
-    prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?" });
-    prompts.push({ icon: '🔍', text: "Find UF alumni at my dream companies" });
+    prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?", category: 'find' });
+    prompts.push({ icon: '🔍', text: "Find UF alumni at my dream companies", category: 'find' });
   } else {
     const industryText = industry ? `in ${industry}` : 'that are right for me';
-    prompts.push({ icon: '🔍', text: `Help me find companies ${industryText}` });
-    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at for entry-level roles?" });
+    prompts.push({ icon: '🔍', text: `Help me find companies ${industryText}`, category: 'find' });
+    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at for entry-level roles?", category: 'find' });
   }
-
-  prompts.push({ icon: '📝', text: "Draft a LinkedIn message to a recruiter" });
-  prompts.push({ icon: '🗺️', text: "Create a 4-week career action plan for me" });
+  prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
+  prompts.push({ icon: '📄', text: "Review my resume", category: 'tools' });
+  prompts.push({ icon: '💼', text: "Prep me for an interview", category: 'tools' });
+  prompts.push({ icon: '🔗', text: "Review my LinkedIn profile", category: 'tools' });
+  prompts.push({ icon: '🗺️', text: "Build my career action plan", category: 'tools' });
+  prompts.push({ icon: '💰', text: "What should I negotiate for salary?", category: 'tools' });
+  prompts.push({ icon: '🧭', text: "Explore career paths for my major", category: 'explore' });
 
   return prompts;
 }
@@ -226,33 +229,71 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
         <div className="flex-1 flex flex-col min-w-0">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {messages.length === 0 && !isLoading && (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-[#0021A5]" />
+            {messages.length === 0 && !isLoading && (() => {
+              const allPrompts = getSuggestedPrompts(currentProfile);
+              const findPrompts = allPrompts.filter(p => p.category === 'find');
+              const toolPrompts = allPrompts.filter(p => p.category === 'tools');
+              const explorePrompts = allPrompts.filter(p => p.category === 'explore');
+              return (
+                <div className="py-6 max-w-lg mx-auto">
+                  <div className="text-center mb-6">
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 rounded-2xl flex items-center justify-center mx-auto mb-3 animate-bounce" style={{ animationDuration: '3s' }}>
+                      <Sparkles className="w-7 h-7 text-[#0021A5]" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Your career center is ready.</h3>
+                    <p className="text-sm font-semibold bg-gradient-to-r from-[#0021A5] to-[#FA4616] bg-clip-text text-transparent">What should we tackle first?</p>
+                    <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                      I find companies hiring in your field, discover UF alumni who can open doors — even ones not on CFF — and write you a message to reach out. No other tool does this.
+                    </p>
+                  </div>
+
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">🔍 Find Opportunities</p>
+                  <div className="space-y-2 mb-4">
+                    {findPrompts.map((p, i) => (
+                      <button key={i} onClick={() => sendMessage(p.text)}
+                        className="flex items-center gap-3 w-full text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-[#0021A5]/30 hover:bg-blue-50/50 hover:-translate-y-0.5 transition-all"
+                        style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                        <span className="text-lg flex-shrink-0">{p.icon}</span>
+                        <span className="text-sm text-slate-700 flex-1">{p.text}</span>
+                        <span className="text-slate-300 text-xs">→</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">🛠️ Career Tools</p>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {toolPrompts.map((p, i) => (
+                      <button key={i} onClick={() => sendMessage(p.text)}
+                        className="flex items-center gap-2 text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-[#0021A5]/30 hover:bg-blue-50/50 hover:-translate-y-0.5 transition-all"
+                        style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                        <span className="text-base flex-shrink-0">{p.icon}</span>
+                        <span className="text-xs text-slate-700">{p.text}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {explorePrompts.length > 0 && (
+                    <>
+                      <div className="space-y-2 mb-4">
+                        {explorePrompts.map((p, i) => (
+                          <button key={i} onClick={() => sendMessage(p.text)}
+                            className="flex items-center gap-3 w-full text-left p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 hover:border-cyan-400 hover:-translate-y-0.5 transition-all"
+                            style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                            <span className="text-lg flex-shrink-0">{p.icon}</span>
+                            <span className="text-sm text-slate-700 flex-1">{p.text}</span>
+                            <span className="text-cyan-400 text-xs">→</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <p className="text-xs text-amber-800 leading-relaxed">💡 CFF connects you with parents and alumni who've signed up. FASTIQ goes further — searching the entire web to find UF alumni at ANY company. That's your unfair advantage.</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">You don't have to figure this out alone anymore.</h3>
-                <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                  FASTIQ is your personal networking engine. Every week, I find companies hiring in your field, discover UF alumni who can help — even ones NOT on CFF — and write you a message to reach out. No other tool does this.
-                </p>
-                <div className="space-y-2 max-w-sm mx-auto">
-                  {getSuggestedPrompts(currentProfile).map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => sendMessage(p.text)}
-                      className="flex items-center gap-3 w-full text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-[#0021A5]/30 hover:bg-blue-50/50 transition-all"
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                    >
-                      <span className="text-lg">{p.icon}</span>
-                      <span className="text-sm text-slate-700">{p.text}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-6 mx-auto max-w-sm bg-amber-50 border border-amber-200 rounded-xl p-3">
-                  <p className="text-xs text-amber-800 leading-relaxed">💡 CFF connects you with parents and alumni who've signed up. FASTIQ goes further — searching the entire web to find UF alumni at ANY company. That's your unfair advantage.</p>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             <AnimatePresence>
               {messages.map((msg, i) => (
