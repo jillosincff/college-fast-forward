@@ -355,7 +355,10 @@ function filterAndDedupAlumni(rawAlumni, fallbackCompany) {
   const filtered = processed.filter(a => {
     const deg = (a.degree_info || '').toLowerCase();
     if (NON_UF_SCHOOLS.some(s => deg.includes(s))) return false;
-    if (!a.match_score || a.match_score <= 0) return false;
+    if (!a.match_score || a.match_score < 50) {
+      // Enforce minimum 50 for alumni at the searched company
+      a.match_score = Math.max(a.match_score || 50, 50);
+    }
     return true;
   });
   const seen = new Set();
