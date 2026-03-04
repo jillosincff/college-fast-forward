@@ -35,12 +35,12 @@ Deno.serve(async (req) => {
           { user_email: email }, '-status_date', 50
         ).catch(() => []);
 
-        // Find stale outreach (reached_out > 3 days ago, no reply)
-        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+        // Find stale outreach (reached_out > 4 days ago, no reply)
+        const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
         const staleOutreach = pipeline.filter(p =>
           p.status === 'reached_out' &&
           p.reached_out_date &&
-          new Date(p.reached_out_date) < threeDaysAgo
+          new Date(p.reached_out_date) < fourDaysAgo
         );
 
         // New opportunities
