@@ -152,6 +152,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
         
         @media (max-width: 640px) {
           .fiq-rings-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .fiq-actions-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .fiq-root h1 { font-size: 24px !important; }
         }
       `}</style>
