@@ -1320,7 +1320,7 @@ Rules:
     }
 
     // LAYER 2: Confirmation gate for unknown companies (company intel path)
-    if (detectedCompany && shouldConfirmCompany(detectedCompany, targetCompanies)) {
+    if (detectedCompany && !isConfirmation && shouldConfirmCompany(detectedCompany, targetCompanies)) {
       console.log(`[Layer2] Unknown company "${detectedCompany}" in company query — asking confirmation`);
       return Response.json({
         success: true,
