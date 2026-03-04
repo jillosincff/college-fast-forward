@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 
 export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets, profile }) {
+  const [staleCount, setStaleCount] = useState(0);
+
+  useEffect(() => {
+    const loadStale = async () => {
+      const email = profile?.user_email;
+      if (!email) return;
+      const pipeline = await base44.entities.NetworkingPipeline.filter(
+        { user_email: email, status: 'reached_out' }, '-reached_out_date', 50
+      ).catch(() => []);
+      const fourDaysAgo = Date.now() - 4 * 24 * 60 * 60 * 1000;
+      const stale = pipeline.filter(p => p.reached_out_date && new Date(p.reached_out_date).getTime() < fourDaysAgo);
+      setStaleCount(stale.length);
+    };
+    loadStale();
+  }, [profile?.user_email]);
+
   const hasUnmessaged = unmessagedAlumni > 0;
   const targets = profile?.target_companies?.length || 0;
 
-  let message, cta;
-  if (hasUnmessaged) {
+  let message, cta, emoji, onClick;
+
+  // Priority 1: Follow-up reminders (stale outreach)
+  if (staleCount > 0) {
+    emoji = '📬';
+    message = (
+      <>
+        You have <span style={{ color: '#FA4616', fontWeight: 700 }}>{staleCount} contact{staleCount > 1 ? 's' : ''} waiting for follow-up</span>.
+        Students who send a follow-up within 5 days get <span style={{ color: '#FA4616', fontWeight: 700 }}>3x more replies</span>.
+      </>
+    );
+    cta = 'Draft Follow-Ups →';
+    onClick = () => onOpenChat('Draft follow-up messages for contacts I reached out to but haven\'t heard back from');
+  }
+  // Priority 2: Unmessaged alumni
+  else if (hasUnmessaged) {
+    emoji = '💡';
     message = (
       <>
         Students who reach out within 48 hours of identifying an alumni get{' '}
@@ -14,7 +46,11 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
       </>
     );
     cta = 'Draft Messages →';
-  } else if (targets < 3) {
+    onClick = () => onOpenChat('Draft outreach messages for alumni I haven\'t contacted yet');
+  }
+  // Priority 3: Need more targets
+  else if (targets < 3) {
+    emoji = '💡';
     message = (
       <>
         Students with <span style={{ color: '#FA4616', fontWeight: 700 }}>3+ target companies</span> get matched
@@ -22,7 +58,11 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
       </>
     );
     cta = 'Add Targets →';
-  } else {
+    onClick = () => onAddTargets?.();
+  }
+  // Default
+  else {
+    emoji = '💡';
     message = (
       <>
         Your pipeline is building. Students who follow up weekly see{' '}
@@ -31,36 +71,38 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
       </>
     );
     cta = 'View Pipeline →';
+    onClick = () => onOpenChat('');
   }
 
   return (
     <div className="fiq-animate fiq-delay-2" style={{
-      background: 'linear-gradient(135deg, rgba(0,33,165,0.06), rgba(250,70,22,0.04))',
-      border: '1px solid rgba(0,33,165,0.1)',
+      background: staleCount > 0
+        ? 'linear-gradient(135deg, rgba(250,70,22,0.06), rgba(245,158,11,0.04))'
+        : 'linear-gradient(135deg, rgba(0,33,165,0.06), rgba(250,70,22,0.04))',
+      border: staleCount > 0 ? '1px solid rgba(250,70,22,0.15)' : '1px solid rgba(0,33,165,0.1)',
       borderRadius: 16, padding: '20px 24px', marginBottom: 32,
       display: 'flex', alignItems: 'flex-start', gap: 16,
     }}>
       <div style={{
         width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-        background: 'linear-gradient(135deg, rgba(0,33,165,0.12), rgba(250,70,22,0.08))',
+        background: staleCount > 0
+          ? 'linear-gradient(135deg, rgba(250,70,22,0.12), rgba(245,158,11,0.08))'
+          : 'linear-gradient(135deg, rgba(0,33,165,0.12), rgba(250,70,22,0.08))',
         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-      }}>💡</div>
+      }}>{emoji}</div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', marginBottom: 4 }}>FASTIQ Insight</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', marginBottom: 4 }}>
+          {staleCount > 0 ? 'Follow-Up Needed' : 'FASTIQ Insight'}
+        </div>
         <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.6 }}>{message}</div>
         <button
-          onClick={() => {
-            if (hasUnmessaged) {
-              onOpenChat('Draft outreach messages for alumni I haven\'t contacted yet');
-            } else if (targets < 3 && onAddTargets) {
-              onAddTargets();
-            } else {
-              onOpenChat('');
-            }
-          }}
+          onClick={onClick}
           style={{
-            marginTop: 10, background: 'none', border: '1.5px solid #0021A5',
-            color: '#0021A5', padding: '6px 16px', borderRadius: 8,
+            marginTop: 10,
+            background: staleCount > 0 ? '#FA4616' : 'none',
+            border: staleCount > 0 ? 'none' : '1.5px solid #0021A5',
+            color: staleCount > 0 ? '#fff' : '#0021A5',
+            padding: '6px 16px', borderRadius: 8,
             fontSize: 12, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
             transition: 'all 0.2s',
           }}
