@@ -17,7 +17,6 @@ Deno.serve(async (req) => {
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const oneWeekAgoISO = oneWeekAgo.toISOString();
-
     const weekOfDate = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     let sentCount = 0;
@@ -27,40 +26,33 @@ Deno.serve(async (req) => {
       try {
         if (!profile.user_email) continue;
 
-        // STEP 1 — Fetch weekly data
-        const [interactions, feedback, messages, helpRequests] = await Promise.all([
+        const [interactions, feedback, messages] = await Promise.all([
           base44.asServiceRole.entities.InteractionLog.filter({
             student_email: profile.user_email,
             status: 'completed'
-          }),
+          }).catch(() => []),
           base44.asServiceRole.entities.InteractionFeedback.filter({
             student_email: profile.user_email
-          }),
+          }).catch(() => []),
           base44.asServiceRole.entities.Message.filter({
             sender_email: profile.user_email
-          }),
-          base44.asServiceRole.entities.HelpRequest.filter({
-            student_email: profile.user_email
-          })
+          }).catch(() => [])
         ]);
 
         const weekInteractions = (interactions || []).filter(i => i.completed_at && i.completed_at >= oneWeekAgoISO);
         const weekFeedback = (feedback || []).filter(r => r.created_date && r.created_date >= oneWeekAgoISO);
         const weekMessages = (messages || []).filter(m => m.created_date && m.created_date >= oneWeekAgoISO);
-        const weekHelpRequests = (helpRequests || []).filter(h => h.created_date && h.created_date >= oneWeekAgoISO);
 
         const newInteractions = weekInteractions.length;
         const newFeedbackCount = weekFeedback.length;
         const messagesSent = weekMessages.length;
         const positiveWeekFeedback = weekFeedback.filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
 
-        // STEP 2 — Urgency tier
         const urgencyTier = calculateUrgencyTier(profile, now);
         if (urgencyTier !== profile.urgency_tier) {
-          await base44.asServiceRole.entities.FastTrackProfile.update(profile.id, { urgency_tier: urgencyTier });
+          await base44.asServiceRole.entities.FastTrackProfile.update(profile.id, { urgency_tier: urgencyTier }).catch(() => {});
         }
 
-        // STEP 3 — Cold app equivalent (cumulative)
         const allInteractions = (interactions || []).filter(i => i.status === 'completed');
         const allPositiveFeedback = (feedback || []).filter(r => r.overall_impression === 'excellent' || r.overall_impression === 'great');
         const intros = await base44.asServiceRole.entities.Intro.filter({ student_email: profile.user_email }).catch(() => []);
@@ -71,11 +63,9 @@ Deno.serve(async (req) => {
           allPositiveFeedback.length * 10 +
           ((intros || []).length + (connections || []).length) * 20;
 
-        // STEP 4 — Grades
         const activityGrade = newInteractions >= 3 ? 'A' : newInteractions === 2 ? 'B' : newInteractions === 1 ? 'C' : 'D';
         const feedbackGrade = positiveWeekFeedback.length >= 2 ? 'A' : positiveWeekFeedback.length === 1 ? 'B' : newFeedbackCount >= 1 ? 'C' : 'D';
 
-        // STEP 5 — Build email
         const studentName = profile.user_name || profile.user_email.split('@')[0];
         const tierDisplayNames = {
           just_getting_started: 'Just Getting Started',
@@ -88,7 +78,6 @@ Deno.serve(async (req) => {
         const tierGap = getTierGap(profile);
         const thisWeeksMove = getThisWeeksMove(profile);
 
-        // Positive feedback quote
         let feedbackQuote = '';
         if (positiveWeekFeedback.length > 0) {
           const topFeedback = positiveWeekFeedback[0];
@@ -164,12 +153,10 @@ How you network matters. Show up, and we'll bend over backwards for you.
 
 function calculateUrgencyTier(profile, now) {
   if (!profile.graduation_year) return 'cruising';
-
   const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
   const gradMonth = semesterMonthMap[profile.graduation_semester] || 5;
   const gradDate = new Date(profile.graduation_year, gradMonth - 1, 15);
   const monthsUntil = (gradDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-
   if (monthsUntil > 18) return 'cruising';
   if (monthsUntil > 12) return 'time_to_move';
   if (monthsUntil > 6) return 'dont_miss_this';
@@ -191,7 +178,6 @@ function getUrgencyHeadline(urgencyTier, profile, now) {
     const monthsLeft = Math.max(1, Math.round((gradDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
     return `You're ${monthsLeft} months from graduation. This is the semester that matters most.`;
   }
-  // all_hands_on_deck
   const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
   const gradMonth = semesterMonthMap[profile.graduation_semester] || 5;
   const gradDate = new Date(profile.graduation_year, gradMonth - 1, 15);
@@ -229,7 +215,6 @@ function getTierGap(profile) {
     if (streak < 4) gaps.push(`a ${4 - streak} week longer activity streak`);
     return gaps.length > 0 ? `You need ${gaps.join(', ')} to reach Fast Tracked.` : "You're on the doorstep of Fast Tracked! Keep going.";
   }
-  // fast_tracked
   return "You're Fast Tracked! Stay active to maintain your visibility to hiring companies.";
 }
 
@@ -244,15 +229,12 @@ function getThisWeeksMove(profile) {
   if (tier === 'just_getting_started' || completed < 1) {
     return `Parents in ${industries} are active this week. Claim your first conversation — it only takes one to start building momentum.`;
   }
-
-  // Find biggest gap to next tier
   if (tier === 'building_momentum') {
     if (completed < 3) return `${3 - completed} parents in ${industries} are active this week. Claim a conversation.`;
     if (positiveFeedback < 2) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
     if (followUp < 60) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
     return 'Keep connecting — you\'re close to Rising!';
   }
-
   if (tier === 'rising') {
     if (completed < 6) return `Schedule your next conversation this week. ${6 - completed} more to reach Fast Tracked.`;
     if (positiveFeedback < 5) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
@@ -260,7 +242,5 @@ function getThisWeeksMove(profile) {
     if (streak < 4) return `Log in and connect this week to keep your streak alive. You're at ${streak} week${streak !== 1 ? 's' : ''}.`;
     return 'You\'re almost Fast Tracked. One more strong week could do it.';
   }
-
-  // fast_tracked
   return 'Stay visible. Companies are watching. Schedule a conversation this week to maintain your streak.';
 }
