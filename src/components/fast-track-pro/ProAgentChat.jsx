@@ -15,6 +15,7 @@ import InterviewPrepCard from './InterviewPrepCard';
 import SalaryIntelCard from './SalaryIntelCard';
 import CoverLetterCard from './CoverLetterCard';
 import LinkedInReviewCard from './LinkedInReviewCard';
+import BatchTargetScanCard from './BatchTargetScanCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
