@@ -449,9 +449,10 @@ export default function StudentOnboarding() {
                     <button
                       key={year}
                       type="button"
+                      data-chip="true"
                       onClick={() => setGradYear(year)}
                       className={`
-                        px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm
+                        chip-btn px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm
                         ${gradYear === year
                           ? 'bg-blue-50 border-[#0021A5] text-[#0021A5] shadow-md'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
