@@ -166,6 +166,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     setInput('');
     setIsLoading(true);
 
+    // Persist user message for context tracking
+    persistMessage('user', text, 'text');
+
     try {
       const timeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), 45000)
@@ -184,6 +187,8 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           message_type: data.message_type || 'text',
           payload: data.payload,
         }]);
+        // Persist assistant response for context tracking
+        persistMessage('assistant', data.response, data.message_type || 'text');
       } else {
         setMessages(prev => [...prev, {
           role: 'assistant',
