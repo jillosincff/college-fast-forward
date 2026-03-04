@@ -467,7 +467,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                 onKeyDown={handleKeyDown}
                 placeholder="Ask FASTIQ anything..."
                 rows={1}
-                className="flex-1 resize-none text-sm px-2 py-2 outline-none bg-transparent max-h-32"
+                className="flex-1 resize-none text-sm px-2 py-2 outline-none bg-transparent max-h-32 focus:ring-0 focus:outline-none border-none shadow-none"
                 style={{ minHeight: '40px' }}
               />
               <button
