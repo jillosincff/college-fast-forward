@@ -708,6 +708,97 @@ function isShortAnswer(message) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  FOLLOW-UP DRAFT HANDLER
+// ═══════════════════════════════════════════════════════════
+
+async function handleFollowUpDraft(base44, user, profile, resolvedMessage, pipelineData, staleOutreach, profileContext) {
+  console.log('Intent: follow_up_draft');
+  const followUpNameMatch = resolvedMessage.match(/follow.?up\s+(?:message\s+)?(?:to|with|for)\s+(\w[\w\s.''-]{1,40}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
+  let targetName = followUpNameMatch?.[1]?.trim() || '';
+  let targetCompanyName = followUpNameMatch?.[2]?.trim() || '';
+
+  let pipelineRecord = null;
+  if (targetName && pipelineData.length > 0) {
+    pipelineRecord = pipelineData.find(p => p.status === 'reached_out' && (p.alumni_name?.toLowerCase().includes(targetName.toLowerCase()) || targetName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')));
+    if (!pipelineRecord) pipelineRecord = pipelineData.find(p => p.alumni_name?.toLowerCase().includes(targetName.toLowerCase()) || targetName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || ''));
+  }
+  if (!pipelineRecord && staleOutreach.length > 0) pipelineRecord = staleOutreach[0];
+
+  targetName = pipelineRecord?.alumni_name || targetName || 'the contact';
+  targetCompanyName = pipelineRecord?.company || targetCompanyName || '';
+  const daysSince = pipelineRecord?.reached_out_date ? Math.round((Date.now() - new Date(pipelineRecord.reached_out_date).getTime()) / (1000*60*60*24)) : 5;
+  const followUpCount = pipelineRecord?.follow_up_count || 0;
+
+  // SECOND FOLLOW-UP: 14+ days total and already sent 1 follow-up → suggest alternatives, no 3rd message
+  if (followUpCount >= 1 && daysSince >= 14) {
+    console.log('Second follow-up limit reached for', targetName);
+    const otherTargets = (profile.target_companies || []).filter(c => c.toLowerCase() !== targetCompanyName.toLowerCase());
+    if (pipelineRecord?.id) {
+      base44.entities.NetworkingPipeline.update(pipelineRecord.id, { status: 'no_response', status_date: new Date().toISOString(), notes: (pipelineRecord.notes || '') + `\nMarked no_response after 2 attempts on ${new Date().toLocaleDateString()}` }).catch(() => {});
+    }
+    return Response.json({
+      success: true,
+      response: `**${targetName}** hasn't replied after your follow-up. That happens — it doesn't mean they're not interested. I'd suggest:\n\n→ **Try connecting on LinkedIn** with a brief note instead\n→ **Look for other UF alumni at ${targetCompanyName}** — sometimes a different contact works better\n→ **Move on to other targets** — you have ${otherTargets.length > 0 ? otherTargets.length + ' other companies' : 'other companies'} to pursue\n\nTwo outreach attempts is the professional limit. I've moved ${targetName} to "no response" in your pipeline.`,
+      message_type: 'career_advice',
+      payload: { suggested_actions: [`Find other UF alumni at ${targetCompanyName}`, otherTargets.length > 0 ? `Research ${otherTargets[0]} for me` : 'Help me find new companies to target', 'Show my networking pipeline'] }
+    });
+  }
+  // Already sent 1 follow-up but not 14 days yet
+  if (followUpCount >= 1) {
+    return Response.json({
+      success: true,
+      response: `You already sent a follow-up to **${targetName}** at ${targetCompanyName}. Wait about 7 more days — if they still haven't responded, I'll suggest alternative strategies.`,
+      message_type: 'career_advice',
+      payload: { suggested_actions: [`Find other UF alumni at ${targetCompanyName}`, 'Research my #1 target company'] }
+    });
+  }
+
+  // Load original outreach for context
+  let originalMessage = '';
+  if (pipelineRecord?.outreach_message_id) {
+    try { const c = await base44.entities.ProAgentConversation.filter({ id: pipelineRecord.outreach_message_id }); if (c?.[0]?.content) originalMessage = c[0].content.substring(0, 500); } catch(e) {}
+  }
+
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are FASTIQ. Draft a follow-up message for this student.
+
+${profileContext}
+
+CONTEXT:
+- Original outreach was sent to ${targetName}, ${pipelineRecord?.alumni_role || ''} at ${targetCompanyName} approximately ${daysSince} days ago
+- No reply received yet
+- Student's name: ${user.full_name || 'Gator Student'}
+- Student's major: ${user.major || 'undeclared'}
+${originalMessage ? `\nORIGINAL MESSAGE:\n${originalMessage}` : ''}
+
+RULES:
+1. Keep it SHORT — 3-4 sentences max
+2. Reference the original message: "I reached out last week about..."
+3. Add a new hook — mention something current about the company or a different angle
+4. One clear, low-pressure ask: "If you have 15 minutes, I'd love to hear about your experience at ${targetCompanyName}"
+5. Do NOT sound desperate, passive-aggressive, or robotic
+6. Do NOT say "I'm sure you're busy" or "I know you're busy" — it's presumptuous
+7. Tone: warm, confident, brief
+8. Sign off with first name only (not full signature again)`,
+    add_context_from_internet: true,
+    response_json_schema: { type: "object", properties: { response: { type: "string" }, recipient: { type: "string" }, channel: { type: "string" }, subject: { type: "string" }, message_body: { type: "string" } }, required: ["response", "recipient", "message_body"] }
+  });
+
+  // Update pipeline
+  if (pipelineRecord?.id) {
+    const now = new Date().toISOString();
+    base44.entities.NetworkingPipeline.update(pipelineRecord.id, { follow_up_date: now, follow_up_count: followUpCount + 1, status_date: now, notes: (pipelineRecord.notes || '') + `\nFollow-up sent ${new Date().toLocaleDateString()}` }).catch(() => {});
+  }
+
+  trackActivity(base44, user.email, profile.id, 'message_draft', targetName);
+  return Response.json({
+    success: true, response: result.response || `Here's your follow-up to ${targetName}:`,
+    message_type: 'outreach_draft',
+    payload: { recipient: result.recipient || targetName, recipient_title: pipelineRecord?.alumni_role || '', recipient_company: targetCompanyName, channel: result.channel || 'LinkedIn', subject: result.subject || '', message: result.message_body || '', ask_type: 'follow_up' }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN HANDLER
 // ═══════════════════════════════════════════════════════════
 
