@@ -317,6 +317,47 @@ function detectCoverLetter(message) {
     /(?:write|draft|create)\s+(?:a\s+)?cover\s+letter/i.test(message);
 }
 
+function detectFollowUp(message) {
+  const lower = message.toLowerCase();
+  return /(?:follow.?up|followup)\s+(?:message|email|note|to|for|with)/i.test(message) ||
+    /(?:draft|write|send)\s+(?:a\s+)?follow.?up/i.test(message) ||
+    /haven'?t\s+heard\s+back/i.test(message) ||
+    /no\s+(?:reply|response)\s+(?:yet|from)/i.test(message) ||
+    lower.includes('follow up') || lower.includes('followup');
+}
+
+function detectReplyHelp(message) {
+  const lower = message.toLowerCase();
+  return /(?:they|he|she|alumni|contact)\s+(?:replied|responded|wrote back|got back)/i.test(message) ||
+    /(?:help me|craft|write)\s+(?:a\s+)?(?:response|reply)/i.test(message) ||
+    /(?:here'?s?\s+(?:what|their)\s+(?:they|reply|response)|paste[d]?\s+(?:their|the)\s+reply)/i.test(message) ||
+    /(?:replied to my|responded to my)\s+(?:outreach|message|email)/i.test(message) ||
+    lower.includes('they replied') || lower.includes('got a reply') || lower.includes('they responded');
+}
+
+function detectThankYouNote(message) {
+  const lower = message.toLowerCase();
+  return /(?:thank.?you|thanks)\s+(?:note|email|message|letter)/i.test(message) ||
+    /(?:draft|write|send)\s+(?:a\s+)?thank.?you/i.test(message) ||
+    /(?:after\s+(?:the|my)\s+interview)/i.test(message) && /(?:thank|follow)/i.test(message) ||
+    lower.includes('thank you note') || lower.includes('thank-you note') || lower.includes('thank you email');
+}
+
+function detectOfferNegotiation(message) {
+  const lower = message.toLowerCase();
+  return /(?:got|received|have)\s+(?:an?\s+)?offer/i.test(message) ||
+    /(?:offer\s+from|job\s+offer)/i.test(message) ||
+    /(?:negotiate|negotiation)\s+(?:the|my|an?)\s+(?:offer|salary|comp)/i.test(message) ||
+    /(?:evaluate|assess)\s+(?:the|my|an?)\s+offer/i.test(message);
+}
+
+function detectNetworkThankYou(message) {
+  const lower = message.toLowerCase();
+  return /(?:thank|message)\s+(?:everyone|all|my\s+network|my\s+contacts|everyone\s+who\s+helped)/i.test(message) ||
+    /(?:draft\s+thank.?you\s+(?:to|for)\s+(?:everyone|all|my\s+network))/i.test(message) ||
+    lower.includes('thank my network') || lower.includes('thank everyone who helped');
+}
+
 // ═══════════════════════════════════════════════════════════
 //  DATA / CACHE HELPERS
 // ═══════════════════════════════════════════════════════════
