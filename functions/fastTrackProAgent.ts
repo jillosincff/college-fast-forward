@@ -1385,7 +1385,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
       });
 
       const intel = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nhiring_score: 0-100 (80+=hot, 50-79=warm, <50=cool). salary_range: specific like "$65K-$95K". recent_news: array of 2-4 factual items.`,
+        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nhiring_score: 0-100 (80+=hot, 50-79=warm, <50=cool). salary_range: specific like "$65K-$95K". recent_news: array of 2-4 factual items. If the company doesn't appear to be a real company or the research returned no meaningful results, set hiring_score to 0 and company_summary to "NOT_FOUND".`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -1396,6 +1396,17 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
           required: ["response","hiring_score","hiring_signal","salary_range","open_roles_count","company_summary"]
         }
       });
+
+      // LAYER 3: Graceful recovery — if company not found or nonsensical results
+      if (intel.company_summary === 'NOT_FOUND' || (intel.hiring_score === 0 && intel.open_roles_count === 0 && (!intel.company_summary || intel.company_summary.length < 20))) {
+        console.log(`[Layer3] Company "${detectedCompany}" returned nonsensical results — recovering gracefully`);
+        return Response.json({
+          success: true,
+          response: `Hmm, I might have misunderstood. It looks like **"${detectedCompany}"** isn't matching a real company. Did you mean something else?\n\nYou can try:\n→ Naming a specific company like **"Research Apple"** or **"Research ${targetCompanies[0] || 'Google'}"**\n→ Or asking me to **"find internships at my target companies"**\n→ Or **"help me find companies to target"**`,
+          message_type: 'text',
+          payload: {}
+        });
+      }
 
       saveCompanyIntelCache(base44, detectedCompany, { hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, summary: intel.company_summary, open_roles_count: intel.open_roles_count, salary_range: intel.salary_range });
       trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
