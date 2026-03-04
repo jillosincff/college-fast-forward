@@ -713,6 +713,13 @@ Deno.serve(async (req) => {
 - Challenge: ${profile.biggest_challenge || 'not set'}
 - Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}`;
 
+    // Detect explicit confirmation responses like "Yes, research X" → bypass Layer 2
+    const confirmationMatch = message.match(/^(?:yes|yeah|yep|sure|ok|okay|correct|right|go ahead)[,.]?\s*(?:research|look into|check|find|scan)\s+(.+)/i);
+    const isConfirmation = confirmationMatch || /^(?:yes|yeah|yep|sure|ok|okay|correct|right|go ahead|do it|please)[.!,]?\s*$/i.test(message.trim());
+    if (isConfirmation) {
+      console.log('[Layer2 Bypass] User confirmed — skipping confirmation gate this turn');
+    }
+
     // Resolve target company references (#1 target, my dream company, etc.)
     let resolvedMessage = message;
     const targetCompanies = profile.target_companies || [];
