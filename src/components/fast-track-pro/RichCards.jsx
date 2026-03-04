@@ -212,7 +212,7 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                   className="mt-1.5 text-[11px] font-medium text-[#0021A5] hover:text-[#001580] hover:underline bg-transparent border-0 p-0 cursor-pointer"
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
                 >
-                  ✉️ Draft message to {a.name?.split(' ')[0]}
+                  ✉️ Draft message to {getFirstName(a.name)}
                 </button>
               )}
             </div>
