@@ -62,24 +62,27 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
 
       // Build ticker items from real data
       const tItems = [];
-      if (intelRaw.length > 0) {
-        const recent = intelRaw[0];
-        tItems.push(`FASTIQ scanned ${recent.company_name || 'your targets'} recently`);
-        if (recent.open_roles_count > 0) tItems.push(`${recent.company_name} has ${recent.open_roles_count} open roles`);
-      }
+      intelRaw.forEach(intel => {
+        const name = titleCase(intel.company_name || '');
+        if (name) {
+          tItems.push(`FASTIQ scanned ${name} recently`);
+          if (intel.open_roles_count > 0) tItems.push(`${name} has ${intel.open_roles_count} open roles this week`);
+          if (intel.hiring_signal === 'hot') tItems.push(`🔥 ${name} is actively hiring right now`);
+        }
+      });
       if (alumniRaw.length > 0) {
-        const companies = [...new Set(alumniRaw.slice(0, 3).map(a => a.company).filter(Boolean))];
+        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => a.company).filter(Boolean))];
         companies.forEach(c => {
           const count = aMap[c.toLowerCase()] || 0;
           if (count > 0) tItems.push(`${count} UF alumni found at ${titleCase(c)}`);
         });
       }
       if (oppsRaw.length > 0) {
-        tItems.push(`${oppsRaw.length} new opportunities matched to your profile`);
+        tItems.push(`${oppsRaw.length} new opportunities matched to your profile this week`);
       }
       // Fallback placeholders
       if (tItems.length < 3) {
-        tItems.push('FASTIQ scanned your targets 12 min ago');
+        tItems.push('FASTIQ is scanning your target companies right now');
         tItems.push('New roles posted at target companies this week');
         tItems.push('FASTIQ continuously monitors hiring signals for you');
       }
