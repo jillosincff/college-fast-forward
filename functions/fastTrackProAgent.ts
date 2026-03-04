@@ -834,7 +834,9 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
 
       const news = Array.isArray(intel.recent_news) ? intel.recent_news : (intel.recent_news ? [intel.recent_news] : []);
       const intelForAnalysis = { ...intel, recent_news: news };
-      const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis);
+      // Build memory delta context from previous intel
+      const memoryCtx = buildMemoryContext(previousIntel, intel, detectedCompany);
+      const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis, memoryCtx);
 
       return Response.json({
         success: true,
