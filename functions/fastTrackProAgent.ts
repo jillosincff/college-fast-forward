@@ -325,6 +325,79 @@ function filterAndDedupAlumni(rawAlumni, fallbackCompany) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  CONTEXT-AWARE INTENT CLASSIFICATION (LLM fallback)
+// ═══════════════════════════════════════════════════════════
+
+async function classifyIntentWithContext(base44, message, recentMessages, profileContext) {
+  // Build conversation snippet for LLM
+  const convoSnippet = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content?.substring(0, 300)}`).join('\n');
+
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are an intent classifier for FASTIQ, a career AI for UF students.
+
+${profileContext}
+
+RECENT CONVERSATION:
+${convoSnippet}
+User: ${message}
+
+Given this conversation context, classify the user's CURRENT message intent.
+
+CRITICAL RULES:
+- If the assistant just asked a clarifying question (like "Which company?", "What company?", "Tell me about which company?") and the user responded with a company name or short answer, treat the user's message as the ANSWER to that question, NOT a new standalone query.
+- Map the answer back to the ORIGINAL intent. For example:
+  - If assistant asked "Which company do you want me to scan for UF alumni?" and user says "Disney" → intent is "alumni_discovery" with company "Disney"
+  - If assistant asked "Which company should I research?" and user says "Google" → intent is "company_intel" with company "Google"  
+  - If assistant asked "Who should I draft a message to?" and user says "John Smith" → intent is "outreach_draft" with target "John Smith"
+  - If assistant suggested "Want me to find UF alumni there?" and user says "yes" or "sure" → intent is "alumni_discovery" with company from previous context
+- If the message is a standalone request, classify normally.
+
+Possible intents: alumni_discovery, company_intel, outreach_draft, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
+
+Return the intent and any extracted entity (company name, person name, etc).`,
+    response_json_schema: {
+      type: "object",
+      properties: {
+        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
+        company: { type: "string", description: "Company name if relevant, empty string if not" },
+        person: { type: "string", description: "Person name if relevant (for outreach), empty string if not" },
+        confidence: { type: "string", enum: ["high", "medium", "low"] },
+        reasoning: { type: "string", description: "Brief explanation of classification" }
+      },
+      required: ["intent", "company", "confidence"]
+    }
+  });
+
+  return result;
+}
+
+// Check if the assistant's last message was a clarifying question
+function isAssistantAskingClarification(lastAssistantContent) {
+  if (!lastAssistantContent) return false;
+  const lower = lastAssistantContent.toLowerCase();
+  const patterns = [
+    /which company/i, /what company/i, /tell me (?:about )?which/i,
+    /which (?:one|firm|employer|organization)/i,
+    /want me to (?:scan|research|look into|check)/i,
+    /should i (?:scan|research|look into|check)/i,
+    /who should i (?:draft|write|compose)/i,
+    /who do you want me to/i,
+    /what (?:role|position|job)/i,
+    /\?\s*$/  // ends with a question mark
+  ];
+  return patterns.some(p => p.test(lower));
+}
+
+// Check if user message is a short answer (likely replying to a question)
+function isShortAnswer(message) {
+  const words = message.trim().split(/\s+/);
+  // Short answers: 1-4 words, or "yes/sure/yeah" affirmatives
+  if (words.length <= 4) return true;
+  if (/^(?:yes|yeah|yep|sure|ok|okay|please|definitely|absolutely|do it|go ahead|sounds good)/i.test(message.trim())) return true;
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN HANDLER
 // ═══════════════════════════════════════════════════════════
 
@@ -338,6 +411,16 @@ Deno.serve(async (req) => {
     const message = body.message;
     const conversation_history = body.conversation_history || '';
     if (!message) return Response.json({ error: 'Message is required' }, { status: 400 });
+
+    // Load recent conversation messages from DB for context tracking
+    let recentDbMessages = [];
+    try {
+      const dbMessages = await base44.entities.ProAgentConversation.filter(
+        { user_email: user.email }, '-created_date', 6
+      );
+      // Reverse to chronological order (oldest first)
+      recentDbMessages = (dbMessages || []).reverse();
+    } catch(e) { console.log('Could not load conversation history:', e.message); }
 
     // Load profile
     let profile = {};
