@@ -587,12 +587,16 @@ Deno.serve(async (req) => {
       const alumni = filterAndDedupAlumni(alumniResult.alumni || [], alumniCompany);
 
       if (alumni.length > 0) {
-        saveAlumniCache(base44, alumni);
-        saveToPipeline(base44, user.email, alumniCompany, alumni);
+        // Cross-reference against CFF member database
+        const enrichedAlumni = await crossReferenceCFF(base44, alumni);
+        saveAlumniCache(base44, enrichedAlumni);
+        saveToPipeline(base44, user.email, alumniCompany, enrichedAlumni);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
+        const cffCount = enrichedAlumni.filter(a => a.is_cff_member).length;
+        const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message ${cffCount === 1 ? 'them' : 'them'} directly on CFF!` : '';
         return Response.json({
-          success: true, response: alumniResult.response || `Here are UF alumni at ${alumniCompany}:`,
-          message_type: 'alumni_card', payload: { alumni, cached: false }
+          success: true, response: (alumniResult.response || `Here are UF alumni at ${alumniCompany}:`) + cffNote,
+          message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false }
         });
       }
 
