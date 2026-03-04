@@ -68,7 +68,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
   );
 }
 
-export default function TargetCompaniesSection({ companies, companyIntel, alumniCounts, onOpenChat }) {
+export default function TargetCompaniesSection({ companies, companyIntel, alumniCounts, onOpenChat, onAddTargets }) {
   return (
     <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -76,7 +76,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
           fontSize: 11, fontWeight: 700, color: '#94A3B8',
           textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
         }}>Target Companies</h2>
-        <button onClick={() => onOpenChat('Help me find more companies to target')} style={{
+        <button onClick={onAddTargets} style={{
           background: 'none', border: '1.5px solid #E2E8F0', padding: '6px 14px',
           borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#0021A5',
           cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
@@ -104,7 +104,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
           <div style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.5, maxWidth: 320, margin: '0 auto 16px' }}>
             Tell FASTIQ which companies you're interested in and it will find UF alumni, track hiring signals, and scout opportunities for you.
           </div>
-          <button onClick={() => onOpenChat('Help me find companies to target based on my profile')} style={{
+          <button onClick={onAddTargets} style={{
             background: '#0021A5', color: '#fff', border: 'none', padding: '10px 24px',
             borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
           }}>+ Add Target Companies</button>

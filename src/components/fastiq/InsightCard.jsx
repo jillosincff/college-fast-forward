@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function InsightCard({ unmessagedAlumni, onOpenChat, profile }) {
+export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets, profile }) {
   const hasUnmessaged = unmessagedAlumni > 0;
   const targets = profile?.target_companies?.length || 0;
 
@@ -49,7 +49,15 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, profile }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', marginBottom: 4 }}>FASTIQ Insight</div>
         <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.6 }}>{message}</div>
         <button
-          onClick={() => onOpenChat(hasUnmessaged ? 'Draft outreach messages for alumni I haven\'t contacted yet' : '')}
+          onClick={() => {
+            if (hasUnmessaged) {
+              onOpenChat('Draft outreach messages for alumni I haven\'t contacted yet');
+            } else if (targets < 3 && onAddTargets) {
+              onAddTargets();
+            } else {
+              onOpenChat('');
+            }
+          }}
           style={{
             marginTop: 10, background: 'none', border: '1.5px solid #0021A5',
             color: '#0021A5', padding: '6px 16px', borderRadius: 8,

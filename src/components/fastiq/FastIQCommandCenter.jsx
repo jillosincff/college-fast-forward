@@ -9,8 +9,9 @@ import PipelineBar from './PipelineBar';
 import TargetCompaniesSection from './TargetCompaniesSection';
 import QuickActionsGrid from './QuickActionsGrid';
 import WeeklyBriefCard from './WeeklyBriefCard';
+import AddTargetsModal from './AddTargetsModal';
 
-export default function FastIQCommandCenter({ user, profile, onOpenChat, highlightAlerts }) {
+export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
   const [alumniCounts, setAlumniCounts] = useState({});
   const [pipelineCounts, setPipelineCounts] = useState({ identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0 });
@@ -18,6 +19,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
   const [tickerItems, setTickerItems] = useState([]);
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
+  const [showAddTargets, setShowAddTargets] = useState(false);
   const alertsRef = useRef(null);
 
   useEffect(() => {
@@ -188,7 +190,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
 
       {/* CONTENT */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
-        <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} profile={profile} />
+        <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} onAddTargets={() => setShowAddTargets(true)} profile={profile} />
 
         {newOpportunities.length > 0 && (
           <div ref={alertsRef} className="fiq-animate fiq-delay-3">
@@ -210,6 +212,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
           companyIntel={companyIntel}
           alumniCounts={alumniCounts}
           onOpenChat={onOpenChat}
+          onAddTargets={() => setShowAddTargets(true)}
         />
 
         <QuickActionsGrid onOpenChat={onOpenChat} />
@@ -222,6 +225,19 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
           FASTIQ™ by College Fast Forward · Because applying isn't a strategy.
         </div>
       </div>
+
+      {showAddTargets && (
+        <AddTargetsModal
+          profile={profile}
+          onClose={() => setShowAddTargets(false)}
+          onSaved={(newCompanies) => {
+            setShowAddTargets(false);
+            if (onProfileUpdated) {
+              onProfileUpdated({ ...profile, target_companies: newCompanies });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
