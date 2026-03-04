@@ -318,22 +318,44 @@ function detectCoverLetter(message) {
 }
 
 function detectFollowUp(message) {
-  return /(?:follow.?up|haven'?t heard back|no reply|didn'?t respond|no response)/i.test(message) &&
-    /(?:draft|write|compose|help|message|email)/i.test(message);
+  const lower = message.toLowerCase();
+  return /(?:follow.?up|followup)\s+(?:message|email|note|to|for|with)/i.test(message) ||
+    /(?:draft|write|send)\s+(?:a\s+)?follow.?up/i.test(message) ||
+    /haven'?t\s+heard\s+back/i.test(message) ||
+    /no\s+(?:reply|response)\s+(?:yet|from)/i.test(message) ||
+    lower.includes('follow up') || lower.includes('followup');
 }
 
 function detectReplyHelp(message) {
-  return /(?:they replied|got a reply|received a reply|they responded|they said|here'?s what they said|paste their reply)/i.test(message) ||
-    (/(?:help me respond|craft.*?response|respond to)/i.test(message) && /(?:replied|response|outreach)/i.test(message));
+  const lower = message.toLowerCase();
+  return /(?:they|he|she|alumni|contact)\s+(?:replied|responded|wrote back|got back)/i.test(message) ||
+    /(?:help me|craft|write)\s+(?:a\s+)?(?:response|reply)/i.test(message) ||
+    /(?:here'?s?\s+(?:what|their)\s+(?:they|reply|response)|paste[d]?\s+(?:their|the)\s+reply)/i.test(message) ||
+    /(?:replied to my|responded to my)\s+(?:outreach|message|email)/i.test(message) ||
+    lower.includes('they replied') || lower.includes('got a reply') || lower.includes('they responded');
 }
 
 function detectThankYouNote(message) {
-  return /(?:thank.?you note|thank.?you email|thank everyone|thank my network|thank.?you.*?interview)/i.test(message) ||
-    (/(?:draft|write)\s+(?:a\s+)?thank/i.test(message));
+  const lower = message.toLowerCase();
+  return /(?:thank.?you|thanks)\s+(?:note|email|message|letter)/i.test(message) ||
+    /(?:draft|write|send)\s+(?:a\s+)?thank.?you/i.test(message) ||
+    /(?:after\s+(?:the|my)\s+interview)/i.test(message) && /(?:thank|follow)/i.test(message) ||
+    lower.includes('thank you note') || lower.includes('thank-you note') || lower.includes('thank you email');
 }
 
-function detectInterviewFollowUp(message) {
-  return /(?:how did.*?interview go|after.*?interview|interview went|post.?interview|thank.?you.*?after.*?interview)/i.test(message);
+function detectOfferNegotiation(message) {
+  const lower = message.toLowerCase();
+  return /(?:got|received|have)\s+(?:an?\s+)?offer/i.test(message) ||
+    /(?:offer\s+from|job\s+offer)/i.test(message) ||
+    /(?:negotiate|negotiation)\s+(?:the|my|an?)\s+(?:offer|salary|comp)/i.test(message) ||
+    /(?:evaluate|assess)\s+(?:the|my|an?)\s+offer/i.test(message);
+}
+
+function detectNetworkThankYou(message) {
+  const lower = message.toLowerCase();
+  return /(?:thank|message)\s+(?:everyone|all|my\s+network|my\s+contacts|everyone\s+who\s+helped)/i.test(message) ||
+    /(?:draft\s+thank.?you\s+(?:to|for)\s+(?:everyone|all|my\s+network))/i.test(message) ||
+    lower.includes('thank my network') || lower.includes('thank everyone who helped');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -627,13 +649,13 @@ CRITICAL RULES:
   - If assistant suggested "Want me to find UF alumni there?" and user says "yes" or "sure" → intent is "alumni_discovery" with company from previous context
 - If the message is a standalone request, classify normally.
 
-Possible intents: alumni_discovery, company_intel, outreach_draft, follow_up, reply_help, thank_you, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
+Possible intents: alumni_discovery, company_intel, outreach_draft, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
 
 Return the intent and any extracted entity (company name, person name, etc).`,
     response_json_schema: {
       type: "object",
       properties: {
-        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "follow_up", "reply_help", "thank_you", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
+        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
         company: { type: "string", description: "Company name if relevant, empty string if not" },
         person: { type: "string", description: "Person name if relevant (for outreach), empty string if not" },
         confidence: { type: "string", enum: ["high", "medium", "low"] },
@@ -793,15 +815,6 @@ Deno.serve(async (req) => {
             } else if (contextOverrideIntent === 'interview_prep' && contextOverrideCompany) {
               resolvedMessage = `Prepare me for an interview at ${contextOverrideCompany}`;
               console.log(`Context override: interview_prep → "${resolvedMessage}"`);
-            } else if (contextOverrideIntent === 'follow_up' && contextOverrideCompany) {
-              resolvedMessage = `Draft a follow-up message — I haven't heard back from my outreach at ${contextOverrideCompany}`;
-              console.log(`Context override: follow_up → "${resolvedMessage}"`);
-            } else if (contextOverrideIntent === 'reply_help') {
-              resolvedMessage = `They replied to my outreach. Help me craft a response.`;
-              console.log(`Context override: reply_help`);
-            } else if (contextOverrideIntent === 'thank_you') {
-              resolvedMessage = `Draft a thank-you note after my interview`;
-              console.log(`Context override: thank_you`);
             } else if (contextOverrideIntent === 'roadmap') {
               resolvedMessage = `Create a career roadmap for me`;
             } else if (contextOverrideIntent === 'opportunity_discovery') {
@@ -817,209 +830,6 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════════════════
     //  INTENT ROUTING (order matters!)
     // ═══════════════════════════════════════════════════════
-
-    // 0.5 FOLLOW-UP DRAFT
-    if (detectFollowUp(resolvedMessage)) {
-      console.log('Intent: follow_up_draft');
-      // Extract the person/company from the message
-      const nameMatch = resolvedMessage.match(/(?:follow.?up.*?(?:to|with|for)\s+)(\w[\w\s.''-]{1,40}?)(?:\s+at\s+)/i);
-      const companyMatch = resolvedMessage.match(/(?:at\s+)(\w[\w\s&.''-]{1,40})/i);
-      const recipientName = nameMatch?.[1]?.trim() || '';
-      const recipientCompany = companyMatch?.[1]?.trim() || '';
-
-      // Try to find original outreach in pipeline
-      let pipelineContact = null;
-      if (recipientName) {
-        const pipeline = await base44.entities.NetworkingPipeline.filter({ user_email: user.email, status: 'reached_out' });
-        pipelineContact = (pipeline || []).find(p =>
-          p.alumni_name?.toLowerCase().includes(recipientName.toLowerCase()) ||
-          recipientName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')
-        );
-      }
-
-      const daysAgo = pipelineContact?.reached_out_date
-        ? Math.round((Date.now() - new Date(pipelineContact.reached_out_date).getTime()) / (1000*60*60*24))
-        : 5;
-      const studentName = user.full_name || 'Gator Student';
-      const studentMajor = user.major || 'undeclared';
-      const gradYear = user.graduation_year || 'upcoming';
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a follow-up message for this student who reached out to an alumni and hasn't heard back.
-
-${profileContext}
-
-ORIGINAL OUTREACH:
-- Recipient: ${pipelineContact?.alumni_name || recipientName || 'the alumni'}
-- Title: ${pipelineContact?.alumni_role || ''}
-- Company: ${pipelineContact?.company || recipientCompany || ''}
-- Sent: ~${daysAgo} days ago
-- Student: ${studentName}, ${studentMajor} major, UF class of ${gradYear}
-
-RULES FOR FOLLOW-UP:
-1. SHORTER than original — 3-4 sentences max
-2. Reference the original naturally ("I reached out last week about...")
-3. Add a NEW hook or value prop ("I also noticed ${pipelineContact?.company || recipientCompany || 'your company'} just ${['launched a new product', 'expanded their team', 'was featured in the news'][Math.floor(Math.random()*3)]} — fascinating work")
-4. Clear, LOW-PRESSURE ask ("If you have 15 minutes this week, I'd love to hear about your experience")
-5. Do NOT sound desperate or robotic
-6. Do NOT apologize for following up — it's professional and expected
-7. Sign off with name and university`,
-        add_context_from_internet: !!(pipelineContact?.company || recipientCompany),
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            recipient: { type: "string" },
-            channel: { type: "string" },
-            subject: { type: "string" },
-            message_body: { type: "string" }
-          },
-          required: ["response", "message_body"]
-        }
-      });
-
-      trackActivity(base44, user.email, profile.id, 'message_draft', pipelineContact?.alumni_name || recipientName);
-      return Response.json({
-        success: true,
-        response: result.response || `Here's your follow-up:`,
-        message_type: 'outreach_draft',
-        payload: {
-          recipient: result.recipient || pipelineContact?.alumni_name || recipientName,
-          recipient_title: pipelineContact?.alumni_role || '',
-          recipient_company: pipelineContact?.company || recipientCompany || '',
-          channel: result.channel || 'LinkedIn',
-          subject: result.subject || '',
-          message: result.message_body || '',
-          ask_type: 'follow_up'
-        }
-      });
-    }
-
-    // 0.6 REPLY HELP
-    if (detectReplyHelp(resolvedMessage)) {
-      console.log('Intent: reply_help');
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. A student received a reply to their networking outreach and needs help responding.
-
-${profileContext}
-
-STUDENT'S MESSAGE: "${resolvedMessage}"
-
-${conversation_history ? `CONVERSATION CONTEXT:\n${conversation_history}` : ''}
-
-ANALYZE the reply they received and determine the tone:
-- POSITIVE (meeting offered, advice given, introduction offered) → Draft an enthusiastic, professional response accepting with suggested meeting times
-- NEUTRAL (polite but noncommittal, "maybe later") → Draft a response that gently moves toward a specific ask ("Would next Thursday work for a quick 15-min call?")
-- REFERRAL (they referred the student to someone else) → Draft a thank-you to this person AND a separate message to the referred person mentioning the referral
-- NEGATIVE (not interested, too busy) → Draft a gracious response that leaves the door open, and suggest other alumni at the same company to try
-
-Keep responses concise and professional. Don't be sycophantic.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            tone_detected: { type: "string", enum: ["positive", "neutral", "referral", "negative"] },
-            suggested_response: { type: "string" },
-            referral_message: { type: "string", description: "If referral detected, message to the referred person" },
-            suggested_actions: { type: "array", items: { type: "string" } }
-          },
-          required: ["response", "tone_detected", "suggested_response"]
-        }
-      });
-
-      return Response.json({
-        success: true,
-        response: result.response || "Here's how I'd respond:",
-        message_type: 'career_advice',
-        payload: { suggested_actions: result.suggested_actions || [] }
-      });
-    }
-
-    // 0.7 THANK-YOU NOTE (post-interview or network thanks)
-    if (detectThankYouNote(resolvedMessage)) {
-      console.log('Intent: thank_you_note');
-      // Check if this is a post-interview thank-you or network-wide thanks
-      const isPostInterview = /interview/i.test(resolvedMessage);
-      const isNetworkThanks = /everyone|network|all.*?helped|thank my/i.test(resolvedMessage);
-
-      if (isNetworkThanks) {
-        // Load pipeline contacts who helped
-        const pipeline = await base44.entities.NetworkingPipeline.filter(
-          { user_email: user.email }, '-status_date', 50
-        ).catch(() => []);
-        const helpedContacts = pipeline.filter(p => ['replied', 'interview', 'offer'].includes(p.status));
-
-        const result = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are FASTIQ. Generate personalized thank-you messages for each alumni who helped this student.
-
-${profileContext}
-
-ALUMNI WHO HELPED:
-${helpedContacts.map(c => `- ${c.alumni_name} at ${c.company} (status: ${c.status})`).join('\n')}
-
-For each person, write a short, heartfelt thank-you message (3-4 sentences) that:
-1. References the specific help they provided
-2. Shares an update on the student's progress
-3. Keeps the relationship warm for the future
-4. Is NOT generic — each message should feel personal`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              response: { type: "string" },
-              messages: { type: "array", items: { type: "object", properties: { recipient: { type: "string" }, company: { type: "string" }, message: { type: "string" } }, required: ["recipient", "message"] } }
-            },
-            required: ["response", "messages"]
-          }
-        });
-
-        return Response.json({
-          success: true,
-          response: result.response || `Here are personalized thank-you messages for ${helpedContacts.length} contacts:`,
-          message_type: 'career_advice',
-          payload: { suggested_actions: ['Send these messages on LinkedIn', 'Update your pipeline status'] }
-        });
-      }
-
-      // Post-interview thank-you
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a post-interview thank-you email.
-
-${profileContext}
-
-STUDENT'S REQUEST: "${resolvedMessage}"
-${conversation_history ? `CONTEXT:\n${conversation_history}` : ''}
-
-Write a personalized thank-you that:
-1. Thanks them for their time
-2. References a SPECIFIC topic discussed (the student should provide bullet points, but generate reasonable ones if not provided)
-3. Reiterates enthusiasm for the role
-4. Keeps it to 4-5 sentences
-5. Professional but genuine tone`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            recipient: { type: "string" },
-            subject: { type: "string" },
-            message_body: { type: "string" }
-          },
-          required: ["response", "message_body"]
-        }
-      });
-
-      return Response.json({
-        success: true,
-        response: result.response || "Here's your thank-you note:",
-        message_type: 'outreach_draft',
-        payload: {
-          recipient: result.recipient || 'Interviewer',
-          channel: 'Email',
-          subject: result.subject || 'Thank you for your time',
-          message: result.message_body || '',
-          ask_type: 'thank_you'
-        }
-      });
-    }
 
     // 1. RESUME REVIEW
     if (detectResumeReview(resolvedMessage)) {
@@ -1678,7 +1488,283 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
       });
     }
 
-    // 13. CAREER ADVICE (DEFAULT FALLBACK)
+    // 13. FOLLOW-UP DRAFT
+    if (detectFollowUp(resolvedMessage)) {
+      console.log('Intent: follow_up_draft');
+      // Extract target name/company from message
+      const followUpNameMatch = resolvedMessage.match(/follow.?up\s+(?:message\s+)?(?:to|with|for)\s+(\w[\w\s.''-]{1,40}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
+      let targetName = followUpNameMatch?.[1]?.trim() || '';
+      let targetCompanyName = followUpNameMatch?.[2]?.trim() || '';
+
+      // Try to find pipeline record
+      let pipelineRecord = null;
+      if (targetName && pipelineData.length > 0) {
+        pipelineRecord = pipelineData.find(p =>
+          p.alumni_name?.toLowerCase().includes(targetName.toLowerCase()) ||
+          targetName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')
+        );
+      }
+      // If no name found, look for any stale outreach
+      if (!pipelineRecord && staleOutreach.length > 0) {
+        pipelineRecord = staleOutreach[0];
+      }
+
+      targetName = pipelineRecord?.alumni_name || targetName || 'the contact';
+      targetCompanyName = pipelineRecord?.company || targetCompanyName || '';
+      const daysSince = pipelineRecord?.reached_out_date
+        ? Math.round((Date.now() - new Date(pipelineRecord.reached_out_date).getTime()) / (1000*60*60*24))
+        : 5;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ. Draft a follow-up message for this student.
+
+${profileContext}
+
+CONTEXT:
+- Original outreach was sent to ${targetName} at ${targetCompanyName} approximately ${daysSince} days ago
+- No reply received yet
+- Student's name: ${user.full_name || 'Gator Student'}
+- Student's major: ${user.major || 'undeclared'}
+
+RULES FOR FOLLOW-UP MESSAGES:
+1. SHORTER than the original — 3-4 sentences MAX
+2. Reference the original message naturally ("I reached out last week about..." or "Following up on my note from...")
+3. Add a NEW hook or value prop ("I noticed ${targetCompanyName} just launched..." or "I recently completed a project in...")
+4. Clear, LOW-PRESSURE ask ("If you have 15 minutes this week, I'd love to hear about your experience" or "Even a brief reply with one piece of advice would mean a lot")
+5. Do NOT sound desperate, robotic, or overly formal
+6. Do NOT use "I hope this message finds you well" or "Just bumping this up"
+7. Tone: warm, brief, adds value, makes it easy to reply
+8. Sign with first name only`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string" },
+            recipient: { type: "string" }, channel: { type: "string" },
+            subject: { type: "string" }, message_body: { type: "string" }
+          },
+          required: ["response", "recipient", "message_body"]
+        }
+      });
+
+      trackActivity(base44, user.email, profile.id, 'message_draft', targetName);
+      return Response.json({
+        success: true, response: result.response || `Here's your follow-up to ${targetName}:`,
+        message_type: 'outreach_draft',
+        payload: { recipient: result.recipient || targetName, recipient_title: pipelineRecord?.alumni_role || '', recipient_company: targetCompanyName, channel: result.channel || 'LinkedIn', subject: result.subject || '', message: result.message_body || '', ask_type: 'follow_up' }
+      });
+    }
+
+    // 14. REPLY HELP — student got a reply and needs help responding
+    if (detectReplyHelp(resolvedMessage)) {
+      console.log('Intent: reply_help');
+      // Extract the reply content from the message
+      const replyContent = resolvedMessage.replace(/^.*?(?:here'?s?\s+(?:what\s+)?(?:they|their|the)\s+(?:said|reply|response|wrote)|they\s+(?:replied|responded|wrote\s+back|said)):?\s*/i, '').trim();
+
+      // Find the relevant pipeline contact
+      let contactName = '', contactCompany = '';
+      const nameMatch = resolvedMessage.match(/(?:from|to|with)\s+(\w[\w\s.''-]{1,30}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
+      if (nameMatch) {
+        contactName = nameMatch[1]?.trim() || '';
+        contactCompany = nameMatch[2]?.trim() || '';
+      }
+      // Fallback: find recently replied pipeline contact
+      if (!contactName) {
+        const recentReplied = pipelineData.find(p => p.status === 'replied');
+        const recentReachedOut = pipelineData.find(p => p.status === 'reached_out');
+        const contact = recentReplied || recentReachedOut;
+        if (contact) {
+          contactName = contact.alumni_name || '';
+          contactCompany = contact.company || '';
+        }
+      }
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ. A student received a reply from an alumni contact and needs help crafting the perfect response.
+
+${profileContext}
+
+CONTACT: ${contactName} at ${contactCompany}
+THEIR REPLY: "${replyContent || resolvedMessage}"
+
+ANALYSIS INSTRUCTIONS:
+1. First, analyze the TONE of the reply:
+   - Positive (meeting offered, advice given, enthusiastic) → Draft an enthusiastic, professional response accepting/following up with suggested meeting times
+   - Neutral (polite but noncommittal, "maybe sometime") → Draft a response that gently moves toward a specific ask (propose a specific date/time)
+   - Referral (they suggested talking to someone else) → Draft a gracious thank-you AND a message to the referred person mentioning the referral
+   - Negative (not interested, too busy, declined) → Draft a gracious response that leaves the door open, and suggest other alumni at the same company
+
+2. Be specific about what the reply says and tailor the response accordingly
+3. Keep the response professional but warm
+4. Include the student's name and UF connection
+5. If a meeting is suggested, include 2-3 specific time slots
+6. Do NOT use generic platitudes`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "Brief analysis of the reply tone and strategy" },
+            tone_analysis: { type: "string", enum: ["positive", "neutral", "referral", "negative"] },
+            reply_draft: { type: "string", description: "The suggested response message" },
+            referred_person_name: { type: "string", description: "Name of referred person if applicable" },
+            referred_person_draft: { type: "string", description: "Message to referred person if applicable" },
+            suggested_actions: { type: "array", items: { type: "string" } }
+          },
+          required: ["response", "tone_analysis", "reply_draft"]
+        }
+      });
+
+      // Build a combined response
+      let fullResponse = result.response || 'Here\'s how I\'d respond:';
+      fullResponse += '\n\n**Suggested Response:**\n' + (result.reply_draft || '');
+      if (result.tone_analysis === 'referral' && result.referred_person_draft) {
+        fullResponse += '\n\n**Message to ' + (result.referred_person_name || 'the referred person') + ':**\n' + result.referred_person_draft;
+      }
+
+      return Response.json({
+        success: true,
+        response: fullResponse,
+        message_type: 'career_advice',
+        payload: { suggested_actions: result.suggested_actions || ['Draft a thank-you note after the meeting', 'Add this interaction to your pipeline'] }
+      });
+    }
+
+    // 15. THANK-YOU NOTE (after interview)
+    if (detectThankYouNote(resolvedMessage)) {
+      console.log('Intent: thank_you_note');
+      const companyMatch = resolvedMessage.match(/(?:at|for|with)\s+(\w[\w\s&.''-]{1,40})/i);
+      const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ. Draft a personalized thank-you email after an interview.
+
+${profileContext}
+
+Request: "${resolvedMessage}"
+Company: ${company}
+
+RULES:
+1. Reference SPECIFIC topics from the interview (ask the student to provide bullet points if not included in their message)
+2. Reiterate enthusiasm for the role and company
+3. Include one specific detail that shows you were paying attention
+4. Keep it concise — 3-4 short paragraphs
+5. Professional but genuine tone
+6. Include a forward-looking statement ("I'm excited about the possibility of contributing to...")
+7. Sign with full name and contact info`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string" },
+            recipient: { type: "string" }, channel: { type: "string" },
+            subject: { type: "string" }, message_body: { type: "string" }
+          },
+          required: ["response", "message_body"]
+        }
+      });
+
+      trackActivity(base44, user.email, profile.id, 'message_draft', company);
+      return Response.json({
+        success: true, response: result.response || `Here's your thank-you note:`,
+        message_type: 'outreach_draft',
+        payload: { recipient: result.recipient || 'Interviewer', recipient_title: '', recipient_company: company, channel: result.channel || 'Email', subject: result.subject || `Thank you — ${company} Interview`, message: result.message_body || '', ask_type: 'thank_you' }
+      });
+    }
+
+    // 16. OFFER EVALUATION & NEGOTIATION
+    if (detectOfferNegotiation(resolvedMessage)) {
+      console.log('Intent: offer_negotiation');
+      const companyMatch = resolvedMessage.match(/(?:offer\s+from|at|with)\s+(\w[\w\s&.''-]{1,40})/i);
+      const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ. A student just received a job offer! Help them evaluate and negotiate.
+
+${profileContext}
+
+Request: "${resolvedMessage}"
+Company: ${company || 'the company'}
+
+INSTRUCTIONS:
+1. First CELEBRATE — this is a big deal!
+2. Research the salary range for this role and level at this company and in this market
+3. Identify negotiation leverage points (competing offers, unique skills, market data)
+4. Provide a specific negotiation script/email template
+5. List what to negotiate beyond salary (signing bonus, start date, PTO, remote work, stock/equity, professional development budget)
+6. Provide a timeline: when to respond, when to negotiate, when to accept
+7. Include a "what to say if they say no" script`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string" },
+            role: { type: "string" }, location: { type: "string" },
+            salary_range: { type: "string" }, median_salary: { type: "string" },
+            negotiation_tips: { type: "array", items: { type: "string" } },
+            sample_script: { type: "string" },
+            beyond_salary: { type: "array", items: { type: "string" } },
+            suggested_actions: { type: "array", items: { type: "string" } }
+          },
+          required: ["response", "salary_range", "negotiation_tips", "sample_script"]
+        }
+      });
+
+      return Response.json({
+        success: true, response: result.response || "Congratulations! Here's your negotiation strategy:",
+        message_type: 'salary_intel',
+        payload: { ...result, company: company }
+      });
+    }
+
+    // 17. NETWORK THANK-YOU (thank everyone who helped)
+    if (detectNetworkThankYou(resolvedMessage)) {
+      console.log('Intent: network_thank_you');
+      // Find all contacts who helped (replied, interview, or offer status)
+      const helpfulContacts = pipelineData.filter(p => ['replied', 'interview', 'offer'].includes(p.status));
+
+      if (helpfulContacts.length === 0) {
+        return Response.json({
+          success: true,
+          response: "It looks like you don't have any alumni contacts marked as 'replied' or 'interview' in your pipeline yet. Once you start getting responses, I can help you draft personalized thank-you messages to everyone who helped!",
+          message_type: 'career_advice',
+          payload: { suggested_actions: ['Research a target company', 'Find UF alumni at your dream companies'] }
+        });
+      }
+
+      const contactsList = helpfulContacts.map(c => `- ${c.alumni_name} at ${c.company} (${c.status})`).join('\n');
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ. The student wants to thank everyone who helped them in their job search.
+
+${profileContext}
+
+CONTACTS WHO HELPED:
+${contactsList}
+
+INSTRUCTIONS:
+1. For EACH contact, draft a SHORT personalized thank-you message (2-3 sentences)
+2. Reference what they specifically helped with (based on their status: replied = initial advice, interview = referral/connection, offer = advocacy)
+3. Include the outcome if applicable (got the offer, learned something valuable, etc.)
+4. Make each message feel personal, not templated
+5. Sign with first name
+
+Return ALL messages in the response field, clearly separated with the contact name as a header.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string", description: "All thank-you messages formatted with headers" },
+            suggested_actions: { type: "array", items: { type: "string" } }
+          },
+          required: ["response"]
+        }
+      });
+
+      return Response.json({
+        success: true,
+        response: result.response || "Here are thank-you messages for your network:",
+        message_type: 'career_advice',
+        payload: { suggested_actions: result.suggested_actions || ['Copy and send these messages', 'Update your pipeline status'] }
+      });
+    }
+
+    // 18. CAREER ADVICE (DEFAULT FALLBACK)
     console.log('Intent: career_advice (default)');
     const webResult = await base44.integrations.Core.InvokeLLM({
       prompt: `You are a career research assistant for a UF student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\n${conversation_history ? 'Context:\n' + conversation_history : ''}\n\nProvide detailed, personalized career advice.`,
