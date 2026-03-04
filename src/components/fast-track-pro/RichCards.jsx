@@ -6,6 +6,13 @@ import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
 
+// Extract first name only, stripping titles like Dr., Mr., etc.
+function getFirstName(fullName) {
+  if (!fullName) return '';
+  const cleaned = fullName.replace(/^(?:Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Prof\.?)\s+/i, '');
+  return cleaned.split(' ')[0] || cleaned;
+}
+
 function toArray(val) {
   if (Array.isArray(val)) return val;
   if (typeof val === 'string' && val.trim()) {
