@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
+import PipelineStatusModal from '@/components/fastiq/PipelineStatusModal';
 
 const STATUS_CONFIG = {
   identified:   { emoji: '🔍', label: 'Identified',   color: '#64748B', bg: '#F1F5F9', next: 'reached_out' },
@@ -45,6 +46,7 @@ function StatusBadge({ status, onClick }) {
 
 export default function PipelineCompanyRow({ company, contacts, hiringScore, onOpenChat, onContactsChange }) {
   const [expanded, setExpanded] = useState(false);
+  const [celebrationModal, setCelebrationModal] = useState(null); // { newStatus, contact }
 
   const alumniFound = contacts.length;
   const contacted = contacts.filter(c => ['reached_out', 'replied', 'interview', 'offer'].includes(c.status)).length;
@@ -69,6 +71,11 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
       status_date: now,
       [dateField]: now,
     });
+    // Show celebration modal for replied, interview, offer
+    const newStatus = cfg.next;
+    if (['replied', 'interview', 'offer'].includes(newStatus)) {
+      setCelebrationModal({ newStatus, contact: { ...contact, status: newStatus } });
+    }
     if (onContactsChange) onContactsChange();
   };
 
@@ -170,6 +177,18 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Celebration modal */}
+      {celebrationModal && (
+        <PipelineStatusModal
+          newStatus={celebrationModal.newStatus}
+          contact={celebrationModal.contact}
+          onClose={() => setCelebrationModal(null)}
+          onSendMessage={(msg) => {
+            setCelebrationModal(null);
+            onOpenChat(msg);
+          }}
+        />
+      )}
     </div>
   );
 }
