@@ -10,6 +10,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
 import BenchmarkCard from './BenchmarkCard';
+import MasterResumeCard from './MasterResumeCard';
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
@@ -154,6 +155,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
       {/* CONTENT */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
+        <MasterResumeCard profile={profile} onOpenChat={onOpenChat} />
         <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} onAddTargets={() => setShowAddTargets(true)} profile={profile} />
 
         {newOpportunities.length > 0 && (
