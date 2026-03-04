@@ -16,19 +16,18 @@ import CoverLetterCard from './CoverLetterCard';
 import LinkedInReviewCard from './LinkedInReviewCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
+import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
 
 function getSuggestedPrompts(profile) {
   const hasTargets = (profile?.target_companies || []).length > 0;
-  const industry = profile?.target_industry;
   const prompts = [];
 
   if (hasTargets) {
     prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?", category: 'find' });
     prompts.push({ icon: '🔍', text: "Find UF alumni at my dream companies", category: 'find' });
   } else {
-    const industryText = industry ? `in ${industry}` : 'that are right for me';
-    prompts.push({ icon: '🔍', text: `Help me find companies ${industryText}`, category: 'find' });
-    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at for entry-level roles?", category: 'find' });
+    prompts.push({ icon: '🔍', text: "Help me find companies to target", category: 'find' });
+    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at?", category: 'find' });
   }
   prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
   prompts.push({ icon: '📄', text: "Review my resume", category: 'tools' });
@@ -102,7 +101,13 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   useEffect(() => {
     if (initialMessage && !sentInitialRef.current) {
       sentInitialRef.current = true;
-      sendMessage(initialMessage);
+      // Check if initial message maps to a conversational opener
+      const openerKey = matchPromptToOpener(initialMessage);
+      if (openerKey) {
+        startConversation(openerKey);
+      } else {
+        sendMessage(initialMessage);
+      }
     }
   }, [initialMessage]);
 
@@ -115,9 +120,29 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       .join('\n\n');
   };
 
+  // Start a conversational opener: show user message + instant assistant reply, no API call
+  const startConversation = (openerKey) => {
+    const opener = getConversationalOpener(openerKey, currentProfile);
+    if (!opener) return;
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: opener.userMessage },
+      { role: 'assistant', content: opener.assistantMessage, message_type: 'text' },
+    ]);
+  };
+
   const sendMessage = async (messageText) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
+
+    // Check if this prompt maps to a conversational opener
+    const openerKey = matchPromptToOpener(text);
+    if (openerKey && messages.length === 0) {
+      // First interaction — start a conversation instead of hitting the API
+      startConversation(openerKey);
+      setInput('');
+      return;
+    }
 
     const userMessage = { role: 'user', content: text };
     setMessages(prev => [...prev, userMessage]);
