@@ -89,6 +89,8 @@ function detectCompanyQuery(message) {
     /(?:research|tell me about|look into|check|what about|how is|is)\s+(\w[\w\s&.''-]{1,40}?)(?:\s+hiring|\s+jobs|\s+careers|\s+salary|\s+for me|\s*\?|$)/i,
     /(?:hiring|jobs|careers|openings|roles)\s+(?:at|for)\s+(\w[\w\s&.''-]{1,40})/i,
     /(\w[\w\s&.''-]{1,30}?)\s+(?:hiring|jobs|careers|openings|internships)/i,
+    /(?:show me|give me|get me|what'?s? the|latest|current)\s+(?:the\s+)?(?:intel|intelligence|info|information|data|details|briefing)\s+(?:on|for|about)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:intel|intelligence|briefing|info)\s+(?:on|for|about)\s+(\w[\w\s&.''-]{1,40})/i,
   ];
   for (const p of patterns) {
     const m = message.match(p);
