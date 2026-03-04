@@ -41,10 +41,11 @@ function detectOutreachQuery(message) {
   const alumniKeywords = /\b(?:find|show|discover|search for|look for|who works?|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|insiders?|connections?|people|grads?)/i;
   if (alumniKeywords.test(message)) return null;
   const patterns = [
-    /(?:draft|write|compose|create|help me write)\s+(?:a\s+)?(?:message|email|linkedin message|outreach|note|dm|intro)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:draft|write|compose|create|help me write)\s+(?:a\s+)?(?:warm\s+)?(?:message|email|linkedin message|outreach|note|dm|intro(?:duction)?)\s+(?:message\s+)?(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
     /(?:draft|write|compose)\s+(?:a\s+)?(?:cold email|cold message|introduction|outreach)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
     /(?:help me reach out|help me contact)\s+(\w[\w\s.''-]{1,40})/i,
     /(?:draft outreach|write outreach)\s+(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
+    /(?:draft|write|compose|create)\s+(?:a\s+)?(?:warm\s+)?(?:intro|introduction)\s+(?:message\s+)?(?:to|for)\s+(\w[\w\s.''-]{1,40})/i,
   ];
   for (const p of patterns) {
     const m = message.match(p);
