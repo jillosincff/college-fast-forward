@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 // This function should be run on a schedule (e.g., every 10 minutes via a cron job).
 // It finds and delivers due reminders for application follow-ups.

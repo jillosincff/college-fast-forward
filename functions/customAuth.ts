@@ -1,5 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
-import { SendEmail } from '@/integrations/Core';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const base44 = createClient({
   appId: Deno.env.get('BASE44_APP_ID'),
