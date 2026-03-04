@@ -102,7 +102,11 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
   }, [user?.email, profile?.target_companies]);
 
   const targetCompanies = (profile?.target_companies || []).map(c => titleCase(c));
-  const userFirstName = user?.full_name?.split(' ')[0] || 'Student';
+  const rawName = user?.full_name || '';
+  // Handle "Last, First" format or "First Last" format
+  const userFirstName = rawName.includes(',')
+    ? rawName.split(',')[1]?.trim().split(' ')[0] || rawName.split(' ')[0] || 'Student'
+    : rawName.split(' ')[0] || 'Student';
 
   const statValues = {
     targets: profile?.target_companies?.length || 0,
