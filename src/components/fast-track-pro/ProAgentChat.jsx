@@ -186,7 +186,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
         </div>
         <div>
           <h2 className="text-white font-bold text-sm">FASTIQ™</h2>
-          <p className="text-white/60 text-xs">Intelligent networking engine</p>
+          <p className="text-white/60 text-xs">Your personal career center</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <button
@@ -323,7 +323,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                       )}
                     </div>
                     {/* Rich Card below the text bubble */}
-                    {msg.role === 'assistant' && msg.message_type !== 'text' && (
+                    {msg.role === 'assistant' && msg.message_type && msg.message_type !== 'text' && (
                       <RichCardRenderer
                         message_type={msg.message_type}
                         payload={msg.payload}
