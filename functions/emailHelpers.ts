@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 // Centralized email helper functions — called by all email functions via:
 //   base44.functions.invoke('emailHelpers', { action: 'canSendEmail', ... })
