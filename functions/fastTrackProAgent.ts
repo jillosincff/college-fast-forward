@@ -9,7 +9,9 @@ function detectAlumniQuery(message) {
   if (detectBatchTargetCommand(message)) return null;
 
   const patterns = [
+    /(?:find|show|who|any|look for|search|discover)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at|who work there)\s+(\w[\w\s&.''-]{1,40}?)(?:\s+(?:who|that|which|to|can|could|for|in)\b|$)/i,
     /(?:find|show|who|any|look for|search|discover)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at|who work there)\s*(\w[\w\s&.''-]{1,40})?/i,
+    /(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40}?)(?:\s+(?:who|that|which|to|can|could|for|in)\b|$)/i,
     /(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
     /(?:who|anyone)\s+(?:works?|is)\s+at\s+(\w[\w\s&.''-]{1,40})\s+(?:from uf|from university of florida|who went to uf)/i,
     /(?:uf|university of florida)\s+(?:alumni|grads?|people)\s+(?:at|from)\s+(\w[\w\s&.''-]{1,40})/i,
