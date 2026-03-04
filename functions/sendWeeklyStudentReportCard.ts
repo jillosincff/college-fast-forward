@@ -22,9 +22,24 @@ Deno.serve(async (req) => {
     let sentCount = 0;
     const errors = [];
 
-    for (const profile of profiles) {
+    // Filter out test/dev emails — only send to real users
+    const realProfiles = profiles.filter(p => {
+      if (!p.user_email) return false;
+      var email = p.user_email.toLowerCase();
+      if (email.includes('@cff.dev') || email.startsWith('test-') || email.startsWith('test.')) return false;
+      return true;
+    });
+
+    console.log("Real profiles: " + realProfiles.length + " (filtered from " + profiles.length + " total)");
+
+    for (const profile of realProfiles) {
       try {
         if (!profile.user_email) continue;
+
+        // Rate limit: small delay between emails to avoid 429s
+        if (sentCount > 0 && sentCount % 5 === 0) {
+          await new Promise(r => setTimeout(r, 2000));
+        }
 
         const [interactions, feedback, messages] = await Promise.all([
           base44.asServiceRole.entities.InteractionLog.filter({
