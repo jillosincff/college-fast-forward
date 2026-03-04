@@ -86,6 +86,16 @@ const OPENERS = {
       "Which company do you want me to scan for UF alumni? I'll search the entire web — LinkedIn, company pages, news — not just CFF.\n\n" +
       "If you're not sure which company, I can suggest some based on your interests."
   },
+
+  resume_builder: {
+    userMessage: "Help me build a resume",
+    getAssistantMessage: (profile) => {
+      const name = profile?.user_email ? '' : '';
+      return "No problem! Lots of students don't have a resume yet — and that's totally fine. I'll help you build a professional one right now. It only takes a few minutes, and you'd be surprised how much you've already done that employers value.\n\n" +
+        "Let's start with the basics! What's your **full name**? And what's the **best email and phone number** for employers to reach you?\n\n" +
+        "If you have a **LinkedIn profile**, include that too — if not, no worries, we can set that up later.";
+    }
+  },
 };
 
 /**
@@ -104,6 +114,7 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('explore') || t.includes('career paths')) return 'explore_careers';
   if (t.includes('action plan') || t.includes('career plan') || t.includes('4-week')) return 'career_plan';
   if (t.includes('find uf alumni') || t.includes('scan') || t.includes('insiders') || t.includes('alumni at my')) return 'scan_insiders';
+  if (t.includes('build a resume') || t.includes('build my resume') || t.includes('don\'t have a resume') || t.includes('no resume')) return 'resume_builder';
 
   return null;
 }
