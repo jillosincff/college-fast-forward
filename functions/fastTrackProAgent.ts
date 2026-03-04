@@ -1020,7 +1020,7 @@ Deno.serve(async (req) => {
     }
 
     // LAYER 2: Confirmation gate for unknown companies (alumni path)
-    if (alumniCompany && shouldConfirmCompany(alumniCompany, targetCompanies)) {
+    if (alumniCompany && !isConfirmation && shouldConfirmCompany(alumniCompany, targetCompanies)) {
       console.log(`[Layer2] Unknown company "${alumniCompany}" in alumni query — asking confirmation`);
       return Response.json({
         success: true,
