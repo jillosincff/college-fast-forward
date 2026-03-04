@@ -14,9 +14,10 @@ export default function ProgressRing({ value, max, color, size = 68, strokeWidth
 
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+      {/* Ghost track - always visible */}
       <circle
         cx={size / 2} cy={size / 2} r={radius}
-        fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={strokeWidth}
+        fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth={strokeWidth}
       />
       <circle
         cx={size / 2} cy={size / 2} r={radius}

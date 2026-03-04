@@ -5,7 +5,11 @@ export default function WeeklyBriefCard({ stats, onOpenChat }) {
   if (stats.opportunities > 0) parts.push(`${stats.opportunities} new opportunities found`);
   if (stats.alumniFound > 0) parts.push(`${stats.alumniFound} alumni identified`);
   if (stats.companiesScanned > 0) parts.push(`${stats.companiesScanned} companies scanned`);
-  if (stats.topSignal && String(stats.topSignal).trim().length > 1) parts.push(`${String(stats.topSignal).trim()} moved to "Hot Hiring"`);
+  // Only show topSignal if it's a real company name (>2 chars, no field fragments)
+  const topSig = String(stats.topSignal || '').trim();
+  if (topSig.length > 2 && !/^[a-z_]+$/i.test(topSig) && !['week','undefined','null'].includes(topSig.toLowerCase())) {
+    parts.push(`${topSig} moved to "Hot Hiring"`);
+  }
   const summary = parts.join(' · ') || 'FASTIQ is monitoring your targets — updates coming soon.';
 
   return (

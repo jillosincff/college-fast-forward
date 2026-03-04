@@ -60,18 +60,19 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
       // New opportunities
       setNewOpportunities(oppsRaw);
 
-      // Build ticker items from real data — always use full company_name
+      // Build ticker items from real data — always use full company_name, filter out fragments
       const tItems = [];
+      const isValidCompanyName = (n) => n && n.length > 2 && !/^[a-z_]+$/i.test(n) && !['week','undefined','null','company'].includes(n.toLowerCase());
       intelRaw.forEach(intel => {
         const name = titleCase(String(intel.company_name || '').trim());
-        if (name && name.length > 1) {
+        if (isValidCompanyName(name)) {
           tItems.push(`FASTIQ scanned ${name} recently`);
           if (intel.open_roles_count > 0) tItems.push(`${name} has ${intel.open_roles_count} open roles this week`);
           if (intel.hiring_signal === 'hot') tItems.push(`🔥 ${name} is actively hiring right now`);
         }
       });
       if (alumniRaw.length > 0) {
-        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => String(a.company || '').trim()).filter(c => c.length > 1))];
+        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => String(a.company || '').trim()).filter(isValidCompanyName))];
         companies.forEach(c => {
           const count = aMap[c.toLowerCase()] || 0;
           if (count > 0) tItems.push(`${count} UF alumni found at ${titleCase(c)}`);
@@ -80,7 +81,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
       oppsRaw.forEach(opp => {
         const cn = String(opp.company_name || '').trim();
         const role = String(opp.role_title || '').trim();
-        if (cn.length > 1 && role.length > 1) {
+        if (isValidCompanyName(cn) && role.length > 1) {
           tItems.push(`New: ${role} at ${titleCase(cn)} matched to your profile`);
         }
       });
@@ -107,7 +108,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
         opportunities: weekOps || oppsRaw.length,
         alumniFound: alumniFound || alumniRaw.length,
         companiesScanned: companiesScanned || Object.keys(iMap).length,
-        topSignal: (topSignalName && topSignalName.length > 1) ? topSignalName : null,
+        topSignal: isValidCompanyName(topSignalName) ? topSignalName : null,
       });
     };
     load();
