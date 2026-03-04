@@ -818,8 +818,15 @@ async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineD
   contactName = pipelineRecord?.alumni_name || contactName || 'the contact';
   contactCompany = pipelineRecord?.company || contactCompany || '';
 
-  const replyContent = resolvedMessage.replace(/^.*?(?:here'?s?\s+(?:what\s+)?(?:they|their|the)\s+(?:said|reply|response|wrote)|they\s+(?:replied|responded|wrote\s+back|said)|got a reply from[\w\s.''-]*?[!.:])\s*/i, '').trim();
-  if (replyContent.length < 30 || /^(?:i got a reply|they replied|they responded|here'?s)/i.test(replyContent)) {
+  // Strip the trigger phrase to get the actual reply content
+  const replyContent = resolvedMessage
+    .replace(/^.*?(?:here'?s?\s+what\s+(?:they|she|he)\s+said:?|what\s+(?:they|she|he)\s+said:?|their\s+reply:?|the\s+reply:?)/i, '')
+    .replace(/^.*?(?:got a reply from\s+[\w\s.''-]+?(?:at\s+[\w\s&.''-]+?)?[!.:]\s*)/i, '')
+    .replace(/^.*?(?:they\s+(?:replied|responded|wrote\s+back|said):?\s*)/i, '')
+    .replace(/^.*?(?:replied!\s*)/i, '')
+    .trim();
+  const isJustTrigger = replyContent.length < 30 && !/[.!?,;:]/.test(replyContent.slice(10));
+  if (isJustTrigger) {
     if (pipelineRecord?.id && pipelineRecord.status !== 'replied') base44.entities.NetworkingPipeline.update(pipelineRecord.id, { status: 'replied', replied_date: new Date().toISOString(), status_date: new Date().toISOString() }).catch(() => {});
     return Response.json({ success: true, response: `That's great news! 🎉 Paste **${contactName}**'s reply below and I'll analyze it and draft your perfect response.`, message_type: 'text', payload: {} });
   }
