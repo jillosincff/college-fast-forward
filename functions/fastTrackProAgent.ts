@@ -175,9 +175,81 @@ async function getCachedCompanyIntel(base44, company) {
   try {
     const cached = await base44.entities.CompanyIntelCache.filter({ company_name: company });
     if (cached?.length > 0 && new Date(cached[0].expires_at) > new Date()) return cached[0];
-    if (cached?.length > 0) { try { await base44.entities.CompanyIntelCache.delete(cached[0].id); } catch(e){} }
+    // Return expired cache as "previous" for delta comparison, then delete
+    if (cached?.length > 0) {
+      const expired = cached[0];
+      try { await base44.entities.CompanyIntelCache.delete(expired.id); } catch(e){}
+      return { ...expired, _expired: true };
+    }
   } catch(e) {}
   return null;
+}
+
+// Build persistent memory context — compare new intel against previous data
+function buildMemoryContext(previousIntel, newIntel, companyName) {
+  if (!previousIntel) return '';
+  const lines = [];
+  const prevRoles = previousIntel.open_roles_count;
+  const newRoles = newIntel.open_roles_count;
+  if (prevRoles != null && newRoles != null && prevRoles !== newRoles) {
+    const diff = newRoles - prevRoles;
+    if (diff > 0) lines.push(`MEMORY: Last time you researched ${companyName}, they had ${prevRoles} open roles. Now they have ${newRoles} — hiring is RAMPING UP (+${diff} roles).`);
+    else lines.push(`MEMORY: Last time you researched ${companyName}, they had ${prevRoles} open roles. Now it dropped to ${newRoles} — they may be slowing down hiring (${diff} roles).`);
+  }
+  const prevScore = previousIntel.hiring_score;
+  const newScore = newIntel.hiring_score;
+  if (prevScore != null && newScore != null && Math.abs(prevScore - newScore) >= 10) {
+    if (newScore > prevScore) lines.push(`MEMORY: Their hiring score improved from ${prevScore} to ${newScore} since you last checked.`);
+    else lines.push(`MEMORY: Their hiring score dropped from ${prevScore} to ${newScore} since you last checked.`);
+  }
+  const prevSignal = previousIntel.hiring_signal;
+  const newSignal = newIntel.hiring_signal;
+  if (prevSignal && newSignal && prevSignal !== newSignal) {
+    lines.push(`MEMORY: Hiring signal changed from ${prevSignal.toUpperCase()} to ${newSignal.toUpperCase()}.`);
+  }
+  return lines.join('\n');
+}
+
+// Cross-reference alumni against CFF member database
+async function crossReferenceCFF(base44, alumni) {
+  if (!alumni || alumni.length === 0) return alumni;
+  // Load CFF parent/alumni members
+  let cffMembers = [];
+  try {
+    const [parents, users] = await Promise.all([
+      base44.entities.ParentExpertise.filter({}, '-last_active_at', 200).catch(() => []),
+      base44.asServiceRole.entities.User.list('-created_date', 200).catch(() => []),
+    ]);
+    // Build lookup by name (lowercase)
+    const parentNames = new Map();
+    (parents || []).forEach(p => {
+      if (p.parent_name) parentNames.set(p.parent_name.toLowerCase().trim(), { email: p.parent_email, company: p.current_company, role: p.current_role });
+    });
+    const userNames = new Map();
+    (users || []).forEach(u => {
+      if (u.full_name) userNames.set(u.full_name.toLowerCase().trim(), { email: u.email, id: u.id });
+    });
+    cffMembers = { parentNames, userNames };
+  } catch(e) {
+    console.log('CFF cross-reference error:', e.message);
+    return alumni.map(a => ({ ...a, is_cff_member: false, cff_channel: 'linkedin' }));
+  }
+
+  return alumni.map(a => {
+    const nameKey = (a.name || '').toLowerCase().trim();
+    const parentMatch = cffMembers.parentNames.get(nameKey);
+    const userMatch = cffMembers.userNames.get(nameKey);
+    if (parentMatch || userMatch) {
+      return {
+        ...a,
+        is_cff_member: true,
+        cff_email: parentMatch?.email || userMatch?.email || '',
+        cff_user_id: userMatch?.id || '',
+        cff_channel: 'cff_message',
+      };
+    }
+    return { ...a, is_cff_member: false, cff_channel: 'linkedin' };
+  });
 }
 
 async function saveCompanyIntelCache(base44, company, data) {
