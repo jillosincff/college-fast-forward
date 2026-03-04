@@ -61,7 +61,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
         {/* Greeting */}
         <div className="fiq-animate">
           <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 6, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-            {userName}'s Command Center
+            {userName}'s Career Center
           </h1>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
             Your personal career center, working for you 24/7
