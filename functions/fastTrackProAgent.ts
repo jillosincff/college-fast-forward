@@ -5,6 +5,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 // ═══════════════════════════════════════════════════════════
 
 function detectAlumniQuery(message) {
+  // Skip if this is a batch target command
+  if (detectBatchTargetCommand(message)) return null;
+
   const patterns = [
     /(?:find|show|who|any|look for|search|discover)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at|who work there)\s*(\w[\w\s&.''-]{1,40})?/i,
     /(?:alumni|gators?|connections?|people|grads?|insiders?)\s+(?:at|from|who work at|working at)\s+(\w[\w\s&.''-]{1,40})/i,
@@ -18,7 +21,14 @@ function detectAlumniQuery(message) {
   ];
   for (const p of patterns) {
     const m = message.match(p);
-    if (m) return m[1]?.trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '') || 'RESOLVE_FROM_CONTEXT';
+    if (m) {
+      const candidate = m[1]?.trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '');
+      if (candidate && !isLikelyCompanyName(candidate)) {
+        console.log(`Rejected "${candidate}" as company name in alumni query`);
+        return null;
+      }
+      return candidate || 'RESOLVE_FROM_CONTEXT';
+    }
   }
   return null;
 }
