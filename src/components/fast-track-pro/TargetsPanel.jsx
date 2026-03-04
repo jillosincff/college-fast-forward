@@ -36,6 +36,7 @@ const CHALLENGE_LABELS = {
 
 export default function TargetsPanel({ profile, onResearchCompany, onRerunAssessment, onProfileUpdated, onOpenChat }) {
   const [editing, setEditing] = useState(false);
+
   const [companies, setCompanies] = useState([]);
   const [newCompany, setNewCompany] = useState('');
   const [saving, setSaving] = useState(false);
