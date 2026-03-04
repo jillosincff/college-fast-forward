@@ -1644,68 +1644,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
 
     // 13. FOLLOW-UP DRAFT
     if (detectFollowUp(resolvedMessage)) {
-      console.log('Intent: follow_up_draft');
-      // Extract target name/company from message
-      const followUpNameMatch = resolvedMessage.match(/follow.?up\s+(?:message\s+)?(?:to|with|for)\s+(\w[\w\s.''-]{1,40}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
-      let targetName = followUpNameMatch?.[1]?.trim() || '';
-      let targetCompanyName = followUpNameMatch?.[2]?.trim() || '';
-
-      // Try to find pipeline record
-      let pipelineRecord = null;
-      if (targetName && pipelineData.length > 0) {
-        pipelineRecord = pipelineData.find(p =>
-          p.alumni_name?.toLowerCase().includes(targetName.toLowerCase()) ||
-          targetName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')
-        );
-      }
-      // If no name found, look for any stale outreach
-      if (!pipelineRecord && staleOutreach.length > 0) {
-        pipelineRecord = staleOutreach[0];
-      }
-
-      targetName = pipelineRecord?.alumni_name || targetName || 'the contact';
-      targetCompanyName = pipelineRecord?.company || targetCompanyName || '';
-      const daysSince = pipelineRecord?.reached_out_date
-        ? Math.round((Date.now() - new Date(pipelineRecord.reached_out_date).getTime()) / (1000*60*60*24))
-        : 5;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a follow-up message for this student.
-
-${profileContext}
-
-CONTEXT:
-- Original outreach was sent to ${targetName} at ${targetCompanyName} approximately ${daysSince} days ago
-- No reply received yet
-- Student's name: ${user.full_name || 'Gator Student'}
-- Student's major: ${user.major || 'undeclared'}
-
-RULES FOR FOLLOW-UP MESSAGES:
-1. SHORTER than the original — 3-4 sentences MAX
-2. Reference the original message naturally ("I reached out last week about..." or "Following up on my note from...")
-3. Add a NEW hook or value prop ("I noticed ${targetCompanyName} just launched..." or "I recently completed a project in...")
-4. Clear, LOW-PRESSURE ask ("If you have 15 minutes this week, I'd love to hear about your experience" or "Even a brief reply with one piece of advice would mean a lot")
-5. Do NOT sound desperate, robotic, or overly formal
-6. Do NOT use "I hope this message finds you well" or "Just bumping this up"
-7. Tone: warm, brief, adds value, makes it easy to reply
-8. Sign with first name only`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            recipient: { type: "string" }, channel: { type: "string" },
-            subject: { type: "string" }, message_body: { type: "string" }
-          },
-          required: ["response", "recipient", "message_body"]
-        }
-      });
-
-      trackActivity(base44, user.email, profile.id, 'message_draft', targetName);
-      return Response.json({
-        success: true, response: result.response || `Here's your follow-up to ${targetName}:`,
-        message_type: 'outreach_draft',
-        payload: { recipient: result.recipient || targetName, recipient_title: pipelineRecord?.alumni_role || '', recipient_company: targetCompanyName, channel: result.channel || 'LinkedIn', subject: result.subject || '', message: result.message_body || '', ask_type: 'follow_up' }
-      });
+      return await handleFollowUpDraft(base44, user, profile, resolvedMessage, pipelineData, staleOutreach, profileContext);
     }
 
     // 14. REPLY HELP — student got a reply and needs help responding
