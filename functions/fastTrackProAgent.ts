@@ -109,18 +109,66 @@ function detectOpportunityDiscovery(message) {
   return patterns.some(p => p.test(message));
 }
 
-// Guard: reject extracted company names that are clearly full sentences, not real company names
+// ═══════════════════════════════════════════════════════════
+//  LAYER 1 — COMPANY NAME VALIDATION
+// ═══════════════════════════════════════════════════════════
+
+// Words that are NEVER company names
+const COMPANY_NAME_BLOCKLIST = [
+  'identify','relevant','find','show','help','research','draft','review',
+  'prep','explore','build','create','scan','check','look','tell','give',
+  'get','what','where','how','should','could','would','please','do',
+  'internships','openings','roles','jobs','careers','opportunities',
+  'hiring','my','your','the','all','each','every','about','into','at','for',
+  'entry','level','target','companies','company',
+];
+
+// Common phrases that are commands, not company names
+const COMMAND_PHRASES = [
+  'my target companies','relevant internships','entry level roles',
+  'target companies','all companies','my companies','my targets',
+  'entry level','full time','part time','new grad','recent grad',
+  'open roles','open positions','job openings','career opportunities',
+  'internship opportunities','summer internships','fall internships',
+];
+
 function isLikelyCompanyName(name) {
   if (!name) return false;
-  const words = name.trim().split(/\s+/);
-  // Real company names are typically 1-4 words (e.g. "JPMorgan Chase & Co")
-  if (words.length > 4) return false;
-  // Reject if it contains common sentence words that aren't in company names
-  const sentenceWords = ['identify','find','show','research','look','check','help','tell','give','get','what','where','how','should','could','would','please','relevant','internships','openings','roles','jobs','careers','opportunities','hiring','at','for','my','your','the','all','each','every','about','into'];
-  const lowerWords = words.map(w => w.toLowerCase());
-  // If more than half the words are sentence words, it's not a company name
+  const trimmed = name.trim();
+  const lower = trimmed.toLowerCase();
+  const words = trimmed.split(/\s+/);
+
+  // Rule 1: More than 4 words → not a company name
+  if (words.length > 4) {
+    console.log(`[Layer1] Rejected "${trimmed}": too many words (${words.length})`);
+    return false;
+  }
+
+  // Rule 2: Check if the entire phrase matches a known command phrase
+  if (COMMAND_PHRASES.some(phrase => lower.includes(phrase) || phrase.includes(lower))) {
+    console.log(`[Layer1] Rejected "${trimmed}": matches command phrase`);
+    return false;
+  }
+
+  // Rule 3: If ANY word is in the blocklist, reject (single blocklist word = definitely not a company)
+  const lowerWords = words.map(w => w.toLowerCase().replace(/[^a-z]/g, ''));
+  for (const w of lowerWords) {
+    if (COMPANY_NAME_BLOCKLIST.includes(w)) {
+      console.log(`[Layer1] Rejected "${trimmed}": contains blocklisted word "${w}"`);
+      return false;
+    }
+  }
+
+  // Rule 4: If more than half the words are common sentence words, reject
+  const sentenceWords = ['a','an','the','is','are','was','were','be','been','being','am',
+    'do','does','did','have','has','had','will','shall','may','might','can','to','of','in',
+    'on','with','by','from','up','out','if','or','and','but','not','no','so','as','than'];
   const sentenceCount = lowerWords.filter(w => sentenceWords.includes(w)).length;
-  if (sentenceCount >= Math.ceil(words.length / 2)) return false;
+  if (sentenceCount >= Math.ceil(words.length / 2)) {
+    console.log(`[Layer1] Rejected "${trimmed}": too many sentence words`);
+    return false;
+  }
+
   return true;
 }
 
