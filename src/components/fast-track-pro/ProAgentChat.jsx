@@ -59,6 +59,7 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'salary_intel': return <SalaryIntelCard data={payload} />;
     case 'cover_letter': return <CoverLetterCard data={payload} />;
     case 'linkedin_review': return <LinkedInReviewCard data={payload} />;
+    case 'batch_target_scan': return <BatchTargetScanCard data={payload} onResearchCompany={onResearchCompany} />;
     case 'career_advice': return payload?.suggested_actions?.length > 0 ? (
       <div className="mt-2 flex flex-wrap gap-2">
         {payload.suggested_actions.map((a, i) => (
