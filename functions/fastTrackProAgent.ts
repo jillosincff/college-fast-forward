@@ -312,6 +312,16 @@ function detectSalaryNegotiation(message) {
     lower.includes('salary data') || lower.includes('salary range');
 }
 
+function detectResumeBuilder(message) {
+  const lower = message.toLowerCase();
+  return /(?:help me )?build (?:a |my )?resume/i.test(message) ||
+    /(?:don'?t|do not) have a resume/i.test(message) ||
+    /(?:create|make|write) (?:a |my )?resume (?:from scratch|for me)/i.test(message) ||
+    /no resume yet/i.test(message) ||
+    lower.includes('build my resume') || lower.includes('build a resume') ||
+    lower.includes('create my resume') || lower.includes('help me make a resume');
+}
+
 function detectCoverLetter(message) {
   return /(?:cover letter|application letter|write a letter)/i.test(message) ||
     /(?:write|draft|create)\s+(?:a\s+)?cover\s+letter/i.test(message);
@@ -830,6 +840,41 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════════════════
     //  INTENT ROUTING (order matters!)
     // ═══════════════════════════════════════════════════════
+
+    // 0. RESUME BUILDER
+    if (detectResumeBuilder(resolvedMessage)) {
+      console.log('Intent: resume_builder');
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are FASTIQ, a supportive AI career center for UF students. A student wants help building their resume from scratch. Many students feel embarrassed about not having one — your job is to be encouraging and make them feel confident.
+
+${profileContext}
+
+Start the conversational resume builder. Walk them through Step 1: Contact Info.
+
+Your response should:
+1. Be warm and encouraging — "No problem! Lots of students don't have a resume yet."
+2. Normalize it — "Campus jobs totally count. Class projects are great. You'd be surprised how much you've already done that employers value."
+3. Ask for: Full name, best email, phone number, and LinkedIn URL (if they have one)
+4. Keep it conversational, not like a form
+5. End with: "Once I have these basics, we'll move to your education — and your UF degree is already a huge asset!"
+
+Be genuinely encouraging and warm. This student might feel behind — make them feel like they're about to create something great.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            response: { type: "string" },
+            suggested_actions: { type: "array", items: { type: "string" } }
+          },
+          required: ["response"]
+        }
+      });
+      return Response.json({
+        success: true,
+        response: result.response || "Let's build your resume! No problem at all — I'll walk you through it step by step. Let's start with the basics: what's your full name, email, and phone number?",
+        message_type: 'career_advice',
+        payload: { suggested_actions: result.suggested_actions || ['Type your name, email, and phone number', 'Include LinkedIn URL if you have one'] }
+      });
+    }
 
     // 1. RESUME REVIEW
     if (detectResumeReview(resolvedMessage)) {
