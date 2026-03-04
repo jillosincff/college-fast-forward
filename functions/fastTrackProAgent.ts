@@ -1740,75 +1740,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
 
     // 14. REPLY HELP — student got a reply and needs help responding
     if (detectReplyHelp(resolvedMessage)) {
-      console.log('Intent: reply_help');
-      // Extract the reply content from the message
-      const replyContent = resolvedMessage.replace(/^.*?(?:here'?s?\s+(?:what\s+)?(?:they|their|the)\s+(?:said|reply|response|wrote)|they\s+(?:replied|responded|wrote\s+back|said)):?\s*/i, '').trim();
-
-      // Find the relevant pipeline contact
-      let contactName = '', contactCompany = '';
-      const nameMatch = resolvedMessage.match(/(?:from|to|with)\s+(\w[\w\s.''-]{1,30}?)(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
-      if (nameMatch) {
-        contactName = nameMatch[1]?.trim() || '';
-        contactCompany = nameMatch[2]?.trim() || '';
-      }
-      // Fallback: find recently replied pipeline contact
-      if (!contactName) {
-        const recentReplied = pipelineData.find(p => p.status === 'replied');
-        const recentReachedOut = pipelineData.find(p => p.status === 'reached_out');
-        const contact = recentReplied || recentReachedOut;
-        if (contact) {
-          contactName = contact.alumni_name || '';
-          contactCompany = contact.company || '';
-        }
-      }
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. A student received a reply from an alumni contact and needs help crafting the perfect response.
-
-${profileContext}
-
-CONTACT: ${contactName} at ${contactCompany}
-THEIR REPLY: "${replyContent || resolvedMessage}"
-
-ANALYSIS INSTRUCTIONS:
-1. First, analyze the TONE of the reply:
-   - Positive (meeting offered, advice given, enthusiastic) → Draft an enthusiastic, professional response accepting/following up with suggested meeting times
-   - Neutral (polite but noncommittal, "maybe sometime") → Draft a response that gently moves toward a specific ask (propose a specific date/time)
-   - Referral (they suggested talking to someone else) → Draft a gracious thank-you AND a message to the referred person mentioning the referral
-   - Negative (not interested, too busy, declined) → Draft a gracious response that leaves the door open, and suggest other alumni at the same company
-
-2. Be specific about what the reply says and tailor the response accordingly
-3. Keep the response professional but warm
-4. Include the student's name and UF connection
-5. If a meeting is suggested, include 2-3 specific time slots
-6. Do NOT use generic platitudes`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string", description: "Brief analysis of the reply tone and strategy" },
-            tone_analysis: { type: "string", enum: ["positive", "neutral", "referral", "negative"] },
-            reply_draft: { type: "string", description: "The suggested response message" },
-            referred_person_name: { type: "string", description: "Name of referred person if applicable" },
-            referred_person_draft: { type: "string", description: "Message to referred person if applicable" },
-            suggested_actions: { type: "array", items: { type: "string" } }
-          },
-          required: ["response", "tone_analysis", "reply_draft"]
-        }
-      });
-
-      // Build a combined response
-      let fullResponse = result.response || 'Here\'s how I\'d respond:';
-      fullResponse += '\n\n**Suggested Response:**\n' + (result.reply_draft || '');
-      if (result.tone_analysis === 'referral' && result.referred_person_draft) {
-        fullResponse += '\n\n**Message to ' + (result.referred_person_name || 'the referred person') + ':**\n' + result.referred_person_draft;
-      }
-
-      return Response.json({
-        success: true,
-        response: fullResponse,
-        message_type: 'career_advice',
-        payload: { suggested_actions: result.suggested_actions || ['Draft a thank-you note after the meeting', 'Add this interaction to your pipeline'] }
-      });
+      return await handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext);
     }
 
     // 15. THANK-YOU NOTE (after interview)
