@@ -224,6 +224,20 @@ export default function StudentOnboarding() {
         console.log('Auto-link check failed (non-critical):', autoLinkErr.message);
       }
 
+      // Send welcome email (fire-and-forget)
+      try {
+        base44.functions.invoke('sendWelcomeEmail', {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.full_name,
+          persona: 'gator',
+          userIndustries: industries,
+        }).catch(e => console.log('Welcome email failed (non-critical):', e.message));
+        console.log('✅ Welcome email triggered');
+      } catch (e) {
+        console.log('Welcome email trigger failed (non-critical):', e.message);
+      }
+
       // Show celebration screen instead of navigating directly
       setShowCelebration(true);
       setLoading(false);
