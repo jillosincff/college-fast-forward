@@ -365,14 +365,7 @@ export default function GatorDirectory() {
               </div>
             </div>
 
-            {/* ALWAYS show Founding Members banner */}
-            {!loading && (
-              <div className="mt-8 inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                <p className="text-white/90 text-sm font-medium">
-                  Only <span className="text-[#FA4616] font-bold">{stats.members}</span> Founding Members — be next
-                </p>
-              </div>
-            )}
+
           </div>
         </div>
       </div>
