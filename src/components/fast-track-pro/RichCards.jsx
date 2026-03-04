@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight } from 'lucide-react';
+import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight, ExternalLink, CheckCircle2, Search } from 'lucide-react';
 import SuggestedActions from './SuggestedActions';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
+import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 // Extract first name only, stripping titles like Dr., Mr., etc.
 function getFirstName(fullName) {
@@ -180,8 +182,36 @@ export function CompanyIntelCard({ data, onSendMessage }) {
 
 export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
   const alumni = toArray(data?.alumni);
+  const [verifiedMap, setVerifiedMap] = React.useState({});
   if (!alumni.length) return null;
   const cffCount = alumni.filter(a => a.is_cff_member).length;
+
+  const handleVerify = async (alumniName) => {
+    setVerifiedMap(prev => ({ ...prev, [alumniName]: true }));
+    try {
+      const records = await base44.entities.DiscoveredAlumni.filter({ name: alumniName });
+      if (records?.[0]) {
+        const user = await base44.auth.me();
+        await base44.entities.DiscoveredAlumni.update(records[0].id, { verified: true, verified_by: user?.email || '' });
+      }
+    } catch (e) { console.log('Verify error:', e.message); }
+    toast.success(`Marked ${getFirstName(alumniName)} as verified`);
+  };
+
+  const getLinkedInUrl = (a) => {
+    if (a.linkedin_url && a.linkedin_url.includes('linkedin.com')) return a.linkedin_url;
+    return `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent((a.name || '') + ' ' + (a.company || ''))}`;
+  };
+
+  const hasDirectLinkedIn = (a) => !!(a.linkedin_url && a.linkedin_url.includes('linkedin.com'));
+
+  const handleCFFMessage = (a) => {
+    const email = a.cff_email || '';
+    if (email) {
+      navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(a.name || '')}`);
+    }
+  };
+
   return (
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
       <div className="flex items-center gap-2 mb-3">
@@ -194,50 +224,97 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
         )}
       </div>
       <div className="space-y-3">
-        {alumni.slice(0, 5).map((a, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
-              a.is_cff_member ? 'bg-green-200 text-green-700 ring-2 ring-green-400' : 'bg-purple-200 text-purple-700'
-            }`}>
-              {a.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-semibold text-slate-900 text-sm truncate">{a.name}</p>
-                {a.is_cff_member && (
-                  <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0">
-                    ✓ CFF Member
-                  </Badge>
+        {alumni.slice(0, 5).map((a, i) => {
+          const isVerified = a.verified || verifiedMap[a.name];
+          return (
+            <div key={i} className="flex items-start gap-3">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                a.is_cff_member ? 'bg-green-200 text-green-700 ring-2 ring-green-400' : 'bg-purple-200 text-purple-700'
+              }`}>
+                {a.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-slate-900 text-sm truncate">{a.name}</p>
+                  {a.is_cff_member && (
+                    <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0">
+                      ✓ CFF Member
+                    </Badge>
+                  )}
+                  {a.match_score && (
+                    <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0">{a.match_score}%</Badge>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
+                {/* Degree info + verification */}
+                {a.degree_info && (
+                  <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    <span className="text-[11px] text-purple-600">🐊 {a.degree_info}</span>
+                    {isVerified ? (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] text-green-600 font-medium">
+                        <CheckCircle2 className="w-3 h-3" /> Verified
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-amber-600">🔍 Verify on LinkedIn before reaching out</span>
+                    )}
+                  </div>
                 )}
-                {a.match_score && (
-                  <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0">{a.match_score}%</Badge>
+                {!a.degree_info && !isVerified && (
+                  <p className="text-[10px] text-amber-600 mt-0.5">🔍 Verify on LinkedIn before reaching out</p>
+                )}
+                {/* LinkedIn / CFF link */}
+                {a.is_cff_member ? (
+                  <button
+                    onClick={() => handleCFFMessage(a)}
+                    className="mt-1 text-[11px] font-medium text-green-700 hover:text-green-800 hover:underline bg-transparent border-0 p-0 cursor-pointer inline-flex items-center gap-1"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    💬 Message on CFF →
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    <a
+                      href={getLinkedInUrl(a)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-medium text-[#0077B5] hover:text-[#005885] hover:underline inline-flex items-center gap-1"
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                    >
+                      {hasDirectLinkedIn(a) ? (
+                        <>🔗 View LinkedIn Profile →</>
+                      ) : (
+                        <><Search className="w-3 h-3" /> Search on LinkedIn →</>
+                      )}
+                    </a>
+                    {!isVerified && (
+                      <button
+                        onClick={() => handleVerify(a.name)}
+                        className="text-[10px] font-medium text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-full px-2 py-0.5 cursor-pointer transition-colors inline-flex items-center gap-0.5"
+                        style={{ minHeight: 'auto', minWidth: 'auto' }}
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> Mark Verified
+                      </button>
+                    )}
+                  </div>
+                )}
+                {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
+                {/* Draft message button */}
+                {onDraftMessage && (
+                  <button
+                    onClick={() => onDraftMessage(a.name)}
+                    className="mt-1.5 text-[11px] font-medium text-[#0021A5] hover:text-[#001580] hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    ✉️ Draft message to {getFirstName(a.name)}
+                  </button>
                 )}
               </div>
-              <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
-              {a.degree_info && <p className="text-[11px] text-purple-600 mt-0.5">🐊 {a.degree_info}</p>}
-              {a.is_cff_member ? (
-                <p className="text-[11px] text-green-600 mt-0.5 font-medium">💬 Message directly on CFF</p>
-              ) : (
-                <p className="text-[11px] text-slate-400 mt-0.5">🔗 Reach out via LinkedIn</p>
-              )}
-              {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
-              {/* Action button per alumni */}
-              {onDraftMessage && (
-                <button
-                  onClick={() => onDraftMessage(a.name)}
-                  className="mt-1.5 text-[11px] font-medium text-[#0021A5] hover:text-[#001580] hover:underline bg-transparent border-0 p-0 cursor-pointer"
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
-                >
-                  ✉️ Draft message to {getFirstName(a.name)}
-                </button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {/* Bottom actions */}
       {alumni.length > 0 && onDraftMessage && (() => {
-        // Use top_match from agent recommendation, fallback to highest score
         let topMatchName = data?.top_match;
         if (!topMatchName) {
           const sorted = [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
