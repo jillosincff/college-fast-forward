@@ -69,7 +69,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
         </div>
 
         {/* Progress Rings */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 28 }} className="fiq-animate fiq-delay-1">
+        <div className="fiq-animate fiq-delay-1 fiq-rings-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 28 }}>
           {rings.map((r, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)',
