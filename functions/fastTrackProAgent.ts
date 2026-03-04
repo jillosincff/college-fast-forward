@@ -70,6 +70,20 @@ function detectRoadmapQuery(message) {
   return ['roadmap','action plan','career plan','week by week','step by step','game plan'].some(k => lower.includes(k));
 }
 
+function detectBatchTargetCommand(message) {
+  const lower = message.toLowerCase();
+  const patterns = [
+    /(?:my|your|the)\s+target\s+companies/i,
+    /(?:all|each|every)\s+(?:of\s+)?(?:my|your|the)\s+(?:target\s+)?companies/i,
+    /(?:my|your|the)\s+targets/i,
+    /(?:all|each|every)\s+(?:of\s+)?(?:my|your|the)\s+targets/i,
+    /(?:all|each)\s+(?:my|the)\s+companies/i,
+    /(?:research|scan|check|find|identify|show|look)\s+(?:\w+\s+){0,4}(?:at\s+)?(?:my|your|the)\s+target/i,
+    /(?:internships?|roles?|jobs?|openings?|opportunities?)\s+(?:at|for|across)\s+(?:my|your|the|all)\s+(?:target\s+)?compan/i,
+  ];
+  return patterns.some(p => p.test(message));
+}
+
 function detectOpportunityDiscovery(message) {
   const patterns = [
     /(?:find|suggest|recommend|show)\s+(?:me\s+)?companies/i,
@@ -83,6 +97,21 @@ function detectOpportunityDiscovery(message) {
     /(?:explore|discover)\s+(?:companies|employers|opportunities)/i,
   ];
   return patterns.some(p => p.test(message));
+}
+
+// Guard: reject extracted company names that are clearly full sentences, not real company names
+function isLikelyCompanyName(name) {
+  if (!name) return false;
+  const words = name.trim().split(/\s+/);
+  // Real company names are typically 1-4 words (e.g. "JPMorgan Chase & Co")
+  if (words.length > 4) return false;
+  // Reject if it contains common sentence words that aren't in company names
+  const sentenceWords = ['identify','find','show','research','look','check','help','tell','give','get','what','where','how','should','could','would','please','relevant','internships','openings','roles','jobs','careers','opportunities','hiring','at','for','my','your','the','all','each','every','about','into'];
+  const lowerWords = words.map(w => w.toLowerCase());
+  // If more than half the words are sentence words, it's not a company name
+  const sentenceCount = lowerWords.filter(w => sentenceWords.includes(w)).length;
+  if (sentenceCount >= Math.ceil(words.length / 2)) return false;
+  return true;
 }
 
 function detectCompanyQuery(message) {
