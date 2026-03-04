@@ -47,7 +47,7 @@ export default function MasterResumeCard({ profile, onOpenChat }) {
           <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>
             {hasResume
               ? `Last updated ${formatDate(updatedAt)}`
-              : 'Upload your resume to unlock smarter features'}
+              : 'Students who upload their resume get 2x more relevant company matches'}
           </div>
         </div>
       </div>

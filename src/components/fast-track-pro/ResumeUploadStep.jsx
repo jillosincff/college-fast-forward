@@ -139,9 +139,13 @@ export default function ResumeUploadStep({ user, onResumeReady, onStartBuilder }
           </div>
         </button>
 
-        <p className="text-white/30 text-xs text-center mt-4">
-          You can always update your resume later
-        </p>
+        <button
+          onClick={() => onResumeReady(null, null)}
+          className="text-white/30 text-xs text-center hover:text-white/50 underline mt-4 block mx-auto"
+          style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+        >
+          Skip for now — I'll add it later
+        </button>
       </div>
     );
   }

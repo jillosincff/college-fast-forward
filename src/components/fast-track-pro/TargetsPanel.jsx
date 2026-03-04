@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin } from 'lucide-react';
+import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin, FileText, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
@@ -333,6 +333,49 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+        {/* Divider */}
+        <div className="border-t border-slate-100" />
+
+        {/* Master Resume Section */}
+        <div className="px-4 py-3">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">📄 Master Resume</p>
+          {profile?.resume_text ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.5)' }} />
+                <span className="text-[12px] text-slate-700 font-medium">
+                  Last updated {profile.updated_date ? new Date(profile.updated_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'recently'}
+                </span>
+              </div>
+              <button
+                onClick={() => onResearchCompany && false}
+                className="text-[11px] text-[#0021A5] font-semibold hover:underline"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
+                onClick={() => {
+                  // Trigger resume review via chat
+                  if (onResearchCompany) {
+                    // Hack: use a special handler - we'll wire this properly
+                  }
+                }}
+              >
+                Update
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] text-slate-500">Not uploaded yet</span>
+              <button
+                className="text-[11px] text-[#FA4616] font-bold hover:underline flex items-center gap-1"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
+              >
+                <Upload className="w-3 h-3" />
+                Upload Now
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
