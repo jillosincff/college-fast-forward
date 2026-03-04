@@ -39,9 +39,14 @@ export default function FastIQ() {
     setLoading(false);
   };
 
-  const handleAssessmentComplete = (newProfile) => {
+  const handleAssessmentComplete = (newProfile, openChatWith) => {
     setProfile(newProfile);
-    setView('dashboard');
+    if (openChatWith) {
+      setChatInitialMessage(openChatWith);
+      setView('chat');
+    } else {
+      setView('dashboard');
+    }
   };
 
   const handleOpenChat = (initialMessage) => {
