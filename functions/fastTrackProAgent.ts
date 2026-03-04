@@ -750,13 +750,14 @@ Deno.serve(async (req) => {
       detectedCompany = titleCase(detectedCompany);
 
       // Helper: run personalized analysis on intel results
-      const runPersonalizedAnalysis = async (companyName, intelData) => {
+      const runPersonalizedAnalysis = async (companyName, intelData, memoryContext) => {
         try {
           const analysisResult = await base44.integrations.Core.InvokeLLM({
             prompt: `You are FASTIQ, an elite AI career center for UF students. You just researched ${companyName} for this student. Now ANALYZE what the research means specifically for them.
 
 ${profileContext}
 
+${memoryContext ? `PERSISTENT MEMORY (changes since last research):\n${memoryContext}\n\nIMPORTANT: If there are memory deltas, LEAD with what changed. Example: "Last time you looked at Disney, they had 35 open roles — now it's 28. They may be slowing down. Consider accelerating your outreach before the window closes."\n` : ''}
 COMPANY INTEL:
 - Company: ${companyName}
 - Hiring Score: ${intelData.hiring_score}/100 (${intelData.hiring_signal})
