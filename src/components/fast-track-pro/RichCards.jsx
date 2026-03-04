@@ -165,27 +165,45 @@ export function CompanyIntelCard({ data }) {
 export function AlumniListCard({ data }) {
   const alumni = toArray(data?.alumni);
   if (!alumni.length) return null;
+  const cffCount = alumni.filter(a => a.is_cff_member).length;
   return (
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-purple-600" />
         <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni Found</span>
+        {cffCount > 0 && (
+          <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0">
+            {cffCount} CFF Member{cffCount > 1 ? 's' : ''}
+          </Badge>
+        )}
       </div>
       <div className="space-y-3">
         {alumni.slice(0, 5).map((a, i) => (
           <div key={i} className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-purple-200 rounded-lg flex items-center justify-center text-purple-700 font-bold text-xs flex-shrink-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+              a.is_cff_member ? 'bg-green-200 text-green-700 ring-2 ring-green-400' : 'bg-purple-200 text-purple-700'
+            }`}>
               {a.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-semibold text-slate-900 text-sm truncate">{a.name}</p>
+                {a.is_cff_member && (
+                  <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0">
+                    ✓ CFF Member
+                  </Badge>
+                )}
                 {a.match_score && (
                   <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0">{a.match_score}%</Badge>
                 )}
               </div>
               <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
               {a.degree_info && <p className="text-[11px] text-purple-600 mt-0.5">🐊 {a.degree_info}</p>}
+              {a.is_cff_member ? (
+                <p className="text-[11px] text-green-600 mt-0.5 font-medium">💬 Message directly on CFF</p>
+              ) : (
+                <p className="text-[11px] text-slate-400 mt-0.5">🔗 Reach out via LinkedIn</p>
+              )}
               {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
             </div>
           </div>
