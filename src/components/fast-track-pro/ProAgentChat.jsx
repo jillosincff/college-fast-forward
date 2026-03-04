@@ -50,16 +50,16 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} onSendMessage={onSendMessage} />;
     case 'alumni_card': return <AlumniListCard data={payload} onDraftMessage={handleDraftMessage} onResearchCompany={onResearchCompany} />;
-    case 'outreach_draft': return <OutreachDraftCard data={payload} />;
+    case 'outreach_draft': return <OutreachDraftCard data={payload} onSendMessage={onSendMessage} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} />;
     case 'warm_path': return <WarmPathCard data={payload} onOpenChat={onSendMessage} />;
-    case 'resume_review': case 'resume_match': case 'resume_tailor': return <ResumeReviewCard data={payload} />;
-    case 'interview_prep': return <InterviewPrepCard data={payload} />;
-    case 'salary_intel': return <SalaryIntelCard data={payload} />;
-    case 'cover_letter': return <CoverLetterCard data={payload} />;
-    case 'linkedin_review': return <LinkedInReviewCard data={payload} />;
-    case 'batch_target_scan': return <BatchTargetScanCard data={payload} onResearchCompany={onResearchCompany} />;
+    case 'resume_review': case 'resume_match': case 'resume_tailor': return <ResumeReviewCard data={payload} onSendMessage={onSendMessage} />;
+    case 'interview_prep': return <InterviewPrepCard data={payload} onSendMessage={onSendMessage} />;
+    case 'salary_intel': return <SalaryIntelCard data={payload} onSendMessage={onSendMessage} />;
+    case 'cover_letter': return <CoverLetterCard data={payload} onSendMessage={onSendMessage} />;
+    case 'linkedin_review': return <LinkedInReviewCard data={payload} onSendMessage={onSendMessage} />;
+    case 'batch_target_scan': return <BatchTargetScanCard data={payload} onResearchCompany={onResearchCompany} onSendMessage={onSendMessage} />;
     case 'career_advice': return payload?.suggested_actions?.length > 0 ? (
       <div className="mt-2 flex flex-wrap gap-2">
         {payload.suggested_actions.map((a, i) => (
