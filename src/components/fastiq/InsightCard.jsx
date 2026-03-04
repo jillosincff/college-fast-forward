@@ -20,11 +20,25 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
 
   const hasUnmessaged = unmessagedAlumni > 0;
   const targets = profile?.target_companies?.length || 0;
+  const hasResume = !!profile?.resume_text;
 
   let message, cta, emoji, onClick;
 
+  // Priority 0: Resume upload (highest priority if missing)
+  if (!hasResume && staleCount === 0) {
+    emoji = '📄';
+    message = (
+      <>
+        Students who upload their resume get{' '}
+        <span style={{ color: '#FA4616', fontWeight: 700 }}>2x more relevant company matches</span>.
+        Upload yours to unlock the full FASTIQ experience — smarter outreach, tailored interview prep, and instant resume tailoring.
+      </>
+    );
+    cta = 'Upload Resume →';
+    onClick = () => onOpenChat('Help me build a resume');
+  }
   // Priority 1: Follow-up reminders (stale outreach)
-  if (staleCount > 0) {
+  else if (staleCount > 0) {
     emoji = '📬';
     message = (
       <>
