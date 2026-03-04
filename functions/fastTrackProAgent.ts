@@ -1301,6 +1301,17 @@ Rules:
       if (detectedCompany.length < 2 || bad.includes(detectedCompany.toLowerCase())) detectedCompany = null;
     }
 
+    // LAYER 2: Confirmation gate for unknown companies (company intel path)
+    if (detectedCompany && shouldConfirmCompany(detectedCompany, targetCompanies)) {
+      console.log(`[Layer2] Unknown company "${detectedCompany}" in company query — asking confirmation`);
+      return Response.json({
+        success: true,
+        response: `Just to make sure — did you want me to research a company called **"${titleCase(detectedCompany)}"**? Or were you asking me to do something else?\n\nYou can say:\n→ **"Yes, research ${titleCase(detectedCompany)}"** to continue\n→ Or name a specific company like **"Research Apple"**\n→ Or ask me to **"find internships at my target companies"**`,
+        message_type: 'text',
+        payload: {}
+      });
+    }
+
     if (detectedCompany) {
       console.log('Intent: company_intel for', detectedCompany);
       detectedCompany = titleCase(detectedCompany);
