@@ -557,12 +557,15 @@ Deno.serve(async (req) => {
 
       const cached = await getCachedAlumni(base44, alumniCompany);
       if (cached) {
-        saveToPipeline(base44, user.email, alumniCompany, cached);
+        const enrichedCached = await crossReferenceCFF(base44, cached.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: a.match_score, degree_info: a.degree_info, location: a.location })));
+        saveToPipeline(base44, user.email, alumniCompany, enrichedCached);
         trackActivity(base44, user.email, profile.id, 'alumni_view', alumniCompany);
+        const cffCount = enrichedCached.filter(a => a.is_cff_member).length;
+        const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message ${cffCount === 1 ? 'them' : 'them'} directly on CFF!` : '';
         return Response.json({
-          success: true, response: `Here are UF alumni I found at ${alumniCompany}:`,
+          success: true, response: `Here are UF alumni I found at ${alumniCompany}:` + cffNote,
           message_type: 'alumni_card',
-          payload: { alumni: cached.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: a.match_score, degree_info: a.degree_info, location: a.location })), cached: true }
+          payload: { alumni: enrichedCached, cached: true }
         });
       }
 
