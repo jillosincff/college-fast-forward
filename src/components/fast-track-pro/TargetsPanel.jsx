@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin, FileText, Upload } from 'lucide-react';
+import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
