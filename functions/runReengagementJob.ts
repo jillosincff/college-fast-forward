@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
 
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     
     // Verify admin access
     const currentUser = await base44.auth.me();
-    if (currentUser?.role !== 'admin') {
+    if (!currentUser?.roles?.includes('admin') && currentUser?.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
     
