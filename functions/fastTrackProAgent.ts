@@ -797,7 +797,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
       };
 
       const cached = await getCachedCompanyIntel(base44, detectedCompany);
-      if (cached) {
+      if (cached && !cached._expired) {
         trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
         const cachedIntelData = { hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, recent_news: [], interview_process: '' };
         const analysis = await runPersonalizedAnalysis(detectedCompany, cachedIntelData);
@@ -808,6 +808,8 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
           payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null }
         });
       }
+      // Keep expired cache for memory delta comparison
+      const previousIntel = (cached && cached._expired) ? cached : null;
 
       const webResult = await base44.integrations.Core.InvokeLLM({
         prompt: `Research ${detectedCompany} as of 2026. Hiring status, open roles count, salary ranges, recent news, interview process. Be specific.`,
