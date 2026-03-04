@@ -304,6 +304,47 @@ function titleCase(str) {
   return str.replace(/\b\w/g, c => c.toUpperCase());
 }
 
+// Generate contextual guidance after showing alumni results
+async function generateAlumniGuidance(base44, alumni, company, profileContext) {
+  try {
+    const alumniSummary = alumni.slice(0, 5).map(a =>
+      `- ${a.name}: ${a.role_title} (score: ${a.match_score}%, CFF: ${a.is_cff_member ? 'yes' : 'no'})`
+    ).join('\n');
+    const cffCount = alumni.filter(a => a.is_cff_member).length;
+
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are FASTIQ. You just found these UF alumni at ${company} for a student. Write a SHORT personalized analysis (3-5 sentences) about WHO to reach out to first and WHY.
+
+${profileContext}
+
+ALUMNI FOUND:
+${alumniSummary}
+CFF Members: ${cffCount}
+
+INSTRUCTIONS:
+1. Note the pattern in roles (e.g. "These are mostly senior engineering roles" or "Good mix of levels")
+2. Recommend ONE specific person to reach out to FIRST, using their FIRST NAME only. Explain why (e.g. seniority for referrals, CFF member for easy contact, similar background)
+3. If there are CFF members, highlight that they can be messaged directly on the platform
+4. End with a specific prompt like "Want me to draft that message?" or "Want me to draft a warm intro to [first name]?"
+
+Be warm, strategic, and direct. Use first names only. Max 4 sentences.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          guidance: { type: "string" }
+        },
+        required: ["guidance"]
+      }
+    });
+    return result.guidance || `Here are UF alumni I found at ${company}:`;
+  } catch (e) {
+    console.log('Alumni guidance generation error:', e.message);
+    const cffCount = alumni.filter(a => a.is_cff_member).length;
+    const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message them directly on CFF!` : '';
+    return `Here are UF alumni I found at ${company}:` + cffNote;
+  }
+}
+
 const UF_FILTER = `CRITICAL: Only include people who attended the University of Florida (UF) in Gainesville. Do NOT include alumni from FIU, FSU, UCF, USF, or any other school.`;
 const NON_UF_SCHOOLS = ['fiu','florida international','fsu','florida state','ucf','central florida','usf','south florida','famu','fgcu'];
 
