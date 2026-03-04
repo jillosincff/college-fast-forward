@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
 const corsHeaders = {

@@ -1,5 +1,4 @@
-
-import { createClient } from 'npm:@base44/sdk@0.1.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe';
 
 const corsHeaders = {
