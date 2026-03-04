@@ -149,6 +149,11 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
         .fiq-delay-5 { animation-delay: 0.75s; }
         .fiq-delay-6 { animation-delay: 0.9s; }
         .fiq-delay-7 { animation-delay: 1.05s; }
+        
+        @media (max-width: 640px) {
+          .fiq-rings-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .fiq-root h1 { font-size: 24px !important; }
+        }
       `}</style>
 
       {/* HERO with Ticker */}
