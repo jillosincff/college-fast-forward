@@ -30,11 +30,13 @@ export default function QuickActionsGrid({ onOpenChat }) {
             }}
             onMouseEnter={e => {
               e.currentTarget.style.borderColor = a.color;
+              e.currentTarget.style.borderWidth = '2px';
               e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = `0 4px 16px ${a.color}18`;
+              e.currentTarget.style.boxShadow = `0 6px 20px ${a.color}30`;
             }}
             onMouseLeave={e => {
               e.currentTarget.style.borderColor = '#E2E8F0';
+              e.currentTarget.style.borderWidth = '1px';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }}

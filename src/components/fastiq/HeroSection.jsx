@@ -10,10 +10,10 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
   const subtitle = ['UF', major, gradYear, industry ? `Targeting ${industry}` : ''].filter(Boolean).join(' · ');
 
   const rings = [
-    { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FA4616' },
-    { value: statValues.insiders, max: 15, label: 'Insiders\nFound', color: '#06B6D4' },
-    { value: statValues.messages, max: 10, label: 'Messages\nSent', color: '#8B5CF6' },
-    { value: statValues.warmPaths, max: 5, label: 'Warm\nPaths', color: '#34D399' },
+    { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
+    { value: statValues.insiders, max: 15, label: 'Insiders\nFound', color: '#22D3EE' },
+    { value: statValues.messages, max: 10, label: 'Messages\nSent', color: '#A78BFA' },
+    { value: statValues.warmPaths, max: 5, label: 'Warm\nPaths', color: '#4ADE80' },
   ];
 
   return (
@@ -81,7 +81,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
               display: 'flex', flexDirection: 'column', alignItems: 'center',
             }}>
               <div style={{ position: 'relative', marginBottom: 10 }}>
-                <ProgressRing value={r.value} max={r.max} color={r.color} size={68} strokeWidth={5} />
+                <ProgressRing value={r.value} max={r.max} color={r.color} size={68} strokeWidth={6} />
                 <div className="fiq-mono" style={{
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%, -50%)',

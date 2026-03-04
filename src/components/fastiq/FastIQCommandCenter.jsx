@@ -60,24 +60,31 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
       // New opportunities
       setNewOpportunities(oppsRaw);
 
-      // Build ticker items from real data
+      // Build ticker items from real data — always use full company_name
       const tItems = [];
       intelRaw.forEach(intel => {
-        const name = titleCase(intel.company_name || '');
-        if (name) {
+        const name = titleCase(String(intel.company_name || '').trim());
+        if (name && name.length > 1) {
           tItems.push(`FASTIQ scanned ${name} recently`);
           if (intel.open_roles_count > 0) tItems.push(`${name} has ${intel.open_roles_count} open roles this week`);
           if (intel.hiring_signal === 'hot') tItems.push(`🔥 ${name} is actively hiring right now`);
         }
       });
       if (alumniRaw.length > 0) {
-        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => a.company).filter(Boolean))];
+        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => String(a.company || '').trim()).filter(c => c.length > 1))];
         companies.forEach(c => {
           const count = aMap[c.toLowerCase()] || 0;
           if (count > 0) tItems.push(`${count} UF alumni found at ${titleCase(c)}`);
         });
       }
-      if (oppsRaw.length > 0) {
+      oppsRaw.forEach(opp => {
+        const cn = String(opp.company_name || '').trim();
+        const role = String(opp.role_title || '').trim();
+        if (cn.length > 1 && role.length > 1) {
+          tItems.push(`New: ${role} at ${titleCase(cn)} matched to your profile`);
+        }
+      });
+      if (oppsRaw.length > 0 && tItems.filter(t => t.includes('matched')).length === 0) {
         tItems.push(`${oppsRaw.length} new opportunities matched to your profile this week`);
       }
       // Fallback placeholders
@@ -88,17 +95,19 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
       }
       setTickerItems(tItems);
 
-      // Weekly stats
+      // Weekly stats — use full company_name for topSignal
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const weekOps = oppsRaw.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
       const weekActivity = activityRaw.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
       const companiesScanned = new Set(weekActivity.filter(a => a.action_type === 'company_search').map(a => a.target_name)).size;
       const alumniFound = weekActivity.filter(a => a.action_type === 'alumni_view').length;
+      const hotCompany = intelRaw.find(i => i.hiring_signal === 'hot');
+      const topSignalName = hotCompany ? titleCase(String(hotCompany.company_name || '').trim()) : null;
       setWeeklyStats({
         opportunities: weekOps || oppsRaw.length,
         alumniFound: alumniFound || alumniRaw.length,
         companiesScanned: companiesScanned || Object.keys(iMap).length,
-        topSignal: intelRaw.find(i => i.hiring_signal === 'hot')?.company_name || null,
+        topSignal: (topSignalName && topSignalName.length > 1) ? topSignalName : null,
       });
     };
     load();
@@ -181,7 +190,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
         <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} profile={profile} />
 
         {newOpportunities.length > 0 && (
-          <div ref={alertsRef}>
+          <div ref={alertsRef} className="fiq-animate fiq-delay-3">
             <OpportunitiesSection
               opportunities={newOpportunities}
               onOpenChat={onOpenChat}
@@ -195,14 +204,12 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, highlig
 
         <PipelineBar counts={pipelineCounts} />
 
-        {targetCompanies.length > 0 && (
-          <TargetCompaniesSection
-            companies={targetCompanies}
-            companyIntel={companyIntel}
-            alumniCounts={alumniCounts}
-            onOpenChat={onOpenChat}
-          />
-        )}
+        <TargetCompaniesSection
+          companies={targetCompanies}
+          companyIntel={companyIntel}
+          alumniCounts={alumniCounts}
+          onOpenChat={onOpenChat}
+        />
 
         <QuickActionsGrid onOpenChat={onOpenChat} />
 

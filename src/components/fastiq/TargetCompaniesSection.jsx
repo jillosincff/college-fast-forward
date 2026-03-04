@@ -82,7 +82,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
           cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
         }}>+ Add Company</button>
       </div>
-      {companies.map((c, i) => {
+      {companies.length > 0 ? companies.map((c, i) => {
         const key = c.toLowerCase();
         return (
           <CompanyRow
@@ -94,7 +94,22 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
             delay={0.8 + i * 0.05}
           />
         );
-      })}
+      }) : (
+        <div style={{
+          background: '#fff', borderRadius: 14, border: '2px dashed #E2E8F0',
+          padding: '32px 20px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>🎯</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#475569', marginBottom: 6 }}>No targets yet</div>
+          <div style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.5, maxWidth: 320, margin: '0 auto 16px' }}>
+            Tell FASTIQ which companies you're interested in and it will find UF alumni, track hiring signals, and scout opportunities for you.
+          </div>
+          <button onClick={() => onOpenChat('Help me find companies to target based on my profile')} style={{
+            background: '#0021A5', color: '#fff', border: 'none', padding: '10px 24px',
+            borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
+          }}>+ Add Target Companies</button>
+        </div>
+      )}
     </div>
   );
 }
