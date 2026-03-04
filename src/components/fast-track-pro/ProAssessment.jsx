@@ -407,35 +407,52 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
 
             {/* Step 5: Biggest Challenge Radio */}
             {currentStep.id === 'challenge' && renderRadioOptions(CHALLENGES, 'biggest_challenge')}
+
+            {/* Step 6: Resume */}
+            {currentStep.id === 'resume' && resumeMode !== 'builder' && (
+              <ResumeUploadStep
+                user={user}
+                onResumeReady={handleResumeReady}
+                onStartBuilder={() => setResumeMode('builder')}
+              />
+            )}
+            {currentStep.id === 'resume' && resumeMode === 'builder' && (
+              <ResumeBuilderStep
+                user={user}
+                onResumeReady={handleResumeReady}
+                onBack={() => setResumeMode(null)}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-white/10 p-4 safe-area-bottom">
-        <div className="max-w-lg mx-auto flex gap-3">
-          {step > 0 && (
+      {/* Bottom Nav — hidden on resume step (resume step has its own buttons) */}
+      {currentStep.id !== 'resume' && (
+        <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-white/10 p-4 safe-area-bottom">
+          <div className="max-w-lg mx-auto flex gap-3">
+            {step > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setStep(step - 1)}
+                className="border-white/30 text-white hover:bg-white/10 bg-white/10"
+                style={{ minHeight: 'auto', width: 'auto' }}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            )}
             <Button
-              variant="outline"
-              onClick={() => setStep(step - 1)}
-              className="border-white/30 text-white hover:bg-white/10 bg-white/10"
-              style={{ minHeight: 'auto', width: 'auto' }}
+              onClick={handleNext}
+              disabled={!canProceed() || saving}
+              className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-12 font-semibold"
             >
-              <ChevronLeft className="w-4 h-4" />
+              {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              Continue
+              <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
-          )}
-          <Button
-            onClick={handleNext}
-            disabled={!canProceed() || saving}
-            className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-12 font-semibold"
-          >
-            {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-            {step === STEPS.length - 1 ? (saving ? 'Setting up...' : 'Activate FASTIQ') : 'Continue'}
-            {!saving && step < STEPS.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
-            {!saving && step === STEPS.length - 1 && <Sparkles className="w-4 h-4 ml-1" />}
-          </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
