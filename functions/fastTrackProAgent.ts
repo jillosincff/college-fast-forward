@@ -346,6 +346,23 @@ Deno.serve(async (req) => {
       profile = profiles?.[0] || {};
     } catch(e) {}
 
+    // Load pipeline for memory context
+    let pipelineData = [];
+    try {
+      pipelineData = await base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date', 50).catch(() => []);
+    } catch(e) {}
+
+    const pipelineSummary = pipelineData.length > 0
+      ? `\n- Pipeline: ${pipelineData.length} contacts (${pipelineData.filter(p => p.status === 'identified').length} identified, ${pipelineData.filter(p => p.status === 'reached_out').length} reached out, ${pipelineData.filter(p => p.status === 'replied').length} replied)`
+      : '';
+    const staleOutreach = pipelineData.filter(p => {
+      if (p.status !== 'reached_out' || !p.reached_out_date) return false;
+      return (Date.now() - new Date(p.reached_out_date).getTime()) > 3 * 24 * 60 * 60 * 1000;
+    });
+    const staleSummary = staleOutreach.length > 0
+      ? `\n- Stale outreach: ${staleOutreach.map(s => `${s.alumni_name} at ${s.company} (sent ${Math.round((Date.now() - new Date(s.reached_out_date).getTime()) / (1000*60*60*24))} days ago)`).join('; ')}`
+      : '';
+
     const profileContext = `STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
 - Major: ${user.major || 'undeclared'}
@@ -356,7 +373,8 @@ Deno.serve(async (req) => {
 - Location: ${profile.location_preference || 'not set'}
 - Timeline: ${profile.career_timeline || 'not set'}
 - Stage: ${profile.current_stage || 'not set'}
-- Challenge: ${profile.biggest_challenge || 'not set'}`;
+- Challenge: ${profile.biggest_challenge || 'not set'}
+- Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}`;
 
     // Resolve target company references (#1 target, my dream company, etc.)
     let resolvedMessage = message;
