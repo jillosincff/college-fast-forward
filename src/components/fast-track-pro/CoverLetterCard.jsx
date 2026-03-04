@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
+import SuggestedActions from './SuggestedActions';
 
-export default function CoverLetterCard({ data }) {
+export default function CoverLetterCard({ data, onSendMessage }) {
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(data?.letter_text || '');
@@ -64,6 +65,8 @@ export default function CoverLetterCard({ data }) {
           </Button>
         )}
       </div>
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-indigo-200" />
     </Card>
   );
 }

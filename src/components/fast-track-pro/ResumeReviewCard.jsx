@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, Tag } from 'lucide-react';
+import SuggestedActions from './SuggestedActions';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
@@ -30,7 +31,7 @@ function ScoreRing({ score, size = 80 }) {
   );
 }
 
-export default function ResumeReviewCard({ data }) {
+export default function ResumeReviewCard({ data, onSendMessage }) {
   if (!data || typeof data !== 'object') return null;
   const score = typeof data.overall_score === 'number' ? data.overall_score : 0;
   const strengths = toArray(data.strengths);
@@ -92,6 +93,8 @@ export default function ResumeReviewCard({ data }) {
           </div>
         </div>
       )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-yellow-200" />
     </Card>
   );
 }

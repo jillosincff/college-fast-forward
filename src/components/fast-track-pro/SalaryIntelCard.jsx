@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import SuggestedActions from './SuggestedActions';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
@@ -11,7 +12,7 @@ function toArray(val) {
   return [];
 }
 
-export default function SalaryIntelCard({ data }) {
+export default function SalaryIntelCard({ data, onSendMessage }) {
   const [copied, setCopied] = useState(false);
   if (!data || typeof data !== 'object') return null;
 
@@ -81,6 +82,8 @@ export default function SalaryIntelCard({ data }) {
           </div>
         </div>
       )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-green-200" />
     </Card>
   );
 }

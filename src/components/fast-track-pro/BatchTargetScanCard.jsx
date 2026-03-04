@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Briefcase, TrendingUp, Star } from 'lucide-react';
 import titleCase from '@/components/utils/titleCase';
+import SuggestedActions from './SuggestedActions';
 
 const signalConfig = {
   hot: { emoji: '🟢', label: 'Hot', bg: 'bg-green-100 text-green-700' },
@@ -63,7 +64,7 @@ function CompanyRow({ company, isBestMatch, onResearch }) {
   );
 }
 
-export default function BatchTargetScanCard({ data, onResearchCompany }) {
+export default function BatchTargetScanCard({ data, onResearchCompany, onSendMessage }) {
   const companies = data?.companies || [];
   const bestMatch = data?.best_match || '';
 
@@ -93,6 +94,8 @@ export default function BatchTargetScanCard({ data, onResearchCompany }) {
           />
         ))}
       </div>
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-indigo-200" />
     </Card>
   );
 }

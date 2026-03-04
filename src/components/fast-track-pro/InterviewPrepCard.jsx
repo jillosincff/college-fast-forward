@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import SuggestedActions from './SuggestedActions';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
@@ -44,7 +45,7 @@ function QuestionItem({ q }) {
   );
 }
 
-export default function InterviewPrepCard({ data }) {
+export default function InterviewPrepCard({ data, onSendMessage }) {
   if (!data || typeof data !== 'object') return null;
 
   const questions = toArray(data.likely_questions);
@@ -95,6 +96,8 @@ export default function InterviewPrepCard({ data }) {
           </ul>
         </div>
       )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-red-200" />
     </Card>
   );
 }

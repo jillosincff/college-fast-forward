@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import SuggestedActions from './SuggestedActions';
 
 function toArray(val) {
   if (Array.isArray(val)) return val;
@@ -29,7 +30,7 @@ function ScoreRing({ score, size = 70 }) {
   );
 }
 
-export default function LinkedInReviewCard({ data }) {
+export default function LinkedInReviewCard({ data, onSendMessage }) {
   if (!data || typeof data !== 'object') return null;
 
   const score = typeof data.overall_score === 'number' ? data.overall_score : 0;
@@ -85,6 +86,8 @@ export default function LinkedInReviewCard({ data }) {
           </div>
         </div>
       )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-sky-200" />
     </Card>
   );
 }

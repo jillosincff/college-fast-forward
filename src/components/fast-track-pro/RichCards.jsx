@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight } from 'lucide-react';
+import SuggestedActions from './SuggestedActions';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
 
@@ -268,7 +269,7 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
   );
 }
 
-export function OutreachDraftCard({ data }) {
+export function OutreachDraftCard({ data, onSendMessage }) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMessage, setEditedMessage] = useState(data?.message || '');
@@ -386,6 +387,8 @@ export function OutreachDraftCard({ data }) {
           </Button>
         )}
       </div>
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-orange-200" />
     </Card>
   );
 }
