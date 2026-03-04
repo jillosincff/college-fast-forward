@@ -123,6 +123,17 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       .join('\n\n');
   };
 
+  // Persist a message to ProAgentConversation for context tracking
+  const persistMessage = (role, content, messageType) => {
+    if (!user?.email) return;
+    base44.entities.ProAgentConversation.create({
+      user_email: user.email,
+      role,
+      content: (content || '').substring(0, 2000),
+      message_type: messageType || 'text',
+    }).catch(e => console.log('Failed to persist message:', e.message));
+  };
+
   // Start a conversational opener: show user message + instant assistant reply, no API call
   const startConversation = (openerKey) => {
     const opener = getConversationalOpener(openerKey, currentProfile);
@@ -132,6 +143,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       { role: 'user', content: opener.userMessage },
       { role: 'assistant', content: opener.assistantMessage, message_type: 'text' },
     ]);
+    // Persist both messages for context tracking
+    persistMessage('user', opener.userMessage, 'text');
+    persistMessage('assistant', opener.assistantMessage, 'text');
   };
 
   const sendMessage = async (messageText) => {
