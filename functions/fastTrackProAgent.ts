@@ -816,6 +816,65 @@ Deno.serve(async (req) => {
       });
     }
 
+    // 7.5 BATCH TARGET COMMAND — must be checked BEFORE alumni/company/opportunity detectors
+    if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length > 0) {
+      console.log('Intent: batch_target_scan for', targetCompanies.join(', '));
+      const major = user.major || 'their field';
+      const industry = profile.target_industry || 'any industry';
+      const gradYear = user.graduation_year || 'upcoming';
+
+      // Research all target companies in parallel
+      const batchPromises = targetCompanies.map(company =>
+        base44.integrations.Core.InvokeLLM({
+          prompt: `Find current entry-level and intern ${major} roles at ${company} in 2026. Include role titles, locations, whether applications are open, and how well they match a ${major} major graduating ${gradYear}. Be specific and factual.`,
+          add_context_from_internet: true,
+        }).then(webRes =>
+          base44.integrations.Core.InvokeLLM({
+            prompt: `You are FASTIQ. Parse research into structured roles found at ${company} for a ${major} student in ${industry}.\n\nRESEARCH:\n${String(typeof webRes === 'string' ? webRes : JSON.stringify(webRes)).substring(0, 3000)}\n\nReturn relevant entry-level/intern roles. hiring_signal: hot (many openings), warm (some), cool (few/none). profile_match: how well the roles fit a ${major} major (strong/moderate/weak).`,
+            response_json_schema: {
+              type: "object",
+              properties: {
+                company_name: { type: "string" },
+                hiring_signal: { type: "string", enum: ["hot", "warm", "cool"] },
+                profile_match: { type: "string", enum: ["strong", "moderate", "weak"] },
+                roles: { type: "array", items: { type: "object", properties: { title: { type: "string" }, location: { type: "string" }, type: { type: "string", enum: ["internship", "entry_level", "mid_level"] }, applications_open: { type: "boolean" } }, required: ["title"] } },
+                summary: { type: "string" }
+              },
+              required: ["company_name", "hiring_signal", "profile_match", "roles", "summary"]
+            }
+          })
+        ).catch(e => ({ company_name: company, hiring_signal: 'cool', profile_match: 'weak', roles: [], summary: `Could not research ${company}: ${e.message}` }))
+      );
+
+      const batchResults = await Promise.all(batchPromises);
+
+      // Generate overall summary
+      const summaryLines = batchResults.map(r => `${r.company_name}: ${r.hiring_signal} hiring, ${r.roles?.length || 0} roles, ${r.profile_match} match`).join('\n');
+      const bestMatch = batchResults.reduce((best, r) => {
+        const score = (r.profile_match === 'strong' ? 3 : r.profile_match === 'moderate' ? 2 : 1) + (r.hiring_signal === 'hot' ? 3 : r.hiring_signal === 'warm' ? 2 : 1);
+        return score > best.score ? { company: r.company_name, score } : best;
+      }, { company: '', score: 0 });
+
+      trackActivity(base44, user.email, profile.id, 'company_search', 'batch_targets');
+
+      return Response.json({
+        success: true,
+        response: `Here's what I found across your ${targetCompanies.length} target companies. ${bestMatch.company ? `**${bestMatch.company}** looks like your strongest opportunity right now.` : ''}`,
+        message_type: 'batch_target_scan',
+        payload: { companies: batchResults, best_match: bestMatch.company, summary: summaryLines }
+      });
+    }
+
+    // If batch target command detected but NO target companies set, tell the user
+    if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length === 0) {
+      return Response.json({
+        success: true,
+        response: "You don't have any target companies set yet. Add your target companies first (up to 5), and then I can scan all of them for relevant roles.",
+        message_type: 'text',
+        payload: {}
+      });
+    }
+
     // 8. ALUMNI DISCOVERY (checked before outreach to prevent misclassification)
     let alumniCompany = detectAlumniQuery(resolvedMessage);
     if (alumniCompany === 'RESOLVE_FROM_CONTEXT') {
