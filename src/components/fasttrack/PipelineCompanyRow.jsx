@@ -154,6 +154,14 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
                     </div>
                     <div className="col-span-2">
                       <span className="text-[10px] text-slate-500">{dateStr}</span>
+                      {contact.status === 'reached_out' && contact.reached_out_date && (() => {
+                        const days = Math.round((Date.now() - new Date(contact.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
+                        return days >= 4 ? (
+                          <div className="text-[9px] font-bold text-amber-600 mt-0.5">⏰ {days}d ago</div>
+                        ) : days > 0 ? (
+                          <div className="text-[9px] text-slate-400 mt-0.5">{days}d ago</div>
+                        ) : null;
+                      })()}
                     </div>
                     <div className="col-span-3 text-right">
                       {actionCfg && (
