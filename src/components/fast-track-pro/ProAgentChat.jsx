@@ -43,9 +43,12 @@ function getSuggestedPrompts(profile) {
 
 function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated, onSendMessage }) {
   if (!payload) return null;
+  const handleDraftMessage = (name) => {
+    if (onSendMessage && name) onSendMessage(`Draft a warm intro message to ${name}`);
+  };
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} />;
-    case 'alumni_card': return <AlumniListCard data={payload} />;
+    case 'alumni_card': return <AlumniListCard data={payload} onDraftMessage={handleDraftMessage} onResearchCompany={onResearchCompany} />;
     case 'outreach_draft': return <OutreachDraftCard data={payload} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} />;
