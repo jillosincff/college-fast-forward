@@ -55,7 +55,7 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
   switch (message_type) {
     case 'company_intel': return <CompanyIntelCard data={payload} onSendMessage={onSendMessage} />;
     case 'alumni_card': return <AlumniListCard data={payload} onDraftMessage={handleDraftMessage} onResearchCompany={onResearchCompany} />;
-    case 'outreach_draft': return <OutreachDraftCard data={payload} onSendMessage={onSendMessage} />;
+    case 'outreach_draft': case 'follow_up_draft': return <OutreachDraftCard data={payload} onSendMessage={onSendMessage} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} onSendMessage={onSendMessage} />;
     case 'warm_path': return <WarmPathCard data={payload} onOpenChat={onSendMessage} />;
