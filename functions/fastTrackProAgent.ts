@@ -339,7 +339,7 @@ async function saveAlumniCache(base44, alumni) {
       await base44.asServiceRole.entities.DiscoveredAlumni.create({
         name: a.name, role_title: a.role_title, company: a.company, school_code: 'UF',
         match_score: a.match_score || 0, degree_info: a.degree_info || '',
-        location: a.location || '', expires_at: exp,
+        location: a.location || '', linkedin_url: a.linkedin_url || '', expires_at: exp,
       });
     } catch(e) {}
   }
@@ -1064,6 +1064,7 @@ ${profileContext}
 
 ${UF_FILTER}
 - DEDUPLICATE same name+title
+- For each alumni, try to find their LinkedIn profile URL. If found in the research data, include it. Format: https://www.linkedin.com/in/username
 
 MATCH SCORE RULES — MINIMUM 50% for ANY UF alum at this company:
 The student specifically searched for alumni at ${alumniCompany}. Every alum found here is a HIGH-VALUE contact by definition.
@@ -1102,7 +1103,7 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
           type: "object",
           properties: {
             response: { type: "string" },
-            alumni: { type: "array", items: { type: "object", properties: { name: { type: "string" }, role_title: { type: "string" }, company: { type: "string" }, degree_info: { type: "string" }, location: { type: "string" }, match_score: { type: "integer" }, seniority_level: { type: "string", enum: ["entry","mid","senior","director","vp_plus"] } }, required: ["name","role_title","company","match_score"] } }
+            alumni: { type: "array", items: { type: "object", properties: { name: { type: "string" }, role_title: { type: "string" }, company: { type: "string" }, degree_info: { type: "string" }, location: { type: "string" }, match_score: { type: "integer" }, seniority_level: { type: "string", enum: ["entry","mid","senior","director","vp_plus"] }, linkedin_url: { type: "string", description: "LinkedIn profile URL if found" } }, required: ["name","role_title","company","match_score"] } }
           },
           required: ["response","alumni"]
         }
