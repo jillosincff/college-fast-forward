@@ -477,6 +477,53 @@ Deno.serve(async (req) => {
     }
 
     // ═══════════════════════════════════════════════════════
+    //  CONVERSATION CONTEXT RESOLUTION
+    //  If the user's message is a short answer to a clarifying question,
+    //  use LLM to classify the REAL intent from conversation context
+    // ═══════════════════════════════════════════════════════
+
+    let contextOverrideIntent = null;
+    let contextOverrideCompany = null;
+    let contextOverridePerson = null;
+
+    if (recentDbMessages.length >= 2 && isShortAnswer(message)) {
+      // Find the last assistant message
+      const lastAssistantMsg = [...recentDbMessages].reverse().find(m => m.role === 'assistant');
+      if (lastAssistantMsg && isAssistantAskingClarification(lastAssistantMsg.content)) {
+        console.log('Context: Detected short answer to clarifying question. Running LLM intent classification...');
+        try {
+          const classification = await classifyIntentWithContext(base44, message, recentDbMessages.slice(-4), profileContext);
+          console.log('Context classification:', JSON.stringify(classification));
+          if (classification && classification.confidence !== 'low') {
+            contextOverrideIntent = classification.intent;
+            contextOverrideCompany = classification.company || null;
+            contextOverridePerson = classification.person || null;
+            // Rewrite resolvedMessage to make regex-based detectors work
+            if (contextOverrideCompany && contextOverrideIntent === 'alumni_discovery') {
+              resolvedMessage = `Find UF alumni at ${contextOverrideCompany}`;
+              console.log(`Context override: alumni_discovery → "${resolvedMessage}"`);
+            } else if (contextOverrideCompany && contextOverrideIntent === 'company_intel') {
+              resolvedMessage = `Research ${contextOverrideCompany} hiring`;
+              console.log(`Context override: company_intel → "${resolvedMessage}"`);
+            } else if (contextOverridePerson && contextOverrideIntent === 'outreach_draft') {
+              resolvedMessage = `Draft a message to ${contextOverridePerson}`;
+              console.log(`Context override: outreach_draft → "${resolvedMessage}"`);
+            } else if (contextOverrideIntent === 'interview_prep' && contextOverrideCompany) {
+              resolvedMessage = `Prepare me for an interview at ${contextOverrideCompany}`;
+              console.log(`Context override: interview_prep → "${resolvedMessage}"`);
+            } else if (contextOverrideIntent === 'roadmap') {
+              resolvedMessage = `Create a career roadmap for me`;
+            } else if (contextOverrideIntent === 'opportunity_discovery') {
+              resolvedMessage = `Find companies hiring in my field`;
+            }
+          }
+        } catch(e) {
+          console.log('Context classification failed (continuing with regex):', e.message);
+        }
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
     //  INTENT ROUTING (order matters!)
     // ═══════════════════════════════════════════════════════
 
