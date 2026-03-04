@@ -120,6 +120,7 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('linkedin')) return 'linkedin_review';
   if (t.includes('salary') || t.includes('negotiate')) return 'salary_intel';
   if (t.includes('find companies') || t.includes('companies to target') || t.includes('companies that') || t.includes('mid-size companies')) return 'find_companies';
+  if (t.includes('follow-up') || t.includes('follow up') || t.includes('followup') || t.includes('stale outreach')) return null; // Let follow-up go to backend handler
   if (t.includes('draft') || t.includes('intro message') || t.includes('outreach')) return 'draft_outreach';
   if (t.includes('explore') || t.includes('career paths')) return 'explore_careers';
   if (t.includes('action plan') || t.includes('career plan') || t.includes('4-week')) return 'career_plan';
