@@ -3,10 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Building2, ChevronRight, ChevronLeft, Loader2, X, Sparkles } from 'lucide-react';
+import { Zap, Building2, ChevronRight, ChevronLeft, Loader2, X, Sparkles, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
+import ResumeUploadStep from './ResumeUploadStep';
+import ResumeBuilderStep from './ResumeBuilderStep';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
@@ -14,6 +16,7 @@ const STEPS = [
   { id: 'timeline', title: 'When do you want to start?', subtitle: 'This sets your urgency level.' },
   { id: 'stage', title: 'Where are you in your search?', subtitle: 'We\'ll calibrate your roadmap to this.' },
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
+  { id: 'resume', title: "Last step — let's get your resume into FASTIQ", subtitle: 'This powers everything: better company matches, tailored outreach, smarter interview prep, and instant resume tailoring for any job.' },
 ];
 
 const INDUSTRIES = [
@@ -58,6 +61,7 @@ const CHALLENGES = [
 export default function ProAssessment({ user, existingProfile, onComplete }) {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [resumeMode, setResumeMode] = useState(null); // null, 'builder'
 
   // Pre-fill from existing profile first, then user fields
   const initialIndustries = useMemo(() => {
@@ -99,6 +103,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       case 'timeline': return data.career_timeline !== '';
       case 'stage': return data.current_stage !== '';
       case 'challenge': return data.biggest_challenge !== '';
+      case 'resume': return false; // resume step handled separately
       default: return false;
     }
   };
@@ -127,7 +132,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
 
   // titleCase imported from @/components/utils/titleCase
 
-  const handleFinish = async () => {
+  const handleFinish = async (resumeText, parsedData) => {
     setSaving(true);
     const profileData = {
       target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
@@ -143,6 +148,10 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
     } else {
       profileData.company_size_preference = '';
       profileData.location_preference = '';
+    }
+    // Save resume if provided
+    if (resumeText) {
+      profileData.resume_text = resumeText;
     }
 
     let profile;
@@ -160,9 +169,13 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
     onComplete(profile);
   };
 
+  const handleResumeReady = (resumeText, parsedData) => {
+    handleFinish(resumeText, parsedData);
+  };
+
   const handleNext = () => {
     if (step < STEPS.length - 1) setStep(step + 1);
-    else handleFinish();
+    // Resume step is handled by its own components, not handleFinish directly
   };
 
   const renderRadioOptions = (options, field) => (
