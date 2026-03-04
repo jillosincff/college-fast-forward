@@ -14,7 +14,7 @@ export default function QuickActionsGrid({ onOpenChat }) {
         fontSize: 11, fontWeight: 700, color: '#94A3B8',
         textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
       }}>Quick Actions</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <div className="fiq-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {ACTIONS.map((a, i) => (
           <div
             key={a.label}
