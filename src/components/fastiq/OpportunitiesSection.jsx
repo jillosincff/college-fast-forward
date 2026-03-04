@@ -60,13 +60,17 @@ function OpportunityCard({ opp, onResearch, onDismiss, delay }) {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => onResearch(opp.company_name)} style={{
-            padding: '8px 18px', borderRadius: 10, border: 'none', background: '#0021A5',
-            color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
+            padding: '8px 14px', borderRadius: 10, border: 'none', background: '#0021A5',
+            color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
           }}>Research →</button>
+          <button onClick={() => onResearch(`Tailor my resume for ${opp.role_title} at ${opp.company_name}`)} style={{
+            padding: '8px 14px', borderRadius: 10, border: '1.5px solid #8B5CF6',
+            background: 'rgba(139,92,246,0.06)', color: '#8B5CF6', fontSize: 11, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
+          }}>Tailor Resume →</button>
           <button onClick={() => onDismiss(opp.id)} style={{
-            padding: '8px 12px', borderRadius: 10, border: '1.5px solid #E2E8F0',
+            padding: '8px 10px', borderRadius: 10, border: '1.5px solid #E2E8F0',
             background: 'transparent', color: '#94A3B8', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
           }}>✕</button>
         </div>

@@ -11,6 +11,7 @@ import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
 import BenchmarkCard from './BenchmarkCard';
 import MasterResumeCard from './MasterResumeCard';
+import MyResumesSection from './MyResumesSection';
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
@@ -172,6 +173,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         )}
 
         <PipelineBar counts={pipelineCounts} />
+
+        <MyResumesSection profile={profile} onOpenChat={onOpenChat} />
 
         <TargetCompaniesSection
           companies={targetCompanies}

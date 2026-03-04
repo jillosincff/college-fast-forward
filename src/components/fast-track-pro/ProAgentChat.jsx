@@ -11,6 +11,7 @@ import RoadmapTimelineCard from './RoadmapTimelineCard';
 import CompanySuggestionsCard from './CompanySuggestionsCard';
 import WarmPathCard from './WarmPathCard';
 import ResumeReviewCard from './ResumeReviewCard';
+import ResumeTailoredCard from './ResumeTailoredCard';
 import InterviewPrepCard from './InterviewPrepCard';
 import SalaryIntelCard from './SalaryIntelCard';
 import CoverLetterCard from './CoverLetterCard';
@@ -35,6 +36,7 @@ function getSuggestedPrompts(profile) {
   prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
   prompts.push({ icon: '📬', text: "Draft follow-up messages for stale outreach", category: 'find' });
   prompts.push({ icon: '📄', text: "Review my resume", category: 'tools' });
+  prompts.push({ icon: '✨', text: "Tailor my resume for a job", category: 'tools' });
   prompts.push({ icon: '💼', text: "Prep me for an interview", category: 'tools' });
   prompts.push({ icon: '🔗', text: "Review my LinkedIn profile", category: 'tools' });
   prompts.push({ icon: '🗺️', text: "Build my career action plan", category: 'tools' });
@@ -57,7 +59,9 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
     case 'company_suggestions': return <CompanySuggestionsCard data={payload} onResearchCompany={onResearchCompany} profile={profile} onProfileUpdated={onProfileUpdated} onSendMessage={onSendMessage} />;
     case 'warm_path': return <WarmPathCard data={payload} onOpenChat={onSendMessage} />;
-    case 'resume_review': case 'resume_match': case 'resume_tailor': return <ResumeReviewCard data={payload} onSendMessage={onSendMessage} />;
+    case 'resume_review': case 'resume_match': return <ResumeReviewCard data={payload} onSendMessage={onSendMessage} />;
+    case 'resume_tailored': return <ResumeTailoredCard data={payload} onSendMessage={onSendMessage} />;
+    case 'resume_tailor': return <ResumeReviewCard data={payload} onSendMessage={onSendMessage} />;
     case 'interview_prep': return <InterviewPrepCard data={payload} onSendMessage={onSendMessage} />;
     case 'salary_intel': return <SalaryIntelCard data={payload} onSendMessage={onSendMessage} />;
     case 'cover_letter': return <CoverLetterCard data={payload} onSendMessage={onSendMessage} />;

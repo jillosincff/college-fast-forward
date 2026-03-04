@@ -87,6 +87,13 @@ const OPENERS = {
       "If you're not sure which company, I can suggest some based on your interests."
   },
 
+  resume_tailor: {
+    userMessage: "I want to tailor my resume for a job",
+    getAssistantMessage: () =>
+      "I'd love to tailor your resume! Paste the **job description** here — or if you saw a role through FASTIQ, just tell me which company and position.\n\n" +
+      "I'll rewrite your resume to maximize ATS match score and highlight the most relevant experience."
+  },
+
   resume_builder: {
     userMessage: "Help me build a resume",
     getAssistantMessage: (profile) => {
@@ -106,6 +113,9 @@ export function matchPromptToOpener(promptText) {
   const t = (promptText || '').toLowerCase();
 
   if (t.includes('interview') || t.includes('prep me')) return 'interview_prep';
+  if (t.includes('tailor') && t.includes('resume')) return 'resume_tailor';
+  if (t.includes('customize') && t.includes('resume')) return 'resume_tailor';
+  if (t.includes('optimize') && t.includes('resume') && (t.includes('job') || t.includes('role'))) return 'resume_tailor';
   if (t.includes('resume') && (t.includes('review') || t.includes('my resume'))) return 'resume_review';
   if (t.includes('linkedin')) return 'linkedin_review';
   if (t.includes('salary') || t.includes('negotiate')) return 'salary_intel';

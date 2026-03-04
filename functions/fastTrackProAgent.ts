@@ -289,8 +289,11 @@ function detectResumeMatch(message) {
 }
 
 function detectResumeTailor(message) {
+  const lower = message.toLowerCase();
   return /(?:tailor|rewrite|customize|adjust|optimize)\s+(?:my\s+)?resume/i.test(message) ||
-    /(?:resume\s+for|rewrite.*?for)\s+(\w[\w\s]{1,30})/i.test(message);
+    /(?:resume\s+for|rewrite.*?for)\s+(\w[\w\s]{1,30})/i.test(message) ||
+    /(?:make|get)\s+(?:my\s+)?resume\s+(?:match|fit|work for)/i.test(message) ||
+    (lower.includes('resume') && (lower.includes('job description') || lower.includes('this job') || lower.includes('this role') || lower.includes('this position')));
 }
 
 function detectInterviewPrep(message) {
@@ -929,20 +932,126 @@ Be genuinely encouraging and warm. This student might feel behind — make them 
     // 3. RESUME TAILOR
     if (detectResumeTailor(resolvedMessage)) {
       console.log('Intent: resume_tailor');
+      const resumeText = profile.resume_text || '';
+
+      if (!resumeText) {
+        return Response.json({
+          success: true,
+          response: "I need your master resume first before I can tailor it. Want to **upload one** or **build one together**?",
+          message_type: 'career_advice',
+          payload: { suggested_actions: ['Upload my resume', 'Help me build a resume'] }
+        });
+      }
+
+      // Extract job description from the message (anything after common delimiters or long text)
+      const jdMatch = resolvedMessage.match(/(?:job description|jd|posting|here'?s?\s+the\s+(?:job|role|posting)):?\s*([\s\S]{50,})/i);
+      const jobDescription = jdMatch ? jdMatch[1].trim() : '';
+
+      if (!jobDescription && resolvedMessage.length < 200) {
+        return Response.json({
+          success: true,
+          response: "I'd love to tailor your resume! Paste the **job description** here — or if you saw a role through FASTIQ, just tell me which company and position.",
+          message_type: 'text',
+          payload: {}
+        });
+      }
+
+      // The message itself may contain the JD if long enough
+      const jdText = jobDescription || resolvedMessage;
+
+      // Extract company/role from message
+      const roleMatch = resolvedMessage.match(/(?:for|at)\s+(?:the\s+)?(\w[\w\s&.''-]{1,40}?)(?:\s+(?:role|position|job|at)\s+(\w[\w\s&.''-]{1,40}))?/i);
+      const extractedRole = roleMatch?.[1]?.trim() || '';
+      const extractedCompany = roleMatch?.[2]?.trim() || '';
+
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Tailor this student's resume for a specific role.\n\n${profileContext}\n\n${profile.resume_text ? `RESUME:\n${profile.resume_text}\n\n` : ''}Request: "${resolvedMessage}"\n\nRewrite bullet points and summary to target the specific role. Show original vs suggested text for each section.`,
+        prompt: `You are an expert resume writer and ATS optimization specialist. Rewrite this student's resume to maximize their chances for the specific job described below.
+
+STUDENT PROFILE:
+- Name: ${user.full_name || 'Gator Student'}
+- Major: ${user.major || 'undeclared'}, University of Florida, Class of ${user.graduation_year || 'upcoming'}
+- Target industry: ${profile.target_industry || 'not specified'}
+
+MASTER RESUME:
+${resumeText}
+
+JOB DESCRIPTION:
+${jdText}
+
+INSTRUCTIONS:
+1. Rewrite the professional summary to directly address this role's core requirements
+2. Reorder experience to put the most relevant items first
+3. Rewrite bullet points to emphasize skills and achievements that match the job description
+4. Incorporate exact keywords from the job description naturally throughout (critical for ATS scanning)
+5. Quantify achievements wherever possible — use realistic metrics if the original is vague
+6. Create a tailored Skills section highlighting skills mentioned in the job description
+7. Feature relevant projects or coursework prominently if applicable
+8. De-emphasize irrelevant experience (keep it but reduce space)
+9. Keep to one page
+10. Do NOT fabricate experience or skills the student doesn't have — only reframe what exists
+
+Return as JSON with these exact fields:`,
         response_json_schema: {
           type: "object",
           properties: {
-            response: { type: "string" },
-            sections: { type: "array", items: { type: "object", properties: { section_name: { type: "string" }, original_text: { type: "string" }, suggested_text: { type: "string" }, reason: { type: "string" } }, required: ["section_name","suggested_text","reason"] } }
+            resume: {
+              type: "object",
+              properties: {
+                contact: { type: "object", properties: { name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, linkedin: { type: "string" }, location: { type: "string" } } },
+                summary: { type: "string" },
+                education: { type: "array", items: { type: "object", properties: { school: { type: "string" }, degree: { type: "string" }, graduation_date: { type: "string" }, gpa: { type: "string" }, relevant_coursework: { type: "string" } } } },
+                experience: { type: "array", items: { type: "object", properties: { company: { type: "string" }, title: { type: "string" }, dates: { type: "string" }, bullets: { type: "array", items: { type: "string" } } } } },
+                skills: { type: "object", properties: { technical: { type: "array", items: { type: "string" } }, tools: { type: "array", items: { type: "string" } }, soft: { type: "array", items: { type: "string" } } } },
+                projects: { type: "array", items: { type: "object", properties: { name: { type: "string" }, bullets: { type: "array", items: { type: "string" } } } } },
+                certifications: { type: "array", items: { type: "string" } }
+              }
+            },
+            keywords_matched: { type: "array", items: { type: "string" }, description: "Keywords from JD found in resume" },
+            keywords_added: { type: "array", items: { type: "string" }, description: "Keywords woven into the rewrite" },
+            keywords_missing: { type: "array", items: { type: "string" }, description: "Keywords from JD NOT in resume because student lacks the skill — include a brief explanation for each" },
+            ats_score: { type: "integer", description: "Estimated ATS match percentage 0-100" },
+            changes_summary: { type: "string", description: "2-3 sentences explaining what was changed and why" },
+            changes: { type: "array", items: { type: "object", properties: { section: { type: "string" }, before: { type: "string" }, after: { type: "string" }, keywords_added: { type: "array", items: { type: "string" } } } } },
+            company_name: { type: "string" },
+            role_title: { type: "string" }
           },
-          required: ["response", "sections"]
+          required: ["resume", "keywords_matched", "keywords_added", "keywords_missing", "ats_score", "changes_summary", "company_name", "role_title"]
         }
       });
+
+      const companyName = result.company_name || extractedCompany || 'Unknown Company';
+      const roleTitle = result.role_title || extractedRole || 'Target Role';
+
+      // Save to TailoredResume entity
+      try {
+        await base44.entities.TailoredResume.create({
+          user_email: user.email,
+          company_name: companyName,
+          role_title: roleTitle,
+          job_description_text: jdText.substring(0, 5000),
+          tailored_resume_json: JSON.stringify(result.resume || {}),
+          ats_score: result.ats_score || 0,
+          keywords_matched: (result.keywords_matched?.length || 0) + (result.keywords_added?.length || 0),
+          keywords_total: (result.keywords_matched?.length || 0) + (result.keywords_added?.length || 0) + (result.keywords_missing?.length || 0),
+          changes_summary: result.changes_summary || '',
+        });
+      } catch(e) { console.log('Failed to save tailored resume:', e.message); }
+
       return Response.json({
-        success: true, response: result.response || "Here's your tailored resume:",
-        message_type: 'resume_tailor', payload: result
+        success: true,
+        response: result.changes_summary || `Your resume has been tailored for ${roleTitle} at ${companyName}!`,
+        message_type: 'resume_tailored',
+        payload: {
+          resume: result.resume || {},
+          ats_score: result.ats_score || 0,
+          keywords_matched: result.keywords_matched || [],
+          keywords_added: result.keywords_added || [],
+          keywords_missing: result.keywords_missing || [],
+          changes_summary: result.changes_summary || '',
+          changes: result.changes || [],
+          company_name: companyName,
+          role_title: roleTitle,
+        }
       });
     }
 

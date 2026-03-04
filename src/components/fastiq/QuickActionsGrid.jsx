@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const PRIMARY_ACTIONS = [
   { icon: '🔍', label: 'Scan for Insiders', color: '#0021A5', prompt: 'Find UF alumni at my target companies' },
   { icon: '✉️', label: 'Draft Outreach', color: '#FA4616', prompt: 'Draft an outreach message' },
-  { icon: '📄', label: 'Resume Review', color: '#EAB308', prompt: 'Review my resume' },
+  { icon: '📄', label: 'Resume Review & Tailor', color: '#EAB308', prompt: 'Review my resume' },
   { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview' },
 ];
 
