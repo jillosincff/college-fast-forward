@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
     return Response.json({
       message: "Weekly report cards sent",
       sent: sentCount,
-      total: profiles.length,
+      total: realProfiles.length,
       errors: errors.length > 0 ? errors : undefined
     });
   } catch (error) {
