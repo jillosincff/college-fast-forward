@@ -19,6 +19,7 @@ import BatchTargetScanCard from './BatchTargetScanCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
+import FollowUpNudgeBanner from '@/components/fastiq/FollowUpNudgeBanner';
 
 function getSuggestedPrompts(profile) {
   const hasTargets = (profile?.target_companies || []).length > 0;
@@ -309,6 +310,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
         <div className="flex-1 flex flex-col min-w-0">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {/* Follow-up nudge banner */}
+            <FollowUpNudgeBanner userEmail={user?.email} onSendMessage={sendMessage} />
+
             {messages.length === 0 && !isLoading && (() => {
               const allPrompts = getSuggestedPrompts(currentProfile);
               const findPrompts = allPrompts.filter(p => p.category === 'find');
