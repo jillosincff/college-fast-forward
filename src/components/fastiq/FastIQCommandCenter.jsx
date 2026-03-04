@@ -10,6 +10,7 @@ import TargetCompaniesSection from './TargetCompaniesSection';
 import QuickActionsGrid from './QuickActionsGrid';
 import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
+import BenchmarkCard from './BenchmarkCard';
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
@@ -214,6 +215,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onOpenChat={onOpenChat}
           onAddTargets={() => setShowAddTargets(true)}
         />
+
+        <BenchmarkCard profile={profile} />
 
         <QuickActionsGrid onOpenChat={onOpenChat} />
 
