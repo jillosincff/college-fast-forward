@@ -34,7 +34,7 @@ const CHALLENGE_LABELS = {
   unsure_what_i_want: 'Exploring options',
 };
 
-export default function TargetsPanel({ profile, onResearchCompany, onRerunAssessment, onProfileUpdated, onOpenChat }) {
+export default function TargetsPanel({ profile, onResearchCompany, onRerunAssessment, onProfileUpdated, onOpenChat }) { 
   const [editing, setEditing] = useState(false);
   const [companies, setCompanies] = useState([]);
   const [newCompany, setNewCompany] = useState('');
