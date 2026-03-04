@@ -64,7 +64,28 @@ Deno.serve(async (req) => {
         const planItems = [];
         let itemNum = 1;
 
-        // Follow-ups
+        // Follow-ups — lead section (before numbered plan items)
+        let followUpBlock = '';
+        if (staleOutreach.length > 0) {
+          const followUpLines = staleOutreach.slice(0, 5).map(p => {
+            const days = Math.round((Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
+            return `<li style="margin-bottom:8px;font-size:13px;color:#92400E;">
+              <strong>${p.alumni_name} at ${p.company}</strong> — sent ${days} days ago, no reply
+            </li>`;
+          }).join('');
+          followUpBlock = `
+            <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+              <div style="font-size:15px;font-weight:700;color:#92400E;margin-bottom:8px;">🔔 Follow-up needed</div>
+              <ul style="list-style:disc;padding-left:18px;margin:0 0 12px;">${followUpLines}</ul>
+              <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.base44.com'}/#FastIQ" 
+                 style="display:inline-block;background:#FA4616;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:12px;">
+                Open FASTIQ to draft follow-ups →
+              </a>
+            </div>
+          `;
+        }
+
+        // Follow-ups as plan items too
         staleOutreach.slice(0, 3).forEach(p => {
           const days = Math.round((Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
           planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Follow up with ${p.alumni_name} at ${p.company}</strong><br/><span style="color:#64748B;font-size:13px;">Sent ${days} days ago, no reply yet. A friendly follow-up doubles your response rate.</span></li>`);
@@ -131,6 +152,8 @@ Deno.serve(async (req) => {
                   <div style="font-size:10px;color:#94A3B8;text-transform:uppercase;">In<br/>Pipeline</div>
                 </div>
               </div>
+
+              ${followUpBlock}
 
               <!-- Plan Items -->
               <h2 style="font-size:16px;font-weight:700;color:#1E293B;margin-bottom:16px;">📋 This Week's Action Plan</h2>
