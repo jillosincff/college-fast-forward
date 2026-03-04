@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
-import LiveTickerBar from './LiveTickerBar';
 import HeroSection from './HeroSection';
 import InsightCard from './InsightCard';
 import OpportunitiesSection from './OpportunitiesSection';
@@ -17,7 +16,6 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   const [alumniCounts, setAlumniCounts] = useState({});
   const [pipelineCounts, setPipelineCounts] = useState({ identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0 });
   const [newOpportunities, setNewOpportunities] = useState([]);
-  const [tickerItems, setTickerItems] = useState([]);
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
   const [showAddTargets, setShowAddTargets] = useState(false);
@@ -63,41 +61,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       // New opportunities
       setNewOpportunities(oppsRaw);
 
-      // Build ticker items from real data — always use full company_name, filter out fragments
-      const tItems = [];
       const isValidCompanyName = (n) => n && n.length > 2 && !/^[a-z_]+$/i.test(n) && !['week','undefined','null','company'].includes(n.toLowerCase());
-      intelRaw.forEach(intel => {
-        const name = titleCase(String(intel.company_name || '').trim());
-        if (isValidCompanyName(name)) {
-          tItems.push(`FASTIQ scanned ${name} recently`);
-          if (intel.open_roles_count > 0) tItems.push(`${name} has ${intel.open_roles_count} open roles this week`);
-          if (intel.hiring_signal === 'hot') tItems.push(`🔥 ${name} is actively hiring right now`);
-        }
-      });
-      if (alumniRaw.length > 0) {
-        const companies = [...new Set(alumniRaw.slice(0, 5).map(a => String(a.company || '').trim()).filter(isValidCompanyName))];
-        companies.forEach(c => {
-          const count = aMap[c.toLowerCase()] || 0;
-          if (count > 0) tItems.push(`${count} UF alumni found at ${titleCase(c)}`);
-        });
-      }
-      oppsRaw.forEach(opp => {
-        const cn = String(opp.company_name || '').trim();
-        const role = String(opp.role_title || '').trim();
-        if (isValidCompanyName(cn) && role.length > 1) {
-          tItems.push(`New: ${role} at ${titleCase(cn)} matched to your profile`);
-        }
-      });
-      if (oppsRaw.length > 0 && tItems.filter(t => t.includes('matched')).length === 0) {
-        tItems.push(`${oppsRaw.length} new opportunities matched to your profile this week`);
-      }
-      // Fallback placeholders
-      if (tItems.length < 3) {
-        tItems.push('FASTIQ is scanning your target companies right now');
-        tItems.push('New roles posted at target companies this week');
-        tItems.push('FASTIQ continuously monitors hiring signals for you');
-      }
-      setTickerItems(tItems);
 
       // Weekly stats — use full company_name for topSignal
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -177,9 +141,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         }
       `}</style>
 
-      {/* HERO with Ticker */}
+      {/* HERO */}
       <div style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 50%, #1a3a8f 100%)', position: 'relative', overflow: 'hidden' }}>
-        <LiveTickerBar items={tickerItems} />
         <HeroSection
           userName={userFirstName}
           user={user}
