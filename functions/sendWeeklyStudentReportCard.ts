@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
-  console.log('[sendWeeklyStudentReportCard] Starting v2...');
+  console.log('[sendWeeklyStudentReportCard] Starting...');
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -93,54 +93,27 @@ Deno.serve(async (req) => {
           const attr = (topFeedback.positive_attributes || [])[0];
           const attrPhrase = attr ? attrMap[attr] || attr : 'Great interaction';
           const mentorName = topFeedback.reviewer_name ? topFeedback.reviewer_name.split(' ')[0] : 'A mentor';
-          feedbackQuote = `\n"${attrPhrase}" — ${mentorName}`;
+          feedbackQuote = "\n\"" + attrPhrase + "\" — " + mentorName;
         }
 
-        const emailBody = `${urgencyHeadline}
-
-Hey ${studentName},
-
-Here's your weekly CFF Report Card:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-NETWORK ACTIVITY: ${activityGrade}
-${newInteractions} conversation${newInteractions !== 1 ? 's' : ''} this week. ${messagesSent} message${messagesSent !== 1 ? 's' : ''} sent.
-
-YOUR FEEDBACK: ${feedbackGrade}
-${newFeedbackCount} new feedback received.${feedbackQuote}
-
-YOUR TIER: ${tierDisplayNames[profile.current_tier] || 'Just Getting Started'}
-${tierGap}
-
-COLD APPLICATION EQUIVALENT: ${coldAppEquivalent}
-CFF has saved you the equivalent of ${coldAppEquivalent} cold applications so far.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-THIS WEEK'S MOVE:
-${thisWeeksMove}
-
-How you network matters. Show up, and we'll bend over backwards for you.
-
-— College Fast Forward at UF`;
+        const emailBody = urgencyHeadline + "\n\nHey " + studentName + ",\n\nHere's your weekly CFF Report Card:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nNETWORK ACTIVITY: " + activityGrade + "\n" + newInteractions + " conversation" + (newInteractions !== 1 ? "s" : "") + " this week. " + messagesSent + " message" + (messagesSent !== 1 ? "s" : "") + " sent.\n\nYOUR FEEDBACK: " + feedbackGrade + "\n" + newFeedbackCount + " new feedback received." + feedbackQuote + "\n\nYOUR TIER: " + (tierDisplayNames[profile.current_tier] || "Just Getting Started") + "\n" + tierGap + "\n\nCOLD APPLICATION EQUIVALENT: " + coldAppEquivalent + "\nCFF has saved you the equivalent of " + coldAppEquivalent + " cold applications so far.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nTHIS WEEK'S MOVE:\n" + thisWeeksMove + "\n\nHow you network matters. Show up, and we'll bend over backwards for you.\n\n— College Fast Forward at UF";
 
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: profile.user_email,
-          subject: `Your CFF Report Card — Week of ${weekOfDate}`,
+          subject: "Your CFF Report Card — Week of " + weekOfDate,
           body: emailBody,
           from_name: 'College Fast Forward'
         });
 
         sentCount++;
       } catch (studentError) {
-        console.error(`Error processing student ${profile.user_email}:`, studentError.message);
+        console.error("Error processing student " + profile.user_email + ":", studentError.message);
         errors.push({ email: profile.user_email, error: studentError.message });
       }
     }
 
     return Response.json({
-      message: `Weekly report cards sent`,
+      message: "Weekly report cards sent",
       sent: sentCount,
       total: profiles.length,
       errors: errors.length > 0 ? errors : undefined
@@ -165,82 +138,82 @@ function calculateUrgencyTier(profile, now) {
 
 function getUrgencyHeadline(urgencyTier, profile, now) {
   if (urgencyTier === 'cruising') {
-    return "You've got time — and that's your superpower. Use it to build relationships now.";
+    return "You have time — and that is your superpower. Use it to build relationships now.";
   }
   if (urgencyTier === 'time_to_move') {
-    const season = now.getMonth() >= 8 ? 'Spring' : 'Fall';
-    return `${season} recruiting is approaching. The students who start networking now get the best opportunities.`;
+    var season = now.getMonth() >= 8 ? 'Spring' : 'Fall';
+    return season + " recruiting is approaching. The students who start networking now get the best opportunities.";
   }
   if (urgencyTier === 'dont_miss_this') {
-    const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
-    const gradMonth = semesterMonthMap[profile.graduation_semester] || 5;
-    const gradDate = new Date(profile.graduation_year, gradMonth - 1, 15);
-    const monthsLeft = Math.max(1, Math.round((gradDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
-    return `You're ${monthsLeft} months from graduation. This is the semester that matters most.`;
+    var semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
+    var gradMonth = semesterMonthMap[profile.graduation_semester] || 5;
+    var gradDate = new Date(profile.graduation_year, gradMonth - 1, 15);
+    var monthsLeft = Math.max(1, Math.round((gradDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
+    return "You are " + monthsLeft + " months from graduation. This is the semester that matters most.";
   }
-  const semesterMonthMap = { Spring: 5, Summer: 8, Fall: 12 };
-  const gradMonth = semesterMonthMap[profile.graduation_semester] || 5;
-  const gradDate = new Date(profile.graduation_year, gradMonth - 1, 15);
-  const daysLeft = Math.max(1, Math.round((gradDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-  return `${daysLeft} days until you walk across that stage. The CFF community has your back. Let's go.`;
+  var semMap = { Spring: 5, Summer: 8, Fall: 12 };
+  var gMonth = semMap[profile.graduation_semester] || 5;
+  var gDate = new Date(profile.graduation_year, gMonth - 1, 15);
+  var daysLeft = Math.max(1, Math.round((gDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  return daysLeft + " days until you walk across that stage. The CFF community has your back. Let us go.";
 }
 
 function getTierGap(profile) {
-  const tier = profile.current_tier || 'just_getting_started';
-  const completed = profile.completed_interactions || 0;
-  const positiveFeedback = profile.positive_feedback || 0;
-  const reliability = profile.reliability_score || 100;
-  const followUp = profile.follow_up_rate || 0;
-  const wouldRefer = profile.would_refer_count || 0;
-  const streak = profile.weekly_activity_streak || 0;
+  var tier = profile.current_tier || 'just_getting_started';
+  var completed = profile.completed_interactions || 0;
+  var positiveFeedback = profile.positive_feedback || 0;
+  var reliability = profile.reliability_score || 100;
+  var followUp = profile.follow_up_rate || 0;
+  var wouldRefer = profile.would_refer_count || 0;
+  var streak = profile.weekly_activity_streak || 0;
 
   if (tier === 'just_getting_started') {
     return 'Complete your first conversation to reach Building Momentum.';
   }
   if (tier === 'building_momentum') {
-    const gaps = [];
-    if (completed < 3) gaps.push(`${3 - completed} more conversation${3 - completed !== 1 ? 's' : ''}`);
-    if (positiveFeedback < 2) gaps.push(`${2 - positiveFeedback} more positive feedback`);
-    if (reliability < 80) gaps.push('improve your reliability score to 80%');
-    if (followUp < 60) gaps.push('improve your follow-up rate to 60%');
-    return gaps.length > 0 ? `You're ${gaps.join(' and ')} away from Rising.` : 'You're close to Rising! Keep it up.';
+    var gaps = [];
+    if (completed < 3) gaps.push((3 - completed) + " more conversation" + (3 - completed !== 1 ? "s" : ""));
+    if (positiveFeedback < 2) gaps.push((2 - positiveFeedback) + " more positive feedback");
+    if (reliability < 80) gaps.push("improve your reliability score to 80%");
+    if (followUp < 60) gaps.push("improve your follow-up rate to 60%");
+    return gaps.length > 0 ? "You are " + gaps.join(" and ") + " away from Rising." : "You are close to Rising! Keep it up.";
   }
   if (tier === 'rising') {
-    const gaps = [];
-    if (completed < 6) gaps.push(`${6 - completed} more conversation${6 - completed !== 1 ? 's' : ''}`);
-    if (positiveFeedback < 5) gaps.push(`${5 - positiveFeedback} more positive feedback`);
-    if (reliability < 90) gaps.push('a 90%+ reliability score');
-    if (followUp < 80) gaps.push('an 80%+ follow-up rate');
-    if (wouldRefer < 2) gaps.push(`${2 - wouldRefer} more "would refer" endorsement${2 - wouldRefer !== 1 ? 's' : ''}`);
-    if (streak < 4) gaps.push(`a ${4 - streak} week longer activity streak`);
-    return gaps.length > 0 ? `You need ${gaps.join(', ')} to reach Fast Tracked.` : "You're on the doorstep of Fast Tracked! Keep going.";
+    var gaps2 = [];
+    if (completed < 6) gaps2.push((6 - completed) + " more conversation" + (6 - completed !== 1 ? "s" : ""));
+    if (positiveFeedback < 5) gaps2.push((5 - positiveFeedback) + " more positive feedback");
+    if (reliability < 90) gaps2.push("a 90%+ reliability score");
+    if (followUp < 80) gaps2.push("an 80%+ follow-up rate");
+    if (wouldRefer < 2) gaps2.push((2 - wouldRefer) + " more would-refer endorsement" + (2 - wouldRefer !== 1 ? "s" : ""));
+    if (streak < 4) gaps2.push("a " + (4 - streak) + " week longer activity streak");
+    return gaps2.length > 0 ? "You need " + gaps2.join(", ") + " to reach Fast Tracked." : "You are on the doorstep of Fast Tracked! Keep going.";
   }
-  return "You're Fast Tracked! Stay active to maintain your visibility to hiring companies.";
+  return "You are Fast Tracked! Stay active to maintain your visibility to hiring companies.";
 }
 
 function getThisWeeksMove(profile) {
-  const tier = profile.current_tier || 'just_getting_started';
-  const completed = profile.completed_interactions || 0;
-  const positiveFeedback = profile.positive_feedback || 0;
-  const followUp = profile.follow_up_rate || 0;
-  const streak = profile.weekly_activity_streak || 0;
-  const industries = (profile.target_industries || []).join(', ') || 'your target industry';
+  var tier = profile.current_tier || 'just_getting_started';
+  var completed = profile.completed_interactions || 0;
+  var positiveFeedback = profile.positive_feedback || 0;
+  var followUp = profile.follow_up_rate || 0;
+  var streak = profile.weekly_activity_streak || 0;
+  var industries = (profile.target_industries || []).join(', ') || 'your target industry';
 
   if (tier === 'just_getting_started' || completed < 1) {
-    return `Parents in ${industries} are active this week. Claim your first conversation — it only takes one to start building momentum.`;
+    return "Parents in " + industries + " are active this week. Claim your first conversation — it only takes one to start building momentum.";
   }
   if (tier === 'building_momentum') {
-    if (completed < 3) return `${3 - completed} parents in ${industries} are active this week. Claim a conversation.`;
-    if (positiveFeedback < 2) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
-    if (followUp < 60) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
-    return 'Keep connecting — you\'re close to Rising!';
+    if (completed < 3) return (3 - completed) + " parents in " + industries + " are active this week. Claim a conversation.";
+    if (positiveFeedback < 2) return "Focus on preparation before your next call. Check the parent background and come with 3 questions.";
+    if (followUp < 60) return "After your next conversation, send a thank-you within 24 hours. It makes a huge difference.";
+    return "Keep connecting — you are close to Rising!";
   }
   if (tier === 'rising') {
-    if (completed < 6) return `Schedule your next conversation this week. ${6 - completed} more to reach Fast Tracked.`;
-    if (positiveFeedback < 5) return 'Focus on preparation before your next call. Check the parent\'s background and come with 3 questions.';
-    if (followUp < 80) return 'After your next conversation, send a thank-you within 24 hours. It makes a huge difference.';
-    if (streak < 4) return `Log in and connect this week to keep your streak alive. You're at ${streak} week${streak !== 1 ? 's' : ''}.`;
-    return 'You\'re almost Fast Tracked. One more strong week could do it.';
+    if (completed < 6) return "Schedule your next conversation this week. " + (6 - completed) + " more to reach Fast Tracked.";
+    if (positiveFeedback < 5) return "Focus on preparation before your next call. Check the parent background and come with 3 questions.";
+    if (followUp < 80) return "After your next conversation, send a thank-you within 24 hours. It makes a huge difference.";
+    if (streak < 4) return "Log in and connect this week to keep your streak alive. You are at " + streak + " week" + (streak !== 1 ? "s" : "") + ".";
+    return "You are almost Fast Tracked. One more strong week could do it.";
   }
-  return 'Stay visible. Companies are watching. Schedule a conversation this week to maintain your streak.';
+  return "Stay visible. Companies are watching. Schedule a conversation this week to maintain your streak.";
 }
