@@ -123,6 +123,19 @@ export default function ParentOnboarding() {
         console.log('Onboarding karma failed (non-critical):', karmaErr.message);
       }
 
+      // Send welcome email (fire-and-forget)
+      try {
+        base44.functions.invoke('sendWelcomeEmail', {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.full_name,
+          persona: 'parent',
+          userIndustries: user.industries || formData?.industries || [],
+        }).catch(e => console.log('Welcome email failed (non-critical):', e.message));
+      } catch (e) {
+        console.log('Welcome email trigger failed (non-critical):', e.message);
+      }
+
       // Clear pending invite data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
