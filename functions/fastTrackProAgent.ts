@@ -809,9 +809,11 @@ RULES:
 async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext) {
   console.log('Intent: reply_help');
   let contactName = '', contactCompany = '', pipelineRecord = null;
-  // Match "from [Name]" or "from [Name] at [Company]" — name must start with uppercase
-  const nameMatch = resolvedMessage.match(/(?:reply|response|heard back)\s+from\s+([A-Z][\w.''-]+(?:\s+[A-Z][\w.''-]+){0,3})(?:\s+at\s+(\w[\w\s&.''-]{1,40}))?/i);
+  // Match "from [Name] at [Company]" — capture name before "at", company after
+  const nameMatch = resolvedMessage.match(/(?:reply|response|heard back)\s+from\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})\s+at\s+([A-Z][\w\s&.''-]{1,40}?)(?:\s*[!.:,]|\s+(?:here|she|he|they|said))/i);
+  const nameOnlyMatch = !nameMatch && resolvedMessage.match(/(?:reply|response|heard back)\s+from\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})(?:\s*[!.:,]|\s+(?:here|she|he|they|said))/i);
   if (nameMatch) { contactName = nameMatch[1]?.trim() || ''; contactCompany = nameMatch[2]?.trim() || ''; }
+  else if (nameOnlyMatch) { contactName = nameOnlyMatch[1]?.trim() || ''; }
   if (contactName && pipelineData.length > 0) {
     pipelineRecord = pipelineData.find(p => (p.status === 'replied' || p.status === 'reached_out') && (p.alumni_name?.toLowerCase().includes(contactName.toLowerCase()) || contactName.toLowerCase().includes(p.alumni_name?.toLowerCase().split(' ')[0] || '')));
   }
