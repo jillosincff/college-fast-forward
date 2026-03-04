@@ -205,10 +205,41 @@ export function AlumniListCard({ data }) {
                 <p className="text-[11px] text-slate-400 mt-0.5">🔗 Reach out via LinkedIn</p>
               )}
               {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
+              {/* Action button per alumni */}
+              {onDraftMessage && (
+                <button
+                  onClick={() => onDraftMessage(a.name)}
+                  className="mt-1.5 text-[11px] font-medium text-[#0021A5] hover:text-[#001580] hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  ✉️ Draft message to {a.name?.split(' ')[0]}
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
+      {/* Bottom actions */}
+      {alumni.length > 0 && onDraftMessage && (
+        <div className="mt-3 pt-3 border-t border-purple-200 flex flex-wrap gap-2">
+          <button
+            onClick={() => onDraftMessage(alumni[0]?.name)}
+            className="text-xs bg-[#0021A5] text-white px-3 py-1.5 rounded-lg hover:bg-[#001580] transition-colors font-medium"
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            ✉️ Draft outreach to top match
+          </button>
+          {alumni[0]?.company && (
+            <button
+              onClick={() => onResearchCompany && onResearchCompany(alumni[0].company)}
+              className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-200 transition-colors font-medium"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              🏢 Research {titleCase(alumni[0].company)}
+            </button>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
