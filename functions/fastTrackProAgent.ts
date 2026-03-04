@@ -773,37 +773,36 @@ ${profileContext}
 ${UF_FILTER}
 - DEDUPLICATE same name+title
 
-MATCH SCORE ALGORITHM (0-100):
-Score each alumni based on how useful they are for THIS specific student. Add points from each factor:
+MATCH SCORE RULES — MINIMUM 50% for ANY UF alum at this company:
+The student specifically searched for alumni at ${alumniCompany}. Every alum found here is a HIGH-VALUE contact by definition.
 
-1. COMPANY MATCH (0-40 points):
-   - Works at student's target company: +40
-   - Works at competitor/partner in same industry: +20
-   - Works in same industry but different company: +10
+SCORING TIERS:
+- FLOOR: 50% — Any UF alum at this company, regardless of role (they're a fellow Gator at a company the student cares about)
+- SAME INDUSTRY as student's target (${profile.target_industry || 'their field'}): 60%+
+- RELEVANT DEPARTMENT for student's major (${user.major || 'their major'}): 70%+
+- REACHABLE ROLE the student could realistically contact (similar function, approachable seniority): 80%+
+- PERFECT MATCH (relevant dept + reachable + senior enough to refer): 85-95%
 
-2. INDUSTRY/FIELD ALIGNMENT (0-25 points):
-   - Role is directly in student's target industry (${profile.target_industry || 'their field'}): +25
-   - Role is adjacent (e.g. student wants finance, alumni is in consulting at a bank): +15
-   - Role is in a different field at the target company: +8
+SENIORITY BONUS (add on top of tier score):
+- Entry-level/recent grad: +0
+- Mid-level (3-8 years): +3
+- Senior/Manager: +5
+- Director/VP/C-suite: +8
 
-3. ROLE RELEVANCE to student's major (${user.major || 'their major'}) (0-20 points):
-   - Role directly uses skills from student's major: +20
-   - Role somewhat related to student's major: +10
-   - Role unrelated but at a target company: +5
+EXAMPLES for a Finance major searching alumni at JPMorgan:
+- VP of Investment Banking → 80% + 8 = 88% (relevant dept, reachable for advice, senior enough for referral)
+- Risk Analyst → 70% + 0 = 70% (relevant dept, entry-level peer)
+- Marketing Director → 60% + 8 = 68% (same industry, different dept, senior)
+- HR Coordinator → 50% + 0 = 50% (baseline — still a Gator at JPMorgan)
 
-4. SENIORITY / NETWORKING VALUE (0-15 points):
-   - VP/Director/C-suite (great for warm intros and referrals): +15
-   - Senior/Manager (great for career advice and internal referrals): +12
-   - Mid-level/experienced (great for realistic advice): +8
-   - Entry-level/recent grad (great for realistic expectations, interview tips): +5
+EXAMPLES for a CS major searching alumni at Google:
+- Software Engineer (mid) → 80% + 3 = 83%
+- Engineering Manager → 80% + 5 = 85%
+- VP of Engineering → 80% + 8 = 88%
+- Product Manager → 70% + 5 = 75%
+- Recruiter → 50% + 3 = 53%
 
-EXAMPLES:
-- UF alum who is VP of Engineering at student's #1 target company, student is CS major → 40+25+20+15 = 100
-- UF alum who is Marketing Manager at student's target company, student is Marketing major → 40+25+20+12 = 97
-- UF alum who is Software Engineer at a competitor, student is CS major → 20+15+20+8 = 63
-- UF alum who is HR Coordinator at target company, student is Finance major → 40+8+5+5 = 58
-
-CRITICAL: An alum at the student's TARGET COMPANY in a related role should score 60-90+. Do NOT give 10-20% to someone at a target company.
+ABSOLUTE RULE: No score below 50 for anyone at this company. They are all UF connections at a company the student chose to search.
 
 RESEARCH:
 ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}`,
