@@ -47,8 +47,6 @@ function getSuggestedPrompts(profile) {
   prompts.push({ icon: '🗺️', text: "Build my career action plan", category: 'tools' });
   prompts.push({ icon: '💰', text: "What should I negotiate for salary?", category: 'tools' });
   prompts.push({ icon: '🙏', text: "Draft a thank-you note after my interview", category: 'tools' });
-  prompts.push({ icon: '🎉', text: "I got a job offer!", category: 'tools' });
-  prompts.push({ icon: '🤝', text: "Thank everyone who helped me", category: 'tools' });
   prompts.push({ icon: '🧭', text: "Explore career paths for my major", category: 'explore' });
 
   return prompts;

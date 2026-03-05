@@ -112,6 +112,11 @@ const OPENERS = {
 export function matchPromptToOpener(promptText) {
   const t = (promptText || '').toLowerCase();
 
+  // Let thank-you / post-interview / offer / network thank flows go to backend handler directly
+  if (t.includes('thank you note') || t.includes('thank-you note') || t.includes('thank you email') || t.includes('write a thank you') || t.includes('draft a thank you')) return null;
+  if (t.includes('i had my interview') || t.includes('after my interview') || t.includes('interview went') || t.includes('interview today')) return null;
+  if (t.includes('got an offer') || t.includes('received an offer') || t.includes('job offer') || t.includes('offer from')) return null;
+  if (t.includes('thank my network') || t.includes('thank everyone') || t.includes('accepted an offer') || t.includes('accepted the offer')) return null;
   if (t.includes('interview') || t.includes('prep me')) return 'interview_prep';
   if (t.includes('tailor') && t.includes('resume')) return 'resume_tailor';
   if (t.includes('customize') && t.includes('resume')) return 'resume_tailor';
