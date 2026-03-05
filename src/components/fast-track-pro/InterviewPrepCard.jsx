@@ -97,7 +97,27 @@ export default function InterviewPrepCard({ data, onSendMessage }) {
         </div>
       )}
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-red-200" />
+      {/* Fixed action buttons */}
+      {onSendMessage && (
+        <div className="mt-3 pt-3 border-t border-red-200 flex flex-wrap gap-1.5">
+          <button
+            onClick={() => onSendMessage(`Do a mock interview for ${data.company_name ? data.company_name + ' ' : ''}${data.role || 'this role'}`)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-red-500 text-red-500 bg-transparent hover:bg-red-500 hover:text-white transition-all duration-200 cursor-pointer"
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            🎤 Do a mock interview →
+          </button>
+          <button
+            onClick={() => onSendMessage(`Draft a thank-you note after my ${data.company_name ? data.company_name + ' ' : ''}interview`)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-emerald-500 text-emerald-500 bg-transparent hover:bg-emerald-500 hover:text-white transition-all duration-200 cursor-pointer"
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            ✉️ Draft a thank-you note →
+          </button>
+        </div>
+      )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-2" accentColor="#DC2626" />
     </Card>
   );
 }
