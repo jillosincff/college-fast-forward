@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Pencil, X, Mail, Heart } from 'lucide-react';
+import SuggestedActions from './SuggestedActions';
 import { toast } from 'sonner';
 
 function DraftBlock({ label, message, subject }) {
@@ -136,23 +137,7 @@ export default function ThankYouNoteCard({ data, onSendMessage }) {
 
       {/* Suggested actions */}
       {data.suggested_actions?.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-emerald-200 space-y-1.5">
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Next Steps</p>
-          {data.suggested_actions.map((action, i) => {
-            const text = String(action).replace(/^→\s*/, '').trim();
-            return (
-              <button
-                key={i}
-                onClick={() => onSendMessage?.(text)}
-                className="w-full flex items-start gap-2 bg-white/80 rounded-lg px-3 py-2 border border-slate-200 text-left cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-all group"
-                style={{ minHeight: 'auto', minWidth: 'auto' }}
-              >
-                <span className="text-emerald-600 mt-0.5 flex-shrink-0 text-xs group-hover:translate-x-0.5 transition-transform">→</span>
-                <span className="text-xs text-slate-700 font-medium group-hover:text-emerald-700">{text}</span>
-              </button>
-            );
-          })}
-        </div>
+        <SuggestedActions actions={data.suggested_actions} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-emerald-200" accentColor="#059669" />
       )}
     </Card>
   );

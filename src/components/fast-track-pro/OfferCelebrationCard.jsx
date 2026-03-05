@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Check, Pencil, X, Trophy, DollarSign, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import SuggestedActions from './SuggestedActions';
 
 export default function OfferCelebrationCard({ data, onSendMessage }) {
   const [showConfetti, setShowConfetti] = useState(true);
@@ -178,23 +179,7 @@ export default function OfferCelebrationCard({ data, onSendMessage }) {
 
       {/* Suggested next actions */}
       {data.suggested_actions?.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-amber-200 space-y-1.5">
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Next Steps</p>
-          {data.suggested_actions.map((action, i) => {
-            const text = String(action).replace(/^→\s*/, '').trim();
-            return (
-              <button
-                key={i}
-                onClick={() => onSendMessage?.(text)}
-                className="w-full flex items-start gap-2 bg-white/80 rounded-lg px-3 py-2 border border-amber-200 text-left cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-all group"
-                style={{ minHeight: 'auto', minWidth: 'auto' }}
-              >
-                <span className="text-amber-600 mt-0.5 flex-shrink-0 text-xs group-hover:translate-x-0.5 transition-transform">→</span>
-                <span className="text-xs text-slate-700 font-medium group-hover:text-amber-700">{text}</span>
-              </button>
-            );
-          })}
-        </div>
+        <SuggestedActions actions={data.suggested_actions} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-amber-200" accentColor="#D97706" />
       )}
     </Card>
   );
