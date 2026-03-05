@@ -30,6 +30,7 @@ function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   if (repliedCount > 0) lines.push(`💬 ${repliedCount} alumni have replied to your outreach`);
   if (interviewCount > 0) lines.push(`📅 ${interviewCount} interview${interviewCount > 1 ? 's' : ''} in your pipeline`);
   if (weeklyStats?.companiesScanned > 0) lines.push(`📊 ${weeklyStats.companiesScanned} companies scanned this week`);
+  // topSignal is already validated against target companies in the data loader
   if (weeklyStats?.topSignal) lines.push(`🔥 ${weeklyStats.topSignal} is actively hiring right now`);
   if (lines.length === 0) {
     lines.push('⚡ FASTIQ is scanning the market for you');
@@ -97,15 +98,40 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
       setNewOpportunities(oppsRaw);
 
-      const isValidCompanyName = (n) => n && n.length > 2 && !/^[a-z_]+$/i.test(n) && !['week','undefined','null','company'].includes(n.toLowerCase());
+      // Strict company name validation: must be in target list OR pass rigorous checks
+      const targetNamesLower = targetCompanyNames.map(n => n.toLowerCase());
+      const JUNK_WORDS = ['experience','identify','relevant','more','week','undefined','null','company',
+        'the','and','for','with','your','this','that','from','have','been','about','into','each',
+        'find','search','apply','submit','check','browse','explore','discover','learn','view'];
+      
+      const isValidCompanyName = (name) => {
+        if (!name || typeof name !== 'string') return false;
+        const trimmed = name.trim();
+        if (trimmed.length < 2) return false;
+        // If it's in the student's target list, always valid
+        if (targetNamesLower.includes(trimmed.toLowerCase())) return true;
+        // Reject single lowercase/underscore words (field names)
+        if (/^[a-z_]+$/i.test(trimmed)) return false;
+        // Reject if the name IS a common English word
+        if (JUNK_WORDS.includes(trimmed.toLowerCase())) return false;
+        // Reject if name contains only common words (multi-word junk like "Experience More")
+        const words = trimmed.toLowerCase().split(/\s+/);
+        if (words.every(w => JUNK_WORDS.includes(w))) return false;
+        return true;
+      };
 
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const weekOps = oppsRaw.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
       const weekActivity = activityRaw.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
       const companiesScanned = new Set(weekActivity.filter(a => a.action_type === 'company_search').map(a => a.target_name)).size;
       const alumniFound = weekActivity.filter(a => a.action_type === 'alumni_view').length;
-      const hotCompany = intelRaw.find(i => i.hiring_signal === 'hot');
-      const topSignalName = hotCompany ? titleCase(String(hotCompany.company_name || '').trim()) : null;
+      
+      // Only show "moved to Hot" for companies in the student's actual target list
+      const hotTargetCompany = relevantIntel.find(i => 
+        i.hiring_signal === 'hot' && targetNamesLower.includes((i.company_name || '').toLowerCase())
+      );
+      const topSignalName = hotTargetCompany ? titleCase(String(hotTargetCompany.company_name || '').trim()) : null;
+      
       setWeeklyStats({
         opportunities: weekOps || oppsRaw.length,
         alumniFound: alumniFound || alumniRaw.length,

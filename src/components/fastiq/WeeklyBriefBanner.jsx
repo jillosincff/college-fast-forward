@@ -11,14 +11,16 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
   if (dismissed) return null;
 
   const { alumniFound = 0, companiesScanned = 0, topSignal, opportunities = 0 } = weeklyStats || {};
-  const hasActivity = alumniFound > 0 || companiesScanned > 0 || topSignal || opportunities > 0;
-  if (!hasActivity) return null;
 
+  // Build display parts — topSignal is already validated at the source (only target companies)
   const parts = [];
-  if (alumniFound > 0) parts.push(`${alumniFound} alumni`);
-  if (companiesScanned > 0) parts.push(`${companiesScanned} companies`);
-  if (topSignal) parts.push(`${topSignal} moved to Hot`);
   if (opportunities > 0) parts.push(`${opportunities} new opportunities`);
+  if (alumniFound > 0) parts.push(`${alumniFound} alumni found`);
+  if (companiesScanned > 0) parts.push(`${companiesScanned} companies scanned`);
+  if (topSignal) parts.push(`${topSignal} moved to Hot`);
+
+  // If nothing meaningful, show generic or hide
+  if (parts.length === 0) return null;
 
   return (
     <div className="fiq-animate" style={{
