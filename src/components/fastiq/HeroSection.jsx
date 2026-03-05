@@ -36,10 +36,10 @@ function HeroStatusLineInline({ lines = [] }) {
 export default function HeroSection({ userName, user, profile, statValues, onOpenChat, statusLines, onEditProfile }) {
   const major = user?.major || user?.student_major || profile?.target_industry || '';
   const gradYear = user?.graduation_year || '';
-  const industry = profile?.target_industry || '';
   const location = profile?.location_preference || '';
+  const targetCompanies = profile?.target_companies || [];
 
-  const subtitle = ['UF', major, gradYear, industry ? `Targeting ${industry}` : '', location].filter(Boolean).join(' · ');
+  const profileLine = ['UF', major, gradYear, location].filter(Boolean).join(' · ');
 
   const rings = [
     { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
@@ -98,21 +98,70 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
             Your personal career center, working for you 24/7
           </p>
-          <p
-            onClick={onEditProfile}
-            style={{
-              fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500, marginTop: 4,
-              cursor: onEditProfile ? 'pointer' : 'default',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => { if (onEditProfile) e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-            onMouseLeave={e => { if (onEditProfile) e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
-            title={onEditProfile ? 'Click to edit profile' : undefined}
-          >
-            {subtitle || 'UF · Your intelligent networking engine'}
-            {onEditProfile && <span style={{ marginLeft: 6, fontSize: 11 }}>✏️</span>}
-          </p>
-          {/* Inline rotating status line */}
+          {/* Line 3: Profile details + Edit Profile pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+              {profileLine || 'UF · Your intelligent networking engine'}
+            </span>
+            {onEditProfile && (
+              <button
+                onClick={onEditProfile}
+                style={{
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'rgba(255,255,255,0.8)', padding: '3px 12px', borderRadius: 20,
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                  minHeight: 'auto', minWidth: 'auto', width: 'auto',
+                  backdropFilter: 'blur(4px)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+              >
+                Edit Profile
+              </button>
+            )}
+          </div>
+
+          {/* Line 4: Target companies chips + Edit Targets pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+            {targetCompanies.length > 0 ? (
+              <>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Targeting:
+                </span>
+                {targetCompanies.map((c, i) => (
+                  <span key={i} style={{
+                    background: 'rgba(250,70,22,0.15)', border: '1px solid rgba(250,70,22,0.3)',
+                    color: 'rgba(255,255,255,0.85)', padding: '2px 10px', borderRadius: 14,
+                    fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap',
+                  }}>
+                    {c}
+                  </span>
+                ))}
+              </>
+            ) : (
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>
+                No target companies set yet
+              </span>
+            )}
+            {onEditProfile && (
+              <button
+                onClick={onEditProfile}
+                style={{
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'rgba(255,255,255,0.8)', padding: '2px 10px', borderRadius: 14,
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                  minHeight: 'auto', minWidth: 'auto', width: 'auto',
+                  backdropFilter: 'blur(4px)', whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+              >
+                {targetCompanies.length > 0 ? '+ Edit' : '+ Add Targets'}
+              </button>
+            )}
+          </div>
+
+          {/* Line 5: Rotating status line */}
           <HeroStatusLineInline lines={statusLines} />
         </div>
 
