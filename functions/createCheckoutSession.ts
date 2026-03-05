@@ -65,12 +65,19 @@ Deno.serve(async (req) => {
     // Determine subscription type from metadata
     const subscriptionType = metadata?.subscriptionType || 'parent_paid';
     
-    // For student self-pay, use the $9/month Full Access price
-    // Map custom price ID to actual Stripe price
+    // Map custom/virtual price IDs to actual Stripe prices
     let actualPriceId = priceId;
     if (priceId === 'price_student_self_pay_9') {
-      // Use the Early Adopter $9/month price for student self-pay
+      // Use the $9/month CFF-only price for student self-pay
       actualPriceId = 'price_1SUJ2g873TV7WMcTBYvmzGYU';
+    }
+    // FASTIQ $29/month → standard Stripe price
+    // price_1SUJ7I873TV7WMcT1plkAZpz is the $29/month FASTIQ price
+    // price_fastiq_annual_249 → annual FASTIQ price (create in Stripe dashboard)
+    // For annual, look up or use your annual price ID from Stripe
+    if (priceId === 'price_fastiq_annual_249') {
+      // TODO: Replace with actual Stripe annual price ID once created
+      actualPriceId = 'price_fastiq_annual_249';
     }
 
     // Create checkout session
