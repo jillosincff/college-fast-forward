@@ -97,11 +97,45 @@ const OPENERS = {
   resume_builder: {
     userMessage: "Help me build a resume",
     getAssistantMessage: (profile) => {
-      const name = profile?.user_email ? '' : '';
       return "No problem! Lots of students don't have a resume yet — and that's totally fine. I'll help you build a professional one right now. It only takes a few minutes, and you'd be surprised how much you've already done that employers value.\n\n" +
         "Let's start with the basics! What's your **full name**? And what's the **best email and phone number** for employers to reach you?\n\n" +
         "If you have a **LinkedIn profile**, include that too — if not, no worries, we can set that up later.";
     }
+  },
+
+  thank_you_note: {
+    userMessage: "I need to write a thank-you note after my interview",
+    getAssistantMessage: () =>
+      "I'd love to help you write a killer thank-you note! 📝 Tell me:\n\n" +
+      "- **Who interviewed you?** (name and title if you know it)\n" +
+      "- **What did you talk about?** Any specific topics, projects, or questions they asked?\n" +
+      "- **Anything you wish you had said** or want to emphasize?\n" +
+      "- **When did they say they'd get back to you?**\n\n" +
+      "The more detail you give me, the more personal — and effective — the note will be."
+  },
+
+  offer_received: {
+    userMessage: "I got a job offer!",
+    getAssistantMessage: () =>
+      "🎉🎉🎉 **CONGRATULATIONS!** That's incredible! All your hard work paid off.\n\n" +
+      "Before you accept, let me help you make sure you're getting the best deal. Tell me:\n\n" +
+      "- **Company name**\n" +
+      "- **Role title**\n" +
+      "- **Base salary**\n" +
+      "- **Bonus** (if any)\n" +
+      "- **Equity/stock** (if any)\n" +
+      "- **Location**\n" +
+      "- **Start date**\n" +
+      "- **Any other benefits** they mentioned\n\n" +
+      "I'll research how this compares to market rates and build your negotiation strategy."
+  },
+
+  network_thank_you: {
+    userMessage: "I want to thank everyone who helped me",
+    getAssistantMessage: () =>
+      "That's a great instinct! 🤝 Thanking the people who helped you strengthens the Gator network and creates lasting goodwill.\n\n" +
+      "I'll pull up everyone in your networking pipeline who replied, helped with introductions, or supported you. Then I'll draft personalized thank-you messages for each person.\n\n" +
+      "Did you accept an offer? If so, tell me the **company and role** — sharing good news makes the thank-you even more meaningful!"
   },
 };
 
@@ -112,11 +146,6 @@ const OPENERS = {
 export function matchPromptToOpener(promptText) {
   const t = (promptText || '').toLowerCase();
 
-  // Let thank-you / post-interview / offer / network thank flows go to backend handler directly
-  if (t.includes('thank you note') || t.includes('thank-you note') || t.includes('thank you email') || t.includes('write a thank you') || t.includes('draft a thank you')) return null;
-  if (t.includes('i had my interview') || t.includes('after my interview') || t.includes('interview went') || t.includes('interview today')) return null;
-  if (t.includes('got an offer') || t.includes('received an offer') || t.includes('job offer') || t.includes('offer from')) return null;
-  if (t.includes('thank my network') || t.includes('thank everyone') || t.includes('accepted an offer') || t.includes('accepted the offer')) return null;
   if (t.includes('interview') || t.includes('prep me')) return 'interview_prep';
   if (t.includes('tailor') && t.includes('resume')) return 'resume_tailor';
   if (t.includes('customize') && t.includes('resume')) return 'resume_tailor';
@@ -132,6 +161,9 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('action plan') || t.includes('career plan') || t.includes('4-week')) return 'career_plan';
   if (t.includes('find uf alumni') || t.includes('scan') || t.includes('insiders') || t.includes('alumni at my')) return 'scan_insiders';
   if (t.includes('build a resume') || t.includes('build my resume') || t.includes('don\'t have a resume') || t.includes('no resume')) return 'resume_builder';
+  if ((t.includes('thank') && (t.includes('note') || t.includes('email')) && t.includes('interview')) || t.includes('post-interview')) return 'thank_you_note';
+  if ((t.includes('got') || t.includes('received')) && (t.includes('offer') || t.includes('job offer'))) return 'offer_received';
+  if (t.includes('thank everyone') || t.includes('thank my network') || t.includes('thank all') || t.includes('everyone who helped')) return 'network_thank_you';
 
   return null;
 }

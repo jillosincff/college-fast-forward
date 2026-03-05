@@ -18,14 +18,47 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
     loadStale();
   }, [profile?.user_email]);
 
+  const [recentInterviewCompany, setRecentInterviewCompany] = useState(null);
+
+  useEffect(() => {
+    const checkRecentInterviews = async () => {
+      const email = profile?.user_email;
+      if (!email) return;
+      const pipeline = await base44.entities.NetworkingPipeline.filter(
+        { user_email: email, status: 'interview' }, '-interview_date', 5
+      ).catch(() => []);
+      // Show nudge if interview was 1-3 days ago
+      const oneDayAgo = Date.now() - 1 * 24 * 60 * 60 * 1000;
+      const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+      const recent = pipeline.find(p => {
+        const d = p.interview_date ? new Date(p.interview_date).getTime() : 0;
+        return d > threeDaysAgo && d < oneDayAgo;
+      });
+      if (recent) setRecentInterviewCompany(recent.company);
+    };
+    checkRecentInterviews();
+  }, [profile?.user_email]);
+
   const hasUnmessaged = unmessagedAlumni > 0;
   const targets = profile?.target_companies?.length || 0;
   const hasResume = !!profile?.resume_text;
 
   let message, cta, emoji, onClick;
 
+  // Priority -1: Post-interview thank-you nudge (highest if applicable)
+  if (recentInterviewCompany) {
+    emoji = '📝';
+    message = (
+      <>
+        How did your interview at <span style={{ color: '#FA4616', fontWeight: 700 }}>{recentInterviewCompany}</span> go?
+        Let me help you send a thank-you note — it makes a <span style={{ color: '#FA4616', fontWeight: 700 }}>big impression</span>.
+      </>
+    );
+    cta = 'Draft Thank-You Note →';
+    onClick = () => onOpenChat(`Help me write a thank you note after my interview at ${recentInterviewCompany}`);
+  }
   // Priority 0: Resume upload (highest priority if missing)
-  if (!hasResume && staleCount === 0) {
+  else if (!hasResume && staleCount === 0) {
     emoji = '📄';
     message = (
       <>
