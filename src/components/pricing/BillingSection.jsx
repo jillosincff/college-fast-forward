@@ -76,7 +76,7 @@ export default function BillingSection({ user }) {
   }
 
   // Paid Tiers (Early Adopter or Standard)
-  const priceDisplay = tier === 'early_adopter' ? '$9' : '$19';
+  const priceDisplay = tier === 'early_adopter' ? '$9' : '$29';
   const tierLabel = tier === 'early_adopter' ? 'Early Adopter' : 'Standard';
   const TierIcon = tier === 'early_adopter' ? Star : Check;
 
