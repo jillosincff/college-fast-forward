@@ -1,15 +1,44 @@
 import React from 'react';
 
-export default function WeeklyBriefCard({ stats, onOpenChat }) {
+/**
+ * "This Week's Brief" — a detailed weekly summary (different from the "Since Last Visit" banner).
+ * Only shows when there's meaningful weekly data that differs from the snapshot banner.
+ */
+export default function WeeklyBriefCard({ stats, pipelineCounts, onOpenChat, bannerDismissed }) {
+  const { alumniFound = 0, companiesScanned = 0, topSignal, opportunities = 0,
+          entryLevelRoles = 0, internRoles = 0, messagesDrafted = 0 } = stats || {};
+  const { identified = 0, reached_out = 0, replied = 0 } = pipelineCounts || {};
+
+  // Build detailed summary parts — focus on actionable weekly data
   const parts = [];
-  if (stats.opportunities > 0) parts.push(`${stats.opportunities} new opportunities found`);
-  if (stats.alumniFound > 0) parts.push(`${stats.alumniFound} alumni identified`);
-  if (stats.companiesScanned > 0) parts.push(`${stats.companiesScanned} companies scanned`);
-  // topSignal is already validated at the source — only real target companies pass through
-  if (stats.topSignal) {
-    parts.push(`${stats.topSignal} moved to "Hot Hiring"`);
+  if (alumniFound > 0) {
+    const companyCount = companiesScanned || 1;
+    parts.push(`${alumniFound} alumni identified across ${companyCount} compan${companyCount > 1 ? 'ies' : 'y'}`);
   }
-  const summary = parts.join(' · ') || 'FASTIQ is monitoring your targets — updates coming soon.';
+  if (messagesDrafted > 0) parts.push(`${messagesDrafted} outreach messages drafted`);
+  const studentRoles = entryLevelRoles + internRoles;
+  if (topSignal && studentRoles > 0) {
+    parts.push(`${topSignal} actively hiring entry-level roles`);
+  } else if (topSignal) {
+    parts.push(`${topSignal} moved to Hot hiring`);
+  }
+  if (identified > 0 || reached_out > 0 || replied > 0) {
+    const pipelineParts = [];
+    if (identified > 0) pipelineParts.push(`${identified} identified`);
+    if (reached_out > 0) pipelineParts.push(`${reached_out} reached out`);
+    if (replied > 0) pipelineParts.push(`${replied} replied`);
+    const nudge = reached_out === 0 && identified > 0 ? ' (time to make a move!)' : '';
+    parts.push(`Your pipeline: ${pipelineParts.join(', ')}${nudge}`);
+  }
+
+  // If banner is still visible and content is basically the same, hide weekly brief to avoid duplication
+  const hasMinimalContent = parts.length <= 1;
+  if (!bannerDismissed && hasMinimalContent) return null;
+
+  // If truly nothing to show
+  if (parts.length === 0) return null;
+
+  const summary = parts.join(' · ');
 
   return (
     <div className="fiq-animate fiq-delay-7" style={{
@@ -25,11 +54,11 @@ export default function WeeklyBriefCard({ stats, onOpenChat }) {
         <div style={{
           fontSize: 11, fontWeight: 700, color: '#FA4616',
           textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10,
-        }}>📊 Weekly Brief</div>
-        <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
-          FASTIQ worked while you were away
+        }}>📊 This Week's Brief</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
+          Here's what happened this week
         </div>
-        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
           {summary}
         </div>
         <button
@@ -41,7 +70,7 @@ export default function WeeklyBriefCard({ stats, onOpenChat }) {
             cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
           }}
         >
-          View Full Brief →
+          View Detailed Brief →
         </button>
       </div>
     </div>

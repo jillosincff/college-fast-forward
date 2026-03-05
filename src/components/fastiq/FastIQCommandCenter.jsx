@@ -14,6 +14,7 @@ import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
 import LeaderboardCard from './LeaderboardCard';
 import MyResumeSection from './MyResumeSection';
+import ProfileEditModal from './ProfileEditModal';
 
 function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   const lines = [];
@@ -53,10 +54,12 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
   const [showAddTargets, setShowAddTargets] = useState(false);
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [noResponseContacts, setNoResponseContacts] = useState([]);
   const alertsRef = useRef(null);
   const weeklyBriefRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [bannerDismissed, setBannerDismissed] = useState(() => !!sessionStorage.getItem('fiq_banner_dismissed_at'));
 
   useEffect(() => {
     if (highlightAlerts && alertsRef.current) {
@@ -225,12 +228,13 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           statValues={statValues}
           onOpenChat={onOpenChat}
           statusLines={buildStatusLines(pipelineData, newOpportunities, weeklyStats)}
+          onEditProfile={() => setShowProfileEdit(true)}
         />
       </div>
 
       {/* CONTENT */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
-        {/* 2. WEEKLY BRIEF BANNER */}
+        {/* SINCE YOUR LAST VISIT banner — persists dismissal per session */}
         <WeeklyBriefBanner
           weeklyStats={weeklyStats}
           onViewBrief={() => {
@@ -238,6 +242,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
               weeklyBriefRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
+          onDismissed={() => setBannerDismissed(true)}
         />
 
         {/* 3. INSIGHT CARD — always-on, priority-ordered */}
@@ -286,7 +291,12 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
         {weeklyStats && (
           <div ref={weeklyBriefRef}>
-            <WeeklyBriefCard stats={weeklyStats} onOpenChat={onOpenChat} />
+            <WeeklyBriefCard
+              stats={{ ...weeklyStats, messagesDrafted: profile?.messages_drafted || 0 }}
+              pipelineCounts={pipelineCounts}
+              onOpenChat={onOpenChat}
+              bannerDismissed={bannerDismissed}
+            />
           </div>
         )}
 
@@ -304,6 +314,19 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
             if (onProfileUpdated) {
               onProfileUpdated({ ...profile, target_companies: newCompanies });
             }
+            setRefreshKey(prev => prev + 1);
+          }}
+        />
+      )}
+
+      {showProfileEdit && (
+        <ProfileEditModal
+          user={user}
+          profile={profile}
+          onClose={() => setShowProfileEdit(false)}
+          onSaved={(updatedProfile) => {
+            setShowProfileEdit(false);
+            if (onProfileUpdated) onProfileUpdated(updatedProfile);
             setRefreshKey(prev => prev + 1);
           }}
         />

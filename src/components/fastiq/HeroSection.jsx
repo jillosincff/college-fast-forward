@@ -33,12 +33,13 @@ function HeroStatusLineInline({ lines = [] }) {
   );
 }
 
-export default function HeroSection({ userName, user, profile, statValues, onOpenChat, statusLines }) {
+export default function HeroSection({ userName, user, profile, statValues, onOpenChat, statusLines, onEditProfile }) {
   const major = user?.major || user?.student_major || profile?.target_industry || '';
   const gradYear = user?.graduation_year || '';
   const industry = profile?.target_industry || '';
+  const location = profile?.location_preference || '';
 
-  const subtitle = ['UF', major, gradYear, industry ? `Targeting ${industry}` : ''].filter(Boolean).join(' · ');
+  const subtitle = ['UF', major, gradYear, industry ? `Targeting ${industry}` : '', location].filter(Boolean).join(' · ');
 
   const rings = [
     { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
@@ -97,8 +98,19 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
             Your personal career center, working for you 24/7
           </p>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500, marginTop: 4 }}>
+          <p
+            onClick={onEditProfile}
+            style={{
+              fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500, marginTop: 4,
+              cursor: onEditProfile ? 'pointer' : 'default',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => { if (onEditProfile) e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+            onMouseLeave={e => { if (onEditProfile) e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+            title={onEditProfile ? 'Click to edit profile' : undefined}
+          >
             {subtitle || 'UF · Your intelligent networking engine'}
+            {onEditProfile && <span style={{ marginLeft: 6, fontSize: 11 }}>✏️</span>}
           </p>
           {/* Inline rotating status line */}
           <HeroStatusLineInline lines={statusLines} />
