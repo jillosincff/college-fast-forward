@@ -59,7 +59,13 @@ export default function FastIQ() {
   const handleBackFromChat = () => {
     setChatInitialMessage('');
     setView('dashboard');
-    loadProfile();
+    loadProfile(); // Refresh profile data after chat session
+  };
+
+  // P2 FIX: Force command center data refetch after assessment re-run
+  const handleAssessmentRerun = () => {
+    setChatInitialMessage('');
+    setView('assessment');
   };
 
   // P0 FIX: Show loading while auth is resolving (user === undefined)
@@ -113,7 +119,7 @@ export default function FastIQ() {
         profile={profile}
         initialMessage={chatInitialMessage}
         onBack={handleBackFromChat}
-        onRerunAssessment={() => { setChatInitialMessage(''); setView('assessment'); }}
+        onRerunAssessment={handleAssessmentRerun}
       />
     );
   }
