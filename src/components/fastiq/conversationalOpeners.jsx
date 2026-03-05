@@ -146,7 +146,11 @@ const OPENERS = {
 export function matchPromptToOpener(promptText) {
   const t = (promptText || '').toLowerCase();
 
-  if (t.includes('interview') || t.includes('prep me')) return 'interview_prep';
+  // Thank-you/post-interview checks BEFORE interview_prep
+  if ((t.includes('thank') && (t.includes('note') || t.includes('email')) && t.includes('interview')) || t.includes('post-interview') || t.includes('had my interview')) return 'thank_you_note';
+  if ((t.includes('got') || t.includes('received')) && (t.includes('offer') || t.includes('job offer'))) return 'offer_received';
+  if (t.includes('thank everyone') || t.includes('thank my network') || t.includes('thank all') || t.includes('everyone who helped')) return 'network_thank_you';
+  if ((t.includes('interview') && !t.includes('thank') && !t.includes('had my')) || t.includes('prep me')) return 'interview_prep';
   if (t.includes('tailor') && t.includes('resume')) return 'resume_tailor';
   if (t.includes('customize') && t.includes('resume')) return 'resume_tailor';
   if (t.includes('optimize') && t.includes('resume') && (t.includes('job') || t.includes('role'))) return 'resume_tailor';
@@ -161,10 +165,6 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('action plan') || t.includes('career plan') || t.includes('4-week')) return 'career_plan';
   if (t.includes('find uf alumni') || t.includes('scan') || t.includes('insiders') || t.includes('alumni at my')) return 'scan_insiders';
   if (t.includes('build a resume') || t.includes('build my resume') || t.includes('don\'t have a resume') || t.includes('no resume')) return 'resume_builder';
-  if ((t.includes('thank') && (t.includes('note') || t.includes('email')) && t.includes('interview')) || t.includes('post-interview')) return 'thank_you_note';
-  if ((t.includes('got') || t.includes('received')) && (t.includes('offer') || t.includes('job offer'))) return 'offer_received';
-  if (t.includes('thank everyone') || t.includes('thank my network') || t.includes('thank all') || t.includes('everyone who helped')) return 'network_thank_you';
-
   return null;
 }
 
