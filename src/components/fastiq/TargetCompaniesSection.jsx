@@ -6,6 +6,19 @@ function guessDomain(companyName) {
   return clean.split(/\s+/).join('') + '.com';
 }
 
+function CompanyInitial({ name }) {
+  const letter = (name || '?')[0].toUpperCase();
+  const colors = ['#0021A5','#FA4616','#8B5CF6','#10B981','#EAB308','#06B6D4'];
+  const colorIdx = (name || '').charCodeAt(0) % colors.length;
+  return (
+    <div style={{
+      width: 26, height: 26, borderRadius: 8, background: colors[colorIdx],
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 13, fontWeight: 700, color: '#fff',
+    }}>{letter}</div>
+  );
+}
+
 function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
   const domain = guessDomain(name);
   const [logoErr, setLogoErr] = React.useState(false);
@@ -43,7 +56,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
           {domain && !logoErr ? (
             <img src={`https://logo.clearbit.com/${domain}`} alt="" style={{ width: 26, height: 26, objectFit: 'contain' }} onError={() => setLogoErr(true)} />
           ) : (
-            <span style={{ fontSize: 18 }}>🏢</span>
+            <CompanyInitial name={name} />
           )}
         </div>
         <div>

@@ -469,8 +469,8 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-4 safe-area-bottom">
+          {/* Input — uses env(safe-area-inset-bottom) for notched phones and keyboard */}
+          <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-4" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
             <div className="max-w-4xl mx-auto flex items-end gap-2 bg-white border-2 border-slate-200 focus-within:border-[#0021A5] rounded-2xl p-2 transition-colors shadow-sm">
               <input
                 ref={fileInputRef}

@@ -40,6 +40,10 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
   };
 
   const handleSave = async () => {
+    if (!profile?.id) {
+      console.error('No profile ID — cannot save targets');
+      return;
+    }
     setSaving(true);
     await base44.entities.FastTrackProProfile.update(profile.id, {
       target_companies: companies,

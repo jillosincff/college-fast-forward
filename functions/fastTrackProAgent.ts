@@ -559,9 +559,30 @@ async function saveToPipeline(base44, email, company, alumni) {
   } catch(e) {}
 }
 
+// P2 FIX: Improved titleCase with known company name lookup
+const KNOWN_COMPANY_NAMES = {
+  'jpmorgan': 'JPMorgan', 'nvidia': 'NVIDIA', 'ibm': 'IBM', 'pwc': 'PwC',
+  'ey': 'EY', 'kpmg': 'KPMG', 'bcg': 'BCG', 'hca': 'HCA', 'cvs': 'CVS',
+  'ge': 'GE', 'hp': 'HP', 'amd': 'AMD', 'att': 'AT&T', 'at&t': 'AT&T',
+  'bmw': 'BMW', 'bp': 'BP', 'kkr': 'KKR', 'j&j': 'J&J', 'p&g': 'P&G',
+  'spacex': 'SpaceX', 'linkedin': 'LinkedIn', 'youtube': 'YouTube',
+  'github': 'GitHub', 'openai': 'OpenAI', 'hubspot': 'HubSpot',
+  'salesforce': 'Salesforce', 'doordash': 'DoorDash', 'tiktok': 'TikTok',
+  'mckinsey': 'McKinsey', 'goldman sachs': 'Goldman Sachs',
+  'morgan stanley': 'Morgan Stanley', 'bank of america': 'Bank of America',
+  'johnson & johnson': 'Johnson & Johnson', 'lockheed martin': 'Lockheed Martin',
+  'booz allen': 'Booz Allen', 'raymond james': 'Raymond James',
+  'l3harris': 'L3Harris', 'unitedhealth': 'UnitedHealth',
+  'ernst young': 'Ernst & Young', 'ernst & young': 'Ernst & Young',
+};
+
 function titleCase(str) {
   if (!str) return '';
-  return str.replace(/\b\w/g, c => c.toUpperCase());
+  const lower = str.toLowerCase().trim();
+  // Check known company names first
+  if (KNOWN_COMPANY_NAMES[lower]) return KNOWN_COMPANY_NAMES[lower];
+  // Fallback: lowercase then capitalize first letters
+  return lower.replace(/\b\w/g, c => c.toUpperCase());
 }
 
 // Generate contextual guidance after showing alumni results
