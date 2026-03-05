@@ -362,7 +362,7 @@ function detectThankYouNote(message) {
   if (/(?:just finished|came out of|done with)\s+(?:my|the|an)\s+interview/i.test(message)) return true;
   if (lower.includes('thank you note') || lower.includes('thank-you note') || lower.includes('thank you email')) return true;
   if (lower.includes('i had my interview') || lower.includes('post-interview')) return true;
-  // Detect interview detail responses: mentions interviewer name/title + topics discussed
+  // Detect interview detail responses (interviewer + topics)
   if (/(?:interviewed with|interviewer was|met with|spoke with)\s+\w/i.test(message) && /(?:talked about|discussed|mentioned|asked about|we covered)/i.test(message)) return true;
   return false;
 }
