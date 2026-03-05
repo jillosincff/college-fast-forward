@@ -85,7 +85,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
       {/* Logo */}
       <div style={{ flexShrink: 0 }}>
         {domain && !logoErr ? (
-          <img src={`https://logo.clearbit.com/${domain}`} alt="" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 6 }} onError={() => setLogoErr(true)} />
+          <img src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} alt="" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 6 }} onError={() => setLogoErr(true)} />
         ) : (
           <CompanyInitial name={name} />
         )}
