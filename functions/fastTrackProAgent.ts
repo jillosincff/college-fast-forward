@@ -993,8 +993,6 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const message = body.message;
-    // P2 FIX: Use DB as single source of truth for conversation history.
-    // Frontend no longer needs to send conversation_history.
     if (!message) return Response.json({ error: 'Message is required' }, { status: 400 });
 
     // Load recent conversation messages from DB — single source of truth
@@ -1007,7 +1005,14 @@ Deno.serve(async (req) => {
       recentDbMessages = (dbMessages || []).reverse();
     } catch(e) { console.log('Could not load conversation history:', e.message); }
 
-    // Build conversation_history string from DB messages (replaces frontend-sent history)
+    // P1 FIX: Belt-and-suspenders — if the current user message isn't in DB yet
+    // (race condition), append it to the in-memory history so we always have context
+    const lastUserMsg = [...recentDbMessages].reverse().find(m => m.role === 'user');
+    if (!lastUserMsg || lastUserMsg.content?.substring(0, 100) !== message.substring(0, 100)) {
+      recentDbMessages.push({ role: 'user', content: message, message_type: 'text' });
+    }
+
+    // Build conversation_history string from DB messages
     const conversation_history = recentDbMessages
       .map(m => `${m.role === 'user' ? 'Student' : 'Agent'}: ${(m.content || '').substring(0, 300)}`)
       .join('\n\n');
