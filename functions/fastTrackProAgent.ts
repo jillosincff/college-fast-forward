@@ -514,6 +514,7 @@ async function saveCompanyIntelCache(base44, company, data) {
       company_name: titleCase(company), school_code: 'UF',
       hiring_score: data.hiring_score || 0, hiring_signal: data.hiring_signal || 'cool',
       intel_summary: data.summary || '', open_roles_count: data.open_roles_count || 0,
+      entry_level_roles_count: data.entry_level_roles_count || 0, intern_roles_count: data.intern_roles_count || 0,
       salary_range: data.salary_range || '', expires_at: new Date(Date.now() + 24*60*60*1000).toISOString(),
     });
   } catch(e) {}
@@ -1840,26 +1841,22 @@ ${profileContext}
 ${memoryContext ? `PERSISTENT MEMORY (changes since last research):\n${memoryContext}\n\nIMPORTANT: If there are memory deltas, LEAD with what changed. Example: "Last time you looked at Disney, they had 35 open roles — now it's 28. They may be slowing down. Consider accelerating your outreach before the window closes."\n` : ''}
 COMPANY INTEL:
 - Company: ${companyName}
-- Hiring Score: ${intelData.hiring_score}/100 (${intelData.hiring_signal})
-- Open Roles: ${intelData.open_roles_count}
-- Salary Range: ${intelData.salary_range || 'unknown'}
+- Hiring Score: ${intelData.hiring_score}/100 (${intelData.hiring_signal}) — based on entry-level/intern availability
+- Entry-Level Roles: ${intelData.entry_level_roles_count || 0}
+- Internship Roles: ${intelData.intern_roles_count || 0}
+- Total Roles (all levels): ${intelData.open_roles_count}
+- Entry-Level Salary Range: ${intelData.salary_range || 'unknown'}
 - Summary: ${intelData.company_summary || ''}
 - Recent News: ${(intelData.recent_news || []).join('; ')}
-- Interview Process: ${intelData.interview_process || 'unknown'}
 
 INSTRUCTIONS:
-Based on the student's profile (major, graduation year, career stage, target industry, location preference, career timeline) and the company intel, write a SHORT personalized assessment (3-5 sentences max).
+Write a SHORT personalized assessment (3-5 sentences). ALWAYS mention entry-level/intern count vs total. Examples:
+- "${companyName} has 150 open roles but only 3 are entry-level. Still worth pursuing — those 3 are strong matches."
+- "${companyName} has 12 active internship postings — that's unusually high. Move fast."
+- "${companyName}'s roles are mostly senior. Reach out to alumni for intel on upcoming intern recruiting."
 
-Consider these scenarios:
-- If roles are too senior: flag it and suggest finding entry-level pipelines via alumni or suggest similar companies hiring entry-level
-- If it's a great match: say so and suggest immediate next steps (find alumni, draft cover letter, etc.)
-- If there's a hiring freeze/layoffs: warn them and suggest alternatives or watchlisting
-- If location doesn't match: highlight which roles might work and which don't
-- If industry alignment is weak: note the gap and suggest how to bridge it
-
-End with exactly 2 concrete suggested next actions formatted as arrows (→). Each action should be specific and actionable, like "Find UF alumni at ${companyName} who could give you a warm intro" or "Research similar companies that are hiring entry-level right now".
-
-Be direct, warm, and strategic. Never dump data — always tell them what it MEANS for them.`,
+Consider: senior-heavy roles, great match, hiring freeze, location mismatch, industry gap.
+End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
             response_json_schema: {
               type: "object",
               properties: {
@@ -1880,33 +1877,35 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
       const cached = await getCachedCompanyIntel(base44, detectedCompany);
       if (cached && !cached._expired) {
         trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
-        const cachedIntelData = { hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, recent_news: [], interview_process: '' };
+        const cachedIntelData = { hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, recent_news: [], interview_process: '' };
         const analysis = await runPersonalizedAnalysis(detectedCompany, cachedIntelData);
         return Response.json({
           success: true,
           response: analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`,
           message_type: 'company_intel',
-          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null }
+          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null }
         });
       }
       // Keep expired cache for memory delta comparison
       const previousIntel = (cached && cached._expired) ? cached : null;
 
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Research ${detectedCompany} as of 2026. Hiring status, open roles count, salary ranges, recent news, interview process. Be specific.`,
+        prompt: `Research ${detectedCompany} hiring activity as of March 2026. Focus on entry-level positions (0-2 years), internships, new grad programs, and roles relevant to a ${studentMajor} major. Do NOT count senior/manager/director/VP roles in hiring score. Also find total roles, entry-level salary ranges, recent news, interview process.`,
         add_context_from_internet: true,
       });
 
       const intel = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nhiring_score: 0-100 (80+=hot, 50-79=warm, <50=cool). salary_range: specific like "$65K-$95K". recent_news: array of 2-4 factual items. If the company doesn't appear to be a real company or the research returned no meaningful results, set hiring_score to 0 and company_summary to "NOT_FOUND".`,
+        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing FOCUSED ON ENTRY-LEVEL/INTERN ROLES.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nSCORING: hiring_score 0-100 based on ENTRY-LEVEL/INTERN availability ONLY. Company with 150 senior roles but 0 entry-level = score <20. hiring_signal: hot only if entry-level/interns actively hiring. salary_range: for entry-level only. If company not real, set hiring_score=0 and company_summary="NOT_FOUND".`,
         response_json_schema: {
           type: "object",
           properties: {
             response: { type: "string" }, hiring_score: { type: "integer" }, hiring_signal: { type: "string", enum: ["hot","warm","cool"] },
-            salary_range: { type: "string" }, open_roles_count: { type: "integer" }, company_summary: { type: "string" },
+            salary_range: { type: "string" }, open_roles_count: { type: "integer" },
+            entry_level_roles_count: { type: "integer" }, intern_roles_count: { type: "integer" },
+            company_summary: { type: "string" },
             recent_news: { type: "array", items: { type: "string" } }, interview_process: { type: "string" }
           },
-          required: ["response","hiring_score","hiring_signal","salary_range","open_roles_count","company_summary"]
+          required: ["response","hiring_score","hiring_signal","salary_range","open_roles_count","entry_level_roles_count","intern_roles_count","company_summary"]
         }
       });
 
@@ -1921,12 +1920,11 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
         });
       }
 
-      saveCompanyIntelCache(base44, detectedCompany, { hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, summary: intel.company_summary, open_roles_count: intel.open_roles_count, salary_range: intel.salary_range });
+      saveCompanyIntelCache(base44, detectedCompany, { hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range });
       trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
 
       const news = Array.isArray(intel.recent_news) ? intel.recent_news : (intel.recent_news ? [intel.recent_news] : []);
       const intelForAnalysis = { ...intel, recent_news: news };
-      // Build memory delta context from previous intel
       const memoryCtx = buildMemoryContext(previousIntel, intel, detectedCompany);
       const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis, memoryCtx);
 
@@ -1934,7 +1932,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
         success: true,
         response: analysis ? analysis.assessment : (intel.response || `Here's intel on ${detectedCompany}:`),
         message_type: 'company_intel',
-        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null }
+        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null }
       });
     }
 
