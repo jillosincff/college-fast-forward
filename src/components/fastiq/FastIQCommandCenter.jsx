@@ -2,26 +2,31 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import HeroSection from './HeroSection';
+import HeroStatusLine from './HeroStatusLine';
+import WeeklyBriefBanner from './WeeklyBriefBanner';
 import InsightCard from './InsightCard';
 import OpportunitiesSection from './OpportunitiesSection';
 import PipelineBar from './PipelineBar';
+import PipelineNudge from './PipelineNudge';
 import TargetCompaniesSection from './TargetCompaniesSection';
 import QuickActionsGrid from './QuickActionsGrid';
 import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
-import BenchmarkCard from './BenchmarkCard';
+import LeaderboardCard from './LeaderboardCard';
 import MyResumeSection from './MyResumeSection';
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
   const [alumniCounts, setAlumniCounts] = useState({});
   const [pipelineCounts, setPipelineCounts] = useState({ identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0, no_response: 0 });
+  const [pipelineData, setPipelineData] = useState([]);
   const [newOpportunities, setNewOpportunities] = useState([]);
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
   const [showAddTargets, setShowAddTargets] = useState(false);
   const [noResponseContacts, setNoResponseContacts] = useState([]);
   const alertsRef = useRef(null);
+  const weeklyBriefRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -34,11 +39,9 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   useEffect(() => {
     if (!user?.email) return;
     const load = async () => {
-      // P1 FIX: Filter CompanyIntelCache by user's target companies instead of loading all
       const targetCompanyNames = (profile?.target_companies || []).map(c => titleCase(c));
 
       const [intelRaw, alumniRaw, pipelineRaw, oppsRaw, activityRaw] = await Promise.all([
-        // Load intel only for target companies, falling back to empty if none set
         targetCompanyNames.length > 0
           ? base44.entities.CompanyIntelCache.filter({}, '-created_date', 50).catch(() => [])
           : Promise.resolve([]),
@@ -48,7 +51,6 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         base44.entities.ProActivityLog.filter({ user_email: user.email }, '-timestamp', 50).catch(() => []),
       ]);
 
-      // P1 FIX: Filter intel to only user's target companies
       const relevantIntel = targetCompanyNames.length > 0
         ? intelRaw.filter(i => targetCompanyNames.some(tc => tc.toLowerCase() === (i.company_name || '').toLowerCase()))
         : intelRaw;
@@ -56,29 +58,24 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       relevantIntel.forEach(i => { iMap[i.company_name?.toLowerCase()] = i; });
       setCompanyIntel(iMap);
 
-      // Alumni counts — filter to user's target companies
       const aMap = {};
       alumniRaw.forEach(a => { const k = a.company?.toLowerCase(); if (k) aMap[k] = (aMap[k] || 0) + 1; });
       setAlumniCounts(aMap);
 
-      // Pipeline — include no_response tracking
       const pc = { identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0, no_response: 0 };
       pipelineRaw.forEach(p => { if (pc[p.status] !== undefined) pc[p.status]++; });
       setPipelineCounts(pc);
+      setPipelineData(pipelineRaw);
 
-      // P2 FIX: Track no_response contacts for separate display
       setNoResponseContacts(pipelineRaw.filter(p => p.status === 'no_response'));
 
-      // Unmessaged alumni (identified but not reached_out)
       const identifiedOnly = pipelineRaw.filter(p => p.status === 'identified').length;
       setUnmessagedAlumni(identifiedOnly);
 
-      // New opportunities
       setNewOpportunities(oppsRaw);
 
       const isValidCompanyName = (n) => n && n.length > 2 && !/^[a-z_]+$/i.test(n) && !['week','undefined','null','company'].includes(n.toLowerCase());
 
-      // Weekly stats — use full company_name for topSignal
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const weekOps = oppsRaw.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
       const weekActivity = activityRaw.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
@@ -98,7 +95,6 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
   const targetCompanies = (profile?.target_companies || []).map(c => titleCase(c));
   const rawName = user?.full_name || '';
-  // Handle "Last, First" format or "First Last" format
   const userFirstName = rawName.includes(',')
     ? rawName.split(',')[1]?.trim().split(' ')[0] || rawName.split(' ')[0] || 'Student'
     : rawName.split(' ')[0] || 'Student';
@@ -165,11 +161,38 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           statValues={statValues}
           onOpenChat={onOpenChat}
         />
+        {/* 1. ROTATING STATUS LINE */}
+        <HeroStatusLine
+          pipelineData={pipelineData}
+          newOpportunities={newOpportunities}
+          weeklyStats={weeklyStats}
+          profile={profile}
+        />
+        <div style={{ height: 16 }} />
       </div>
 
       {/* CONTENT */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
-        <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} onAddTargets={() => setShowAddTargets(true)} profile={profile} />
+        {/* 2. WEEKLY BRIEF BANNER */}
+        <WeeklyBriefBanner
+          weeklyStats={weeklyStats}
+          onViewBrief={() => {
+            if (weeklyBriefRef.current) {
+              weeklyBriefRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+        />
+
+        {/* 3. INSIGHT CARD — always-on, priority-ordered */}
+        <InsightCard
+          unmessagedAlumni={unmessagedAlumni}
+          onOpenChat={onOpenChat}
+          onAddTargets={() => setShowAddTargets(true)}
+          profile={profile}
+          pipelineCounts={pipelineCounts}
+        />
+
+        {/* 8. CONSOLIDATED RESUME SECTION */}
         <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
 
         {newOpportunities.length > 0 && (
@@ -185,8 +208,11 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           </div>
         )}
 
+        {/* 4. PIPELINE + NUDGE */}
         <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} />
+        <PipelineNudge pipelineCounts={pipelineCounts} onOpenChat={onOpenChat} />
 
+        {/* 5. TARGET COMPANIES — visual hierarchy handled in TargetCompaniesSection */}
         <TargetCompaniesSection
           companies={targetCompanies}
           companyIntel={companyIntel}
@@ -195,12 +221,16 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onAddTargets={() => setShowAddTargets(true)}
         />
 
-        <BenchmarkCard profile={profile} />
+        {/* 6. COMPETITIVE ELEMENT */}
+        <LeaderboardCard profile={profile} onOpenChat={onOpenChat} />
 
+        {/* 7. QUICK ACTIONS — hover enhancements handled in QuickActionsGrid */}
         <QuickActionsGrid onOpenChat={onOpenChat} />
 
         {weeklyStats && (
-          <WeeklyBriefCard stats={weeklyStats} onOpenChat={onOpenChat} />
+          <div ref={weeklyBriefRef}>
+            <WeeklyBriefCard stats={weeklyStats} onOpenChat={onOpenChat} />
+          </div>
         )}
 
         <div style={{ textAlign: 'center', padding: '40px 0 10px', fontSize: 12, color: '#94A3B8' }}>
@@ -217,7 +247,6 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
             if (onProfileUpdated) {
               onProfileUpdated({ ...profile, target_companies: newCompanies });
             }
-            // P2 FIX: Force data refetch after targets change
             setRefreshKey(prev => prev + 1);
           }}
         />
