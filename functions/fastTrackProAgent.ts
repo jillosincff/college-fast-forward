@@ -387,9 +387,11 @@ function detectNetworkThankYou(message) {
 //  DATA / CACHE HELPERS
 // ═══════════════════════════════════════════════════════════
 
+// P2 FIX: Normalize company name to titleCase before cache lookup
 async function getCachedAlumni(base44, company) {
   try {
-    const cached = await base44.entities.DiscoveredAlumni.filter({ company, school_code: 'UF' });
+    const normalizedCompany = titleCase(company);
+    const cached = await base44.entities.DiscoveredAlumni.filter({ company: normalizedCompany, school_code: 'UF' });
     if (cached?.length > 0) {
       const now = new Date();
       const valid = cached.filter(a => new Date(a.expires_at) > now);
@@ -400,12 +402,13 @@ async function getCachedAlumni(base44, company) {
   return null;
 }
 
+// P2 FIX: Normalize company name on cache write
 async function saveAlumniCache(base44, alumni) {
   const exp = new Date(Date.now() + 24*60*60*1000).toISOString();
   for (const a of alumni) {
     try {
       await base44.asServiceRole.entities.DiscoveredAlumni.create({
-        name: a.name, role_title: a.role_title, company: a.company, school_code: 'UF',
+        name: a.name, role_title: a.role_title, company: titleCase(a.company || ''), school_code: 'UF',
         match_score: a.match_score || 0, degree_info: a.degree_info || '',
         location: a.location || '', linkedin_url: a.linkedin_url || '', expires_at: exp,
       });
@@ -413,9 +416,11 @@ async function saveAlumniCache(base44, alumni) {
   }
 }
 
+// P2 FIX: Normalize company name to titleCase before cache lookup
 async function getCachedCompanyIntel(base44, company) {
   try {
-    const cached = await base44.entities.CompanyIntelCache.filter({ company_name: company });
+    const normalizedCompany = titleCase(company);
+    const cached = await base44.entities.CompanyIntelCache.filter({ company_name: normalizedCompany });
     if (cached?.length > 0 && new Date(cached[0].expires_at) > new Date()) return cached[0];
     // Return expired cache as "previous" for delta comparison, then delete
     if (cached?.length > 0) {
@@ -453,24 +458,32 @@ function buildMemoryContext(previousIntel, newIntel, companyName) {
 }
 
 // Cross-reference alumni against CFF member database
+// P2 FIX: Instead of loading ALL users, we filter by the alumni names we're looking for.
+// This is more targeted and scales better than loading 200 users into memory.
 async function crossReferenceCFF(base44, alumni) {
   if (!alumni || alumni.length === 0) return alumni;
-  // Load CFF parent/alumni members
-  let cffMembers = [];
+  let cffMembers = { parentNames: new Map(), userNames: new Map() };
   try {
-    const [parents, users] = await Promise.all([
-      base44.entities.ParentExpertise.filter({}, '-last_active_at', 200).catch(() => []),
-      base44.asServiceRole.entities.User.list('-created_date', 200).catch(() => []),
-    ]);
-    // Build lookup by name (lowercase)
+    // Load parent expertise (these are already CFF participants, smaller set)
+    const parents = await base44.entities.ParentExpertise.filter({}, '-last_active_at', 200).catch(() => []);
     const parentNames = new Map();
     (parents || []).forEach(p => {
       if (p.parent_name) parentNames.set(p.parent_name.toLowerCase().trim(), { email: p.parent_email, company: p.current_company, role: p.current_role });
     });
+
+    // For users: only search for names that match alumni we found
+    // This avoids loading ALL users into memory
     const userNames = new Map();
-    (users || []).forEach(u => {
-      if (u.full_name) userNames.set(u.full_name.toLowerCase().trim(), { email: u.email, id: u.id });
+    const alumniNames = alumni.map(a => a.name).filter(Boolean);
+    // Batch check: search for each alumni name in users
+    const userSearches = alumniNames.slice(0, 10).map(name =>
+      base44.asServiceRole.entities.User.filter({ full_name: name }).catch(() => [])
+    );
+    const userResults = await Promise.all(userSearches);
+    userResults.flat().forEach(u => {
+      if (u?.full_name) userNames.set(u.full_name.toLowerCase().trim(), { email: u.email, id: u.id });
     });
+
     cffMembers = { parentNames, userNames };
   } catch(e) {
     console.log('CFF cross-reference error:', e.message);
@@ -494,10 +507,11 @@ async function crossReferenceCFF(base44, alumni) {
   });
 }
 
+// P2 FIX: Normalize company name on cache write
 async function saveCompanyIntelCache(base44, company, data) {
   try {
     await base44.asServiceRole.entities.CompanyIntelCache.create({
-      company_name: company, school_code: 'UF',
+      company_name: titleCase(company), school_code: 'UF',
       hiring_score: data.hiring_score || 0, hiring_signal: data.hiring_signal || 'cool',
       intel_summary: data.summary || '', open_roles_count: data.open_roles_count || 0,
       salary_range: data.salary_range || '', expires_at: new Date(Date.now() + 24*60*60*1000).toISOString(),
@@ -505,6 +519,10 @@ async function saveCompanyIntelCache(base44, company, data) {
   } catch(e) {}
 }
 
+// P1 NOTE: Counter increments use read-then-write pattern which has a theoretical race
+// condition if the same student sends multiple concurrent requests. At current scale
+// (single student → single FASTIQ session), this is extremely unlikely. If scale
+// increases, consider atomic increments or a queue-based approach.
 async function trackActivity(base44, email, profileId, actionType, targetName) {
   try {
     await base44.entities.ProActivityLog.create({
@@ -710,12 +728,17 @@ function isAssistantAskingClarification(lastAssistantContent) {
   return patterns.some(p => p.test(lower));
 }
 
-// Check if user message is a short answer (likely replying to a question)
+// P3 FIX: Stricter short answer detection — reduced threshold to 3 words,
+// and exclude messages containing action verbs (those are new commands, not answers).
 function isShortAnswer(message) {
-  const words = message.trim().split(/\s+/);
-  // Short answers: 1-4 words, or "yes/sure/yeah" affirmatives
-  if (words.length <= 4) return true;
-  if (/^(?:yes|yeah|yep|sure|ok|okay|please|definitely|absolutely|do it|go ahead|sounds good)/i.test(message.trim())) return true;
+  const trimmed = message.trim();
+  const words = trimmed.split(/\s+/);
+  // Action verbs indicate a new command, not an answer to a clarifying question
+  const ACTION_VERBS = /\b(?:draft|find|research|review|tailor|prep|prepare|build|create|help|show|scan|check|explore|negotiate|write|compose)\b/i;
+  if (ACTION_VERBS.test(trimmed)) return false;
+  // Short answers: 1-3 words, or bare affirmatives
+  if (words.length <= 3) return true;
+  if (/^(?:yes|yeah|yep|sure|ok|okay|please|definitely|absolutely|do it|go ahead|sounds good)[.!,]?\s*$/i.test(trimmed)) return true;
   return false;
 }
 
@@ -780,7 +803,7 @@ CONTEXT:
 - Original outreach was sent to ${targetName}, ${pipelineRecord?.alumni_role || ''} at ${targetCompanyName} approximately ${daysSince} days ago
 - No reply received yet
 - Student's name: ${user.full_name || 'Gator Student'}
-- Student's major: ${user.major || 'undeclared'}
+- Student's major: ${profile.target_industry || user.major || 'undeclared'}
 ${originalMessage ? `\nORIGINAL MESSAGE:\n${originalMessage}` : ''}
 
 RULES:
@@ -949,18 +972,24 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const message = body.message;
-    const conversation_history = body.conversation_history || '';
+    // P2 FIX: Use DB as single source of truth for conversation history.
+    // Frontend no longer needs to send conversation_history.
     if (!message) return Response.json({ error: 'Message is required' }, { status: 400 });
 
-    // Load recent conversation messages from DB for context tracking
+    // Load recent conversation messages from DB — single source of truth
     let recentDbMessages = [];
     try {
       const dbMessages = await base44.entities.ProAgentConversation.filter(
-        { user_email: user.email }, '-created_date', 6
+        { user_email: user.email }, '-created_date', 8
       );
       // Reverse to chronological order (oldest first)
       recentDbMessages = (dbMessages || []).reverse();
     } catch(e) { console.log('Could not load conversation history:', e.message); }
+
+    // Build conversation_history string from DB messages (replaces frontend-sent history)
+    const conversation_history = recentDbMessages
+      .map(m => `${m.role === 'user' ? 'Student' : 'Agent'}: ${(m.content || '').substring(0, 300)}`)
+      .join('\n\n');
 
     // Load profile
     let profile = {};
@@ -986,10 +1015,14 @@ Deno.serve(async (req) => {
       ? `\n- Stale outreach: ${staleOutreach.map(s => `${s.alumni_name} at ${s.company} (sent ${Math.round((Date.now() - new Date(s.reached_out_date).getTime()) / (1000*60*60*24))} days ago)`).join('; ')}`
       : '';
 
+    // P0 FIX: Read major/graduation_year from User entity first, fallback to profile fields
+    const studentMajor = user.major || profile.target_industry || 'undeclared';
+    const studentGradYear = user.graduation_year || 'unknown';
+
     const profileContext = `STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
-- Major: ${user.major || 'undeclared'}
-- Graduation: ${user.graduation_year || 'unknown'}
+- Major: ${studentMajor}
+- Graduation: ${studentGradYear}
 - Target Industry: ${profile.target_industry || 'not specified'}
 - Target Companies: ${(profile.target_companies || []).join(', ') || 'none set'}
 - Company Size: ${profile.company_size_preference || 'not set'}
@@ -999,9 +1032,11 @@ Deno.serve(async (req) => {
 - Challenge: ${profile.biggest_challenge || 'not set'}
 - Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}`;
 
-    // Detect explicit confirmation responses like "Yes, research X" → bypass Layer 2
+    // P3 FIX: Stricter confirmation detection — must be ONLY a confirmation word(s) with no extra content,
+    // OR an explicit "yes, research X" pattern. "Ok Google" or "Sure, can you also..." won't match.
     const confirmationMatch = message.match(/^(?:yes|yeah|yep|sure|ok|okay|correct|right|go ahead)[,.]?\s*(?:research|look into|check|find|scan)\s+(.+)/i);
-    const isConfirmation = confirmationMatch || /^(?:yes|yeah|yep|sure|ok|okay|correct|right|go ahead|do it|please)[.!,]?\s*$/i.test(message.trim());
+    const isBareSonfirmation = /^(?:yes|yeah|yep|sure|ok|okay|correct|right|go ahead|do it|please|definitely|absolutely)[.!,]?\s*$/i.test(message.trim());
+    const isConfirmation = confirmationMatch || isBareSonfirmation;
     if (isConfirmation) {
       console.log('[Layer2 Bypass] User confirmed — skipping confirmation gate this turn');
     }
@@ -1199,7 +1234,7 @@ Be genuinely encouraging and warm. This student might feel behind — make them 
 
 STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
-- Major: ${user.major || 'undeclared'}, University of Florida, Class of ${user.graduation_year || 'upcoming'}
+- Major: ${studentMajor}, University of Florida, Class of ${studentGradYear}
 - Target industry: ${profile.target_industry || 'not specified'}
 
 MASTER RESUME:
@@ -1296,7 +1331,7 @@ Return as JSON with these exact fields:`,
       const companyMatch = resolvedMessage.match(/(?:interview\s+(?:at|for|with)|prep.*?for)\s+(\w[\w\s&.''-]{1,40})/i);
       const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Prepare this student for an interview.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n${company ? `Company: ${company}` : ''}\n\nResearch the company's interview process. Personalize questions based on the student's major (${user.major || 'their field'}) and target role. Include behavioral, technical, and culture-fit questions.`,
+        prompt: `You are FASTIQ. Prepare this student for an interview.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n${company ? `Company: ${company}` : ''}\n\nResearch the company's interview process. Personalize questions based on the student's major (${studentMajor}) and target role. Include behavioral, technical, and culture-fit questions.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -1389,9 +1424,9 @@ Return as JSON with these exact fields:`,
     // 7.5 BATCH TARGET COMMAND — must be checked BEFORE alumni/company/opportunity detectors
     if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length > 0) {
       console.log('Intent: batch_target_scan for', targetCompanies.join(', '));
-      const major = user.major || 'their field';
+      const major = studentMajor;
       const industry = profile.target_industry || 'any industry';
-      const gradYear = user.graduation_year || 'upcoming';
+      const gradYear = studentGradYear;
 
       // Research all target companies in parallel
       const batchPromises = targetCompanies.map(company =>
@@ -1708,12 +1743,12 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       }
 
       const studentName = user.full_name || 'Gator Student';
-      const studentMajor = user.major || 'undeclared';
-      const gradYear = user.graduation_year || 'upcoming';
+      const outreachMajor = studentMajor;
+      const gradYear = studentGradYear;
       const targetIndustry = profile.target_industry || 'their target industry';
 
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Draft a ${channel} message from ${studentName}, a ${studentMajor} major at the University of Florida (class of ${gradYear}), to ${recipientName}, ${recipientTitle} at ${recipientCompany}.
+        prompt: `Draft a ${channel} message from ${studentName}, a ${outreachMajor} major at the University of Florida (class of ${gradYear}), to ${recipientName}, ${recipientTitle} at ${recipientCompany}.
 
 Context: The student is interested in ${targetIndustry} and chose to reach out to this person because ${recommendationReason || 'they are a fellow UF alum in a role relevant to the student\'s career goals'}.
 
