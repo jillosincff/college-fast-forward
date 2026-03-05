@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 /**
  * "Since your last visit" banner — dismissed per session and stays hidden until next visit.
  */
-export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
+export default function WeeklyBriefBanner({ weeklyStats, onViewBrief, onDismissed }) {
   const STORAGE_KEY = 'fiq_banner_dismissed_at';
   const [dismissed, setDismissed] = useState(false);
 
@@ -17,6 +17,7 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
   const handleDismiss = () => {
     setDismissed(true);
     sessionStorage.setItem(STORAGE_KEY, Date.now().toString());
+    if (onDismissed) onDismissed();
   };
 
   if (dismissed) return null;
