@@ -154,11 +154,16 @@ function LinkStudentFirstView() {
 
 // ── Main parent component ──
 export default function ParentFastIQView({ user }) {
-  const [state, setState] = useState('loading'); // loading | active | upsell | no_student | chat
+  const [state, setState] = useState('loading'); // loading | active | upsell | no_student
   const [studentProfile, setStudentProfile] = useState(null);
   const [studentName, setStudentName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
   const [familyId, setFamilyId] = useState('');
-  const [chatInitialMessage, setChatInitialMessage] = useState('');
+  const [pipelineCounts, setPipelineCounts] = useState({});
+  const [intelCache, setIntelCache] = useState({});
+  const [alumniCounts, setAlumniCounts] = useState({});
+  const [activities, setActivities] = useState([]);
+  const [weeklyStats, setWeeklyStats] = useState({});
 
   useEffect(() => {
     if (!user) return;
@@ -169,7 +174,6 @@ export default function ParentFastIQView({ user }) {
     try {
       // Find family for this parent
       const families = await base44.entities.Family.filter({ primary_parent_id: user.id });
-      // Also check parent_ids array (secondary parent)
       let family = families[0];
       if (!family) {
         const allFamilies = await base44.entities.Family.filter({});
@@ -183,41 +187,42 @@ export default function ParentFastIQView({ user }) {
 
       setFamilyId(family.id);
 
-      // Find student user(s)
-      let studentEmail = family.student_email;
+      // Find student user
+      let sEmail = family.student_email;
+      let sName = '';
       if (family.student_ids?.length > 0) {
         try {
           const students = await base44.entities.User.filter({ id: family.student_ids[0] });
           if (students.length > 0) {
-            studentEmail = students[0].email;
-            // Handle "Last, First M." format from UF
+            sEmail = students[0].email;
             const fullName = students[0].full_name || '';
-            let firstName = '';
             if (fullName.includes(',')) {
-              // "Osinoff, Lindsey M." → "Lindsey"
-              firstName = fullName.split(',')[1]?.trim().split(' ')[0] || '';
+              sName = fullName.split(',')[1]?.trim().split(' ')[0] || '';
             } else {
-              firstName = fullName.split(' ')[0] || '';
+              sName = fullName.split(' ')[0] || '';
             }
-            setStudentName(firstName);
           }
         } catch (e) {
           console.log('Could not fetch student user, using student_email');
         }
       }
 
-      if (!studentEmail) {
+      setStudentName(sName);
+      setStudentEmail(sEmail);
+
+      if (!sEmail) {
         setState('no_student');
         return;
       }
 
       // Check if student has FASTIQ profile
-      const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: studentEmail });
+      const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: sEmail });
       if (profiles.length > 0 && profiles[0].assessment_complete) {
         setStudentProfile(profiles[0]);
+        // Load all supplementary data in parallel
+        loadDashboardData(sEmail, profiles[0]);
         setState('active');
       } else {
-        // Student doesn't have FASTIQ active — show sales page
         setState('upsell');
       }
     } catch (err) {
@@ -226,14 +231,63 @@ export default function ParentFastIQView({ user }) {
     }
   };
 
-  const handleOpenChat = (initialMessage) => {
-    setChatInitialMessage(initialMessage || '');
-    setState('chat');
-  };
+  const loadDashboardData = async (email, profile) => {
+    try {
+      const oneWeekAgo = moment().subtract(7, 'days').toISOString();
 
-  const handleBackFromChat = () => {
-    setChatInitialMessage('');
-    setState('active');
+      // Parallel fetch all data
+      const [pipeline, activityLogs, intelItems, alumniItems] = await Promise.all([
+        base44.entities.NetworkingPipeline.filter({ user_email: email }),
+        base44.entities.ProActivityLog.filter({ user_email: email }, '-timestamp', 10),
+        profile.target_companies?.length > 0
+          ? base44.entities.CompanyIntelCache.filter({})
+          : Promise.resolve([]),
+        profile.target_companies?.length > 0
+          ? base44.entities.DiscoveredAlumni.filter({})
+          : Promise.resolve([]),
+      ]);
+
+      // Pipeline counts
+      const counts = {};
+      pipeline.forEach(p => {
+        const s = p.status || 'identified';
+        counts[s] = (counts[s] || 0) + 1;
+      });
+      setPipelineCounts(counts);
+
+      // Activities
+      setActivities(activityLogs || []);
+
+      // Weekly stats from activity logs
+      const weekLogs = (activityLogs || []).filter(a => {
+        const ts = a.timestamp || a.created_date;
+        return ts && moment(ts).isAfter(oneWeekAgo);
+      });
+      setWeeklyStats({
+        companies: weekLogs.filter(a => a.action_type === 'company_search').length,
+        alumni: weekLogs.filter(a => a.action_type === 'alumni_view').length,
+        messages: weekLogs.filter(a => a.action_type === 'message_draft').length,
+      });
+
+      // Intel cache by company name (lowercase)
+      const ic = {};
+      (intelItems || []).forEach(item => {
+        if (item.company_name) ic[item.company_name.toLowerCase()] = item;
+      });
+      setIntelCache(ic);
+
+      // Alumni counts by company name (lowercase)
+      const ac = {};
+      (alumniItems || []).forEach(item => {
+        if (item.company) {
+          const key = item.company.toLowerCase();
+          ac[key] = (ac[key] || 0) + 1;
+        }
+      });
+      setAlumniCounts(ac);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+    }
   };
 
   if (state === 'loading') {
@@ -244,12 +298,20 @@ export default function ParentFastIQView({ user }) {
     );
   }
 
-  if (state === 'chat') {
-    return <ProAgentChat user={user} profile={studentProfile} initialMessage={chatInitialMessage} onBack={handleBackFromChat} />;
-  }
-
   if (state === 'active') {
-    return <ActiveStudentView studentProfile={studentProfile} studentName={studentName} onOpenChat={handleOpenChat} />;
+    return (
+      <ActiveStudentView
+        studentProfile={studentProfile}
+        studentName={studentName}
+        studentEmail={studentEmail}
+        parentUser={user}
+        pipelineCounts={pipelineCounts}
+        intelCache={intelCache}
+        alumniCounts={alumniCounts}
+        activities={activities}
+        weeklyStats={weeklyStats}
+      />
+    );
   }
 
   if (state === 'upsell') {
