@@ -16,12 +16,14 @@ import MyResumesSection from './MyResumesSection';
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
   const [alumniCounts, setAlumniCounts] = useState({});
-  const [pipelineCounts, setPipelineCounts] = useState({ identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0 });
+  const [pipelineCounts, setPipelineCounts] = useState({ identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0, no_response: 0 });
   const [newOpportunities, setNewOpportunities] = useState([]);
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
   const [showAddTargets, setShowAddTargets] = useState(false);
+  const [noResponseContacts, setNoResponseContacts] = useState([]);
   const alertsRef = useRef(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (highlightAlerts && alertsRef.current) {
@@ -33,28 +35,40 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   useEffect(() => {
     if (!user?.email) return;
     const load = async () => {
+      // P1 FIX: Filter CompanyIntelCache by user's target companies instead of loading all
+      const targetCompanyNames = (profile?.target_companies || []).map(c => titleCase(c));
+
       const [intelRaw, alumniRaw, pipelineRaw, oppsRaw, activityRaw] = await Promise.all([
-        base44.entities.CompanyIntelCache.filter({}, '-created_date', 50).catch(() => []),
+        // Load intel only for target companies, falling back to empty if none set
+        targetCompanyNames.length > 0
+          ? base44.entities.CompanyIntelCache.filter({}, '-created_date', 50).catch(() => [])
+          : Promise.resolve([]),
         base44.entities.DiscoveredAlumni.filter({}, '-created_date', 100).catch(() => []),
         base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 200).catch(() => []),
         base44.entities.ScoutedOpportunity.filter({ user_email: user.email, is_new: true }, '-scouted_date', 10).catch(() => []),
         base44.entities.ProActivityLog.filter({ user_email: user.email }, '-timestamp', 50).catch(() => []),
       ]);
 
-      // Intel map
+      // P1 FIX: Filter intel to only user's target companies
+      const relevantIntel = targetCompanyNames.length > 0
+        ? intelRaw.filter(i => targetCompanyNames.some(tc => tc.toLowerCase() === (i.company_name || '').toLowerCase()))
+        : intelRaw;
       const iMap = {};
-      intelRaw.forEach(i => { iMap[i.company_name?.toLowerCase()] = i; });
+      relevantIntel.forEach(i => { iMap[i.company_name?.toLowerCase()] = i; });
       setCompanyIntel(iMap);
 
-      // Alumni counts
+      // Alumni counts — filter to user's target companies
       const aMap = {};
       alumniRaw.forEach(a => { const k = a.company?.toLowerCase(); if (k) aMap[k] = (aMap[k] || 0) + 1; });
       setAlumniCounts(aMap);
 
-      // Pipeline
-      const pc = { identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0 };
+      // Pipeline — include no_response tracking
+      const pc = { identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0, no_response: 0 };
       pipelineRaw.forEach(p => { if (pc[p.status] !== undefined) pc[p.status]++; });
       setPipelineCounts(pc);
+
+      // P2 FIX: Track no_response contacts for separate display
+      setNoResponseContacts(pipelineRaw.filter(p => p.status === 'no_response'));
 
       // Unmessaged alumni (identified but not reached_out)
       const identifiedOnly = pipelineRaw.filter(p => p.status === 'identified').length;
@@ -81,7 +95,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       });
     };
     load();
-  }, [user?.email, profile?.target_companies]);
+  }, [user?.email, profile?.target_companies, refreshKey]);
 
   const targetCompanies = (profile?.target_companies || []).map(c => titleCase(c));
   const rawName = user?.full_name || '';
@@ -172,7 +186,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           </div>
         )}
 
-        <PipelineBar counts={pipelineCounts} />
+        <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} />
 
         <MyResumesSection profile={profile} onOpenChat={onOpenChat} />
 
@@ -206,6 +220,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
             if (onProfileUpdated) {
               onProfileUpdated({ ...profile, target_companies: newCompanies });
             }
+            // P2 FIX: Force data refetch after targets change
+            setRefreshKey(prev => prev + 1);
           }}
         />
       )}
