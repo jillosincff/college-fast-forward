@@ -412,9 +412,15 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                       {msg.role === 'user' ? (
                         <p className="text-sm leading-relaxed text-white">{msg.content}</p>
                       ) : (
-                        <div className="prose prose-sm prose-slate max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
-                        </div>
+                        <>
+                          <div className="prose prose-sm prose-slate max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
+                          </div>
+                          {/* Inline suggestion buttons parsed from text */}
+                          {(!msg.message_type || msg.message_type === 'text') && (
+                            <InlineSuggestionButtons text={msg.content} onSendMessage={sendMessage} />
+                          )}
+                        </>
                       )}
                     </div>
                     {/* Rich Card below the text bubble */}
