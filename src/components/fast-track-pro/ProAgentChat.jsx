@@ -25,6 +25,7 @@ import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
 import FollowUpNudgeBanner from '@/components/fastiq/FollowUpNudgeBanner';
+import InlineSuggestionButtons from './InlineSuggestionButtons';
 
 function getSuggestedPrompts(profile) {
   const hasTargets = (profile?.target_companies || []).length > 0;
@@ -81,18 +82,8 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'career_advice': {
       const actions = payload?.suggested_actions || payload?.suggested_next_steps || payload?.next_steps || [];
       return actions.length > 0 ? (
-        <div className="mt-2 space-y-1.5">
-          {actions.map((a, i) => {
-            const text = String(a).replace(/^→\s*/, '').trim();
-            return (
-              <button key={i} onClick={() => onSendMessage(text)}
-                className="w-full flex items-start gap-2 bg-white/80 rounded-lg px-3 py-2.5 border border-blue-100 text-left cursor-pointer hover:bg-blue-50 hover:border-[#0021A5]/30 active:bg-blue-100 transition-all group"
-                style={{ minHeight: 'auto', minWidth: 'auto' }}>
-                <span className="w-3.5 h-3.5 text-[#0021A5] mt-0.5 flex-shrink-0 group-hover:translate-x-0.5 transition-transform">→</span>
-                <span className="text-xs text-slate-700 font-medium group-hover:text-[#0021A5] transition-colors">{text}</span>
-              </button>
-            );
-          })}
+        <div className="mt-2">
+          <SuggestedActions actions={actions} onSendMessage={onSendMessage} accentColor="#0021A5" label="Suggested Actions" />
         </div>
       ) : null;
     }
