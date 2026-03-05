@@ -9,6 +9,7 @@ import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import ResumeUploadStep from './ResumeUploadStep';
 import ResumeBuilderStep from './ResumeBuilderStep';
+import { toast } from 'sonner';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
@@ -134,71 +135,83 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
 
   const handleFinish = async (resumeText, parsedData) => {
     setSaving(true);
-    const profileData = {
-      target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
-      target_industry: data.target_industry.join(', '),
-      career_timeline: data.career_timeline,
-      biggest_challenge: data.biggest_challenge,
-      current_stage: data.current_stage,
-      assessment_complete: true,
-    };
-    if (explorerMode) {
-      profileData.company_size_preference = companySizePref;
-      profileData.location_preference = locationPref;
-    } else {
-      profileData.company_size_preference = '';
-      profileData.location_preference = '';
-    }
-    // Save resume if provided (resumeText === null means skip)
-    if (resumeText) {
-      profileData.resume_text = resumeText;
-    }
+    try {
+      const profileData = {
+        target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
+        target_industry: data.target_industry.join(', '),
+        career_timeline: data.career_timeline,
+        biggest_challenge: data.biggest_challenge,
+        current_stage: data.current_stage,
+        assessment_complete: true,
+      };
+      if (explorerMode) {
+        profileData.company_size_preference = companySizePref;
+        profileData.location_preference = locationPref;
+      } else {
+        profileData.company_size_preference = '';
+        profileData.location_preference = '';
+      }
+      // Save resume if provided (resumeText === null means skip)
+      if (resumeText) {
+        profileData.resume_text = resumeText;
+      }
 
-    let profile;
-    if (existingProfile?.id) {
-      await base44.entities.FastTrackProProfile.update(existingProfile.id, profileData);
-      profile = { ...existingProfile, ...profileData };
-    } else {
-      profile = await base44.entities.FastTrackProProfile.create({
-        user_email: user.email,
-        pro_tier: 'free_trial',
-        ...profileData,
-      });
+      let profile;
+      if (existingProfile?.id) {
+        await base44.entities.FastTrackProProfile.update(existingProfile.id, profileData);
+        profile = { ...existingProfile, ...profileData };
+      } else {
+        profile = await base44.entities.FastTrackProProfile.create({
+          user_email: user.email,
+          pro_tier: 'free_trial',
+          ...profileData,
+        });
+      }
+      setSaving(false);
+      onComplete(profile);
+    } catch (err) {
+      console.error('Assessment save failed:', err);
+      setSaving(false);
+      toast.error('Something went wrong saving your profile. Please try again.');
     }
-    setSaving(false);
-    onComplete(profile);
   };
 
   const handleStartBuilderAndFinish = async () => {
     // Save profile without resume, then navigate to chat with resume builder
     setSaving(true);
-    const profileData = {
-      target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
-      target_industry: data.target_industry.join(', '),
-      career_timeline: data.career_timeline,
-      biggest_challenge: data.biggest_challenge,
-      current_stage: data.current_stage,
-      assessment_complete: true,
-    };
-    if (explorerMode) {
-      profileData.company_size_preference = companySizePref;
-      profileData.location_preference = locationPref;
-    }
+    try {
+      const profileData = {
+        target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
+        target_industry: data.target_industry.join(', '),
+        career_timeline: data.career_timeline,
+        biggest_challenge: data.biggest_challenge,
+        current_stage: data.current_stage,
+        assessment_complete: true,
+      };
+      if (explorerMode) {
+        profileData.company_size_preference = companySizePref;
+        profileData.location_preference = locationPref;
+      }
 
-    let profile;
-    if (existingProfile?.id) {
-      await base44.entities.FastTrackProProfile.update(existingProfile.id, profileData);
-      profile = { ...existingProfile, ...profileData };
-    } else {
-      profile = await base44.entities.FastTrackProProfile.create({
-        user_email: user.email,
-        pro_tier: 'free_trial',
-        ...profileData,
-      });
+      let profile;
+      if (existingProfile?.id) {
+        await base44.entities.FastTrackProProfile.update(existingProfile.id, profileData);
+        profile = { ...existingProfile, ...profileData };
+      } else {
+        profile = await base44.entities.FastTrackProProfile.create({
+          user_email: user.email,
+          pro_tier: 'free_trial',
+          ...profileData,
+        });
+      }
+      setSaving(false);
+      // Navigate to chat with resume builder opener
+      onComplete(profile, 'Help me build a resume');
+    } catch (err) {
+      console.error('Assessment save failed:', err);
+      setSaving(false);
+      toast.error('Something went wrong saving your profile. Please try again.');
     }
-    setSaving(false);
-    // Navigate to chat with resume builder opener
-    onComplete(profile, 'Help me build a resume');
   };
 
   const handleResumeReady = (resumeText, parsedData) => {

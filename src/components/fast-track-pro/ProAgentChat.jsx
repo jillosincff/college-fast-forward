@@ -191,14 +191,18 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     setInput('');
     setIsLoading(true);
 
-    // Persist user message for context tracking
-    persistMessage('user', text, 'text');
+    // P0 FIX: Await persist so backend has the message in DB when it reads history
+    await persistMessage('user', text, 'text');
 
     try {
+      // Detect batch operations for longer timeout
+      const isBatchOp = /(?:my|all|each|every)\s+(?:target\s+)?companies|(?:scan|research|check)\s+(?:\w+\s+){0,4}(?:my|all)\s+targets/i.test(text);
+      const timeoutMs = isBatchOp ? 120000 : 90000;
+
       const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 45000)
+        setTimeout(() => reject(new Error('timeout')), timeoutMs)
       );
-      // P2 FIX: No longer sending conversation_history — backend reads from DB
+      // Send current message text as fallback context for the backend
       const call = fastTrackProAgent({
         message: text,
       });
@@ -223,7 +227,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       }
     } catch (err) {
       const errorMsg = err.message === 'timeout'
-        ? 'Research is taking longer than expected. Try asking about a specific company or topic.'
+        ? "This is taking longer than expected — FASTIQ is doing deep research. You can wait or come back and I'll have results ready."
         : 'Something went wrong. Please try again.';
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -456,7 +460,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                 <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-[#0021A5] animate-spin" />
-                    <span className="text-sm text-slate-500">FASTIQ is researching...</span>
+                    <span className="text-sm text-slate-500">FASTIQ is researching — this may take a moment...</span>
                   </div>
                 </div>
               </motion.div>

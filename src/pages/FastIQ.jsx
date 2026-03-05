@@ -19,9 +19,11 @@ export default function FastIQ() {
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const highlightAlerts = urlParams.get('view') === 'alerts';
 
-  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  // P0 FIX: Only compute isParent when user is confirmed loaded (not undefined)
+  const isParent = user ? (user.persona === 'parent' || user.roles?.includes('parent')) : false;
 
   useEffect(() => {
+    if (user === undefined) return; // Auth still loading
     if (!user) { setLoading(false); return; }
     if (isParent) { setLoading(false); return; }
     loadProfile();
@@ -59,6 +61,15 @@ export default function FastIQ() {
     setView('dashboard');
     loadProfile();
   };
+
+  // P0 FIX: Show loading while auth is resolving (user === undefined)
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
+        <Loader2 className="w-7 h-7 text-orange-400 animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
