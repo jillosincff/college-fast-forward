@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const PRIMARY_ACTIONS = [
   { icon: '🔍', label: 'Scan for Insiders', color: '#0021A5', prompt: 'Find UF alumni at my target companies' },
   { icon: '✉️', label: 'Draft Outreach', color: '#FA4616', prompt: 'Draft an outreach message' },
-  { icon: '📄', label: 'Resume Review & Tailor', color: '#EAB308', prompt: 'Review my resume' },
+  { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major' },
   { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview' },
 ];
 
@@ -11,7 +11,7 @@ const MORE_ACTIONS = [
   { icon: '🗺️', label: 'Career Plan', color: '#10B981', prompt: 'Build my career action plan' },
   { icon: '💰', label: 'Salary Intel', color: '#10B981', prompt: 'Help me negotiate salary' },
   { icon: '🔗', label: 'LinkedIn Review', color: '#0077B5', prompt: 'Review my LinkedIn profile' },
-  { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major' },
+  { icon: '📝', label: 'Cover Letter', color: '#8B5CF6', prompt: 'Write a cover letter for me' },
 ];
 
 function ActionCard({ action, onOpenChat }) {

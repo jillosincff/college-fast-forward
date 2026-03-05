@@ -10,8 +10,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
 import BenchmarkCard from './BenchmarkCard';
-import MasterResumeCard from './MasterResumeCard';
-import MyResumesSection from './MyResumesSection';
+import MyResumeSection from './MyResumeSection';
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
@@ -170,8 +169,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
       {/* CONTENT */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
-        <MasterResumeCard profile={profile} onOpenChat={onOpenChat} />
         <InsightCard unmessagedAlumni={unmessagedAlumni} onOpenChat={onOpenChat} onAddTargets={() => setShowAddTargets(true)} profile={profile} />
+        <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
 
         {newOpportunities.length > 0 && (
           <div ref={alertsRef} className="fiq-animate fiq-delay-3">
@@ -187,8 +186,6 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         )}
 
         <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} />
-
-        <MyResumesSection profile={profile} onOpenChat={onOpenChat} />
 
         <TargetCompaniesSection
           companies={targetCompanies}
