@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Zap, Loader2, Users, Building2, MessageSquare, Map, UserPlus, Sparkles, ArrowRight } from 'lucide-react';
+import { Zap, Loader2, UserPlus, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
-import AnimatedCounter from './AnimatedCounter';
-import ProAgentChat from '../fast-track-pro/ProAgentChat';
 import ParentFastIQSalesPage from './ParentFastIQSalesPage';
+import ParentProgressRings from '../fastiq/parent/ParentProgressRings';
+import ParentPipelineSummary from '../fastiq/parent/ParentPipelineSummary';
+import ParentTargetCompanies from '../fastiq/parent/ParentTargetCompanies';
+import ParentActivityFeed from '../fastiq/parent/ParentActivityFeed';
+import ParentWeeklySummary from '../fastiq/parent/ParentWeeklySummary';
+import ParentNudgeButton from '../fastiq/parent/ParentNudgeButton';
+import moment from 'moment';
 
 const fade = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
 
