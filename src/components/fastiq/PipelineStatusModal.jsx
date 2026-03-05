@@ -24,9 +24,9 @@ const CELEBRATIONS = {
     color: '#F59E0B',
     bg: 'linear-gradient(135deg, #FFFBEB, #FEF3C7)',
     border: '#FDE68A',
-    title: 'Interview scheduled!',
-    subtitle: 'Let\'s get you ready.',
-    prompt: 'Tell me a bit about the role or what they mentioned, and I\'ll prep you.',
+    title: 'Interview at {company}! That\'s huge.',
+    subtitle: 'Want me to prep you for this interview?',
+    prompt: 'Tell me a bit about the role or what they mentioned, and I\'ll prep you with company intel, likely questions, and culture notes.',
     ctaText: 'Prep me for this interview →',
     buildPrompt: (name, company, details) =>
       `I have an interview coming up at ${company}${name ? ` (through ${name})` : ''}. ${details ? `Here's what I know: ${details}` : ''} Help me prepare — company intel, likely questions, culture notes, everything.`,
@@ -37,10 +37,10 @@ const CELEBRATIONS = {
     color: '#EAB308',
     bg: 'linear-gradient(135deg, #FEF9C3, #FDE68A)',
     border: '#FCD34D',
-    title: 'Congratulations — you got an offer!',
-    subtitle: 'Before you accept, let\'s make sure you\'re getting the best deal.',
-    prompt: 'Share the role details and I\'ll research salary ranges and help you negotiate.',
-    ctaText: 'Help me negotiate →',
+    title: '🎉🎉🎉 CONGRATULATIONS!',
+    subtitle: 'You got an offer from {company}! All your hard work paid off.',
+    prompt: 'Before you accept, let me help you make sure you\'re getting the best deal. Tell me: role title, base salary, bonus, equity (if any), location, start date, and any other benefits they mentioned.',
+    ctaText: 'Help me evaluate this offer →',
     buildPrompt: (name, company, details) =>
       `I just got an offer from ${company}! ${details ? `Details: ${details}` : ''} Help me research the salary range for this role and prepare a negotiation strategy.`,
   },
@@ -95,8 +95,8 @@ export default function PipelineStatusModal({ newStatus, contact, onClose, onSen
             </div>
           )}
 
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1E293B', marginBottom: 4 }}>{cfg.title}</h2>
-          <p style={{ fontSize: 14, color: '#64748B', fontWeight: 500 }}>{cfg.subtitle}</p>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1E293B', marginBottom: 4 }}>{cfg.title.replace('{company}', contact?.company || 'the company')}</h2>
+          <p style={{ fontSize: 14, color: '#64748B', fontWeight: 500 }}>{cfg.subtitle.replace('{company}', contact?.company || 'the company')}</p>
         </div>
 
         {/* Input area */}
