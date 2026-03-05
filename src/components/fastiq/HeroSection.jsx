@@ -69,6 +69,8 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500, marginTop: 4 }}>
             {subtitle || 'UF · Your intelligent networking engine'}
           </p>
+          {/* Inline rotating status line */}
+          <HeroStatusLineInline lines={statusLines} />
         </div>
 
         {/* Progress Rings */}
