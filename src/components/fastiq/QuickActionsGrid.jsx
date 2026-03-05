@@ -1,39 +1,37 @@
 import React, { useState } from 'react';
 
 const PRIMARY_ACTIONS = [
-  { icon: '🔍', label: 'Scan for Insiders', color: '#0021A5', prompt: 'Find UF alumni at my target companies' },
-  { icon: '✉️', label: 'Draft Outreach', color: '#FA4616', prompt: 'Draft an outreach message' },
-  { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major' },
-  { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview' },
+  { icon: '🔍', label: 'Scan for Insiders', color: '#0021A5', prompt: 'Find UF alumni at my target companies', preview: 'Find UF alumni at your targets' },
+  { icon: '✉️', label: 'Draft Outreach', color: '#FA4616', prompt: 'Draft an outreach message', preview: 'AI-drafted personalized message' },
+  { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major', preview: 'Discover roles that fit your major' },
+  { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview', preview: 'Company-specific mock questions' },
 ];
 
 const MORE_ACTIONS = [
-  { icon: '🗺️', label: 'Career Plan', color: '#10B981', prompt: 'Build my career action plan' },
-  { icon: '💰', label: 'Salary Intel', color: '#10B981', prompt: 'Help me negotiate salary' },
-  { icon: '🔗', label: 'LinkedIn Review', color: '#0077B5', prompt: 'Review my LinkedIn profile' },
-  { icon: '📝', label: 'Cover Letter', color: '#8B5CF6', prompt: 'Write a cover letter for me' },
+  { icon: '🗺️', label: 'Career Plan', color: '#10B981', prompt: 'Build my career action plan', preview: 'Week-by-week action roadmap' },
+  { icon: '💰', label: 'Salary Intel', color: '#10B981', prompt: 'Help me negotiate salary', preview: 'Market data + negotiation script' },
+  { icon: '🔗', label: 'LinkedIn Review', color: '#0077B5', prompt: 'Review my LinkedIn profile', preview: 'Score and optimize your profile' },
+  { icon: '📝', label: 'Cover Letter', color: '#8B5CF6', prompt: 'Write a cover letter for me', preview: 'Tailored letter for any role' },
 ];
 
 function ActionCard({ action, onOpenChat }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <div
       onClick={() => onOpenChat(action.prompt)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         padding: '20px 12px', background: '#fff', borderRadius: 14,
-        border: '1px solid #E2E8F0', textAlign: 'center', cursor: 'pointer',
+        border: `1px solid ${hovered ? action.color : '#E2E8F0'}`,
+        borderTop: `3px solid ${hovered ? action.color : '#E2E8F0'}`,
+        textAlign: 'center', cursor: 'pointer',
         transition: 'all 0.25s',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = action.color;
-        e.currentTarget.style.borderWidth = '2px';
-        e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.boxShadow = `0 6px 20px ${action.color}30`;
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#E2E8F0';
-        e.currentTarget.style.borderWidth = '1px';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
+        boxShadow: hovered ? `0 6px 20px ${action.color}25` : 'none',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div style={{
@@ -43,6 +41,16 @@ function ActionCard({ action, onOpenChat }) {
         margin: '0 auto 10px', fontSize: 22,
       }}>{action.icon}</div>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{action.label}</div>
+      {/* 7. HOVER PREVIEW */}
+      <div style={{
+        fontSize: 10, color: '#94A3B8', marginTop: 4,
+        height: hovered ? 16 : 0,
+        opacity: hovered ? 1 : 0,
+        transition: 'all 0.25s',
+        overflow: 'hidden',
+      }}>
+        {action.preview}
+      </div>
     </div>
   );
 }
