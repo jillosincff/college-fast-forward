@@ -297,6 +297,10 @@ function detectResumeTailor(message) {
 }
 
 function detectInterviewPrep(message) {
+  // Skip if this is a thank-you note request or post-interview reflection
+  if (/(?:thank.?you|thanks)\s+(?:note|email|message)/i.test(message)) return false;
+  if (/(?:i had|just had|finished|completed|done with)\s+(?:my|the|an)\s+interview/i.test(message)) return false;
+  if (/post.interview/i.test(message)) return false;
   return /(?:prep|prepare)\s+(?:me\s+)?(?:for\s+)?(?:an?\s+)?interview/i.test(message) ||
     /interview\s+(?:questions?|prep|tips|practice|at|for)/i.test(message) ||
     /(?:what will they ask|mock interview|behavioral questions)/i.test(message) ||
