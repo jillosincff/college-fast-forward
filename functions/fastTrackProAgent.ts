@@ -586,80 +586,23 @@ function titleCase(str) {
   return lower.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// Generate contextual guidance after showing alumni results
-// Returns { guidance, top_match, recommendation_reason }
 async function generateAlumniGuidance(base44, alumni, company, profileContext) {
   try {
-    const alumniSummary = alumni.slice(0, 5).map(a =>
-      `- ${a.name}: ${a.role_title} (score: ${a.match_score}%, CFF: ${a.is_cff_member ? 'yes' : 'no'})`
-    ).join('\n');
+    const alumniSummary = alumni.slice(0, 5).map(a => `- ${a.name}: ${a.role_title} (score: ${a.match_score}%, CFF: ${a.is_cff_member ? 'yes' : 'no'})`).join('\n');
     const cffCount = alumni.filter(a => a.is_cff_member).length;
-
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are FASTIQ. You just found these UF alumni at ${company} for a student. Write a SHORT personalized analysis (3-5 sentences) about WHO to reach out to first and WHY.
-
-${profileContext}
-
-ALUMNI FOUND:
-${alumniSummary}
-CFF Members: ${cffCount}
-
-INSTRUCTIONS:
-1. Note the pattern in roles (e.g. "These are mostly senior engineering roles" or "Good mix of levels")
-2. Recommend ONE specific person to reach out to FIRST, using their FIRST NAME only. Explain why (e.g. seniority for referrals, CFF member for easy contact, similar background, their role bridges the student's major with the company)
-3. If there are CFF members, highlight that they can be messaged directly on the platform
-4. End with a specific prompt like "Want me to draft that message?" or "Want me to draft a warm intro to [first name]?"
-5. CRITICAL: In recommended_full_name, return the FULL NAME (exactly as it appears in the alumni list) of the person you recommend. In recommendation_reason, explain the SPECIFIC strategic reason — e.g. "As a Marketing student, Jessica's role as Hardware Engineering Manager gives you a unique angle to ask how marketing and engineering teams collaborate at Apple."
-
-Be warm, strategic, and direct. Use first names only in the guidance text. Max 4 sentences.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          guidance: { type: "string" },
-          recommended_full_name: { type: "string", description: "The EXACT full name of the recommended person from the alumni list" },
-          recommendation_reason: { type: "string", description: "The specific strategic reason for recommending this person, referencing the student's background and the alumni's role" }
-        },
-        required: ["guidance", "recommended_full_name", "recommendation_reason"]
-      }
+      prompt: `You are FASTIQ. Found UF alumni at ${company}. Write SHORT analysis (3-5 sentences) about WHO to reach out to first and WHY.\n\n${profileContext}\n\nALUMNI:\n${alumniSummary}\nCFF Members: ${cffCount}\n\n1. Note role patterns 2. Recommend ONE person FIRST (first name only), explain why 3. Highlight CFF members 4. End with "Want me to draft that message?" 5. In recommended_full_name return EXACT full name. In recommendation_reason explain strategic reason.`,
+      response_json_schema: { type: "object", properties: { guidance: { type: "string" }, recommended_full_name: { type: "string" }, recommendation_reason: { type: "string" } }, required: ["guidance", "recommended_full_name", "recommendation_reason"] }
     });
-
-    const topMatch = result.recommended_full_name || '';
-    const reason = result.recommendation_reason || '';
-
-    // Validate recommended name exists in alumni list
-    let validatedTopMatch = topMatch;
-    if (topMatch) {
-      const found = alumni.find(a => a.name?.toLowerCase() === topMatch.toLowerCase());
-      if (!found) {
-        // Fuzzy match: check if first name matches
-        const firstName = topMatch.split(' ')[0].toLowerCase();
-        const fuzzy = alumni.find(a => a.name?.toLowerCase().startsWith(firstName));
-        validatedTopMatch = fuzzy ? fuzzy.name : '';
-      }
-    }
-
-    // Fallback to highest match_score if no valid recommendation
-    if (!validatedTopMatch && alumni.length > 0) {
-      const sorted = [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-      validatedTopMatch = sorted[0].name;
-    }
-
-    return {
-      guidance: result.guidance || `Here are UF alumni I found at ${company}:`,
-      top_match: validatedTopMatch,
-      recommendation_reason: reason
-    };
+    let topMatch = result.recommended_full_name || '';
+    if (topMatch) { const found = alumni.find(a => a.name?.toLowerCase() === topMatch.toLowerCase()); if (!found) { const fn = topMatch.split(' ')[0].toLowerCase(); const fuzzy = alumni.find(a => a.name?.toLowerCase().startsWith(fn)); topMatch = fuzzy ? fuzzy.name : ''; } }
+    if (!topMatch && alumni.length > 0) topMatch = [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0))[0].name;
+    return { guidance: result.guidance || `Here are UF alumni I found at ${company}:`, top_match: topMatch, recommendation_reason: result.recommendation_reason || '' };
   } catch (e) {
-    console.log('Alumni guidance generation error:', e.message);
     const cffCount = alumni.filter(a => a.is_cff_member).length;
-    const cffNote = cffCount > 0 ? ` ${cffCount} of them ${cffCount === 1 ? 'is a' : 'are'} CFF member${cffCount === 1 ? '' : 's'} — you can message them directly on CFF!` : '';
-    // Fallback top_match to highest score
+    const cffNote = cffCount > 0 ? ` ${cffCount} are CFF members — message them directly!` : '';
     const fallbackTop = alumni.length > 0 ? [...alumni].sort((a, b) => (b.match_score || 0) - (a.match_score || 0))[0].name : '';
-    return {
-      guidance: `Here are UF alumni I found at ${company}:` + cffNote,
-      top_match: fallbackTop,
-      recommendation_reason: ''
-    };
+    return { guidance: `Here are UF alumni I found at ${company}:` + cffNote, top_match: fallbackTop, recommendation_reason: '' };
   }
 }
 
