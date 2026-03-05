@@ -861,6 +861,70 @@ async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineD
 }
 
 // ═══════════════════════════════════════════════════════════
+//  THANK-YOU NOTE HANDLER
+// ═══════════════════════════════════════════════════════════
+
+async function handleThankYouNote(base44, user, profile, resolvedMessage, pipelineData, targetCompanies, profileContext) {
+  console.log('Intent: thank_you_note');
+  const companyMatch = resolvedMessage.match(/(?:at|for|with)\s+(\w[\w\s&.''-]{1,40})/i);
+  const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
+  const hasDetails = resolvedMessage.length > 80 || /interviewed\s+(?:me|with|by)/i.test(resolvedMessage) || /talked about|discussed|mentioned|specific/i.test(resolvedMessage);
+  if (!hasDetails) {
+    return Response.json({ success: true, response: `I'd love to help you write a killer thank-you note! 📝 Tell me:\n\n- **Who interviewed you?** (name and title if you know it)\n- **What did you talk about?** Any specific topics, projects, or questions they asked?\n- **Anything you wish you had said** or want to emphasize?\n- **When did they say they'd get back to you?**\n\nThe more detail you give me, the more personal — and effective — the note will be.`, message_type: 'text', payload: {} });
+  }
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are FASTIQ. Draft a professional thank-you email after an interview.\n\n${profileContext}\n\nRequest/details: "${resolvedMessage}"\nCompany: ${company}\nStudent name: ${user.full_name || 'Gator Student'}\n\nRULES:\n1. Send within 24 hours of the interview\n2. Reference ONE specific thing discussed (personal, not templated)\n3. Briefly reinforce why the student is a strong fit\n4. Express genuine enthusiasm for the team/project/company\n5. Keep under 150 words\n6. Professional but warm tone\n7. Include subject line\n8. Sign with full name\n\nIf multiple interviewers are mentioned, create a separate draft for each referencing something DIFFERENT.`,
+    response_json_schema: { type: "object", properties: { response: { type: "string" }, drafts: { type: "array", items: { type: "object", properties: { recipient: { type: "string" }, recipient_title: { type: "string" }, subject: { type: "string" }, message: { type: "string" } }, required: ["recipient","subject","message"] } }, multiple_interviewers_detected: { type: "boolean" }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response","drafts"] }
+  });
+  trackActivity(base44, user.email, profile.id, 'message_draft', company);
+  return Response.json({ success: true, response: result.response || `Here's your thank-you note:`, message_type: 'thank_you_note', payload: { drafts: result.drafts || [], ask_about_others: !result.multiple_interviewers_detected, company, suggested_actions: result.suggested_actions || ['Set a reminder to follow up if you don\'t hear back in a week'] } });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OFFER NEGOTIATION HANDLER
+// ═══════════════════════════════════════════════════════════
+
+async function handleOfferNegotiation(base44, user, profile, resolvedMessage, pipelineData, targetCompanies, profileContext) {
+  console.log('Intent: offer_negotiation');
+  const companyMatch = resolvedMessage.match(/(?:offer\s+from|at|with)\s+(\w[\w\s&.''-]{1,40})/i);
+  const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
+  const hasOfferDetails = /\$[\d,]+|salary|base|bonus|equity|stock|start date|benefits/i.test(resolvedMessage);
+  const offerPipeline = pipelineData.find(p => company && p.company?.toLowerCase().includes(company.toLowerCase()));
+  if (offerPipeline?.id) {
+    base44.entities.NetworkingPipeline.update(offerPipeline.id, { status: 'offer', offer_date: new Date().toISOString(), status_date: new Date().toISOString() }).catch(() => {});
+  }
+  if (!hasOfferDetails) {
+    return Response.json({ success: true, response: `🎉🎉🎉 **CONGRATULATIONS!** You got an offer from **${company || 'them'}**! All your hard work paid off.\n\nBefore you accept, let me help you make sure you're getting the best deal. Tell me:\n\n- **Role title**\n- **Base salary**\n- **Bonus** (if any)\n- **Equity/stock** (if any)\n- **Location**\n- **Start date**\n- **Any other benefits** they mentioned\n\nI'll research how this compares to market rates and help you negotiate.`, message_type: 'text', payload: {} });
+  }
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are FASTIQ. A student received a job offer with details. Analyze and help negotiate.\n\n${profileContext}\n\nOFFER DETAILS: "${resolvedMessage}"\nCompany: ${company || 'the company'}\n\nINSTRUCTIONS:\n1. Research salary benchmarks for this role at this company in this location\n2. Determine if above, at, or below market median\n3. If BELOW: provide strong negotiation script with specific dollar amounts\n4. If AT: acknowledge solid, suggest negotiating signing bonus/start date/remote\n5. If ABOVE: celebrate, suggest asking about equity vesting/review timeline/dev budget\n6. Provide complete email negotiation script with specific language\n7. List items to negotiate beyond salary\n8. Include timeline advice`,
+    add_context_from_internet: true,
+    response_json_schema: { type: "object", properties: { response: { type: "string" }, company: { type: "string" }, role: { type: "string" }, location: { type: "string" }, base_salary: { type: "string" }, total_comp: { type: "string" }, market_median: { type: "string" }, market_comparison: { type: "string", enum: ["above_market","at_market","below_market"] }, market_analysis: { type: "string" }, negotiation_advice: { type: "string" }, negotiation_script: { type: "string" }, beyond_salary: { type: "array", items: { type: "string" } }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response","market_comparison","negotiation_script"] }
+  });
+  return Response.json({ success: true, response: result.response || "🎉 Here's your offer analysis:", message_type: 'offer_celebration', payload: { company: result.company || company, role: result.role || '', location: result.location || '', base_salary: result.base_salary || '', total_comp: result.total_comp || '', market_median: result.market_median || '', market_comparison: result.market_comparison || 'at_market', market_analysis: result.market_analysis || '', negotiation_advice: result.negotiation_advice || '', negotiation_script: result.negotiation_script || '', beyond_salary: result.beyond_salary || [], suggested_actions: result.suggested_actions || ['Thank your network — the people who helped you deserve to know!', 'Set a reminder to respond within the timeline'] } });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NETWORK THANK-YOU HANDLER
+// ═══════════════════════════════════════════════════════════
+
+async function handleNetworkThankYou(base44, user, profile, resolvedMessage, pipelineData, profileContext) {
+  console.log('Intent: network_thank_you');
+  const helpfulContacts = pipelineData.filter(p => ['replied','interview','offer'].includes(p.status));
+  if (helpfulContacts.length === 0) {
+    return Response.json({ success: true, response: "It looks like you don't have any alumni contacts who replied or helped you in your pipeline yet. Once you start getting responses, I can help you draft personalized thank-you messages!", message_type: 'career_advice', payload: { suggested_actions: ['Research a target company', 'Find UF alumni at your dream companies'] } });
+  }
+  const offerCompany = pipelineData.find(p => p.status === 'offer')?.company || '';
+  const contactsList = helpfulContacts.map(c => `- ${c.alumni_name} at ${c.company} (status: ${c.status}, notes: ${(c.notes || '').substring(0,200)})`).join('\n');
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are FASTIQ. Draft personalized thank-you messages for the student's network.\n\n${profileContext}\n\n${offerCompany ? `ACCEPTED OFFER AT: ${offerCompany}` : ''}\n\nCONTACTS WHO HELPED:\n${contactsList}\n\nFor EACH contact:\n1. Start with "Hi [First Name],"\n2. If student accepted an offer, share the news\n3. Reference something SPECIFIC from their interaction\n4. Thank genuinely for their specific help\n5. Mention being a fellow Gator\n6. Keep 3-4 sentences max\n7. Sign with student's first name\n8. Make each DIFFERENT — not templated`,
+    response_json_schema: { type: "object", properties: { response: { type: "string" }, contacts: { type: "array", items: { type: "object", properties: { name: { type: "string" }, company: { type: "string" }, status: { type: "string" }, message: { type: "string" } }, required: ["name","company","message"] } }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response","contacts"] }
+  });
+  trackActivity(base44, user.email, profile.id, 'message_draft', 'network_thank_you');
+  return Response.json({ success: true, response: result.response || `Here are personalized thank-you messages for ${helpfulContacts.length} people who helped you:`, message_type: 'network_thank_you', payload: { contacts: result.contacts || helpfulContacts.map(c => ({ name: c.alumni_name, company: c.company, status: c.status, message: '' })), suggested_actions: result.suggested_actions || ['Update your LinkedIn with your new role', 'Stay connected with these alumni'] } });
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN HANDLER
 // ═══════════════════════════════════════════════════════════
 
