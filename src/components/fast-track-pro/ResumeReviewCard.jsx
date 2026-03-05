@@ -94,20 +94,29 @@ export default function ResumeReviewCard({ data, onSendMessage }) {
         </div>
       )}
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-yellow-200" />
-
-      {/* Tailor for specific role CTA */}
+      {/* Fixed action buttons */}
       {onSendMessage && (
-        <div className="mt-3 pt-3 border-t border-yellow-200">
+        <div className="mt-3 pt-3 border-t border-yellow-200 flex flex-wrap gap-1.5">
+          {improvements.length > 0 && (
+            <button
+              onClick={() => onSendMessage('Fix the issues you found in my resume and give me an improved version')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-[#F59E0B] text-[#F59E0B] bg-transparent hover:bg-[#F59E0B] hover:text-white transition-all duration-200 cursor-pointer"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              🔧 Fix These Issues →
+            </button>
+          )}
           <button
-            onClick={() => onSendMessage('Tailor my resume for a specific role')}
-            className="w-full flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm"
-            style={{ minHeight: 'auto' }}
+            onClick={() => onSendMessage('Tailor my resume for a specific role — I\'ll paste the job description')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-violet-500 text-violet-500 bg-transparent hover:bg-violet-500 hover:text-white transition-all duration-200 cursor-pointer"
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
           >
             ✨ Tailor for a specific role
           </button>
         </div>
       )}
+
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-2" accentColor="#D97706" />
     </Card>
   );
 }
