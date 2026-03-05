@@ -17,6 +17,7 @@ const STEPS = [
   { id: 'timeline', title: 'When do you want to start?', subtitle: 'This sets your urgency level.' },
   { id: 'stage', title: 'Where are you in your search?', subtitle: 'We\'ll calibrate your roadmap to this.' },
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
+  { id: 'greek', title: 'Are you in a fraternity or sorority?', subtitle: 'Optional — Greek connections are powerful for networking.' },
   { id: 'resume', title: "Last step — let's get your resume into FASTIQ", subtitle: 'This powers everything: better company matches, tailored outreach, smarter interview prep, and instant resume tailoring for any job.' },
 ];
 
@@ -86,6 +87,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
     career_timeline: initialTimeline,
     current_stage: existingProfile?.current_stage || '',
     biggest_challenge: existingProfile?.biggest_challenge || '',
+    greek_organization: existingProfile?.greek_organization || '',
   });
   const [companyInput, setCompanyInput] = useState('');
   const [explorerMode, setExplorerMode] = useState(
@@ -104,6 +106,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       case 'timeline': return data.career_timeline !== '';
       case 'stage': return data.current_stage !== '';
       case 'challenge': return data.biggest_challenge !== '';
+      case 'greek': return true; // optional step, always can proceed
       case 'resume': return false; // resume step handled separately
       default: return false;
     }
@@ -151,6 +154,9 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
         profileData.company_size_preference = '';
         profileData.location_preference = '';
       }
+      if (data.greek_organization) {
+        profileData.greek_organization = data.greek_organization;
+      }
       // Save resume if provided (resumeText === null means skip)
       if (resumeText) {
         profileData.resume_text = resumeText;
@@ -191,6 +197,9 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       if (explorerMode) {
         profileData.company_size_preference = companySizePref;
         profileData.location_preference = locationPref;
+      }
+      if (data.greek_organization) {
+        profileData.greek_organization = data.greek_organization;
       }
 
       let profile;
@@ -453,6 +462,44 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
 
             {/* Step 5: Biggest Challenge Radio */}
             {currentStep.id === 'challenge' && renderRadioOptions(CHALLENGES, 'biggest_challenge')}
+
+            {/* Step 5.5: Greek Life (optional) */}
+            {currentStep.id === 'greek' && (
+              <div>
+                <Input
+                  value={data.greek_organization}
+                  onChange={(e) => setData(prev => ({ ...prev, greek_organization: e.target.value }))}
+                  placeholder="e.g. Kappa Delta, Sigma Chi, Alpha Phi..."
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12 mb-4"
+                />
+                <p className="text-white/50 text-xs mb-4">
+                  Greek connections are a powerful networking lever — sorority sisters and fraternity brothers respond at 3× the rate of cold outreach.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {['Kappa Delta', 'Alpha Delta Pi', 'Sigma Chi', 'Phi Delta Theta', 'Tri Delta', 'Kappa Kappa Gamma', 'Pi Beta Phi', 'Sigma Nu', 'Alpha Epsilon Phi', 'Zeta Beta Tau'].map(org => (
+                    <button
+                      key={org}
+                      onClick={() => setData(prev => ({ ...prev, greek_organization: org }))}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        data.greek_organization === org
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/10'
+                      }`}
+                      style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                    >
+                      🏛️ {org}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleNext}
+                  className="mt-6 w-full text-white/50 text-sm hover:text-white/70 underline"
+                  style={{ minHeight: 'auto' }}
+                >
+                  Skip — I'm not in Greek life
+                </button>
+              </div>
+            )}
 
             {/* Step 6: Resume */}
             {currentStep.id === 'resume' && resumeMode !== 'builder' && (

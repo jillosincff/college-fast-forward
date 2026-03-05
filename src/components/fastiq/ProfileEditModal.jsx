@@ -33,6 +33,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   const [location, setLocation] = useState(profile?.location_preference || '');
   const [major, setMajor] = useState(user?.major || user?.student_major || profile?.target_industry || '');
   const [gradYear, setGradYear] = useState(user?.graduation_year || '');
+  const [greekOrg, setGreekOrg] = useState(profile?.greek_organization || '');
   const [saving, setSaving] = useState(false);
 
   const addCompany = () => {
@@ -54,6 +55,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       career_timeline: timeline,
       current_stage: stage,
       location_preference: location,
+      greek_organization: greekOrg,
     };
     const userUpdates = {};
     if (major) userUpdates.major = major;
@@ -182,6 +184,13 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
           <div>
             <label style={labelStyle}>Location Preference</label>
             <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Florida, Remote, NYC" style={inputStyle} />
+          </div>
+
+          {/* Greek Organization */}
+          <div>
+            <label style={labelStyle}>Fraternity / Sorority (optional)</label>
+            <input value={greekOrg} onChange={e => setGreekOrg(e.target.value)} placeholder="e.g. Kappa Delta, Sigma Chi" style={inputStyle} />
+            <p style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>Greek connections respond at 3× the rate of cold outreach</p>
           </div>
         </div>
 
