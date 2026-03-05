@@ -297,6 +297,10 @@ function detectResumeTailor(message) {
 }
 
 function detectInterviewPrep(message) {
+  // Skip if this is a thank-you note request or post-interview reflection
+  if (/(?:thank.?you|thanks)\s+(?:note|email|message)/i.test(message)) return false;
+  if (/(?:i had|just had|finished|completed|done with)\s+(?:my|the|an)\s+interview/i.test(message)) return false;
+  if (/post.interview/i.test(message)) return false;
   return /(?:prep|prepare)\s+(?:me\s+)?(?:for\s+)?(?:an?\s+)?interview/i.test(message) ||
     /interview\s+(?:questions?|prep|tips|practice|at|for)/i.test(message) ||
     /(?:what will they ask|mock interview|behavioral questions)/i.test(message) ||
@@ -310,6 +314,9 @@ function detectLinkedInReview(message) {
 
 function detectSalaryNegotiation(message) {
   const lower = message.toLowerCase();
+  // If this is an offer announcement, skip salary detection — let offer handler take it
+  if (/(?:got|received|have)\s+(?:an?\s+)?(?:job\s+)?offer/i.test(message) || /(?:offer\s+from|job\s+offer)/i.test(message)) return false;
+  if (/(?:accepted|taking)\s+(?:a|the|an)\s+(?:offer|position|job|role)/i.test(message)) return false;
   return /(?:salary|negotiate|compensation|how much|what do they pay|pay range)/i.test(message) ||
     lower.includes('what should i ask') || lower.includes('what should i negotiate') ||
     lower.includes('salary data') || lower.includes('salary range');
@@ -356,20 +363,19 @@ function detectThankYouNote(message) {
   const lower = message.toLowerCase();
   return /(?:thank.?you|thanks)\s+(?:note|email|message|letter)/i.test(message) ||
     /(?:draft|write|send)\s+(?:a\s+)?thank.?you/i.test(message) ||
-    /(?:after\s+(?:the|my)\s+interview)/i.test(message) ||
-    /(?:i had my interview|interview went|interview today|interview yesterday)/i.test(message) ||
-    /(?:just finished|came out of|done with)\s+(?:my|the|an)\s+interview/i.test(message) ||
+    (/(?:after\s+(?:the|my)\s+interview)/i.test(message) && /(?:thank|follow)/i.test(message)) ||
+    /(?:i had|just had|finished|completed|done with)\s+(?:my|the|an)\s+interview/i.test(message) ||
     lower.includes('thank you note') || lower.includes('thank-you note') || lower.includes('thank you email') ||
-    lower.includes('i had my interview') || lower.includes('post-interview');
+    lower.includes('post-interview') || lower.includes('had my interview');
 }
 
 function detectOfferNegotiation(message) {
   const lower = message.toLowerCase();
-  return /(?:got|received|have)\s+(?:an?\s+)?offer/i.test(message) ||
+  return /(?:got|received|have)\s+(?:an?\s+)?(?:job\s+)?offer/i.test(message) ||
     /(?:offer\s+from|job\s+offer)/i.test(message) ||
     /(?:negotiate|negotiation)\s+(?:the|my|an?)\s+(?:offer|salary|comp)/i.test(message) ||
     /(?:evaluate|assess)\s+(?:the|my|an?)\s+offer/i.test(message) ||
-    lower.includes('accepted an offer') || lower.includes('accepted the offer');
+    /(?:accepted|taking)\s+(?:a|the|an)\s+(?:offer|position|job|role)/i.test(message);
 }
 
 function detectNetworkThankYou(message) {
@@ -377,7 +383,7 @@ function detectNetworkThankYou(message) {
   return /(?:thank|message)\s+(?:everyone|all|my\s+network|my\s+contacts|everyone\s+who\s+helped)/i.test(message) ||
     /(?:draft\s+thank.?you\s+(?:to|for)\s+(?:everyone|all|my\s+network))/i.test(message) ||
     lower.includes('thank my network') || lower.includes('thank everyone who helped') ||
-    lower.includes('thank the people who helped') || lower.includes('thank everyone in my pipeline');
+    lower.includes('thank all my contacts') || lower.includes('thank the people who helped');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -891,11 +897,6 @@ async function handleThankYouNote(base44, user, profile, resolvedMessage, pipeli
 
 async function handleOfferNegotiation(base44, user, profile, resolvedMessage, pipelineData, targetCompanies, profileContext) {
   console.log('Intent: offer_negotiation');
-  const lower = resolvedMessage.toLowerCase();
-  // If the student says they accepted, redirect to network thank-you
-  if (lower.includes('accepted an offer') || lower.includes('accepted the offer') || lower.includes('i accepted')) {
-    return await handleNetworkThankYou(base44, user, profile, resolvedMessage, pipelineData, profileContext);
-  }
   const companyMatch = resolvedMessage.match(/(?:offer\s+from|at|with)\s+(\w[\w\s&.''-]{1,40})/i);
   const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
   const hasOfferDetails = /\$[\d,]+|salary|base|bonus|equity|stock|start date|benefits/i.test(resolvedMessage);
