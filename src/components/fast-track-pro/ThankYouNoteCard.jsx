@@ -124,13 +124,10 @@ export default function ThankYouNoteCard({ data, onSendMessage }) {
         <div className="mt-3 pt-3 border-t border-emerald-200">
           <button
             onClick={() => onSendMessage?.("I also met with other people during my interview — help me draft individual thank-yous for each")}
-            className="w-full flex items-start gap-2 bg-white/80 rounded-lg px-3 py-2.5 border border-emerald-200 text-left cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-all group"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-emerald-500 text-emerald-500 bg-transparent hover:bg-emerald-500 hover:text-white transition-all duration-200 cursor-pointer"
             style={{ minHeight: 'auto', minWidth: 'auto' }}
           >
-            <span className="text-emerald-600 mt-0.5 flex-shrink-0 text-xs group-hover:translate-x-0.5 transition-transform">→</span>
-            <span className="text-xs text-slate-700 font-medium group-hover:text-emerald-700">
-              I met with more people — draft individual thank-yous for each
-            </span>
+            ✉️ I met with more people — draft individual thank-yous
           </button>
         </div>
       )}
