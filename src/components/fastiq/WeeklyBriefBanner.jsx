@@ -24,18 +24,27 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief, onDismisse
 
   const { alumniFound = 0, companiesScanned = 0, topSignal, opportunities = 0, entryLevelRoles = 0, internRoles = 0 } = weeklyStats || {};
 
-  const parts = [];
-  const studentRelevantRoles = entryLevelRoles + internRoles;
-  if (studentRelevantRoles > 0) {
-    parts.push(`${studentRelevantRoles} entry-level/intern role${studentRelevantRoles > 1 ? 's' : ''} found`);
-  } else if (opportunities > 0) {
-    parts.push(`${opportunities} new opportunities`);
+  // Build natural-language sentence(s) instead of stat shorthand
+  const sentences = [];
+  if (alumniFound > 0) {
+    sentences.push(`FASTIQ found ${alumniFound} new alumni at your targets`);
   }
-  if (alumniFound > 0) parts.push(`${alumniFound} alumni found`);
-  if (companiesScanned > 0) parts.push(`${companiesScanned} companies scanned`);
-  if (topSignal) parts.push(`${topSignal} moved to Hot`);
+  const studentRelevantRoles = entryLevelRoles + internRoles;
+  if (topSignal && studentRelevantRoles > 0) {
+    sentences.push(`${topSignal} is now actively hiring with ${studentRelevantRoles} entry-level/intern role${studentRelevantRoles > 1 ? 's' : ''}`);
+  } else if (topSignal) {
+    sentences.push(`${topSignal} moved to Hot — now actively hiring`);
+  } else if (studentRelevantRoles > 0) {
+    sentences.push(`${studentRelevantRoles} new entry-level/intern role${studentRelevantRoles > 1 ? 's were' : ' was'} posted at your target companies`);
+  } else if (opportunities > 0) {
+    sentences.push(`${opportunities} new opportunit${opportunities > 1 ? 'ies were' : 'y was'} scouted for you`);
+  }
+  if (companiesScanned > 0 && sentences.length === 0) {
+    sentences.push(`FASTIQ scanned ${companiesScanned} companies for new openings`);
+  }
 
-  if (parts.length === 0) return null;
+  if (sentences.length === 0) return null;
+  const summaryText = sentences.join(' and ') + '.';
 
   return (
     <div className="fiq-animate" style={{
@@ -57,7 +66,7 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief, onDismisse
             Since your last visit
           </p>
           <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: '2px 0 0' }}>
-            {parts.join(' · ')}
+            {summaryText}
           </p>
         </div>
       </div>

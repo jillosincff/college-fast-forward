@@ -57,13 +57,6 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
     cta = 'Draft Follow-Up →';
     prompt = 'Draft a follow-up message';
     accentColor = '#F59E0B';
-  } else if (identified >= 1 && reachedOut === 0) {
-    // (b) Identified but not contacted — PIPELINE FIRST
-    emoji = '✉️';
-    message = `You've found ${identified} alumni but haven't reached out yet. The hardest part is the first message — let me draft it for you.`;
-    cta = 'Draft Outreach →';
-    prompt = 'Draft an outreach message to the top alumni in my pipeline';
-    accentColor = '#0021A5';
   } else if (!hasResume) {
     // (c) Resume not uploaded
     emoji = '📄';

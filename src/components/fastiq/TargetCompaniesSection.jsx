@@ -114,15 +114,21 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
               {alumniCount} alumni
             </span>
           )}
-          {researched && ((intel?.entry_level_roles_count > 0 || intel?.intern_roles_count > 0) ? (
-            <span style={{ fontSize: 10, color: '#64748B' }}>
-              {(intel.entry_level_roles_count || 0) + (intel.intern_roles_count || 0)} entry-level{intel.open_roles_count ? ` (${intel.open_roles_count} total)` : ''}
-            </span>
-          ) : intel?.open_roles_count > 0 ? (
-            <span style={{ fontSize: 10, color: '#64748B' }}>
-              {intel.open_roles_count} roles
-            </span>
-          ) : null)}
+          {researched && (() => {
+            const entry = intel?.entry_level_roles_count || 0;
+            const intern = intel?.intern_roles_count || 0;
+            const total = entry + intern;
+            if (total > 0) {
+              const parts = [];
+              if (entry > 0) parts.push(`${entry} entry-level`);
+              if (intern > 0) parts.push(`${intern} intern`);
+              return <span style={{ fontSize: 10, color: '#64748B' }}>{parts.join(' + ')} role{total > 1 ? 's' : ''}</span>;
+            }
+            if (intel?.open_roles_count > 0) {
+              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No entry-level roles found</span>;
+            }
+            return null;
+          })()}
         </div>
       </div>
 
