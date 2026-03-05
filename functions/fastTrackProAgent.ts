@@ -973,17 +973,25 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════════════════
     const EXIT_PHRASES = /^(?:stop|cancel|skip|quit|exit|nevermind|never mind|i'?ll do this later|do this later|go back|back)[.!]?\s*$/i;
 
+    console.log(`[FlowCheck] profile.id=${profile.id}, active_flow="${profile.active_flow || 'null'}", flow_step="${profile.flow_step || 'null'}"`);
+
     if (profile.active_flow && profile.id) {
-      console.log(`[ActiveFlow] "${profile.active_flow}" step="${profile.flow_step}"`);
+      console.log(`[ActiveFlow] INTERCEPTED — routing to "${profile.active_flow}" step="${profile.flow_step}", skipping all intent classification`);
 
       if (EXIT_PHRASES.test(message.trim())) {
+        console.log(`[ActiveFlow] User exited flow`);
         await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
         return Response.json({ success: true, response: "No problem! You can come back to this anytime. What else can I help with?", message_type: 'career_advice', payload: { suggested_actions: ['Research my target companies', 'Find UF alumni', 'Help me with my career'] } });
       }
 
       if (profile.active_flow === 'resume_builder') {
+        console.log(`[ActiveFlow] Calling handleResumeBuilderFlow for step="${profile.flow_step}"`);
         const flowResult = await handleResumeBuilderFlow(base44, user, profile, message);
-        if (flowResult) return flowResult;
+        if (flowResult) {
+          console.log(`[ActiveFlow] Flow handler returned response — returning to client`);
+          return flowResult;
+        }
+        console.log(`[ActiveFlow] Flow handler returned null — clearing flow`);
       }
 
       // Unknown flow — clear and fall through
