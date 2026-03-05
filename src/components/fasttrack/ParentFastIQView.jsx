@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Zap, Loader2, UserPlus, Sparkles, ArrowRight } from 'lucide-react';
+import { Loader2, UserPlus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
