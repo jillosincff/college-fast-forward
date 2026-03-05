@@ -1025,6 +1025,28 @@ Deno.serve(async (req) => {
       profile = profiles?.[0] || {};
     } catch(e) {}
 
+    // ═══════════════════════════════════════════════════════
+    //  ACTIVE FLOW CHECK — OVERRIDES INTENT CLASSIFICATION
+    // ═══════════════════════════════════════════════════════
+    const EXIT_PHRASES = /^(?:stop|cancel|skip|quit|exit|nevermind|never mind|i'?ll do this later|do this later|go back|back)[.!]?\s*$/i;
+
+    if (profile.active_flow && profile.id) {
+      console.log(`[ActiveFlow] "${profile.active_flow}" step="${profile.flow_step}"`);
+
+      if (EXIT_PHRASES.test(message.trim())) {
+        await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
+        return Response.json({ success: true, response: "No problem! You can come back to this anytime. What else can I help with?", message_type: 'career_advice', payload: { suggested_actions: ['Research my target companies', 'Find UF alumni', 'Help me with my career'] } });
+      }
+
+      if (profile.active_flow === 'resume_builder') {
+        const flowResult = await handleResumeBuilderFlow(base44, user, profile, message);
+        if (flowResult) return flowResult;
+      }
+
+      // Unknown flow — clear and fall through
+      await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
+    }
+
     // Load pipeline for memory context
     let pipelineData = [];
     try {
@@ -1136,38 +1158,21 @@ Deno.serve(async (req) => {
     //  INTENT ROUTING (order matters!)
     // ═══════════════════════════════════════════════════════
 
-    // 0. RESUME BUILDER
+    // 0. RESUME BUILDER — set active_flow and start conversational flow
     if (detectResumeBuilder(resolvedMessage)) {
-      console.log('Intent: resume_builder');
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ, a supportive AI career center for UF students. A student wants help building their resume from scratch. Many students feel embarrassed about not having one — your job is to be encouraging and make them feel confident.
-
-${profileContext}
-
-Start the conversational resume builder. Walk them through Step 1: Contact Info.
-
-Your response should:
-1. Be warm and encouraging — "No problem! Lots of students don't have a resume yet."
-2. Normalize it — "Campus jobs totally count. Class projects are great. You'd be surprised how much you've already done that employers value."
-3. Ask for: Full name, best email, phone number, and LinkedIn URL (if they have one)
-4. Keep it conversational, not like a form
-5. End with: "Once I have these basics, we'll move to your education — and your UF degree is already a huge asset!"
-
-Be genuinely encouraging and warm. This student might feel behind — make them feel like they're about to create something great.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            suggested_actions: { type: "array", items: { type: "string" } }
-          },
-          required: ["response"]
-        }
-      });
+      console.log('Intent: resume_builder — starting flow');
+      if (profile.id) {
+        await base44.entities.FastTrackProProfile.update(profile.id, {
+          active_flow: 'resume_builder', flow_step: 'contact_info', flow_data: '{}'
+        });
+      }
+      const firstName = (user.full_name || '').split(' ')[0] || 'there';
+      const major = studentMajor;
       return Response.json({
         success: true,
-        response: result.response || "Let's build your resume! No problem at all — I'll walk you through it step by step. Let's start with the basics: what's your full name, email, and phone number?",
+        response: `No problem at all, ${firstName}! Lots of students don't have a resume yet — and honestly, you'd be surprised how much you've already done that employers value. Campus jobs, class projects, student orgs — it all counts.\n\nLet's build yours together, step by step. 💪\n\n**Step 1: The basics**\nTell me your:\n- **Full name** (as you want it on the resume)\n- **Best email**\n- **Phone number**\n- **LinkedIn URL** (if you have one — totally fine if not!)\n\nOnce I have these, we'll move to your education — and your UF degree is already a huge asset!`,
         message_type: 'career_advice',
-        payload: { suggested_actions: result.suggested_actions || ['Type your name, email, and phone number', 'Include LinkedIn URL if you have one'] }
+        payload: { suggested_actions: ['Type your name, email, and phone number', 'Include LinkedIn URL if you have one'] }
       });
     }
 
