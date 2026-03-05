@@ -3,8 +3,8 @@ import { base44 } from '@/api/base44Client';
 
 /**
  * Always-on insight card showing the single most important action for THIS student.
- * Priority: (a) stale follow-ups, (b) resume not uploaded, (c) alumni identified but none contacted,
- * (d) targets not researched, (e) general benchmarking tip
+ * Priority: (a) stale follow-ups, (b) identified but not contacted, (c) resume not uploaded,
+ * (d) unresearched targets, (e) unmessaged alumni, (f) general benchmarking tip
  */
 export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets, profile, pipelineCounts }) {
   const [staleCount, setStaleCount] = useState(0);
@@ -12,7 +12,6 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
 
   useEffect(() => {
     if (!profile?.user_email) return;
-    // Fetch stale outreach
     base44.entities.NetworkingPipeline.filter({ user_email: profile.user_email, status: 'reached_out' }, '-reached_out_date', 20)
       .then(data => {
         const stale = (data || []).filter(p => {
@@ -22,7 +21,6 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
         setStaleCount(stale.length);
       }).catch(() => {});
 
-    // Fetch recent interviews
     base44.entities.NetworkingPipeline.filter({ user_email: profile.user_email, status: 'interview' }, '-interview_date', 5)
       .then(data => {
         const recent = (data || []).find(p => {
@@ -34,7 +32,6 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
       }).catch(() => {});
   }, [profile?.user_email]);
 
-  // Priority-ordered insight logic
   let emoji = '💡';
   let message = '';
   let cta = '';
@@ -48,7 +45,6 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
   const reachedOut = pipelineCounts?.reached_out || 0;
 
   if (recentInterviewCompany) {
-    // Post-interview: send thank-you
     emoji = '📝';
     message = `You recently interviewed at ${recentInterviewCompany}. Send a thank-you note within 24 hours to stand out.`;
     cta = 'Draft Thank-You →';
@@ -61,27 +57,20 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
     cta = 'Draft Follow-Up →';
     prompt = 'Draft a follow-up message';
     accentColor = '#F59E0B';
-  } else if (!hasResume) {
-    // (b) Resume not uploaded
-    emoji = '📄';
-    message = 'Students with a resume get 2× more relevant company matches and personalized outreach. Upload or build yours now.';
-    cta = 'Add Resume →';
-    prompt = 'Help me upload my resume';
-    accentColor = '#FA4616';
-  } else if (identified >= 3 && reachedOut === 0) {
-    // (c) Alumni identified but none contacted
+  } else if (identified >= 1 && reachedOut === 0) {
+    // (b) Identified but not contacted — PIPELINE FIRST
     emoji = '✉️';
     message = `You've found ${identified} alumni but haven't reached out yet. The hardest part is the first message — let me draft it for you.`;
     cta = 'Draft Outreach →';
     prompt = 'Draft an outreach message to the top alumni in my pipeline';
     accentColor = '#0021A5';
-  } else if (unmessagedAlumni > 0) {
-    // Still have unmessaged alumni
-    emoji = '🎯';
-    message = `${unmessagedAlumni} alumni in your pipeline haven't been contacted yet. Each message is a chance at a warm intro.`;
-    cta = 'Draft Message →';
-    prompt = 'Draft an outreach message';
-    accentColor = '#8B5CF6';
+  } else if (!hasResume) {
+    // (c) Resume not uploaded
+    emoji = '📄';
+    message = 'Students with a resume get 2× more relevant company matches and personalized outreach. Upload or build yours now.';
+    cta = 'Add Resume →';
+    prompt = 'Help me upload my resume';
+    accentColor = '#FA4616';
   } else if (targetCount > 0 && companiesResearched < targetCount) {
     // (d) Targets not researched
     emoji = '🔍';
@@ -90,15 +79,21 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
     cta = 'Research Companies →';
     prompt = 'Research my target companies';
     accentColor = '#0021A5';
+  } else if (unmessagedAlumni > 0) {
+    // (e) Unmessaged alumni
+    emoji = '🎯';
+    message = `${unmessagedAlumni} alumni in your pipeline haven't been contacted yet. Each message is a chance at a warm intro.`;
+    cta = 'Draft Message →';
+    prompt = 'Draft an outreach message';
+    accentColor = '#8B5CF6';
   } else if (targetCount === 0) {
-    // No targets set
     emoji = '🎯';
     message = 'Set your target companies to unlock personalized intel, alumni discovery, and weekly job scouting.';
     cta = 'Add Targets →';
-    prompt = null; // Use onAddTargets instead
+    prompt = null;
     accentColor = '#FA4616';
   } else {
-    // (e) General benchmarking tip
+    // (f) General benchmarking tip
     emoji = '📊';
     message = 'Students who reach out to 5+ alumni are 3× more likely to get a referral. Keep building your network.';
     cta = 'Find More Alumni →';

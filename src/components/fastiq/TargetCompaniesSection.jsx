@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 
 function guessDomain(name) {
@@ -33,16 +33,15 @@ function CompanyInitial({ name }) {
 
 function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
   const domain = guessDomain(name);
-  const [logoErr, setLogoErr] = React.useState(false);
+  const [logoErr, setLogoErr] = useState(false);
   const researched = !!intel;
 
-  // 5. VISUAL HIERARCHY — HOT=orange, WARM=yellow, COOL=blue, unresearched=muted
   const signal = intel?.hiring_signal;
   let borderColor = '#E2E8F0';
   let glowShadow = 'none';
   let statusColor = '#94A3B8';
   let statusBg = '#F1F5F9';
-  let statusLabel = 'Not researched';
+  let statusLabel = '';
 
   if (researched) {
     if (signal === 'hot') {
@@ -73,14 +72,14 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
         padding: '14px 16px',
         background: researched ? '#fff' : '#FAFBFC',
         borderRadius: 12,
-        border: `1.5px solid ${borderColor}`,
-        borderLeft: researched ? `4px solid ${borderColor}` : `4px solid #E2E8F0`,
+        border: researched ? `1.5px solid ${borderColor}` : '1.5px dashed #CBD5E1',
+        borderLeft: researched ? `4px solid ${borderColor}` : '4px dashed #CBD5E1',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
         transition: 'all 0.25s',
         boxShadow: glowShadow,
-        opacity: researched ? 1 : 0.85,
+        opacity: researched ? 1 : 0.9,
       }}
     >
       {/* Logo */}
@@ -94,9 +93,17 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</span>
+          {/* 7. NVIDIA URGENCY: "Not yet scanned" label for unresearched */}
+          {!researched && (
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8', fontStyle: 'italic' }}>
+              Not yet scanned
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
-          {researched && (
+          {researched && statusLabel && (
             <span style={{
               fontSize: 10, fontWeight: 700, color: statusColor,
               background: statusBg, padding: '2px 8px', borderRadius: 6,
@@ -118,18 +125,26 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
       {/* Actions */}
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
         {!researched ? (
+          /* 7. NVIDIA URGENCY: Larger, glowing orange Research button + pulsing dot */
           <button
             onClick={() => onOpenChat(`Research ${name} hiring`)}
             style={{
-              fontSize: 11, fontWeight: 700, color: '#fff',
-              background: '#FA4616', padding: '6px 14px',
+              fontSize: 12, fontWeight: 700, color: '#fff',
+              background: '#FA4616', padding: '8px 18px',
               borderRadius: 8, border: 'none', cursor: 'pointer', minHeight: 'auto',
+              boxShadow: '0 0 14px rgba(250,70,22,0.35)',
+              display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#fff',
+              display: 'inline-block', animation: 'fiq-pulse-ring 2s ease-out infinite',
+            }} />
             Research →
           </button>
         ) : (
           <>
+            {/* 4. TARGET COMPANY ACTIONS: "View X Alumni →" with count */}
             <button
               onClick={() => onOpenChat(`Find UF alumni at ${name}`)}
               style={{
@@ -138,7 +153,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
                 borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
               }}
             >
-              Alumni
+              View {alumniCount || 0} Alumni →
             </button>
             <button
               onClick={() => onOpenChat(`Research ${name} hiring`)}

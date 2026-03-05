@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 
 /**
  * Slim dismissible banner showing "Since your last visit" summary.
- * Shows below hero, above resume section when there's new activity.
+ * Styled as a notification with blue left border and subtle gradient.
  */
 export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
   const [dismissed, setDismissed] = useState(false);
@@ -22,31 +22,43 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
 
   return (
     <div className="fiq-animate" style={{
-      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)',
-      border: '1px solid #BFDBFE',
+      background: 'linear-gradient(135deg, rgba(0,33,165,0.06) 0%, rgba(0,33,165,0.01) 60%, transparent 100%)',
+      borderLeft: '4px solid #0021A5',
       borderRadius: 12,
-      padding: '12px 16px',
+      padding: '14px 18px',
       marginBottom: 20,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 12,
       flexWrap: 'wrap',
+      boxShadow: '0 2px 8px rgba(0,33,165,0.06)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 16 }}>📬</span>
-        <p style={{ fontSize: 12, fontWeight: 600, color: '#1E293B', margin: 0 }}>
-          Since your last visit: {parts.join(' · ')}
-        </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 10,
+          background: 'rgba(0,33,165,0.08)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 16 }}>📬</span>
+        </div>
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#0021A5', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Since your last visit
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: '2px 0 0' }}>
+            {parts.join(' · ')}
+          </p>
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button
           onClick={onViewBrief}
           style={{
-            fontSize: 11, fontWeight: 700, color: '#0021A5',
-            background: 'rgba(0,33,165,0.08)', padding: '6px 14px',
+            fontSize: 11, fontWeight: 700, color: '#fff',
+            background: '#0021A5', padding: '7px 16px',
             borderRadius: 8, border: 'none', cursor: 'pointer', minHeight: 'auto',
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap', transition: 'all 0.2s',
           }}
         >
           View Brief →

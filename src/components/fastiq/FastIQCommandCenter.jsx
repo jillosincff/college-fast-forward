@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import HeroSection from './HeroSection';
-import HeroStatusLine from './HeroStatusLine';
+// HeroStatusLine is now inline inside HeroSection
 import WeeklyBriefBanner from './WeeklyBriefBanner';
 import InsightCard from './InsightCard';
 import OpportunitiesSection from './OpportunitiesSection';
@@ -14,6 +14,29 @@ import WeeklyBriefCard from './WeeklyBriefCard';
 import AddTargetsModal from './AddTargetsModal';
 import LeaderboardCard from './LeaderboardCard';
 import MyResumeSection from './MyResumeSection';
+
+function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
+  const lines = [];
+  const staleCount = (pipelineData || []).filter(p => {
+    if (p.status !== 'reached_out' || !p.reached_out_date) return false;
+    return (Date.now() - new Date(p.reached_out_date).getTime()) > 3 * 24 * 60 * 60 * 1000;
+  }).length;
+  const identifiedCount = (pipelineData || []).filter(p => p.status === 'identified').length;
+  const repliedCount = (pipelineData || []).filter(p => p.status === 'replied').length;
+  const interviewCount = (pipelineData || []).filter(p => p.status === 'interview').length;
+  if (staleCount > 0) lines.push(`⏰ ${staleCount} contact${staleCount > 1 ? 's' : ''} waiting for follow-up`);
+  if ((newOpportunities || []).length > 0) lines.push(`🔥 ${newOpportunities.length} new opportunit${newOpportunities.length > 1 ? 'ies' : 'y'} scouted this week`);
+  if (identifiedCount > 0) lines.push(`🔍 ${identifiedCount} alumni identified across your targets`);
+  if (repliedCount > 0) lines.push(`💬 ${repliedCount} alumni have replied to your outreach`);
+  if (interviewCount > 0) lines.push(`📅 ${interviewCount} interview${interviewCount > 1 ? 's' : ''} in your pipeline`);
+  if (weeklyStats?.companiesScanned > 0) lines.push(`📊 ${weeklyStats.companiesScanned} companies scanned this week`);
+  if (weeklyStats?.topSignal) lines.push(`🔥 ${weeklyStats.topSignal} is actively hiring right now`);
+  if (lines.length === 0) {
+    lines.push('⚡ FASTIQ is scanning the market for you');
+    lines.push('🎯 Set your target companies to get personalized intel');
+  }
+  return lines;
+}
 
 export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfileUpdated, highlightAlerts }) {
   const [companyIntel, setCompanyIntel] = useState({});
@@ -160,15 +183,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           profile={profile}
           statValues={statValues}
           onOpenChat={onOpenChat}
+          statusLines={buildStatusLines(pipelineData, newOpportunities, weeklyStats)}
         />
-        {/* 1. ROTATING STATUS LINE */}
-        <HeroStatusLine
-          pipelineData={pipelineData}
-          newOpportunities={newOpportunities}
-          weeklyStats={weeklyStats}
-          profile={profile}
-        />
-        <div style={{ height: 16 }} />
       </div>
 
       {/* CONTENT */}
