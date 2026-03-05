@@ -171,6 +171,22 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     // Persist both messages to DB so backend has context for the follow-up
     await persistMessage('user', opener.userMessage, 'text');
     await persistMessage('assistant', opener.assistantMessage, 'text');
+
+    // CRITICAL: For multi-step flows, set active_flow on the profile so the
+    // backend routes follow-up messages directly to the flow handler
+    if (openerKey === 'resume_builder' && currentProfile?.id) {
+      console.log('[ResumeBuilder] Setting active_flow on profile:', currentProfile.id);
+      try {
+        await base44.entities.FastTrackProProfile.update(currentProfile.id, {
+          active_flow: 'resume_builder',
+          flow_step: 'contact_info',
+          flow_data: '{}'
+        });
+        setCurrentProfile(prev => ({ ...prev, active_flow: 'resume_builder', flow_step: 'contact_info' }));
+      } catch (e) {
+        console.error('[ResumeBuilder] Failed to set active_flow:', e.message);
+      }
+    }
   };
 
   const sendMessage = async (messageText) => {
