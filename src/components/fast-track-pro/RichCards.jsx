@@ -478,7 +478,7 @@ export function OutreachDraftCard({ data, onSendMessage }) {
         )}
       </div>
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-orange-200" />
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-orange-200" accentColor="#EA580C" />
     </Card>
   );
 }

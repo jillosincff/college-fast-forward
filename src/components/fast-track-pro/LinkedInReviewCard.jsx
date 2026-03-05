@@ -87,7 +87,7 @@ export default function LinkedInReviewCard({ data, onSendMessage }) {
         </div>
       )}
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-sky-200" />
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-sky-200" accentColor="#0077B5" />
     </Card>
   );
 }

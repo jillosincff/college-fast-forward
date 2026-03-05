@@ -95,7 +95,7 @@ export default function BatchTargetScanCard({ data, onResearchCompany, onSendMes
         ))}
       </div>
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-indigo-200" />
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-indigo-200" accentColor="#4F46E5" />
     </Card>
   );
 }

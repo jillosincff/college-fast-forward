@@ -108,7 +108,7 @@ export default function CompanySuggestionsCard({ data, onResearchCompany, profil
         })}
       </div>
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-emerald-200" />
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-emerald-200" accentColor="#059669" />
     </Card>
   );
 }

@@ -83,7 +83,7 @@ export default function SalaryIntelCard({ data, onSendMessage }) {
         </div>
       )}
 
-      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-green-200" />
+      <SuggestedActions actions={data.suggested_next_steps || data.next_steps} onSendMessage={onSendMessage} className="mt-3 pt-3 border-t border-green-200" accentColor="#059669" />
     </Card>
   );
 }
