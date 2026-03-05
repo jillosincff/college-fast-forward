@@ -985,13 +985,53 @@ Deno.serve(async (req) => {
       }
 
       if (profile.active_flow === 'resume_builder') {
-        console.log(`[ActiveFlow] Calling handleResumeBuilderFlow for step="${profile.flow_step}"`);
-        const flowResult = await handleResumeBuilderFlow(base44, user, profile, message);
-        if (flowResult) {
-          console.log(`[ActiveFlow] Flow handler returned response — returning to client`);
-          return flowResult;
+        const step = profile.flow_step || 'contact_info';
+        let flowData = {};
+        try { flowData = JSON.parse(profile.flow_data || '{}'); } catch(e) { flowData = {}; }
+        const fn = (user.full_name || '').split(' ')[0] || 'there';
+        console.log(`[ResumeBuilder] step="${step}", flowData keys=${Object.keys(flowData).join(',')}`);
+        try {
+          if (step === 'contact_info') {
+            const emailM = message.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+            const phoneM = message.match(/(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/);
+            const liM = message.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i);
+            const nameLine = message.split(/\n/)[0].replace(/[\w.+-]+@[\w-]+\.[\w.]+/, '').replace(/(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/, '').trim();
+            flowData.contact = { name: nameLine.replace(/[^a-zA-Z\s'-]/g, '').trim() || user.full_name || '', email: emailM?.[0] || user.email || '', phone: phoneM?.[0] || '', linkedin: liM?.[0] || '' };
+            await base44.entities.FastTrackProProfile.update(profile.id, { flow_step: 'education', flow_data: JSON.stringify(flowData) });
+            return Response.json({ success: true, response: `Got it, ${fn}!\n- **Name:** ${flowData.contact.name || '(not provided)'}\n- **Email:** ${flowData.contact.email || '(not provided)'}\n- **Phone:** ${flowData.contact.phone || '(not provided)'}\n${flowData.contact.linkedin ? `- **LinkedIn:** ${flowData.contact.linkedin}\n` : ''}\n**Step 2: Education** 🎓\nTell me about your education at UF:\n- **Your major** (and minor if you have one)\n- **Expected graduation** (e.g., May 2026)\n- **GPA** (if 3.0+, include it!)\n- **Any relevant coursework**`, message_type: 'career_advice', payload: { suggested_actions: ['Type your major, graduation date, and GPA'] } });
+          }
+          if (step === 'education') {
+            flowData.education = message;
+            await base44.entities.FastTrackProProfile.update(profile.id, { flow_step: 'experience', flow_data: JSON.stringify(flowData) });
+            return Response.json({ success: true, response: `Awesome — your UF education is a huge asset! 💪\n\n**Step 3: Experience** 💼\nTell me about ANY work experience:\n- **Jobs** (even part-time, retail, food service)\n- **Internships**\n- **Campus jobs** (RA, tutoring, research assistant)\n- **Volunteer work**\n\nFor each: **where**, **what title**, **when**, and **what you did**.\n\nDon't worry if it doesn't feel "impressive" — I'll make it shine!`, message_type: 'career_advice', payload: { suggested_actions: ['Describe your work experience', "I don't have any work experience yet"] } });
+          }
+          if (step === 'experience') {
+            flowData.experience = message;
+            await base44.entities.FastTrackProProfile.update(profile.id, { flow_step: 'skills', flow_data: JSON.stringify(flowData) });
+            return Response.json({ success: true, response: `Great stuff, ${fn}!\n\n**Step 4: Skills** 🛠️\nList your skills:\n- **Technical** (Excel, Python, SQL, etc.)\n- **Software/tools** (Microsoft Office, Google Suite, etc.)\n- **Languages**\n- **Certifications**\n- **Soft skills** (leadership, teamwork, etc.)\n\nJust list them out — I'll organize them.`, message_type: 'career_advice', payload: { suggested_actions: ['List your skills'] } });
+          }
+          if (step === 'skills') {
+            flowData.skills = message;
+            await base44.entities.FastTrackProProfile.update(profile.id, { flow_step: 'projects', flow_data: JSON.stringify(flowData) });
+            return Response.json({ success: true, response: `Nice skill set! 🔥\n\n**Step 5 (last one!): Projects & Activities** 🚀\n- **Class projects** (capstone, group projects)\n- **Personal projects** (apps, websites)\n- **Student organizations**\n- **Leadership roles**\n- **Hackathons, competitions, awards**\n\nIf none, just say "none" and I'll build the resume with what we have!`, message_type: 'career_advice', payload: { suggested_actions: ['Describe your projects', "None — let's build the resume"] } });
+          }
+          if (step === 'projects') {
+            flowData.projects = message;
+            await base44.entities.FastTrackProProfile.update(profile.id, { flow_step: 'complete', active_flow: null, flow_data: JSON.stringify(flowData) });
+            const resumeResult = await base44.integrations.Core.InvokeLLM({
+              prompt: `Build a professional one-page resume.\n\nCONTACT: ${JSON.stringify(flowData.contact || {})}\nEDUCATION: ${flowData.education || 'University of Florida'}\nEXPERIENCE: ${flowData.experience || 'None'}\nSKILLS: ${flowData.skills || 'None'}\nPROJECTS: ${flowData.projects || 'None'}\n\nWrite strong action-verb bullets. Quantify where possible. Keep ATS-friendly. Do NOT fabricate.`,
+              response_json_schema: { type: "object", properties: { resume: { type: "object", properties: { contact: { type: "object", properties: { name: {type:"string"}, email: {type:"string"}, phone: {type:"string"}, linkedin: {type:"string"}, location: {type:"string"} } }, summary: {type:"string"}, education: { type: "array", items: { type: "object", properties: { school: {type:"string"}, degree: {type:"string"}, graduation_date: {type:"string"}, gpa: {type:"string"}, relevant_coursework: {type:"string"} } } }, experience: { type: "array", items: { type: "object", properties: { company: {type:"string"}, title: {type:"string"}, dates: {type:"string"}, bullets: { type: "array", items: {type:"string"} } } } }, skills: { type: "object", properties: { technical: { type:"array", items:{type:"string"} }, tools: { type:"array", items:{type:"string"} }, soft: { type:"array", items:{type:"string"} } } }, projects: { type: "array", items: { type: "object", properties: { name: {type:"string"}, bullets: { type: "array", items: {type:"string"} } } } } } }, resume_text: {type:"string"}, summary: {type:"string"} }, required: ["resume","resume_text","summary"] }
+            });
+            if (resumeResult.resume_text) { try { await base44.entities.FastTrackProProfile.update(profile.id, { resume_text: resumeResult.resume_text.substring(0, 10000) }); } catch(e) {} }
+            return Response.json({ success: true, response: `🎉 **Your resume is ready, ${fn}!** ${resumeResult.summary || 'Built from everything you shared.'}\n\nYou can now:\n→ **Tailor it** for specific jobs\n→ **Review it** for feedback`, message_type: 'resume_tailored', payload: { resume: resumeResult.resume || {}, ats_score: 75, keywords_matched: [], keywords_added: [], keywords_missing: [], changes_summary: resumeResult.summary || 'Resume built from scratch', changes: [], company_name: 'Master Resume', role_title: 'General' } });
+          }
+          // Unknown step
+          console.log(`[ResumeBuilder] Unknown step "${step}"`);
+        } catch (flowErr) {
+          console.error(`[ActiveFlow] CRASH in resume_builder: ${flowErr.message}`);
+          await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
+          return Response.json({ success: true, response: "Sorry, something went wrong with the resume builder. Say **\"Help me build a resume\"** to try again.", message_type: 'text', payload: {} });
         }
-        console.log(`[ActiveFlow] Flow handler returned null — clearing flow`);
       }
 
       // Unknown flow — clear and fall through
