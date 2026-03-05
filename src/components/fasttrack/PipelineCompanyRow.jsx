@@ -235,10 +235,17 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
                   : '—';
                 const isEven = idx % 2 === 0;
 
+                const isGlowing = glowContactId === contact.id;
+
                 return (
                   <div
                     key={contact.id}
                     className={`grid grid-cols-12 gap-2 items-center py-2.5 rounded-md px-1 transition-colors ${isEven ? 'bg-slate-50' : 'bg-white'} hover:bg-slate-100`}
+                    style={isGlowing ? {
+                      animation: 'glow-pulse 1s ease-in-out 3',
+                      boxShadow: '0 0 12px rgba(34,197,94,0.4)',
+                      background: 'rgba(34,197,94,0.08)',
+                    } : {}}
                   >
                     <div className="col-span-4 min-w-0">
                       <p className="text-[12px] text-slate-900 font-medium truncate">{contact.alumni_name}</p>
