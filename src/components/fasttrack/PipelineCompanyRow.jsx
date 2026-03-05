@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import PipelineStatusModal from '@/components/fastiq/PipelineStatusModal';
+import CSSConfetti from '@/components/fastiq/CSSConfetti';
+import PipelineCelebrationCard from '@/components/fastiq/PipelineCelebrationCard';
 
 const STATUS_CONFIG = {
   identified:   { emoji: '🔍', label: 'Identified',   color: '#64748B', bg: '#F1F5F9', next: 'reached_out' },
@@ -47,6 +49,9 @@ function StatusBadge({ status, onClick }) {
 export default function PipelineCompanyRow({ company, contacts, hiringScore, onOpenChat, onContactsChange }) {
   const [expanded, setExpanded] = useState(false);
   const [celebrationModal, setCelebrationModal] = useState(null); // { newStatus, contact }
+  const [confettiVariant, setConfettiVariant] = useState(null); // 'normal' | 'big' | null
+  const [celebrationCard, setCelebrationCard] = useState(null); // { type, contact }
+  const [glowContactId, setGlowContactId] = useState(null); // for green glow pulse on repeat replies
 
   const alumniFound = contacts.length;
   const contacted = contacts.filter(c => ['reached_out', 'replied', 'interview', 'offer'].includes(c.status)).length;
@@ -71,12 +76,89 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
       status_date: now,
       [dateField]: now,
     });
-    // Show celebration modal for replied, interview, offer
     const newStatus = cfg.next;
+    const updatedContact = { ...contact, status: newStatus, company };
+
+    // Show celebration modal for replied, interview, offer
     if (['replied', 'interview', 'offer'].includes(newStatus)) {
-      setCelebrationModal({ newStatus, contact: { ...contact, status: newStatus } });
+      setCelebrationModal({ newStatus, contact: updatedContact });
+      fireCelebration(newStatus, updatedContact);
     }
     if (onContactsChange) onContactsChange();
+  };
+
+  // Determine celebration type and fire confetti + card
+  const fireCelebration = async (newStatus, updatedContact) => {
+    // Load milestone flags from profile
+    let profile = null;
+    try {
+      const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: updatedContact.user_email || '' });
+      profile = profiles?.[0];
+    } catch(e) {}
+
+    const milestones = {};
+    try {
+      if (profile?.roadmap_completed_items) {
+        const parsed = JSON.parse(profile.roadmap_completed_items);
+        if (parsed._milestones) Object.assign(milestones, parsed._milestones);
+      }
+    } catch(e) {}
+
+    let cardType = '';
+    let useConfetti = false;
+    let confettiSize = 'normal';
+
+    if (newStatus === 'replied') {
+      if (!milestones.first_reply_celebrated) {
+        cardType = 'first_reply';
+        useConfetti = true;
+        milestones.first_reply_celebrated = true;
+      } else {
+        cardType = 'reply';
+        // Green glow pulse instead of confetti
+        setGlowContactId(updatedContact.id);
+        setTimeout(() => setGlowContactId(null), 3000);
+      }
+    } else if (newStatus === 'interview') {
+      if (!milestones.first_interview_celebrated) {
+        cardType = 'first_interview';
+        useConfetti = true;
+        milestones.first_interview_celebrated = true;
+      } else {
+        cardType = 'interview';
+        useConfetti = true;
+      }
+    } else if (newStatus === 'offer') {
+      cardType = 'offer';
+      useConfetti = true;
+      confettiSize = 'big';
+    }
+
+    if (useConfetti) setConfettiVariant(confettiSize);
+    if (cardType) setCelebrationCard({ type: cardType, contact: updatedContact });
+
+    // Save milestone flags back to profile
+    if (profile?.id) {
+      try {
+        let completed = {};
+        try { completed = JSON.parse(profile.roadmap_completed_items || '{}'); } catch(e) {}
+        completed._milestones = milestones;
+        await base44.entities.FastTrackProProfile.update(profile.id, {
+          roadmap_completed_items: JSON.stringify(completed),
+        });
+      } catch(e) {}
+    }
+
+    // Log milestone to ProActivityLog
+    const actionMap = { first_reply: 'Received first reply', reply: 'Received reply', first_interview: 'Secured first interview', interview: 'Secured interview', offer: 'Received offer' };
+    try {
+      await base44.entities.ProActivityLog.create({
+        user_email: updatedContact.user_email || '',
+        action_type: 'alumni_view',
+        target_name: `${actionMap[cardType] || newStatus} from ${updatedContact.alumni_name} at ${updatedContact.company}`,
+        timestamp: new Date().toISOString(),
+      });
+    } catch(e) {}
   };
 
   const handleAction = (contact) => {
@@ -88,6 +170,19 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
 
   return (
     <div className="rounded-xl overflow-hidden transition-all bg-white border border-slate-200">
+      {/* Confetti */}
+      {confettiVariant && (
+        <CSSConfetti variant={confettiVariant} onDone={() => setConfettiVariant(null)} />
+      )}
+      {/* Celebration card */}
+      {celebrationCard && (
+        <PipelineCelebrationCard
+          type={celebrationCard.type}
+          contact={celebrationCard.contact}
+          onAction={(prompt) => { setCelebrationCard(null); onOpenChat(prompt); }}
+          onDismiss={() => setCelebrationCard(null)}
+        />
+      )}
       {/* Collapsed header */}
       <button
         onClick={() => setExpanded(prev => !prev)}
