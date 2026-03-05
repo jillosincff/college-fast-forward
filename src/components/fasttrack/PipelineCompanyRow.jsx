@@ -170,6 +170,12 @@ export default function PipelineCompanyRow({ company, contacts, hiringScore, onO
 
   return (
     <div className="rounded-xl overflow-hidden transition-all bg-white border border-slate-200">
+      <style>{`
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 4px rgba(34,197,94,0.2); }
+          50% { box-shadow: 0 0 16px rgba(34,197,94,0.5); }
+        }
+      `}</style>
       {/* Confetti */}
       {confettiVariant && (
         <CSSConfetti variant={confettiVariant} onDone={() => setConfettiVariant(null)} />
