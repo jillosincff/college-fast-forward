@@ -143,7 +143,7 @@ export default function LivePricingCounter({ onJoinClick, className = '' }) {
       <div className="bg-white/20 rounded-xl p-4 mb-4">
         <div className="flex justify-between items-center text-white">
           <span>Family Plan (up to 4 people)</span>
-          <span className="font-bold text-xl">$19/month</span>
+          <span className="font-bold text-xl">$29/month</span>
         </div>
       </div>
       

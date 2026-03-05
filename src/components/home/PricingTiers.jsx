@@ -55,7 +55,7 @@ function FoundingTier({ spotsLeft, onCTA }) {
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
         <p className="text-[11px] text-slate-400 mt-2.5">
-          Once 1,000 spots are filled, membership starts at $9/month
+          Once 1,000 spots are filled, CFF starts at $9/month
         </p>
       </div>
     </motion.div>

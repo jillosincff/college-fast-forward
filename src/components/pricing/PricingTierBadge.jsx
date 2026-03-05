@@ -40,7 +40,7 @@ export default function PricingTierBadge({ user, showMemberNumber = true, size =
     standard: {
       icon: Check,
       label: 'MEMBER',
-      subtext: '$19/month',
+      subtext: '$29/month',
       bgColor: 'bg-gradient-to-r from-slate-500 to-slate-600',
       textColor: 'text-white',
       iconColor: 'text-slate-100',
