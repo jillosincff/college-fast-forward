@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
+  { id: 'role_type', title: 'What type of role are you looking for?', subtitle: 'This helps FASTIQ find the right jobs — e.g. "marketing roles at tech companies."' },
   { id: 'companies', title: 'Name up to 5 dream companies', subtitle: 'We\'ll research them and find Gator alumni inside.' },
   { id: 'timeline', title: 'When do you want to start?', subtitle: 'This sets your urgency level.' },
   { id: 'stage', title: 'Where are you in your search?', subtitle: 'We\'ll calibrate your roadmap to this.' },
@@ -22,12 +23,18 @@ const STEPS = [
 ];
 
 const INDUSTRIES = [
-  'Technology', 'Finance & Banking', 'Consulting', 'Healthcare',
-  'Pharmaceuticals & Biotech', 'Engineering', 'Marketing', 'Accounting & Tax',
-  'Law & Legal', 'Data & Analytics', 'Sports & Athletics', 'Media & Entertainment',
-  'Startups & Entrepreneurship', 'Aerospace & Defense', 'Real Estate', 'Education',
-  'Government', 'Supply Chain & Logistics', 'Insurance', 'Agriculture & Food Science',
-  'Non-Profit', 'Retail', 'Manufacturing', 'Hospitality',
+  'Technology & Software', 'Financial Services & Banking', 'Consulting & Professional Services',
+  'Healthcare & Biotech', 'Media & Entertainment', 'Consumer Products & Retail',
+  'Real Estate & Construction', 'Energy & Sustainability', 'Education & EdTech',
+  'Government & Public Policy', 'Nonprofit & Social Impact', 'Sports & Athletics',
+  'Advertising & Public Relations', 'Hospitality & Travel', 'Manufacturing & Supply Chain',
+  'Legal Services', 'Aerospace & Defense', 'Telecommunications', 'Automotive', 'Food & Beverage',
+];
+
+const ROLE_TYPES = [
+  'Marketing', 'Engineering', 'Finance', 'Sales', 'Operations', 'Product Management',
+  'Design', 'Data & Analytics', 'Human Resources', 'Communications', 'Research',
+  'General Management', 'Business Development', 'Other',
 ];
 
 const TIMELINES = [
@@ -45,11 +52,12 @@ const STAGES = [
 ];
 
 const INDUSTRY_COMPANIES = {
-  'Technology': ['Google', 'Apple', 'Amazon', 'Microsoft', 'Meta', 'NVIDIA', 'Salesforce', 'Oracle'],
-  'Finance & Banking': ['JPMorgan', 'Goldman Sachs', 'Morgan Stanley', 'Citadel', 'Deloitte', 'PwC', 'Bank of America', 'Raymond James'],
-  'Consulting': ['McKinsey', 'BCG', 'Bain', 'Deloitte', 'Accenture', 'EY', 'KPMG', 'Booz Allen'],
-  'Healthcare': ['Mayo Clinic', 'UF Health', 'HCA', 'UnitedHealth', 'Johnson & Johnson', 'Medtronic', 'CVS Health', 'Baptist Health'],
-  'Engineering': ['Lockheed Martin', 'Boeing', 'L3Harris', 'Raytheon', 'SpaceX', 'Tesla', 'Siemens', 'GE'],
+  'Technology & Software': ['Google', 'Apple', 'Amazon', 'Microsoft', 'Meta', 'NVIDIA', 'Salesforce', 'Oracle'],
+  'Financial Services & Banking': ['JPMorgan', 'Goldman Sachs', 'Morgan Stanley', 'Citadel', 'Deloitte', 'PwC', 'Bank of America', 'Raymond James'],
+  'Consulting & Professional Services': ['McKinsey', 'BCG', 'Bain', 'Deloitte', 'Accenture', 'EY', 'KPMG', 'Booz Allen'],
+  'Healthcare & Biotech': ['Mayo Clinic', 'UF Health', 'HCA', 'UnitedHealth', 'Johnson & Johnson', 'Medtronic', 'CVS Health', 'Baptist Health'],
+  'Aerospace & Defense': ['Lockheed Martin', 'Boeing', 'L3Harris', 'Raytheon', 'SpaceX', 'Northrop Grumman', 'General Dynamics', 'BAE Systems'],
+  'Media & Entertainment': ['Disney', 'Warner Bros', 'Netflix', 'Comcast', 'Spotify', 'Paramount', 'Fox', 'Live Nation'],
 };
 const GENERIC_COMPANIES = ['Google', 'Amazon', 'Deloitte', 'JPMorgan', 'Lockheed Martin', 'UF Health', 'Disney', 'PwC'];
 
@@ -81,8 +89,16 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
     return '';
   }, [user, existingProfile]);
 
+  const initialRoles = useMemo(() => {
+    if (existingProfile?.target_role) {
+      return existingProfile.target_role.split(', ').filter(r => ROLE_TYPES.includes(r));
+    }
+    return [];
+  }, [existingProfile]);
+
   const [data, setData] = useState({
     target_industry: initialIndustries,
+    target_role: initialRoles,
     target_companies: (existingProfile?.target_companies || []).map(titleCase),
     career_timeline: initialTimeline,
     current_stage: existingProfile?.current_stage || '',
@@ -99,9 +115,19 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
   const currentStep = STEPS[step];
   const progress = ((step + 1) / STEPS.length) * 100;
 
+  const toggleRole = (role) => {
+    setData(prev => ({
+      ...prev,
+      target_role: prev.target_role.includes(role)
+        ? prev.target_role.filter(r => r !== role)
+        : [...prev.target_role, role],
+    }));
+  };
+
   const canProceed = () => {
     switch (currentStep.id) {
       case 'industry': return data.target_industry.length > 0;
+      case 'role_type': return data.target_role.length > 0;
       case 'companies': return explorerMode ? companySizePref !== '' : data.target_companies.length > 0;
       case 'timeline': return data.career_timeline !== '';
       case 'stage': return data.current_stage !== '';
@@ -142,6 +168,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       const profileData = {
         target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
         target_industry: data.target_industry.join(', '),
+        target_role: data.target_role.join(', '),
         career_timeline: data.career_timeline,
         biggest_challenge: data.biggest_challenge,
         current_stage: data.current_stage,
@@ -157,7 +184,6 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       if (data.greek_organization) {
         profileData.greek_organization = data.greek_organization;
       }
-      // Save resume if provided (resumeText === null means skip)
       if (resumeText) {
         profileData.resume_text = resumeText;
       }
@@ -189,6 +215,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       const profileData = {
         target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
         target_industry: data.target_industry.join(', '),
+        target_role: data.target_role.join(', '),
         career_timeline: data.career_timeline,
         biggest_challenge: data.biggest_challenge,
         current_stage: data.current_stage,
@@ -287,23 +314,53 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
             <h2 className="text-2xl font-bold text-white mb-2">{currentStep.title}</h2>
             <p className="text-white/60 text-sm mb-8">{currentStep.subtitle}</p>
 
-            {/* Step 1: Industry Chips */}
+            {/* Step 1: Industry Chips (multi-select) */}
             {currentStep.id === 'industry' && (
-              <div className="flex flex-wrap gap-2">
-                {INDUSTRIES.map(ind => (
-                  <button
-                    key={ind}
-                    onClick={() => toggleIndustry(ind)}
-                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-                      data.target_industry.includes(ind)
-                        ? 'bg-[#FA4616] text-white shadow-md'
-                        : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/10'
-                    }`}
-                    style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
-                  >
-                    {ind}
-                  </button>
-                ))}
+              <div>
+                <div className="flex flex-wrap gap-2">
+                  {INDUSTRIES.map(ind => (
+                    <button
+                      key={ind}
+                      onClick={() => toggleIndustry(ind)}
+                      className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
+                        data.target_industry.includes(ind)
+                          ? 'bg-[#FA4616] text-white shadow-md'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/10'
+                      }`}
+                      style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
+                {data.target_industry.length > 0 && (
+                  <p className="text-white/40 text-xs mt-3">{data.target_industry.length} selected</p>
+                )}
+              </div>
+            )}
+
+            {/* Step 1.5: Role Type Chips (multi-select) */}
+            {currentStep.id === 'role_type' && (
+              <div>
+                <div className="flex flex-wrap gap-2">
+                  {ROLE_TYPES.map(role => (
+                    <button
+                      key={role}
+                      onClick={() => toggleRole(role)}
+                      className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
+                        data.target_role.includes(role)
+                          ? 'bg-[#FA4616] text-white shadow-md'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/10'
+                      }`}
+                      style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+                {data.target_role.length > 0 && (
+                  <p className="text-white/40 text-xs mt-3">{data.target_role.length} selected</p>
+                )}
               </div>
             )}
 
