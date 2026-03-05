@@ -13,46 +13,8 @@ import ParentWeeklySummary from '../fastiq/parent/ParentWeeklySummary';
 import ParentNudgeButton from '../fastiq/parent/ParentNudgeButton';
 import moment from 'moment';
 
-const fade = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
-
-const STAT_CONFIG = [
-  { icon: Building2, label: 'TARGETS LOCKED', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
-  { icon: Users, label: 'INSIDERS FOUND', color: '#FA4616', bg: 'rgba(250,70,22,0.12)' },
-  { icon: MessageSquare, label: 'MESSAGES DEPLOYED', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-  { icon: Map, label: 'WARM PATHS MAPPED', color: '#A855F7', bg: 'rgba(168,85,247,0.12)' },
-];
-
-function ParentStatCard({ config, value, delay }) {
-  const { icon: Icon, label, color, bg } = config;
-  const hasValue = value > 0;
-  return (
-    <motion.div {...fade} transition={{ duration: 0.25, delay }}>
-      <div className="rounded-lg p-4" style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)', borderLeft: `3px solid ${color}` }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: bg }}>
-            <Icon className="w-[18px] h-[18px]" style={{ color }} />
-          </div>
-          <div>
-            <p className="text-[28px] font-bold tracking-tight leading-none mb-0.5" style={{ color: hasValue ? color : 'rgba(255,255,255,0.35)' }}>
-              <AnimatedCounter value={value} />
-            </p>
-            <p className="text-[9px] text-slate-400 uppercase tracking-[0.12em] font-semibold">{label}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ── Active student view ──
-function ActiveStudentView({ studentProfile, studentName, onOpenChat }) {
-  const statValues = [
-    studentProfile.companies_researched || 0,
-    studentProfile.alumni_discovered || 0,
-    studentProfile.messages_drafted || 0,
-    studentProfile.roadmaps_generated || 0,
-  ];
-
+// ── Active student progress dashboard ──
+function ActiveStudentView({ studentProfile, studentName, studentEmail, parentUser, pipelineCounts, intelCache, alumniCounts, activities, weeklyStats }) {
   return (
     <motion.div className="min-h-screen" style={{ background: '#0F172A' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Hero */}
@@ -64,53 +26,33 @@ function ActiveStudentView({ studentProfile, studentName, onOpenChat }) {
             <span className="text-[11px] font-semibold text-green-400 uppercase tracking-wider">Active</span>
           </div>
           <h1 className="text-[26px] sm:text-[34px] font-extrabold text-white mb-2 tracking-tight" style={{ lineHeight: 1.15 }}>
-            {studentName ? `${studentName}'s FASTIQ™ is active.` : "Your student's FASTIQ™ is active."}
+            FASTIQ is active for {studentName || 'your student'}
           </h1>
-          <p className="text-[15px] text-white/55 max-w-md mx-auto leading-relaxed mb-6">
-            They're building insider access to their dream companies — here's their progress.
+          <p className="text-[15px] text-white/55 max-w-md mx-auto leading-relaxed">
+            {studentName || 'Your student'} is using their personal career center
           </p>
-          {onOpenChat && (
-            <motion.button
-              onClick={() => onOpenChat()}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
-              style={{ background: '#FA4616', boxShadow: '0 0 30px rgba(250,70,22,0.35)', minHeight: 'auto' }}
-            >
-              <Sparkles className="w-5 h-5" /> Try FASTIQ Chat
-            </motion.button>
-          )}
         </motion.div>
       </div>
 
-      {/* Stats */}
+      {/* Dashboard content */}
       <div className="max-w-2xl mx-auto px-4 pb-20 space-y-8 pt-8">
-        <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">Progress Dashboard</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {STAT_CONFIG.map((cfg, i) => (
-            <ParentStatCard key={cfg.label} config={cfg} value={statValues[i]} delay={0.1 + i * 0.05} />
-          ))}
+        <ParentProgressRings profile={studentProfile} />
+        <ParentPipelineSummary counts={pipelineCounts} studentName={studentName} />
+        <ParentTargetCompanies
+          companies={studentProfile.target_companies}
+          intelCache={intelCache}
+          alumniCounts={alumniCounts}
+        />
+        <ParentActivityFeed activities={activities} />
+        <ParentWeeklySummary studentName={studentName} weeklyStats={weeklyStats} />
+        <ParentNudgeButton studentName={studentName} studentEmail={studentEmail} parentUser={parentUser} />
+
+        {/* Footer message */}
+        <div className="rounded-xl p-5 text-center" style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="text-[13px] text-slate-400 leading-relaxed">
+            FASTIQ is {studentName || 'your student'}'s personal career center. It works for them 24/7 — researching companies, finding alumni, and keeping them on track. The best thing you can do is encourage them to use it.
+          </p>
         </div>
-
-        {/* Target companies */}
-        {studentProfile.target_companies?.length > 0 && (
-          <div>
-            <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-3">Target Companies</h2>
-            <div className="space-y-2">
-              {studentProfile.target_companies.map(c => (
-                <div key={c} className="rounded-lg p-4 flex items-center gap-3" style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <Building2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span className="text-sm font-medium text-white capitalize">{c}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {studentProfile.target_industry && (
-          <div className="rounded-lg p-4" style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Target Industry</p>
-            <p className="text-sm text-white font-medium capitalize">{studentProfile.target_industry}</p>
-          </div>
-        )}
       </div>
     </motion.div>
   );
