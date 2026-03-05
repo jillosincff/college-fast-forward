@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
 import { base44 } from '@/api/base44Client';
 import { CompanyIntelCard, AlumniListCard, OutreachDraftCard } from './RichCards';
+import SuggestedActions from './SuggestedActions';
 import RoadmapTimelineCard from './RoadmapTimelineCard';
 import CompanySuggestionsCard from './CompanySuggestionsCard';
 import WarmPathCard from './WarmPathCard';
