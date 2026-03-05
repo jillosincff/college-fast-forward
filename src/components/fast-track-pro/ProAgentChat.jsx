@@ -159,8 +159,8 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     }
   };
 
-  // Start a conversational opener: show user message + instant assistant reply, no API call
-  const startConversation = (openerKey) => {
+  // P3 FIX: Start a conversational opener and persist both messages to DB for context
+  const startConversation = async (openerKey) => {
     const opener = getConversationalOpener(openerKey, currentProfile);
     if (!opener) return;
     setMessages(prev => [
@@ -168,9 +168,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       { role: 'user', content: opener.userMessage },
       { role: 'assistant', content: opener.assistantMessage, message_type: 'text' },
     ]);
-    // Persist both messages for context tracking
-    persistMessage('user', opener.userMessage, 'text');
-    persistMessage('assistant', opener.assistantMessage, 'text');
+    // Persist both messages to DB so backend has context for the follow-up
+    await persistMessage('user', opener.userMessage, 'text');
+    await persistMessage('assistant', opener.assistantMessage, 'text');
   };
 
   const sendMessage = async (messageText) => {

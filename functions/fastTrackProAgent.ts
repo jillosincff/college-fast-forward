@@ -837,7 +837,7 @@ RULES:
 //  REPLY HELP HANDLER
 // ═══════════════════════════════════════════════════════════
 
-async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext) {
+async function handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext, studentMajor, studentGradYear) {
   console.log('Intent: reply_help');
   let contactName = '', contactCompany = '', pipelineRecord = null;
   // Match "from [Name] at [Company]" — capture name before "at", company after
@@ -1919,7 +1919,7 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
 
     // 14. REPLY HELP — student got a reply and needs help responding
     if (detectReplyHelp(resolvedMessage)) {
-      return await handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext);
+      return await handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext, studentMajor, studentGradYear);
     }
 
     // 15-17: OFFER, NETWORK THANK — handled by extracted helper
