@@ -2,6 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { PulseDot } from './LiveTickerBar';
 import ProgressRing from './ProgressRing';
 
+function HeroStatusLineInline({ lines = [] }) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  const safeLines = lines && lines.length > 0 ? lines : ['⚡ FASTIQ is scanning the market for you'];
+
+  useEffect(() => {
+    if (safeLines.length <= 1) return;
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setCurrentIdx(prev => (prev + 1) % safeLines.length);
+        setVisible(true);
+      }, 500);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [safeLines.length]);
+
+  return (
+    <div style={{ height: 20, marginTop: 10, display: 'flex', alignItems: 'center' }}>
+      <span style={{
+        fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 500,
+        transition: 'opacity 0.4s ease-in-out',
+        opacity: visible ? 1 : 0,
+      }}>
+        {safeLines[currentIdx % safeLines.length]}
+      </span>
+    </div>
+  );
+}
+
 export default function HeroSection({ userName, user, profile, statValues, onOpenChat, statusLines }) {
   const major = user?.major || user?.student_major || profile?.target_industry || '';
   const gradYear = user?.graduation_year || '';
