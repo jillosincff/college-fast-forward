@@ -6,17 +6,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * Tiers:
  * - Founding (1-1000): FREE FOREVER
  * - Early Adopter (1001-5000): $9/month FOREVER
- * - Standard (5001+): $19/month
+ * - Standard (5001+): $29/month
  */
 
 const FOUNDING_LIMIT = 1000;
 const EARLY_ADOPTER_LIMIT = 5000;
 const EARLY_ADOPTER_PRICE = 900; // cents
-const STANDARD_PRICE = 1900; // cents
+const STANDARD_PRICE = 2900; // cents
 
 // Stripe Price IDs (from Stripe dashboard)
 const STRIPE_PRICE_EARLY_ADOPTER = 'price_1SUJ2g873TV7WMcTBYvmzGYU'; // $9/month
-const STRIPE_PRICE_STANDARD = 'price_1SUJ7I873TV7WMcT1plkAZpz'; // $19/month
+const STRIPE_PRICE_STANDARD = 'price_1SUJ7I873TV7WMcT1plkAZpz'; // $29/month
 
 Deno.serve(async (req) => {
   try {
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
       requires_payment: requiresPayment,
       spots_remaining: spotsRemaining,
       next_tier: tier === 'founding' ? 'early_adopter' : tier === 'early_adopter' ? 'standard' : null,
-      next_tier_price: tier === 'founding' ? '$9/month' : tier === 'early_adopter' ? '$19/month' : null,
+      next_tier_price: tier === 'founding' ? '$9/month' : tier === 'early_adopter' ? '$29/month' : null,
       
       // Messaging for UI
       urgency_message: tier === 'founding' 
