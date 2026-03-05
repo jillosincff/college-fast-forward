@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PulseDot } from './LiveTickerBar';
 import ProgressRing from './ProgressRing';
 
-export default function HeroSection({ userName, user, profile, statValues, onOpenChat }) {
+export default function HeroSection({ userName, user, profile, statValues, onOpenChat, statusLines }) {
   const major = user?.major || user?.student_major || profile?.target_industry || '';
   const gradYear = user?.graduation_year || '';
   const industry = profile?.target_industry || '';
