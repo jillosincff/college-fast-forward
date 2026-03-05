@@ -1540,7 +1540,7 @@ The student specifically searched for alumni at ${alumniCompany}. Every alum fou
 SCORING TIERS:
 - FLOOR: 50% — Any UF alum at this company, regardless of role (they're a fellow Gator at a company the student cares about)
 - SAME INDUSTRY as student's target (${profile.target_industry || 'their field'}): 60%+
-- RELEVANT DEPARTMENT for student's major (${user.major || 'their major'}): 70%+
+- RELEVANT DEPARTMENT for student's major (${studentMajor}): 70%+
 - REACHABLE ROLE the student could realistically contact (similar function, approachable seniority): 80%+
 - PERFECT MATCH (relevant dept + reachable + senior enough to refer): 85-95%
 
@@ -1656,7 +1656,7 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       console.log('Intent: opportunity_discovery');
       const sizePref = { large: 'large corporation', mid_size: 'mid-size company', startup: 'startup' }[profile.company_size_preference] || '';
       const industry = profile.target_industry || 'any industry';
-      const major = user.major || 'their field';
+      const major = studentMajor;
       const locPref = profile.location_preference || '';
 
       const webResult = await base44.integrations.Core.InvokeLLM({

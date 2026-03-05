@@ -136,24 +136,27 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
     }
   }, [initialMessage]);
 
-  const buildConversationHistory = (extraMsg) => {
-    const all = [...messages];
-    if (extraMsg) all.push(extraMsg);
-    return all
-      .slice(-10)
-      .map(m => `${m.role === 'user' ? 'Student' : 'Agent'}: ${m.content}`)
-      .join('\n\n');
-  };
+  // P2 FIX: Removed buildConversationHistory — backend now uses DB as single source of truth
 
-  // Persist a message to ProAgentConversation for context tracking
-  const persistMessage = (role, content, messageType) => {
+  // P2 FIX: Persist messages with retry on failure
+  const persistMessage = async (role, content, messageType) => {
     if (!user?.email) return;
-    base44.entities.ProAgentConversation.create({
+    const payload = {
       user_email: user.email,
       role,
       content: (content || '').substring(0, 2000),
       message_type: messageType || 'text',
-    }).catch(e => console.log('Failed to persist message:', e.message));
+    };
+    try {
+      await base44.entities.ProAgentConversation.create(payload);
+    } catch (e) {
+      console.warn('Persist message failed, retrying:', e.message);
+      try {
+        await base44.entities.ProAgentConversation.create(payload);
+      } catch (e2) {
+        console.error('Persist message failed after retry:', e2.message);
+      }
+    }
   };
 
   // Start a conversational opener: show user message + instant assistant reply, no API call
@@ -195,9 +198,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       const timeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), 45000)
       );
+      // P2 FIX: No longer sending conversation_history — backend reads from DB
       const call = fastTrackProAgent({
         message: text,
-        conversation_history: buildConversationHistory(userMessage),
       });
       const res = await Promise.race([call, timeout]);
 

@@ -359,16 +359,14 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
   );
 }
 
+// P1 FIX: Use local state for message/subject instead of mutating props
 export function OutreachDraftCard({ data, onSendMessage }) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedMessage, setEditedMessage] = useState(data?.message || '');
-  const [editedSubject, setEditedSubject] = useState(data?.subject || '');
+  const [currentMessage, setCurrentMessage] = useState(data?.message || '');
+  const [currentSubject, setCurrentSubject] = useState(data?.subject || '');
 
   if (!data) return null;
-
-  const currentMessage = isEditing ? editedMessage : (data.message || '');
-  const currentSubject = isEditing ? editedSubject : (data.subject || '');
 
   const handleCopy = () => {
     const fullText = currentSubject
@@ -381,8 +379,6 @@ export function OutreachDraftCard({ data, onSendMessage }) {
   };
 
   const handleSaveEdit = () => {
-    data.message = editedMessage;
-    data.subject = editedSubject;
     setIsEditing(false);
   };
 
@@ -408,15 +404,15 @@ export function OutreachDraftCard({ data, onSendMessage }) {
         <div className="space-y-2 mb-3">
           {data.channel === 'Email' && (
             <input
-              value={editedSubject}
-              onChange={(e) => setEditedSubject(e.target.value)}
+              value={currentSubject}
+              onChange={(e) => setCurrentSubject(e.target.value)}
               className="w-full text-xs border border-orange-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400"
               placeholder="Subject line..."
             />
           )}
           <textarea
-            value={editedMessage}
-            onChange={(e) => setEditedMessage(e.target.value)}
+            value={currentMessage}
+            onChange={(e) => setCurrentMessage(e.target.value)}
             rows={8}
             className="w-full text-sm border border-orange-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 resize-y leading-relaxed"
           />
@@ -453,8 +449,8 @@ export function OutreachDraftCard({ data, onSendMessage }) {
             </Button>
             <Button
               onClick={() => {
-                setEditedMessage(data.message || '');
-                setEditedSubject(data.subject || '');
+                setCurrentMessage(data.message || '');
+                setCurrentSubject(data.subject || '');
                 setIsEditing(false);
               }}
               variant="ghost"
