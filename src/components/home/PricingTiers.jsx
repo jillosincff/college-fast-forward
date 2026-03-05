@@ -123,10 +123,10 @@ function FastIQTier({ onCTA }) {
         <h3 className="text-lg font-bold text-slate-900 mb-1">FASTIQ™</h3>
         <p className="text-sm text-slate-500 mb-4">Your unfair advantage</p>
         <div className="flex items-baseline justify-center gap-2 mb-1">
-          <span className="text-4xl md:text-5xl font-extrabold text-slate-900">$19</span>
+          <span className="text-4xl md:text-5xl font-extrabold text-slate-900">$29</span>
           <span className="text-slate-500 font-medium">/month</span>
         </div>
-        <p className="text-[#FA4616] font-semibold text-sm mb-6">or $149/year — save 35%</p>
+        <p className="text-[#FA4616] font-semibold text-sm mb-6">or $249/year — save 28%</p>
 
         <p className="text-left text-sm text-slate-700 font-bold mb-3">
           Everything in CFF Membership, plus:

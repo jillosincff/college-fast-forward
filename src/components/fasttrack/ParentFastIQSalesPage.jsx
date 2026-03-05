@@ -193,19 +193,74 @@ function ComparisonSection() {
   );
 }
 
+// ── SECTION 3.5: COST COMPARISON TABLE ──
+const COST_ROWS = [
+  { service: 'Career coaching', typical: '$200–400/session', fastiq: 'Unlimited' },
+  { service: 'Resume review', typical: '$100–250 per review', fastiq: 'Unlimited + job-tailored' },
+  { service: 'Interview prep', typical: '$150–300/session', fastiq: 'Unlimited + company-specific' },
+  { service: 'LinkedIn optimization', typical: '$200–500 one-time', fastiq: 'Continuous' },
+  { service: 'Job search CRM', typical: '$15–30/month', fastiq: 'Built in' },
+  { service: 'Salary research', typical: '$30/month', fastiq: 'Built in' },
+  { service: 'Alumni network access', typical: 'Priceless', fastiq: 'Entire web + CFF network' },
+];
+
+function CostComparisonSection() {
+  return (
+    <div style={{ background: '#F8FAFC' }}>
+      <AnimatedSection className="max-w-3xl mx-auto px-5 py-16 sm:py-20">
+        <motion.p variants={fadeUp} className="text-center text-[11px] font-bold text-blue-600 uppercase tracking-[0.15em] mb-2">Value</motion.p>
+        <motion.h2 variants={fadeUp} className="text-center text-[24px] sm:text-[32px] font-extrabold text-slate-900 mb-10 tracking-tight">
+          What $29/month replaces
+        </motion.h2>
+        <motion.div variants={fadeUp} className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+          {/* Header */}
+          <div className="grid grid-cols-3 gap-0 bg-slate-50 border-b border-slate-200 px-5 py-3">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Service</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Typical Cost</span>
+            <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider text-center">With FASTIQ</span>
+          </div>
+          {/* Rows */}
+          {COST_ROWS.map((row, i) => (
+            <div key={i} className={`grid grid-cols-3 gap-0 px-5 py-3.5 items-center ${i < COST_ROWS.length - 1 ? 'border-b border-slate-100' : ''}`}>
+              <span className="text-[13px] text-slate-800 font-medium">{row.service}</span>
+              <span className="text-[13px] text-slate-500 text-center">{row.typical}</span>
+              <span className="text-[13px] text-green-700 font-semibold text-center flex items-center justify-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0" /> {row.fastiq}
+              </span>
+            </div>
+          ))}
+          {/* Total row */}
+          <div className="grid grid-cols-3 gap-0 px-5 py-4 bg-slate-50 border-t border-slate-200">
+            <span className="text-[14px] text-slate-900 font-bold">Total if separate</span>
+            <span className="text-[14px] text-red-600 font-bold text-center">$1,000+/month</span>
+            <span className="text-[14px] text-green-700 font-extrabold text-center">$29/month</span>
+          </div>
+        </motion.div>
+        <motion.p variants={fadeUp} className="text-center text-[14px] text-slate-600 mt-6 max-w-lg mx-auto leading-relaxed font-medium">
+          Your student's tuition already paid for the degree. FASTIQ makes sure they actually use it.
+        </motion.p>
+      </AnimatedSection>
+    </div>
+  );
+}
+
 // ── SECTION 4: THE ASK ──
 function CTASection({ user, studentName, familyId }) {
   const [checkingOut, setCheckingOut] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('monthly');
 
   const handleCheckout = async () => {
     setCheckingOut(true);
     try {
       const baseUrl = window.location.origin;
+      const priceId = selectedPlan === 'annual'
+        ? 'price_fastiq_annual_249'
+        : 'price_1SUJ7I873TV7WMcT1plkAZpz';
       const res = await base44.functions.invoke('createCheckoutSession', {
-        priceId: 'price_1SUJ2g873TV7WMcTBYvmzGYU',
-        successUrl: `${baseUrl}/#FastTrackPro?checkout=success`,
-        cancelUrl: `${baseUrl}/#FastTrackPro?checkout=cancel`,
-        metadata: { subscriptionType: 'parent_fastiq', family_id: familyId },
+        priceId,
+        successUrl: `${baseUrl}/#FastIQ?checkout=success`,
+        cancelUrl: `${baseUrl}/#FastIQ?checkout=cancel`,
+        metadata: { subscriptionType: 'parent_fastiq', family_id: familyId, plan: selectedPlan },
       });
       if (res.data?.url) {
         window.location.href = res.data.url;
@@ -234,11 +289,31 @@ function CTASection({ user, studentName, familyId }) {
         <motion.p variants={fadeUp} className="text-[15px] sm:text-[17px] text-white/55 max-w-lg mx-auto leading-relaxed mb-8">
           For less than the cost of one textbook, FASTIQ gives your student a personal career agent that works around the clock to find them opportunities and warm introductions.
         </motion.p>
+
+        {/* Plan toggle */}
+        <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 mb-6">
+          <button
+            onClick={() => setSelectedPlan('monthly')}
+            className={`px-5 py-2.5 rounded-xl text-[14px] font-bold transition-all ${selectedPlan === 'monthly' ? 'bg-white text-slate-900 shadow-lg' : 'bg-white/10 text-white/60 hover:bg-white/15'}`}
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            $29/month
+          </button>
+          <button
+            onClick={() => setSelectedPlan('annual')}
+            className={`px-5 py-2.5 rounded-xl text-[14px] font-bold transition-all relative ${selectedPlan === 'annual' ? 'bg-white text-slate-900 shadow-lg' : 'bg-white/10 text-white/60 hover:bg-white/15'}`}
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            $249/year
+            <span className="absolute -top-2.5 -right-2 px-1.5 py-0.5 rounded-full bg-green-500 text-[9px] font-bold text-white uppercase">Save 28%</span>
+          </button>
+        </motion.div>
+
         <motion.div variants={fadeUp}>
           <button
             onClick={handleCheckout}
             disabled={checkingOut}
-            className="inline-flex items-center gap-2.5 px-10 py-4.5 rounded-xl text-[16px] font-bold text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+            className="inline-flex items-center gap-2.5 rounded-xl text-[16px] font-bold text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
             style={{
               background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
               boxShadow: '0 0 40px rgba(250,70,22,0.4), 0 4px 20px rgba(250,70,22,0.3)',
@@ -247,7 +322,11 @@ function CTASection({ user, studentName, familyId }) {
             }}
           >
             {checkingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-            {checkingOut ? 'Redirecting to checkout...' : 'Activate FASTIQ — $19/month'}
+            {checkingOut
+              ? 'Redirecting to checkout...'
+              : selectedPlan === 'annual'
+                ? 'Activate FASTIQ — $249/year'
+                : 'Activate FASTIQ — $29/month'}
           </button>
         </motion.div>
         <motion.p variants={fadeUp} className="text-[13px] text-white/40 mt-4">
@@ -268,6 +347,7 @@ export default function ParentFastIQSalesPage({ user, studentName, familyId }) {
       <HookSection />
       <FeaturesSection />
       <ComparisonSection />
+      <CostComparisonSection />
       <CTASection user={user} studentName={studentName} familyId={familyId} />
     </div>
   );
