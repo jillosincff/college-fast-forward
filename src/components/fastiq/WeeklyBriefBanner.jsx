@@ -10,11 +10,16 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief }) {
 
   if (dismissed) return null;
 
-  const { alumniFound = 0, companiesScanned = 0, topSignal, opportunities = 0 } = weeklyStats || {};
+  const { alumniFound = 0, companiesScanned = 0, topSignal, opportunities = 0, entryLevelRoles = 0, internRoles = 0 } = weeklyStats || {};
 
-  // Build display parts — topSignal is already validated at the source (only target companies)
+  // Build display parts — reference entry-level/intern roles, not generic totals
   const parts = [];
-  if (opportunities > 0) parts.push(`${opportunities} new opportunities`);
+  const studentRelevantRoles = entryLevelRoles + internRoles;
+  if (studentRelevantRoles > 0) {
+    parts.push(`${studentRelevantRoles} entry-level/intern role${studentRelevantRoles > 1 ? 's' : ''} found`);
+  } else if (opportunities > 0) {
+    parts.push(`${opportunities} new opportunities`);
+  }
   if (alumniFound > 0) parts.push(`${alumniFound} alumni found`);
   if (companiesScanned > 0) parts.push(`${companiesScanned} companies scanned`);
   if (topSignal) parts.push(`${topSignal} moved to Hot`);

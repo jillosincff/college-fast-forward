@@ -114,11 +114,15 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
               {alumniCount} alumni
             </span>
           )}
-          {researched && intel?.open_roles_count > 0 && (
+          {researched && ((intel?.entry_level_roles_count > 0 || intel?.intern_roles_count > 0) ? (
+            <span style={{ fontSize: 10, color: '#64748B' }}>
+              {(intel.entry_level_roles_count || 0) + (intel.intern_roles_count || 0)} entry-level{intel.open_roles_count ? ` (${intel.open_roles_count} total)` : ''}
+            </span>
+          ) : intel?.open_roles_count > 0 ? (
             <span style={{ fontSize: 10, color: '#64748B' }}>
               {intel.open_roles_count} roles
             </span>
-          )}
+          ) : null)}
         </div>
       </div>
 

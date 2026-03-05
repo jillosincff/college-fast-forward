@@ -59,7 +59,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           </div>
         </div>
 
-        {/* Key stats row */}
+        {/* Key stats row — focused on student-relevant roles */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           {hiringScore !== null && (
             <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
@@ -68,18 +68,25 @@ export function CompanyIntelCard({ data, onSendMessage }) {
               <p className="text-[10px] text-slate-500 uppercase">Hiring Score</p>
             </div>
           )}
-          {openRolesCount !== null && (
-            <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
-              <Briefcase className="w-3.5 h-3.5 mx-auto mb-0.5 text-indigo-600" />
-              <p className="text-lg font-bold text-slate-900">{openRolesCount.toLocaleString()}</p>
-              <p className="text-[10px] text-slate-500 uppercase">Open Roles</p>
-            </div>
-          )}
+          <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
+            <Briefcase className="w-3.5 h-3.5 mx-auto mb-0.5 text-indigo-600" />
+            <p className="text-lg font-bold text-slate-900">
+              {((data.entry_level_roles_count || 0) + (data.intern_roles_count || 0)) || (openRolesCount ?? '—')}
+            </p>
+            <p className="text-[10px] text-slate-500 uppercase">
+              {(data.entry_level_roles_count != null || data.intern_roles_count != null) 
+                ? 'Entry / Intern' 
+                : 'Open Roles'}
+            </p>
+            {openRolesCount != null && (data.entry_level_roles_count != null || data.intern_roles_count != null) && (
+              <p className="text-[9px] text-slate-400 mt-0.5">{openRolesCount} total</p>
+            )}
+          </div>
           {data.salary_range && (
             <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
               <DollarSign className="w-3.5 h-3.5 mx-auto mb-0.5 text-green-600" />
               <p className="text-sm font-bold text-slate-900">{String(data.salary_range)}</p>
-              <p className="text-[10px] text-slate-500 uppercase">Salary Range</p>
+              <p className="text-[10px] text-slate-500 uppercase">Entry Salary</p>
             </div>
           )}
         </div>

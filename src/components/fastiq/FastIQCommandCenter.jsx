@@ -25,7 +25,12 @@ function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   const repliedCount = (pipelineData || []).filter(p => p.status === 'replied').length;
   const interviewCount = (pipelineData || []).filter(p => p.status === 'interview').length;
   if (staleCount > 0) lines.push(`⏰ ${staleCount} contact${staleCount > 1 ? 's' : ''} waiting for follow-up`);
-  if ((newOpportunities || []).length > 0) lines.push(`🔥 ${newOpportunities.length} new opportunit${newOpportunities.length > 1 ? 'ies' : 'y'} scouted this week`);
+  const studentRoles = (weeklyStats?.entryLevelRoles || 0) + (weeklyStats?.internRoles || 0);
+  if (studentRoles > 0) {
+    lines.push(`🔥 ${studentRoles} entry-level/intern role${studentRoles > 1 ? 's' : ''} found at your targets`);
+  } else if ((newOpportunities || []).length > 0) {
+    lines.push(`🔥 ${newOpportunities.length} new opportunit${newOpportunities.length > 1 ? 'ies' : 'y'} scouted this week`);
+  }
   if (identifiedCount > 0) lines.push(`🔍 ${identifiedCount} alumni identified across your targets`);
   if (repliedCount > 0) lines.push(`💬 ${repliedCount} alumni have replied to your outreach`);
   if (interviewCount > 0) lines.push(`📅 ${interviewCount} interview${interviewCount > 1 ? 's' : ''} in your pipeline`);
@@ -132,11 +137,21 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       );
       const topSignalName = hotTargetCompany ? titleCase(String(hotTargetCompany.company_name || '').trim()) : null;
       
+      // Compute entry-level role counts across target companies for the banner
+      let entryLevelTotal = 0;
+      let internTotal = 0;
+      Object.values(iMap).forEach(i => {
+        entryLevelTotal += (i.entry_level_roles_count || 0);
+        internTotal += (i.intern_roles_count || 0);
+      });
+
       setWeeklyStats({
         opportunities: weekOps || oppsRaw.length,
         alumniFound: alumniFound || alumniRaw.length,
         companiesScanned: companiesScanned || Object.keys(iMap).length,
         topSignal: isValidCompanyName(topSignalName) ? topSignalName : null,
+        entryLevelRoles: entryLevelTotal,
+        internRoles: internTotal,
       });
     };
     load();

@@ -34,9 +34,19 @@ Deno.serve(async (req) => {
         const location = location_preference || 'any location in the US';
         const industry = target_industry || 'any industry';
 
-        // Search for new opportunities via web-connected LLM
+        // Search for new opportunities via web-connected LLM — ENTRY-LEVEL/INTERN ONLY
         const searchResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Find new job postings and internships posted in the last 48 hours for ${industry} roles. Location preference: ${location}. Focus on entry-level and intern positions suitable for a college student or recent graduate at the "${current_stage || 'exploring'}" stage. ${companiesList ? `Also check for new postings at these specific companies: ${companiesList}.` : ''} Return up to 8 of the most relevant opportunities. For each, provide: company name, role title, posting date (ISO format or approximate), location, a direct application link if available, and a brief 1-sentence reason why this is relevant to a ${industry} student.`,
+          prompt: `Find new entry-level and internship job postings posted in the last 48 hours for ${industry} roles. Location preference: ${location}.
+
+CRITICAL FILTER: ONLY include positions suitable for a college student or recent graduate:
+- Entry-level roles (0-2 years experience required)
+- Internship programs
+- New grad programs
+- Associate/junior level positions
+
+Do NOT include: senior roles, manager roles, director roles, VP roles, or any position requiring 3+ years of experience. These are irrelevant to this student.
+
+Student is at the "${current_stage || 'exploring'}" stage. ${companiesList ? `Also check for new postings at these specific companies: ${companiesList}.` : ''} Return up to 8 of the most relevant ENTRY-LEVEL/INTERN opportunities only. For each, provide: company name, role title, posting date (ISO format or approximate), location, a direct application link if available, and a brief 1-sentence reason why this is relevant to a ${industry} student.`,
           add_context_from_internet: true,
           response_json_schema: {
             type: "object",
