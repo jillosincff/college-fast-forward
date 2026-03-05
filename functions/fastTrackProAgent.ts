@@ -1805,141 +1805,15 @@ Be direct, warm, and strategic. Never dump data — always tell them what it MEA
       return await handleReplyHelp(base44, user, profile, resolvedMessage, pipelineData, profileContext);
     }
 
-    // 15. THANK-YOU NOTE (after interview)
+    // 15-17: THANK-YOU, OFFER, NETWORK THANK — handled by extracted helper
     if (detectThankYouNote(resolvedMessage)) {
-      console.log('Intent: thank_you_note');
-      const companyMatch = resolvedMessage.match(/(?:at|for|with)\s+(\w[\w\s&.''-]{1,40})/i);
-      const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Draft a personalized thank-you email after an interview.
-
-${profileContext}
-
-Request: "${resolvedMessage}"
-Company: ${company}
-
-RULES:
-1. Reference SPECIFIC topics from the interview (ask the student to provide bullet points if not included in their message)
-2. Reiterate enthusiasm for the role and company
-3. Include one specific detail that shows you were paying attention
-4. Keep it concise — 3-4 short paragraphs
-5. Professional but genuine tone
-6. Include a forward-looking statement ("I'm excited about the possibility of contributing to...")
-7. Sign with full name and contact info`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            recipient: { type: "string" }, channel: { type: "string" },
-            subject: { type: "string" }, message_body: { type: "string" }
-          },
-          required: ["response", "message_body"]
-        }
-      });
-
-      trackActivity(base44, user.email, profile.id, 'message_draft', company);
-      return Response.json({
-        success: true, response: result.response || `Here's your thank-you note:`,
-        message_type: 'outreach_draft',
-        payload: { recipient: result.recipient || 'Interviewer', recipient_title: '', recipient_company: company, channel: result.channel || 'Email', subject: result.subject || `Thank you — ${company} Interview`, message: result.message_body || '', ask_type: 'thank_you' }
-      });
+      return await handleThankYouNote(base44, user, profile, resolvedMessage, pipelineData, targetCompanies, profileContext);
     }
-
-    // 16. OFFER EVALUATION & NEGOTIATION
     if (detectOfferNegotiation(resolvedMessage)) {
-      console.log('Intent: offer_negotiation');
-      const companyMatch = resolvedMessage.match(/(?:offer\s+from|at|with)\s+(\w[\w\s&.''-]{1,40})/i);
-      const company = companyMatch?.[1]?.trim() || targetCompanies[0] || '';
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. A student just received a job offer! Help them evaluate and negotiate.
-
-${profileContext}
-
-Request: "${resolvedMessage}"
-Company: ${company || 'the company'}
-
-INSTRUCTIONS:
-1. First CELEBRATE — this is a big deal!
-2. Research the salary range for this role and level at this company and in this market
-3. Identify negotiation leverage points (competing offers, unique skills, market data)
-4. Provide a specific negotiation script/email template
-5. List what to negotiate beyond salary (signing bonus, start date, PTO, remote work, stock/equity, professional development budget)
-6. Provide a timeline: when to respond, when to negotiate, when to accept
-7. Include a "what to say if they say no" script`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            role: { type: "string" }, location: { type: "string" },
-            salary_range: { type: "string" }, median_salary: { type: "string" },
-            negotiation_tips: { type: "array", items: { type: "string" } },
-            sample_script: { type: "string" },
-            beyond_salary: { type: "array", items: { type: "string" } },
-            suggested_actions: { type: "array", items: { type: "string" } }
-          },
-          required: ["response", "salary_range", "negotiation_tips", "sample_script"]
-        }
-      });
-
-      return Response.json({
-        success: true, response: result.response || "Congratulations! Here's your negotiation strategy:",
-        message_type: 'salary_intel',
-        payload: { ...result, company: company }
-      });
+      return await handleOfferNegotiation(base44, user, profile, resolvedMessage, pipelineData, targetCompanies, profileContext);
     }
-
-    // 17. NETWORK THANK-YOU (thank everyone who helped)
     if (detectNetworkThankYou(resolvedMessage)) {
-      console.log('Intent: network_thank_you');
-      // Find all contacts who helped (replied, interview, or offer status)
-      const helpfulContacts = pipelineData.filter(p => ['replied', 'interview', 'offer'].includes(p.status));
-
-      if (helpfulContacts.length === 0) {
-        return Response.json({
-          success: true,
-          response: "It looks like you don't have any alumni contacts marked as 'replied' or 'interview' in your pipeline yet. Once you start getting responses, I can help you draft personalized thank-you messages to everyone who helped!",
-          message_type: 'career_advice',
-          payload: { suggested_actions: ['Research a target company', 'Find UF alumni at your dream companies'] }
-        });
-      }
-
-      const contactsList = helpfulContacts.map(c => `- ${c.alumni_name} at ${c.company} (${c.status})`).join('\n');
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. The student wants to thank everyone who helped them in their job search.
-
-${profileContext}
-
-CONTACTS WHO HELPED:
-${contactsList}
-
-INSTRUCTIONS:
-1. For EACH contact, draft a SHORT personalized thank-you message (2-3 sentences)
-2. Reference what they specifically helped with (based on their status: replied = initial advice, interview = referral/connection, offer = advocacy)
-3. Include the outcome if applicable (got the offer, learned something valuable, etc.)
-4. Make each message feel personal, not templated
-5. Sign with first name
-
-Return ALL messages in the response field, clearly separated with the contact name as a header.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string", description: "All thank-you messages formatted with headers" },
-            suggested_actions: { type: "array", items: { type: "string" } }
-          },
-          required: ["response"]
-        }
-      });
-
-      return Response.json({
-        success: true,
-        response: result.response || "Here are thank-you messages for your network:",
-        message_type: 'career_advice',
-        payload: { suggested_actions: result.suggested_actions || ['Copy and send these messages', 'Update your pipeline status'] }
-      });
+      return await handleNetworkThankYou(base44, user, profile, resolvedMessage, pipelineData, profileContext);
     }
 
     // 18. CAREER ADVICE (DEFAULT FALLBACK)
