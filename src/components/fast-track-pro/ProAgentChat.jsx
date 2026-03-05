@@ -18,6 +18,9 @@ import CoverLetterCard from './CoverLetterCard';
 import LinkedInReviewCard from './LinkedInReviewCard';
 import BatchTargetScanCard from './BatchTargetScanCard';
 import ReplyResponseCard from './ReplyResponseCard';
+import ThankYouNoteCard from './ThankYouNoteCard';
+import OfferCelebrationCard from './OfferCelebrationCard';
+import NetworkThankYouCard from './NetworkThankYouCard';
 import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
@@ -44,6 +47,8 @@ function getSuggestedPrompts(profile) {
   prompts.push({ icon: '🗺️', text: "Build my career action plan", category: 'tools' });
   prompts.push({ icon: '💰', text: "What should I negotiate for salary?", category: 'tools' });
   prompts.push({ icon: '🙏', text: "Draft a thank-you note after my interview", category: 'tools' });
+  prompts.push({ icon: '🎉', text: "I got a job offer!", category: 'tools' });
+  prompts.push({ icon: '🤝', text: "Thank everyone who helped me", category: 'tools' });
   prompts.push({ icon: '🧭', text: "Explore career paths for my major", category: 'explore' });
 
   return prompts;
@@ -70,6 +75,9 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'linkedin_review': return <LinkedInReviewCard data={payload} onSendMessage={onSendMessage} />;
     case 'batch_target_scan': return <BatchTargetScanCard data={payload} onResearchCompany={onResearchCompany} onSendMessage={onSendMessage} />;
     case 'reply_response': return <ReplyResponseCard data={payload} onSendMessage={onSendMessage} />;
+    case 'thank_you_note': return <ThankYouNoteCard data={payload} onSendMessage={onSendMessage} />;
+    case 'offer_celebration': return <OfferCelebrationCard data={payload} onSendMessage={onSendMessage} />;
+    case 'network_thank_you': return <NetworkThankYouCard data={payload} onSendMessage={onSendMessage} />;
     case 'career_advice': {
       const actions = payload?.suggested_actions || payload?.suggested_next_steps || payload?.next_steps || [];
       return actions.length > 0 ? (
