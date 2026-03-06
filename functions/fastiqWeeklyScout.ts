@@ -25,7 +25,13 @@ Deno.serve(async (req) => {
       try {
         const { user_email, target_industry, target_companies, location_preference, current_stage } = profile;
 
-        if (!target_industry && (!target_companies || target_companies.length === 0)) {
+        // Skip users with no target companies — nothing to scout
+        if (!target_companies || target_companies.length === 0) {
+          console.log(`Skipping ${user_email} — no target companies set (industry-only is not enough for scouting)`);
+          continue;
+        }
+
+        if (!target_industry && target_companies.length === 0) {
           console.log(`Skipping ${user_email} — no industry or companies set`);
           continue;
         }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React_PLACEHOLDER_TEMP, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Search, Plus, Check, Sparkles, MapPin } from 'lucide-react';

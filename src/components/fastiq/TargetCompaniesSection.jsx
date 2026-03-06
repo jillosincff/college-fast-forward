@@ -196,20 +196,30 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
         }}>
           <span style={{ fontSize: 28 }}>🎯</span>
           <p style={{ fontSize: 13, fontWeight: 600, color: '#64748B', marginTop: 8, marginBottom: 4 }}>
-            Set your target companies
+            Not sure where to start?
           </p>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 14 }}>
-            FASTIQ will monitor hiring, find alumni, and scout opportunities for you
+          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 14, lineHeight: 1.5, maxWidth: 280, marginLeft: 'auto', marginRight: 'auto' }}>
+            Tell FASTIQ what kind of companies you're interested in and it will suggest matches, track hiring signals, and scout opportunities for you.
           </p>
           <button
-            onClick={onAddTargets}
+            onClick={() => onOpenChat('Help me find companies to target')}
             style={{
               padding: '10px 24px', borderRadius: 10, border: 'none',
-              background: '#0021A5', color: '#fff', fontSize: 12, fontWeight: 700,
+              background: 'linear-gradient(135deg, #0021A5, #FA4616)', color: '#fff', fontSize: 12, fontWeight: 700,
               cursor: 'pointer', minHeight: 'auto',
             }}
           >
-            + Add Target Companies
+            Help Me Find Companies →
+          </button>
+          <button
+            onClick={onAddTargets}
+            style={{
+              display: 'block', margin: '10px auto 0', padding: '8px 20px', borderRadius: 8, border: 'none',
+              background: 'transparent', color: '#64748B', fontSize: 11, fontWeight: 600,
+              cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline',
+            }}
+          >
+            I already know my companies
           </button>
         </div>
       </div>

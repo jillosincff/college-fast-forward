@@ -1674,36 +1674,25 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       });
     }
 
-    // 9. OPPORTUNITY DISCOVERY
+    // 9. OPPORTUNITY DISCOVERY (includes guided company discovery for students with no targets)
     if (detectOpportunityDiscovery(resolvedMessage)) {
-      console.log('Intent: opportunity_discovery');
-      const sizePref = { large: 'large corporation', mid_size: 'mid-size company', startup: 'startup' }[profile.company_size_preference] || '';
+      console.log('Intent: opportunity_discovery', targetCompanies.length === 0 ? '(no targets — guided discovery)' : '');
       const industry = profile.target_industry || 'any industry';
       const major = studentMajor;
+      const sizePref = { large: 'large corporation', mid_size: 'mid-size company', startup: 'startup' }[profile.company_size_preference] || '';
       const locPref = profile.location_preference || '';
-
-      const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Find 5-8 companies hiring entry-level ${major} roles in ${industry}${sizePref ? ', focusing on ' + sizePref + ' companies' : ''}${locPref ? ' near ' + locPref : ''}. Student request: "${resolvedMessage}"`,
-        add_context_from_internet: true,
-      });
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ.\n\n${profileContext}\n\nBased on research, suggest 5-8 companies for this ${major} student.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nEvery company MUST have roles for a ${major} graduate. Be realistic.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" },
-            suggestions: { type: "array", items: { type: "object", properties: { company_name: { type: "string" }, reason: { type: "string" }, size: { type: "string", enum: ["large","mid_size","startup"] }, hiring_status: { type: "string", enum: ["actively_hiring","some_openings","unknown"] }, location: { type: "string" } }, required: ["company_name","reason","size","hiring_status"] } }
-          },
-          required: ["response","suggestions"]
-        }
-      });
-
+      // If no targets and missing preferences, ask conversationally first
+      if (targetCompanies.length === 0 && (!profile.company_size_preference || !profile.location_preference)) {
+        let q = `Let's find the right companies for you! I already know you're interested in **${industry}**.`;
+        if (!profile.company_size_preference) q += `\n\nWhat size company appeals to you?\n- 🏢 **Big names** everyone knows (Apple, Google, Disney)\n- 📈 **Mid-size companies** with strong growth\n- 🚀 **Startups** where you'd wear many hats\n- 🤷 **Open to anything**`;
+        if (!profile.location_preference) q += `\n\nAnd location — any preference?\n- 🌴 I want to stay in **Florida**\n- 🌎 **Open to relocating** anywhere\n- 📍 A **specific city** (tell me which)`;
+        q += `\n\nJust tell me and I'll find companies that are actually hiring for your background!`;
+        return Response.json({ success: true, response: q, message_type: 'text', payload: {} });
+      }
+      const webResult = await base44.integrations.Core.InvokeLLM({ prompt: `Find 8-10 companies hiring entry-level ${major} roles in ${industry}${sizePref ? ', focusing on ' + sizePref + ' companies' : ''}${locPref ? ' near ' + locPref : ''}. Student request: "${resolvedMessage}". Focus on companies realistically hiring ${major} majors for ${industry} roles at the entry level.`, add_context_from_internet: true });
+      const result = await base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ.\n\n${profileContext}\n\nBased on research, suggest 8-10 companies for this ${major} student.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nEvery company MUST have roles for a ${major} graduate. Be realistic.${targetCompanies.length === 0 ? ' Emphasize that the student can add any of these to their targets and FASTIQ will start monitoring hiring, finding alumni, and scouting opportunities for them.' : ''}`, response_json_schema: { type: "object", properties: { response: { type: "string" }, suggestions: { type: "array", items: { type: "object", properties: { company_name: { type: "string" }, reason: { type: "string" }, size: { type: "string", enum: ["large","mid_size","startup"] }, hiring_status: { type: "string", enum: ["actively_hiring","some_openings","unknown"] }, location: { type: "string" } }, required: ["company_name","reason","size","hiring_status"] } } }, required: ["response","suggestions"] } });
       trackActivity(base44, user.email, profile.id, 'company_search', industry);
-      return Response.json({
-        success: true, response: result.response || "Here are companies for you:",
-        message_type: 'company_suggestions', payload: { suggestions: result.suggestions || [] }
-      });
+      return Response.json({ success: true, response: result.response || "Here are companies for you:", message_type: 'company_suggestions', payload: { suggestions: result.suggestions || [] } });
     }
 
     // 10. ROADMAP
@@ -1952,28 +1941,15 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
 
     // 18. CAREER ADVICE (DEFAULT FALLBACK)
     console.log('Intent: career_advice (default)');
-    const webResult = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a career research assistant for a UF student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\n${conversation_history ? 'Context:\n' + conversation_history : ''}\n\nProvide detailed, personalized career advice.`,
-      add_context_from_internet: true,
-    });
-
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are FASTIQ, a full-service AI career center for UF students.\n\n${profileContext}\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nRequest: "${resolvedMessage}"\n\nProvide personalized career advice. At the END, suggest 2-3 relevant FASTIQ actions like "Want me to find companies hiring for this?" or "Find UF alumni in this field?"`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          response: { type: "string" },
-          suggested_actions: { type: "array", items: { type: "string" }, description: "2-3 follow-up action suggestions" }
-        },
-        required: ["response"]
-      }
-    });
-
-    return Response.json({
-      success: true, response: result.response || String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,2000),
-      message_type: 'career_advice',
-      payload: { suggested_actions: result.suggested_actions || [] }
-    });
+    const webResult = await base44.integrations.Core.InvokeLLM({ prompt: `You are a career research assistant for a UF student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\n${conversation_history ? 'Context:\n' + conversation_history : ''}\n\nProvide detailed, personalized career advice.`, add_context_from_internet: true });
+    const result = await base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ, a full-service AI career center for UF students.\n\n${profileContext}\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nRequest: "${resolvedMessage}"\n\nProvide personalized career advice. At the END, suggest 2-3 relevant FASTIQ actions.`, response_json_schema: { type: "object", properties: { response: { type: "string" }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response"] } });
+    let careerResp = result.response || String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,2000);
+    const careerActions = result.suggested_actions || [];
+    if (targetCompanies.length === 0) {
+      careerResp += "\n\n---\n\n💡 **By the way**, I noticed you don't have any target companies set yet. If you tell me what kind of companies interest you — size, industry, location, culture — I can suggest some great matches and add them to your targets. Want me to help with that?";
+      if (!careerActions.some(a => a.toLowerCase().includes('find companies'))) careerActions.push('Help me find companies to target');
+    }
+    return Response.json({ success: true, response: careerResp, message_type: 'career_advice', payload: { suggested_actions: careerActions } });
 
   } catch (error) {
     console.error('fastTrackProAgent error:', error.message);
