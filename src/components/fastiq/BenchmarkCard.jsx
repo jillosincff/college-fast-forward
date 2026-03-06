@@ -14,7 +14,13 @@ export default function BenchmarkCard({ profile }) {
 
   // Determine primary message
   let message, emoji, bgGrad;
-  if (alumni === 0 && messages === 0) {
+
+  // No targets = fresh start messaging
+  if (targets === 0) {
+    emoji = '🎯';
+    message = 'Add target companies to start building your stats. FASTIQ will track alumni discovered, messages sent, and companies researched for you.';
+    bgGrad = 'linear-gradient(135deg, rgba(250,70,22,0.06), rgba(0,33,165,0.04))';
+  } else if (alumni === 0 && messages === 0) {
     emoji = '🚀';
     message = `Students using FASTIQ identify an average of ${AVG_ALUMNI_30_DAYS} alumni in their first month. Start by researching your target companies to get ahead.`;
     bgGrad = 'linear-gradient(135deg, rgba(0,33,165,0.06), rgba(250,70,22,0.04))';

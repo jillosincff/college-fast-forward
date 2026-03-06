@@ -18,6 +18,14 @@ import ProfileEditModal from './ProfileEditModal';
 import PastResearchSection from './PastResearchSection';
 
 function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
+  // If no targets, show fresh-start lines only
+  if (weeklyStats?._noTargets) {
+    return [
+      '🎯 Add target companies to activate scanning',
+      '⚡ FASTIQ monitors hiring signals, finds alumni, and scouts jobs for you',
+    ];
+  }
+
   const lines = [];
   const staleCount = (pipelineData || []).filter(p => {
     if (p.status !== 'reached_out' || !p.reached_out_date) return false;
@@ -37,16 +45,9 @@ function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   if (repliedCount > 0) lines.push(`💬 ${repliedCount} alumni have replied to your outreach`);
   if (interviewCount > 0) lines.push(`📅 ${interviewCount} interview${interviewCount > 1 ? 's' : ''} in your pipeline`);
   if (weeklyStats?.companiesScanned > 0) lines.push(`📊 ${weeklyStats.companiesScanned} companies scanned this week`);
-  // topSignal is already validated against target companies in the data loader
   if (weeklyStats?.topSignal) lines.push(`🔥 ${weeklyStats.topSignal} is actively hiring right now`);
   if (lines.length === 0) {
-    const hasTargets = (pipelineData || []).length > 0 || (newOpportunities || []).length > 0;
-    if (!hasTargets) {
-      lines.push('🎯 Add target companies to get personalized intel');
-      lines.push('⚡ FASTIQ monitors hiring signals, finds alumni, and scouts jobs for you');
-    } else {
-      lines.push('⚡ FASTIQ is scanning the market for you');
-    }
+    lines.push('⚡ FASTIQ is scanning the market for you');
   }
   return lines;
 }
@@ -199,11 +200,40 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
     ? rawName.split(',')[1]?.trim().split(' ')[0] || rawName.split(' ')[0] || 'Student'
     : rawName.split(' ')[0] || 'Student';
 
+  // Compute real stat values from live DB-filtered data (not stale profile counters)
+  const [liveInsiders, setLiveInsiders] = useState(0);
+  const [liveMessages, setLiveMessages] = useState(0);
+  const [liveWarmPaths, setLiveWarmPaths] = useState(0);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    const targetNames = (profile?.target_companies || []).map(c => c.toLowerCase());
+    const hasTargets = targetNames.length > 0;
+
+    // Insiders: non-archived alumni at current targets only
+    base44.entities.DiscoveredAlumni.filter({}, '-created_date', 200).then(all => {
+      if (!hasTargets) { setLiveInsiders(0); return; }
+      const count = all.filter(a => a.company && targetNames.includes(a.company.toLowerCase())).length;
+      setLiveInsiders(count);
+    }).catch(() => setLiveInsiders(0));
+
+    // Messages & warm paths: from active pipeline at current targets only
+    base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 200).then(all => {
+      if (!hasTargets) { setLiveMessages(0); setLiveWarmPaths(0); return; }
+      const ACTIVE = ['reached_out', 'replied', 'interview', 'offer'];
+      const WARM = ['replied', 'interview', 'offer'];
+      const atTargets = all.filter(p => p.company && targetNames.includes(p.company.toLowerCase()));
+      const archived = (p) => (p.notes || '').includes('[archived: target removed]');
+      setLiveMessages(atTargets.filter(p => ACTIVE.includes(p.status) && !archived(p)).length);
+      setLiveWarmPaths(atTargets.filter(p => WARM.includes(p.status) && !archived(p)).length);
+    }).catch(() => { setLiveMessages(0); setLiveWarmPaths(0); });
+  }, [user?.email, profile?.target_companies, refreshKey]);
+
   const statValues = {
     targets: profile?.target_companies?.length || 0,
-    insiders: profile?.alumni_discovered || 0,
-    messages: profile?.messages_drafted || 0,
-    warmPaths: profile?.roadmaps_generated || 0,
+    insiders: liveInsiders,
+    messages: liveMessages,
+    warmPaths: liveWarmPaths,
   };
 
   return (

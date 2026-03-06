@@ -9,6 +9,35 @@ export default function WeeklyBriefCard({ stats, pipelineCounts, onOpenChat, ban
           entryLevelRoles = 0, internRoles = 0, messagesDrafted = 0 } = stats || {};
   const { identified = 0, reached_out = 0, replied = 0 } = pipelineCounts || {};
 
+  // If no targets, show fresh-start message
+  const noTargets = stats?._noTargets;
+  if (noTargets) {
+    return (
+      <div className="fiq-animate fiq-delay-7" style={{
+        background: 'linear-gradient(135deg, #0A1628, #0021A5)',
+        borderRadius: 18, padding: '28px', position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', top: -30, right: -20, width: 150, height: 150,
+          borderRadius: '50%', background: 'radial-gradient(circle, rgba(250,70,22,0.2), transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{ position: 'relative' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: '#FA4616',
+            textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10,
+          }}>📊 Weekly Brief</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
+            Your weekly brief is waiting
+          </div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
+            Add target companies and FASTIQ will start working for you — scanning for roles, finding alumni, and identifying opportunities every week.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Build detailed summary parts — focus on actionable weekly data
   const parts = [];
   if (alumniFound > 0) {
