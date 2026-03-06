@@ -1580,39 +1580,24 @@ Return as JSON with these exact fields:`,
 ${profileContext}
 
 ${UF_FILTER}
+
+COMPANY VALIDATION (CRITICAL — apply BEFORE scoring):
+- For each person, set "company" to the EXACT company name listed on their profile/LinkedIn
+- ONLY include people whose current employer IS "${alumniCompany}" or a direct division of it (e.g. "Amazon Web Services" counts for Amazon, "Google Cloud" counts for Google)
+- EXCLUDE anyone whose current company is a DIFFERENT company, even if they mention ${alumniCompany} as a client, partner, or past employer
+- EXCLUDE anyone who USED TO work at ${alumniCompany} but now works elsewhere
+- If unsure whether someone currently works at ${alumniCompany}, EXCLUDE them
 - DEDUPLICATE same name+title
-- For each alumni, try to find their LinkedIn profile URL. If found in the research data, include it. Format: https://www.linkedin.com/in/username
+- For each alumni, try to find their LinkedIn profile URL if in the research data
 
-MATCH SCORE RULES — MINIMUM 50% for ANY UF alum at this company:
-The student specifically searched for alumni at ${alumniCompany}. Every alum found here is a HIGH-VALUE contact by definition.
-
+MATCH SCORE RULES — MINIMUM 65% for verified current employees:
 SCORING TIERS:
-- FLOOR: 50% — Any UF alum at this company, regardless of role (they're a fellow Gator at a company the student cares about)
-- SAME INDUSTRY as student's target (${profile.target_industry || 'their field'}): 60%+
-- RELEVANT DEPARTMENT for student's major (${studentMajor}): 70%+
-- REACHABLE ROLE the student could realistically contact (similar function, approachable seniority): 80%+
+- FLOOR: 65% — Any UF alum currently employed at ${alumniCompany}
+- SAME INDUSTRY as student's target (${profile.target_industry || 'their field'}): 70%+
+- RELEVANT DEPARTMENT for student's major (${studentMajor}): 75%+
+- REACHABLE ROLE (similar function, approachable seniority): 80%+
 - PERFECT MATCH (relevant dept + reachable + senior enough to refer): 85-95%
-
-SENIORITY BONUS (add on top of tier score):
-- Entry-level/recent grad: +0
-- Mid-level (3-8 years): +3
-- Senior/Manager: +5
-- Director/VP/C-suite: +8
-
-EXAMPLES for a Finance major searching alumni at JPMorgan:
-- VP of Investment Banking → 80% + 8 = 88% (relevant dept, reachable for advice, senior enough for referral)
-- Risk Analyst → 70% + 0 = 70% (relevant dept, entry-level peer)
-- Marketing Director → 60% + 8 = 68% (same industry, different dept, senior)
-- HR Coordinator → 50% + 0 = 50% (baseline — still a Gator at JPMorgan)
-
-EXAMPLES for a CS major searching alumni at Google:
-- Software Engineer (mid) → 80% + 3 = 83%
-- Engineering Manager → 80% + 5 = 85%
-- VP of Engineering → 80% + 8 = 88%
-- Product Manager → 70% + 5 = 75%
-- Recruiter → 50% + 3 = 53%
-
-ABSOLUTE RULE: No score below 50 for anyone at this company. They are all UF connections at a company the student chose to search.
+SENIORITY BONUS: Entry-level +0, Mid-level +3, Senior/Manager +5, Director/VP/C-suite +8
 
 RESEARCH:
 ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}`,
