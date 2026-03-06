@@ -1812,10 +1812,15 @@ Rules:
       });
 
       trackActivity(base44, user.email, profile.id, 'message_draft', recipientName);
+      const otherTargets = targetCompanies.filter(c => c.toLowerCase() !== recipientCompany.toLowerCase());
+      const outreachNextActions = [];
+      if (otherTargets.length > 0) outreachNextActions.push(`Find alumni at ${otherTargets[0]} →`);
+      outreachNextActions.push(`Tailor my resume for ${recipientCompany || 'this role'} →`);
+      outreachNextActions.push('Research another company →');
       return Response.json({
-        success: true, response: result.response || `Here's your draft to ${recipientName}:`,
+        success: true, response: (result.response || `Here's your draft to ${recipientName}:`) + `\n\nAfter you send it, I'll track it in your pipeline and remind you to follow up if you don't hear back.\n\nWhat's next?`,
         message_type: 'outreach_draft',
-        payload: { recipient: result.recipient || recipientName, recipient_title: recipientTitle, recipient_company: recipientCompany, channel: result.channel || channel, subject: result.subject || '', message: result.message_body || '', ask_type: askType }
+        payload: { recipient: result.recipient || recipientName, recipient_title: recipientTitle, recipient_company: recipientCompany, channel: result.channel || channel, subject: result.subject || '', message: result.message_body || '', ask_type: askType, suggested_next_steps: outreachNextActions }
       });
     }
 
