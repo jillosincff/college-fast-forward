@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
         console.log('Processing verification for token:', token);
 
         // Find the registration attempt
-        const registrationAttempts = await base44.entities.RegistrationAttempt.filter({ 
+        const registrationAttempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ 
             token: token, 
             status: 'pending' 
         });
@@ -45,10 +45,10 @@ Deno.serve(async (req) => {
         console.log('Found registration attempt for:', attempt.email);
 
         // Check if user already exists
-        const existingUsers = await base44.entities.User.filter({ email: attempt.email });
+        const existingUsers = await base44.asServiceRole.entities.User.filter({ email: attempt.email });
         if (existingUsers && existingUsers.length > 0) {
             // Mark attempt as processed
-            await base44.entities.RegistrationAttempt.update(attempt.id, { status: 'processed' });
+            await base44.asServiceRole.entities.RegistrationAttempt.update(attempt.id, { status: 'processed' });
             
             return new Response(JSON.stringify({ 
                 success: true,
@@ -71,11 +71,11 @@ Deno.serve(async (req) => {
             persona: attempt.persona
         };
 
-        const newUser = await base44.entities.User.create(userData);
+        const newUser = await base44.asServiceRole.entities.User.create(userData);
         console.log('User created:', newUser.id);
 
         // Mark registration attempt as processed
-        await base44.entities.RegistrationAttempt.update(attempt.id, { status: 'processed' });
+        await base44.asServiceRole.entities.RegistrationAttempt.update(attempt.id, { status: 'processed' });
 
         return new Response(JSON.stringify({ 
             success: true,
