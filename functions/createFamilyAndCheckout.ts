@@ -77,6 +77,10 @@ Deno.serve(async (req) => {
       parent_ids: user.persona === 'parent' ? [user.id] : [],
       student_ids: user.persona === 'gator' ? [user.id] : [],
       subscription_status: isFounder ? 'active' : 'none',
+      subscription_tier: isFounder ? 'free_founding' : null,
+      billing_owner_id: user.id,
+      billing_owner_email: user.email,
+      billing_owner_name: user.full_name || '',
     });
 
     console.log('Created family:', family.id);
