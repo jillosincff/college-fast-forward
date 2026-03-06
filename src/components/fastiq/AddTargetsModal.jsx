@@ -124,7 +124,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
             style={{
               height: 44, padding: '0 18px', borderRadius: 12, border: 'none',
               background: (!input.trim() || companies.length >= 5) ? '#E2E8F0' : '#0021A5',
-              color: (!input.trim() || companies.length >= 5) ? '#94A3B8' : '#fff',
+              color: (!input.trim() || companies.length >= 5) ? '#64748B' : '#fff',
               fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
               transition: 'all 0.2s',
             }}
@@ -136,7 +136,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
         {/* Added companies */}
         {companies.length > 0 && (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
               Your targets ({companies.length}/5)
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -167,7 +167,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
         {/* Suggestions */}
         {companies.length < 5 && suggestions.length > 0 && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
               {primaryIndustry ? `Popular in ${primaryIndustry}` : 'Popular with UF students'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
