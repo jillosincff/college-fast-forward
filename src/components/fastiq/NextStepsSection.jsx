@@ -4,18 +4,203 @@ import titleCase from '@/components/utils/titleCase';
 
 /**
  * SECTION 2 — YOUR NEXT STEPS
- * Shows 2-3 numbered, priority-ordered action items as a checklist.
- * Each card disappears when completed; the next priority surfaces.
+ * Alumni discovery is the #1 hero action. Finding PEOPLE is FASTIQ's superpower.
+ * Shows 2-3 numbered, priority-ordered action items.
  */
 
+function guessDomain(name) {
+  const map = { 'amazon': 'amazon.com', 'google': 'google.com', 'meta': 'meta.com', 'apple': 'apple.com', 'microsoft': 'microsoft.com', 'salesforce': 'salesforce.com', 'netflix': 'netflix.com', 'adobe': 'adobe.com', 'spotify': 'spotify.com', 'tesla': 'tesla.com', 'nike': 'nike.com', 'disney': 'disney.com', 'airbnb': 'airbnb.com', 'uber': 'uber.com', 'deloitte': 'deloitte.com', 'jpmorgan': 'jpmorgan.com', 'goldman sachs': 'goldmansachs.com', 'nvidia': 'nvidia.com' };
+  const lower = (name || '').toLowerCase();
+  return map[lower] || `${lower.replace(/[^a-z0-9]/g, '')}.com`;
+}
+
+/* ─── HERO CARD: Alumni Discovery (Step 1) ─── */
+function AlumniHeroCard({ targetCompanies, onOpenChat }) {
+  const names = targetCompanies.slice(0, 3).join(', ');
+  const allLabel = targetCompanies.length > 1
+    ? `Find Alumni at All ${targetCompanies.length} Companies →`
+    : `Find Alumni at ${targetCompanies[0]} →`;
+  const firstCompany = targetCompanies[0];
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
+      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
+      padding: '22px 22px', display: 'flex', alignItems: 'flex-start', gap: 16,
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: 12, background: '#0021A5',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 22, flexShrink: 0, marginTop: 2,
+      }}>
+        🎓
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{
+            width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
+          }}>1</span>
+          <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+            Find UF Gators working at {names}
+          </p>
+        </div>
+        <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
+          FASTIQ will search the entire web for UF alumni at your target companies — people who can give you a warm intro, insider advice, and referrals.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => onOpenChat(`Find UF alumni at all my target companies: ${targetCompanies.join(', ')}`)}
+            style={{
+              padding: '9px 18px', borderRadius: 10, border: 'none',
+              background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
+            }}
+          >
+            {allLabel}
+          </button>
+          {targetCompanies.length > 1 && (
+            <button
+              onClick={() => onOpenChat(`Find UF alumni at ${firstCompany}`)}
+              style={{
+                padding: '9px 18px', borderRadius: 10, border: 'none',
+                background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 700,
+                cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+              }}
+            >
+              Start with {firstCompany} →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── HERO CARD: Alumni Found — show inline list ─── */
+function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? alumni : alumni.slice(0, 5);
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
+      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
+      padding: '20px 22px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <span style={{
+          width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
+        }}>1</span>
+        <span style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+          🎓 {totalCount} UF Alumni Found at Your Target Companies
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {visible.map((a, i) => (
+          <div key={a.id || i} style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+            background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0',
+          }}>
+            <img
+              src={`https://logo.clearbit.com/${guessDomain(a.company)}`}
+              alt="" style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'contain', background: '#F1F5F9' }}
+              onError={e => { e.target.style.display = 'none'; }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {a.name || a.alumni_name}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, color: '#64748B' }}>
+                  {a.role_title || a.alumni_role} at {titleCase(a.company)}
+                </span>
+                {a.greek_organization && (
+                  <span style={{ fontSize: 10, color: '#8B5CF6', fontWeight: 600 }}>🏛️ {a.greek_organization}</span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => onOpenChat(`Draft a message to ${a.name || a.alumni_name} at ${a.company}`)}
+              style={{
+                padding: '5px 12px', borderRadius: 6, border: 'none',
+                background: '#0021A5', color: '#fff', fontSize: 11, fontWeight: 700,
+                cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
+              }}
+            >
+              Draft Message →
+            </button>
+          </div>
+        ))}
+      </div>
+      {totalCount > 5 && !showAll && (
+        <button
+          onClick={() => setShowAll(true)}
+          style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#0021A5', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
+        >
+          See all {totalCount} alumni →
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ─── HERO CARD: All scanned, alumni identified but not contacted ─── */
+function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
+      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
+      padding: '22px 22px', display: 'flex', alignItems: 'flex-start', gap: 16,
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: 12, background: '#0021A5',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 22, flexShrink: 0, marginTop: 2,
+      }}>
+        🎓
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{
+            width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
+          }}>1</span>
+          <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+            You've found {identifiedCount} UF alumni — time to reach out
+          </p>
+        </div>
+        <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
+          The hardest part is the first message. Pick someone and I'll draft a warm, personalized intro for you.
+        </p>
+        <button
+          onClick={() => onOpenChat('Show me my identified alumni so I can pick who to message')}
+          style={{
+            padding: '9px 18px', borderRadius: 10, border: 'none',
+            background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
+          }}
+        >
+          Choose an Alumni & Draft →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Standard step card for steps 2, 3 ─── */
 function StepCard({ stepNumber, emoji, title, description, actions }) {
   return (
     <div style={{
       background: '#fff', borderRadius: 12, border: '1px solid #E2E8F0',
       padding: '16px 18px', display: 'flex', alignItems: 'flex-start', gap: 14,
-      transition: 'all 0.15s',
     }}>
-      {/* Step number badge */}
       <div style={{
         width: 28, height: 28, borderRadius: '50%', background: '#0021A5',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -38,7 +223,7 @@ function StepCard({ stepNumber, emoji, title, description, actions }) {
                 background: i === 0 ? '#0021A5' : '#F1F5F9',
                 color: i === 0 ? '#fff' : '#475569',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
-                whiteSpace: 'nowrap', transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
               }}
             >
               {a.label}
@@ -50,7 +235,7 @@ function StepCard({ stepNumber, emoji, title, description, actions }) {
   );
 }
 
-export default function NextStepsSection({ profile, pipelineCounts, pipelineData, companyIntel, onOpenChat, onAddTargets }) {
+export default function NextStepsSection({ profile, pipelineCounts, pipelineData, companyIntel, alumniData, onOpenChat, onAddTargets }) {
   const [staleContacts, setStaleContacts] = useState([]);
 
   useEffect(() => {
@@ -60,8 +245,7 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
     ).then(data => {
       const stale = (data || []).filter(p => {
         if (!p.reached_out_date) return false;
-        const days = (Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24);
-        return days >= 3;
+        return (Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24) >= 3;
       });
       setStaleContacts(stale);
     }).catch(() => {});
@@ -70,80 +254,72 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
   const hasResume = !!profile?.resume_text;
   const targetCount = profile?.target_companies?.length || 0;
   const identified = pipelineCounts?.identified || 0;
-
-  // Determine unresearched companies by checking companyIntel map
+  const reachedOut = pipelineCounts?.reached_out || 0;
   const targetCompanies = (profile?.target_companies || []).map(c => titleCase(c));
+
+  // Determine unresearched companies
   const unresearchedCompanies = targetCompanies.filter(c => {
     const intel = companyIntel ? companyIntel[c.toLowerCase()] : null;
     return !intel;
   });
 
-  // Build priority-ordered steps (show top 3)
-  const steps = [];
+  // Alumni at current targets (from pipeline identified + from discovered alumni data)
+  const alumniAtTargets = alumniData || [];
+  const totalAlumniFound = alumniAtTargets.length;
+  const allTargetsScanned = targetCount > 0 && unresearchedCompanies.length === 0;
 
-  // Priority 0: No targets = fresh start
+  // ─── Determine Step 1 (Alumni Hero) ───
+  let heroCard = null;
+
   if (targetCount === 0) {
-    steps.push({
-      emoji: '🎯',
-      title: 'Add target companies to get started',
-      description: 'FASTIQ will scan for openings, find alumni, and build your personalized action plan.',
-      actions: [
-        { label: 'Add Targets →', onClick: onAddTargets },
-      ],
-    });
+    // No targets yet
+    heroCard = null; // handled below as a regular step
+  } else if (totalAlumniFound > 0 && identified === 0 && reachedOut === 0) {
+    // Alumni found but all already contacted or none in pipeline "identified" — show found list
+    heroCard = <AlumniFoundCard alumni={alumniAtTargets} totalCount={totalAlumniFound} onOpenChat={onOpenChat} />;
+  } else if (identified > 0) {
+    // Alumni in pipeline waiting to be contacted
+    heroCard = <AlumniOutreachNudgeCard identifiedCount={identified} onOpenChat={onOpenChat} />;
+  } else if (totalAlumniFound > 0) {
+    // Alumni found — show them
+    heroCard = <AlumniFoundCard alumni={alumniAtTargets} totalCount={totalAlumniFound} onOpenChat={onOpenChat} />;
+  } else {
+    // Targets exist but no alumni found yet — prompt to scan
+    heroCard = <AlumniHeroCard targetCompanies={targetCompanies} onOpenChat={onOpenChat} />;
   }
 
-  // Priority 1: Stale follow-ups
-  if (staleContacts.length > 0 && steps.length < 3) {
+  // ─── Build secondary steps (steps 2-3) ───
+  const secondarySteps = [];
+
+  // Stale follow-ups
+  if (staleContacts.length > 0 && secondarySteps.length < 2) {
     const contact = staleContacts[0];
     const daysSince = Math.round((Date.now() - new Date(contact.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
-    steps.push({
+    secondarySteps.push({
       emoji: '📬',
       title: `Follow up with ${contact.alumni_name} at ${titleCase(contact.company)}`,
-      description: `You messaged them ${daysSince} days ago — a well-timed follow-up can double your response rate.${staleContacts.length > 1 ? ` (${staleContacts.length - 1} more waiting)` : ''}`,
-      actions: [
-        { label: 'Draft Follow-Up →', onClick: () => onOpenChat(`Draft a follow-up message to ${contact.alumni_name} at ${contact.company}`) },
-      ],
+      description: `You messaged them ${daysSince} days ago — a follow-up can double your response rate.${staleContacts.length > 1 ? ` (${staleContacts.length - 1} more waiting)` : ''}`,
+      actions: [{ label: 'Draft Follow-Up →', onClick: () => onOpenChat(`Draft a follow-up message to ${contact.alumni_name} at ${contact.company}`) }],
     });
   }
 
-  // Priority 2: Unresearched target companies (HIGH PRIORITY)
-  if (unresearchedCompanies.length > 0 && steps.length < 3) {
+  // Unresearched targets
+  if (unresearchedCompanies.length > 0 && secondarySteps.length < 2) {
     const topTwo = unresearchedCompanies.slice(0, 2);
-    const names = topTwo.join(' and ');
-    steps.push({
+    secondarySteps.push({
       emoji: '🔍',
-      title: `Research ${names} — you added ${topTwo.length > 1 ? 'them' : 'it'} but haven't scanned yet`,
-      description: `Let's see if ${topTwo.length > 1 ? 'they\'re' : 'it\'s'} hiring and find UF alumni who can open doors.`,
-      actions: topTwo.map(c => ({
-        label: `Research ${c} →`,
-        onClick: () => onOpenChat(`Research ${c}`),
-      })),
+      title: `Research ${topTwo.join(' and ')} to see if they're hiring entry-level roles`,
+      description: `Scan for openings and hiring signals at ${topTwo.length > 1 ? 'these companies' : 'this company'}.`,
+      actions: topTwo.map(c => ({ label: `Research ${c} →`, onClick: () => onOpenChat(`Research ${c}`) })),
     });
   }
 
-  // Priority 3: Alumni identified but not contacted
-  if (identified > 0 && steps.length < 3) {
-    const firstIdentified = (pipelineData || []).find(p => p.status === 'identified');
-    const name = firstIdentified ? firstIdentified.alumni_name : 'an alumni';
-    const company = firstIdentified ? titleCase(firstIdentified.company) : 'your targets';
-    steps.push({
-      emoji: '✉️',
-      title: `${identified} alumni identified — time to reach out`,
-      description: `Pick one and I'll draft a personalized message for you.`,
-      actions: [
-        { label: `Message ${name} →`, onClick: () => onOpenChat(`Draft an outreach message to ${name} at ${company}`) },
-        ...(identified > 1 ? [{ label: 'Choose Alumni', onClick: () => onOpenChat('Show me my identified alumni so I can pick who to message') }] : []),
-      ],
-    });
-  }
-
-  // Priority 4: No resume
-  if (!hasResume && steps.length < 3) {
-    steps.push({
+  // No resume
+  if (!hasResume && secondarySteps.length < 2) {
+    secondarySteps.push({
       emoji: '📄',
       title: 'Upload your resume to unlock smarter matches',
-      description: 'Your resume powers tailored applications, personalized outreach, and smarter interview prep.',
+      description: 'Your resume powers tailored applications, personalized outreach, and interview prep.',
       actions: [
         { label: 'Upload Resume →', onClick: () => onOpenChat('Help me upload my resume') },
         { label: 'Build One With Me →', onClick: () => onOpenChat('Help me build a resume') },
@@ -151,41 +327,43 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
     });
   }
 
-  // Priority 5: Resume not tailored
-  if (hasResume && steps.length < 3) {
-    steps.push({
-      emoji: '✨',
+  // Tailor resume
+  if (hasResume && secondarySteps.length < 2) {
+    secondarySteps.push({
+      emoji: '📄',
       title: 'Tailor your resume for a specific role',
       description: 'Find a role that interests you and I\'ll customize your resume to match the job description.',
-      actions: [
-        { label: 'Tailor for a Job →', onClick: () => onOpenChat('Tailor my resume for a new role') },
-      ],
+      actions: [{ label: 'Tailor for a Job →', onClick: () => onOpenChat('Tailor my resume for a new role') }],
     });
   }
 
-  // Priority 6: General encouragement (only if nothing else)
-  if (steps.length === 0) {
-    steps.push({
-      emoji: '🚀',
-      title: 'You\'re making great progress!',
-      description: 'Keep building momentum — explore career paths or prep for an upcoming interview.',
-      actions: [
-        { label: 'Explore Careers →', onClick: () => onOpenChat('Explore career paths for my major') },
-        { label: 'Interview Prep →', onClick: () => onOpenChat('Prep me for an interview') },
-      ],
-    });
+  // General encouragement
+  if (!heroCard && secondarySteps.length === 0) {
+    // No targets — show add targets as the only step
+    if (targetCount === 0) {
+      secondarySteps.push({
+        emoji: '🎯',
+        title: 'Add target companies to get started',
+        description: 'FASTIQ will find UF alumni, scan for openings, and build your personalized action plan.',
+        actions: [{ label: 'Add Targets →', onClick: onAddTargets }],
+      });
+    } else {
+      secondarySteps.push({
+        emoji: '🚀',
+        title: 'You\'re making great progress!',
+        description: 'Explore career paths or prep for an upcoming interview.',
+        actions: [
+          { label: 'Explore Careers →', onClick: () => onOpenChat('Explore career paths for my major') },
+          { label: 'Interview Prep →', onClick: () => onOpenChat('Prep me for an interview') },
+        ],
+      });
+    }
   }
-
-  // Take top 3
-  const visibleSteps = steps.slice(0, 3);
 
   return (
     <div className="fiq-animate fiq-delay-2" style={{
-      marginBottom: 28,
-      background: '#F0F4FA',
-      borderRadius: 16,
-      padding: '20px 18px',
-      border: '1px solid #E2E8F0',
+      marginBottom: 28, background: '#F0F4FA',
+      borderRadius: 16, padding: '20px 18px', border: '1px solid #E2E8F0',
     }}>
       <h2 style={{
         fontSize: 11, fontWeight: 700, color: '#334155',
@@ -194,8 +372,17 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
         🎯 Your Next Steps
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {visibleSteps.map((step, i) => (
-          <StepCard key={i} stepNumber={i + 1} {...step} />
+        {/* Step 1: Alumni Hero Card */}
+        {heroCard}
+
+        {/* No-targets fallback when heroCard is null */}
+        {!heroCard && targetCount === 0 && secondarySteps.length > 0 && (
+          <StepCard stepNumber={1} {...secondarySteps[0]} />
+        )}
+
+        {/* Steps 2-3 */}
+        {(heroCard ? secondarySteps : secondarySteps.slice(1)).map((step, i) => (
+          <StepCard key={i} stepNumber={(heroCard || targetCount === 0 ? 1 : 0) + i + (heroCard ? 2 : 2)} {...step} />
         ))}
       </div>
     </div>

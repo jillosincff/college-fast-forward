@@ -25,22 +25,22 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
           background: '#fff', borderRadius: 16, padding: '28px 24px',
           border: '1.5px dashed #CBD5E1', textAlign: 'center',
         }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>🚀</div>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>🎓</div>
           <p style={{ fontSize: 14, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>
-            Your networking pipeline is empty — let's change that
+            Your networking pipeline is empty — let's find UF alumni
           </p>
-          <p style={{ fontSize: 12, color: '#64748B', marginBottom: 16, lineHeight: 1.5, maxWidth: 380, margin: '0 auto 16px' }}>
-            Research a target company and FASTIQ will start finding alumni for you.
+          <p style={{ fontSize: 12, color: '#64748B', marginBottom: 16, lineHeight: 1.5, maxWidth: 420, margin: '0 auto 16px' }}>
+            FASTIQ will search for UF Gators at your target companies and start building connections for you.
           </p>
           <button
-            onClick={() => onOpenChat && onOpenChat('Research my target companies')}
+            onClick={() => onOpenChat && onOpenChat('Find UF alumni at my target companies')}
             style={{
               padding: '10px 24px', borderRadius: 10, border: 'none',
               background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
               cursor: 'pointer', minHeight: 'auto',
             }}
           >
-            Research My Targets →
+            Find Alumni →
           </button>
         </div>
       ) : (
