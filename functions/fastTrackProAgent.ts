@@ -1603,7 +1603,7 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       const alumni = filterAndDedupAlumni(alumniResult.alumni || [], alumniCompany);
 
       // LAYER 3: Graceful recovery for alumni — if 0 real alumni AND the response text suggests confusion
-      if (alumni.length === 0 && !alumniResult.response?.toLowerCase().includes('alumni')) {
+      if (alumni.length === 0 && !String(alumniResult.response || '').toLowerCase().includes('alumni')) {
         console.log(`[Layer3] Alumni search for "${alumniCompany}" returned 0 results and confused response — recovering`);
         return Response.json({
           success: true,
