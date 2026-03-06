@@ -1059,18 +1059,37 @@ Deno.serve(async (req) => {
     const studentMajor = user.major || profile.target_industry || 'undeclared';
     const studentGradYear = user.graduation_year || 'unknown';
 
+    // Position type config for personalized searches
+    const POSITION_TYPE_CONFIGS = {
+      summer_internship: { label: 'Summer Internship', searchTerms: 'summer internship, intern', roleLabel: 'internship', outreachPhrase: 'a summer internship', salaryType: 'intern compensation (hourly rate + housing stipend)' },
+      semester_internship: { label: 'Internship / Co-op', searchTerms: 'internship, co-op, cooperative education', roleLabel: 'internship', outreachPhrase: 'an internship or co-op', salaryType: 'intern compensation (hourly rate + housing stipend)' },
+      entry_level: { label: 'Entry-level / New Grad', searchTerms: 'entry-level, new grad, associate, junior', roleLabel: 'entry-level role', outreachPhrase: 'an entry-level position', salaryType: 'entry-level annual salary' },
+      experienced: { label: 'Experienced Position', searchTerms: 'mid-level, experienced, 2-5 years', roleLabel: 'mid-level role', outreachPhrase: 'a position', salaryType: 'salary range' },
+      exploring: { label: 'Exploring', searchTerms: 'entry-level, internship, new grad', roleLabel: 'role', outreachPhrase: 'opportunities', salaryType: 'salary range' },
+    };
+    const positionType = profile.position_type || 'entry_level';
+    const ptConfig = POSITION_TYPE_CONFIGS[positionType] || POSITION_TYPE_CONFIGS.entry_level;
+    const startTimeline = profile.start_timeline || '';
+
     const profileContext = `STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
 - Major: ${studentMajor}
 - Graduation: ${studentGradYear}
+- Position Type Seeking: ${ptConfig.label}
+- Start Timeline: ${startTimeline || 'not set'}
 - Target Industry: ${profile.target_industry || 'not specified'}
 - Target Companies: ${(profile.target_companies || []).join(', ') || 'none set'}
 - Company Size: ${profile.company_size_preference || 'not set'}
 - Location: ${profile.location_preference || 'not set'}
-- Timeline: ${profile.career_timeline || 'not set'}
 - Stage: ${profile.current_stage || 'not set'}
 - Challenge: ${profile.biggest_challenge || 'not set'}
-- Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}`;
+- Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}
+
+CRITICAL POSITION TYPE CONTEXT:
+- The student is looking for: ${ptConfig.label}
+- When searching for roles, focus on: ${ptConfig.searchTerms}
+- When drafting outreach, reference they are looking for: ${ptConfig.outreachPhrase}
+- For salary data, show: ${ptConfig.salaryType}`;
 
     // P3 FIX: Stricter confirmation detection — must be ONLY a confirmation word(s) with no extra content,
     // OR an explicit "yes, research X" pattern. "Ok Google" or "Sure, can you also..." won't match.
