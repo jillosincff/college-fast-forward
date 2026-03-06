@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     for (const profile of allProfiles) {
       try {
-        const { user_email, target_industry, target_companies, location_preference, current_stage } = profile;
+        const { user_email, target_industry, target_companies, location_preference, current_stage, position_type } = profile;
 
         // Skip users with no target companies — nothing to scout
         if (!target_companies || target_companies.length === 0) {
@@ -40,19 +40,23 @@ Deno.serve(async (req) => {
         const location = location_preference || 'any location in the US';
         const industry = target_industry || 'any industry';
 
-        // Search for new opportunities via web-connected LLM — ENTRY-LEVEL/INTERN ONLY
+        // Determine search terms based on position_type
+        const PT_CONFIGS = {
+          summer_internship: { searchTerms: 'summer internship', filter: 'ONLY include summer internship positions. Do NOT include full-time roles, senior roles, or manager positions.' },
+          semester_internship: { searchTerms: 'internship, co-op', filter: 'ONLY include internship and co-op positions. Do NOT include full-time roles, senior roles, or manager positions.' },
+          entry_level: { searchTerms: 'entry-level, new grad, associate, junior', filter: 'ONLY include entry-level, new grad, and associate positions (0-2 years experience). Do NOT include senior roles, manager roles, director roles, VP roles.' },
+          experienced: { searchTerms: 'mid-level, experienced', filter: 'Include mid-level positions (2-5 years experience). Exclude senior/director/VP roles.' },
+          exploring: { searchTerms: 'entry-level, internship, new grad', filter: 'Include entry-level and internship positions suitable for a college student or recent graduate.' },
+        };
+        const ptConf = PT_CONFIGS[position_type] || PT_CONFIGS.entry_level;
+
+        // Search for new opportunities via web-connected LLM — filtered by position type
         const searchResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Find new entry-level and internship job postings posted in the last 48 hours for ${industry} roles. Location preference: ${location}.
+          prompt: `Find new ${ptConf.searchTerms} job postings posted in the last 48 hours for ${industry} roles. Location preference: ${location}.
 
-CRITICAL FILTER: ONLY include positions suitable for a college student or recent graduate:
-- Entry-level roles (0-2 years experience required)
-- Internship programs
-- New grad programs
-- Associate/junior level positions
+CRITICAL FILTER: ${ptConf.filter}
 
-Do NOT include: senior roles, manager roles, director roles, VP roles, or any position requiring 3+ years of experience. These are irrelevant to this student.
-
-Student is at the "${current_stage || 'exploring'}" stage. ${companiesList ? `Also check for new postings at these specific companies: ${companiesList}.` : ''} Return up to 8 of the most relevant ENTRY-LEVEL/INTERN opportunities only. For each, provide: company name, role title, posting date (ISO format or approximate), location, a direct application link if available, and a brief 1-sentence reason why this is relevant to a ${industry} student.`,
+Student is at the "${current_stage || 'exploring'}" stage. ${companiesList ? `Also check for new postings at these specific companies: ${companiesList}.` : ''} Return up to 8 of the most relevant opportunities only. For each, provide: company name, role title, posting date (ISO format or approximate), location, a direct application link if available, and a brief 1-sentence reason why this is relevant to a ${industry} student.`,
           add_context_from_internet: true,
           response_json_schema: {
             type: "object",

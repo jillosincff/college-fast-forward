@@ -1422,7 +1422,7 @@ Return as JSON with these exact fields:`,
     if (detectSalaryNegotiation(resolvedMessage)) {
       console.log('Intent: salary_negotiation');
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ. Provide salary intelligence for this student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\nFind real salary data for entry-level ${profile.target_industry || ''} roles${profile.location_preference ? ' in ' + profile.location_preference : ''}. Include negotiation tactics and a sample negotiation script.`,
+        prompt: `You are FASTIQ. Provide salary intelligence for this student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\nThe student is seeking: ${ptConfig.label}. Find real ${ptConfig.salaryType} data for ${ptConfig.searchTerms} ${profile.target_industry || ''} roles${profile.location_preference ? ' in ' + profile.location_preference : ''}.${positionType === 'summer_internship' || positionType === 'semester_internship' ? ' For internships, show hourly rate, housing stipend if offered, and total estimated compensation.' : ' Include negotiation tactics and a sample negotiation script.'}`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -1856,9 +1856,9 @@ COMPANY INTEL:
 
 INSTRUCTIONS:
 Write a SHORT personalized assessment (3-5 sentences). ALWAYS mention entry-level/intern count vs total. Examples:
-- "${companyName} has 150 open roles but only 3 are entry-level. Still worth pursuing — those 3 are strong matches."
-- "${companyName} has 12 active internship postings — that's unusually high. Move fast."
-- "${companyName}'s roles are mostly senior. Reach out to alumni for intel on upcoming intern recruiting."
+- "${companyName} has 150 open roles but only 3 match what you're looking for (${ptConfig.label}). Still worth pursuing — those 3 are strong matches."
+- "${companyName} has 12 active ${ptConfig.roleLabel} postings — that's unusually high. Move fast."
+- "${companyName}'s roles are mostly senior. Reach out to alumni for intel on upcoming ${ptConfig.roleLabel} recruiting."
 
 Consider: senior-heavy roles, great match, hiring freeze, location mismatch, industry gap.
 End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
