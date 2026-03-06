@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { getPositionTypeConfig } from './constants';
 
 function guessDomain(name) {
   if (!name) return null;
@@ -31,7 +32,8 @@ function CompanyInitial({ name }) {
   );
 }
 
-function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
+function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType }) {
+  const ptConfig = getPositionTypeConfig(positionType);
   const domain = guessDomain(name);
   const [logoErr, setLogoErr] = useState(false);
   const researched = !!intel;
@@ -117,18 +119,26 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
           {researched && (() => {
             const entry = intel?.entry_level_roles_count || 0;
             const intern = intel?.intern_roles_count || 0;
-            const total = entry + intern;
-            if (total > 0) {
-              const parts = [];
-              if (entry > 0) parts.push(`${entry} entry-level`);
-              if (intern > 0) parts.push(`${intern} intern`);
-              return <span style={{ fontSize: 10, color: '#64748B' }}>{parts.join(' + ')} role{total > 1 ? 's' : ''}</span>;
+            // Show count relevant to position type
+            const isIntern = positionType === 'summer_internship' || positionType === 'semester_internship';
+            const isEntryLevel = positionType === 'entry_level';
+            let relevantCount = entry + intern;
+            let relevantLabel = ptConfig.rolesFoundLabel;
+            if (isIntern && intern > 0) {
+              relevantCount = intern;
+              relevantLabel = 'internship' + (intern > 1 ? 's' : '');
+            } else if (isEntryLevel && entry > 0) {
+              relevantCount = entry;
+              relevantLabel = 'new grad role' + (entry > 1 ? 's' : '');
+            }
+            if (relevantCount > 0) {
+              return <span style={{ fontSize: 10, color: '#64748B' }}>{relevantCount} {relevantLabel}</span>;
             }
             if (alumniCount === 0) {
               return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No matches yet</span>;
             }
             if (intel?.open_roles_count > 0) {
-              return <span style={{ fontSize: 10, color: '#64748B', fontStyle: 'italic' }}>No entry-level roles found</span>;
+              return <span style={{ fontSize: 10, color: '#64748B', fontStyle: 'italic' }}>No {ptConfig.rolesFoundLabel} found</span>;
             }
             return null;
           })()}
@@ -209,7 +219,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
   );
 }
 
-export default function TargetCompaniesSection({ companies, companyIntel, alumniCounts, onOpenChat, onAddTargets }) {
+export default function TargetCompaniesSection({ companies, companyIntel, alumniCounts, onOpenChat, onAddTargets, positionType }) {
   if (!companies || companies.length === 0) {
     return (
       <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
@@ -281,6 +291,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
             alumniCount={alumniCounts[c.toLowerCase()] || 0}
             onOpenChat={onOpenChat}
             delay={Math.min(i + 5, 7)}
+            positionType={positionType}
           />
         ))}
       </div>
