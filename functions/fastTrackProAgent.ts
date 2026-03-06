@@ -1070,6 +1070,9 @@ Deno.serve(async (req) => {
     const positionType = profile.position_type || 'entry_level';
     const ptConfig = POSITION_TYPE_CONFIGS[positionType] || POSITION_TYPE_CONFIGS.entry_level;
     const startTimeline = profile.start_timeline || '';
+    const jobSearchType = profile.job_search_type || 'entry_level';
+    const JST = { internship: { label: 'internship', plural: 'internships', noun: 'internships', noMatch: 'No internships' }, entry_level: { label: 'entry-level role', plural: 'entry-level roles', noun: 'entry-level roles', noMatch: 'No entry-level roles' }, co_op: { label: 'co-op or internship', plural: 'co-ops and internships', noun: 'co-ops and internships', noMatch: 'No co-ops' }, exploring: { label: 'opportunity', plural: 'opportunities', noun: 'roles', noMatch: 'Limited positions' } };
+    const jstConfig = JST[jobSearchType] || JST.entry_level;
 
     const profileContext = `STUDENT PROFILE:
 - Name: ${user.full_name || 'Gator Student'}
