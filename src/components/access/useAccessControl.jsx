@@ -3,36 +3,38 @@ import { useMemo } from 'react';
 const FOUNDING_GATOR_LIMIT = 1000;
 
 // ═══════════════════════════════════════════════════════════════
-// CFF + FASTIQ Access Control
+// CFF + FASTIQ Access Control — Family-First Model
 // ═══════════════════════════════════════════════════════════════
-// Tiers:
-//   free_founding — All access (CFF + FASTIQ) free forever
-//   cff           — CFF only ($9/mo). No FASTIQ.
-//   fastiq        — CFF + FASTIQ ($29/mo or $249/yr)
-//   null/none     — No subscription, needs to sign up
+// Access check priority:
+//   1. User's own subscription_tier / subscription_status
+//   2. Family entity subscription (covers all linked members)
+//   3. Founding member status (user OR family)
 //
-// Founding members are NOT gated. The gating logic is built
-// but not enforced until we flip the switch.
+// Family entity is the source of truth for billing.
 // ═══════════════════════════════════════════════════════════════
 
 /**
  * Check if a user is a founding member (free access to everything)
  */
-export function isFoundingMember(user) {
+export function isFoundingMember(user, family = null) {
   if (!user) return false;
   if (user.subscription_tier === 'free_founding') return true;
   if (user.is_founding_member === true) return true;
   if (user.is_founding_gator === true) return true;
   if (user.price_tier === 'founding') return true;
   if (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT) return true;
+  // Check family
+  if (family?.subscription_tier === 'free_founding') return true;
+  if (family?.price_tier === 'founding' && family?.subscription_status === 'active') return true;
   return false;
 }
 
 /**
- * Check if user has FASTIQ access
+ * Check if user has FASTIQ access.
+ * Accepts optional family parameter for family-level subscription check.
  * Returns: { hasAccess, reason, tier }
  */
-export function checkFastIQAccess(user) {
+export function checkFastIQAccess(user, family = null) {
   if (!user) return { hasAccess: false, reason: 'not_authenticated', tier: null };
 
   // Admins always have access
@@ -44,35 +46,54 @@ export function checkFastIQAccess(user) {
   }
 
   // Founding members get everything free
-  if (isFoundingMember(user)) {
+  if (isFoundingMember(user, family)) {
     return { hasAccess: true, reason: 'founding_member', tier: 'free_founding' };
   }
 
-  // Active FASTIQ subscription
-  const tier = user.subscription_tier;
-  const status = user.subscription_status;
-  const isActive = status === 'active' || status === 'trialing';
+  // ── Check user's own subscription ──
+  const userTier = user.subscription_tier;
+  const userStatus = user.subscription_status;
+  const userActive = userStatus === 'active' || userStatus === 'trialing';
 
-  if (tier === 'fastiq' && isActive) {
+  if (userTier === 'fastiq' && userActive) {
     return { hasAccess: true, reason: 'fastiq_subscriber', tier: 'fastiq' };
   }
 
-  // CFF-only subscriber — no FASTIQ
-  if (tier === 'cff' && isActive) {
-    return { hasAccess: false, reason: 'cff_only', tier: 'cff' };
-  }
-
-  // Canceled but still within billing period
-  if (tier === 'fastiq' && status === 'canceled' && user.current_period_end) {
+  // Canceled but still within billing period (user level)
+  if (userTier === 'fastiq' && userStatus === 'canceled' && user.current_period_end) {
     const periodEnd = new Date(user.current_period_end);
     if (periodEnd > new Date()) {
       return { hasAccess: true, reason: 'canceled_active_period', tier: 'fastiq', periodEnd: user.current_period_end };
     }
   }
 
-  // Parent paid for FASTIQ
-  if (user.linked_parent_subscription_active === true || user.has_active_parent_subscription === true) {
-    return { hasAccess: true, reason: 'parent_paid', tier: 'fastiq' };
+  // ── Check Family entity subscription (source of truth) ──
+  if (family) {
+    const famTier = family.subscription_tier;
+    const famStatus = family.subscription_status;
+    const famActive = famStatus === 'active' || famStatus === 'trialing';
+
+    if (famTier === 'fastiq' && famActive) {
+      return { hasAccess: true, reason: 'family_subscription', tier: 'fastiq', billingOwner: family.billing_owner_name };
+    }
+
+    // Family canceled but within period
+    if (famTier === 'fastiq' && famStatus === 'canceled' && family.current_period_end) {
+      const periodEnd = new Date(family.current_period_end);
+      if (periodEnd > new Date()) {
+        return { hasAccess: true, reason: 'family_canceled_active_period', tier: 'fastiq', periodEnd: family.current_period_end };
+      }
+    }
+
+    // Family has CFF only
+    if (famTier === 'cff' && famActive) {
+      return { hasAccess: false, reason: 'family_cff_only', tier: 'cff' };
+    }
+  }
+
+  // CFF-only subscriber (user level) — no FASTIQ
+  if (userTier === 'cff' && userActive) {
+    return { hasAccess: false, reason: 'cff_only', tier: 'cff' };
   }
 
   // No subscription
@@ -82,32 +103,37 @@ export function checkFastIQAccess(user) {
 /**
  * Check if user has CFF access (directory, community, messaging, etc.)
  */
-export function checkCFFAccess(user) {
+export function checkCFFAccess(user, family = null) {
   if (!user) return false;
   if (user.roles?.includes('admin')) return true;
-  if (isFoundingMember(user)) return true;
+  if (isFoundingMember(user, family)) return true;
 
   const status = user.subscription_status;
   const isActive = status === 'active' || status === 'trialing' || status === 'free_founding';
-
   if (isActive) return true;
 
   // Canceled but within period
   if (status === 'canceled' && user.current_period_end) {
-    return new Date(user.current_period_end) > new Date();
+    if (new Date(user.current_period_end) > new Date()) return true;
   }
 
-  // Legacy: parent subscription
-  if (user.linked_parent_subscription_active === true) return true;
-  if (user.has_active_parent_subscription === true) return true;
+  // Check family subscription
+  if (family) {
+    const famActive = family.subscription_status === 'active' || family.subscription_status === 'trialing';
+    if (famActive) return true;
+    if (family.subscription_status === 'canceled' && family.current_period_end) {
+      if (new Date(family.current_period_end) > new Date()) return true;
+    }
+  }
 
   return false;
 }
 
 /**
- * Hook to determine user's access level and restrictions
+ * Hook to determine user's access level and restrictions.
+ * family: the user's Family entity record (fetched by the page).
  */
-export function useAccessControl(user, linkedParent = null, totalUserCount = 0) {
+export function useAccessControl(user, family = null, totalUserCount = 0) {
   return useMemo(() => {
     if (!user) {
       return {
@@ -132,9 +158,9 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
       };
     }
 
-    const fastiqAccess = checkFastIQAccess(user);
-    const cffAccess = checkCFFAccess(user);
-    const founding = isFoundingMember(user);
+    const fastiqAccess = checkFastIQAccess(user, family);
+    const cffAccess = checkCFFAccess(user, family);
+    const founding = isFoundingMember(user, family);
 
     // Currently: everyone gets full access (founding members era)
     // When we flip the switch, cffAccess and fastiqAccess will gate features
@@ -154,30 +180,34 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
       canSeeFullContactInfo: true,
       isFeatured: founding,
       hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-      subscriptionTier: user.subscription_tier || (founding ? 'free_founding' : null),
-      subscriptionStatus: user.subscription_status || (founding ? 'free_founding' : null),
+      subscriptionTier: user.subscription_tier || family?.subscription_tier || (founding ? 'free_founding' : null),
+      subscriptionStatus: user.subscription_status || family?.subscription_status || (founding ? 'free_founding' : null),
       fastiqReason: fastiqAccess.reason,
       fastiqPeriodEnd: fastiqAccess.periodEnd,
+      fastiqBillingOwner: fastiqAccess.billingOwner,
+      isBillingOwner: !family?.billing_owner_id || family?.billing_owner_id === user.id,
       reason: user.persona === 'parent' ? 'parent' : user.roles?.includes('admin') ? 'admin' : founding ? 'founding_gator' : 'full_access',
     };
-  }, [user, linkedParent, totalUserCount]);
+  }, [user, family, totalUserCount]);
 }
 
 /**
  * Non-hook version for use outside components
  */
-export function checkFullAccess(user, linkedParent = null) {
+export function checkFullAccess(user, family = null) {
   if (!user) return false;
   if (user.persona === 'parent') return true;
   if (user.roles?.includes('admin')) return true;
-  if (isFoundingMember(user)) return true;
+  if (isFoundingMember(user, family)) return true;
 
   const status = user.subscription_status;
   if (status === 'active' || status === 'trialing') return true;
 
-  if (linkedParent?.subscription_status === 'active') return true;
-  if (user.linked_parent_subscription_active === true) return true;
-  if (user.has_active_parent_subscription === true) return true;
+  // Family subscription
+  if (family) {
+    const famStatus = family.subscription_status;
+    if (famStatus === 'active' || famStatus === 'trialing') return true;
+  }
 
   return false;
 }
@@ -185,20 +215,21 @@ export function checkFullAccess(user, linkedParent = null) {
 /**
  * Get user's tier display info
  */
-export function getUserTierInfo(user) {
+export function getUserTierInfo(user, family = null) {
   if (!user) return null;
 
-  if (isFoundingMember(user)) {
+  if (isFoundingMember(user, family)) {
     return {
       tier: 'free_founding',
-      memberNumber: user.member_number || user.founding_gator_number || user.signup_order,
+      memberNumber: user.member_number || user.founding_gator_number || user.signup_order || family?.member_number,
       priceDisplay: 'FREE FOREVER',
       badgeLabel: '👑 FOUNDING MEMBER',
       isFounder: true,
     };
   }
 
-  const tier = user.subscription_tier;
+  // Check family tier first (source of truth), then user
+  const tier = family?.subscription_tier || user.subscription_tier;
   if (tier === 'fastiq') {
     return {
       tier: 'fastiq',
