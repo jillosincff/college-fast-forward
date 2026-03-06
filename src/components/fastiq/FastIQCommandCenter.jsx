@@ -294,6 +294,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           alumniCounts={alumniCounts}
           onOpenChat={onOpenChat}
           onAddTargets={() => setShowAddTargets(true)}
+          positionType={profile?.position_type}
         />
 
         {/* SECTION 4 — CAREER CENTER TOOLS */}
