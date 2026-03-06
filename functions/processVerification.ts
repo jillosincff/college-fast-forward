@@ -1,9 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const base44 = createClient({
-    appId: Deno.env.get('BASE44_APP_ID'),
-});
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -16,6 +12,7 @@ Deno.serve(async (req) => {
     }
 
     try {
+        const base44 = createClientFromRequest(req);
         const { token } = await req.json();
         
         if (!token) {
