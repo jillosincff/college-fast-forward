@@ -43,7 +43,30 @@ export default function WeeklyBriefBanner({ weeklyStats, onViewBrief, onDismisse
     sentences.push(`FASTIQ scanned ${companiesScanned} companies for new openings`);
   }
 
-  if (sentences.length === 0) return null;
+  if (sentences.length === 0) {
+    // If no stats at all OR all zeros, check if user has targets
+    if (weeklyStats && weeklyStats._noTargets) {
+      // Show a generic message for users with no targets
+      return (
+        <div className="fiq-animate" style={{
+          background: 'linear-gradient(135deg, rgba(250,70,22,0.06) 0%, rgba(250,70,22,0.01) 60%, transparent 100%)',
+          borderLeft: '4px solid #FA4616', borderRadius: 12, padding: '14px 18px',
+          marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 2px 8px rgba(250,70,22,0.06)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(250,70,22,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 16 }}>🎯</span>
+            </div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0 }}>
+              Add target companies so FASTIQ can start scanning for you
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
   const summaryText = sentences.join(' and ') + '.';
 
   return (

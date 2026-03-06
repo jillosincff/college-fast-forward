@@ -80,8 +80,8 @@ export default function InsightCard({ unmessagedAlumni, onOpenChat, onAddTargets
     prompt = 'Draft an outreach message';
     accentColor = '#8B5CF6';
   } else if (targetCount === 0) {
-    emoji = '🎯';
-    message = 'Set your target companies to unlock personalized intel, alumni discovery, and weekly job scouting.';
+    emoji = '⚡';
+    message = 'Add target companies to unlock FASTIQ\'s full power — personalized intel, alumni discovery, and weekly job scouting tailored to your goals.';
     cta = 'Add Targets →';
     prompt = null;
     accentColor = '#FA4616';
