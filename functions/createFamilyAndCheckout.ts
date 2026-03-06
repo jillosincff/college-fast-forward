@@ -21,7 +21,7 @@ const FOUNDING_LIMIT = 1000;
 const STRIPE_PRICES = {
   cff_monthly:    'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
   fastiq_monthly: 'price_1SUJ7I873TV7WMcT1plkAZpz',  // $29/month
-  fastiq_annual:  'price_fastiq_annual_249',           // $249/year — TODO: create in Stripe
+  fastiq_annual:  'price_1T7pOU873TV7WMcTbbBXguCb',     // $249/year
 };
 
 const TRIAL_DAYS = 7;
