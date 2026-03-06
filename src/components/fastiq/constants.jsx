@@ -1,4 +1,76 @@
-// Shared FASTIQ constants for industries and roles
+// Shared FASTIQ constants for industries, roles, position types, and start timelines
+
+export const POSITION_TYPES = [
+  { value: 'summer_internship', label: 'Summer Internship', emoji: '☀️' },
+  { value: 'semester_internship', label: 'Semester/Year-long Internship or Co-op', emoji: '📋' },
+  { value: 'entry_level', label: 'Entry-level / New Grad (full-time)', emoji: '🎓' },
+  { value: 'experienced', label: 'Experienced Position (2+ years experience)', emoji: '💼' },
+  { value: 'exploring', label: "I'm just exploring — not actively searching yet", emoji: '🔍' },
+];
+
+export const START_TIMELINES = [
+  { value: 'immediately', label: 'Immediately / ASAP', emoji: '🔥' },
+  { value: 'summer_2026', label: 'This summer (Summer 2026)', emoji: '☀️' },
+  { value: 'fall_2026', label: 'Fall 2026', emoji: '🍂' },
+  { value: 'spring_2027', label: 'Spring 2027', emoji: '🌸' },
+  { value: 'after_graduation', label: 'After graduation', emoji: '🎓' },
+  { value: 'browsing', label: "I'm just browsing for now", emoji: '👀' },
+];
+
+/**
+ * Get a human-readable label for a position_type value.
+ * Also returns search keywords and role label for use in backend/UI.
+ */
+export function getPositionTypeConfig(positionType) {
+  const configs = {
+    summer_internship: {
+      label: 'Summer Internship',
+      shortLabel: 'Internships',
+      searchTerms: 'summer internship, intern',
+      roleLabel: 'internship',
+      rolesFoundLabel: 'internships',
+      salaryLabel: 'Intern Compensation',
+      outreachPhrase: 'a summer internship',
+    },
+    semester_internship: {
+      label: 'Internship / Co-op',
+      shortLabel: 'Internships',
+      searchTerms: 'internship, co-op, cooperative education',
+      roleLabel: 'internship',
+      rolesFoundLabel: 'internships',
+      salaryLabel: 'Intern Compensation',
+      outreachPhrase: 'an internship or co-op',
+    },
+    entry_level: {
+      label: 'Entry-level / New Grad',
+      shortLabel: 'Entry-level roles',
+      searchTerms: 'entry-level, new grad, associate, junior',
+      roleLabel: 'entry-level role',
+      rolesFoundLabel: 'entry-level roles',
+      salaryLabel: 'Entry-level Salary',
+      outreachPhrase: 'an entry-level position',
+    },
+    experienced: {
+      label: 'Experienced Position',
+      shortLabel: 'Mid-level roles',
+      searchTerms: 'mid-level, experienced, 2-5 years',
+      roleLabel: 'mid-level role',
+      rolesFoundLabel: 'mid-level roles',
+      salaryLabel: 'Salary Range',
+      outreachPhrase: 'a position',
+    },
+    exploring: {
+      label: 'Exploring',
+      shortLabel: 'Roles',
+      searchTerms: 'entry-level, internship, new grad',
+      roleLabel: 'role',
+      rolesFoundLabel: 'roles',
+      salaryLabel: 'Salary Range',
+      outreachPhrase: 'opportunities',
+    },
+  };
+  return configs[positionType] || configs.entry_level;
+}
 
 export const INDUSTRIES = [
   'Technology & Software', 'Financial Services & Banking', 'Consulting & Professional Services',
