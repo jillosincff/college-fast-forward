@@ -148,8 +148,67 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           </div>
         )}
 
-        {/* Tailor Resume Button */}
-        {data.company && onSendMessage && (
+        {/* Alumni found alongside intel */}
+        {data.alumni && data.alumni.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Users className="w-3.5 h-3.5 text-purple-600" />
+              <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni at {titleCase(String(data.company || ''))}</span>
+            </div>
+            <div className="space-y-2">
+              {data.alumni.slice(0, 3).map((a, i) => (
+                <div key={i} className="flex items-center gap-2 bg-white rounded-lg p-2 border border-purple-100">
+                  <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-[10px] flex-shrink-0 ${a.is_cff_member ? 'bg-green-200 text-green-700' : 'bg-purple-200 text-purple-700'}`}>
+                    {a.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 text-xs truncate">{a.name}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{a.role_title}{a.match_score ? ` · ${a.match_score}% match` : ''}</p>
+                  </div>
+                  {onSendMessage && (
+                    <button
+                      onClick={() => onSendMessage(`Draft a message to ${a.name} at ${a.company}`)}
+                      className="text-[10px] font-bold text-[#0021A5] bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md border border-blue-200 cursor-pointer transition-colors flex-shrink-0"
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                    >
+                      Draft Intro →
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {data.alumni.length > 3 && (
+              <p className="text-[10px] text-purple-600 mt-1.5 font-medium">+{data.alumni.length - 3} more alumni found</p>
+            )}
+          </div>
+        )}
+
+        {/* Suggested Actions (people-focused) */}
+        {data.suggested_actions && data.suggested_actions.length > 0 && onSendMessage && (
+          <div className="mt-3 pt-3 border-t border-blue-200 flex flex-wrap gap-1.5">
+            {data.suggested_actions.map((action, i) => {
+              const cleanAction = String(action).replace(/\s*→\s*$/, '');
+              return (
+                <button
+                  key={i}
+                  onClick={() => onSendMessage(cleanAction)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 cursor-pointer transition-all duration-200 ${
+                    i === 0
+                      ? 'border-[#0021A5] text-white bg-[#0021A5] hover:bg-[#001580]'
+                      : 'border-[#0021A5] text-[#0021A5] bg-transparent hover:bg-[#0021A5] hover:text-white'
+                  }`}
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  <ArrowRight className="w-3 h-3 flex-shrink-0" />
+                  {cleanAction}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Fallback: Tailor Resume Button (when no suggested_actions) */}
+        {!data.suggested_actions && data.company && onSendMessage && (
           <div className="mt-3 pt-3 border-t border-blue-200">
             <button
               onClick={() => onSendMessage(`Tailor my resume for a role at ${titleCase(String(data.company))}`)}
