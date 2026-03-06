@@ -176,12 +176,13 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       });
 
       setWeeklyStats({
-        opportunities: weekOps || oppsRaw.length,
-        alumniFound: alumniFound || alumniRaw.length,
+        opportunities: weekOps || activeOpps.length,
+        alumniFound: alumniFound || Object.values(aMap).reduce((s, v) => s + v, 0),
         companiesScanned: companiesScanned || Object.keys(iMap).length,
         topSignal: isValidCompanyName(topSignalName) ? topSignalName : null,
         entryLevelRoles: entryLevelTotal,
         internRoles: internTotal,
+        _noTargets: targetCompanyNames.length === 0,
       });
     };
     load();
