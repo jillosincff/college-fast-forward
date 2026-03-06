@@ -1781,19 +1781,20 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Draft a ${channel} message from ${studentName}, a ${outreachMajor} major at the University of Florida (class of ${gradYear}), to ${recipientName}, ${recipientTitle} at ${recipientCompany}.
 
-Context: The student is interested in ${targetIndustry} and chose to reach out to this person because ${recommendationReason || 'they are a fellow UF alum in a role relevant to the student\'s career goals'}.
+Context: The student is looking for ${ptConfig.outreachPhrase} in ${targetIndustry} and chose to reach out to this person because ${recommendationReason || 'they are a fellow UF alum in a role relevant to the student\'s career goals'}.
 
 ${conversationContext ? `RECENT CONVERSATION CONTEXT:\n${conversationContext}\n` : ''}
 
 Rules:
 1. Reference something SPECIFIC about the alumni's role or background — never generic
 2. Connect the student's major/interests to the alumni's work in a specific way
-3. Ask ONE clear, specific question — not "any advice" but something like "I'd love to hear how your team approaches X" or "I'm curious whether a background in Y translates well into Z"
-4. Keep it under 100 words — busy people don't read essays
-5. Tone: confident but not arrogant, curious but not needy, specific but not stalkerish
-6. Sign off with full name, university, and graduation year
-7. Do NOT use "I hope this message finds you well" or any other cliche opener
-8. No placeholders — use real names and details from above`,
+3. Naturally mention they are looking for ${ptConfig.outreachPhrase} — e.g. "I'm a ${outreachMajor.toLowerCase().includes('junior') ? 'junior' : 'student'} at UF looking for ${ptConfig.outreachPhrase}..."
+4. Ask ONE clear, specific question — not "any advice" but something like "I'd love to hear how your team approaches X" or "I'm curious whether a background in Y translates well into Z"
+5. Keep it under 100 words — busy people don't read essays
+6. Tone: confident but not arrogant, curious but not needy, specific but not stalkerish
+7. Sign off with full name, university, and graduation year
+8. Do NOT use "I hope this message finds you well" or any other cliche opener
+9. No placeholders — use real names and details from above`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -1900,12 +1901,12 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
       const previousIntel = (cached && cached._expired) ? cached : null;
 
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Research ${detectedCompany} hiring activity as of March 2026. Focus on entry-level positions (0-2 years), internships, new grad programs, and roles relevant to a ${studentMajor} major. Do NOT count senior/manager/director/VP roles in hiring score. Also find total roles, entry-level salary ranges, recent news, interview process.`,
+        prompt: `Research ${detectedCompany} hiring activity as of March 2026. The student is specifically looking for: ${ptConfig.label}. Focus on ${ptConfig.searchTerms} positions and roles relevant to a ${studentMajor} major.${positionType === 'experienced' ? '' : ' Do NOT count senior/manager/director/VP roles in hiring score.'} Also find total roles, ${ptConfig.salaryType}, recent news, interview process.`,
         add_context_from_internet: true,
       });
 
       const intel = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing FOCUSED ON ENTRY-LEVEL/INTERN ROLES.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nSCORING: hiring_score 0-100 based on ENTRY-LEVEL/INTERN availability ONLY. Company with 150 senior roles but 0 entry-level = score <20. hiring_signal: hot only if entry-level/interns actively hiring. salary_range: for entry-level only. If company not real, set hiring_score=0 and company_summary="NOT_FOUND".`,
+        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing FOCUSED ON ${ptConfig.label.toUpperCase()} ROLES.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nSCORING: hiring_score 0-100 based on ${ptConfig.searchTerms} availability. ${positionType === 'experienced' ? 'Include mid-level roles.' : 'Company with 150 senior roles but 0 matching positions = score <20.'} hiring_signal: hot only if matching positions actively hiring. salary_range: ${ptConfig.salaryType}. If company not real, set hiring_score=0 and company_summary="NOT_FOUND".`,
         response_json_schema: {
           type: "object",
           properties: {
