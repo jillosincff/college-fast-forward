@@ -324,12 +324,12 @@ function CTASection({ user, studentName, familyId }) {
             {checkingOut
               ? 'Redirecting to checkout...'
               : selectedPlan === 'annual'
-                ? 'Activate FASTIQ — $249/year'
-                : 'Activate FASTIQ — $29/month'}
+                ? 'Activate FASTIQ for Your Family — $249/year'
+                : 'Activate FASTIQ for Your Family — $29/month'}
           </button>
         </motion.div>
         <motion.p variants={fadeUp} className="text-[13px] text-white/40 mt-4">
-          7-day free trial &bull; Cancel anytime
+          7-day free trial &bull; Cancel anytime &bull; Covers your entire family on CFF
         </motion.p>
         <motion.p variants={fadeUp} className="text-[14px] text-white/25 mt-6 italic font-medium">
           Because applying isn't a strategy.

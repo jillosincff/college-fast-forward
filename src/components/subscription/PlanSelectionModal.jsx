@@ -62,6 +62,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
     setLoading(planId);
     const baseUrl = window.location.origin;
     try {
+      // family_id is auto-resolved by createCheckoutSession if not provided
       const { data } = await createCheckoutSession({
         plan: planId,
         successUrl: `${baseUrl}/#Dashboard?payment=success`,
