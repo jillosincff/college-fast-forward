@@ -194,17 +194,17 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
         {/* Save */}
         <button
           onClick={handleSave}
-          disabled={saving || companies.length === 0}
+          disabled={saving}
           style={{
             width: '100%', height: 48, borderRadius: 14, border: 'none',
-            background: (saving || companies.length === 0) ? '#CBD5E1' : '#0021A5',
+            background: saving ? '#CBD5E1' : '#0021A5',
             color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             transition: 'all 0.2s', minHeight: 'auto',
           }}
         >
           {saving && <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />}
-          {saving ? 'Saving...' : 'Save Targets'}
+          {saving ? 'Saving...' : companies.length === 0 ? 'Clear All Targets' : 'Save Targets'}
         </button>
       </div>
     </div>

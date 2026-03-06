@@ -177,7 +177,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
       setWeeklyStats({
         opportunities: weekOps || activeOpps.length,
-        alumniFound: alumniFound || Object.values(aMap).reduce((s, v) => s + v, 0),
+        alumniFound: alumniFound || Object.values(aMap).reduce((a, b) => a + b, 0),
         companiesScanned: companiesScanned || Object.keys(iMap).length,
         topSignal: isValidCompanyName(topSignalName) ? topSignalName : null,
         entryLevelRoles: entryLevelTotal,
@@ -194,10 +194,14 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
     ? rawName.split(',')[1]?.trim().split(' ')[0] || rawName.split(' ')[0] || 'Student'
     : rawName.split(' ')[0] || 'Student';
 
+  // Recalculate progress ring values based on active (non-archived) data only
+  const activeAlumniCount = Object.values(alumniCounts).reduce((a, b) => a + b, 0);
+  const activePipelineMessages = (pipelineCounts.reached_out || 0) + (pipelineCounts.replied || 0) + (pipelineCounts.interview || 0) + (pipelineCounts.offer || 0);
+
   const statValues = {
     targets: profile?.target_companies?.length || 0,
-    insiders: profile?.alumni_discovered || 0,
-    messages: profile?.messages_drafted || 0,
+    insiders: activeAlumniCount || 0,
+    messages: activePipelineMessages || 0,
     warmPaths: profile?.roadmaps_generated || 0,
   };
 
