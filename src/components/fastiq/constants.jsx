@@ -8,6 +8,54 @@ export const POSITION_TYPES = [
   { value: 'exploring', label: "I'm just exploring — not actively searching yet", emoji: '🔍' },
 ];
 
+export const JOB_SEARCH_TYPES = [
+  { value: 'internship', label: 'Internship (summer or semester)', emoji: '☀️' },
+  { value: 'entry_level', label: 'Entry-level full-time position', emoji: '🎓' },
+  { value: 'co_op', label: 'Co-op program', emoji: '🔄' },
+  { value: 'exploring', label: "I'm just exploring — not actively searching yet", emoji: '🔍' },
+];
+
+/**
+ * Get config for a job_search_type value — used for filtering and framing.
+ */
+export function getJobSearchTypeConfig(jobSearchType) {
+  const configs = {
+    internship: {
+      label: 'internship',
+      pluralLabel: 'internships',
+      searchFilter: 'intern, internship, co-op',
+      roleNoun: 'internships',
+      noMatchPhrase: 'No internships available',
+      frameStyle: 'urgency',
+    },
+    entry_level: {
+      label: 'entry-level role',
+      pluralLabel: 'entry-level roles',
+      searchFilter: 'entry-level, new grad, associate, junior',
+      roleNoun: 'entry-level roles',
+      noMatchPhrase: 'No entry-level roles available',
+      frameStyle: 'urgency',
+    },
+    co_op: {
+      label: 'co-op or internship',
+      pluralLabel: 'co-ops and internships',
+      searchFilter: 'co-op, cooperative education, internship',
+      roleNoun: 'co-ops and internships',
+      noMatchPhrase: 'No co-op or internship positions available',
+      frameStyle: 'urgency',
+    },
+    exploring: {
+      label: 'opportunity',
+      pluralLabel: 'opportunities',
+      searchFilter: 'entry-level, internship, new grad',
+      roleNoun: 'roles',
+      noMatchPhrase: 'Not many open positions right now',
+      frameStyle: 'exploration',
+    },
+  };
+  return configs[jobSearchType] || configs.entry_level;
+}
+
 export const START_TIMELINES = [
   { value: 'immediately', label: 'Immediately / ASAP', emoji: '🔥' },
   { value: 'summer_2026', label: 'This summer (Summer 2026)', emoji: '☀️' },
