@@ -1568,9 +1568,9 @@ Return as JSON with these exact fields:`,
         });
       }
 
-      // Web research
+      // Web research — strict current-employee filter
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Find alumni of the University of Florida (UF, in Gainesville, Florida) who currently work at ${alumniCompany}.\n\n${UF_FILTER}\n\nFor each confirmed UF alumni found, provide their full name, current job title, UF degree info, and location.`,
+        prompt: `Find people who attended the University of Florida (UF, Gainesville) and CURRENTLY WORK at ${alumniCompany} as employees.\n\nCRITICAL RULES:\n- They must be CURRENT employees of ${alumniCompany}, not former employees\n- They must work AT ${alumniCompany} directly, not at a partner, vendor, client, or subsidiary\n- Do NOT include people who work at companies with similar names (e.g. Smartsheet is NOT Amazon)\n- Do NOT include people who merely mention ${alumniCompany} in their profile as a client or project\n- If their LinkedIn or bio says they work at a DIFFERENT company, do not include them\n- Verify the company name matches EXACTLY\n\n${UF_FILTER}\n\nFor each person, include: full name, CURRENT job title, their CURRENT company name exactly as listed on their profile, UF degree info, and location.`,
         add_context_from_internet: true,
       });
 
