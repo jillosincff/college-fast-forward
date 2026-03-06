@@ -15,6 +15,7 @@ import AddTargetsModal from './AddTargetsModal';
 import LeaderboardCard from './LeaderboardCard';
 import MyResumeSection from './MyResumeSection';
 import ProfileEditModal from './ProfileEditModal';
+import PastResearchSection from './PastResearchSection';
 
 function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   const lines = [];
@@ -314,6 +315,22 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
         {/* 7. QUICK ACTIONS — hover enhancements handled in QuickActionsGrid */}
         <QuickActionsGrid onOpenChat={onOpenChat} />
+
+        {/* PAST RESEARCH — collapsible archive of removed targets */}
+        <PastResearchSection
+          pastResearch={pastResearch}
+          onOpenChat={onOpenChat}
+          onReAddCompany={async (companyName) => {
+            if (!profile?.id) return;
+            const current = profile.target_companies || [];
+            if (current.length >= 5) return;
+            if (current.map(c => c.toLowerCase()).includes(companyName.toLowerCase())) return;
+            const updated = [...current, titleCase(companyName)];
+            await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
+            if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
+            setRefreshKey(prev => prev + 1);
+          }}
+        />
 
         {weeklyStats && (
           <div ref={weeklyBriefRef}>
