@@ -1986,10 +1986,7 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
     const result = await base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ, a full-service AI career center for UF students.\n\n${profileContext}\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nRequest: "${resolvedMessage}"\n\nProvide personalized career advice. At the END, suggest 2-3 relevant FASTIQ actions.`, response_json_schema: { type: "object", properties: { response: { type: "string" }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response"] } });
     let careerResp = result.response || String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,2000);
     const careerActions = result.suggested_actions || [];
-    if (targetCompanies.length === 0) {
-      careerResp += "\n\n---\n\n💡 **By the way**, I noticed you don't have any target companies set yet. If you tell me what kind of companies interest you — size, industry, location, culture — I can suggest some great matches and add them to your targets. Want me to help with that?";
-      if (!careerActions.some(a => a.toLowerCase().includes('find companies'))) careerActions.push('Help me find companies to target');
-    }
+    if (targetCompanies.length === 0) { careerResp += "\n\n---\n\n💡 **By the way**, I noticed you don't have any target companies set yet. If you tell me what kind of companies interest you, I can suggest some great matches. Want me to help?"; if (!careerActions.some(a => a.toLowerCase().includes('find companies'))) careerActions.push('Help me find companies to target'); }
     return Response.json({ success: true, response: careerResp, message_type: 'career_advice', payload: { suggested_actions: careerActions } });
 
   } catch (error) {
