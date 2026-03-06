@@ -10,31 +10,17 @@ import titleCase from '@/components/utils/titleCase';
 import ResumeUploadStep from './ResumeUploadStep';
 import ResumeBuilderStep from './ResumeBuilderStep';
 import { toast } from 'sonner';
-import { INDUSTRIES, ROLE_TYPES, migrateIndustries, migrateRoles } from '@/components/fastiq/constants';
+import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, migrateIndustries, migrateRoles } from '@/components/fastiq/constants';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
   { id: 'role_type', title: 'What type of role are you looking for?', subtitle: 'This helps FASTIQ find the right jobs — e.g. "marketing roles at tech companies."' },
   { id: 'companies', title: 'Name up to 5 dream companies', subtitle: 'We\'ll research them and find Gator alumni inside.' },
-  { id: 'timeline', title: 'When do you want to start?', subtitle: 'This sets your urgency level.' },
-  { id: 'stage', title: 'Where are you in your search?', subtitle: 'We\'ll calibrate your roadmap to this.' },
+  { id: 'position_type', title: 'What type of position are you looking for?', subtitle: 'This tells FASTIQ exactly what to search for at every company.' },
+  { id: 'start_timeline', title: 'When are you looking to start?', subtitle: 'This helps us time your outreach perfectly.' },
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
   { id: 'greek', title: 'Are you in a fraternity or sorority?', subtitle: 'Optional — Greek connections are powerful for networking.' },
   { id: 'resume', title: "Last step — let's get your resume into FASTIQ", subtitle: 'This powers everything: better company matches, tailored outreach, smarter interview prep, and instant resume tailoring for any job.' },
-];
-
-const TIMELINES = [
-  { value: 'asap', label: 'ASAP', emoji: '🔥' },
-  { value: '3_months', label: 'Within 3 months', emoji: '⏰' },
-  { value: '6_months', label: 'Within 6 months', emoji: '📅' },
-  { value: 'next_year', label: 'Next year', emoji: '🌱' },
-];
-
-const STAGES = [
-  { value: 'just_starting', label: 'Just starting', emoji: '🚀' },
-  { value: 'applying', label: 'Applying to roles', emoji: '📝' },
-  { value: 'interviewing', label: 'Interviewing', emoji: '🎤' },
-  { value: 'have_offers', label: 'Have offers', emoji: '🎉' },
 ];
 
 const INDUSTRY_COMPANIES = {
@@ -83,6 +69,8 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
     target_industry: initialIndustries,
     target_role: initialRoles,
     target_companies: (existingProfile?.target_companies || []).map(titleCase),
+    position_type: existingProfile?.position_type || '',
+    start_timeline: existingProfile?.start_timeline || '',
     career_timeline: initialTimeline,
     current_stage: existingProfile?.current_stage || '',
     biggest_challenge: existingProfile?.biggest_challenge || '',
@@ -112,8 +100,8 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       case 'industry': return data.target_industry.length > 0;
       case 'role_type': return data.target_role.length > 0;
       case 'companies': return explorerMode ? companySizePref !== '' : data.target_companies.length > 0;
-      case 'timeline': return data.career_timeline !== '';
-      case 'stage': return data.current_stage !== '';
+      case 'position_type': return data.position_type !== '';
+      case 'start_timeline': return data.start_timeline !== '';
       case 'challenge': return data.biggest_challenge !== '';
       case 'greek': return true; // optional step, always can proceed
       case 'resume': return false; // resume step handled separately
@@ -152,9 +140,11 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
         target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
         target_industry: data.target_industry.join(', '),
         target_role: data.target_role.join(', '),
-        career_timeline: data.career_timeline,
+        position_type: data.position_type,
+        start_timeline: data.start_timeline,
+        career_timeline: data.start_timeline || data.career_timeline,
         biggest_challenge: data.biggest_challenge,
-        current_stage: data.current_stage,
+        current_stage: data.current_stage || 'just_starting',
         assessment_complete: true,
       };
       if (explorerMode) {
@@ -199,9 +189,11 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
         target_companies: explorerMode ? [] : data.target_companies.map(titleCase),
         target_industry: data.target_industry.join(', '),
         target_role: data.target_role.join(', '),
-        career_timeline: data.career_timeline,
+        position_type: data.position_type,
+        start_timeline: data.start_timeline,
+        career_timeline: data.start_timeline || data.career_timeline,
         biggest_challenge: data.biggest_challenge,
-        current_stage: data.current_stage,
+        current_stage: data.current_stage || 'just_starting',
         assessment_complete: true,
       };
       if (explorerMode) {
@@ -494,11 +486,11 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
               </div>
             )}
 
-            {/* Step 3: Timeline Radio */}
-            {currentStep.id === 'timeline' && renderRadioOptions(TIMELINES, 'career_timeline')}
+            {/* Step 3: Position Type */}
+            {currentStep.id === 'position_type' && renderRadioOptions(POSITION_TYPES, 'position_type')}
 
-            {/* Step 4: Current Stage Radio */}
-            {currentStep.id === 'stage' && renderRadioOptions(STAGES, 'current_stage')}
+            {/* Step 4: Start Timeline */}
+            {currentStep.id === 'start_timeline' && renderRadioOptions(START_TIMELINES, 'start_timeline')}
 
             {/* Step 5: Biggest Challenge Radio */}
             {currentStep.id === 'challenge' && renderRadioOptions(CHALLENGES, 'biggest_challenge')}
