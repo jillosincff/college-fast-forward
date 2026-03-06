@@ -253,17 +253,16 @@ function CTASection({ user, studentName, familyId }) {
     setCheckingOut(true);
     try {
       const baseUrl = window.location.origin;
-      const priceId = selectedPlan === 'annual'
-        ? 'price_fastiq_annual_249'
-        : 'price_1SUJ7I873TV7WMcT1plkAZpz';
-      const res = await base44.functions.invoke('createCheckoutSession', {
-        priceId,
+      const plan = selectedPlan === 'annual' ? 'fastiq_annual' : 'fastiq_monthly';
+      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
+      const { data } = await createCheckoutSession({
+        plan,
         successUrl: `${baseUrl}/#FastIQ?checkout=success`,
         cancelUrl: `${baseUrl}/#FastIQ?checkout=cancel`,
-        metadata: { subscriptionType: 'parent_fastiq', family_id: familyId, plan: selectedPlan },
+        metadata: { family_id: familyId || '' },
       });
-      if (res.data?.url) {
-        window.location.href = res.data.url;
+      if (data?.url) {
+        window.location.href = data.url;
       }
     } catch (err) {
       console.error('Checkout failed:', err);

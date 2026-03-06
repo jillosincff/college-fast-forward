@@ -1,19 +1,18 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Zap, Crown } from 'lucide-react';
-import { navigate, useParams } from '@/components/utils/navigation';
+import { CheckCircle, Zap, Crown, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { trackEvent } from '@/components/utils/analytics';
 
 export default function PaymentSuccess() {
-  const params = useParams();
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const familyId = urlParams.get('family_id');
 
   useEffect(() => {
-    trackEvent('payment_success_viewed', { 
-      session_id: params.session_id,
-      source: 'stripe_redirect'
-    });
-  }, [params.session_id]);
+    try {
+      const { base44 } = require('@/api/base44Client');
+      base44.analytics.track({ eventName: 'payment_success_viewed', properties: { family_id: familyId } });
+    } catch (e) { /* non-critical */ }
+  }, [familyId]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -25,37 +24,32 @@ export default function PaymentSuccess() {
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-12 h-12 text-green-600" />
         </div>
-        
-        <h1 className="text-3xl font-bold text-slate-900 mb-3">Payment Successful!</h1>
-        
-        <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-lg p-4 mb-6">
+
+        <h1 className="text-3xl font-bold text-slate-900 mb-3">You're All Set!</h1>
+
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Crown className="w-5 h-5 text-amber-600" />
-            <span className="font-semibold text-amber-800">Welcome to Pro!</span>
+            <Zap className="w-5 h-5 text-blue-600" />
+            <span className="font-semibold text-blue-800">Subscription Activated</span>
           </div>
-          <p className="text-sm text-amber-700">
-            Your boosts have been added to your account and are ready to use.
+          <p className="text-sm text-blue-700">
+            Your 7-day free trial has started. You won't be charged until it ends.
           </p>
         </div>
-        
+
         <p className="text-slate-600 mb-8">
-          Thank you for your purchase. You can now boost your requests for maximum visibility.
+          You now have full access. Start exploring your career opportunities!
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={() => navigate('SixDegrees')} size="lg" className="bg-[var(--uf-orange)] hover:bg-orange-600">
+          <Button onClick={() => { window.location.hash = '#FastIQ'; }} size="lg" className="bg-[#FA4616] hover:bg-orange-600">
             <Zap className="w-4 h-4 mr-2" />
-            Use a Boost
+            Open FASTIQ
           </Button>
-          <Button onClick={() => navigate('Dashboard')} variant="outline" size="lg">
+          <Button onClick={() => { window.location.hash = '#Dashboard'; }} variant="outline" size="lg">
+            <Home className="w-4 h-4 mr-2" />
             Go to Dashboard
           </Button>
-        </div>
-        
-        <div className="mt-6 text-center">
-          <p className="text-xs text-slate-500">
-            Need help? Check out our <button className="text-[var(--uf-blue)] hover:underline" onClick={() => navigate('HelpCenter')}>Help Center</button>
-          </p>
         </div>
       </motion.div>
     </div>
