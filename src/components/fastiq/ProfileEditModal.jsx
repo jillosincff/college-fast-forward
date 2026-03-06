@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import titleCase from '@/components/utils/titleCase';
+import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
 
 const INDUSTRIES = [
   'Technology', 'Finance', 'Consulting', 'Healthcare', 'Marketing',
@@ -49,6 +51,10 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
 
   const handleSave = async () => {
     setSaving(true);
+    // Detect removed companies
+    const oldTargets = (profile?.target_companies || []).map(c => titleCase(c));
+    const newTargets = companies.map(c => titleCase(c));
+    const removedCompanies = oldTargets.filter(c => !newTargets.map(n => n.toLowerCase()).includes(c.toLowerCase()));
     const profileUpdates = {
       target_industry: industry,
       target_companies: companies,
@@ -56,6 +62,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       current_stage: stage,
       location_preference: location,
       greek_organization: greekOrg,
+      ...(removedCompanies.length > 0 ? { new_alerts_count: 0 } : {}),
     };
     const userUpdates = {};
     if (major) userUpdates.major = major;
@@ -64,6 +71,10 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
     await base44.entities.FastTrackProProfile.update(profile.id, profileUpdates);
     if (Object.keys(userUpdates).length > 0) {
       await base44.auth.updateMe(userUpdates);
+    }
+    // Archive data for removed companies in background
+    if (removedCompanies.length > 0) {
+      archiveRemovedTargets({ removed_companies: removedCompanies, profile_id: profile.id }).catch(e => console.warn('Archive error:', e));
     }
     setSaving(false);
     onSaved({ ...profile, ...profileUpdates });

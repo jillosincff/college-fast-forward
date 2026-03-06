@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Building2, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
+import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
 
 const INDUSTRY_COMPANIES = {
   'Technology': ['Google', 'Apple', 'Amazon', 'Microsoft', 'Meta', 'NVIDIA', 'Salesforce', 'Oracle'],
@@ -45,9 +46,18 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
       return;
     }
     setSaving(true);
+    // Detect removed companies
+    const oldTargets = (profile?.target_companies || []).map(c => titleCase(c));
+    const newTargets = companies.map(c => titleCase(c));
+    const removedCompanies = oldTargets.filter(c => !newTargets.map(n => n.toLowerCase()).includes(c.toLowerCase()));
     await base44.entities.FastTrackProProfile.update(profile.id, {
       target_companies: companies,
+      ...(removedCompanies.length > 0 ? { new_alerts_count: 0 } : {}),
     });
+    // Archive data for removed companies in background
+    if (removedCompanies.length > 0) {
+      archiveRemovedTargets({ removed_companies: removedCompanies, profile_id: profile.id }).catch(e => console.warn('Archive error:', e));
+    }
     setSaving(false);
     onSaved(companies);
   };
