@@ -3,23 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
-import { INDUSTRIES, ROLE_TYPES, migrateIndustries, migrateRoles } from './constants';
-
-const TIMELINES = [
-  { value: 'this_semester', label: 'This semester' },
-  { value: 'next_semester', label: 'Next semester' },
-  { value: 'within_6_months', label: 'Within 6 months' },
-  { value: 'within_year', label: 'Within a year' },
-  { value: 'exploring', label: 'Just exploring' },
-];
-
-const STAGES = [
-  { value: 'exploring', label: 'Just getting started' },
-  { value: 'researching', label: 'Researching companies' },
-  { value: 'networking', label: 'Actively networking' },
-  { value: 'applying', label: 'Applying to roles' },
-  { value: 'interviewing', label: 'Interviewing' },
-];
+import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, migrateIndustries, migrateRoles } from './constants';
 
 export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   // Migrate legacy values on load
@@ -30,8 +14,8 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   const [roles, setRoles] = useState(initialRoles);
   const [companies, setCompanies] = useState(profile?.target_companies || []);
   const [companyInput, setCompanyInput] = useState('');
-  const [timeline, setTimeline] = useState(profile?.career_timeline || '');
-  const [stage, setStage] = useState(profile?.current_stage || '');
+  const [positionType, setPositionType] = useState(profile?.position_type || '');
+  const [startTimeline, setStartTimeline] = useState(profile?.start_timeline || '');
   const [location, setLocation] = useState(profile?.location_preference || '');
   const [major, setMajor] = useState(user?.major || user?.student_major || '');
   const [gradYear, setGradYear] = useState(user?.graduation_year || '');
@@ -66,8 +50,9 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       target_industry: industries.join(', '),
       target_role: roles.join(', '),
       target_companies: companies,
-      career_timeline: timeline,
-      current_stage: stage,
+      position_type: positionType,
+      start_timeline: startTimeline,
+      career_timeline: startTimeline,
       location_preference: location,
       greek_organization: greekOrg,
       ...(removedCompanies.length > 0 ? { new_alerts_count: 0 } : {}),
@@ -200,20 +185,20 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* Timeline + Stage row */}
+          {/* Position Type + Start Timeline row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={labelStyle}>Career Timeline</label>
-              <select value={timeline} onChange={e => setTimeline(e.target.value)} style={selectStyle}>
+              <label style={labelStyle}>Position Type</label>
+              <select value={positionType} onChange={e => setPositionType(e.target.value)} style={selectStyle}>
                 <option value="">Select...</option>
-                {TIMELINES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                {POSITION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Current Stage</label>
-              <select value={stage} onChange={e => setStage(e.target.value)} style={selectStyle}>
+              <label style={labelStyle}>Looking to Start</label>
+              <select value={startTimeline} onChange={e => setStartTimeline(e.target.value)} style={selectStyle}>
                 <option value="">Select...</option>
-                {STAGES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                {START_TIMELINES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
           </div>
