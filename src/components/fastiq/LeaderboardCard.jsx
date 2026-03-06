@@ -148,9 +148,9 @@ export default function LeaderboardCard({ profile, onOpenChat }) {
             {benchmarkLine}
           </p>
           <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, color: '#64748B' }}>📊 {data.myAlumni} alumni</span>
-            <span style={{ fontSize: 11, color: '#64748B' }}>✉️ {data.myMessages} messages</span>
-            <span style={{ fontSize: 11, color: '#64748B' }}>🔍 {data.myCompanies} companies</span>
+            <span style={{ fontSize: 11, color: '#475569' }}>📊 {data.myAlumni} alumni</span>
+            <span style={{ fontSize: 11, color: '#475569' }}>✉️ {data.myMessages} messages</span>
+            <span style={{ fontSize: 11, color: '#475569' }}>🔍 {data.myCompanies} companies</span>
           </div>
         </div>
         <button

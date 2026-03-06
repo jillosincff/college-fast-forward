@@ -17,12 +17,12 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         }}
       >
         <span style={{ fontSize: 14 }}>📁</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Past Research ({pastResearch.length})
         </span>
         {expanded
-          ? <ChevronDown style={{ width: 14, height: 14, color: '#94A3B8' }} />
-          : <ChevronRight style={{ width: 14, height: 14, color: '#94A3B8' }} />
+          ? <ChevronDown style={{ width: 14, height: 14, color: '#475569' }} />
+          : <ChevronRight style={{ width: 14, height: 14, color: '#475569' }} />
         }
       </button>
 
@@ -31,7 +31,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
           background: '#FAFBFC', borderRadius: 14, border: '1px solid #E2E8F0',
           padding: '16px', marginTop: 8,
         }}>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 14, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11, color: '#64748B', marginBottom: 14, lineHeight: 1.5 }}>
             Companies you previously researched that are no longer targets. Your data is preserved.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -63,7 +63,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
                       {alumni > 0 && `${alumni} alumni found`}
                       {alumni > 0 && reached > 0 && ' · '}
                       {reached > 0 && `${reached} reached out`}

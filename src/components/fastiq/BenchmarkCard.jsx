@@ -51,7 +51,7 @@ export default function BenchmarkCard({ profile }) {
     }}>
       <div style={{ fontSize: 22, flexShrink: 0, marginTop: 2 }}>{emoji}</div>
       <div>
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
           FASTIQ Benchmark
         </div>
         <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.6 }}>{message}</div>

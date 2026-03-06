@@ -12,7 +12,7 @@ export default function PipelineBar({ counts, noResponseContacts = [] }) {
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: '#94A3B8',
+        fontSize: 11, fontWeight: 700, color: '#334155',
         textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
       }}>Your Pipeline</h2>
       <div style={{
@@ -33,10 +33,10 @@ export default function PipelineBar({ counts, noResponseContacts = [] }) {
                 }}>{s.icon}</div>
                 <div className="fiq-mono" style={{
                   fontSize: 24, fontWeight: 700,
-                  color: active ? s.color : '#CBD5E1',
+                  color: active ? s.color : '#94A3B8',
                 }}>{count}</div>
                 <div style={{
-                  fontSize: 10, fontWeight: 600, color: '#94A3B8',
+                  fontSize: 10, fontWeight: 600, color: '#475569',
                   textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2,
                 }}>{s.label}</div>
               </div>
@@ -58,7 +58,7 @@ export default function PipelineBar({ counts, noResponseContacts = [] }) {
           border: '1px solid #E2E8F0', padding: '14px 16px',
         }}>
           <div style={{
-            fontSize: 10, fontWeight: 700, color: '#94A3B8',
+            fontSize: 10, fontWeight: 700, color: '#475569',
             textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
             display: 'flex', alignItems: 'center', gap: 6,
           }}>
@@ -71,16 +71,16 @@ export default function PipelineBar({ counts, noResponseContacts = [] }) {
                 fontSize: 12, color: '#64748B',
               }}>
                 <span>{c.alumni_name} at {c.company}</span>
-                <span style={{ fontSize: 10, color: '#94A3B8' }}>No response</span>
+                <span style={{ fontSize: 10, color: '#64748B' }}>No response</span>
               </div>
             ))}
             {noResponseContacts.length > 5 && (
-              <div style={{ fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: '#64748B', textAlign: 'center' }}>
                 +{noResponseContacts.length - 5} more
               </div>
             )}
           </div>
-          <p style={{ fontSize: 10, color: '#94A3B8', marginTop: 8, lineHeight: 1.4 }}>
+          <p style={{ fontSize: 10, color: '#64748B', marginTop: 8, lineHeight: 1.4 }}>
             These contacts didn't respond after 2 attempts. FASTIQ suggested alternative strategies.
           </p>
         </div>

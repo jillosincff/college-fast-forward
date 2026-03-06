@@ -43,7 +43,7 @@ function ActionCard({ action, onOpenChat }) {
       <div style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{action.label}</div>
       {/* 7. HOVER PREVIEW */}
       <div style={{
-        fontSize: 10, color: '#94A3B8', marginTop: 4,
+        fontSize: 10, color: '#64748B', marginTop: 4,
         height: hovered ? 16 : 0,
         opacity: hovered ? 1 : 0,
         transition: 'all 0.25s',
@@ -61,7 +61,7 @@ export default function QuickActionsGrid({ onOpenChat }) {
   return (
     <div className="fiq-animate fiq-delay-6" style={{ marginBottom: 40 }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: '#94A3B8',
+        fontSize: 11, fontWeight: 700, color: '#334155',
         textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
       }}>Quick Actions</h2>
       <div className="fiq-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>

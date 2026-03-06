@@ -50,13 +50,13 @@ function OpportunityCard({ opp, onResearch, onTailor, onDismiss, delay }) {
               }}>NEW</span>
             </div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#0021A5', marginBottom: 4 }}>{opp.role_title}</div>
-            {opp.match_reason && <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 6 }}>{opp.match_reason}</div>}
+            {opp.match_reason && <div style={{ fontSize: 12, color: '#475569', marginBottom: 6 }}>{opp.match_reason}</div>}
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>🕐 {timeAgo}</span>
+              <span style={{ fontSize: 11, color: '#64748B' }}>🕐 {timeAgo}</span>
               {opp.alumni_count > 0 && (
                 <span style={{ fontSize: 11, color: '#FA4616', fontWeight: 700 }}>✨ {opp.alumni_count} UF alumni here</span>
               )}
-              <span style={{ fontSize: 11, color: '#94A3B8', fontStyle: 'italic' }}>Early applicants get noticed first</span>
+              <span style={{ fontSize: 11, color: '#64748B', fontStyle: 'italic' }}>Early applicants get noticed first</span>
             </div>
           </div>
         </div>
@@ -72,6 +72,7 @@ function OpportunityCard({ opp, onResearch, onTailor, onDismiss, delay }) {
           <button onClick={() => onDismiss(opp.id)} style={{
             padding: '8px 10px', borderRadius: 10, border: '1.5px solid #E2E8F0',
             background: 'transparent', color: '#94A3B8', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
+          background: 'transparent', color: '#64748B', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
           }}>✕</button>
         </div>
       </div>
@@ -100,7 +101,7 @@ export default function OpportunitiesSection({ opportunities, onOpenChat, onDism
             fontWeight: 800, padding: '3px 8px', borderRadius: 6,
           }}>NEW</span>
         </div>
-        <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>Updated {timeAgo}</span>
+        <span style={{ fontSize: 12, color: '#64748B', fontWeight: 500 }}>Updated {timeAgo}</span>
       </div>
       {opportunities.map((opp, i) => (
         <OpportunityCard

@@ -31,7 +31,7 @@ function NoResumeState({ onOpenChat }) {
             <Upload style={{ width: 22, height: 22, color: '#0021A5' }} />
           </div>
           <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>I have a resume</p>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 16, lineHeight: 1.4 }}>Upload PDF, DOCX, or paste text</p>
+          <p style={{ fontSize: 11, color: '#64748B', marginBottom: 16, lineHeight: 1.4 }}>Upload PDF, DOCX, or paste text</p>
           <button style={{
             padding: '10px 22px', borderRadius: 10, border: 'none',
             background: '#0021A5', color: '#fff', fontSize: 12, fontWeight: 700,
@@ -53,7 +53,7 @@ function NoResumeState({ onOpenChat }) {
             <Sparkles style={{ width: 22, height: 22, color: '#FA4616' }} />
           </div>
           <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>I need to create one</p>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 16, lineHeight: 1.4 }}>FASTIQ will build it with you in minutes</p>
+          <p style={{ fontSize: 11, color: '#64748B', marginBottom: 16, lineHeight: 1.4 }}>FASTIQ will build it with you in minutes</p>
           <button style={{
             padding: '10px 22px', borderRadius: 10, border: 'none',
             background: '#FA4616', color: '#fff', fontSize: 12, fontWeight: 700,
@@ -61,7 +61,7 @@ function NoResumeState({ onOpenChat }) {
           }}>Build My Resume →</button>
         </div>
       </div>
-      <p style={{ fontSize: 11, color: '#94A3B8', textAlign: 'center', marginTop: 14, lineHeight: 1.5 }}>
+      <p style={{ fontSize: 11, color: '#475569', textAlign: 'center', marginTop: 14, lineHeight: 1.5 }}>
         Your resume powers everything — better company matches, tailored outreach, smarter interview prep, and instant resume customization for any job.
       </p>
     </div>
@@ -82,7 +82,7 @@ function CollapsedResumeBar({ profile, tailoredCount, onExpand, onOpenChat }) {
     }}>
       <CheckCircle2 style={{ width: 18, height: 18, color: '#10B981', flexShrink: 0 }} />
       <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>Master Resume</span>
-      <span style={{ fontSize: 11, color: '#94A3B8' }}>· Updated {formatDate(profile?.updated_date)}</span>
+      <span style={{ fontSize: 11, color: '#64748B' }}>· Updated {formatDate(profile?.updated_date)}</span>
       {tailoredCount > 0 && (
         <span style={{ fontSize: 11, color: '#8B5CF6', fontWeight: 600 }}>· {tailoredCount} tailored</span>
       )}
@@ -152,7 +152,7 @@ function ExpandedResumeState({ profile, tailored, onOpenChat, onCollapse }) {
             <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>Master Resume</span>
             <span style={{ fontSize: 10, fontWeight: 600, color: '#10B981', background: '#ECFDF5', padding: '2px 8px', borderRadius: 10 }}>✓ Active</span>
           </div>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>Last updated {formatDate(profile?.updated_date)}</p>
+          <p style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Last updated {formatDate(profile?.updated_date)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={() => onOpenChat('Tailor my resume for a new role')} style={{
@@ -191,7 +191,7 @@ function ExpandedResumeState({ profile, tailored, onOpenChat, onCollapse }) {
             <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Tailored for {tr.role_title} at {tr.company_name}
             </p>
-            <p style={{ fontSize: 11, color: '#94A3B8' }}>{formatDate(tr.created_date)}</p>
+            <p style={{ fontSize: 11, color: '#64748B' }}>{formatDate(tr.created_date)}</p>
           </div>
           {tr.ats_score > 0 && <ScoreBadge score={tr.ats_score} />}
         </div>
@@ -226,7 +226,7 @@ function ExpandedResumeState({ profile, tailored, onOpenChat, onCollapse }) {
       <button onClick={onCollapse} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
         width: '100%', padding: '6px 0', background: 'transparent', border: 'none',
-        fontSize: 11, fontWeight: 600, color: '#94A3B8', cursor: 'pointer', minHeight: 'auto',
+        fontSize: 11, fontWeight: 600, color: '#64748B', cursor: 'pointer', minHeight: 'auto',
       }}>
         <ChevronUp style={{ width: 12, height: 12 }} /> Collapse
       </button>
@@ -252,7 +252,7 @@ export default function MyResumeSection({ profile, onOpenChat }) {
     <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#94A3B8',
+          fontSize: 11, fontWeight: 700, color: '#334155',
           textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
         }}>
           📄 My Resume

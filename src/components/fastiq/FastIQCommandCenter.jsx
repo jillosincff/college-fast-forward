@@ -379,7 +379,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           </div>
         )}
 
-        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontSize: 12, color: '#94A3B8' }}>
+        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontSize: 12, color: '#64748B' }}>
           FASTIQ™ by College Fast Forward · Because applying isn't a strategy.
         </div>
       </div>

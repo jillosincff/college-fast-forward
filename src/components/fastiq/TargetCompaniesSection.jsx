@@ -39,7 +39,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
   const signal = intel?.hiring_signal;
   let borderColor = '#E2E8F0';
   let glowShadow = 'none';
-  let statusColor = '#94A3B8';
+  let statusColor = '#64748B';
   let statusBg = '#F1F5F9';
   let statusLabel = '';
 
@@ -97,7 +97,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
           <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</span>
           {/* 7. NVIDIA URGENCY: "Not yet scanned" label for unresearched */}
           {!researched && (
-            <span style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8', fontStyle: 'italic' }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', fontStyle: 'italic' }}>
               Not yet scanned
             </span>
           )}
@@ -125,7 +125,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
               return <span style={{ fontSize: 10, color: '#64748B' }}>{parts.join(' + ')} role{total > 1 ? 's' : ''}</span>;
             }
             if (intel?.open_roles_count > 0) {
-              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No entry-level roles found</span>;
+              return <span style={{ fontSize: 10, color: '#64748B', fontStyle: 'italic' }}>No entry-level roles found</span>;
             }
             return null;
           })()}
@@ -187,7 +187,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
     return (
       <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#94A3B8',
+          fontSize: 11, fontWeight: 700, color: '#334155',
           textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
         }}>Target Companies</h2>
         <div style={{
@@ -198,7 +198,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
           <p style={{ fontSize: 13, fontWeight: 600, color: '#64748B', marginTop: 8, marginBottom: 4 }}>
             Not sure where to start?
           </p>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 14, lineHeight: 1.5, maxWidth: 280, marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ fontSize: 11, color: '#475569', marginBottom: 14, lineHeight: 1.5, maxWidth: 280, marginLeft: 'auto', marginRight: 'auto' }}>
             Tell FASTIQ what kind of companies you're interested in and it will suggest matches, track hiring signals, and scout opportunities for you.
           </p>
           <button
@@ -230,7 +230,7 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
     <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#94A3B8',
+          fontSize: 11, fontWeight: 700, color: '#334155',
           textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
         }}>Target Companies</h2>
         <button
