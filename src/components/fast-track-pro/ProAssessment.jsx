@@ -10,6 +10,7 @@ import titleCase from '@/components/utils/titleCase';
 import ResumeUploadStep from './ResumeUploadStep';
 import ResumeBuilderStep from './ResumeBuilderStep';
 import { toast } from 'sonner';
+import { INDUSTRIES, ROLE_TYPES, migrateIndustries, migrateRoles } from '@/components/fastiq/constants';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
@@ -20,21 +21,6 @@ const STEPS = [
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
   { id: 'greek', title: 'Are you in a fraternity or sorority?', subtitle: 'Optional — Greek connections are powerful for networking.' },
   { id: 'resume', title: "Last step — let's get your resume into FASTIQ", subtitle: 'This powers everything: better company matches, tailored outreach, smarter interview prep, and instant resume tailoring for any job.' },
-];
-
-const INDUSTRIES = [
-  'Technology & Software', 'Financial Services & Banking', 'Consulting & Professional Services',
-  'Healthcare & Biotech', 'Media & Entertainment', 'Consumer Products & Retail',
-  'Real Estate & Construction', 'Energy & Sustainability', 'Education & EdTech',
-  'Government & Public Policy', 'Nonprofit & Social Impact', 'Sports & Athletics',
-  'Advertising & Public Relations', 'Hospitality & Travel', 'Manufacturing & Supply Chain',
-  'Legal Services', 'Aerospace & Defense', 'Telecommunications', 'Automotive', 'Food & Beverage',
-];
-
-const ROLE_TYPES = [
-  'Marketing', 'Engineering', 'Finance', 'Sales', 'Operations', 'Product Management',
-  'Design', 'Data & Analytics', 'Human Resources', 'Communications', 'Research',
-  'General Management', 'Business Development', 'Other',
 ];
 
 const TIMELINES = [
@@ -73,10 +59,10 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
   const [saving, setSaving] = useState(false);
   const [resumeMode, setResumeMode] = useState(null); // null, 'builder'
 
-  // Pre-fill from existing profile first, then user fields
+  // Pre-fill from existing profile first, then user fields — migrate legacy values
   const initialIndustries = useMemo(() => {
     if (existingProfile?.target_industry) {
-      return existingProfile.target_industry.split(', ').filter(i => INDUSTRIES.includes(i));
+      return migrateIndustries(existingProfile.target_industry);
     }
     if (user?.industries_interested?.length) return user.industries_interested.filter(i => INDUSTRIES.includes(i));
     return [];
@@ -90,10 +76,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
   }, [user, existingProfile]);
 
   const initialRoles = useMemo(() => {
-    if (existingProfile?.target_role) {
-      return existingProfile.target_role.split(', ').filter(r => ROLE_TYPES.includes(r));
-    }
-    return [];
+    return migrateRoles(existingProfile?.target_role, existingProfile?.target_industry);
   }, [existingProfile]);
 
   const [data, setData] = useState({

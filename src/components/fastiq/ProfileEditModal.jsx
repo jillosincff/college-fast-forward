@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
-
-const INDUSTRIES = [
-  'Technology', 'Finance', 'Consulting', 'Healthcare', 'Marketing',
-  'Engineering', 'Media & Entertainment', 'Real Estate', 'Education',
-  'Government', 'Nonprofit', 'Retail', 'Energy', 'Law',
-];
+import { INDUSTRIES, ROLE_TYPES, migrateIndustries, migrateRoles } from './constants';
 
 const TIMELINES = [
   { value: 'this_semester', label: 'This semester' },
@@ -27,16 +22,29 @@ const STAGES = [
 ];
 
 export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
-  const [industry, setIndustry] = useState(profile?.target_industry || '');
+  // Migrate legacy values on load
+  const initialIndustries = useMemo(() => migrateIndustries(profile?.target_industry), [profile?.target_industry]);
+  const initialRoles = useMemo(() => migrateRoles(profile?.target_role, profile?.target_industry), [profile?.target_role, profile?.target_industry]);
+
+  const [industries, setIndustries] = useState(initialIndustries);
+  const [roles, setRoles] = useState(initialRoles);
   const [companies, setCompanies] = useState(profile?.target_companies || []);
   const [companyInput, setCompanyInput] = useState('');
   const [timeline, setTimeline] = useState(profile?.career_timeline || '');
   const [stage, setStage] = useState(profile?.current_stage || '');
   const [location, setLocation] = useState(profile?.location_preference || '');
-  const [major, setMajor] = useState(user?.major || user?.student_major || profile?.target_industry || '');
+  const [major, setMajor] = useState(user?.major || user?.student_major || '');
   const [gradYear, setGradYear] = useState(user?.graduation_year || '');
   const [greekOrg, setGreekOrg] = useState(profile?.greek_organization || '');
   const [saving, setSaving] = useState(false);
+
+  const toggleIndustry = (ind) => {
+    setIndustries(prev => prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]);
+  };
+
+  const toggleRole = (role) => {
+    setRoles(prev => prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]);
+  };
 
   const addCompany = () => {
     const name = companyInput.trim();
@@ -51,12 +59,12 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
 
   const handleSave = async () => {
     setSaving(true);
-    // Detect removed companies
     const oldTargets = (profile?.target_companies || []).map(c => titleCase(c));
     const newTargets = companies.map(c => titleCase(c));
     const removedCompanies = oldTargets.filter(c => !newTargets.map(n => n.toLowerCase()).includes(c.toLowerCase()));
     const profileUpdates = {
-      target_industry: industry,
+      target_industry: industries.join(', '),
+      target_role: roles.join(', '),
       target_companies: companies,
       career_timeline: timeline,
       current_stage: stage,
@@ -72,7 +80,6 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
     if (Object.keys(userUpdates).length > 0) {
       await base44.auth.updateMe(userUpdates);
     }
-    // Archive data for removed companies in background
     if (removedCompanies.length > 0) {
       archiveRemovedTargets({ removed_companies: removedCompanies, profile_id: profile.id }).catch(e => console.warn('Archive error:', e));
     }
@@ -89,6 +96,14 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   };
   const inputStyle = { ...selectStyle, appearance: 'auto', backgroundImage: 'none' };
   const labelStyle = { fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6, display: 'block' };
+
+  const chipStyle = (selected) => ({
+    padding: '6px 14px', borderRadius: 20,
+    border: selected ? '2px solid #0021A5' : '1.5px solid #E2E8F0',
+    background: selected ? '#EFF6FF' : '#fff',
+    color: selected ? '#0021A5' : '#64748B',
+    fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+  });
 
   return (
     <div style={{
@@ -124,18 +139,30 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* Industry */}
+          {/* Target Industries (multi-select) */}
           <div>
             <label style={labelStyle}>Target Industry</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {INDUSTRIES.map(ind => (
-                <button key={ind} onClick={() => setIndustry(ind)} style={{
-                  padding: '6px 14px', borderRadius: 20, border: industry === ind ? '2px solid #0021A5' : '1.5px solid #E2E8F0',
-                  background: industry === ind ? '#EFF6FF' : '#fff', color: industry === ind ? '#0021A5' : '#64748B',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
-                }}>{ind}</button>
+                <button key={ind} onClick={() => toggleIndustry(ind)} style={chipStyle(industries.includes(ind))}>{ind}</button>
               ))}
             </div>
+            {industries.length > 0 && (
+              <p style={{ fontSize: 10, color: '#64748B', marginTop: 6 }}>{industries.length} selected</p>
+            )}
+          </div>
+
+          {/* Target Roles (multi-select) */}
+          <div>
+            <label style={labelStyle}>What type of role are you looking for?</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {ROLE_TYPES.map(role => (
+                <button key={role} onClick={() => toggleRole(role)} style={chipStyle(roles.includes(role))}>{role}</button>
+              ))}
+            </div>
+            {roles.length > 0 && (
+              <p style={{ fontSize: 10, color: '#64748B', marginTop: 6 }}>{roles.length} selected</p>
+            )}
           </div>
 
           {/* Target Companies */}
