@@ -51,6 +51,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   const [pipelineData, setPipelineData] = useState([]);
   const [newOpportunities, setNewOpportunities] = useState([]);
   const [newAlumni, setNewAlumni] = useState([]);
+  const [allAlumniAtTargets, setAllAlumniAtTargets] = useState([]);
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [unmessagedAlumni, setUnmessagedAlumni] = useState(0);
   const [showAddTargets, setShowAddTargets] = useState(false);
@@ -86,14 +87,16 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       relevantIntel.forEach(i => { iMap[i.company_name?.toLowerCase()] = i; });
       setCompanyIntel(iMap);
 
-      // Alumni counts + new alumni list
+      // Alumni counts + new alumni list + all alumni at targets
       const aMap = {};
       const recentAlumni = [];
+      const allTargetAlumni = [];
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       alumniRaw.forEach(a => {
         const k = a.company?.toLowerCase();
         if (k && targetNamesLowerSet.has(k)) {
           aMap[k] = (aMap[k] || 0) + 1;
+          allTargetAlumni.push(a);
           if (a.created_date && new Date(a.created_date) >= oneWeekAgo) {
             recentAlumni.push(a);
           }
@@ -101,6 +104,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       });
       setAlumniCounts(aMap);
       setNewAlumni(recentAlumni.slice(0, 10));
+      setAllAlumniAtTargets(allTargetAlumni);
 
       // Pipeline
       const ACTIVE_STATUSES = ['reached_out', 'replied', 'interview', 'offer'];
@@ -277,6 +281,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           pipelineCounts={pipelineCounts}
           pipelineData={pipelineData}
           companyIntel={companyIntel}
+          alumniData={allAlumniAtTargets}
           onOpenChat={onOpenChat}
           onAddTargets={() => setShowAddTargets(true)}
         />
