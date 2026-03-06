@@ -74,37 +74,62 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       const targetCompanyNames = (profile?.target_companies || []).map(c => titleCase(c));
 
       const [intelRaw, alumniRaw, pipelineRaw, oppsRaw, activityRaw] = await Promise.all([
-        targetCompanyNames.length > 0
-          ? base44.entities.CompanyIntelCache.filter({}, '-created_date', 50).catch(() => [])
-          : Promise.resolve([]),
+        base44.entities.CompanyIntelCache.filter({}, '-created_date', 50).catch(() => []),
         base44.entities.DiscoveredAlumni.filter({}, '-created_date', 100).catch(() => []),
         base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 200).catch(() => []),
         base44.entities.ScoutedOpportunity.filter({ user_email: user.email, is_new: true }, '-scouted_date', 10).catch(() => []),
         base44.entities.ProActivityLog.filter({ user_email: user.email }, '-timestamp', 50).catch(() => []),
       ]);
 
-      const relevantIntel = targetCompanyNames.length > 0
-        ? intelRaw.filter(i => targetCompanyNames.some(tc => tc.toLowerCase() === (i.company_name || '').toLowerCase()))
-        : intelRaw;
+      const targetNamesLowerSet = new Set(targetCompanyNames.map(n => n.toLowerCase()));
+
+      // Filter intel to current targets only
+      const relevantIntel = intelRaw.filter(i => targetNamesLowerSet.has((i.company_name || '').toLowerCase()));
       const iMap = {};
       relevantIntel.forEach(i => { iMap[i.company_name?.toLowerCase()] = i; });
       setCompanyIntel(iMap);
 
+      // Alumni counts: only for current targets
       const aMap = {};
-      alumniRaw.forEach(a => { const k = a.company?.toLowerCase(); if (k) aMap[k] = (aMap[k] || 0) + 1; });
+      alumniRaw.forEach(a => { const k = a.company?.toLowerCase(); if (k && targetNamesLowerSet.has(k)) aMap[k] = (aMap[k] || 0) + 1; });
       setAlumniCounts(aMap);
 
+      // Pipeline: show active contacts (reached_out, replied, interview, offer) regardless of target status
+      // Only show "identified" contacts if their company is a current target
+      const ACTIVE_STATUSES = ['reached_out', 'replied', 'interview', 'offer'];
+      const activePipeline = pipelineRaw.filter(p => {
+        if (ACTIVE_STATUSES.includes(p.status)) return true; // always show active contacts
+        if (p.status === 'no_response') return true; // show paused contacts
+        if (p.status === 'identified' && targetNamesLowerSet.has((p.company || '').toLowerCase())) return true;
+        if ((p.notes || '').includes('[archived: target removed]')) return false;
+        return targetNamesLowerSet.has((p.company || '').toLowerCase());
+      });
+
       const pc = { identified: 0, reached_out: 0, replied: 0, interview: 0, offer: 0, no_response: 0 };
-      pipelineRaw.forEach(p => { if (pc[p.status] !== undefined) pc[p.status]++; });
+      activePipeline.forEach(p => { if (pc[p.status] !== undefined) pc[p.status]++; });
       setPipelineCounts(pc);
-      setPipelineData(pipelineRaw);
+      setPipelineData(activePipeline);
 
-      setNoResponseContacts(pipelineRaw.filter(p => p.status === 'no_response'));
+      setNoResponseContacts(activePipeline.filter(p => p.status === 'no_response'));
 
-      const identifiedOnly = pipelineRaw.filter(p => p.status === 'identified').length;
+      const identifiedOnly = activePipeline.filter(p => p.status === 'identified').length;
       setUnmessagedAlumni(identifiedOnly);
 
-      setNewOpportunities(oppsRaw);
+      // Opportunities: only show for current targets
+      const activeOpps = oppsRaw.filter(o => targetNamesLowerSet.has((o.company_name || '').toLowerCase()));
+      setNewOpportunities(activeOpps);
+
+      // Build past research data (companies researched but no longer targets)
+      const pastCompanies = intelRaw.filter(i => !targetNamesLowerSet.has((i.company_name || '').toLowerCase()));
+      const pastAlumniMap = {};
+      alumniRaw.forEach(a => { const k = a.company?.toLowerCase(); if (k && !targetNamesLowerSet.has(k)) pastAlumniMap[k] = (pastAlumniMap[k] || 0) + 1; });
+      const pastPipelineMap = {};
+      pipelineRaw.forEach(p => { const k = (p.company || '').toLowerCase(); if (!targetNamesLowerSet.has(k)) { if (!pastPipelineMap[k]) pastPipelineMap[k] = { total: 0, reached: 0 }; pastPipelineMap[k].total++; if (p.status !== 'identified') pastPipelineMap[k].reached++; } });
+      setPastResearch(pastCompanies.map(i => ({
+        company_name: i.company_name, intel: i,
+        alumni_count: pastAlumniMap[(i.company_name || '').toLowerCase()] || 0,
+        pipeline: pastPipelineMap[(i.company_name || '').toLowerCase()] || { total: 0, reached: 0 },
+      })));
 
       // Strict company name validation: must be in target list OR pass rigorous checks
       const targetNamesLower = targetCompanyNames.map(n => n.toLowerCase());
