@@ -70,10 +70,10 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
       className={`fiq-animate fiq-delay-${delay}`}
       style={{
         padding: '14px 16px',
-        background: researched ? '#fff' : '#FAFBFC',
+        background: researched ? '#fff' : '#FFFBF5',
         borderRadius: 12,
-        border: researched ? `1.5px solid ${borderColor}` : '1.5px dashed #CBD5E1',
-        borderLeft: researched ? `4px solid ${borderColor}` : '4px dashed #CBD5E1',
+        border: researched ? `1.5px solid ${borderColor}` : '1.5px dashed #E2C9A6',
+        borderLeft: researched ? `4px solid ${borderColor}` : '4px dashed #E2A54A',
         display: 'flex',
         alignItems: 'center',
         gap: 12,

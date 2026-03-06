@@ -43,9 +43,9 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
 
   const rings = [
     { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
-    { value: statValues.insiders, max: 15, label: 'Warm Intros\nFound', color: '#22D3EE' },
+    { value: statValues.insiders, max: 15, label: 'Alumni\nFound', color: '#22D3EE' },
     { value: statValues.messages, max: 10, label: 'Intros\nSent', color: '#A78BFA' },
-    { value: statValues.warmPaths, max: 5, label: 'Warm\nIntros', color: '#4ADE80' },
+    { value: statValues.warmPaths, max: 5, label: 'Replies', color: '#4ADE80' },
   ];
 
   return (

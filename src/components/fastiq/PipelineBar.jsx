@@ -9,8 +9,9 @@ const STAGES = [
 ];
 
 export default function PipelineBar({ counts, noResponseContacts = [], onOpenChat }) {
-  // Check if ALL main stages are zero
+  // Hide pipeline entirely when all stages are 0
   const allZero = STAGES.every(s => (counts[s.key] || 0) === 0);
+  if (allZero) return null;
 
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
@@ -19,31 +20,7 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
         textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
       }}>Your Pipeline</h2>
 
-      {allZero ? (
-        /* Empty pipeline — single motivational card */
-        <div style={{
-          background: '#fff', borderRadius: 16, padding: '28px 24px',
-          border: '1.5px dashed #CBD5E1', textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>🎓</div>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>
-            One warm intro beats 100 cold applications
-          </p>
-          <p style={{ fontSize: 12, color: '#64748B', marginBottom: 16, lineHeight: 1.5, maxWidth: 420, margin: '0 auto 16px' }}>
-            Let's find UF alumni at your targets and start building warm paths — no cold applications needed.
-          </p>
-          <button
-            onClick={() => onOpenChat && onOpenChat('Find UF alumni at my target companies')}
-            style={{
-              padding: '10px 24px', borderRadius: 10, border: 'none',
-              background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
-              cursor: 'pointer', minHeight: 'auto',
-            }}
-          >
-            Find Alumni at My Targets →
-          </button>
-        </div>
-      ) : (
+      {(
         /* Normal pipeline stages */
         <div style={{
           background: '#fff', borderRadius: 16, padding: '24px 16px',

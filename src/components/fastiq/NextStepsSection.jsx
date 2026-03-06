@@ -53,26 +53,16 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
           <button
             onClick={() => onOpenChat(`Find UF alumni at all my target companies: ${targetCompanies.join(', ')}`)}
             style={{
-              padding: '9px 18px', borderRadius: 10, border: 'none',
-              background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
-              cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-              boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
+              padding: '13px 18px', borderRadius: 12, border: 'none',
+              background: 'linear-gradient(135deg, #0021A5 0%, #1a3a8f 100%)',
+              color: '#fff', fontSize: 15, fontWeight: 800,
+              cursor: 'pointer', minHeight: 'auto', width: '100%',
+              boxShadow: '0 4px 16px rgba(0,33,165,0.35)',
+              textAlign: 'center', letterSpacing: '0.01em',
             }}
           >
             Find My Warm Intros →
           </button>
-          {targetCompanies.length > 1 && (
-            <button
-              onClick={() => onOpenChat(`Find UF alumni at ${firstCompany}`)}
-              style={{
-                padding: '9px 18px', borderRadius: 10, border: 'none',
-                background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 700,
-                cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-              }}
-            >
-              Start with {firstCompany} →
-            </button>
-          )}
         </div>
       </div>
     </div>
@@ -384,9 +374,10 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
         )}
 
         {/* Steps 2-3 */}
-        {(heroCard ? secondarySteps : secondarySteps.slice(1)).map((step, i) => (
-          <StepCard key={i} stepNumber={(heroCard || targetCount === 0 ? 1 : 0) + i + (heroCard ? 2 : 2)} {...step} />
-        ))}
+        {(heroCard ? secondarySteps : secondarySteps.slice(1)).map((step, i) => {
+          const base = (heroCard || targetCount === 0) ? 2 : 2;
+          return <StepCard key={i} stepNumber={base + i} {...step} />;
+        })}
       </div>
     </div>
   );
