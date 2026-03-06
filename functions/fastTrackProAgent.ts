@@ -1082,11 +1082,9 @@ Deno.serve(async (req) => {
 - Start Timeline: ${startTimeline || 'not set'}
 - Target Industry: ${profile.target_industry || 'not specified'}
 - Target Companies: ${(profile.target_companies || []).join(', ') || 'none set'}
-- Company Size: ${profile.company_size_preference || 'not set'}
 - Location: ${profile.location_preference || 'not set'}
-- Stage: ${profile.current_stage || 'not set'}
 - Challenge: ${profile.biggest_challenge || 'not set'}
-- Stats: ${profile.alumni_discovered || 0} alumni found, ${profile.messages_drafted || 0} messages drafted, ${profile.companies_researched || 0} companies researched${pipelineSummary}${staleSummary}
+- Stats: ${profile.alumni_discovered || 0} alumni, ${profile.messages_drafted || 0} msgs, ${profile.companies_researched || 0} researched${pipelineSummary}${staleSummary}
 
 CRITICAL POSITION TYPE CONTEXT:
 - The student is looking for: ${ptConfig.label}
