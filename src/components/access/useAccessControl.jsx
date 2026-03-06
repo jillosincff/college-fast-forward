@@ -1,60 +1,119 @@
 import { useMemo } from 'react';
 
 const FOUNDING_GATOR_LIMIT = 1000;
-const EARLY_ADOPTER_THRESHOLD = 5000;
-const PREMIUM_PRICE_EARLY = 9;
-const PREMIUM_PRICE_STANDARD = 19;
-const PREMIUM_ACTIVATION_THRESHOLD = 1000;
-const LIFETIME_DEAL_START = 451;
-const LIFETIME_DEAL_END = 2000;
-const LIFETIME_DEAL_PRICE = 149;
 
-// Cache for user count to avoid repeated API calls
-let cachedUserCount = null;
-let cacheExpiry = 0;
+// ═══════════════════════════════════════════════════════════════
+// CFF + FASTIQ Access Control
+// ═══════════════════════════════════════════════════════════════
+// Tiers:
+//   free_founding — All access (CFF + FASTIQ) free forever
+//   cff           — CFF only ($9/mo). No FASTIQ.
+//   fastiq        — CFF + FASTIQ ($29/mo or $249/yr)
+//   null/none     — No subscription, needs to sign up
+//
+// Founding members are NOT gated. The gating logic is built
+// but not enforced until we flip the switch.
+// ═══════════════════════════════════════════════════════════════
 
 /**
- * Get total user count (cached for 5 minutes)
+ * Check if a user is a founding member (free access to everything)
  */
-export async function getTotalUserCount() {
-  const now = Date.now();
-  if (cachedUserCount !== null && now < cacheExpiry) {
-    return cachedUserCount;
-  }
-  
-  try {
-    const { getUserCount } = await import('@/functions/getUserCount');
-    const result = await getUserCount({});
-    cachedUserCount = result?.data?.count || 0;
-    cacheExpiry = now + 5 * 60 * 1000; // Cache for 5 minutes
-    return cachedUserCount;
-  } catch (error) {
-    console.error('Failed to get user count:', error);
-    return cachedUserCount || 0;
-  }
+export function isFoundingMember(user) {
+  if (!user) return false;
+  if (user.subscription_tier === 'free_founding') return true;
+  if (user.is_founding_member === true) return true;
+  if (user.is_founding_gator === true) return true;
+  if (user.price_tier === 'founding') return true;
+  if (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT) return true;
+  return false;
 }
 
 /**
- * Check if premium features should be active (1,000+ users)
+ * Check if user has FASTIQ access
+ * Returns: { hasAccess, reason, tier }
  */
-export function isPremiumActive(userCount) {
-  return userCount >= PREMIUM_ACTIVATION_THRESHOLD;
+export function checkFastIQAccess(user) {
+  if (!user) return { hasAccess: false, reason: 'not_authenticated', tier: null };
+
+  // Admins always have access
+  if (user.roles?.includes('admin')) return { hasAccess: true, reason: 'admin', tier: 'admin' };
+
+  // Parents always have access (they see the parent view)
+  if (user.persona === 'parent' || user.roles?.includes('parent')) {
+    return { hasAccess: true, reason: 'parent', tier: 'parent' };
+  }
+
+  // Founding members get everything free
+  if (isFoundingMember(user)) {
+    return { hasAccess: true, reason: 'founding_member', tier: 'free_founding' };
+  }
+
+  // Active FASTIQ subscription
+  const tier = user.subscription_tier;
+  const status = user.subscription_status;
+  const isActive = status === 'active' || status === 'trialing';
+
+  if (tier === 'fastiq' && isActive) {
+    return { hasAccess: true, reason: 'fastiq_subscriber', tier: 'fastiq' };
+  }
+
+  // CFF-only subscriber — no FASTIQ
+  if (tier === 'cff' && isActive) {
+    return { hasAccess: false, reason: 'cff_only', tier: 'cff' };
+  }
+
+  // Canceled but still within billing period
+  if (tier === 'fastiq' && status === 'canceled' && user.current_period_end) {
+    const periodEnd = new Date(user.current_period_end);
+    if (periodEnd > new Date()) {
+      return { hasAccess: true, reason: 'canceled_active_period', tier: 'fastiq', periodEnd: user.current_period_end };
+    }
+  }
+
+  // Parent paid for FASTIQ
+  if (user.linked_parent_subscription_active === true || user.has_active_parent_subscription === true) {
+    return { hasAccess: true, reason: 'parent_paid', tier: 'fastiq' };
+  }
+
+  // No subscription
+  return { hasAccess: false, reason: 'no_subscription', tier: null };
 }
 
+/**
+ * Check if user has CFF access (directory, community, messaging, etc.)
+ */
+export function checkCFFAccess(user) {
+  if (!user) return false;
+  if (user.roles?.includes('admin')) return true;
+  if (isFoundingMember(user)) return true;
 
+  const status = user.subscription_status;
+  const isActive = status === 'active' || status === 'trialing' || status === 'free_founding';
+
+  if (isActive) return true;
+
+  // Canceled but within period
+  if (status === 'canceled' && user.current_period_end) {
+    return new Date(user.current_period_end) > new Date();
+  }
+
+  // Legacy: parent subscription
+  if (user.linked_parent_subscription_active === true) return true;
+  if (user.has_active_parent_subscription === true) return true;
+
+  return false;
+}
 
 /**
  * Hook to determine user's access level and restrictions
- * @param {Object} user - The current user object
- * @param {Object} linkedParent - Optional: the user's linked parent (if fetched separately)
- * @param {number} totalUserCount - Optional: current total user count for premium activation check
- * @returns {Object} Access control info
  */
 export function useAccessControl(user, linkedParent = null, totalUserCount = 0) {
   return useMemo(() => {
     if (!user) {
       return {
         hasFullAccess: false,
+        hasFastIQAccess: false,
+        hasCFFAccess: false,
         isPremium: false,
         isFoundingGator: false,
         isLimitedMode: false,
@@ -67,20 +126,24 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
         canSeeFullContactInfo: false,
         isFeatured: false,
         hasLinkedParent: false,
-        premiumActivated: false,
-        reason: 'not_authenticated'
+        subscriptionTier: null,
+        subscriptionStatus: null,
+        reason: 'not_authenticated',
       };
     }
 
-    // Everyone gets full access - no freemium limits
-    const premiumActivated = isPremiumActive(totalUserCount);
-    const isFoundingGator = user.is_founding_gator === true || (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT);
+    const fastiqAccess = checkFastIQAccess(user);
+    const cffAccess = checkCFFAccess(user);
+    const founding = isFoundingMember(user);
 
-    // Everyone gets full access - no limits
+    // Currently: everyone gets full access (founding members era)
+    // When we flip the switch, cffAccess and fastiqAccess will gate features
     return {
-      hasFullAccess: true,
+      hasFullAccess: true,        // ← flip to: cffAccess
+      hasFastIQAccess: true,      // ← flip to: fastiqAccess.hasAccess
+      hasCFFAccess: true,         // ← flip to: cffAccess
       isPremium: true,
-      isFoundingGator,
+      isFoundingGator: founding,
       isLimitedMode: false,
       canSendMessages: true,
       messagesRemaining: Infinity,
@@ -89,129 +152,83 @@ export function useAccessControl(user, linkedParent = null, totalUserCount = 0) 
       canSaveOpportunities: true,
       canMessageInDirectory: true,
       canSeeFullContactInfo: true,
-      isFeatured: isFoundingGator,
+      isFeatured: founding,
       hasLinkedParent: !!user.linked_parent_id || !!user.parent_email,
-      premiumActivated,
-      reason: user.persona === 'parent' ? 'parent' : user.roles?.includes('admin') ? 'admin' : isFoundingGator ? 'founding_gator' : 'full_access'
+      subscriptionTier: user.subscription_tier || (founding ? 'free_founding' : null),
+      subscriptionStatus: user.subscription_status || (founding ? 'free_founding' : null),
+      fastiqReason: fastiqAccess.reason,
+      fastiqPeriodEnd: fastiqAccess.periodEnd,
+      reason: user.persona === 'parent' ? 'parent' : user.roles?.includes('admin') ? 'admin' : founding ? 'founding_gator' : 'full_access',
     };
   }, [user, linkedParent, totalUserCount]);
 }
 
 /**
- * Check if a user has full/premium access (non-hook version for use outside components)
+ * Non-hook version for use outside components
  */
 export function checkFullAccess(user, linkedParent = null) {
   if (!user) return false;
   if (user.persona === 'parent') return true;
   if (user.roles?.includes('admin')) return true;
-  
-  // Founding members always have access
-  if (user.is_founding_member === true) return true;
-  if (user.is_founding_gator === true) return true;
-  if (user.price_tier === 'founding') return true;
-  if (user.signup_order && user.signup_order <= FOUNDING_GATOR_LIMIT) return true;
-  
-  // Active subscription (any tier)
-  if (user.subscription_status === 'active') return true;
-  if (user.subscription_status === 'trialing') return true;
-  
-  // Legacy fields
+  if (isFoundingMember(user)) return true;
+
+  const status = user.subscription_status;
+  if (status === 'active' || status === 'trialing') return true;
+
   if (linkedParent?.subscription_status === 'active') return true;
   if (user.linked_parent_subscription_active === true) return true;
   if (user.has_active_parent_subscription === true) return true;
-  
+
   return false;
 }
 
 /**
- * Get user's pricing tier info
+ * Get user's tier display info
  */
 export function getUserTierInfo(user) {
   if (!user) return null;
-  
-  const tier = user.price_tier || (user.is_founding_member || user.is_founding_gator ? 'founding' : null);
-  const memberNumber = user.member_number || user.founding_gator_number || user.signup_order;
-  
-  if (!tier) return null;
-  
+
+  if (isFoundingMember(user)) {
+    return {
+      tier: 'free_founding',
+      memberNumber: user.member_number || user.founding_gator_number || user.signup_order,
+      priceDisplay: 'FREE FOREVER',
+      badgeLabel: '👑 FOUNDING MEMBER',
+      isFounder: true,
+    };
+  }
+
+  const tier = user.subscription_tier;
+  if (tier === 'fastiq') {
+    return {
+      tier: 'fastiq',
+      priceDisplay: '$29/month',
+      badgeLabel: '⚡ CFF + FASTIQ',
+      isFounder: false,
+    };
+  }
+  if (tier === 'cff') {
+    return {
+      tier: 'cff',
+      priceDisplay: '$9/month',
+      badgeLabel: '✓ CFF Member',
+      isFounder: false,
+    };
+  }
+
   return {
-    tier,
-    memberNumber,
-    priceDisplay: tier === 'founding' ? 'FREE FOREVER' : tier === 'early_adopter' ? '$9/month' : '$19/month',
-    badgeLabel: tier === 'founding' ? '👑 FOUNDING MEMBER' : tier === 'early_adopter' ? '⭐ EARLY ADOPTER' : '✓ MEMBER',
-    isFounder: tier === 'founding'
+    tier: null,
+    priceDisplay: 'No plan',
+    badgeLabel: 'Free',
+    isFounder: false,
   };
 }
 
-/**
- * Check if user has a linked parent account
- */
 export function hasLinkedParent(user) {
   if (!user) return false;
   return !!user.linked_parent_id || !!user.parent_email;
 }
 
-
-
-/**
- * Get current premium price based on total user count
- */
-export function getCurrentPremiumPrice(userCount) {
-  if (userCount >= EARLY_ADOPTER_THRESHOLD) {
-    return PREMIUM_PRICE_STANDARD; // $19
-  }
-  return PREMIUM_PRICE_EARLY; // $9
-}
-
-/**
- * Get pricing tier info based on user count
- */
-export function getPricingTierInfo(userCount) {
-  const foundingSpotsLeft = Math.max(0, FOUNDING_GATOR_LIMIT - userCount);
-  
-  if (userCount < FOUNDING_GATOR_LIMIT) {
-    return {
-      phase: 'founding',
-      currentPrice: 0,
-      spotsLeft: foundingSpotsLeft,
-      nextPhase: 'early_adopter',
-      nextPrice: PREMIUM_PRICE_EARLY
-    };
-  }
-  
-  if (userCount < EARLY_ADOPTER_THRESHOLD) {
-    return {
-      phase: 'early_adopter',
-      currentPrice: PREMIUM_PRICE_EARLY,
-      spotsLeft: EARLY_ADOPTER_THRESHOLD - userCount,
-      nextPhase: 'standard',
-      nextPrice: PREMIUM_PRICE_STANDARD
-    };
-  }
-  
-  return {
-    phase: 'standard',
-    currentPrice: PREMIUM_PRICE_STANDARD,
-    spotsLeft: null,
-    nextPhase: null,
-    nextPrice: null
-  };
-}
-
-/**
- * Check if lifetime deal is available for a given user count
- */
-export function isLifetimeDealAvailable(userCount) {
-  return userCount >= LIFETIME_DEAL_START && userCount < LIFETIME_DEAL_END;
-}
-
 export const ACCESS_CONSTANTS = {
   FOUNDING_GATOR_LIMIT,
-  PREMIUM_PRICE_EARLY,
-  PREMIUM_PRICE_STANDARD,
-  EARLY_ADOPTER_THRESHOLD,
-  PREMIUM_ACTIVATION_THRESHOLD,
-  LIFETIME_DEAL_START,
-  LIFETIME_DEAL_END,
-  LIFETIME_DEAL_PRICE
 };
