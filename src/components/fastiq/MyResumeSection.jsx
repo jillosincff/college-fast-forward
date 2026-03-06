@@ -248,37 +248,39 @@ export default function MyResumeSection({ profile, onOpenChat }) {
       .finally(() => setLoading(false));
   }, [profile?.user_email]);
 
+  // When resume exists and not expanded, show just the slim bar without a section header
+  if (hasResume && !expanded) {
+    return (
+      <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 28 }}>
+        <CollapsedResumeBar
+          profile={profile}
+          tailoredCount={tailored.length}
+          onExpand={() => setExpanded(true)}
+          onOpenChat={onOpenChat}
+        />
+      </div>
+    );
+  }
+
+  // When resume exists and expanded, show with header
+  if (hasResume && expanded) {
+    return (
+      <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 28 }}>
+        <ExpandedResumeState profile={profile} tailored={tailored} onOpenChat={onOpenChat} onCollapse={() => setExpanded(false)} />
+      </div>
+    );
+  }
+
+  // No resume: show full upload section with header
   return (
     <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 32 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#334155',
-          textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
-        }}>
-          📄 My Resume
-        </h2>
-        {hasResume && !expanded && (
-          <button onClick={() => onOpenChat('Help me update my resume')} style={{
-            fontSize: 11, fontWeight: 600, color: '#0021A5', background: 'none',
-            border: 'none', cursor: 'pointer', minHeight: 'auto',
-          }}>Update</button>
-        )}
-      </div>
-
-      {hasResume ? (
-        expanded ? (
-          <ExpandedResumeState profile={profile} tailored={tailored} onOpenChat={onOpenChat} onCollapse={() => setExpanded(false)} />
-        ) : (
-          <CollapsedResumeBar
-            profile={profile}
-            tailoredCount={tailored.length}
-            onExpand={() => setExpanded(true)}
-            onOpenChat={onOpenChat}
-          />
-        )
-      ) : (
-        <NoResumeState onOpenChat={onOpenChat} />
-      )}
+      <h2 style={{
+        fontSize: 11, fontWeight: 700, color: '#334155',
+        textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px',
+      }}>
+        📄 My Resume
+      </h2>
+      <NoResumeState onOpenChat={onOpenChat} />
     </div>
   );
 }

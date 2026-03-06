@@ -124,6 +124,9 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
               if (intern > 0) parts.push(`${intern} intern`);
               return <span style={{ fontSize: 10, color: '#64748B' }}>{parts.join(' + ')} role{total > 1 ? 's' : ''}</span>;
             }
+            if (alumniCount === 0) {
+              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No matches yet</span>;
+            }
             if (intel?.open_roles_count > 0) {
               return <span style={{ fontSize: 10, color: '#64748B', fontStyle: 'italic' }}>No entry-level roles found</span>;
             }
@@ -135,7 +138,6 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
       {/* Actions */}
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
         {!researched ? (
-          /* 7. NVIDIA URGENCY: Larger, glowing orange Research button + pulsing dot */
           <button
             onClick={() => onOpenChat(`Research ${name} hiring`)}
             style={{
@@ -152,19 +154,44 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
             }} />
             Research →
           </button>
-        ) : (
+        ) : (alumniCount === 0 && !(intel?.entry_level_roles_count > 0 || intel?.intern_roles_count > 0)) ? (
+          /* 0 alumni + 0 entry-level: helpful guidance instead of dead-end */
           <>
-            {/* 4. TARGET COMPANY ACTIONS: "View X Alumni →" with count */}
             <button
-              onClick={() => onOpenChat(`Find UF alumni at ${name}`)}
+              onClick={() => onOpenChat(`Find companies similar to ${name} that are hiring`)}
               style={{
                 fontSize: 10, fontWeight: 600, color: '#0021A5',
                 background: 'rgba(0,33,165,0.06)', padding: '5px 10px',
                 borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
               }}
             >
-              View {alumniCount || 0} Alumni →
+              Find Similar →
             </button>
+            <button
+              onClick={() => onOpenChat(`Research ${name} hiring`)}
+              style={{
+                fontSize: 10, fontWeight: 600, color: '#64748B',
+                background: '#F1F5F9', padding: '5px 10px',
+                borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
+              }}
+            >
+              Refresh
+            </button>
+          </>
+        ) : (
+          <>
+            {alumniCount > 0 && (
+              <button
+                onClick={() => onOpenChat(`Find UF alumni at ${name}`)}
+                style={{
+                  fontSize: 10, fontWeight: 600, color: '#0021A5',
+                  background: 'rgba(0,33,165,0.06)', padding: '5px 10px',
+                  borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
+                }}
+              >
+                View {alumniCount} Alumni →
+              </button>
+            )}
             <button
               onClick={() => onOpenChat(`Research ${name} hiring`)}
               style={{

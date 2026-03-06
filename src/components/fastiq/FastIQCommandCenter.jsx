@@ -151,7 +151,12 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
 
       const weekOps = activeOpps.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
       const weekActivity = activityRaw.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
-      const companiesScanned = new Set(weekActivity.filter(a => a.action_type === 'company_search').map(a => a.target_name)).size;
+      // Only count company_search actions for CURRENT targets (filter out stale data from removed targets)
+      const companiesScanned = new Set(
+        weekActivity
+          .filter(a => a.action_type === 'company_search' && a.target_name && targetNamesLowerSet.has(a.target_name.toLowerCase()))
+          .map(a => a.target_name)
+      ).size;
       const alumniFound = weekActivity.filter(a => a.action_type === 'alumni_view').length;
       const hotTargetCompany = relevantIntel.find(i => i.hiring_signal === 'hot' && targetNamesLowerArr.includes((i.company_name || '').toLowerCase()));
       const topSignalName = hotTargetCompany ? titleCase(String(hotTargetCompany.company_name || '').trim()) : null;
@@ -271,6 +276,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           profile={profile}
           pipelineCounts={pipelineCounts}
           pipelineData={pipelineData}
+          companyIntel={companyIntel}
           onOpenChat={onOpenChat}
           onAddTargets={() => setShowAddTargets(true)}
         />
@@ -279,7 +285,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
 
         {/* SECTION 4 — YOUR PIPELINE */}
-        <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} />
+        <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} onOpenChat={onOpenChat} />
         <PipelineNudge pipelineCounts={pipelineCounts} onOpenChat={onOpenChat} />
 
         {/* SECTION 5 — TARGET COMPANIES */}

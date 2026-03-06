@@ -8,48 +8,79 @@ const STAGES = [
   { key: 'offer', icon: '🎉', label: 'Offers', color: '#EAB308' },
 ];
 
-export default function PipelineBar({ counts, noResponseContacts = [] }) {
+export default function PipelineBar({ counts, noResponseContacts = [], onOpenChat }) {
+  // Check if ALL main stages are zero
+  const allZero = STAGES.every(s => (counts[s.key] || 0) === 0);
+
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
       <h2 style={{
         fontSize: 11, fontWeight: 700, color: '#334155',
         textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
       }}>Your Pipeline</h2>
-      <div style={{
-        background: '#fff', borderRadius: 16, padding: '24px 16px',
-        border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center',
-      }}>
-        {STAGES.map((s, i) => {
-          const count = counts[s.key] || 0;
-          const active = count > 0;
-          return (
-            <React.Fragment key={s.key}>
-              <div style={{ textAlign: 'center', flex: 1 }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12,
-                  background: active ? `${s.color}12` : '#F1F5F9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 8px', fontSize: 18, transition: 'all 0.3s',
-                }}>{s.icon}</div>
-                <div className="fiq-mono" style={{
-                  fontSize: 24, fontWeight: 700,
-                  color: active ? s.color : '#94A3B8',
-                }}>{count}</div>
-                <div style={{
-                  fontSize: 10, fontWeight: 600, color: '#475569',
-                  textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2,
-                }}>{s.label}</div>
-              </div>
-              {i < STAGES.length - 1 && (
-                <div style={{
-                  width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#E2E8F0', fontSize: 18, marginTop: -20, flexShrink: 0,
-                }}>→</div>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
+
+      {allZero ? (
+        /* Empty pipeline — single motivational card */
+        <div style={{
+          background: '#fff', borderRadius: 16, padding: '28px 24px',
+          border: '1.5px dashed #CBD5E1', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>🚀</div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>
+            Your networking pipeline is empty — let's change that
+          </p>
+          <p style={{ fontSize: 12, color: '#64748B', marginBottom: 16, lineHeight: 1.5, maxWidth: 380, margin: '0 auto 16px' }}>
+            Research a target company and FASTIQ will start finding alumni for you.
+          </p>
+          <button
+            onClick={() => onOpenChat && onOpenChat('Research my target companies')}
+            style={{
+              padding: '10px 24px', borderRadius: 10, border: 'none',
+              background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer', minHeight: 'auto',
+            }}
+          >
+            Research My Targets →
+          </button>
+        </div>
+      ) : (
+        /* Normal pipeline stages */
+        <div style={{
+          background: '#fff', borderRadius: 16, padding: '24px 16px',
+          border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center',
+        }}>
+          {STAGES.map((s, i) => {
+            const count = counts[s.key] || 0;
+            const active = count > 0;
+            return (
+              <React.Fragment key={s.key}>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12,
+                    background: active ? `${s.color}12` : '#F1F5F9',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 8px', fontSize: 18, transition: 'all 0.3s',
+                  }}>{s.icon}</div>
+                  <div className="fiq-mono" style={{
+                    fontSize: 24, fontWeight: 700,
+                    color: active ? s.color : '#94A3B8',
+                  }}>{count}</div>
+                  <div style={{
+                    fontSize: 10, fontWeight: 600, color: '#475569',
+                    textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2,
+                  }}>{s.label}</div>
+                </div>
+                {i < STAGES.length - 1 && (
+                  <div style={{
+                    width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#E2E8F0', fontSize: 18, marginTop: -20, flexShrink: 0,
+                  }}>→</div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
 
       {/* P2 FIX: Show no_response contacts as separate archived section */}
       {noResponseContacts.length > 0 && (
