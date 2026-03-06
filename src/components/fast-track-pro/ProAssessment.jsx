@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Building2, ChevronRight, ChevronLeft, Loader2, X, Sparkles, FileText } from 'lucide-react';
+import { Zap, Building2, ChevronRight, ChevronLeft, Loader2, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
