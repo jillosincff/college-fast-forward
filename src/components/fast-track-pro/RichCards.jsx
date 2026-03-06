@@ -394,7 +394,7 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
           );
         })}
       </div>
-      {/* Bottom actions */}
+      {/* Bottom actions — scenario-driven */}
       {alumni.length > 0 && onDraftMessage && (() => {
         let topMatchName = data?.top_match;
         if (!topMatchName) {
@@ -402,22 +402,43 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
           topMatchName = sorted[0]?.name;
         }
         const topFirstName = getFirstName(topMatchName);
+        // Use suggested_actions from backend if available
+        const backendActions = data?.suggested_actions;
+        if (backendActions && backendActions.length > 0 && onDraftMessage) {
+          return (
+            <div className="mt-3 pt-3 border-t border-purple-200 space-y-1.5">
+              {backendActions.map((action, i) => {
+                const cleanAction = String(action).replace(/\s*→\s*$/, '').trim();
+                return (
+                  <button key={i} onClick={() => onDraftMessage(cleanAction)}
+                    className={`w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${i === 0 ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-sm' : 'bg-white border-2 border-purple-200 text-purple-700 hover:bg-purple-50'}`}
+                    style={{ minHeight: 'auto' }}>
+                    <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                    {cleanAction}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        }
         return (
-        <div className="mt-3 pt-3 border-t border-purple-200 flex flex-wrap gap-2">
+        <div className="mt-3 pt-3 border-t border-purple-200 space-y-1.5">
           <button
             onClick={() => onDraftMessage(topMatchName)}
-            className="text-xs bg-[#0021A5] text-white px-3 py-1.5 rounded-lg hover:bg-[#001580] transition-colors font-medium"
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-[#0021A5] text-white hover:bg-[#001580] shadow-sm cursor-pointer transition-all"
+            style={{ minHeight: 'auto' }}
           >
-            ✉️ Draft outreach to {topFirstName}
+            <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+            Draft intro to {topFirstName}
           </button>
-          {alumni[0]?.company && (
+          {alumni.length > 1 && (
             <button
-              onClick={() => onResearchCompany && onResearchCompany(alumni[0].company)}
-              className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-200 transition-colors font-medium"
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
+              onClick={() => onDraftMessage(`See all alumni at ${titleCase(alumni[0]?.company || '')}`)}
+              className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-white border-2 border-purple-200 text-purple-700 hover:bg-purple-50 cursor-pointer transition-all"
+              style={{ minHeight: 'auto' }}
             >
-              🏢 Research {titleCase(alumni[0].company)}
+              <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+              See all {alumni.length} alumni
             </button>
           )}
         </div>
