@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 
-const PRIMARY_ACTIONS = [
-  { icon: '🔍', label: 'Find Warm Intros', color: '#0021A5', prompt: 'Find UF alumni at my target companies', preview: 'Find UF alumni at your targets' },
-  { icon: '✉️', label: 'Draft Intro', color: '#FA4616', prompt: 'Draft an outreach message', preview: 'AI-drafted personalized intro' },
-  { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major', preview: 'Discover roles that fit your major' },
-  { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview', preview: 'Company-specific mock questions' },
-];
-
-const MORE_ACTIONS = [
-  { icon: '🗺️', label: 'Career Plan', color: '#10B981', prompt: 'Build my career action plan', preview: 'Week-by-week action roadmap' },
-  { icon: '💰', label: 'Salary Intel', color: '#10B981', prompt: 'Help me negotiate salary', preview: 'Market data + negotiation script' },
-  { icon: '🔗', label: 'LinkedIn Review', color: '#0077B5', prompt: 'Review my LinkedIn profile', preview: 'Score and optimize your profile' },
-  { icon: '📝', label: 'Cover Letter', color: '#8B5CF6', prompt: 'Write a cover letter for me', preview: 'Tailored letter for any role' },
+const ALL_ACTIONS = [
+  { icon: '🔍', label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#0021A5', prompt: 'Find UF alumni at my target companies', primary: true },
+  { icon: '✉️', label: 'Draft Intro', description: "I'll write a personalized message for you", color: '#FA4616', prompt: 'Draft an outreach message', primary: true },
+  { icon: '📄', label: 'Resume Review & Tailor', description: 'Build, review, or customize your resume', color: '#8B5CF6', prompt: 'Help me with my resume', primary: true },
+  { icon: '💼', label: 'Interview Prep', description: 'Company-specific questions and tips', color: '#EF4444', prompt: 'Prep me for an interview', primary: true },
+  { icon: '🧭', label: 'Explore Careers', description: "Not sure what to do? Let's figure it out", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
+  { icon: '💰', label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
+  { icon: '🔗', label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: 'Review my LinkedIn profile', primary: false },
+  { icon: '📝', label: 'Cover Letter', description: 'Tailored to each job you apply for', color: '#EAB308', prompt: 'Write a cover letter for me', primary: false },
 ];
 
 function ActionCard({ action, onOpenChat }) {
@@ -23,75 +20,75 @@ function ActionCard({ action, onOpenChat }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        padding: '20px 12px', background: '#fff', borderRadius: 14,
+        padding: action.primary ? '18px 14px 16px' : '14px 12px 12px',
+        background: '#fff',
+        borderRadius: 14,
         border: `1px solid ${hovered ? action.color : '#E2E8F0'}`,
-        borderTop: `3px solid ${hovered ? action.color : '#E2E8F0'}`,
-        textAlign: 'center', cursor: 'pointer',
+        borderTop: `3px solid ${action.color}`,
+        cursor: 'pointer',
         transition: 'all 0.25s',
         transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered ? `0 6px 20px ${action.color}25` : 'none',
-        position: 'relative',
-        overflow: 'hidden',
+        boxShadow: hovered ? `0 8px 24px ${action.color}20` : action.primary ? '0 1px 4px rgba(0,0,0,0.04)' : 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
       }}
     >
       <div style={{
-        width: 48, height: 48, borderRadius: 14,
-        background: `${action.color}0D`, display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 10px', fontSize: 22,
+        width: action.primary ? 44 : 38,
+        height: action.primary ? 44 : 38,
+        borderRadius: 12,
+        background: `${action.color}0D`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: action.primary ? 20 : 18,
       }}>{action.icon}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{action.label}</div>
-      {/* 7. HOVER PREVIEW */}
       <div style={{
-        fontSize: 10, color: '#64748B', marginTop: 4,
-        height: hovered ? 16 : 0,
-        opacity: hovered ? 1 : 0,
-        transition: 'all 0.25s',
-        overflow: 'hidden',
-      }}>
-        {action.preview}
-      </div>
+        fontSize: action.primary ? 14 : 13,
+        fontWeight: 700,
+        color: '#1E293B',
+        lineHeight: 1.3,
+      }}>{action.label}</div>
+      <div style={{
+        fontSize: 11,
+        color: '#64748B',
+        lineHeight: 1.4,
+      }}>{action.description}</div>
     </div>
   );
 }
 
-export default function QuickActionsGrid({ onOpenChat }) {
-  const [showMore, setShowMore] = useState(false);
-
+export default function QuickActionsGrid({ onOpenChat, isNewUser }) {
   return (
-    <div className="fiq-animate fiq-delay-6" style={{ marginBottom: 40 }}>
+    <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 32 }}>
       <h2 style={{
         fontSize: 11, fontWeight: 700, color: '#334155',
-        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
-      }}>Quick Actions</h2>
-      <div className="fiq-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-        {PRIMARY_ACTIONS.map((a) => (
-          <ActionCard key={a.label} action={a} onOpenChat={onOpenChat} />
-        ))}
-      </div>
+        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14,
+      }}>What Can I Help With?</h2>
 
-      {showMore && (
-        <div className="fiq-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginTop: 10 }}>
-          {MORE_ACTIONS.map((a) => (
-            <ActionCard key={a.label} action={a} onOpenChat={onOpenChat} />
-          ))}
+      {isNewUser && (
+        <div style={{
+          background: '#F0F4FA', borderRadius: 10, padding: '10px 14px',
+          marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8,
+          border: '1px solid #E2E8F0',
+        }}>
+          <span style={{ fontSize: 16 }}>👋</span>
+          <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.4 }}>
+            <b>New here?</b> Start with <b>"Find Warm Intros"</b> or <b>"Explore Careers"</b> — FASTIQ will guide you from there.
+          </span>
         </div>
       )}
 
-      <button
-        onClick={() => setShowMore(!showMore)}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          width: '100%', marginTop: 12, padding: '10px 0',
-          background: 'transparent', border: '1px dashed #CBD5E1',
-          borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#64748B',
-          cursor: 'pointer', transition: 'all 0.2s', minHeight: 'auto',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = '#0021A5'; e.currentTarget.style.color = '#0021A5'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#64748B'; }}
-      >
-        {showMore ? '↑ Show less' : '↓ More tools'}
-      </button>
+      <div className="fiq-actions-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 10,
+      }}>
+        {ALL_ACTIONS.map((a) => (
+          <ActionCard key={a.label} action={a} onOpenChat={onOpenChat} />
+        ))}
+      </div>
     </div>
   );
 }

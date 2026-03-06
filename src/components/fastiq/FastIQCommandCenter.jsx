@@ -286,14 +286,10 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onAddTargets={() => setShowAddTargets(true)}
         />
 
-        {/* SECTION 3 — MY RESUME (compact) */}
-        <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
+        {/* SECTION 3 — CAREER CENTER TOOLS (moved up for visibility) */}
+        <QuickActionsGrid onOpenChat={onOpenChat} isNewUser={statValues.targets === 0 && statValues.insiders === 0 && statValues.messages === 0} />
 
-        {/* SECTION 4 — YOUR PIPELINE */}
-        <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} onOpenChat={onOpenChat} />
-        <PipelineNudge pipelineCounts={pipelineCounts} onOpenChat={onOpenChat} />
-
-        {/* SECTION 5 — TARGET COMPANIES */}
+        {/* SECTION 4 — TARGET COMPANIES */}
         <TargetCompaniesSection
           companies={targetCompanies}
           companyIntel={companyIntel}
@@ -302,8 +298,12 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onAddTargets={() => setShowAddTargets(true)}
         />
 
-        {/* SECTION 6 — QUICK ACTIONS */}
-        <QuickActionsGrid onOpenChat={onOpenChat} />
+        {/* SECTION 5 — MY RESUME (compact) */}
+        <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
+
+        {/* SECTION 6 — YOUR PIPELINE */}
+        <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} onOpenChat={onOpenChat} />
+        <PipelineNudge pipelineCounts={pipelineCounts} onOpenChat={onOpenChat} />
 
         {/* SECTION 7 — PAST RESEARCH (collapsible) */}
         <PastResearchSection
