@@ -161,7 +161,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       };
 
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const weekOps = oppsRaw.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
+      const weekOps = activeOpps.filter(o => o.scouted_date && new Date(o.scouted_date) >= oneWeekAgo).length;
       const weekActivity = activityRaw.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
       const companiesScanned = new Set(weekActivity.filter(a => a.action_type === 'company_search').map(a => a.target_name)).size;
       const alumniFound = weekActivity.filter(a => a.action_type === 'alumni_view').length;
