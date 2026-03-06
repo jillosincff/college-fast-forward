@@ -184,9 +184,12 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20 }}>
-          <Shield style={{ width: 14, height: 14, color: '#64748B' }} />
-          <span style={{ fontSize: 11, color: '#64748B' }}>Secure payment via Stripe • Cancel anytime</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20, flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Shield style={{ width: 14, height: 14, color: '#64748B' }} />
+            <span style={{ fontSize: 11, color: '#64748B' }}>Secure payment via Stripe • Cancel anytime</span>
+          </div>
+          <span style={{ fontSize: 11, color: '#94A3B8' }}>One subscription covers your entire family on CFF</span>
         </div>
       </div>
     </div>
