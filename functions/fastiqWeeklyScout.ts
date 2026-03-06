@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     for (const profile of allProfiles) {
       try {
-        const { user_email, target_industry, target_companies, location_preference, current_stage, position_type } = profile;
+        const { user_email, target_industry, target_companies, location_preference, current_stage, position_type, job_search_type } = profile;
 
         // Skip users with no target companies — nothing to scout
         if (!target_companies || target_companies.length === 0) {
@@ -40,7 +40,13 @@ Deno.serve(async (req) => {
         const location = location_preference || 'any location in the US';
         const industry = target_industry || 'any industry';
 
-        // Determine search terms based on position_type
+        // Determine search terms based on job_search_type (primary) and position_type (fallback)
+        const JST_CONFIGS = {
+          internship: { searchTerms: 'internship, summer intern, co-op', filter: 'ONLY include internship and co-op positions. Do NOT include full-time roles, senior roles, or manager positions.' },
+          entry_level: { searchTerms: 'entry-level, new grad, associate, junior', filter: 'ONLY include entry-level, new grad, and associate positions (0-2 years experience). Do NOT include senior roles, manager roles, director roles, VP roles.' },
+          co_op: { searchTerms: 'co-op, cooperative education, internship', filter: 'ONLY include co-op and internship positions. Do NOT include full-time roles, senior roles, or manager positions.' },
+          exploring: { searchTerms: 'entry-level, internship, new grad', filter: 'Include entry-level and internship positions suitable for a college student or recent graduate.' },
+        };
         const PT_CONFIGS = {
           summer_internship: { searchTerms: 'summer internship', filter: 'ONLY include summer internship positions. Do NOT include full-time roles, senior roles, or manager positions.' },
           semester_internship: { searchTerms: 'internship, co-op', filter: 'ONLY include internship and co-op positions. Do NOT include full-time roles, senior roles, or manager positions.' },
@@ -48,7 +54,8 @@ Deno.serve(async (req) => {
           experienced: { searchTerms: 'mid-level, experienced', filter: 'Include mid-level positions (2-5 years experience). Exclude senior/director/VP roles.' },
           exploring: { searchTerms: 'entry-level, internship, new grad', filter: 'Include entry-level and internship positions suitable for a college student or recent graduate.' },
         };
-        const ptConf = PT_CONFIGS[position_type] || PT_CONFIGS.entry_level;
+        // Prefer job_search_type if set, fallback to position_type
+        const ptConf = (job_search_type && JST_CONFIGS[job_search_type]) ? JST_CONFIGS[job_search_type] : (PT_CONFIGS[position_type] || PT_CONFIGS.entry_level);
 
         // Search for new opportunities via web-connected LLM — filtered by position type
         const searchResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
