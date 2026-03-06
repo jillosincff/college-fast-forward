@@ -98,18 +98,6 @@ Deno.serve(async (req) => {
 
     const emailLower = email.toLowerCase().trim();
 
-    // Initialize Base44 client with service role key
-    const appId = Deno.env.get('BASE44_APP_ID');
-    const serviceRoleKey = Deno.env.get('BASE44_SERVICE_ROLE_KEY');
-    
-    if (!appId || !serviceRoleKey) {
-      console.error("Missing BASE44_APP_ID or BASE44_SERVICE_ROLE_KEY");
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     console.log("Initializing Base44 client...");
     const base44 = createClientFromRequest(req);
 
