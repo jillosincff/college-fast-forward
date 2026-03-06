@@ -29,16 +29,13 @@ Deno.serve(async (req) => {
 
     const emailLower = String(email).toLowerCase().trim();
 
-    const base44 = createClient({
-      appId: Deno.env.get('BASE44_APP_ID'),
-      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
-    });
+    const base44 = createClientFromRequest(req);
 
     // Create a one-time magic link token
     const token = `ml_${crypto.randomUUID()}`;
     const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-    await base44.entities.MagicLink.create({
+    await base44.asServiceRole.entities.MagicLink.create({
       email: emailLower,
       token,
       expires_at,

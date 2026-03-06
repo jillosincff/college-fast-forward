@@ -1,9 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const base44 = createClient({
-  appId: Deno.env.get('BASE44_APP_ID'),
-});
-
 function buf2hex(buffer) {
   return [...new Uint8Array(buffer)]
     .map(x => x.toString(16).padStart(2, '0'))
@@ -14,6 +10,7 @@ Deno.serve(async (req) => {
   console.log("=== CREATE USER FROM VERIFICATION ===");
   
   try {
+    const base44 = createClientFromRequest(req);
     const body = await req.json();
     const { email, full_name, password } = body;
     
@@ -32,14 +29,14 @@ Deno.serve(async (req) => {
 
     // Check if user already exists
     try {
-      const existingUsers = await base44.entities.User.filter({ email: lowerCaseEmail });
+      const existingUsers = await base44.asServiceRole.entities.User.filter({ email: lowerCaseEmail });
       if (existingUsers && existingUsers.length > 0) {
         console.log("User already exists, returning existing user");
         const existingUser = existingUsers[0];
         
         // Generate session token
         const sessionToken = crypto.randomUUID();
-        const updatedUser = await base44.entities.User.update(existingUser.id, { 
+        const updatedUser = await base44.asServiceRole.entities.User.update(existingUser.id, { 
           session_token: sessionToken,
           email_verified: true 
         });
@@ -77,7 +74,7 @@ Deno.serve(async (req) => {
     const sessionToken = crypto.randomUUID();
 
     // Create new user
-    const newUser = await base44.entities.User.create({
+    const newUser = await base44.asServiceRole.entities.User.create({
       email: lowerCaseEmail,
       full_name,
       password_hash: hashedPassword,

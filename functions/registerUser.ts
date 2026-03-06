@@ -110,14 +110,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("Initializing Base44 client with service role...");
-    const base44 = createClient({
-      appId,
-      serviceRoleKey,
-    });
+    console.log("Initializing Base44 client...");
+    const base44 = createClientFromRequest(req);
 
     console.log("Checking for existing users...");
-    const existingUsers = await base44.entities.User.filter({ email: emailLower });
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email: emailLower });
     if (existingUsers && existingUsers.length > 0) {
       console.log("User already exists:", emailLower);
       return new Response(JSON.stringify({ error: 'An account with this email already exists.' }), {
@@ -134,7 +131,7 @@ Deno.serve(async (req) => {
     console.log("Getting current user count for signup_order...");
     let signupOrder = null;
     try {
-      const allUsers = await base44.entities.User.filter({});
+      const allUsers = await base44.asServiceRole.entities.User.filter({});
       signupOrder = (allUsers?.length || 0) + 1;
       console.log("Assigned signup_order:", signupOrder);
     } catch (countErr) {
@@ -148,7 +145,7 @@ Deno.serve(async (req) => {
       console.log("Looking up referral code:", referral_code);
       try {
         // Try to find user with matching referral code pattern (stored as ambassador code)
-        const ambassadors = await base44.entities.User.filter({ ambassador_code: referral_code.trim().toUpperCase() });
+        const ambassadors = await base44.asServiceRole.entities.User.filter({ ambassador_code: referral_code.trim().toUpperCase() });
         if (ambassadors && ambassadors.length > 0) {
           ambassadorId = ambassadors[0].id;
           teamLeadId = ambassadors[0].team_lead_id || null;
@@ -162,7 +159,7 @@ Deno.serve(async (req) => {
     }
 
     console.log("Creating registration attempt...");
-    await base44.entities.RegistrationAttempt.create({
+    await base44.asServiceRole.entities.RegistrationAttempt.create({
       email: emailLower,
       full_name,
       password_hash: passwordHash,
