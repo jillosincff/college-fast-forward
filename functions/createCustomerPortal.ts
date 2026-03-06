@@ -1,44 +1,33 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import Stripe from 'npm:stripe';
+import Stripe from 'npm:stripe@14.21.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), { apiVersion: '2024-06-20' });
-
-const base44 = createClient({
-    appId: Deno.env.get('BASE44_APP_ID'),
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
+  apiVersion: '2024-11-20.acacia',
 });
 
 Deno.serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders });
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) throw new Error('Unauthorized');
-        const token = authHeader.split(' ')[1];
-        base44.auth.setToken(token);
-        const { data: { user }, error: userError } = await base44.auth.getUser();
-        if (userError || !user) throw new Error('User not found');
-
-        const { return_url } = await req.json();
-
-        const portalSession = await stripe.billingPortal.sessions.create({
-            customer: user.stripe_customer_id,
-            return_url: return_url,
-        });
-
-        return new Response(JSON.stringify({ url: portalSession.url }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+    if (!user.stripe_customer_id) {
+      return Response.json({ error: 'No billing account found' }, { status: 400 });
     }
+
+    const { return_url } = await req.json();
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripe_customer_id,
+      return_url: return_url || `${req.headers.get('origin')}/#Dashboard`,
+    });
+
+    return Response.json({ url: portalSession.url });
+  } catch (error) {
+    console.error('Customer portal error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
