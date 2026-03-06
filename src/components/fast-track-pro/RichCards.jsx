@@ -74,9 +74,11 @@ export function CompanyIntelCard({ data, onSendMessage }) {
               {((data.entry_level_roles_count || 0) + (data.intern_roles_count || 0)) || (openRolesCount ?? '—')}
             </p>
             <p className="text-[10px] text-slate-500 uppercase">
-              {(data.entry_level_roles_count != null || data.intern_roles_count != null) 
-                ? 'Entry / Intern' 
-                : 'Open Roles'}
+              {data.roles_found_label 
+                ? data.roles_found_label 
+                : (data.entry_level_roles_count != null || data.intern_roles_count != null) 
+                  ? 'Entry / Intern' 
+                  : 'Open Roles'}
             </p>
             {openRolesCount != null && (data.entry_level_roles_count != null || data.intern_roles_count != null) && (
               <p className="text-[9px] text-slate-400 mt-0.5">{openRolesCount} total</p>
@@ -86,7 +88,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
             <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
               <DollarSign className="w-3.5 h-3.5 mx-auto mb-0.5 text-green-600" />
               <p className="text-sm font-bold text-slate-900">{String(data.salary_range)}</p>
-              <p className="text-[10px] text-slate-500 uppercase">Entry Salary</p>
+              <p className="text-[10px] text-slate-500 uppercase">{data.salary_label || 'Entry Salary'}</p>
             </div>
           )}
         </div>
