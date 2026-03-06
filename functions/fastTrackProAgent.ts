@@ -1894,7 +1894,7 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
         cActions.push(`Tailor your resume for ${detectedCompany} →`);
         return Response.json({
           success: true, response: cResp, message_type: 'company_intel',
-          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null, alumni: cAlumni.length > 0 ? cAlumni : undefined, alumni_top_match: cAlumniGuidance?.top_match || undefined, suggested_actions: cActions }
+          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null, alumni: cAlumni.length > 0 ? cAlumni : undefined, alumni_top_match: cAlumniGuidance?.top_match || undefined, suggested_actions: cActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
         });
       }
       // Keep expired cache for memory delta comparison
@@ -1958,7 +1958,7 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
       fActions.push(`Tailor your resume for ${detectedCompany} →`);
       return Response.json({
         success: true, response: fResp, message_type: 'company_intel',
-        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null, alumni: fAlumni.length > 0 ? fAlumni : undefined, alumni_top_match: fAlumniGuidance?.top_match || undefined, suggested_actions: fActions }
+        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null, alumni: fAlumni.length > 0 ? fAlumni : undefined, alumni_top_match: fAlumniGuidance?.top_match || undefined, suggested_actions: fActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
       });
     }
 
