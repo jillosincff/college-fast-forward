@@ -1,4 +1,4 @@
-import React_PLACEHOLDER_TEMP, { useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Search, Plus, Check, Sparkles, MapPin } from 'lucide-react';
@@ -27,7 +27,10 @@ export default function CompanySuggestionsCard({ data, onResearchCompany, profil
     await base44.entities.FastTrackProProfile.update(profile.id, { target_companies: updated });
     setAddedSet(prev => new Set([...prev, name.toLowerCase()]));
     if (onProfileUpdated) onProfileUpdated({ ...profile, target_companies: updated });
-    toast.success(`${name} added to your targets!`);
+    toast.success(`${name} added! Want me to research them right now?`, {
+      action: { label: 'Research →', onClick: () => onResearchCompany?.(name) },
+      duration: 6000,
+    });
   };
 
   return (
