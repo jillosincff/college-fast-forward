@@ -55,11 +55,8 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
   }, [user, existingProfile]);
 
   const initialTimeline = useMemo(() => {
-    if (existingProfile?.career_timeline) return existingProfile.career_timeline;
-    const t = user?.target_timeline;
-    if (t && TIMELINES.some(tl => tl.value === t)) return t;
-    return '';
-  }, [user, existingProfile]);
+    return existingProfile?.career_timeline || existingProfile?.start_timeline || '';
+  }, [existingProfile]);
 
   const initialRoles = useMemo(() => {
     return migrateRoles(existingProfile?.target_role, existingProfile?.target_industry);
