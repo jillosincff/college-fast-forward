@@ -1858,7 +1858,7 @@ Rules:
         const analysis = await runPersonalizedAnalysis(detectedCompany, cachedIntelData);
         // Auto-check for alumni alongside cached intel
         let cAlumni = []; let cAlumniGuidance = null;
-        try { const ca = await getCachedAlumni(base44, detectedCompany); if (ca?.length > 0) { cAlumni = await crossReferenceCFF(base44, ca.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: Math.max(a.match_score||50,50), degree_info: a.degree_info, location: a.location, linkedin_url: a.linkedin_url||'', verified: a.verified||false }))); cAlumniGuidance = await generateAlumniGuidance(base44, cAlumni, detectedCompany, profileContext); } } catch(e) {}
+        try { const ca = await getCachedAlumni(base44, detectedCompany); if (ca?.length > 0) { cAlumni = await crossReferenceCFF(base44, ca.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: Math.max(a.match_score||65,65), degree_info: a.degree_info, location: a.location, linkedin_url: a.linkedin_url||'', verified: a.verified||false }))); cAlumniGuidance = await generateAlumniGuidance(base44, cAlumni, detectedCompany, profileContext); } } catch(e) {}
         let cResp = analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`;
         const cActions = [];
         const cScenario = analysis?.scenario || 'A';
