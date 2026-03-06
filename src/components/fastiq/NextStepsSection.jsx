@@ -43,11 +43,11 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
             fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
           }}>1</span>
           <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
-            Find UF Gators working at {names}
+            Find UF alumni at {names}
           </p>
         </div>
         <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
-          FASTIQ will search the entire web for UF alumni at your target companies — people who can give you a warm intro, insider advice, and referrals.
+          One warm intro is worth more than 100 cold applications. Let's find people at your target companies who share your UF connection.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
@@ -59,7 +59,7 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
               boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
             }}
           >
-            {allLabel}
+            Find My Warm Intros →
           </button>
           {targetCompanies.length > 1 && (
             <button
@@ -90,16 +90,19 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
       borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
       padding: '20px 22px',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
         <span style={{
           width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
         }}>1</span>
         <span style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
-          🎓 {totalCount} UF Alumni Found at Your Target Companies
+          🎓 Your Warm Intros — {totalCount} UF Alumni Found
         </span>
       </div>
+      <p style={{ fontSize: 12, color: '#475569', margin: '0 0 12px 32px', lineHeight: 1.5 }}>
+        These UF alumni work at your target companies. Each one is a warm path in — no cold applications needed.
+      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {visible.map((a, i) => (
           <div key={a.id || i} style={{
@@ -132,7 +135,7 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
                 cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
-              Draft Message →
+              Draft Intro →
             </button>
           </div>
         ))}
@@ -172,11 +175,11 @@ function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
             fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
           }}>1</span>
           <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
-            You've found {identifiedCount} UF alumni — time to reach out
+            {identifiedCount} warm intros waiting — time to reach out
           </p>
         </div>
         <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
-          The hardest part is the first message. Pick someone and I'll draft a warm, personalized intro for you.
+          The hardest part is the first message. Pick someone and I'll draft a warm, personalized intro for you — no cold applications needed.
         </p>
         <button
           onClick={() => onOpenChat('Show me my identified alumni so I can pick who to message')}
@@ -187,7 +190,7 @@ function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
             boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
           }}
         >
-          Choose an Alumni & Draft →
+          Choose an Alumni & Draft Intro →
         </button>
       </div>
     </div>

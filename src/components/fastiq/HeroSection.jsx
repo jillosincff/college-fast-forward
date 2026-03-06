@@ -43,9 +43,9 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
 
   const rings = [
     { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
-    { value: statValues.insiders, max: 15, label: 'Insiders\nFound', color: '#22D3EE' },
-    { value: statValues.messages, max: 10, label: 'Messages\nSent', color: '#A78BFA' },
-    { value: statValues.warmPaths, max: 5, label: 'Warm\nPaths', color: '#4ADE80' },
+    { value: statValues.insiders, max: 15, label: 'Warm Intros\nFound', color: '#22D3EE' },
+    { value: statValues.messages, max: 10, label: 'Intros\nSent', color: '#A78BFA' },
+    { value: statValues.warmPaths, max: 5, label: 'Warm\nIntros', color: '#4ADE80' },
   ];
 
   return (
@@ -96,7 +96,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
             {userName}'s Career Center
           </h1>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
-            Your personal career center, working for you 24/7
+            Finding warm intros so you never have to apply cold again
           </p>
           {/* Line 3: Profile details + Edit Profile pill */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>

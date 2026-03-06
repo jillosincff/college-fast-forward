@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 const PRIMARY_ACTIONS = [
-  { icon: '🔍', label: 'Scan for Insiders', color: '#0021A5', prompt: 'Find UF alumni at my target companies', preview: 'Find UF alumni at your targets' },
-  { icon: '✉️', label: 'Draft Outreach', color: '#FA4616', prompt: 'Draft an outreach message', preview: 'AI-drafted personalized message' },
+  { icon: '🔍', label: 'Find Warm Intros', color: '#0021A5', prompt: 'Find UF alumni at my target companies', preview: 'Find UF alumni at your targets' },
+  { icon: '✉️', label: 'Draft Intro', color: '#FA4616', prompt: 'Draft an outreach message', preview: 'AI-drafted personalized intro' },
   { icon: '🧭', label: 'Explore Careers', color: '#06B6D4', prompt: 'Explore career paths for my major', preview: 'Discover roles that fit your major' },
   { icon: '💼', label: 'Interview Prep', color: '#EF4444', prompt: 'Prep me for an interview', preview: 'Company-specific mock questions' },
 ];

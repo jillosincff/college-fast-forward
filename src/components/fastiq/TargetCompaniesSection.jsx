@@ -95,10 +95,10 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</span>
-          {/* 7. NVIDIA URGENCY: "Not yet scanned" label for unresearched */}
+          {/* Unresearched label */}
           {!researched && (
             <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', fontStyle: 'italic' }}>
-              Not yet scanned
+              Not scanned yet — find UF alumni here
             </span>
           )}
         </div>
