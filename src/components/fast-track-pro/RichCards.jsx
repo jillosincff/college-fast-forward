@@ -185,23 +185,23 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           </div>
         )}
 
-        {/* Suggested Actions (people-focused) */}
+        {/* Scenario-Aware Actions */}
         {data.suggested_actions && data.suggested_actions.length > 0 && onSendMessage && (
-          <div className="mt-3 pt-3 border-t border-blue-200 flex flex-wrap gap-1.5">
+          <div className="mt-3 pt-3 border-t border-blue-200 space-y-1.5">
             {data.suggested_actions.map((action, i) => {
-              const cleanAction = String(action).replace(/\s*→\s*$/, '');
+              const cleanAction = String(action).replace(/\s*→\s*$/, '').trim();
               return (
                 <button
                   key={i}
                   onClick={() => onSendMessage(cleanAction)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 cursor-pointer transition-all duration-200 ${
+                  className={`w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 ${
                     i === 0
-                      ? 'border-[#0021A5] text-white bg-[#0021A5] hover:bg-[#001580]'
-                      : 'border-[#0021A5] text-[#0021A5] bg-transparent hover:bg-[#0021A5] hover:text-white'
+                      ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-sm'
+                      : 'bg-white border-2 border-blue-200 text-[#0021A5] hover:bg-blue-50'
                   }`}
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  style={{ minHeight: 'auto' }}
                 >
-                  <ArrowRight className="w-3 h-3 flex-shrink-0" />
+                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
                   {cleanAction}
                 </button>
               );
@@ -210,7 +210,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
         )}
 
         {/* Fallback: Tailor Resume Button (when no suggested_actions) */}
-        {!data.suggested_actions && data.company && onSendMessage && (
+        {(!data.suggested_actions || data.suggested_actions.length === 0) && data.company && onSendMessage && (
           <div className="mt-3 pt-3 border-t border-blue-200">
             <button
               onClick={() => onSendMessage(`Tailor my resume for a role at ${titleCase(String(data.company))}`)}
