@@ -609,24 +609,27 @@ async function generateAlumniGuidance(base44, alumni, company, profileContext) {
 const UF_FILTER = `CRITICAL: Only include people who attended the University of Florida (UF) in Gainesville. Do NOT include alumni from FIU, FSU, UCF, USF, or any other school.`;
 const NON_UF_SCHOOLS = ['fiu','florida international','fsu','florida state','ucf','central florida','usf','south florida','famu','fgcu'];
 
+// Fuzzy company match: "Amazon" ↔ "AWS", but "Smartsheet" ≠ "Amazon"
+function companyMatchesFuzzy(ac, tc) {
+  if (!ac || !tc) return false;
+  const a = ac.toLowerCase().trim(), t = tc.toLowerCase().trim();
+  if (a === t || a.includes(t) || t.includes(a)) return true;
+  const AL = { amazon:['amazon.com','amazon web services','aws'], google:['alphabet','google llc','google cloud','youtube','deepmind','waymo'], meta:['facebook','meta platforms','instagram','whatsapp'], microsoft:['microsoft corporation','linkedin','github','azure'], jpmorgan:['jp morgan','jpmorgan chase','j.p. morgan','chase'], 'goldman sachs':['goldman sachs group','gs'], 'morgan stanley':['morgan stanley & co'], 'bank of america':['bofa','merrill lynch','merrill'], deloitte:['deloitte consulting','deloitte llp'], ey:['ernst & young','ernst young','ey llp'], pwc:['pricewaterhousecoopers'], mckinsey:['mckinsey & company'], bcg:['boston consulting group'], 'johnson & johnson':['j&j','janssen'], 'procter & gamble':['p&g'], 'lockheed martin':['lockheed'], raytheon:['raytheon technologies','rtx'], 'general electric':['ge'], 'at&t':['att'], 'coca cola':['coca-cola'], pepsi:['pepsico'] };
+  for (const [c, al] of Object.entries(AL)) { const all = [c, ...al]; if (all.some(n => t===n||t.includes(n)||n.includes(t)) && all.some(n => a===n||a.includes(n)||n.includes(a))) return true; }
+  return false;
+}
 function filterAndDedupAlumni(rawAlumni, fallbackCompany) {
   const processed = rawAlumni.map(a => ({ ...a, company: a.company || fallbackCompany }));
   const filtered = processed.filter(a => {
     const deg = (a.degree_info || '').toLowerCase();
     if (NON_UF_SCHOOLS.some(s => deg.includes(s))) return false;
-    if (!a.match_score || a.match_score < 50) {
-      // Enforce minimum 50 for alumni at the searched company
-      a.match_score = Math.max(a.match_score || 50, 50);
-    }
+    const listed = (a.company || '').trim();
+    if (listed && fallbackCompany && !companyMatchesFuzzy(listed, fallbackCompany)) { console.log(`[CompanyFilter] REMOVED "${a.name}" — works at "${listed}", NOT "${fallbackCompany}"`); return false; }
+    if (!a.match_score || a.match_score < 65) a.match_score = Math.max(a.match_score || 65, 65);
     return true;
   });
   const seen = new Set();
-  return filtered.filter(a => {
-    const key = `${(a.name||'').toLowerCase()}_${(a.role_title||'').toLowerCase()}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return filtered.filter(a => { const key = `${(a.name||'').toLowerCase()}_${(a.role_title||'').toLowerCase()}`; if (seen.has(key)) return false; seen.add(key); return true; });
 }
 
 // ═══════════════════════════════════════════════════════════
