@@ -14,8 +14,8 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 // ═══════════════════════════════════════════════════════════════
 // CFF + FASTIQ Stripe Webhook Handler
 // ═══════════════════════════════════════════════════════════════
-// Handles: checkout.session.completed, subscription lifecycle, invoice failures
-// Subscription tiers: free_founding | cff | fastiq
+// Family entity is the SOURCE OF TRUTH for billing.
+// One subscription per family covers all linked members.
 // ═══════════════════════════════════════════════════════════════
 
 async function findUserByCustomerId(customerId) {
@@ -23,16 +23,49 @@ async function findUserByCustomerId(customerId) {
   return users?.length > 0 ? users[0] : null;
 }
 
-async function updateFamilyMembers(familyId, updates) {
-  if (!familyId) return;
-  try {
-    const family = await base44.entities.Family.get(familyId);
-    const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
-    for (const memberId of allMemberIds) {
-      await base44.entities.User.update(memberId, updates);
+/**
+ * Find the Family entity associated with a Stripe customer.
+ * Checks: metadata family_id first, then Family.stripe_customer_id, then user.family_id.
+ */
+async function findFamily(familyId, customerId) {
+  // 1. Direct family_id from metadata
+  if (familyId) {
+    try {
+      const family = await base44.entities.Family.get(familyId);
+      if (family) return family;
+    } catch (e) {
+      console.log('Family not found by ID:', familyId);
     }
-  } catch (err) {
-    console.error('Failed to update family members:', err);
+  }
+  // 2. By stripe_customer_id on Family
+  if (customerId) {
+    const families = await base44.entities.Family.filter({ stripe_customer_id: customerId });
+    if (families?.length > 0) return families[0];
+  }
+  // 3. By billing user's family_id
+  const user = await findUserByCustomerId(customerId);
+  if (user?.family_id) {
+    try {
+      return await base44.entities.Family.get(user.family_id);
+    } catch (e) {
+      console.log('Family not found by user.family_id:', user.family_id);
+    }
+  }
+  return null;
+}
+
+/**
+ * Propagate subscription changes to ALL family members (parents + students).
+ */
+async function updateAllFamilyMembers(family, updates) {
+  if (!family) return;
+  const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
+  for (const memberId of allMemberIds) {
+    try {
+      await base44.entities.User.update(memberId, updates);
+    } catch (err) {
+      console.error('Failed to update family member:', memberId, err.message);
+    }
   }
 }
 
@@ -58,34 +91,38 @@ Deno.serve(async (req) => {
         const subscriptionId = session.subscription;
         const subscriptionTier = session.metadata?.subscription_tier || 'cff';
         const familyId = session.metadata?.family_id;
+        const billingUserEmail = session.metadata?.user_email;
+        const billingUserId = session.metadata?.user_id;
 
-        console.log('Checkout completed:', { subscriptionTier, customerId, familyId });
+        console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail });
 
-        // Update user
-        const user = await findUserByCustomerId(customerId);
-        if (user) {
-          await base44.entities.User.update(user.id, {
+        // Update billing user
+        const billingUser = await findUserByCustomerId(customerId);
+        if (billingUser) {
+          await base44.entities.User.update(billingUser.id, {
             stripe_subscription_id: subscriptionId,
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
           });
-          console.log('Updated user:', user.id, 'tier:', subscriptionTier);
+          console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier);
         }
 
-        // Update Family record
-        if (familyId) {
-          try {
-            await base44.entities.Family.update(familyId, {
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId,
-              subscription_status: 'active',
-            });
-          } catch (err) {
-            console.error('Failed to update family:', err);
-          }
+        // Update Family record (source of truth)
+        const family = await findFamily(familyId, customerId);
+        if (family) {
+          await base44.entities.Family.update(family.id, {
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            subscription_status: 'active',
+            subscription_tier: subscriptionTier,
+            billing_owner_id: billingUserId || billingUser?.id || '',
+            billing_owner_email: billingUserEmail || billingUser?.email || '',
+            billing_owner_name: billingUser?.full_name || '',
+          });
+          console.log('Updated family:', family.id, 'tier:', subscriptionTier);
 
-          // Update all family members
-          await updateFamilyMembers(familyId, {
+          // Propagate to ALL family members
+          await updateAllFamilyMembers(family, {
             subscription_status: 'active',
             subscription_tier: subscriptionTier,
           });
@@ -99,90 +136,92 @@ Deno.serve(async (req) => {
         const subscription = event.data.object;
         const customerId = subscription.customer;
         const subscriptionTier = subscription.metadata?.subscription_tier;
+        const familyId = subscription.metadata?.family_id;
         const status = subscription.status; // active, trialing, past_due, canceled, etc.
 
-        const user = await findUserByCustomerId(customerId);
-        if (!user) break;
+        console.log('Subscription event:', event.type, { status, subscriptionTier, familyId });
 
-        const updates = {
+        const billingUser = await findUserByCustomerId(customerId);
+
+        // Build update payload
+        const userUpdates = {
           stripe_subscription_id: subscription.id,
           subscription_status: status,
         };
+        if (subscriptionTier) userUpdates.subscription_tier = subscriptionTier;
+        if (subscription.trial_end) userUpdates.trial_end_date = new Date(subscription.trial_end * 1000).toISOString();
+        if (subscription.current_period_end) userUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-        // Update tier if present in metadata
-        if (subscriptionTier) {
-          updates.subscription_tier = subscriptionTier;
+        // Update billing user
+        if (billingUser) {
+          await base44.entities.User.update(billingUser.id, userUpdates);
+          console.log('Updated billing user subscription:', billingUser.id, status);
         }
 
-        // Track trial end and period end
-        if (subscription.trial_end) {
-          updates.trial_end_date = new Date(subscription.trial_end * 1000).toISOString();
-        }
-        if (subscription.current_period_end) {
-          updates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
-        }
+        // Update Family (source of truth)
+        const family = await findFamily(familyId, customerId);
+        if (family) {
+          const familyUpdates = {
+            subscription_status: status,
+            stripe_subscription_id: subscription.id,
+          };
+          if (subscriptionTier) familyUpdates.subscription_tier = subscriptionTier;
+          if (subscription.trial_end) familyUpdates.trial_ends_at = new Date(subscription.trial_end * 1000).toISOString();
+          if (subscription.current_period_end) familyUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-        await base44.entities.User.update(user.id, updates);
-        console.log('Subscription updated:', user.id, status, subscriptionTier);
+          await base44.entities.Family.update(family.id, familyUpdates);
+          console.log('Updated family subscription:', family.id, status, subscriptionTier);
 
-        // If parent subscription is active, update linked gators
-        if (status === 'active' && user.persona === 'parent' && user.linked_gator_ids?.length > 0) {
-          for (const gatorId of user.linked_gator_ids) {
-            try {
-              await base44.entities.User.update(gatorId, {
-                subscription_status: 'active',
-                subscription_tier: subscriptionTier || user.subscription_tier,
-                has_active_parent_subscription: true,
-                linked_parent_subscription_active: true,
-              });
-            } catch (err) {
-              console.error('Failed to update gator:', gatorId, err);
-            }
-          }
+          // Propagate to ALL family members (not just billing user)
+          const memberUpdates = { subscription_status: status };
+          if (subscriptionTier) memberUpdates.subscription_tier = subscriptionTier;
+          await updateAllFamilyMembers(family, memberUpdates);
         }
         break;
       }
 
-      // ── SUBSCRIPTION DELETED (canceled at period end or immediately) ──
+      // ── SUBSCRIPTION DELETED ──
       case 'customer.subscription.deleted': {
         const deletedSub = event.data.object;
         const customerId = deletedSub.customer;
+        const familyId = deletedSub.metadata?.family_id;
 
-        const user = await findUserByCustomerId(customerId);
-        if (!user) break;
+        const billingUser = await findUserByCustomerId(customerId);
 
         // Don't cancel founding members
-        if (user.subscription_tier === 'free_founding' || user.is_founding_member || user.price_tier === 'founding') {
-          console.log('Skipping cancellation for founding member:', user.id);
+        if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member || billingUser.price_tier === 'founding')) {
+          console.log('Skipping cancellation for founding member:', billingUser.id);
           break;
         }
 
-        await base44.entities.User.update(user.id, {
-          subscription_status: 'canceled',
-        });
-        console.log('Subscription canceled:', user.id);
-
-        // Update Family
-        if (user.family_id) {
-          try {
-            await base44.entities.Family.update(user.family_id, { subscription_status: 'canceled' });
-          } catch (err) {
-            console.error('Failed to update family:', err);
-          }
+        // Update billing user
+        if (billingUser) {
+          await base44.entities.User.update(billingUser.id, { subscription_status: 'canceled' });
+          console.log('Subscription canceled for billing user:', billingUser.id);
         }
 
-        // Update linked gators
-        if (user.persona === 'parent' && user.linked_gator_ids?.length > 0) {
-          for (const gatorId of user.linked_gator_ids) {
+        // Update Family and propagate to all members
+        const family = await findFamily(familyId, customerId);
+        if (family) {
+          // Don't cancel if family is founding
+          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') {
+            console.log('Skipping cancellation for founding family:', family.id);
+            break;
+          }
+
+          await base44.entities.Family.update(family.id, { subscription_status: 'canceled' });
+          console.log('Family subscription canceled:', family.id);
+
+          // Cancel all non-founding members
+          const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
+          for (const memberId of allMemberIds) {
             try {
-              const gator = await base44.entities.User.get(gatorId);
-              if (!gator.is_founding_member && gator.subscription_tier !== 'free_founding') {
-                await base44.entities.User.update(gatorId, {
-                  linked_parent_subscription_active: false,
-                });
+              const member = await base44.entities.User.get(memberId);
+              if (!member.is_founding_member && member.subscription_tier !== 'free_founding') {
+                await base44.entities.User.update(memberId, { subscription_status: 'canceled' });
               }
             } catch (err) {
-              console.error('Failed to update gator:', gatorId, err);
+              console.error('Failed to cancel member:', memberId, err.message);
             }
           }
         }
@@ -193,25 +232,36 @@ Deno.serve(async (req) => {
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         const customerId = invoice.customer;
+        const subscriptionId = invoice.subscription;
 
-        const user = await findUserByCustomerId(customerId);
-        if (!user) break;
-
-        // Don't mark founding members as past_due
-        if (user.subscription_tier === 'free_founding' || user.is_founding_member) {
-          console.log('Skipping payment_failed for founding member:', user.id);
+        const billingUser = await findUserByCustomerId(customerId);
+        if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member)) {
+          console.log('Skipping payment_failed for founding member:', billingUser.id);
           break;
         }
 
-        await base44.entities.User.update(user.id, { subscription_status: 'past_due' });
-        console.log('Marked as past_due:', user.id);
-
-        if (user.family_id) {
+        // Find family via subscription metadata or customer
+        let familyId = null;
+        if (subscriptionId) {
           try {
-            await base44.entities.Family.update(user.family_id, { subscription_status: 'past_due' });
-          } catch (err) {
-            console.error('Failed to update family:', err);
+            const sub = await stripe.subscriptions.retrieve(subscriptionId);
+            familyId = sub.metadata?.family_id;
+          } catch (e) {
+            console.log('Could not retrieve subscription for family_id');
           }
+        }
+
+        if (billingUser) {
+          await base44.entities.User.update(billingUser.id, { subscription_status: 'past_due' });
+          console.log('Marked billing user as past_due:', billingUser.id);
+        }
+
+        const family = await findFamily(familyId, customerId);
+        if (family) {
+          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') break;
+          await base44.entities.Family.update(family.id, { subscription_status: 'past_due' });
+          await updateAllFamilyMembers(family, { subscription_status: 'past_due' });
+          console.log('Family marked past_due:', family.id);
         }
         break;
       }
