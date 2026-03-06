@@ -71,8 +71,7 @@ function OpportunityCard({ opp, onResearch, onTailor, onDismiss, delay }) {
           }}>Tailor Resume →</button>
           <button onClick={() => onDismiss(opp.id)} style={{
             padding: '8px 10px', borderRadius: 10, border: '1.5px solid #E2E8F0',
-            background: 'transparent', color: '#94A3B8', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
-          background: 'transparent', color: '#64748B', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
+            background: 'transparent', color: '#64748B', fontSize: 12, cursor: 'pointer', minHeight: 'auto',
           }}>✕</button>
         </div>
       </div>
