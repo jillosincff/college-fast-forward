@@ -44,13 +44,22 @@ const OPENERS = {
   find_companies: {
     userMessage: "Help me find companies to target",
     getAssistantMessage: (profile) => {
-      const industry = profile?.target_industry;
-      const location = profile?.location_preference;
-      const parts = [industry, location].filter(Boolean);
-      const context = parts.length > 0
-        ? `I already know you're interested in **${parts.join('** in **')}**. Want me to search based on that, or do you have something more specific in mind`
-        : "Tell me a bit about what you're looking for";
-      return `Let's find companies that are right for you! ${context} — like company size, culture, or a particular niche?`;
+      const industry = profile?.target_industry || 'your field';
+      const hasSize = !!profile?.company_size_preference;
+      const hasLocation = !!profile?.location_preference;
+      let msg = `Let's find the right companies for you! I already know you're interested in **${industry}**.`;
+      if (!hasSize) {
+        msg += `\n\nWhat size company appeals to you?\n- 🏢 **Big names** everyone knows (Apple, Google, Disney)\n- 📈 **Mid-size companies** with strong growth\n- 🚀 **Startups** where you'd wear many hats\n- 🤷 **Open to anything**`;
+      }
+      if (!hasLocation) {
+        msg += `\n\nAnd location — any preference?\n- 🌴 I want to stay in **Florida**\n- 🌎 **Open to relocating** anywhere\n- 📍 A **specific city** (tell me which)`;
+      }
+      if (hasSize && hasLocation) {
+        msg += ` Want me to search based on that, or do you have something more specific in mind — like company culture or a particular niche?`;
+      } else {
+        msg += `\n\nJust tell me and I'll find companies that are actually hiring for your background!`;
+      }
+      return msg;
     }
   },
 
