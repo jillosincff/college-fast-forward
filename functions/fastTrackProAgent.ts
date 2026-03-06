@@ -1918,12 +1918,27 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
       const intelForAnalysis = { ...intel, recent_news: news };
       const memoryCtx = buildMemoryContext(previousIntel, intel, detectedCompany);
       const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis, memoryCtx);
-
+      // Auto-search for alumni alongside fresh intel
+      let fAlumni = []; let fAlumniGuidance = null;
+      try {
+        const fCached = await getCachedAlumni(base44, detectedCompany);
+        if (fCached?.length > 0) { fAlumni = await crossReferenceCFF(base44, fCached.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: Math.max(a.match_score||50,50), degree_info: a.degree_info, location: a.location, linkedin_url: a.linkedin_url||'', verified: a.verified||false }))); }
+        else {
+          const aWeb = await base44.integrations.Core.InvokeLLM({ prompt: `Find alumni of the University of Florida (UF, in Gainesville, Florida) who currently work at ${detectedCompany}.\n\n${UF_FILTER}\n\nFor each confirmed UF alumni found, provide their full name, current job title, UF degree info, and location.`, add_context_from_internet: true });
+          const aParsed = await base44.integrations.Core.InvokeLLM({ prompt: `Parse research into structured alumni profiles for UF alumni at ${detectedCompany}.\n\n${profileContext}\n\n${UF_FILTER}\n- DEDUPLICATE same name+title\n- Match score minimum 50%.\n\nRESEARCH:\n${String(typeof aWeb === 'string' ? aWeb : JSON.stringify(aWeb)).substring(0,3000)}`, response_json_schema: { type: "object", properties: { alumni: { type: "array", items: { type: "object", properties: { name: { type: "string" }, role_title: { type: "string" }, company: { type: "string" }, degree_info: { type: "string" }, location: { type: "string" }, match_score: { type: "integer" }, linkedin_url: { type: "string" } }, required: ["name","role_title","company","match_score"] } } }, required: ["alumni"] } });
+          const rawA = filterAndDedupAlumni(aParsed.alumni || [], detectedCompany);
+          if (rawA.length > 0) { fAlumni = await crossReferenceCFF(base44, rawA); saveAlumniCache(base44, fAlumni); saveToPipeline(base44, user.email, detectedCompany, fAlumni); trackActivity(base44, user.email, profile.id, 'alumni_view', detectedCompany); }
+        }
+        if (fAlumni.length > 0) fAlumniGuidance = await generateAlumniGuidance(base44, fAlumni, detectedCompany, profileContext);
+      } catch(e) { console.log('Auto alumni search alongside intel failed:', e.message); }
+      let fResp = analysis ? analysis.assessment : (intel.response || `Here's intel on ${detectedCompany}:`);
+      const fActions = [];
+      if (fAlumni.length > 0 && fAlumniGuidance) { fResp += `\n\nI also found **${fAlumni.length} UF alumni** at ${detectedCompany}. ${fAlumniGuidance.guidance}`; if (fAlumniGuidance.top_match) fActions.push(`Draft a warm intro to ${fAlumniGuidance.top_match} →`); }
+      else if (fAlumni.length === 0) { fResp += `\n\nI didn't find UF alumni at ${detectedCompany} yet — want me to do a deeper search?`; fActions.push(`Find UF alumni at ${detectedCompany} →`); }
+      fActions.push(`Tailor your resume for ${detectedCompany} →`);
       return Response.json({
-        success: true,
-        response: analysis ? analysis.assessment : (intel.response || `Here's intel on ${detectedCompany}:`),
-        message_type: 'company_intel',
-        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null }
+        success: true, response: fResp, message_type: 'company_intel',
+        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null, alumni: fAlumni.length > 0 ? fAlumni : undefined, alumni_top_match: fAlumniGuidance?.top_match || undefined, suggested_actions: fActions }
       });
     }
 
