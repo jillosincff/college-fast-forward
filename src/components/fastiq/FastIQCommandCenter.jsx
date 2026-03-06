@@ -139,7 +139,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       })));
 
       // Strict company name validation: must be in target list OR pass rigorous checks
-      const targetNamesLower = targetCompanyNames.map(n => n.toLowerCase());
+      const targetNamesLowerArr = targetCompanyNames.map(n => n.toLowerCase());
       const JUNK_WORDS = ['experience','identify','relevant','more','week','undefined','null','company',
         'the','and','for','with','your','this','that','from','have','been','about','into','each',
         'find','search','apply','submit','check','browse','explore','discover','learn','view'];
@@ -149,7 +149,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         const trimmed = name.trim();
         if (trimmed.length < 2) return false;
         // If it's in the student's target list, always valid
-        if (targetNamesLower.includes(trimmed.toLowerCase())) return true;
+        if (targetNamesLowerArr.includes(trimmed.toLowerCase())) return true;
         // Reject single lowercase/underscore words (field names)
         if (/^[a-z_]+$/i.test(trimmed)) return false;
         // Reject if the name IS a common English word
@@ -168,7 +168,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       
       // Only show "moved to Hot" for companies in the student's actual target list
       const hotTargetCompany = relevantIntel.find(i => 
-        i.hiring_signal === 'hot' && targetNamesLower.includes((i.company_name || '').toLowerCase())
+        i.hiring_signal === 'hot' && targetNamesLowerArr.includes((i.company_name || '').toLowerCase())
       );
       const topSignalName = hotTargetCompany ? titleCase(String(hotTargetCompany.company_name || '').trim()) : null;
       
