@@ -81,7 +81,7 @@ function CollapsedResumeBar({ profile, tailoredCount, onExpand, onOpenChat }) {
       flexWrap: 'wrap',
     }}>
       <CheckCircle2 style={{ width: 18, height: 18, color: '#10B981', flexShrink: 0 }} />
-      <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>Master Resume</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>My Resume</span>
       <span style={{ fontSize: 11, color: '#64748B' }}>· Updated {formatDate(profile?.updated_date)}</span>
       {tailoredCount > 0 && (
         <span style={{ fontSize: 11, color: '#8B5CF6', fontWeight: 600 }}>· {tailoredCount} tailored</span>
@@ -149,7 +149,7 @@ function ExpandedResumeState({ profile, tailored, onOpenChat, onCollapse }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>Master Resume</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>My Resume</span>
             <span style={{ fontSize: 10, fontWeight: 600, color: '#10B981', background: '#ECFDF5', padding: '2px 8px', borderRadius: 10 }}>✓ Active</span>
           </div>
           <p style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Last updated {formatDate(profile?.updated_date)}</p>
