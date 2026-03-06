@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     
     let base44;
     try {
-      const { createClient } = await import('npm:@base44/sdk@0.1.0');
-      base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID') });
+      const { createClientFromRequest } = await import('npm:@base44/sdk@0.8.20');
+      base44 = createClientFromRequest(req);
       console.log('[verifyEmailDirect] Base44 client created successfully');
     } catch (importError) {
       console.error('[verifyEmailDirect] Import/client creation failed:', importError);
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     
     let magicLinks;
     try {
-      magicLinks = await base44.entities.MagicLink.filter({ token: token });
+      magicLinks = await base44.asServiceRole.entities.MagicLink.filter({ token: token });
       console.log('[verifyEmailDirect] Magic link search result:', magicLinks?.length || 'null');
     } catch (searchError) {
       console.error('[verifyEmailDirect] Magic link search failed:', searchError);
@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
     // Step 6: Create user account
     console.log('[verifyEmailDirect] Attempting to create user account');
     try {
-      const newUser = await base44.entities.User.create({
+      const newUser = await base44.asServiceRole.entities.User.create({
         email: matchingLink.email,
         full_name: registrationData.full_name,
         password_hash: registrationData.password_hash,
@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
       console.log('[verifyEmailDirect] User created successfully:', newUser.id);
 
       // Mark token as used
-      await base44.entities.MagicLink.update(matchingLink.id, { used: true });
+      await base44.asServiceRole.entities.MagicLink.update(matchingLink.id, { used: true });
       console.log('[verifyEmailDirect] Token marked as used');
 
       // SUCCESS!

@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
   try {
@@ -25,15 +25,12 @@ Deno.serve(async (req) => {
 
     console.log(`[verify] Processing verification for token: ${token}`);
 
-    // Create Base44 client with admin access
-    const base44 = createClient({ 
-      appId: Deno.env.get('BASE44_APP_ID'),
-      apiToken: Deno.env.get('BASE44_API_TOKEN') // Admin access
-    });
+    // Create Base44 client
+    const base44 = createClientFromRequest(req);
 
     try {
       // Find the magic link with this token
-      const magicLinks = await base44.entities.MagicLink.filter({ token: token });
+      const magicLinks = await base44.asServiceRole.entities.MagicLink.filter({ token: token });
       
       if (!magicLinks || magicLinks.length === 0) {
         console.log(`[verify] No magic link found for token: ${token}`);
@@ -117,7 +114,7 @@ Deno.serve(async (req) => {
       }
 
       // Create the user account
-      const newUser = await base44.entities.User.create({
+      const newUser = await base44.asServiceRole.entities.User.create({
         email: matchingLink.email,
         full_name: registrationData.full_name,
         password_hash: registrationData.password_hash,
@@ -130,7 +127,7 @@ Deno.serve(async (req) => {
       });
 
       // Mark the magic link as used
-      await base44.entities.MagicLink.update(matchingLink.id, { used: true });
+      await base44.asServiceRole.entities.MagicLink.update(matchingLink.id, { used: true });
 
       console.log(`[verify] Successfully created user: ${newUser.email}`);
 
