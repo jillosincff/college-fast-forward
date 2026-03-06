@@ -140,7 +140,12 @@ Deno.serve(async (req) => {
       });
       customerId = customer.id;
       await base44.asServiceRole.entities.User.update(user.id, { stripe_customer_id: customerId });
-      await base44.asServiceRole.entities.Family.update(family.id, { stripe_customer_id: customerId });
+      await base44.asServiceRole.entities.Family.update(family.id, {
+        stripe_customer_id: customerId,
+        billing_owner_id: user.id,
+        billing_owner_email: user.email,
+        billing_owner_name: user.full_name || '',
+      });
     }
 
     // Create checkout session with 7-day trial
