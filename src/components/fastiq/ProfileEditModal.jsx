@@ -104,7 +104,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', margin: 0 }}>Edit Profile</h2>
-            <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>Update your career preferences</p>
+            <p style={{ fontSize: 12, color: '#64748B', margin: '4px 0 0' }}>Update your career preferences</p>
           </div>
           <button onClick={onClose} style={{ background: '#F1F5F9', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', minHeight: 'auto' }}>
             <X style={{ width: 18, height: 18, color: '#64748B' }} />
@@ -164,7 +164,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
                   {c}
                   <button onClick={() => removeCompany(i)} style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    color: '#94A3B8', minHeight: 'auto', display: 'flex',
+                    color: '#64748B', minHeight: 'auto', display: 'flex',
                   }}>
                     <Trash2 style={{ width: 12, height: 12 }} />
                   </button>
@@ -201,7 +201,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
           <div>
             <label style={labelStyle}>Fraternity / Sorority (optional)</label>
             <input value={greekOrg} onChange={e => setGreekOrg(e.target.value)} placeholder="e.g. Kappa Delta, Sigma Chi" style={inputStyle} />
-            <p style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>Greek connections respond at 3× the rate of cold outreach</p>
+            <p style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Greek connections respond at 3× the rate of cold outreach</p>
           </div>
         </div>
 
