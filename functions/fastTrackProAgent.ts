@@ -1839,45 +1839,18 @@ Rules:
       // Helper: run personalized analysis on intel results
       const runPersonalizedAnalysis = async (companyName, intelData, memoryContext) => {
         try {
-          const analysisResult = await base44.integrations.Core.InvokeLLM({
-            prompt: `You are FASTIQ, an elite AI career center for UF students. You just researched ${companyName} for this student. Now ANALYZE what the research means specifically for them.
-
-${profileContext}
-
-${memoryContext ? `PERSISTENT MEMORY (changes since last research):\n${memoryContext}\n\nIMPORTANT: If there are memory deltas, LEAD with what changed. Example: "Last time you looked at Disney, they had 35 open roles — now it's 28. They may be slowing down. Consider accelerating your outreach before the window closes."\n` : ''}
-COMPANY INTEL:
-- Company: ${companyName}
-- Hiring Score: ${intelData.hiring_score}/100 (${intelData.hiring_signal}) — based on entry-level/intern availability
-- Entry-Level Roles: ${intelData.entry_level_roles_count || 0}
-- Internship Roles: ${intelData.intern_roles_count || 0}
-- Total Roles (all levels): ${intelData.open_roles_count}
-- Entry-Level Salary Range: ${intelData.salary_range || 'unknown'}
-- Summary: ${intelData.company_summary || ''}
-- Recent News: ${(intelData.recent_news || []).join('; ')}
-
-INSTRUCTIONS:
-Write a SHORT personalized assessment (3-5 sentences). ALWAYS mention entry-level/intern count vs total. Examples:
-- "${companyName} has 150 open roles but only 3 match what you're looking for (${ptConfig.label}). Still worth pursuing — those 3 are strong matches."
-- "${companyName} has 12 active ${ptConfig.roleLabel} postings — that's unusually high. Move fast."
-- "${companyName}'s roles are mostly senior. Reach out to alumni for intel on upcoming ${ptConfig.roleLabel} recruiting."
-
-Consider: senior-heavy roles, great match, hiring freeze, location mismatch, industry gap.
-End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
-            response_json_schema: {
-              type: "object",
-              properties: {
-                assessment: { type: "string", description: "The personalized analysis paragraph (3-5 sentences)" },
-                next_actions: { type: "array", items: { type: "string" }, description: "Exactly 2 suggested next actions starting with →" },
-                match_level: { type: "string", enum: ["strong_match", "moderate_match", "weak_match", "caution"], description: "How well this company fits the student" }
-              },
-              required: ["assessment", "next_actions", "match_level"]
-            }
+          const mRoles = (intelData.entry_level_roles_count || 0) + (intelData.intern_roles_count || 0);
+          const tRoles = intelData.open_roles_count || 0;
+          const isHiring = intelData.hiring_signal === 'hot' || intelData.hiring_signal === 'warm';
+          const scenario = (mRoles > 0 && isHiring) ? 'A' : (isHiring && mRoles === 0) ? 'B' : 'C';
+          const scenarioText = { A: `SCENARIO A: ${mRoles} matching ${jstConfig.noun} found. Write: "Great news — ${companyName} has ${mRoles} ${jstConfig.noun} in [student's field]. This looks like a strong fit.\n\nLet's get you in the door. Want me to find UF alumni at ${companyName} who could give you a warm intro?"`, B: `SCENARIO B: Hiring but no match. Write: "${companyName} is actively hiring (${tRoles} roles), but open roles are mostly senior/other — not ${jstConfig.noun} in [student's field].\n\nThat doesn't mean ${companyName} is off the table. What would you like to do?"`, C: `SCENARIO C: Not hiring. Write: "${companyName} doesn't appear to be actively hiring — hiring score is low and I couldn't find positions at your level.\n\nWhat would you like to do?"` };
+          const r = await base44.integrations.Core.InvokeLLM({
+            prompt: `You are FASTIQ. Researched ${companyName}. Analyze using EXACT scenario template.\n\n${profileContext}\n\n${memoryContext || ''}\nINTEL: Score ${intelData.hiring_score}/100 (${intelData.hiring_signal}), ${mRoles} matching ${jstConfig.noun}, ${tRoles} total, Salary: ${intelData.salary_range || 'unknown'}, Summary: ${intelData.company_summary || ''}\n\n${scenarioText[scenario]}\n\nPersonalize with student's field/major. Keep conversational.`,
+            response_json_schema: { type: "object", properties: { assessment: { type: "string" }, scenario: { type: "string", enum: ["A","B","C"] }, match_level: { type: "string", enum: ["strong_match","moderate_match","weak_match","caution"] } }, required: ["assessment","scenario","match_level"] }
           });
-          return analysisResult;
-        } catch (e) {
-          console.log('Personalized analysis error:', e.message);
-          return null;
-        }
+          r.scenario = scenario;
+          return r;
+        } catch (e) { console.log('Analysis error:', e.message); return null; }
       };
 
       const cached = await getCachedCompanyIntel(base44, detectedCompany);
