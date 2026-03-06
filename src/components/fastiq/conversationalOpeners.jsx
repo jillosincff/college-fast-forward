@@ -166,7 +166,7 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('resume') && (t.includes('review') || t.includes('my resume'))) return 'resume_review';
   if (t.includes('linkedin')) return 'linkedin_review';
   if (t.includes('salary') || t.includes('negotiate')) return 'salary_intel';
-  if (t.includes('find companies') || t.includes('companies to target') || t.includes('companies that') || t.includes('mid-size companies')) return 'find_companies';
+  if (t.includes('find companies') || t.includes('companies to target') || t.includes('companies that') || t.includes('mid-size companies') || t.includes('don\'t know where to apply') || t.includes('where should i apply') || t.includes('what companies should') || t.includes('help me find a job') || t.includes('where to apply')) return 'find_companies';
   if (t.includes('they replied') || t.includes('got a reply') || t.includes('they responded') || t.includes('wrote back') || t.includes('here\'s what they said')) return null; // Let reply help go to backend handler
   if (t.includes('follow-up') || t.includes('follow up') || t.includes('followup') || t.includes('stale outreach')) return null; // Let follow-up go to backend handler
   if (t.includes('draft') || t.includes('intro message') || t.includes('outreach')) return 'draft_outreach';
