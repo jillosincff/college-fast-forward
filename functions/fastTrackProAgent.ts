@@ -1864,11 +1864,17 @@ End with exactly 2 concrete suggested next actions formatted as arrows (→).`,
         trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
         const cachedIntelData = { hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, recent_news: [], interview_process: '' };
         const analysis = await runPersonalizedAnalysis(detectedCompany, cachedIntelData);
+        // Auto-check for alumni alongside cached intel
+        let cAlumni = []; let cAlumniGuidance = null;
+        try { const ca = await getCachedAlumni(base44, detectedCompany); if (ca?.length > 0) { cAlumni = await crossReferenceCFF(base44, ca.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: Math.max(a.match_score||50,50), degree_info: a.degree_info, location: a.location, linkedin_url: a.linkedin_url||'', verified: a.verified||false }))); cAlumniGuidance = await generateAlumniGuidance(base44, cAlumni, detectedCompany, profileContext); } } catch(e) {}
+        let cResp = analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`;
+        const cActions = [];
+        if (cAlumni.length > 0 && cAlumniGuidance) { cResp += `\n\nI also found **${cAlumni.length} UF alumni** at ${detectedCompany}. ${cAlumniGuidance.guidance}`; if (cAlumniGuidance.top_match) cActions.push(`Draft a warm intro to ${cAlumniGuidance.top_match} →`); }
+        else { cActions.push(`Find UF alumni at ${detectedCompany} →`); }
+        cActions.push(`Tailor your resume for ${detectedCompany} →`);
         return Response.json({
-          success: true,
-          response: analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`,
-          message_type: 'company_intel',
-          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null }
+          success: true, response: cResp, message_type: 'company_intel',
+          payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null, alumni: cAlumni.length > 0 ? cAlumni : undefined, alumni_top_match: cAlumniGuidance?.top_match || undefined, suggested_actions: cActions }
         });
       }
       // Keep expired cache for memory delta comparison
