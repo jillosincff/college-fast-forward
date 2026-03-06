@@ -8,7 +8,7 @@ import PipelineBar from './PipelineBar';
 import PipelineNudge from './PipelineNudge';
 import TargetCompaniesSection from './TargetCompaniesSection';
 import QuickActionsGrid from './QuickActionsGrid';
-import MyResumeSection from './MyResumeSection';
+// MyResumeSection removed — covered by Resume tool card
 import AddTargetsModal from './AddTargetsModal';
 import ProfileEditModal from './ProfileEditModal';
 import PastResearchSection from './PastResearchSection';
@@ -38,7 +38,7 @@ function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   if (identifiedCount > 0) lines.push(`🔍 ${identifiedCount} alumni identified across your targets`);
   if (repliedCount > 0) lines.push(`💬 ${repliedCount} alumni have replied to your outreach`);
   if (interviewCount > 0) lines.push(`📅 ${interviewCount} interview${interviewCount > 1 ? 's' : ''} in your pipeline`);
-  if (weeklyStats?.companiesScanned > 0) lines.push(`📊 ${weeklyStats.companiesScanned} companies scanned this week`);
+  // Removed "X companies scanned this week" — often stale/grammatically awkward
   if (weeklyStats?.topSignal) lines.push(`🔥 ${weeklyStats.topSignal} is actively hiring right now`);
   if (lines.length === 0) lines.push('⚡ FASTIQ is scanning the market for you');
   return lines;
@@ -231,6 +231,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         @keyframes fiq-heroGlow { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
         @keyframes fiq-ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes fiq-ringPulse { 0%, 100% { filter: drop-shadow(0 0 2px transparent); } 50% { filter: drop-shadow(0 0 8px currentColor); } }
+        @keyframes fiq-cta-glow { 0%, 100% { box-shadow: 0 4px 16px rgba(0,33,165,0.35); } 50% { box-shadow: 0 4px 24px rgba(0,33,165,0.55), 0 0 40px rgba(0,33,165,0.2); } }
         .fiq-animate { animation: fiq-fadeSlideUp 0.6s ease-out both; }
         .fiq-delay-1 { animation-delay: 0.15s; }
         .fiq-delay-2 { animation-delay: 0.3s; }
@@ -286,10 +287,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onAddTargets={() => setShowAddTargets(true)}
         />
 
-        {/* SECTION 3 — CAREER CENTER TOOLS (moved up for visibility) */}
-        <QuickActionsGrid onOpenChat={onOpenChat} isNewUser={statValues.targets === 0 && statValues.insiders === 0 && statValues.messages === 0} />
-
-        {/* SECTION 4 — TARGET COMPANIES */}
+        {/* SECTION 3 — TARGET COMPANIES */}
         <TargetCompaniesSection
           companies={targetCompanies}
           companyIntel={companyIntel}
@@ -298,10 +296,10 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           onAddTargets={() => setShowAddTargets(true)}
         />
 
-        {/* SECTION 5 — MY RESUME (compact) */}
-        <MyResumeSection profile={profile} onOpenChat={onOpenChat} />
+        {/* SECTION 4 — CAREER CENTER TOOLS */}
+        <QuickActionsGrid onOpenChat={onOpenChat} isNewUser={statValues.targets === 0 && statValues.insiders === 0 && statValues.messages === 0} />
 
-        {/* SECTION 6 — YOUR PIPELINE */}
+        {/* SECTION 5 — YOUR PIPELINE (hidden when empty) */}
         <PipelineBar counts={pipelineCounts} noResponseContacts={noResponseContacts} onOpenChat={onOpenChat} />
         <PipelineNudge pipelineCounts={pipelineCounts} onOpenChat={onOpenChat} />
 

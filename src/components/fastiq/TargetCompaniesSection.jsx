@@ -141,10 +141,10 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
           <button
             onClick={() => onOpenChat(`Research ${name} hiring`)}
             style={{
-              fontSize: 12, fontWeight: 700, color: '#fff',
-              background: '#FA4616', padding: '8px 18px',
-              borderRadius: 8, border: 'none', cursor: 'pointer', minHeight: 'auto',
-              boxShadow: '0 0 14px rgba(250,70,22,0.35)',
+              fontSize: 13, fontWeight: 700, color: '#fff',
+              background: '#FA4616', padding: '10px 22px',
+              borderRadius: 10, border: 'none', cursor: 'pointer', minHeight: 'auto',
+              boxShadow: '0 0 16px rgba(250,70,22,0.4)',
               display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
@@ -152,7 +152,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay }) {
               width: 6, height: 6, borderRadius: '50%', background: '#fff',
               display: 'inline-block', animation: 'fiq-pulse-ring 2s ease-out infinite',
             }} />
-            Research →
+            Find Alumni →
           </button>
         ) : (alumniCount === 0 && !(intel?.entry_level_roles_count > 0 || intel?.intern_roles_count > 0)) ? (
           /* 0 alumni + 0 entry-level: helpful guidance instead of dead-end */

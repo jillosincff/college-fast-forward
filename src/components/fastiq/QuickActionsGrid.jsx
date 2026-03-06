@@ -75,7 +75,7 @@ export default function QuickActionsGrid({ onOpenChat, isNewUser }) {
         }}>
           <span style={{ fontSize: 16 }}>👋</span>
           <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.4 }}>
-            <b>New here?</b> Start with <b>"Find Warm Intros"</b> or <b>"Explore Careers"</b> — FASTIQ will guide you from there.
+            <b>Not sure where to start?</b> Try <b>"Find Warm Intros"</b> or <b>"Explore Careers"</b> — FASTIQ will guide you step by step.
           </span>
         </div>
       )}

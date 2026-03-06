@@ -59,6 +59,7 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
               cursor: 'pointer', minHeight: 'auto', width: '100%',
               boxShadow: '0 4px 16px rgba(0,33,165,0.35)',
               textAlign: 'center', letterSpacing: '0.01em',
+              animation: 'fiq-cta-glow 3s ease-in-out infinite',
             }}
           >
             Find My Warm Intros →
