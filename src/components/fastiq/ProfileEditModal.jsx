@@ -3,7 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
-import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, migrateIndustries, migrateRoles } from './constants';
+import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, JOB_SEARCH_TYPES, migrateIndustries, migrateRoles } from './constants';
 
 export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   // Migrate legacy values on load
@@ -14,6 +14,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   const [roles, setRoles] = useState(initialRoles);
   const [companies, setCompanies] = useState(profile?.target_companies || []);
   const [companyInput, setCompanyInput] = useState('');
+  const [jobSearchType, setJobSearchType] = useState(profile?.job_search_type || '');
   const [positionType, setPositionType] = useState(profile?.position_type || '');
   const [startTimeline, setStartTimeline] = useState(profile?.start_timeline || '');
   const [location, setLocation] = useState(profile?.location_preference || '');
@@ -50,6 +51,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       target_industry: industries.join(', '),
       target_role: roles.join(', '),
       target_companies: companies,
+      job_search_type: jobSearchType,
       position_type: positionType,
       start_timeline: startTimeline,
       career_timeline: startTimeline,
@@ -183,6 +185,15 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
                 </span>
               ))}
             </div>
+          </div>
+
+          {/* Job Search Type */}
+          <div>
+            <label style={labelStyle}>What are you looking for right now?</label>
+            <select value={jobSearchType} onChange={e => setJobSearchType(e.target.value)} style={selectStyle}>
+              <option value="">Select...</option>
+              {JOB_SEARCH_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
+            </select>
           </div>
 
           {/* Position Type + Start Timeline row */}
