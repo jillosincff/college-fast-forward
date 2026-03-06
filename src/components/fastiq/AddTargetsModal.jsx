@@ -204,7 +204,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
           }}
         >
           {saving && <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />}
-          {saving ? 'Saving...' : companies.length === 0 ? 'Clear All Targets' : 'Save Targets'}
+          {saving ? 'Saving...' : 'Save Targets'}
         </button>
       </div>
     </div>
