@@ -1551,7 +1551,7 @@ Return as JSON with these exact fields:`,
       if (cached) {
         const enrichedCached = await crossReferenceCFF(base44, cached.map(a => ({
           name: a.name, role_title: a.role_title, company: a.company,
-          match_score: Math.max(a.match_score || 50, 50),
+          match_score: Math.max(a.match_score || 65, 65),
           degree_info: a.degree_info, location: a.location,
           linkedin_url: a.linkedin_url || '', verified: a.verified || false
         })));
