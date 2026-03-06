@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Building2, Search, Mail, RefreshCw, BarChart3, Loader2, Sparkles, X, Check, Zap } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+// Checkout uses dynamic import of createCheckoutSession
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
