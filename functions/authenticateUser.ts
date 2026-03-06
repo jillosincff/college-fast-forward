@@ -19,12 +19,9 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Email and password are required.' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
-    const base44 = createClient({
-      appId: Deno.env.get('BASE44_APP_ID'),
-      apiKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'), // Admin key needed to query the User table
-    });
+    const base44 = createClientFromRequest(req);
 
-    const users = await base44.entities.User.filter({ email: email.toLowerCase() });
+    const users = await base44.asServiceRole.entities.User.filter({ email: email.toLowerCase() });
     const user = users && users.length > 0 ? users[0] : null;
 
     if (!user || !user.password_hash) {

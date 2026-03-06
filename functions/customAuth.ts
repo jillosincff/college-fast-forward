@@ -1,9 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const base44 = createClient({
-  appId: Deno.env.get('BASE44_APP_ID'),
-});
-
 // Simple password hashing function
 async function hashPassword(password) {
   const encoder = new TextEncoder();
@@ -63,12 +59,13 @@ async function sendVerificationEmail(email, token, origin) {
 
 Deno.serve(async (req) => {
   try {
+    const base44 = createClientFromRequest(req);
     const { action, email, password, full_name } = await req.json();
     const origin = new URL(req.url).origin;
 
     if (action === 'register') {
       // Check if user already exists
-      const existingUsers = await base44.entities.User.filter({ email });
+      const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
       if (existingUsers && existingUsers.length > 0) {
         return new Response(JSON.stringify({
           success: false,
@@ -83,7 +80,7 @@ Deno.serve(async (req) => {
       const passwordHash = await hashPassword(password);
 
       // Create user
-      const user = await base44.entities.User.create({
+      const user = await base44.asServiceRole.entities.User.create({
         email,
         full_name,
         password_hash: passwordHash,
@@ -96,7 +93,7 @@ Deno.serve(async (req) => {
       const verificationToken = crypto.randomUUID();
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-      await base44.entities.EmailVerificationToken.create({
+      await base44.asServiceRole.entities.EmailVerificationToken.create({
         token: verificationToken,
         email,
         expires_at: expiresAt.toISOString(),
@@ -123,7 +120,7 @@ Deno.serve(async (req) => {
 
     } else if (action === 'login') {
       // Find user by email
-      const users = await base44.entities.User.filter({ email });
+      const users = await base44.asServiceRole.entities.User.filter({ email });
       if (!users || users.length === 0) {
         return new Response(JSON.stringify({
           success: false,
@@ -162,7 +159,7 @@ Deno.serve(async (req) => {
 
       // Generate session token
       const sessionToken = crypto.randomUUID();
-      await base44.entities.User.update(user.id, {
+      await base44.asServiceRole.entities.User.update(user.id, {
         session_token: sessionToken,
         last_login_at: new Date().toISOString()
       });
