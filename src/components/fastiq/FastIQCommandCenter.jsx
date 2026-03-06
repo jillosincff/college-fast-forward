@@ -56,6 +56,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
   const [showAddTargets, setShowAddTargets] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [noResponseContacts, setNoResponseContacts] = useState([]);
+  const [pastResearch, setPastResearch] = useState([]);
   const alertsRef = useRef(null);
   const weeklyBriefRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
