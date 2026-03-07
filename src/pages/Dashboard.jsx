@@ -24,7 +24,6 @@ import FirstMessageNudgeModal from '@/components/onboarding/student/FirstMessage
 import FoundingMemberBanner from '@/components/dashboard/student/FoundingMemberBanner';
 import DashboardHeader from '@/components/dashboard/student/DashboardHeader';
 import AllCaughtUpState from '@/components/dashboard/student/states/AllCaughtUpState';
-import WhatToDoNext from '@/components/dashboard/student/WhatToDoNext';
 import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
 import ActivationWelcomeBannerStudent from '@/components/dashboard/student/ActivationWelcomeBannerStudent';
 import StudentKarmaCard from '@/components/dashboard/student/StudentKarmaCard';
