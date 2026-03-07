@@ -27,8 +27,8 @@ export default function StatsCards({ stats, state }) {
     if (unreadResponses > 0) {
       return { 
         value: unreadResponses, 
-        label: 'NEW', 
-        sublabel: 'Responses',
+        label: 'Unread', 
+        sublabel: 'Messages',
         highlight: true 
       };
     }
