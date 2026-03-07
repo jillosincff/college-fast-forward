@@ -1634,10 +1634,10 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
         const guidanceResult = await generateAlumniGuidance(base44, enrichedAlumni, alumniCompany, profileContext);
         const topName = guidanceResult.top_match || enrichedAlumni[0]?.name || '';
         const topFirst = topName.split(' ')[0];
-        const alumniResp = `I found **${enrichedAlumni.length} UF alumni** at ${alumniCompany}. ${topName ? `**${topFirst}** looks like your best warm intro — ${guidanceResult.recommendation_reason || 'strong role match'}.` : ''}\n\nWant me to draft a personalized message?`;
+        const alumniResp = `I found **${enrichedAlumni.length} UF alumni** at ${alumniCompany}:`;
         return Response.json({
           success: true, response: alumniResp,
-          message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false, top_match: guidanceResult.top_match, recommendation_reason: guidanceResult.recommendation_reason, suggested_actions: topName ? [`Draft intro to ${topFirst} →`, `See all ${enrichedAlumni.length} alumni →`] : [] }
+          message_type: 'alumni_card', payload: { alumni: enrichedAlumni, cached: false, top_match: guidanceResult.top_match, recommendation_reason: guidanceResult.recommendation_reason, suggested_actions: topName ? [`Draft message to ${topFirst} →`, `Research ${alumniCompany} →`] : [`Research ${alumniCompany} →`] }
         });
       }
 
