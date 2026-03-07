@@ -341,14 +341,9 @@ export default function Dashboard() {
           <NewUserWelcome user={user} />
         )}
 
-        {/* 2. 🎉 YOU GOT A RESPONSE! (with thank/upvote — 1F) */}
-        {unreadCount > 0 && (
-          <YouGotResponseBanner user={user} unreadMessages={unreadMessages} />
-        )}
-
-        {/* 3. YOUR HELP REQUEST */}
+        {/* 2-3. YOUR HELP REQUEST + RESPONSES INLINE */}
         {helpRequest && (
-          <StudentHelpRequestPreview helpRequest={helpRequest} />
+          <RequestWithResponses helpRequest={helpRequest} user={user} />
         )}
 
         {/* Waiting states */}
