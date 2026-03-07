@@ -612,7 +612,7 @@ async function generateAlumniGuidance(base44, alumni, company, profileContext) {
     const alumniSummary = alumni.slice(0, 5).map(a => `- ${a.name}: ${a.role_title} (score: ${a.match_score}%, CFF: ${a.is_cff_member ? 'yes' : 'no'})`).join('\n');
     const cffCount = alumni.filter(a => a.is_cff_member).length;
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are FASTIQ. Found UF alumni at ${company}. Write SHORT analysis (3-5 sentences) about WHO to reach out to first and WHY.\n\n${profileContext}\n\nALUMNI:\n${alumniSummary}\nCFF Members: ${cffCount}\n\n1. Note role patterns 2. Recommend ONE person FIRST (first name only), explain why 3. Highlight CFF members 4. End with "Want me to draft that message?" 5. In recommended_full_name return EXACT full name. In recommendation_reason explain strategic reason.`,
+      prompt: `You are FASTIQ. ACTION MODE — found UF alumni at ${company}. Write 1 sentence recommending WHO to reach out to first and WHY. The alumni card shows all the data — your text is just the recommendation headline.\n\n${profileContext}\n\nALUMNI:\n${alumniSummary}\nCFF Members: ${cffCount}\n\nRecommend ONE person (by first name). In recommended_full_name return EXACT full name. In recommendation_reason give the strategic reason in under 15 words. guidance should be 1-2 sentences max.`,
       response_json_schema: { type: "object", properties: { guidance: { type: "string" }, recommended_full_name: { type: "string" }, recommendation_reason: { type: "string" } }, required: ["guidance", "recommended_full_name", "recommendation_reason"] }
     });
     let topMatch = result.recommended_full_name || '';
