@@ -1483,7 +1483,7 @@ Return as JSON with these exact fields:`,
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's your cover letter:",
+        success: true, response: `Here's your cover letter:`,
         message_type: 'cover_letter', payload: result
       });
     }
