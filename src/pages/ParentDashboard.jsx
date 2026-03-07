@@ -24,6 +24,7 @@ import StudentBoostCard from '@/components/dashboard/parent/StudentBoostCard';
 import ActivationWelcomeBanner from '@/components/dashboard/parent/ActivationWelcomeBanner';
 import LiveActivityTicker from '@/components/dashboard/parent/LiveActivityTicker';
 import YouGotResponseBanner from '@/components/dashboard/parent/YouGotResponseBanner';
+import RequestWithResponses from '@/components/dashboard/student/RequestWithResponses';
 import PledgeReminderBanner from '@/components/dashboard/parent/PledgeReminderBanner';
 import SkippedPledgeQuestionBanner from '@/components/dashboard/parent/SkippedPledgeQuestionBanner';
 import PullToRefresh from '@/components/common/PullToRefresh';
