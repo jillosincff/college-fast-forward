@@ -111,6 +111,7 @@ export function useParentDashboardData(user) {
 
       // Process linked students
       let linkedStudent = null;
+      let studentRequest = null;
       let studentQueueStatus = { hasActiveRequest: false, position: null, totalQuestions: 0 };
       
       if (familyStudentsResult.status === 'fulfilled' && familyStudentsResult.value?.data?.students?.length > 0) {
@@ -121,15 +122,16 @@ export function useParentDashboardData(user) {
         if (jobRequestsResult.status === 'fulfilled') {
           const allActive = (jobRequestsResult.value || []).filter(r => r.status === 'active');
           const studentEmails = students.map(s => s.email?.toLowerCase());
-          const studentRequest = allActive.find(r => 
+          const foundStudentRequest = allActive.find(r => 
             studentEmails.includes(r.poster_email?.toLowerCase()) || 
             studentEmails.includes(r.created_by?.toLowerCase())
           );
           
-          if (studentRequest) {
+          if (foundStudentRequest) {
+            studentRequest = foundStudentRequest;
             // Calculate position based on karma-weighted priority
             const sortedByPriority = [...allActive].sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
-            const position = sortedByPriority.findIndex(r => r.id === studentRequest.id) + 1;
+            const position = sortedByPriority.findIndex(r => r.id === foundStudentRequest.id) + 1;
             
             studentQueueStatus = {
               hasActiveRequest: true,
