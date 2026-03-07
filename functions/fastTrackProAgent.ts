@@ -1414,7 +1414,7 @@ Return as JSON with these exact fields:`,
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's your interview prep:",
+        success: true, response: `Here's your interview prep${company ? ' for **' + company + '**' : ''}:`,
         message_type: 'interview_prep', payload: result
       });
     }
