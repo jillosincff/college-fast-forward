@@ -816,7 +816,7 @@ RULES:
 
   trackActivity(base44, user.email, profile.id, 'message_draft', targetName);
   return Response.json({
-    success: true, response: result.response || `Here's your follow-up to ${targetName}:`,
+    success: true, response: `Here's your follow-up to **${targetName}**:`,
     message_type: 'outreach_draft',
     payload: { recipient: result.recipient || targetName, recipient_title: pipelineRecord?.alumni_role || '', recipient_company: targetCompanyName, channel: result.channel || 'LinkedIn', subject: result.subject || '', message: result.message_body || '', ask_type: 'follow_up' }
   });
