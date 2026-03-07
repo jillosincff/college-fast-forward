@@ -329,6 +329,27 @@ function detectCoverLetter(message) {
     /(?:write|draft|create)\s+(?:a\s+)?cover\s+letter/i.test(message);
 }
 
+function detectSpecificAlumniQuery(message) {
+  const patterns = [
+    /(?:tell me about|who is|who'?s|what do you know about|info on|look up)\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})\s+(?:at|from|who works at)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:tell me about|who is|who'?s|what do you know about|info on|look up)\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})(?:\s*[?.!]?\s*$)/i,
+  ];
+  const rejects = ['amazon','google','apple','meta','microsoft','tesla','nvidia','the','a','my','this','it','that'];
+  for (const p of patterns) { const m = message.match(p); if (m) { const n = m[1]?.trim(); const c = m[2]?.trim() || ''; if (n && !rejects.includes(n.toLowerCase())) return { name: n, company: c }; } }
+  return null;
+}
+
+function detectConnectRequest(message) {
+  const patterns = [
+    /(?:connect with|reach out to|message|contact|send (?:a )?connect(?:ion)? (?:request|message) to)\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})\s+(?:on\s+)?linkedin/i,
+    /(?:connect with|reach out to|contact)\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})\s+(?:at|from)\s+(\w[\w\s&.''-]{1,40})/i,
+    /(?:connect with|reach out to|contact)\s+([A-Z][a-zA-Z.''-]+(?:\s+[A-Z][a-zA-Z.''-]+){0,3})(?:\s*[?.!]?\s*$)/i,
+  ];
+  const rejects = ['amazon','google','apple','meta','microsoft','tesla','nvidia','the','a','my','this','them','someone','anyone'];
+  for (const p of patterns) { const m = message.match(p); if (m) { const n = m[1]?.trim(); const c = m[2]?.trim() || ''; if (n && !rejects.includes(n.toLowerCase())) return { name: n, company: c }; } }
+  return null;
+}
+
 function detectFollowUp(message) {
   const lower = message.toLowerCase();
   return /(?:follow.?up|followup)\s+(?:message|email|note|to|for|with)/i.test(message) ||
