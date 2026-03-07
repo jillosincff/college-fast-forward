@@ -1438,7 +1438,7 @@ Return as JSON with these exact fields:`,
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's your LinkedIn review:",
+        success: true, response: `Here's your LinkedIn review:`,
         message_type: 'linkedin_review', payload: result
       });
     }
