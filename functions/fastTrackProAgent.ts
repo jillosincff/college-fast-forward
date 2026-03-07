@@ -1371,7 +1371,7 @@ Return as JSON with these exact fields:`,
 
       return Response.json({
         success: true,
-        response: result.changes_summary || `Your resume has been tailored for ${roleTitle} at ${companyName}!`,
+        response: `Your resume has been tailored for **${roleTitle}** at **${companyName}**:`,
         message_type: 'resume_tailored',
         payload: {
           resume: result.resume || {},
