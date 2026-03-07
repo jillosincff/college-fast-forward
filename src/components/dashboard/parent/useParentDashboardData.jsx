@@ -216,6 +216,7 @@ export function useParentDashboardData(user) {
 
       setData({
         linkedStudent,
+        studentRequest,
         studentQueueStatus,
         matchedQuestions,
         allQuestionsCount,
