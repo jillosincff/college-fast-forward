@@ -169,9 +169,11 @@ export default function Dashboard() {
     setMyActiveQuestions(totalActiveQuestions);
     
     try {
-      // Fetch user counts
+      // Fetch user counts (with timeout to prevent hanging)
       try {
-        const response = await getUserCount();
+        const countPromise = getUserCount();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+        const response = await Promise.race([countPromise, timeoutPromise]);
         const data = response.data;
         setNetworkStats({
           totalUsers: data?.totalUsers || data?.count || 226,
@@ -180,11 +182,14 @@ export default function Dashboard() {
         });
       } catch (error) {
         console.error('Failed to fetch network stats:', error);
+        setNetworkStats({ totalUsers: 226, activeRequests: 15, spotsLeft: 774 });
       }
 
-      // Fetch messages
+      // Fetch messages (with timeout)
       try {
-        const { data: messagesResponse } = await getUserMessages();
+        const msgPromise = getUserMessages();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+        const { data: messagesResponse } = await Promise.race([msgPromise, timeoutPromise]);
         setMessages(messagesResponse?.messages || []);
       } catch (error) {
         console.error('Failed to fetch messages:', error);
