@@ -75,6 +75,7 @@ export function useParentDashboardData(user) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     linkedStudent: null,
+    studentRequest: null,
     studentQueueStatus: { hasActiveRequest: false, position: null, totalQuestions: 0 },
     matchedQuestions: [],
     allQuestionsCount: 0,
