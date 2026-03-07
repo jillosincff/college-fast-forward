@@ -243,9 +243,11 @@ export default function Dashboard() {
       }
       setMatches(studentMatches || []);
 
-      // Load linked parents
+      // Load linked parents (with timeout)
       try {
-        const parentsResult = await base44.functions.invoke('getLinkedParents', {});
+        const parentPromise = base44.functions.invoke('getLinkedParents', {});
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+        const parentsResult = await Promise.race([parentPromise, timeoutPromise]);
         if (parentsResult.data?.parents) {
           setLinkedParents(parentsResult.data.parents);
         }
