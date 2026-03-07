@@ -1,26 +1,13 @@
-import { createClient } from 'npm:@base44/sdk@0.1.0';
-
-const base44 = createClient({
-    appId: Deno.env.get('BASE44_APP_ID'),
-});
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
     try {
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { "Content-Type": "application/json" } });
-        }
-        
-        const token = authHeader.split(' ')[1];
-        base44.auth.setToken(token);
-        
+        const base44 = createClientFromRequest(req);
         const currentUser = await base44.auth.me();
         if (!currentUser) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { "Content-Type": "application/json" } });
         }
 
-        // For now, just acknowledge the request without sending an email.
-        // This is to fix the deployment issue.
         const body = await req.json();
         console.log('sendReferralEmail called with:', body);
 
