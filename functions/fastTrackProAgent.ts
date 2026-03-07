@@ -1231,7 +1231,7 @@ CRITICAL POSITION TYPE CONTEXT:
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's your resume review:",
+        success: true, response: `Here's your resume review:`,
         message_type: 'resume_review',
         payload: { overall_score: result.overall_score, strengths: result.strengths, improvements: result.improvements, missing_keywords: result.missing_keywords || [], summary: result.summary }
       });
