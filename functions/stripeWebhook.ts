@@ -1,11 +1,5 @@
-import { createClient } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.21.0';
-
-// Service-role client for webhook (no user auth available)
-const base44 = createClient({
-  appId: Deno.env.get('BASE44_APP_ID'),
-  serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
-});
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
   apiVersion: '2024-11-20.acacia',
@@ -18,8 +12,11 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 // One subscription per family covers all linked members.
 // ═══════════════════════════════════════════════════════════════
 
+// These will be set per-request in the handler
+let base44;
+
 async function findUserByCustomerId(customerId) {
-  const users = await base44.entities.User.filter({ stripe_customer_id: customerId });
+  const users = await base44.asServiceRole.entities.User.filter({ stripe_customer_id: customerId });
   return users?.length > 0 ? users[0] : null;
 }
 
@@ -31,7 +28,7 @@ async function findFamily(familyId, customerId) {
   // 1. Direct family_id from metadata
   if (familyId) {
     try {
-      const family = await base44.entities.Family.get(familyId);
+      const family = await base44.asServiceRole.entities.Family.get(familyId);
       if (family) return family;
     } catch (e) {
       console.log('Family not found by ID:', familyId);
@@ -39,14 +36,14 @@ async function findFamily(familyId, customerId) {
   }
   // 2. By stripe_customer_id on Family
   if (customerId) {
-    const families = await base44.entities.Family.filter({ stripe_customer_id: customerId });
+    const families = await base44.asServiceRole.entities.Family.filter({ stripe_customer_id: customerId });
     if (families?.length > 0) return families[0];
   }
   // 3. By billing user's family_id
   const user = await findUserByCustomerId(customerId);
   if (user?.family_id) {
     try {
-      return await base44.entities.Family.get(user.family_id);
+      return await base44.asServiceRole.entities.Family.get(user.family_id);
     } catch (e) {
       console.log('Family not found by user.family_id:', user.family_id);
     }
@@ -62,7 +59,7 @@ async function updateAllFamilyMembers(family, updates) {
   const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
   for (const memberId of allMemberIds) {
     try {
-      await base44.entities.User.update(memberId, updates);
+      await base44.asServiceRole.entities.User.update(memberId, updates);
     } catch (err) {
       console.error('Failed to update family member:', memberId, err.message);
     }
@@ -70,6 +67,7 @@ async function updateAllFamilyMembers(family, updates) {
 }
 
 Deno.serve(async (req) => {
+  base44 = createClientFromRequest(req);
   const signature = req.headers.get('stripe-signature');
   const body = await req.text();
 
@@ -99,7 +97,7 @@ Deno.serve(async (req) => {
         // Update billing user
         const billingUser = await findUserByCustomerId(customerId);
         if (billingUser) {
-          await base44.entities.User.update(billingUser.id, {
+          await base44.asServiceRole.entities.User.update(billingUser.id, {
             stripe_subscription_id: subscriptionId,
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
@@ -110,7 +108,7 @@ Deno.serve(async (req) => {
         // Update Family record (source of truth)
         const family = await findFamily(familyId, customerId);
         if (family) {
-          await base44.entities.Family.update(family.id, {
+          await base44.asServiceRole.entities.Family.update(family.id, {
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             subscription_status: 'active',
@@ -154,7 +152,7 @@ Deno.serve(async (req) => {
 
         // Update billing user
         if (billingUser) {
-          await base44.entities.User.update(billingUser.id, userUpdates);
+          await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user subscription:', billingUser.id, status);
         }
 
@@ -169,7 +167,7 @@ Deno.serve(async (req) => {
           if (subscription.trial_end) familyUpdates.trial_ends_at = new Date(subscription.trial_end * 1000).toISOString();
           if (subscription.current_period_end) familyUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-          await base44.entities.Family.update(family.id, familyUpdates);
+          await base44.asServiceRole.entities.Family.update(family.id, familyUpdates);
           console.log('Updated family subscription:', family.id, status, subscriptionTier);
 
           // Propagate to ALL family members (not just billing user)
@@ -196,7 +194,7 @@ Deno.serve(async (req) => {
 
         // Update billing user
         if (billingUser) {
-          await base44.entities.User.update(billingUser.id, { subscription_status: 'canceled' });
+          await base44.asServiceRole.entities.User.update(billingUser.id, { subscription_status: 'canceled' });
           console.log('Subscription canceled for billing user:', billingUser.id);
         }
 
@@ -209,16 +207,16 @@ Deno.serve(async (req) => {
             break;
           }
 
-          await base44.entities.Family.update(family.id, { subscription_status: 'canceled' });
+          await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'canceled' });
           console.log('Family subscription canceled:', family.id);
 
           // Cancel all non-founding members
           const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
           for (const memberId of allMemberIds) {
             try {
-              const member = await base44.entities.User.get(memberId);
+              const member = await base44.asServiceRole.entities.User.get(memberId);
               if (!member.is_founding_member && member.subscription_tier !== 'free_founding') {
-                await base44.entities.User.update(memberId, { subscription_status: 'canceled' });
+                await base44.asServiceRole.entities.User.update(memberId, { subscription_status: 'canceled' });
               }
             } catch (err) {
               console.error('Failed to cancel member:', memberId, err.message);
@@ -252,14 +250,14 @@ Deno.serve(async (req) => {
         }
 
         if (billingUser) {
-          await base44.entities.User.update(billingUser.id, { subscription_status: 'past_due' });
+          await base44.asServiceRole.entities.User.update(billingUser.id, { subscription_status: 'past_due' });
           console.log('Marked billing user as past_due:', billingUser.id);
         }
 
         const family = await findFamily(familyId, customerId);
         if (family) {
           if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') break;
-          await base44.entities.Family.update(family.id, { subscription_status: 'past_due' });
+          await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'past_due' });
           await updateAllFamilyMembers(family, { subscription_status: 'past_due' });
           console.log('Family marked past_due:', family.id);
         }
