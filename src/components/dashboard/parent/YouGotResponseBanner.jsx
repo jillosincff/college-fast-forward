@@ -126,13 +126,6 @@ export default function YouGotResponseBanner({ user }) {
                 +{current.points} karma earned
               </span>
             )}
-            <button
-              onClick={() => navigate('MyMessages')}
-              className="text-xs font-semibold px-3 py-1 rounded-full transition hover:scale-105"
-              style={{ backgroundColor: '#0021A5', color: 'white' }}
-            >
-              View Messages →
-            </button>
             {notifications.length > 1 && (
               <button onClick={handleNext} className="text-xs text-gray-400 hover:text-gray-600">
                 {currentIndex + 1}/{notifications.length} — Next →
