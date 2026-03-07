@@ -571,7 +571,7 @@ const AdminDashboard = () => {
         )}
 
           <Tabs defaultValue="growth" className="space-y-6">
-          <TabsList className="flex w-full gap-2 h-auto p-2 bg-white border border-slate-200 overflow-x-auto flex-nowrap scrollbar-thin" style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}>
+          <TabsList className="flex w-full gap-2 h-auto p-2 bg-white border border-slate-200 flex-wrap">
             <TabsTrigger 
               value="growth" 
               className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
