@@ -1525,7 +1525,7 @@ Return as JSON with these exact fields:`,
       const rN = ar2?.name || connectReq.name, rT = ar2?.role_title || '', rC = ar2?.company || connectReq.company || '';
       const cRes = await base44.integrations.Core.InvokeLLM({ prompt: `Draft a SHORT LinkedIn connection request (under 280 chars) from ${user.full_name || 'a UF student'}, ${studentMajor} major at UF (${studentGradYear}), to ${rN}, ${rT} at ${rC}. Mention shared UF connection, their role, student looking for ${ptConfig.outreachPhrase}. Warm, brief. End with "Go Gators!" No clichés.`, response_json_schema: { type: "object", properties: { message: { type: "string" } }, required: ["message"] } });
       trackActivity(base44, user.email, profile.id, 'message_draft', rN);
-      return Response.json({ success: true, response: `Here's a connection request for **${rN}**:\n\n> ${cRes.message}\n\nAfter you send it, I'll track it in your pipeline and remind you to follow up.`, message_type: 'outreach_draft', payload: { recipient: rN, recipient_title: rT, recipient_company: rC, channel: 'LinkedIn', subject: '', message: cRes.message || '', ask_type: 'connection_request', suggested_next_steps: [`Find more alumni at ${rC || 'their company'} →`, 'Research another company →'] } });
+      return Response.json({ success: true, response: `Here's your connection request for **${rN}**:`, message_type: 'outreach_draft', payload: { recipient: rN, recipient_title: rT, recipient_company: rC, channel: 'LinkedIn', subject: '', message: cRes.message || '', ask_type: 'connection_request', suggested_next_steps: [`Find more alumni at ${rC || 'their company'} →`, 'Research another company →'] } });
     }
 
     // 8. ALUMNI DISCOVERY (checked before outreach to prevent misclassification)
