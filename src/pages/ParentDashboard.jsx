@@ -417,6 +417,11 @@ export default function ParentDashboard() {
           {/* ========== YOU GOT A RESPONSE (Thank you flow) ========== */}
           <YouGotResponseBanner user={user} />
 
+          {/* ========== STUDENT'S REQUEST + RESPONSES INLINE ========== */}
+          {data.studentRequest && (
+            <RequestWithResponses helpRequest={data.studentRequest} user={user} />
+          )}
+
           {/* ========== ACTIVATION WELCOME BANNER ========== */}
           <ActivationWelcomeBanner user={user} />
 
