@@ -1,13 +1,10 @@
-
-import { createClientFromRequest } from 'npm:@base44/sdk@0.5.0';
-import { Reminder } from '@/entities/Reminder';
-import { OpportunityApplication } from '@/entities/OpportunityApplication';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 // This function should be triggered when a poster sends a message in an application thread.
 // It updates the application status to "replied" and cancels any pending follow-up reminders.
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
-    const serviceRoleClient = base44.asServiceRole();
+    const serviceRoleClient = base44.asServiceRole;
 
     const { applicationId } = await req.json();
 

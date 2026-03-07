@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 // Helper to build the 3 prompt shapes (system/developer/user)
 function buildMessages(payload) {
