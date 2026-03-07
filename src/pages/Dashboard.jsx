@@ -202,37 +202,40 @@ export default function Dashboard() {
 
       // Fetch matches
       let studentMatches = [];
-      
-      studentMatches = await base44.entities.Match.filter(
-        { student_email: user.email },
-        '-match_score',
-        50
-      );
-      
-      if ((!studentMatches || studentMatches.length === 0) && foundRequest) {
+      try {
         studentMatches = await base44.entities.Match.filter(
-          { help_request_id: foundRequest.id },
+          { student_email: user.email },
           '-match_score',
           50
         );
+        
+        if ((!studentMatches || studentMatches.length === 0) && foundRequest) {
+          studentMatches = await base44.entities.Match.filter(
+            { help_request_id: foundRequest.id },
+            '-match_score',
+            50
+          );
+        }
+        
+        if ((!studentMatches || studentMatches.length === 0) && foundRequest?.student_id) {
+          studentMatches = await base44.entities.Match.filter(
+            { student_id: foundRequest.student_id },
+            '-match_score',
+            50
+          );
+        }
+        
+        if ((!studentMatches || studentMatches.length === 0)) {
+          studentMatches = await base44.entities.Match.filter(
+            { student_id: user.id },
+            '-match_score',
+            50
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch matches:', error);
+        studentMatches = [];
       }
-      
-      if ((!studentMatches || studentMatches.length === 0) && foundRequest?.student_id) {
-        studentMatches = await base44.entities.Match.filter(
-          { student_id: foundRequest.student_id },
-          '-match_score',
-          50
-        );
-      }
-      
-      if ((!studentMatches || studentMatches.length === 0)) {
-        studentMatches = await base44.entities.Match.filter(
-          { student_id: user.id },
-          '-match_score',
-          50
-        );
-      }
-      
       setMatches(studentMatches || []);
 
       // Load linked parents
