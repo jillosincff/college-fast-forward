@@ -1256,7 +1256,7 @@ CRITICAL POSITION TYPE CONTEXT:
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's how your resume matches:",
+        success: true, response: `Here's how your resume matches:`,
         message_type: 'resume_match', payload: result
       });
     }
