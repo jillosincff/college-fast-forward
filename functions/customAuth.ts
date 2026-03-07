@@ -50,7 +50,8 @@ async function sendVerificationEmail(email, token, origin) {
     </div>
   `;
 
-  await SendEmail({
+  const base44Internal = createClientFromRequest(globalThis.__currentReq);
+  await base44Internal.asServiceRole.integrations.Core.SendEmail({
     to: email,
     subject: '🐊 Welcome! Verify your email - College Fast Forward',
     body: emailBody
@@ -58,6 +59,7 @@ async function sendVerificationEmail(email, token, origin) {
 }
 
 Deno.serve(async (req) => {
+  globalThis.__currentReq = req;
   try {
     const base44 = createClientFromRequest(req);
     const { action, email, password, full_name } = await req.json();

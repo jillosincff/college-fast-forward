@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     }
 
     // Verify payment session with Stripe
-    const stripe = (await import('npm:stripe@17.5.0')).default(Deno.env.get('STRIPE_SECRET_KEY'));
+    const stripe = (await import('npm:stripe@14.21.0')).default(Deno.env.get('STRIPE_SECRET_KEY'));
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== 'paid') {

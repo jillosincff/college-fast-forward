@@ -60,15 +60,14 @@ Deno.serve(async (req) => {
 
         // If status is 'replied', cancel any pending reminders
         if (status === 'replied') {
-            const serviceRoleClient = base44.asServiceRole();
-            const pendingReminders = await serviceRoleClient.entities.Reminder.filter({
+            const pendingReminders = await base44.asServiceRole.entities.Reminder.filter({
                 application_id: applicationId,
                 delivered_at: null,
                 canceled_at: null
             });
 
             const cancelPromises = pendingReminders.map(reminder => 
-                serviceRoleClient.entities.Reminder.update(reminder.id, {
+                base44.asServiceRole.entities.Reminder.update(reminder.id, {
                     canceled_at: new Date().toISOString()
                 })
             );
