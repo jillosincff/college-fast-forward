@@ -34,8 +34,7 @@ import ShareWhatYouLearnedCard from '@/components/dashboard/student/ShareWhatYou
 import ShareOfferDataCard from '@/components/dashboard/student/ShareOfferDataCard';
 import PostJobGigCard from '@/components/dashboard/student/PostJobGigCard';
 // New 1F/1G components
-import YouGotResponseBanner from '@/components/dashboard/student/YouGotResponseBanner';
-import StudentHelpRequestPreview from '@/components/dashboard/student/StudentHelpRequestPreview';
+import RequestWithResponses from '@/components/dashboard/student/RequestWithResponses';
 import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
 import ExploreSection from '@/components/dashboard/student/ExploreSection';
 import PullToRefresh from '@/components/common/PullToRefresh';
