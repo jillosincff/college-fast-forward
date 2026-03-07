@@ -1977,13 +1977,13 @@ Rules:
       return await handleNetworkThankYou(base44, user, profile, resolvedMessage, pipelineData, profileContext);
     }
 
-    // 18. CAREER ADVICE (DEFAULT FALLBACK)
+    // 18. CAREER ADVICE (DEFAULT FALLBACK — action-biased)
     console.log('Intent: career_advice (default)');
-    const webResult = await base44.integrations.Core.InvokeLLM({ prompt: `You are a career research assistant for a UF student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\n${conversation_history ? 'Context:\n' + conversation_history : ''}\n\nProvide detailed, personalized career advice.`, add_context_from_internet: true });
-    const result = await base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ, a full-service AI career center for UF students.\n\n${profileContext}\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nRequest: "${resolvedMessage}"\n\nProvide personalized career advice. At the END, suggest 2-3 relevant FASTIQ actions.`, response_json_schema: { type: "object", properties: { response: { type: "string" }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response"] } });
+    const webResult = await base44.integrations.Core.InvokeLLM({ prompt: `You are a career research assistant for a UF student.\n\n${profileContext}\n\nRequest: "${resolvedMessage}"\n\n${conversation_history ? 'Context:\n' + conversation_history : ''}\n\nProvide brief, actionable career advice. NO generic essays. If the student mentions a specific person or company, focus on THAT — don't give a 5-point strategy.`, add_context_from_internet: true });
+    const result = await base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ.\n\n${profileContext}\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nRequest: "${resolvedMessage}"\n\nRULES:\n- Be CONCISE (3-5 sentences max unless they asked for detail)\n- Be ACTION-BIASED: suggest doing something, not reading/learning/attending\n- End with 2-3 FASTIQ actions the student can take RIGHT NOW\n- If they asked about a person → offer to draft a message\n- If they asked about a company → offer to research it\n- NEVER give a generic career strategy essay for a specific question`, response_json_schema: { type: "object", properties: { response: { type: "string" }, suggested_actions: { type: "array", items: { type: "string" } } }, required: ["response"] } });
     let careerResp = result.response || String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,2000);
     const careerActions = result.suggested_actions || [];
-    if (targetCompanies.length === 0) { careerResp += "\n\n---\n\n💡 **By the way**, I noticed you don't have any target companies set yet. If you tell me what kind of companies interest you, I can suggest some great matches. Want me to help?"; if (!careerActions.some(a => a.toLowerCase().includes('find companies'))) careerActions.push('Help me find companies to target'); }
+    if (targetCompanies.length === 0 && !careerActions.some(a => a.toLowerCase().includes('find companies'))) careerActions.push('Help me find companies to target');
     return Response.json({ success: true, response: careerResp, message_type: 'career_advice', payload: { suggested_actions: careerActions } });
 
   } catch (error) {
