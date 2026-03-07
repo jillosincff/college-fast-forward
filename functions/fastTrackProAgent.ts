@@ -1861,13 +1861,13 @@ Rules:
         // Auto-check for alumni alongside cached intel
         let cAlumni = []; let cAlumniGuidance = null;
         try { const ca = await getCachedAlumni(base44, detectedCompany); if (ca?.length > 0) { cAlumni = await crossReferenceCFF(base44, ca.map(a => ({ name: a.name, role_title: a.role_title, company: a.company, match_score: Math.max(a.match_score||65,65), degree_info: a.degree_info, location: a.location, linkedin_url: a.linkedin_url||'', verified: a.verified||false }))); cAlumniGuidance = await generateAlumniGuidance(base44, cAlumni, detectedCompany, profileContext); } } catch(e) {}
-        let cResp = analysis ? analysis.assessment : `Here's intel on ${detectedCompany}:`;
+        let cResp = `Here's what I found on **${detectedCompany}**:`;
         const cActions = [];
         const cScenario = analysis?.scenario || 'A';
-        if (cAlumni.length > 0 && cAlumniGuidance) { cResp += `\n\nI also found **${cAlumni.length} UF alumni** at ${detectedCompany}. ${cAlumniGuidance.guidance}`; if (cAlumniGuidance.top_match) cActions.push(`Draft a warm intro to ${cAlumniGuidance.top_match} →`); }
+        if (cAlumni.length > 0 && cAlumniGuidance) { if (cAlumniGuidance.top_match) cActions.push(`Draft message to ${cAlumniGuidance.top_match} →`); cActions.push(`Tailor my resume for ${detectedCompany} →`); }
         else if (cScenario === 'A') { cActions.push(`Find UF alumni at ${detectedCompany} →`); cActions.push(`Tailor my resume for ${detectedCompany} →`); }
-        else if (cScenario === 'B') { cActions.push(`Find UF alumni at ${detectedCompany} anyway →`); cActions.push(`Find similar companies hiring ${jstConfig.noun} →`); }
-        else { cActions.push(`Find UF alumni at ${detectedCompany} anyway →`); cActions.push(`Find companies that ARE hiring ${jstConfig.noun} →`); cActions.push(`Keep ${detectedCompany} on my watchlist →`); }
+        else if (cScenario === 'B') { cActions.push(`Find UF alumni at ${detectedCompany} →`); cActions.push(`Find similar companies hiring ${jstConfig.noun} →`); }
+        else { cActions.push(`Find UF alumni at ${detectedCompany} →`); cActions.push(`Find companies that ARE hiring ${jstConfig.noun} →`); }
         return Response.json({
           success: true, response: cResp, message_type: 'company_intel',
           payload: { company: detectedCompany, hiring_score: cached.hiring_score, hiring_signal: cached.hiring_signal, company_summary: cached.intel_summary, open_roles_count: cached.open_roles_count, entry_level_roles_count: cached.entry_level_roles_count || 0, intern_roles_count: cached.intern_roles_count || 0, salary_range: cached.salary_range, cached: true, personalized_analysis: analysis || null, alumni: cAlumni.length > 0 ? cAlumni : undefined, alumni_top_match: cAlumniGuidance?.top_match || undefined, suggested_actions: cActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
