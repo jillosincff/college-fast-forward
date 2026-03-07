@@ -10,7 +10,7 @@ async function hashPassword(password) {
     .join('');
 }
 
-async function sendVerificationEmail(email, token, origin) {
+async function sendVerificationEmail(base44, email, token, origin) {
   const verificationUrl = `${origin}/#VerifyEmail?token=${token}`;
   
   const emailBody = `
@@ -50,8 +50,7 @@ async function sendVerificationEmail(email, token, origin) {
     </div>
   `;
 
-  const base44Internal = createClientFromRequest(globalThis.__currentReq);
-  await base44Internal.asServiceRole.integrations.Core.SendEmail({
+  await base44.asServiceRole.integrations.Core.SendEmail({
     to: email,
     subject: '🐊 Welcome! Verify your email - College Fast Forward',
     body: emailBody
@@ -59,7 +58,6 @@ async function sendVerificationEmail(email, token, origin) {
 }
 
 Deno.serve(async (req) => {
-  globalThis.__currentReq = req;
   try {
     const base44 = createClientFromRequest(req);
     const { action, email, password, full_name } = await req.json();
@@ -103,7 +101,7 @@ Deno.serve(async (req) => {
       });
 
       // Send verification email
-      await sendVerificationEmail(email, verificationToken, origin);
+      await sendVerificationEmail(base44, email, verificationToken, origin);
 
       return new Response(JSON.stringify({
         success: true,
