@@ -1462,7 +1462,7 @@ Return as JSON with these exact fields:`,
         }
       });
       return Response.json({
-        success: true, response: result.response || "Here's the salary intel:",
+        success: true, response: `Here's the salary data:`,
         message_type: 'salary_intel', payload: result
       });
     }
