@@ -1488,63 +1488,44 @@ Return as JSON with these exact fields:`,
       });
     }
 
-    // 7.5 BATCH TARGET COMMAND — must be checked BEFORE alumni/company/opportunity detectors
+    // 7.5 BATCH TARGET COMMAND
     if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length > 0) {
       console.log('Intent: batch_target_scan for', targetCompanies.join(', '));
-      const major = studentMajor;
-      const industry = profile.target_industry || 'any industry';
-      const gradYear = studentGradYear;
-
-      // Research all target companies in parallel
-      const batchPromises = targetCompanies.map(company =>
-        base44.integrations.Core.InvokeLLM({
-          prompt: `Find current entry-level and intern ${major} roles at ${company} in 2026. Include role titles, locations, whether applications are open, and how well they match a ${major} major graduating ${gradYear}. Be specific and factual.`,
-          add_context_from_internet: true,
-        }).then(webRes =>
-          base44.integrations.Core.InvokeLLM({
-            prompt: `You are FASTIQ. Parse research into structured roles found at ${company} for a ${major} student in ${industry}.\n\nRESEARCH:\n${String(typeof webRes === 'string' ? webRes : JSON.stringify(webRes)).substring(0, 3000)}\n\nReturn relevant entry-level/intern roles. hiring_signal: hot (many openings), warm (some), cool (few/none). profile_match: how well the roles fit a ${major} major (strong/moderate/weak).`,
-            response_json_schema: {
-              type: "object",
-              properties: {
-                company_name: { type: "string" },
-                hiring_signal: { type: "string", enum: ["hot", "warm", "cool"] },
-                profile_match: { type: "string", enum: ["strong", "moderate", "weak"] },
-                roles: { type: "array", items: { type: "object", properties: { title: { type: "string" }, location: { type: "string" }, type: { type: "string", enum: ["internship", "entry_level", "mid_level"] }, applications_open: { type: "boolean" } }, required: ["title"] } },
-                summary: { type: "string" }
-              },
-              required: ["company_name", "hiring_signal", "profile_match", "roles", "summary"]
-            }
-          })
-        ).catch(e => ({ company_name: company, hiring_signal: 'cool', profile_match: 'weak', roles: [], summary: `Could not research ${company}: ${e.message}` }))
-      );
-
+      const major = studentMajor, industry = profile.target_industry || 'any industry', gradYear = studentGradYear;
+      const batchPromises = targetCompanies.map(company => base44.integrations.Core.InvokeLLM({ prompt: `Find current entry-level and intern ${major} roles at ${company} in 2026. Include role titles, locations, whether applications are open, and match for a ${major} major graduating ${gradYear}.`, add_context_from_internet: true }).then(webRes => base44.integrations.Core.InvokeLLM({ prompt: `You are FASTIQ. Parse research into structured roles at ${company} for a ${major} student in ${industry}.\n\nRESEARCH:\n${String(typeof webRes === 'string' ? webRes : JSON.stringify(webRes)).substring(0, 3000)}\n\nReturn relevant entry-level/intern roles. hiring_signal: hot/warm/cool. profile_match: strong/moderate/weak.`, response_json_schema: { type: "object", properties: { company_name: { type: "string" }, hiring_signal: { type: "string", enum: ["hot","warm","cool"] }, profile_match: { type: "string", enum: ["strong","moderate","weak"] }, roles: { type: "array", items: { type: "object", properties: { title: { type: "string" }, location: { type: "string" }, type: { type: "string", enum: ["internship","entry_level","mid_level"] }, applications_open: { type: "boolean" } }, required: ["title"] } }, summary: { type: "string" } }, required: ["company_name","hiring_signal","profile_match","roles","summary"] } })).catch(e => ({ company_name: company, hiring_signal: 'cool', profile_match: 'weak', roles: [], summary: `Could not research ${company}: ${e.message}` })));
       const batchResults = await Promise.all(batchPromises);
-
-      // Generate overall summary
       const summaryLines = batchResults.map(r => `${r.company_name}: ${r.hiring_signal} hiring, ${r.roles?.length || 0} roles, ${r.profile_match} match`).join('\n');
-      const bestMatch = batchResults.reduce((best, r) => {
-        const score = (r.profile_match === 'strong' ? 3 : r.profile_match === 'moderate' ? 2 : 1) + (r.hiring_signal === 'hot' ? 3 : r.hiring_signal === 'warm' ? 2 : 1);
-        return score > best.score ? { company: r.company_name, score } : best;
-      }, { company: '', score: 0 });
-
+      const bestMatch = batchResults.reduce((best, r) => { const score = (r.profile_match === 'strong' ? 3 : r.profile_match === 'moderate' ? 2 : 1) + (r.hiring_signal === 'hot' ? 3 : r.hiring_signal === 'warm' ? 2 : 1); return score > best.score ? { company: r.company_name, score } : best; }, { company: '', score: 0 });
       trackActivity(base44, user.email, profile.id, 'company_search', 'batch_targets');
-
-      return Response.json({
-        success: true,
-        response: `Here's what I found across your ${targetCompanies.length} target companies. ${bestMatch.company ? `**${bestMatch.company}** looks like your strongest opportunity right now.` : ''}`,
-        message_type: 'batch_target_scan',
-        payload: { companies: batchResults, best_match: bestMatch.company, summary: summaryLines }
-      });
+      return Response.json({ success: true, response: `Here's what I found across your ${targetCompanies.length} target companies. ${bestMatch.company ? `**${bestMatch.company}** looks like your strongest opportunity right now.` : ''}`, message_type: 'batch_target_scan', payload: { companies: batchResults, best_match: bestMatch.company, summary: summaryLines } });
+    }
+    if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length === 0) {
+      return Response.json({ success: true, response: "You don't have any target companies set yet. Add your target companies first (up to 5), and then I can scan all of them for relevant roles.", message_type: 'text', payload: {} });
     }
 
-    // If batch target command detected but NO target companies set, tell the user
-    if (detectBatchTargetCommand(resolvedMessage) && targetCompanies.length === 0) {
-      return Response.json({
-        success: true,
-        response: "You don't have any target companies set yet. Add your target companies first (up to 5), and then I can scan all of them for relevant roles.",
-        message_type: 'text',
-        payload: {}
-      });
+    // 7.6 SPECIFIC ALUMNI PROFILE — "Tell me about Carlos at Amazon"
+    const alumniProfileQ = detectSpecificAlumniQuery(resolvedMessage);
+    if (alumniProfileQ) {
+      console.log('Intent: alumni_profile for', alumniProfileQ.name);
+      let ar = null;
+      try { const all = await base44.entities.DiscoveredAlumni.filter({ school_code: 'UF' }); ar = (all||[]).filter(a => new Date(a.expires_at) > new Date()).find(a => a.name?.toLowerCase().includes(alumniProfileQ.name.toLowerCase()) || alumniProfileQ.name.toLowerCase().includes(a.name?.toLowerCase().split(' ')[0] || '')); } catch(e) {}
+      if (!ar) { const pm = pipelineData.find(p => p.alumni_name?.toLowerCase().includes(alumniProfileQ.name.toLowerCase())); if (pm) ar = { name: pm.alumni_name, role_title: pm.alumni_role, company: pm.company }; }
+      const pn = ar?.name || alumniProfileQ.name, pr = ar?.role_title || '', pc = ar?.company || alumniProfileQ.company || '', pf = pn.split(' ')[0];
+      if (pr && pc) return Response.json({ success: true, response: `**${pn}** is a ${pr} at ${pc}.${ar?.degree_info ? ' ' + ar.degree_info + '.' : ''} As a fellow Gator, ${pf} is likely to respond to a warm intro.\n\nWant me to draft a message to ${pf}?`, message_type: 'text', payload: { suggested_actions: [`Draft intro to ${pf} →`, `Find more alumni at ${pc} →`] } });
+      const pRes = await base44.integrations.Core.InvokeLLM({ prompt: `Find info about ${pn}${pc ? ' at ' + pc : ''}. Current role, company, UF connection. 2-3 sentences max.`, add_context_from_internet: true, response_json_schema: { type: "object", properties: { summary: { type: "string" }, company: { type: "string" } }, required: ["summary"] } });
+      return Response.json({ success: true, response: `${pRes.summary || `**${pn}**${pRes.company || pc ? ' works at ' + (pRes.company || pc) : ''}.`}\n\nWant me to draft a warm intro to ${pf}?`, message_type: 'text', payload: { suggested_actions: [`Draft intro to ${pf} →`, (pRes.company || pc) ? `Find more alumni at ${pRes.company || pc} →` : `Research ${pf}'s company →`] } });
+    }
+    // 7.7 CONNECT REQUEST — "Connect with Carlos on LinkedIn"
+    const connectReq = detectConnectRequest(resolvedMessage);
+    if (connectReq) {
+      console.log('Intent: connect_request for', connectReq.name);
+      let ar2 = null;
+      try { const all = await base44.entities.DiscoveredAlumni.filter({ school_code: 'UF' }); ar2 = (all||[]).filter(a => new Date(a.expires_at) > new Date()).find(a => a.name?.toLowerCase().includes(connectReq.name.toLowerCase())); } catch(e) {}
+      if (!ar2) { const pm = pipelineData.find(p => p.alumni_name?.toLowerCase().includes(connectReq.name.toLowerCase())); if (pm) ar2 = { name: pm.alumni_name, role_title: pm.alumni_role, company: pm.company }; }
+      const rN = ar2?.name || connectReq.name, rT = ar2?.role_title || '', rC = ar2?.company || connectReq.company || '';
+      const cRes = await base44.integrations.Core.InvokeLLM({ prompt: `Draft a SHORT LinkedIn connection request (under 280 chars) from ${user.full_name || 'a UF student'}, ${studentMajor} major at UF (${studentGradYear}), to ${rN}, ${rT} at ${rC}. Mention shared UF connection, their role, student looking for ${ptConfig.outreachPhrase}. Warm, brief. End with "Go Gators!" No clichés.`, response_json_schema: { type: "object", properties: { message: { type: "string" } }, required: ["message"] } });
+      trackActivity(base44, user.email, profile.id, 'message_draft', rN);
+      return Response.json({ success: true, response: `Here's a connection request for **${rN}**:\n\n> ${cRes.message}\n\nAfter you send it, I'll track it in your pipeline and remind you to follow up.`, message_type: 'outreach_draft', payload: { recipient: rN, recipient_title: rT, recipient_company: rC, channel: 'LinkedIn', subject: '', message: cRes.message || '', ask_type: 'connection_request', suggested_next_steps: [`Find more alumni at ${rC || 'their company'} →`, 'Research another company →'] } });
     }
 
     // 8. ALUMNI DISCOVERY (checked before outreach to prevent misclassification)
