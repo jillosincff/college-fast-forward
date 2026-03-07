@@ -1927,13 +1927,13 @@ Rules:
         }
         if (fAlumni.length > 0) fAlumniGuidance = await generateAlumniGuidance(base44, fAlumni, detectedCompany, profileContext);
       } catch(e) { console.log('Auto alumni search alongside intel failed:', e.message); }
-      let fResp = analysis ? analysis.assessment : (intel.response || `Here's intel on ${detectedCompany}:`);
+      let fResp = `Here's what I found on **${detectedCompany}**:`;
       const fActions = [];
       const fScenario = analysis?.scenario || 'A';
-      if (fAlumni.length > 0 && fAlumniGuidance) { fResp += `\n\nI found **${fAlumni.length} UF alumni** at ${detectedCompany}. ${fAlumniGuidance.guidance}`; if (fAlumniGuidance.top_match) fActions.push(`Draft a warm intro to ${fAlumniGuidance.top_match} →`); fActions.push(`Tailor my resume for ${detectedCompany} →`); }
+      if (fAlumni.length > 0 && fAlumniGuidance) { if (fAlumniGuidance.top_match) fActions.push(`Draft message to ${fAlumniGuidance.top_match} →`); fActions.push(`Tailor my resume for ${detectedCompany} →`); }
       else if (fScenario === 'A') { fActions.push(`Find UF alumni at ${detectedCompany} →`); fActions.push(`Tailor my resume for ${detectedCompany} →`); }
-      else if (fScenario === 'B') { fActions.push(`Find UF alumni at ${detectedCompany} anyway →`); fActions.push(`Find similar companies hiring ${jstConfig.noun} →`); }
-      else { fActions.push(`Find UF alumni at ${detectedCompany} anyway →`); fActions.push(`Find companies that ARE hiring ${jstConfig.noun} →`); fActions.push(`Keep ${detectedCompany} on my watchlist →`); }
+      else if (fScenario === 'B') { fActions.push(`Find UF alumni at ${detectedCompany} →`); fActions.push(`Find similar companies hiring ${jstConfig.noun} →`); }
+      else { fActions.push(`Find UF alumni at ${detectedCompany} →`); fActions.push(`Find companies that ARE hiring ${jstConfig.noun} →`); }
       return Response.json({
         success: true, response: fResp, message_type: 'company_intel',
         payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null, alumni: fAlumni.length > 0 ? fAlumni : undefined, alumni_top_match: fAlumniGuidance?.top_match || undefined, suggested_actions: fActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
