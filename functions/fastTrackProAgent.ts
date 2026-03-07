@@ -1808,7 +1808,7 @@ Rules:
       outreachNextActions.push(`Tailor my resume for ${recipientCompany || 'this role'} →`);
       outreachNextActions.push('Research another company →');
       return Response.json({
-        success: true, response: (result.response || `Here's your draft to ${recipientName}:`) + `\n\nAfter you send it, I'll track it in your pipeline and remind you to follow up if you don't hear back.\n\nWhat's next?`,
+        success: true, response: `Here's your draft to **${recipientName}**:`,
         message_type: 'outreach_draft',
         payload: { recipient: result.recipient || recipientName, recipient_title: recipientTitle, recipient_company: recipientCompany, channel: result.channel || channel, subject: result.subject || '', message: result.message_body || '', ask_type: askType, suggested_next_steps: outreachNextActions }
       });
