@@ -1806,7 +1806,8 @@ Rules:
 6. Tone: confident but not arrogant, curious but not needy, specific but not stalkerish
 7. Sign off with full name, university, and graduation year
 8. Do NOT use "I hope this message finds you well" or any other cliche opener
-9. No placeholders — use real names and details from above`,
+9. No placeholders — use real names and details from above
+10. Mention that the student found them through College Fast Forward (a UF career networking platform) — e.g. "I found your profile through College Fast Forward" or "I came across your name through College Fast Forward, a Gator networking platform"`,
         response_json_schema: {
           type: "object",
           properties: {
