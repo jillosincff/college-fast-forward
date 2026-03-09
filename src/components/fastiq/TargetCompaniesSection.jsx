@@ -100,7 +100,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
           {/* Unresearched label */}
           {!researched && (
             <span style={{ fontSize: 10, fontWeight: 600, color: '#B45309', fontStyle: 'italic' }}>
-              Not yet scanned — let's find your insiders here 🔍
+              Not yet scanned — let's find your insiders 🔍
             </span>
           )}
         </div>
