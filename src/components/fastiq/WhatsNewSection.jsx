@@ -55,14 +55,26 @@ function AlumniRow({ alumni, onOpenChat }) {
             fontSize: 10, fontWeight: 600, color: '#0369A1', background: '#E0F2FE',
             padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
           }}>💡 {relevanceHint} at {company}</span>
-          <span style={{
-            fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
-            padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
-          }}>{alumni.verified ? '✅ Verified' : '🐊'} UF Alum</span>
-          {alumni.match_score >= 70 && (
-            <span style={{
+          {alumni.uf_verified === false && alumni.confidence === 'low' ? (
+            <span title="School connection unverified — check LinkedIn" style={{
+              fontSize: 10, fontWeight: 600, color: '#92400E', background: '#FEF3C7',
+              padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
+            }}>⚠️ UF Unverified</span>
+          ) : alumni.verified || alumni.uf_verified ? (
+            <span title="Confirmed University of Florida graduate/alum" style={{
+              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
+            }}>✅ UF Alum</span>
+          ) : (
+            <span title="Likely UF connection — verify on LinkedIn" style={{
+              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
+            }}>🐊 UF Alum</span>
+          )}
+          {alumni.match_score >= 70 && alumni.confidence !== 'low' && (
+            <span title="Strong fit for your interests + UF connection" style={{
               fontSize: 10, fontWeight: 600, color: '#9333EA', background: '#F3E8FF',
-              padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
+              padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>⭐ High match</span>
           )}
         </div>
