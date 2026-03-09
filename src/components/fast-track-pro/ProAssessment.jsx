@@ -9,7 +9,7 @@ import titleCase from '@/components/utils/titleCase';
 import ResumeUploadStep from './ResumeUploadStep';
 import ResumeBuilderStep from './ResumeBuilderStep';
 import { toast } from 'sonner';
-import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, JOB_SEARCH_TYPES, migrateIndustries, migrateRoles } from '@/components/fastiq/constants';
+import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, migrateIndustries, migrateRoles } from '@/components/fastiq/constants';
 
 const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
