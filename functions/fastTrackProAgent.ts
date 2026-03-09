@@ -427,13 +427,8 @@ async function getCachedAlumni(base44, company) {
 async function saveAlumniCache(base44, alumni) {
   const exp = new Date(Date.now() + 24*60*60*1000).toISOString();
   for (const a of alumni) {
-    try {
-      await base44.asServiceRole.entities.DiscoveredAlumni.create({
-        name: a.name, role_title: a.role_title, company: titleCase(a.company || ''), school_code: 'UF',
-        match_score: a.match_score || 0, degree_info: a.degree_info || '',
-        location: a.location || '', linkedin_url: a.linkedin_url || '', expires_at: exp,
-      });
-    } catch(e) {}
+    if (a.confidence === 'low') continue;
+    try { await base44.asServiceRole.entities.DiscoveredAlumni.create({ name: a.name, role_title: a.role_title, company: titleCase(a.company || ''), school_code: 'UF', match_score: a.match_score || 0, degree_info: a.degree_info || '', location: a.location || '', linkedin_url: a.linkedin_url || '', expires_at: exp }); } catch(e) {}
   }
 }
 
