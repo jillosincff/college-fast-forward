@@ -295,7 +295,7 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
 
   return (
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <Users className="w-4 h-4 text-purple-600" />
         <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni Found</span>
         {cffCount > 0 && (
@@ -303,6 +303,13 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
             {cffCount} CFF Member{cffCount > 1 ? 's' : ''}
           </Badge>
         )}
+      </div>
+      {/* Accuracy disclaimer */}
+      <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-3">
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+        <p className="text-[11px] text-amber-700 leading-relaxed">
+          Results based on public data — <strong>always verify current roles on LinkedIn</strong> before reaching out. FASTIQ is improving accuracy.
+        </p>
       </div>
       <div className="space-y-3">
         {alumni.slice(0, 5).map((a, i) => {
