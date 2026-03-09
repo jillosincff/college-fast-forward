@@ -65,9 +65,12 @@ const OPENERS = {
 
   draft_outreach: {
     userMessage: "I need to draft an outreach message",
-    getAssistantMessage: () =>
-      "Who are you reaching out to? Tell me their **name, role, and company** — or if you found them through FASTIQ, just say which alumni and I'll pull up their details.\n\n" +
-      "I'll write something personalized that references your shared UF connection."
+    getAssistantMessage: (profile, knownAlumni) => {
+      let msg = "Who are you reaching out to? Tell me their **name, role, and company** — or if you found them through FASTIQ, just say which alumni and I'll pull up their details.\n\n" +
+        "I'll write something personalized that references your shared UF connection.";
+      // knownAlumni is injected by the chat component if available
+      return msg;
+    }
   },
 
   explore_careers: {

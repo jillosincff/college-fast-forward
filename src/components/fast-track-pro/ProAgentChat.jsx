@@ -474,9 +474,13 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-[#0021A5] animate-spin" />
-                    <span className="text-sm text-slate-500">FASTIQ is researching — this may take a moment...</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                    <span className="text-sm text-slate-500">Thinking...</span>
                   </div>
                 </div>
               </motion.div>
