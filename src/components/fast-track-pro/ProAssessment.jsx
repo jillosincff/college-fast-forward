@@ -485,10 +485,7 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
               </div>
             )}
 
-            {/* Step 3: Job Search Type */}
-            {currentStep.id === 'job_search_type' && renderRadioOptions(JOB_SEARCH_TYPES, 'job_search_type')}
-
-            {/* Step 3.5: Position Type */}
+            {/* Step 3: Position Type */}
             {currentStep.id === 'position_type' && renderRadioOptions(POSITION_TYPES, 'position_type')}
 
             {/* Step 4: Start Timeline */}
