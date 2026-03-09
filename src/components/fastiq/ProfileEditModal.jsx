@@ -185,15 +185,6 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* Job Search Type */}
-          <div>
-            <label style={labelStyle}>What are you looking for right now?</label>
-            <select value={jobSearchType} onChange={e => setJobSearchType(e.target.value)} style={selectStyle}>
-              <option value="">Select...</option>
-              {JOB_SEARCH_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
-            </select>
-          </div>
-
           {/* Position Type + Start Timeline row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
