@@ -15,7 +15,6 @@ const STEPS = [
   { id: 'industry', title: 'What industries are you targeting?', subtitle: 'Select all that apply — we\'ll tailor intel to these.' },
   { id: 'role_type', title: 'What type of role are you looking for?', subtitle: 'This helps FASTIQ find the right jobs — e.g. "marketing roles at tech companies."' },
   { id: 'companies', title: 'Name up to 5 dream companies', subtitle: 'We\'ll research them and find Gator alumni inside.' },
-  { id: 'job_search_type', title: 'What are you looking for right now?', subtitle: 'This determines how FASTIQ filters roles and frames everything for you.' },
   { id: 'position_type', title: 'What type of position are you looking for?', subtitle: 'This tells FASTIQ exactly what to search for at every company.' },
   { id: 'start_timeline', title: 'When are you looking to start?', subtitle: 'This helps us time your outreach perfectly.' },
   { id: 'challenge', title: 'What\'s your biggest challenge?', subtitle: 'We\'ll prioritize fixing this first.' },
