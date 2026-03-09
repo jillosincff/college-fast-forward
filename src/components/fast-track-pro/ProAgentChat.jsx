@@ -115,9 +115,26 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const sentInitialRef = useRef(false);
+  const [knownAlumni, setKnownAlumni] = useState([]);
 
   // Keep profile in sync
   useEffect(() => { setCurrentProfile(initialProfile); }, [initialProfile]);
+
+  // Load known alumni for quick-select suggestions
+  useEffect(() => {
+    if (!user?.email) return;
+    const targets = (initialProfile?.target_companies || []).map(c => c.toLowerCase());
+    if (targets.length === 0) return;
+    base44.entities.DiscoveredAlumni.filter({}, '-created_date', 50)
+      .then(all => {
+        const valid = (all || []).filter(a =>
+          a.company && targets.includes(a.company.toLowerCase()) &&
+          new Date(a.expires_at) > new Date()
+        );
+        setKnownAlumni(valid.slice(0, 5));
+      })
+      .catch(() => {});
+  }, [user?.email, initialProfile?.target_companies]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
