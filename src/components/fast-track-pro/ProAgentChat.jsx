@@ -463,6 +463,28 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                         </>
                       )}
                     </div>
+                    {/* Quick-select alumni chips after outreach opener */}
+                    {msg.role === 'assistant' && msg.content?.includes('name, role, and company') && knownAlumni.length > 0 && (
+                      <div className="mt-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">From your targets:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {knownAlumni.map((a, idx) => (
+                            <button
+                              key={a.id || idx}
+                              onClick={() => sendMessage(`Draft a message to ${a.name} at ${a.company}`)}
+                              className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-blue-200 hover:border-[#0021A5] hover:bg-blue-50 transition-all text-left"
+                              style={{ minHeight: 'auto', minWidth: 'auto' }}
+                            >
+                              <div>
+                                <span className="text-xs font-semibold text-slate-800 block">{a.name}</span>
+                                <span className="text-[10px] text-slate-500">{a.role_title} at {titleCase(a.company)}</span>
+                              </div>
+                              <span className="text-blue-500 text-xs ml-1">→</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {/* Rich Card below the text bubble */}
                     {msg.role === 'assistant' && msg.message_type && msg.message_type !== 'text' && (
                       <RichCardRenderer
