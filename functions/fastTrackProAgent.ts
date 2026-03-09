@@ -1823,8 +1823,12 @@ Rules:
       if (otherTargets.length > 0) outreachNextActions.push(`Find alumni at ${otherTargets[0]} →`);
       outreachNextActions.push(`Tailor my resume for ${recipientCompany || 'this role'} →`);
       outreachNextActions.push('Research another company →');
+      // Build confirmation + draft response
+      const confirmLine = alumniRecord
+        ? `Got it — **${recipientName}**, ${recipientTitle} at ${recipientCompany}${alumniRecord.verified ? ' (UF connection verified ✅)' : ' (UF alum 🐊)'}. Here's your draft:`
+        : `Here's your draft to **${recipientName}**:`;
       return Response.json({
-        success: true, response: `Here's your draft to **${recipientName}**:`,
+        success: true, response: confirmLine,
         message_type: 'outreach_draft',
         payload: { recipient: result.recipient || recipientName, recipient_title: recipientTitle, recipient_company: recipientCompany, channel: result.channel || channel, subject: result.subject || '', message: result.message_body || '', ask_type: askType, suggested_next_steps: outreachNextActions }
       });
