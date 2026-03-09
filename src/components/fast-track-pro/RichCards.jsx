@@ -157,6 +157,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
               <Users className="w-3.5 h-3.5 text-purple-600" />
               <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni at {titleCase(String(data.company || ''))}</span>
             </div>
+            <p className="text-[10px] text-amber-600 mb-2">⚠️ Verify current roles on LinkedIn before outreach</p>
             <div className="space-y-2">
               {data.alumni.slice(0, 3).map((a, i) => (
                 <div key={i} className="flex items-center gap-2 bg-white rounded-lg p-2 border border-purple-100">
@@ -164,7 +165,11 @@ export function CompanyIntelCard({ data, onSendMessage }) {
                     {a.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 text-xs truncate">{a.name}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-semibold text-slate-900 text-xs truncate">{a.name}</p>
+                      {a.confidence === 'high' && <ShieldCheck className="w-3 h-3 text-green-600 flex-shrink-0" />}
+                      {a.confidence === 'medium' && <ShieldQuestion className="w-3 h-3 text-amber-500 flex-shrink-0" />}
+                    </div>
                     <p className="text-[10px] text-slate-500 truncate">{a.role_title}{a.match_score ? ` · ${a.match_score}% match` : ''}</p>
                   </div>
                   {onSendMessage && (
