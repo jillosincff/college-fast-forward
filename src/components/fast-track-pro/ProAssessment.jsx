@@ -97,7 +97,6 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       case 'industry': return data.target_industry.length > 0;
       case 'role_type': return data.target_role.length > 0;
       case 'companies': return explorerMode ? companySizePref !== '' : data.target_companies.length > 0;
-      case 'job_search_type': return data.job_search_type !== '';
       case 'position_type': return data.position_type !== '';
       case 'start_timeline': return data.start_timeline !== '';
       case 'challenge': return data.biggest_challenge !== '';
