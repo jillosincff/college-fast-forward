@@ -1637,7 +1637,8 @@ ${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).
         }
       });
 
-      const alumni = filterAndDedupAlumni(alumniResult.alumni || [], alumniCompany);
+      let alumni = filterAndDedupAlumni(alumniResult.alumni || [], alumniCompany);
+      if (alumni.length > 0) { alumni = (await verifyAlumniRoles(base44, alumni, alumniCompany)).filter(a => a.confidence !== 'low'); }
 
       // LAYER 3: Graceful recovery for alumni — if 0 real alumni AND the response text suggests confusion
       if (alumni.length === 0 && !String(alumniResult.response || '').toLowerCase().includes('alumni')) {
