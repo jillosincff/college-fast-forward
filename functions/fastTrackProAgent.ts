@@ -669,7 +669,10 @@ User: ${message}
 Given this conversation context, classify the user's CURRENT message intent.
 
 CRITICAL RULES:
-- If the assistant just asked a clarifying question (like "Which company?", "What company?", "Tell me about which company?") and the user responded with a company name or short answer, treat the user's message as the ANSWER to that question, NOT a new standalone query.
+- Use conversation history FIRST. If the message is short and refers to previous context (e.g., "research another company", "another one", "find more"), treat it as a continuation.
+- "research another company", "another company", "research [blank]", "find another" → opportunity_discovery or company_intel. If no company named, respond ONLY with clarification.
+- Do NOT fall back to career_advice unless the message is a general question with no action verb.
+- If the assistant just asked a clarifying question and the user responded with a company name or short answer, treat it as the ANSWER to that question, NOT a new standalone query.
 - Map the answer back to the ORIGINAL intent. For example:
   - If assistant asked "Which company do you want me to scan for UF alumni?" and user says "Disney" → intent is "alumni_discovery" with company "Disney"
   - If assistant asked "Which company should I research?" and user says "Google" → intent is "company_intel" with company "Google"  
