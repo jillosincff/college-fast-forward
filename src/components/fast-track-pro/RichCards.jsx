@@ -334,17 +334,21 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                       ✓ CFF Member
                     </Badge>
                   )}
-                  {a.confidence === 'high' ? (
-                    <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0">
-                      <ShieldCheck className="w-2.5 h-2.5" /> Verified
+                  {a.uf_verified === false && a.confidence === 'low' ? (
+                    <Badge title="School connection unverified — check LinkedIn" className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0 cursor-help">
+                      <AlertTriangle className="w-2.5 h-2.5" /> UF Unverified
+                    </Badge>
+                  ) : a.confidence === 'high' || a.uf_verified ? (
+                    <Badge title="Confirmed University of Florida graduate/alum" className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0 cursor-help">
+                      <ShieldCheck className="w-2.5 h-2.5" /> UF Verified
                     </Badge>
                   ) : a.confidence === 'medium' ? (
-                    <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0">
-                      <ShieldQuestion className="w-2.5 h-2.5" /> Verify
+                    <Badge title="Likely UF connection — verify on LinkedIn before outreach" className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0 border-0 gap-0.5 flex-shrink-0 cursor-help">
+                      <ShieldQuestion className="w-2.5 h-2.5" /> Verify UF
                     </Badge>
                   ) : null}
-                  {a.match_score && (
-                    <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0">{a.match_score}%</Badge>
+                  {a.match_score && a.confidence !== 'low' && (
+                    <Badge title="Match strength based on your interests + UF connection" className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0 cursor-help">{a.match_score}%</Badge>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
