@@ -85,8 +85,10 @@ function AlumniRow({ alumni, onOpenChat }) {
           style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
         >View Profile →</button>
         <button
-          onClick={() => onOpenChat(`Draft a message to ${alumni.name} at ${alumni.company}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: '#0021A5', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          onClick={() => onOpenChat(`Draft a warm intro message to ${alumni.name}, ${alumni.role_title || 'professional'} at ${alumni.company}`)}
+          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: alumni.uf_verified === false && alumni.confidence === 'low' ? '#94A3B8' : '#0021A5', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          disabled={alumni.uf_verified === false && alumni.confidence === 'low'}
+          title={alumni.uf_verified === false && alumni.confidence === 'low' ? 'Verify UF connection first' : ''}
         >Draft Message →</button>
       </div>
     </div>
