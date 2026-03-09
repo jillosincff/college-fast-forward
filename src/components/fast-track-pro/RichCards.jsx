@@ -414,14 +414,17 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                 )}
                 {a.connection_reason && <p className="text-xs text-slate-600 mt-1">{a.connection_reason}</p>}
                 {/* Draft message button */}
-                {onDraftMessage && (
+                {onDraftMessage && a.confidence !== 'low' && (
                   <button
-                    onClick={() => onDraftMessage(a.name)}
+                    onClick={() => onDraftMessage(`Draft a warm intro message to ${a.name}${a.role_title ? ', ' + a.role_title : ''}${a.company ? ' at ' + a.company : ''}`)}
                     className="mt-1.5 text-[11px] font-medium text-[#0021A5] hover:text-[#001580] hover:underline bg-transparent border-0 p-0 cursor-pointer"
                     style={{ minHeight: 'auto', minWidth: 'auto' }}
                   >
                     ✉️ Draft message to {getFirstName(a.name)}
                   </button>
+                )}
+                {a.confidence === 'low' && (
+                  <p className="text-[10px] text-slate-400 mt-1 italic">Outreach not recommended — verify connection first</p>
                 )}
               </div>
             </div>
