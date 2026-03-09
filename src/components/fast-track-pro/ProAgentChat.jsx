@@ -129,7 +129,8 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       .then(all => {
         const valid = (all || []).filter(a =>
           a.company && targets.includes(a.company.toLowerCase()) &&
-          new Date(a.expires_at) > new Date()
+          new Date(a.expires_at) > new Date() &&
+          a.verified !== false
         );
         setKnownAlumni(valid.slice(0, 5));
       })
