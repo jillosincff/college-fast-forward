@@ -536,10 +536,6 @@ async function saveCompanyIntelCache(base44, company, data) {
   } catch(e) {}
 }
 
-// P1 NOTE: Counter increments use read-then-write pattern which has a theoretical race
-// condition if the same student sends multiple concurrent requests. At current scale
-// (single student → single FASTIQ session), this is extremely unlikely. If scale
-// increases, consider atomic increments or a queue-based approach.
 async function trackActivity(base44, email, profileId, actionType, targetName) {
   try {
     await base44.entities.ProActivityLog.create({
