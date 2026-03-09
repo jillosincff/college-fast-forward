@@ -172,7 +172,13 @@ export function matchPromptToOpener(promptText) {
   if (t.includes('find companies') || t.includes('companies to target') || t.includes('companies that') || t.includes('mid-size companies') || t.includes('don\'t know where to apply') || t.includes('where should i apply') || t.includes('what companies should') || t.includes('help me find a job') || t.includes('where to apply')) return 'find_companies';
   if (t.includes('they replied') || t.includes('got a reply') || t.includes('they responded') || t.includes('wrote back') || t.includes('here\'s what they said')) return null; // Let reply help go to backend handler
   if (t.includes('follow-up') || t.includes('follow up') || t.includes('followup') || t.includes('stale outreach')) return null; // Let follow-up go to backend handler
-  if (t.includes('draft') || t.includes('intro message') || t.includes('outreach')) return 'draft_outreach';
+  // Only show generic draft opener if user didn't specify a person — if they said "draft to [Name]" send directly to backend
+  if (t.includes('draft') || t.includes('intro message') || t.includes('outreach')) {
+    // Check if message contains a specific person (e.g. "draft a message to John Smith, Engineer at Google")
+    const hasSpecificPerson = /(?:to|for)\s+[A-Z][a-z]+\s+[A-Z]/i.test(promptText || '');
+    if (hasSpecificPerson) return null; // Let it go straight to backend
+    return 'draft_outreach';
+  }
   if (t.includes('explore') || t.includes('career paths')) return 'explore_careers';
   if (t.includes('action plan') || t.includes('career plan') || t.includes('4-week')) return 'career_plan';
   if (t.includes('find uf alumni') || t.includes('scan') || t.includes('insiders') || t.includes('alumni at my')) return 'scan_insiders';
