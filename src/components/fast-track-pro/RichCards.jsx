@@ -83,6 +83,9 @@ export function CompanyIntelCard({ data, onSendMessage }) {
             {openRolesCount != null && (data.entry_level_roles_count != null || data.intern_roles_count != null) && (
               <p className="text-[9px] text-slate-400 mt-0.5">{openRolesCount} total</p>
             )}
+            {((data.entry_level_roles_count || 0) + (data.intern_roles_count || 0)) === 0 && openRolesCount > 0 && (
+              <p className="text-[9px] text-blue-500 mt-1">Other roles available — may lead to entry paths</p>
+            )}
           </div>
           {data.salary_range && (
             <div className="bg-white rounded-lg p-2 text-center border border-blue-100">
