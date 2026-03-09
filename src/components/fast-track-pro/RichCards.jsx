@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight, ExternalLink, CheckCircle2, Search } from 'lucide-react';
+import { Building2, Users, Mail, Briefcase, DollarSign, Newspaper, MessageSquare, Copy, Check, Pencil, X, TrendingUp, ClipboardList, Sparkles, ArrowRight, ExternalLink, CheckCircle2, Search, AlertTriangle, ShieldCheck, ShieldQuestion } from 'lucide-react';
 import SuggestedActions from './SuggestedActions';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
