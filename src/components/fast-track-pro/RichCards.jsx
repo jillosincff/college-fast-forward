@@ -356,19 +356,22 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                 </div>
                 <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
                 {/* Degree info + confidence-aware verification */}
-                {a.degree_info && (
+                {a.degree_info && a.uf_verified !== false && (
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className="text-[11px] text-purple-600">🐊 {a.degree_info}</span>
-                    {(isVerified || a.confidence === 'high') ? (
+                    {(isVerified || a.confidence === 'high' || a.uf_verified) ? (
                       <span className="inline-flex items-center gap-0.5 text-[10px] text-green-600 font-medium">
                         <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
                     ) : (
-                      <span className="text-[10px] text-amber-600">🔍 Verify current role on LinkedIn</span>
+                      <span className="text-[10px] text-amber-600">🔍 Verify on LinkedIn</span>
                     )}
                   </div>
                 )}
-                {!a.degree_info && !isVerified && a.confidence !== 'high' && (
+                {a.uf_verified === false && (
+                  <p className="text-[10px] text-amber-600 mt-0.5">⚠️ UF connection unverified — check LinkedIn education section</p>
+                )}
+                {!a.degree_info && a.uf_verified !== false && !isVerified && a.confidence !== 'high' && (
                   <p className="text-[10px] text-amber-600 mt-0.5">🔍 Verify current role on LinkedIn before reaching out</p>
                 )}
                 {a.verification_note && a.confidence !== 'high' && (
