@@ -1825,7 +1825,7 @@ Rules:
       outreachNextActions.push('Research another company →');
       // Build confirmation + draft response
       const confirmLine = alumniRecord
-        ? `Got it — **${recipientName}**, ${recipientTitle} at ${recipientCompany}${alumniRecord.verified ? ' (UF connection verified ✅)' : ' (UF alum 🐊)'}. Here's your draft:`
+        ? `Got it — **${recipientName}**, ${recipientTitle} at ${recipientCompany}${alumniRecord.verified||alumniRecord.uf_verified ? ' (UF connection verified ✅)' : (alumniRecord.uf_verified===false||alumniRecord.confidence==='low'||alumniRecord.confidence==='medium') ? ' ⚠️ UF connection unverified — verify on LinkedIn before sending' : ' (UF alum 🐊)'}. Here's your draft:`
         : `Here's your draft to **${recipientName}**:`;
       return Response.json({
         success: true, response: confirmLine,
