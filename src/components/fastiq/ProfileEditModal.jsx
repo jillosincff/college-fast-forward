@@ -14,7 +14,6 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   const [roles, setRoles] = useState(initialRoles);
   const [companies, setCompanies] = useState(profile?.target_companies || []);
   const [companyInput, setCompanyInput] = useState('');
-  const [jobSearchType, setJobSearchType] = useState(profile?.job_search_type || '');
   const [positionType, setPositionType] = useState(profile?.position_type || '');
   const [startTimeline, setStartTimeline] = useState(profile?.start_timeline || '');
   const [location, setLocation] = useState(profile?.location_preference || '');
