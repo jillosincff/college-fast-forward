@@ -653,10 +653,6 @@ async function verifyAlumniRoles(b44, alumni, tc) {
   } catch(e) { return alumni.map(a => ({ ...a, confidence:'medium', verification_note:'Verification unavailable', uf_verified: false })); }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  CONTEXT-AWARE INTENT CLASSIFICATION (LLM fallback)
-// ═══════════════════════════════════════════════════════════
-
 async function classifyIntentWithContext(base44, message, recentMessages, profileContext) {
   // Build conversation snippet for LLM
   const convoSnippet = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content?.substring(0, 300)}`).join('\n');
