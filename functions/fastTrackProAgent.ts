@@ -1579,9 +1579,24 @@ Return as JSON with these exact fields:`,
         });
       }
 
-      // Web research — strict current-employee filter
+      // Web research — strict current-employee filter with anti-hallucination
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Find people who attended the University of Florida (UF, Gainesville) and CURRENTLY WORK at ${alumniCompany} as employees.\n\nCRITICAL RULES:\n- They must be CURRENT employees of ${alumniCompany}, not former employees\n- They must work AT ${alumniCompany} directly, not at a partner, vendor, client, or subsidiary\n- Do NOT include people who work at companies with similar names (e.g. Smartsheet is NOT Amazon)\n- Do NOT include people who merely mention ${alumniCompany} in their profile as a client or project\n- If their LinkedIn or bio says they work at a DIFFERENT company, do not include them\n- Verify the company name matches EXACTLY\n\n${UF_FILTER}\n\nFor each person, include: full name, CURRENT job title, their CURRENT company name exactly as listed on their profile, UF degree info, and location.`,
+        prompt: `Find people who attended the University of Florida (UF, Gainesville) and CURRENTLY WORK at ${alumniCompany} as employees.
+
+ANTI-HALLUCINATION RULES (CRITICAL):
+- ONLY return alumni where you found EXPLICIT, VERIFIABLE evidence they CURRENTLY work at ${alumniCompany}
+- Their LinkedIn headline or current experience MUST list ${alumniCompany} as their CURRENT employer
+- Do NOT infer, assume, or project past experience as current employment
+- Do NOT include people who USED TO work at ${alumniCompany} but now work elsewhere (look for "Ex-", "Former", or a different current employer)
+- Do NOT include people who have ${alumniCompany} certifications, training, or partnerships but work at a DIFFERENT company
+- Do NOT include people at companies with similar names, subsidiaries, or partners
+- If you cannot confirm from your sources that someone CURRENTLY works at ${alumniCompany}, EXCLUDE them entirely
+- It is BETTER to return fewer verified results than many unverified ones
+- If you find ZERO confirmed current employees, return an empty list — do NOT fabricate entries
+
+${UF_FILTER}
+
+For each CONFIRMED person, include: full name, CURRENT job title exactly as listed, CURRENT company name exactly as listed, UF degree info, and location.`,
         add_context_from_internet: true,
       });
 
