@@ -343,21 +343,24 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                   )}
                 </div>
                 <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
-                {/* Degree info + verification */}
+                {/* Degree info + confidence-aware verification */}
                 {a.degree_info && (
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className="text-[11px] text-purple-600">🐊 {a.degree_info}</span>
-                    {isVerified ? (
+                    {(isVerified || a.confidence === 'high') ? (
                       <span className="inline-flex items-center gap-0.5 text-[10px] text-green-600 font-medium">
                         <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
                     ) : (
-                      <span className="text-[10px] text-amber-600">🔍 Verify on LinkedIn before reaching out</span>
+                      <span className="text-[10px] text-amber-600">🔍 Verify current role on LinkedIn</span>
                     )}
                   </div>
                 )}
-                {!a.degree_info && !isVerified && (
-                  <p className="text-[10px] text-amber-600 mt-0.5">🔍 Verify on LinkedIn before reaching out</p>
+                {!a.degree_info && !isVerified && a.confidence !== 'high' && (
+                  <p className="text-[10px] text-amber-600 mt-0.5">🔍 Verify current role on LinkedIn before reaching out</p>
+                )}
+                {a.verification_note && a.confidence !== 'high' && (
+                  <p className="text-[10px] text-slate-400 mt-0.5 italic">{a.verification_note}</p>
                 )}
                 {/* LinkedIn / CFF link */}
                 {a.is_cff_member ? (
