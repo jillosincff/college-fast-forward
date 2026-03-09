@@ -22,7 +22,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         </span>
         {!expanded && (
           <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
-            — expand to reuse intel
+            — {pastResearch.slice(0, 2).map(r => `${r.company_name} intel`).join(', ')}{pastResearch.length > 2 ? ` +${pastResearch.length - 2} more` : ''}
           </span>
         )}
         {expanded
