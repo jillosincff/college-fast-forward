@@ -104,12 +104,17 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3, flexWrap: 'wrap' }}>
           {researched && statusLabel && (
             <span style={{
               fontSize: 10, fontWeight: 700, color: statusColor,
               background: statusBg, padding: '2px 8px', borderRadius: 6,
             }}>{statusLabel}</span>
+          )}
+          {!researched && (
+            <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>
+              UF alumni likely present · recent postings detected
+            </span>
           )}
           {alumniCount > 0 && (
             <span style={{ fontSize: 10, color: '#64748B' }}>
@@ -119,7 +124,6 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
           {researched && (() => {
             const entry = intel?.entry_level_roles_count || 0;
             const intern = intel?.intern_roles_count || 0;
-            // Show count relevant to position type
             const isIntern = positionType === 'summer_internship' || positionType === 'semester_internship';
             const isEntryLevel = positionType === 'entry_level';
             let relevantCount = entry + intern;
@@ -139,8 +143,12 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             }
             if (intel?.open_roles_count > 0) {
               return (
-                <span style={{ fontSize: 10, color: '#B45309', fontStyle: 'italic' }}>
-                  {intel.open_roles_count} other role{intel.open_roles_count > 1 ? 's' : ''} posted — {ptConfig.rolesFoundLabel} open seasonally 📅
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color: '#EA580C',
+                  background: '#FFF7ED', padding: '2px 10px', borderRadius: 20,
+                  border: '1px solid #FDBA74',
+                }}>
+                  📅 {ptConfig.rolesFoundLabel} open seasonally · {intel.open_roles_count} other role{intel.open_roles_count > 1 ? 's' : ''} posted
                 </span>
               );
             }
