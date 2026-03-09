@@ -50,7 +50,6 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       target_industry: industries.join(', '),
       target_role: roles.join(', '),
       target_companies: companies,
-      job_search_type: jobSearchType,
       position_type: positionType,
       start_timeline: startTimeline,
       career_timeline: startTimeline,
