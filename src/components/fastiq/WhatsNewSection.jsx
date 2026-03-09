@@ -15,27 +15,59 @@ function guessDomain(name) {
 }
 
 function AlumniRow({ alumni, onOpenChat }) {
+  // Build relevance hint from role title and company
+  const role = (alumni.role_title || '').toLowerCase();
+  const company = titleCase(alumni.company || '');
+  let relevanceHint = '';
+  if (role.includes('design') || role.includes('creative') || role.includes('art')) relevanceHint = 'Design/creative role';
+  else if (role.includes('engineer') || role.includes('developer') || role.includes('software')) relevanceHint = 'Tech/engineering role';
+  else if (role.includes('market') || role.includes('brand') || role.includes('growth')) relevanceHint = 'Marketing/growth role';
+  else if (role.includes('financ') || role.includes('analyst') || role.includes('account')) relevanceHint = 'Finance/analytics role';
+  else if (role.includes('manage') || role.includes('director') || role.includes('lead')) relevanceHint = 'Leadership role';
+  else if (role.includes('sales') || role.includes('business dev')) relevanceHint = 'Sales/BD role';
+  else if (role.includes('consult')) relevanceHint = 'Consulting role';
+  else if (role.includes('product')) relevanceHint = 'Product role';
+  else if (role.includes('data') || role.includes('science')) relevanceHint = 'Data/science role';
+  else relevanceHint = `${alumni.role_title || 'Professional'} role`;
+
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+      display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 14px',
       background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0',
       transition: 'all 0.15s',
     }}>
       <img
         src={`https://logo.clearbit.com/${guessDomain(alumni.company)}`}
         alt=""
-        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#F1F5F9' }}
+        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#F1F5F9', marginTop: 2 }}
         onError={e => { e.target.style.display = 'none'; }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {alumni.name}
         </p>
-        <p style={{ fontSize: 11, color: '#64748B', margin: 0 }}>
-          {alumni.role_title} at {titleCase(alumni.company)}
+        <p style={{ fontSize: 11, color: '#64748B', margin: '1px 0 0' }}>
+          {alumni.role_title} at {company}
         </p>
+        {/* Quick relevance bullets */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 5 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 600, color: '#0369A1', background: '#E0F2FE',
+            padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
+          }}>💡 {relevanceHint} at {company}</span>
+          <span style={{
+            fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+            padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
+          }}>{alumni.verified ? '✅ Verified' : '🐊'} UF Alum</span>
+          {alumni.match_score >= 70 && (
+            <span style={{
+              fontSize: 10, fontWeight: 600, color: '#9333EA', background: '#F3E8FF',
+              padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
+            }}>⭐ High match</span>
+          )}
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2 }}>
         <button
           onClick={() => onOpenChat(`Tell me about ${alumni.name} at ${alumni.company}`)}
           style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
@@ -101,13 +133,34 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
       {hasAlumni && (
         <div style={{ marginBottom: hasOpps ? 20 : 0 }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
-            padding: '8px 12px', background: '#EFF6FF', borderRadius: 8, borderLeft: '3px solid #0021A5',
+            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12,
+            padding: '10px 14px', background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
+            borderRadius: 12, border: '1.5px solid #FB923C',
+            boxShadow: '0 0 20px rgba(250,70,22,0.12)',
+            animation: 'fiq-alumni-glow 2.5s ease-in-out infinite',
           }}>
-            <span style={{ fontSize: 16 }}>🔍</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#0021A5' }}>
-              {newAlumni.length} new UF alumni found at your target companies
+            <style>{`
+              @keyframes fiq-alumni-glow {
+                0%, 100% { box-shadow: 0 0 12px rgba(250,70,22,0.10); }
+                50% { box-shadow: 0 0 24px rgba(250,70,22,0.22); }
+              }
+              @keyframes fiq-alumni-dot {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.6); opacity: 0.5; }
+              }
+            `}</style>
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%', background: '#FA4616', flexShrink: 0,
+              animation: 'fiq-alumni-dot 1.5s ease-in-out infinite',
+            }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#C2410C' }}>
+              {newAlumni.length} new UF {newAlumni.length === 1 ? 'alum' : 'alumni'} found at your target companies
             </span>
+            <span style={{
+              marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#fff',
+              background: '#FA4616', padding: '3px 10px', borderRadius: 20, flexShrink: 0,
+              letterSpacing: '0.02em',
+            }}>NEW</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {visibleAlumni.map((a, i) => (

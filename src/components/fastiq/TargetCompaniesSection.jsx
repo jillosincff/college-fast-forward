@@ -99,8 +99,8 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
           <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</span>
           {/* Unresearched label */}
           {!researched && (
-            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', fontStyle: 'italic' }}>
-              Not scanned yet — find UF alumni here
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#B45309', fontStyle: 'italic' }}>
+              Not yet scanned — let's find your insiders here 🔍
             </span>
           )}
         </div>
@@ -134,13 +134,17 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             if (relevantCount > 0) {
               return <span style={{ fontSize: 10, color: '#64748B' }}>{relevantCount} {relevantLabel}</span>;
             }
-            if (alumniCount === 0) {
-              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No matches yet</span>;
+            if (alumniCount === 0 && !(intel?.open_roles_count > 0)) {
+              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No matches yet — many roles open seasonally</span>;
             }
             if (intel?.open_roles_count > 0) {
-              return <span style={{ fontSize: 10, color: '#64748B', fontStyle: 'italic' }}>No {ptConfig.rolesFoundLabel} found</span>;
+              return (
+                <span style={{ fontSize: 10, color: '#B45309', fontStyle: 'italic' }}>
+                  {intel.open_roles_count} other role{intel.open_roles_count > 1 ? 's' : ''} posted — {ptConfig.rolesFoundLabel} open seasonally 📅
+                </span>
+              );
             }
-            return null;
+            return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>Many roles open seasonally — let's scan now?</span>;
           })()}
         </div>
       </div>

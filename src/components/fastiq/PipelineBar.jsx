@@ -9,9 +9,7 @@ const STAGES = [
 ];
 
 export default function PipelineBar({ counts, noResponseContacts = [], onOpenChat }) {
-  // Hide pipeline entirely when all stages are 0
   const allZero = STAGES.every(s => (counts[s.key] || 0) === 0);
-  if (allZero) return null;
 
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
@@ -21,11 +19,28 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
       }}>Your Pipeline</h2>
 
       {(
-        /* Normal pipeline stages */
         <div style={{
           background: '#fff', borderRadius: 16, padding: '24px 16px',
           border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center',
+          position: 'relative', overflow: 'hidden',
         }}>
+          {/* "Getting started" overlay for empty pipeline */}
+          {allZero && (
+            <div style={{
+              position: 'absolute', inset: 0, background: 'rgba(248,250,252,0.85)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 2, borderRadius: 16, backdropFilter: 'blur(2px)',
+            }}>
+              <div style={{ textAlign: 'center', padding: '0 20px' }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                  🚀 Your pipeline is ready
+                </p>
+                <p style={{ fontSize: 11, color: '#64748B', lineHeight: 1.5, maxWidth: 300, margin: '0 auto' }}>
+                  Find alumni at your target companies, send intros, and watch these numbers fill up as you build connections.
+                </p>
+              </div>
+            </div>
+          )}
           {STAGES.map((s, i) => {
             const count = counts[s.key] || 0;
             const active = count > 0;

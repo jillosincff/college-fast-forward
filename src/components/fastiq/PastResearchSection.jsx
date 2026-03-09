@@ -20,6 +20,11 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Past Research ({pastResearch.length})
         </span>
+        {!expanded && (
+          <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
+            — expand to reuse intel
+          </span>
+        )}
         {expanded
           ? <ChevronDown style={{ width: 14, height: 14, color: '#475569' }} />
           : <ChevronRight style={{ width: 14, height: 14, color: '#475569' }} />
