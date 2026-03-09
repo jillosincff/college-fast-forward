@@ -3,7 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
 import { archiveRemovedTargets } from '@/functions/archiveRemovedTargets';
-import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, JOB_SEARCH_TYPES, migrateIndustries, migrateRoles } from './constants';
+import { INDUSTRIES, ROLE_TYPES, POSITION_TYPES, START_TIMELINES, migrateIndustries, migrateRoles } from './constants';
 
 export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   // Migrate legacy values on load
