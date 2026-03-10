@@ -168,10 +168,6 @@ function isLikelyCompanyName(name) {
   return true;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  LAYER 2 — WELL-KNOWN COMPANY LIST (for confirmation gate)
-// ═══════════════════════════════════════════════════════════
-
 const WELL_KNOWN_COMPANIES = new Set([
   // Big Tech
   'apple','google','alphabet','microsoft','amazon','meta','facebook','netflix','nvidia','tesla',
