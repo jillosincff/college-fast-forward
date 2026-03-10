@@ -1,210 +1,106 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-// Weekly accountability email — runs every Monday via scheduled automation
-// Generates a personalized weekly plan for each FASTIQ student
-
 Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
+  const APP_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
+  const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+
   try {
-    const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (user?.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Get all active FASTIQ profiles
-    const profiles = await base44.asServiceRole.entities.FastTrackProProfile.filter({ assessment_complete: true }, '-updated_date', 200);
-    if (!profiles || profiles.length === 0) {
-      return Response.json({ success: true, message: 'No active FASTIQ profiles found', sent: 0 });
-    }
+    // Get all FASTIQ profiles with active users
+    const profiles = await base44.asServiceRole.entities.FastTrackProProfile.filter({}, '-updated_date', 500);
+    const activeProfiles = (profiles || []).filter(p => p.user_email && p.assessment_complete);
 
-    let sentCount = 0;
-    const errors = [];
+    console.log(`Found ${activeProfiles.length} active FASTIQ profiles`);
+    let sent = 0;
+    let skipped = 0;
 
-    for (const profile of profiles) {
-      try {
-        const email = profile.user_email;
-        if (!email) continue;
+    for (const profile of activeProfiles) {
+      // Check email preferences
+      const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: profile.user_email });
+      if (prefs?.[0]?.all_emails === false) {
+        skipped++;
+        continue;
+      }
 
-        // Load user data
-        const users = await base44.asServiceRole.entities.User.filter({ email });
-        const userData = users?.[0] || {};
-        const firstName = (userData.full_name || 'Gator').split(/[\s,]+/)[0];
+      const companiesResearched = profile.companies_researched || 0;
+      const alumniDiscovered = profile.alumni_discovered || 0;
+      const messagesDrafted = profile.messages_drafted || 0;
+      const targetCompanies = profile.target_companies || [];
 
-        // Load pipeline — pending follow-ups
-        const pipeline = await base44.asServiceRole.entities.NetworkingPipeline.filter(
-          { user_email: email }, '-status_date', 50
-        ).catch(() => []);
+      const subject = `Your FASTIQ weekly action plan 🎯`;
 
-        // Find stale outreach (reached_out > 4 days ago, no reply)
-        const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-        const staleOutreach = pipeline.filter(p =>
-          p.status === 'reached_out' &&
-          p.reached_out_date &&
-          new Date(p.reached_out_date) < fourDaysAgo
-        );
-
-        // New opportunities
-        const newOpps = await base44.asServiceRole.entities.ScoutedOpportunity.filter(
-          { user_email: email, is_new: true }, '-scouted_date', 5
-        ).catch(() => []);
-
-        // Activity last 7 days
-        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const recentActivity = await base44.asServiceRole.entities.ProActivityLog.filter(
-          { user_email: email }, '-timestamp', 50
-        ).catch(() => []);
-        const weekActivity = recentActivity.filter(a => a.timestamp && new Date(a.timestamp) >= oneWeekAgo);
-
-        // Resume check — when was it last updated?
-        const resumeLastUpdated = profile.updated_date ? new Date(profile.updated_date) : null;
-        const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-        const resumeStale = !profile.resume_text || (resumeLastUpdated && resumeLastUpdated < twoWeeksAgo);
-
-        // Build plan items
-        const planItems = [];
-        let itemNum = 1;
-
-        // Follow-ups — lead section (before numbered plan items)
-        let followUpBlock = '';
-        if (staleOutreach.length > 0) {
-          const followUpLines = staleOutreach.slice(0, 5).map(p => {
-            const days = Math.round((Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
-            return `<li style="margin-bottom:8px;font-size:13px;color:#92400E;">
-              <strong>${p.alumni_name} at ${p.company}</strong> — sent ${days} days ago, no reply
-            </li>`;
-          }).join('');
-          followUpBlock = `
-            <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-              <div style="font-size:15px;font-weight:700;color:#92400E;margin-bottom:8px;">🔔 Follow-up needed</div>
-              <ul style="list-style:disc;padding-left:18px;margin:0 0 12px;">${followUpLines}</ul>
-              <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.base44.com'}/#FastIQ" 
-                 style="display:inline-block;background:#FA4616;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:12px;">
-                Open FASTIQ to draft follow-ups →
-              </a>
-            </div>
-          `;
-        }
-
-        // Follow-ups as plan items too
-        staleOutreach.slice(0, 3).forEach(p => {
-          const days = Math.round((Date.now() - new Date(p.reached_out_date).getTime()) / (1000 * 60 * 60 * 24));
-          planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Follow up with ${p.alumni_name} at ${p.company}</strong><br/><span style="color:#64748B;font-size:13px;">Sent ${days} days ago, no reply yet. A friendly follow-up doubles your response rate.</span></li>`);
-        });
-
-        // New opportunities
-        newOpps.slice(0, 2).forEach(o => {
-          planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Check out the new ${o.role_title} role at ${o.company_name}</strong><br/><span style="color:#64748B;font-size:13px;">FASTIQ matched this to your profile${o.alumni_available ? ' — and there are UF alumni at this company!' : '.'}</span></li>`);
-        });
-
-        // Resume nudge
-        if (resumeStale) {
-          planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Update your resume</strong><br/><span style="color:#64748B;font-size:13px;">You haven't touched your resume in ${resumeLastUpdated ? 'over 2 weeks' : 'a while'} — want FASTIQ to review it?</span></li>`);
-        }
-
-        // Activity nudge
-        if (weekActivity.length < 2) {
-          planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Research a target company</strong><br/><span style="color:#64748B;font-size:13px;">You've been quiet this week. Students who stay active find opportunities 3x faster.</span></li>`);
-        }
-
-        // Target companies that haven't been researched
-        const targetCompanies = profile.target_companies || [];
-        const researchedCompanies = new Set(recentActivity.filter(a => a.action_type === 'company_search').map(a => a.target_name?.toLowerCase()));
-        const unresearched = targetCompanies.filter(c => !researchedCompanies.has(c.toLowerCase()));
-        if (unresearched.length > 0 && planItems.length < 5) {
-          planItems.push(`<li style="margin-bottom:12px;"><strong>${itemNum++}. Research ${unresearched[0]}</strong><br/><span style="color:#64748B;font-size:13px;">This target company hasn't been researched yet. Let FASTIQ scan it for open roles and alumni.</span></li>`);
-        }
-
-        if (planItems.length === 0) {
-          planItems.push(`<li style="margin-bottom:12px;"><strong>1. Great job staying on top of things!</strong><br/><span style="color:#64748B;font-size:13px;">Your pipeline is active. Keep the momentum — log in to FASTIQ for new intel.</span></li>`);
-        }
-
-        // Weekly stats summary
-        const companiesResearched = weekActivity.filter(a => a.action_type === 'company_search').length;
-        const alumniFound = weekActivity.filter(a => a.action_type === 'alumni_view').length;
-        const messagesDrafted = weekActivity.filter(a => a.action_type === 'message_draft').length;
-        const totalPipeline = pipeline.length;
-
-        const emailBody = `
-          <div style="font-family:'DM Sans',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
-            <div style="background:linear-gradient(135deg,#0021A5,#0033CC);padding:32px 24px;text-align:center;border-radius:16px 16px 0 0;">
-              <div style="font-size:24px;margin-bottom:8px;">⚡</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0 0 4px;">Your FASTIQ Weekly Plan</h1>
-              <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Here's what to focus on this week, ${firstName}.</p>
-            </div>
-
-            <div style="padding:24px;">
-              <!-- Weekly Stats -->
-              <div style="display:flex;gap:8px;margin-bottom:24px;">
-                <div style="flex:1;background:#F8FAFC;border-radius:12px;padding:12px;text-align:center;border:1px solid #E2E8F0;">
-                  <div style="font-size:20px;font-weight:800;color:#0021A5;">${companiesResearched}</div>
-                  <div style="font-size:10px;color:#94A3B8;text-transform:uppercase;">Companies<br/>Researched</div>
+      const htmlBody = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #0021A5 0%, #7C3AED 100%); padding: 32px 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">⚡ Your Weekly FASTIQ Update</h1>
+          </div>
+          <div style="padding: 32px 24px;">
+            <p style="color: #334155; font-size: 16px; line-height: 1.6;">
+              Here's your progress so far:
+            </p>
+            
+            <div style="background: #F8FAFC; border-radius: 12px; padding: 20px; margin: 20px 0;">
+              <div style="display: flex; gap: 16px; text-align: center;">
+                <div style="flex: 1;">
+                  <div style="font-size: 24px; font-weight: 800; color: #0021A5;">${companiesResearched}</div>
+                  <div style="color: #64748B; font-size: 12px;">Companies Researched</div>
                 </div>
-                <div style="flex:1;background:#F8FAFC;border-radius:12px;padding:12px;text-align:center;border:1px solid #E2E8F0;">
-                  <div style="font-size:20px;font-weight:800;color:#8B5CF6;">${alumniFound}</div>
-                  <div style="font-size:10px;color:#94A3B8;text-transform:uppercase;">Alumni<br/>Found</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 24px; font-weight: 800; color: #7C3AED;">${alumniDiscovered}</div>
+                  <div style="color: #64748B; font-size: 12px;">Alumni Found</div>
                 </div>
-                <div style="flex:1;background:#F8FAFC;border-radius:12px;padding:12px;text-align:center;border:1px solid #E2E8F0;">
-                  <div style="font-size:20px;font-weight:800;color:#FA4616;">${messagesDrafted}</div>
-                  <div style="font-size:10px;color:#94A3B8;text-transform:uppercase;">Messages<br/>Drafted</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 24px; font-weight: 800; color: #FA4616;">${messagesDrafted}</div>
+                  <div style="color: #64748B; font-size: 12px;">Messages Drafted</div>
                 </div>
-                <div style="flex:1;background:#F8FAFC;border-radius:12px;padding:12px;text-align:center;border:1px solid #E2E8F0;">
-                  <div style="font-size:20px;font-weight:800;color:#10B981;">${totalPipeline}</div>
-                  <div style="font-size:10px;color:#94A3B8;text-transform:uppercase;">In<br/>Pipeline</div>
-                </div>
-              </div>
-
-              ${followUpBlock}
-
-              <!-- Plan Items -->
-              <h2 style="font-size:16px;font-weight:700;color:#1E293B;margin-bottom:16px;">📋 This Week's Action Plan</h2>
-              <ol style="padding-left:0;list-style:none;margin:0;">
-                ${planItems.join('\n')}
-              </ol>
-
-              <!-- CTA -->
-              <div style="text-align:center;margin-top:24px;">
-                <a href="${Deno.env.get('APP_BASE_URL') || 'https://app.base44.com'}/#FastIQ" 
-                   style="display:inline-block;background:#0021A5;color:#ffffff;padding:12px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;">
-                  Open FASTIQ →
-                </a>
-              </div>
-
-              <!-- Social Proof -->
-              <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:16px;margin-top:24px;text-align:center;">
-                <p style="font-size:13px;color:#9A3412;margin:0;line-height:1.5;">
-                  📊 <strong>FASTIQ students</strong> who complete 3+ actions per week are <strong>4x more likely</strong> to land an interview within 30 days.
-                </p>
               </div>
             </div>
 
-            <div style="padding:16px 24px;text-align:center;border-top:1px solid #E2E8F0;">
-              <p style="font-size:11px;color:#94A3B8;margin:0;">FASTIQ™ by College Fast Forward · Because applying isn't a strategy.</p>
+            <div style="background: #FFF7ED; border-left: 4px solid #FA4616; padding: 16px; border-radius: 8px; margin: 20px 0;">
+              <p style="color: #FA4616; font-weight: 700; margin: 0 0 8px 0;">This week's action items:</p>
+              <ul style="color: #334155; margin: 0; padding-left: 20px; line-height: 2;">
+                ${targetCompanies.length > 0 ? `<li>Research ${targetCompanies[0]} — check hiring signals</li>` : '<li>Add your first target company</li>'}
+                <li>Send at least one outreach message</li>
+                <li>Update your resume with FASTIQ AI</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${APP_URL}/#FastIQ" style="display: inline-block; background: linear-gradient(135deg, #0021A5, #7C3AED); color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 700;">Open FASTIQ →</a>
             </div>
           </div>
-        `;
+          <div style="background: #F8FAFC; padding: 20px 24px; text-align: center; border-top: 1px solid #E2E8F0;">
+            <p style="color: #94A3B8; font-size: 12px; margin: 0;">College Fast Forward — FASTIQ Career Intelligence</p>
+          </div>
+        </div>
+      `;
 
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: email,
-          subject: `⚡ Your FASTIQ Weekly Plan — ${planItems.length} action${planItems.length === 1 ? '' : 's'} for this week`,
-          body: emailBody,
-          from_name: 'FASTIQ™',
-        });
+      const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: profile.user_email }] }],
+          from: { email: 'notifications@collegefastforward.com', name: 'FASTIQ by CFF' },
+          subject,
+          content: [{ type: 'text/html', value: htmlBody }]
+        })
+      });
 
-        sentCount++;
-      } catch (e) {
-        console.log(`Error sending to ${profile.user_email}:`, e.message);
-        errors.push({ email: profile.user_email, error: e.message });
-      }
+      if (sgResponse.ok) sent++;
+      else console.error(`Failed to send to ${profile.user_email}: ${sgResponse.status}`);
     }
 
-    return Response.json({
-      success: true,
-      message: `Sent ${sentCount} weekly accountability emails`,
-      sent: sentCount,
-      errors: errors.length > 0 ? errors : undefined,
-    });
+    return Response.json({ success: true, totalProfiles: activeProfiles.length, sent, skipped });
   } catch (error) {
-    console.error('fastiqWeeklyAccountability error:', error.message);
+    console.error('fastiqWeeklyAccountability error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
