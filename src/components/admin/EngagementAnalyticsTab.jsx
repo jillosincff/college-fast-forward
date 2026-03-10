@@ -31,7 +31,7 @@ export default function EngagementAnalyticsTab() {
         (u.persona === 'parent' || u.roles?.includes('parent')) &&
         u.updated_date && new Date(u.updated_date) >= new Date(thirtyDaysAgo)
       );
-      const studentQuestions = (allJobRequests || []).filter(r => r.poster_type === 'student' && !r.is_alumni_career_request);
+      const studentQuestions = (allJobRequests || []).filter(r => r.poster_type === 'student' && !r.is_alumni_career_request && r.status === 'active');
       const unansweredQuestions = studentQuestions.filter(q => (q.answer_count || 0) === 0);
       const answeredQuestionIds = new Set((allAnswers || []).map(a => a.question_id).filter(Boolean));
       const questionsWithAnswers = studentQuestions.filter(q => answeredQuestionIds.has(q.id));
