@@ -407,7 +407,6 @@ async function getCachedAlumni(base44, company) {
   return null;
 }
 
-// P2 FIX: Normalize company name on cache write
 async function saveAlumniCache(base44, alumni) {
   const exp = new Date(Date.now() + 24*60*60*1000).toISOString();
   for (const a of alumni) {
