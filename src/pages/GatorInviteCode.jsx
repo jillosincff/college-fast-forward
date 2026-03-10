@@ -95,11 +95,20 @@ export default function GatorInviteCode() {
     console.log('📝 Verifying invite code:', trimmedCode);
     
     try {
-      // Verify the invite code first
+      // Verify the invite code (with one retry on failure)
       console.log('📞 Calling verifyInviteCode function...');
-      const response = await base44.functions.invoke('verifyInviteCode', {
-        code: trimmedCode
-      });
+      let response;
+      try {
+        response = await base44.functions.invoke('verifyInviteCode', {
+          code: trimmedCode
+        });
+      } catch (firstErr) {
+        console.warn('⚠️ First attempt failed, retrying in 2s...', firstErr.message);
+        await new Promise(r => setTimeout(r, 2000));
+        response = await base44.functions.invoke('verifyInviteCode', {
+          code: trimmedCode
+        });
+      }
       
       console.log('📬 verifyInviteCode response:', response);
       
