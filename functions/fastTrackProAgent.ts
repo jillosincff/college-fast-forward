@@ -221,8 +221,6 @@ function isWellKnownCompany(name) {
   return false;
 }
 
-// Determine if we should ask for confirmation before researching a company
-// Returns false if company is trusted (in targets or well-known), true if we should confirm
 function shouldConfirmCompany(companyName, targetCompanies) {
   if (!companyName) return true;
   const lower = companyName.toLowerCase().trim();
