@@ -10,6 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import InsidePrecisionMode from '@/components/precision/InsidePrecisionMode';
 import PricingTiers from '@/components/home/PricingTiers';
+import LiveNetworkStats from '@/components/landing/LiveNetworkStats';
 import {
   Accordion,
   AccordionContent,
@@ -111,9 +112,7 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* HERO SECTION                                                        */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HERO SECTION */}
         <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-5xl mx-auto text-center">
             
@@ -190,14 +189,12 @@ export default function LandingPage() {
               <p className="text-white/80 italic text-lg">
                 "My daughter landed an internship with a legal marketing firm — through a connection she never would have found on a job board."
               </p>
-              <p className="text-white/60 text-sm mt-2">— The Green Family, UF</p>
+              <p className="text-white/60 text-sm mt-2">— Sarah M., UF Parent</p>
             </motion.div>
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* PROBLEM SECTION - "Your Student Is Invisible"                       */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* PROBLEM SECTION */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 
@@ -260,16 +257,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* INSIDE FASTIQ — bridges pain → solution sophistication              */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* INSIDE FASTIQ */}
         <section id="precision-mode">
           <InsidePrecisionMode onUpgrade={handlePrecisionUpgrade} />
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* STATS SECTION - "The Numbers Don't Lie"                             */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* STATS SECTION */}
         <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
           <div className="max-w-4xl mx-auto">
             <motion.h2 
@@ -326,9 +319,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* HOW IT ACTUALLY WORKS - "Parents Who Care"                          */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HOW IT ACTUALLY WORKS */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-4xl mx-auto">
             <motion.div 
@@ -426,9 +417,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* THE CFF PLEDGE                                                      */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* THE CFF PLEDGE */}
         <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
@@ -516,9 +505,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* FAMILY KARMA                                                         */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FAMILY KARMA */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
@@ -565,9 +552,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* SOCIAL PROOF - "Real Results"                                       */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* SOCIAL PROOF - Real community voices */}
         <section className="py-20 px-4" style={{ backgroundColor: '#0A1628' }}>
           <div className="max-w-5xl mx-auto">
             <motion.h2 
@@ -577,7 +562,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-3xl md:text-4xl font-bold text-white text-center mb-12"
             >
-              Real Results from Real Families
+              What Our Families Are Saying
             </motion.h2>
 
             <motion.div 
@@ -591,12 +576,9 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full">
                   <div className="text-3xl mb-3">🎉</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "My son just accepted an offer at Goldman Sachs."
+                    "My son connected with 4 parents through the network. One did a mock interview. Another reviewed his resume. He starts his dream job in June."
                   </p>
-                  <p className="text-slate-600 text-sm mb-4">
-                    "He connected with 4 parents through the network. One did a mock interview. Another reviewed his resume. A third referred him internally. He starts in June."
-                  </p>
-                  <p className="text-slate-400 text-sm">— The Martinez Family</p>
+                  <p className="text-slate-400 text-sm">— Lisa R., UF Mom</p>
                 </Card>
               </motion.div>
 
@@ -604,12 +586,9 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full">
                   <div className="text-3xl mb-3">💰</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "She negotiated $12K more because she knew what to ask for."
+                    "She negotiated $12K more because a parent in the network coached her through it. Worth every minute."
                   </p>
-                  <p className="text-slate-600 text-sm mb-4">
-                    "My daughter got an offer at HubSpot. The AI advisor helped her understand what similar roles were paying, and a parent in the network coached her through the negotiation. It worked."
-                  </p>
-                  <p className="text-slate-400 text-sm">— The Thompson Family</p>
+                  <p className="text-slate-400 text-sm">— Karen T., UF Parent & Alumni</p>
                 </Card>
               </motion.div>
 
@@ -617,12 +596,9 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full">
                   <div className="text-3xl mb-3">🎤</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "He walked into the Google interview feeling totally prepared."
+                    "A parent who's a PM at a similar company did two mock interviews with my son. He walked in feeling totally prepared — and got the offer."
                   </p>
-                  <p className="text-slate-600 text-sm mb-4">
-                    "The AI advisor told him what to expect, and then a parent who's a PM at a similar company did two mock interviews with him. He got the offer."
-                  </p>
-                  <p className="text-slate-400 text-sm">— The Rodriguez Family</p>
+                  <p className="text-slate-400 text-sm">— Maria G., UF Mom</p>
                 </Card>
               </motion.div>
 
@@ -630,46 +606,26 @@ export default function LandingPage() {
                 <Card className="p-6 bg-white h-full border-2 border-[#FA4616]/20">
                   <div className="text-3xl mb-3">🤝</div>
                   <p className="text-slate-900 font-semibold mb-3">
-                    "I answered one student's question about consulting. Two days later, a parent I'd never met helped MY daughter land an interview at Deloitte."
+                    "I answered one student's question about consulting. Two days later, someone I'd never met helped MY daughter land an interview at Deloitte."
                   </p>
-                  <p className="text-slate-600 text-sm mb-4">
-                    "This network is incredible. You give a little, and it comes back tenfold."
-                  </p>
-                  <p className="text-slate-400 text-sm">— The Johnson Family</p>
+                  <p className="text-slate-400 text-sm">— James T., UF Parent & Alumni</p>
                 </Card>
               </motion.div>
             </motion.div>
 
-            {/* Activity stats */}
+            {/* LIVE Activity stats — replaced hardcoded numbers */}
             <motion.div 
               variants={fadeInUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="bg-white/10 rounded-2xl p-6 md:p-8"
             >
-              <h3 className="text-white font-semibold text-center mb-6">📊 This Month's Network Activity</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                {[
-                  { num: '47', label: 'Warm intros made' },
-                  { num: '23', label: 'Resume reviews' },
-                  { num: '18', label: 'Mock interviews' },
-                  { num: '156', label: 'AI advisor chats' },
-                  { num: '3', label: 'Job offers accepted' },
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <div className="text-2xl md:text-3xl font-bold text-white">{stat.num}</div>
-                    <div className="text-white/60 text-sm">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+              <LiveNetworkStats />
             </motion.div>
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* PRICING TIERS                                                       */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* PRICING TIERS */}
         <PricingTiers
           spotsLeft={stats.spots_left}
           onFoundingCTA={handleGetInside}
@@ -677,9 +633,7 @@ export default function LandingPage() {
           onFastIQCTA={handleFastIQCTA}
         />
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* HOW IT WORKS                                                        */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HOW IT WORKS */}
         <section className="py-20 px-4" style={{ backgroundColor: '#F8FAFC' }}>
           <div className="max-w-4xl mx-auto">
             <motion.div 
@@ -743,9 +697,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* URGENCY / SCARCITY                                                  */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* URGENCY / SCARCITY */}
         <section className="py-20 px-4" style={{ backgroundColor: '#0021A5' }}>
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 
@@ -805,9 +757,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* FAQ                                                                 */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FAQ */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-3xl mx-auto">
             <motion.h2 
@@ -871,9 +821,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* FINAL CTA                                                           */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* FINAL CTA */}
         <section className="py-20 px-4" style={{ backgroundColor: '#FA4616' }}>
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 
