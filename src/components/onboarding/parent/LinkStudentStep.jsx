@@ -68,7 +68,7 @@ export default function LinkStudentStep({ user, onNext, onSkip }) {
         />
         
         <div className="bg-blue-50 rounded-xl p-3 text-sm text-blue-700">
-          <p>ⓘ Your student will get an email to confirm the link. They don't need to be signed up yet — we'll connect you automatically when they join.</p>
+          <p>ⓘ No confirmation needed — we'll link you automatically. If your student hasn't signed up yet, we'll connect you as soon as they join.</p>
         </div>
       </div>
 
