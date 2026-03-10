@@ -938,6 +938,19 @@ Deno.serve(async (req) => {
     const message = body.message;
     if (!message) return Response.json({ error: 'Message is required' }, { status: 400 });
 
+    // P0: Instantly short-circuit "research another company" BEFORE any LLM/intent work
+    const _clean = message.replace(/[→←↑↓▶►\u2192]/g, '').trim().toLowerCase();
+    if (/(?:research|find|look at|check out|scan|explore)\s+(?:another|a new|a different|more|other)\s*(?:company|companies|one|target)?/.test(_clean) || /another\s+company|another\s+one|next\s+company|new\s+company|different\s+company/.test(_clean)) {
+      console.log('[P0 FollowUp] TRIGGERED:', message);
+      let _p = {}; try { const _ps = await base44.entities.FastTrackProProfile.filter({ user_email: user.email }); _p = _ps?.[0] || {}; } catch(e) {}
+      const _tc = _p.target_companies || [];
+      let _pipe = []; try { _pipe = await base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date', 50); } catch(e) {}
+      const _un = _tc.filter(tc => !_pipe.some(p => p.company?.toLowerCase() === tc.toLowerCase()));
+      const _tl = _tc.length > 0 ? '\n\nYour current targets:\n' + _tc.map(tc => `• **${tc}**${_pipe.some(p => p.company?.toLowerCase() === tc.toLowerCase()) ? ' (already scanned)' : ' (not scanned yet)'}`).join('\n') : '';
+      const _sa = []; if (_un[0]) _sa.push(`Research ${_un[0]} →`); if (_un[1]) _sa.push(`Research ${_un[1]} →`); if (_tc.length < 5) _sa.push('Help me find new companies to target →');
+      return Response.json({ success: true, response: `Which company would you like me to research?${_tl}\n\nOr type a new company name.`, message_type: 'text', payload: { suggested_actions: _sa } });
+    }
+
     // Load recent conversation messages from DB — single source of truth
     let recentDbMessages = [];
     try {
