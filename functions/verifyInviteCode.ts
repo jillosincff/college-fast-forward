@@ -3,7 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { code, skipUsageIncrement } = await req.json();
+    const body = await req.json();
+    const { code, skipUsageIncrement } = body;
 
     console.log('🔑 Verifying invite code:', code, skipUsageIncrement ? '(re-verify, skip increment)' : '');
 
