@@ -110,6 +110,17 @@ function detectOpportunityDiscovery(message) {
   return patterns.some(p => p.test(message));
 }
 
+function detectCareerEventsQuery(message) {
+  const lower = message.toLowerCase();
+  return /(?:career|uf|upcoming)\s+(?:events?|fairs?|treks?|workshops?)/i.test(message) ||
+    /(?:events?|fairs?|treks?|workshops?)\s+(?:at|from|on|this|next)\s+/i.test(message) ||
+    /(?:career center|career connections)\s+(?:events?|schedule|calendar)/i.test(message) ||
+    /(?:what|any|are there)\s+(?:uf\s+)?(?:career\s+)?(?:events?|fairs?|treks?)/i.test(message) ||
+    lower.includes('career fair') || lower.includes('career trek') || lower.includes('career event') ||
+    lower.includes('job fair') || lower.includes('career workshop') ||
+    (lower.includes('events') && (lower.includes('uf') || lower.includes('university') || lower.includes('career') || lower.includes('upcoming')));
+}
+
 // LAYER 1 — COMPANY NAME VALIDATION
 const COMPANY_NAME_BLOCKLIST = [
   'identify','relevant','find','show','help','research','draft','review',
