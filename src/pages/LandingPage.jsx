@@ -804,7 +804,7 @@ export default function LandingPage() {
                   },
                   {
                     q: "Why is it free for the first 1,000?",
-                    a: "Founding members are helping us build something special. You're not just joining a network — you're creating it. In exchange for being early and helping us grow, you get free access forever. Once we hit 1,000, new members pay $9/month. At 5,000, it goes to $19/month. The earlier you join, the more you save."
+                    a: "Founding members are helping us build something special. You're not just joining a network — you're creating it. In exchange for being early and helping us grow, you get free access forever. Once we hit 1,000, new members pay $9/month. FASTIQ AI Career Center is $29/month. The earlier you join, the more you save."
                   }
                 ].map((item, i) => (
                   <AccordionItem key={i} value={`item-${i}`} className="border rounded-xl px-6">
