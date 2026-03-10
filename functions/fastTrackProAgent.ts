@@ -549,7 +549,6 @@ async function saveToPipeline(base44, email, company, alumni) {
   } catch(e) {}
 }
 
-// P2 FIX: Improved titleCase with known company name lookup
 const KNOWN_COMPANY_NAMES = {
   'jpmorgan': 'JPMorgan', 'nvidia': 'NVIDIA', 'ibm': 'IBM', 'pwc': 'PwC',
   'ey': 'EY', 'kpmg': 'KPMG', 'bcg': 'BCG', 'hca': 'HCA', 'cvs': 'CVS',
