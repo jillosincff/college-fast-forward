@@ -110,11 +110,7 @@ function detectOpportunityDiscovery(message) {
   return patterns.some(p => p.test(message));
 }
 
-// ═══════════════════════════════════════════════════════════
-//  LAYER 1 — COMPANY NAME VALIDATION
-// ═══════════════════════════════════════════════════════════
-
-// Words that are NEVER company names
+// LAYER 1 — COMPANY NAME VALIDATION
 const COMPANY_NAME_BLOCKLIST = [
   'identify','relevant','find','show','help','research','draft','review',
   'prep','explore','build','create','scan','check','look','tell','give',
