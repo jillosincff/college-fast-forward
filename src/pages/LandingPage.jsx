@@ -130,7 +130,7 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight font-extrabold px-4"
             >
-              Imagine having hundreds of friends<br />helping your kid land a job.
+              Imagine having thousands of friends<br />helping your kid land a job.
             </motion.h1>
 
             <motion.p 
