@@ -174,8 +174,8 @@ export default function LandingPage() {
               </Button>
               
               <div className="mt-4 text-sm text-slate-600 space-y-1">
-                <p className="font-semibold">Founding members stay free forever.</p>
-                <p className="text-slate-400">After 1,000: $9/mo · After 5K: $19/mo</p>
+                <p className="font-semibold">Founding members: FREE forever. Seriously, locked in for life.</p>
+                <p className="text-slate-400">After 1,000: $9/mo · FASTIQ AI Career Center: $29/mo</p>
               </div>
             </motion.div>
 
