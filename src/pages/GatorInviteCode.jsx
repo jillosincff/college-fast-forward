@@ -145,11 +145,15 @@ export default function GatorInviteCode() {
       console.error('Error details:', err.message, err.response?.data);
       
       // More specific error message based on error type
-      let errorMsg = 'Unable to verify code. Please check your connection and try again.';
-      if (err.message?.includes('500') || err.message?.includes('Internal')) {
-        errorMsg = 'Server error verifying code. Please try again in a moment.';
-      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
-        errorMsg = 'Network error. Please check your connection and try again.';
+      let errorMsg = 'Unable to verify code right now. Please wait a moment and try again.';
+      if (err.response?.status === 401 || err.message?.includes('401')) {
+        errorMsg = 'Session expired. Please refresh the page and try again.';
+      } else if (err.message?.includes('500') || err.message?.includes('Internal')) {
+        errorMsg = 'Our servers are temporarily busy. Please wait a few seconds and try again.';
+      } else if (err.message?.includes('network') || err.message?.includes('fetch') || err.message?.includes('Failed to fetch')) {
+        errorMsg = 'Network error. Please check your internet connection and try again.';
+      } else if (err.message?.includes('not deployed') || err.message?.includes('timeout')) {
+        errorMsg = 'Service is loading. Please wait a few seconds and try again.';
       }
       
       setError(errorMsg);
