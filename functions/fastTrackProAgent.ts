@@ -454,9 +454,6 @@ function buildMemoryContext(previousIntel, newIntel, companyName) {
   return lines.join('\n');
 }
 
-// Cross-reference alumni against CFF member database
-// P2 FIX: Instead of loading ALL users, we filter by the alumni names we're looking for.
-// This is more targeted and scales better than loading 200 users into memory.
 async function crossReferenceCFF(base44, alumni) {
   if (!alumni || alumni.length === 0) return alumni;
   let cffMembers = { parentNames: new Map(), userNames: new Map() };
