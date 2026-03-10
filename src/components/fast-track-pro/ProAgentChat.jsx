@@ -51,6 +51,7 @@ function getSuggestedPrompts(profile) {
   prompts.push({ icon: '🙏', text: "Draft a thank-you note after my interview", category: 'tools' });
   prompts.push({ icon: '🎉', text: "I got a job offer!", category: 'tools' });
   prompts.push({ icon: '❤️', text: "Thank everyone who helped me in my job search", category: 'tools' });
+  prompts.push({ icon: '📅', text: "What UF career events are coming up?", category: 'explore' });
   prompts.push({ icon: '🧭', text: "Explore career paths for my major", category: 'explore' });
 
   return prompts;
@@ -80,6 +81,14 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'thank_you_note': return <ThankYouNoteCard data={payload} onSendMessage={onSendMessage} />;
     case 'offer_celebration': return <OfferCelebrationCard data={payload} onSendMessage={onSendMessage} />;
     case 'network_thank_you': return <NetworkThankYouCard data={payload} onSendMessage={onSendMessage} />;
+    case 'career_events': {
+      const actions = payload?.suggested_actions || [];
+      return actions.length > 0 ? (
+        <div className="mt-2">
+          <SuggestedActions actions={actions} onSendMessage={onSendMessage} accentColor="#0021A5" label="Next Steps" />
+        </div>
+      ) : null;
+    }
     case 'career_advice': {
       const actions = payload?.suggested_actions || payload?.suggested_next_steps || payload?.next_steps || [];
       return actions.length > 0 ? (
