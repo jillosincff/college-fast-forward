@@ -143,11 +143,8 @@ export default function QuestionsPage() {
         return !isTestRequest;
       }).map(req => ({
         ...req,
-        // Use actual answer count from Answer entity as source of truth
-        answer_count: answerCountsMap.get(req.id) || 0,
-        // Calculate total_upvotes from actual answer upvotes
-        total_upvotes: upvoteTotalsMap.get(req.id) || req.total_upvotes || 0,
-        // Use view_count from DB
+        answer_count: req.answer_count || 0,
+        total_upvotes: req.total_upvotes || 0,
         view_count: req.view_count || req.views_count || 0
       }));
       
