@@ -92,7 +92,8 @@ Deno.serve(async (req) => {
       }
 
       // Send notification to inviter (async, don't block)
-      if (currentUser) {
+      // Skip notification for system/admin-created codes (inviter_id is not a real user)
+      if (currentUser && invite.inviter_id && invite.inviter_id !== 'system') {
         // Get inviter details
         try {
           const inviterUser = await base44.asServiceRole.entities.User.get(invite.inviter_id);
