@@ -174,6 +174,14 @@ export function CompanyIntelCard({ data, onSendMessage }) {
                       {a.confidence === 'medium' && <ShieldQuestion className="w-3 h-3 text-amber-500 flex-shrink-0" />}
                     </div>
                     <p className="text-[10px] text-slate-500 truncate">{a.role_title}{a.match_score ? ` · ${a.match_score}% match` : ''}</p>
+                    <a
+                      href={a.linkedin_url && a.linkedin_url.includes('linkedin.com') ? a.linkedin_url : `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent((a.name || '') + ' ' + (a.company || data.company || ''))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-medium text-[#0077B5] hover:underline inline-flex items-center gap-0.5 mt-0.5"
+                    >
+                      {a.linkedin_url && a.linkedin_url.includes('linkedin.com') ? '🔗 LinkedIn' : <><Search className="w-2.5 h-2.5" /> Find on LinkedIn</>}
+                    </a>
                   </div>
                   {onSendMessage && (
                     <button
