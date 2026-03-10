@@ -120,7 +120,6 @@ const COMPANY_NAME_BLOCKLIST = [
   'entry','level','target','companies','company','another','next','different','new','more',
 ];
 
-// Common phrases that are commands, not company names
 const COMMAND_PHRASES = [
   'my target companies','relevant internships','entry level roles',
   'target companies','all companies','my companies','my targets',
