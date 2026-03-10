@@ -5,7 +5,7 @@ import { trackEvent } from '@/components/utils/analytics';
 import { JobRequest } from '@/entities/JobRequest';
 import { HelpRequest } from '@/entities/HelpRequest';
 import { ProfileLike } from '@/entities/ProfileLike';
-import { Answer } from '@/entities/Answer';
+
 import { base44 } from '@/api/base44Client';
 import { Search, Plus, Filter, MessageSquare, DollarSign, Mic, Bot } from 'lucide-react';
 import moment from 'moment';
