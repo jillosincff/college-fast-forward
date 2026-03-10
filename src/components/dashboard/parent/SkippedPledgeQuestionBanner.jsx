@@ -1,97 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
-import { base44 } from '@/api/base44Client';
+import { X, MessageSquare } from 'lucide-react';
 
 export default function SkippedPledgeQuestionBanner({ user }) {
-  const [question, setQuestion] = useState(null);
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    const skippedId = localStorage.getItem('skipped_pledge_question_id');
-    if (!skippedId || !user?.pledge_taken) return;
-
-    // Only show once per session
-    if (sessionStorage.getItem('skipped_pledge_banner_dismissed')) return;
-
-    const source = localStorage.getItem('skipped_pledge_question_source') || 'job';
-
-    async function load() {
-      try {
-        let found = null;
-        if (source === 'help') {
-          const questions = await base44.entities.HelpRequest.filter({ status: 'active' }, '-created_date', 200);
-          found = questions.find(q => q.id === skippedId);
-          if (found) {
-            found._source = 'help';
-            found.poster_name = found.student_name || found.poster_name;
-          }
-        } else {
-          const questions = await base44.entities.JobRequest.filter({ status: 'active' }, '-created_date', 200);
-          found = questions.find(q => q.id === skippedId);
-          if (found) found._source = 'job';
-        }
-        if (found) setQuestion(found);
-      } catch {
-        // Silently fail
-      }
-    }
-    load();
-  }, [user?.pledge_taken]);
+  // Only show if parent skipped the post-pledge question during onboarding
+  if (!user?.skipped_pledge_question) return null;
+  if (dismissed) return null;
+  if (localStorage.getItem('dismissed_skipped_pledge_banner')) return null;
 
   const handleDismiss = () => {
     setDismissed(true);
-    sessionStorage.setItem('skipped_pledge_banner_dismissed', 'true');
-    localStorage.removeItem('skipped_pledge_question_id');
-    localStorage.removeItem('skipped_pledge_question_source');
+    localStorage.setItem('dismissed_skipped_pledge_banner', 'true');
   };
-
-  const handleAnswer = () => {
-    if (question) {
-      const type = question._source === 'help' ? 'help' : 'job';
-      navigate(`QuestionDetail?id=${question.id}&type=${type}`);
-    } else {
-      navigate('Connections');
-    }
-    handleDismiss();
-  };
-
-  if (dismissed || !question) return null;
-
-  const studentName = question.poster_name
-    ? (question.poster_name.includes(',')
-        ? question.poster_name.split(',')[1]?.trim().split(' ')[0]
-        : question.poster_name.split(' ')[0])
-    : 'A student';
-
-  const preview = (question.description || question.title || question.role || '').slice(0, 80);
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 px-4 sm:px-6 py-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
-          <span className="text-xl flex-shrink-0 mt-0.5">🤝</span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-800 mb-1">
-              You pledged to help. Here's your first chance:
-            </p>
-            <p className="text-sm text-slate-600 truncate">
-              <strong>{studentName}:</strong> "{preview}{preview.length >= 80 ? '...' : ''}"
-            </p>
-          </div>
+    <div className="relative bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-5">
+      <button
+        onClick={handleDismiss}
+        className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 transition"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+          <MessageSquare className="w-5 h-5 text-orange-600" />
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-slate-900 text-sm sm:text-base">
+            Complete your first action — answer a student question!
+          </p>
+          <p className="text-slate-600 text-xs sm:text-sm mt-1">
+            Earn 15 karma points and start boosting your student's visibility in the network.
+          </p>
           <button
-            onClick={handleAnswer}
-            className="text-sm font-bold text-white bg-[#0021A5] hover:bg-[#001a8a] px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+            onClick={() => navigate('Connections')}
+            className="mt-3 inline-flex items-center gap-2 bg-[#FA4616] text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-[#E03E14] transition"
           >
-            Answer Now →
-          </button>
-          <button
-            onClick={handleDismiss}
-            className="text-slate-400 hover:text-slate-600 text-lg leading-none"
-            aria-label="Dismiss"
-          >
-            ×
+            Answer a Question Now
+            <span className="text-white/70">+15 karma</span>
           </button>
         </div>
       </div>
