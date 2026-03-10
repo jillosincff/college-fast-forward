@@ -393,11 +393,6 @@ function detectNetworkThankYou(message) {
     lower.includes('thank the people who helped') || lower.includes('thank everyone in my pipeline');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  DATA / CACHE HELPERS
-// ═══════════════════════════════════════════════════════════
-
-// P2 FIX: Normalize company name to titleCase before cache lookup
 async function getCachedAlumni(base44, company) {
   try {
     const normalizedCompany = titleCase(company);
