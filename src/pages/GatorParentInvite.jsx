@@ -53,9 +53,16 @@ export default function GatorParentInvite() {
     const code = inviteCode.trim().toUpperCase();
     
     try {
-      // Verify the invite code FIRST before proceeding
+      // Verify the invite code FIRST before proceeding (with retry)
       console.log('📞 [GatorParentInvite] Verifying invite code:', code);
-      const response = await base44.functions.invoke('verifyInviteCode', { code });
+      let response;
+      try {
+        response = await base44.functions.invoke('verifyInviteCode', { code });
+      } catch (firstErr) {
+        console.warn('⚠️ First attempt failed, retrying in 2s...', firstErr.message);
+        await new Promise(r => setTimeout(r, 2000));
+        response = await base44.functions.invoke('verifyInviteCode', { code });
+      }
       
       if (!response.data?.success) {
         const errorMsg = response.data?.error || 'Invalid invite code. Please check and try again.';
