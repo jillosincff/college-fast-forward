@@ -415,7 +415,6 @@ async function saveAlumniCache(base44, alumni) {
   }
 }
 
-// P2 FIX: Normalize company name to titleCase before cache lookup
 async function getCachedCompanyIntel(base44, company) {
   try {
     const normalizedCompany = titleCase(company);
