@@ -501,7 +501,6 @@ async function crossReferenceCFF(base44, alumni) {
   });
 }
 
-// P2 FIX: Normalize company name on cache write
 async function saveCompanyIntelCache(base44, company, data) {
   try {
     await base44.asServiceRole.entities.CompanyIntelCache.create({
