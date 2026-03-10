@@ -59,6 +59,9 @@ export default function GatorWelcome() {
   }, []);
 
   // Re-verify invite code on mount (prevents localStorage manipulation)
+  // CRITICAL: Only do a lightweight check — do NOT redirect on failure
+  // The code was already verified on GatorInviteCode. Re-verification failures
+  // (e.g. function not deployed, network issue) should NOT block the user.
   useEffect(() => {
     const storedCode = localStorage.getItem('pending_invite_code');
     const storedTimestamp = localStorage.getItem('pending_invite_timestamp');
@@ -77,25 +80,24 @@ export default function GatorWelcome() {
       return;
     }
 
-    // Re-verify code is still valid server-side
+    // Non-blocking re-verification — log only, never redirect on failure
     const verifyCodeAgain = async () => {
       try {
         console.log('🔄 [GatorWelcome] Re-verifying invite code:', storedCode);
         const result = await base44.functions.invoke('verifyInviteCode', { 
           code: storedCode,
-          skipUsageIncrement: true // Don't increment usage on re-verify
+          skipUsageIncrement: true
         });
         
-        if (!result.data?.success) {
-          console.log('❌ [GatorWelcome] Code no longer valid:', result.data?.error);
-          clearPendingInviteData();
-          navigate('GatorInviteCode');
-        } else {
+        if (result.data?.success) {
           console.log('✅ [GatorWelcome] Code re-verified successfully');
+        } else {
+          // Log but do NOT redirect — the code was already verified once
+          console.warn('⚠️ [GatorWelcome] Code re-verify returned false, but allowing to continue:', result.data?.error);
         }
       } catch (err) {
-        console.error('⚠️ [GatorWelcome] Re-verification error (allowing to continue):', err);
-        // On network error, allow to continue (don't lock out user)
+        // On any error, allow to continue — don't lock out the user
+        console.warn('⚠️ [GatorWelcome] Re-verification error (allowing to continue):', err.message);
       }
     };
 
