@@ -121,7 +121,7 @@ const COMPANY_NAME_BLOCKLIST = [
   'get','what','where','how','should','could','would','please','do',
   'internships','openings','roles','jobs','careers','opportunities',
   'hiring','my','your','the','all','each','every','about','into','at','for',
-  'entry','level','target','companies','company',
+  'entry','level','target','companies','company','another','next','different','new','more',
 ];
 
 // Common phrases that are commands, not company names
