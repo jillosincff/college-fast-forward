@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
 
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Get all parents with completed onboarding
-    const allUsers = await base44.asServiceRole.entities.User.filter({}, '-updated_date', 9999);
+    // Get all parents with completed onboarding — batch to avoid rate limits
+    const allUsers = await base44.asServiceRole.entities.User.filter({}, '-updated_date', 500);
     const parents = (allUsers || []).filter(u =>
       (u.persona === 'parent' || u.roles?.includes('parent')) &&
       u.onboarding_completed !== false &&
@@ -32,34 +32,33 @@ Deno.serve(async (req) => {
       !q.is_alumni_career_request
     );
 
-    // Get all answers for karma counting
+    // Get all answers for karma counting  
     const recentAnswers = await base44.asServiceRole.entities.Answer.filter({}, '-created_date', 500);
+
+    // Pre-fetch email prefs and existing digests in bulk to reduce per-parent queries
+    const allPrefs = await base44.asServiceRole.entities.EmailPreference.filter({}, undefined, 500);
+    const prefsMap = new Map((allPrefs || []).map(p => [p.user_email, p]));
+
+    const allDigests = await base44.asServiceRole.entities.ReengagementEmail.filter({ email_type: 'weekly_parent_digest' }, '-sent_at', 500);
 
     let sent = 0;
     let skipped = 0;
 
-    for (const parent of parents) {
-      // Check email preferences
-      const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_email: parent.email });
-      if (prefs?.[0]?.all_emails === false || prefs?.[0]?.weekly_digest === false) {
+    // Limit to 50 parents per run to avoid timeouts
+    const batchParents = parents.slice(0, 50);
+
+    for (const parent of batchParents) {
+      // Check email preferences from pre-fetched map
+      const prefs = prefsMap.get(parent.email);
+      if (prefs?.all_emails === false || prefs?.weekly_digest === false) {
         skipped++;
         continue;
       }
 
-      // Anti-spam: check emails sent this week
-      const weekEmails = await base44.asServiceRole.entities.EmailLog.filter({ user_email: parent.email });
-      const thisWeekEmails = (weekEmails || []).filter(e => e.sent_at && e.sent_at >= oneWeekAgo).length;
-      if (thisWeekEmails >= 5) {
-        skipped++;
-        continue;
-      }
-
-      // Check if already sent this week
-      const existingDigests = await base44.asServiceRole.entities.ReengagementEmail.filter({
-        user_email: parent.email,
-        email_type: 'weekly_parent_digest'
-      });
-      const alreadySentThisWeek = (existingDigests || []).some(e => e.sent_at && e.sent_at >= oneWeekAgo);
+      // Check if already sent this week from pre-fetched data
+      const alreadySentThisWeek = (allDigests || []).some(e => 
+        e.user_email === parent.email && e.sent_at && e.sent_at >= oneWeekAgo
+      );
       if (alreadySentThisWeek) {
         skipped++;
         continue;
