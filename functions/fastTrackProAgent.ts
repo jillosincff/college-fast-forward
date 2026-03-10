@@ -1061,6 +1061,10 @@ Deno.serve(async (req) => {
       await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
     }
 
+    // Load upcoming UF career events
+    let upcomingEvents = [];
+    try { const now=new Date(),allE=await base44.entities.SchoolCareerEvent.filter({school_code:'UF',is_active:true},'start_date',20),ago7=new Date(now.getTime()-7*864e5); upcomingEvents=(allE||[]).filter(e=>{const s=new Date(e.start_date),d=e.deadline?new Date(e.deadline):null;return s>now||(d&&d>ago7)}).slice(0,5); console.log(`[Events] ${upcomingEvents.length} upcoming`); } catch(e){}
+
     // Load pipeline for memory context
     let pipelineData = [];
     try {
