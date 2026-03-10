@@ -66,6 +66,11 @@ Deno.serve(async (req) => {
 
       // Find questions matching parent's industry
       const parentIndustry = parent.industries?.[0] || parent.industry;
+      // Small delay between sends to avoid rate limits
+      if (sent > 0 && sent % 10 === 0) {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
       const matchedQuestions = parentIndustry
         ? thisWeekQuestions.filter(q => q.target_industry?.toLowerCase().includes(parentIndustry.toLowerCase()))
         : thisWeekQuestions;
