@@ -108,31 +108,11 @@ export default function QuestionsPage() {
     
     try {
       // Fetch BOTH JobRequest AND HelpRequest entities
-      const jobRequestsPromise = JobRequest.filter({ status: 'active' }, '-created_date', 200);
-      const helpRequestsPromise = HelpRequest.filter({ status: 'active' }, '-created_date', 200);
-      const directoryUsersPromise = base44.functions.invoke('getDirectoryUsers', {});
-      const answersPromise = Answer.list('-created_date', 1000);
-
-      const [jobRequests, helpRequests, directoryResponse, allAnswers] = await Promise.all([
-        jobRequestsPromise,
-        helpRequestsPromise,
-        directoryUsersPromise,
-        answersPromise
+      const [jobRequests, helpRequests, directoryResponse] = await Promise.all([
+        JobRequest.filter({ status: 'active' }, '-created_date', 200),
+        HelpRequest.filter({ status: 'active' }, '-created_date', 200),
+        base44.functions.invoke('getDirectoryUsers', {})
       ]);
-      
-      // Build answer counts map from actual Answer records
-      const answerCountsMap = new Map();
-      (allAnswers || []).forEach(answer => {
-        const qId = answer.question_id;
-        answerCountsMap.set(qId, (answerCountsMap.get(qId) || 0) + 1);
-      });
-      
-      // Build upvote totals map from answers
-      const upvoteTotalsMap = new Map();
-      (allAnswers || []).forEach(answer => {
-        const qId = answer.question_id;
-        upvoteTotalsMap.set(qId, (upvoteTotalsMap.get(qId) || 0) + (answer.upvote_count || 0));
-      });
       
       // Normalize HelpRequest to match JobRequest structure
       const normalizedHelpRequests = (helpRequests || []).map(hr => ({
