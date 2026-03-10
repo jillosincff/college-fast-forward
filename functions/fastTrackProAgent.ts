@@ -1575,7 +1575,7 @@ ANTI-HALLUCINATION RULES (CRITICAL):
 
 ${UF_FILTER}
 
-For each CONFIRMED person, include: full name, CURRENT job title exactly as listed, CURRENT company name exactly as listed, UF degree info, and location.`,
+For each CONFIRMED person, include: full name, CURRENT job title exactly as listed, CURRENT company name exactly as listed, UF degree info, location, and their LinkedIn profile URL (e.g. https://www.linkedin.com/in/username).`,
         add_context_from_internet: true,
       });
 
