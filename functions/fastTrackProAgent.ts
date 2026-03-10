@@ -430,7 +430,6 @@ async function getCachedCompanyIntel(base44, company) {
   return null;
 }
 
-// Build persistent memory context — compare new intel against previous data
 function buildMemoryContext(previousIntel, newIntel, companyName) {
   if (!previousIntel) return '';
   const lines = [];
