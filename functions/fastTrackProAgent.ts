@@ -1117,7 +1117,7 @@ CRITICAL POSITION TYPE CONTEXT:
 - The student is looking for: ${ptConfig.label}
 - When searching for roles, focus on: ${ptConfig.searchTerms}
 - When drafting outreach, reference they are looking for: ${ptConfig.outreachPhrase}
-- For salary data, show: ${ptConfig.salaryType}`;
+- For salary data, show: ${ptConfig.salaryType}${eventsContext}`;
 
     // P3 FIX: Stricter confirmation detection — must be ONLY a confirmation word(s) with no extra content,
     // OR an explicit "yes, research X" pattern. "Ok Google" or "Sure, can you also..." won't match.
