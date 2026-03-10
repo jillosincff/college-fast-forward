@@ -45,11 +45,7 @@ export default function CommunityInviteManager() {
       }
     } catch (error) {
       console.error('Failed to load community invites:', error);
-      toast({
-        title: "Error Loading Invites",
-        description: "Could not load community invites. Please refresh the page.",
-        variant: "destructive"
-      });
+      setCommunityInvites([]);
     } finally {
       setLoadingInvites(false);
     }
