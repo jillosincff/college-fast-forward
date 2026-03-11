@@ -601,7 +601,7 @@ export default function GatorAuth() {
                 Welcome to College Fast Forward
               </h1>
               <p className="text-slate-600">
-                Which role best describes you for now?
+                Tap your role to get started
               </p>
             </div>
 
@@ -720,26 +720,12 @@ export default function GatorAuth() {
 
             </div>
 
-            <Button
-              onClick={handleRoleSelect}
-              disabled={!selectedRole || loading}
-              className="w-full h-12 text-base font-semibold"
-              style={{ 
-                backgroundColor: selectedRole ? '#0021A5' : undefined 
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Setting up...
-                </>
-              ) : (
-                <>
-                  Continue
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
+            {loading && (
+              <div className="flex items-center justify-center gap-2 text-slate-500 py-3">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-sm">Setting up...</span>
+              </div>
+            )}
             
             <p className="text-slate-400 text-xs mt-6 text-center">
               By continuing, you agree to our{' '}
