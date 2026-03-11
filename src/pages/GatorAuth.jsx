@@ -639,7 +639,20 @@ export default function GatorAuth() {
 
               {/* Parent Option */}
                 <button
-                  onClick={() => setSelectedRole('parent')}
+                  onClick={() => {
+                    setSelectedRole('parent');
+                    // Auto-advance: save role and proceed immediately
+                    localStorage.setItem('pending_invite_role', 'parent');
+                    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    if (!user) {
+                      setStep('oauth');
+                    } else {
+                      const hasInviteCode = localStorage.getItem('pending_invite_code');
+                      if (!hasInviteCode) {
+                        navigate('GatorInviteCode');
+                      }
+                    }
+                  }}
                   className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
                     selectedRole === 'parent'
                       ? 'border-blue-500 bg-blue-50'
@@ -654,15 +667,7 @@ export default function GatorAuth() {
                       <h3 className="font-bold text-lg text-slate-900">I'm a UF Parent</h3>
                       <p className="text-sm text-slate-600">Support your student's career journey</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 ${
-                      selectedRole === 'parent' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
-                    }`}>
-                      {selectedRole === 'parent' && (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-white" />
-                        </div>
-                      )}
-                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-400" />
                   </div>
                 </button>
 
