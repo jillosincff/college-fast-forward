@@ -609,7 +609,29 @@ export default function GatorAuth() {
               
               {/* Student Option */}
               <button
-                onClick={() => setSelectedRole('gator')}
+                onClick={() => {
+                  setSelectedRole('gator');
+                  localStorage.setItem('pending_invite_role', 'gator');
+                  localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                  if (!user) {
+                    setStep('oauth');
+                  } else {
+                    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+                    if (isUFLStudent) {
+                      setLoading(true);
+                      base44.auth.updateMe({
+                        persona: 'gator', roles: ['gator'], onboarding_completed: false,
+                        is_new_signup: true, invite_code_used: 'ufl_direct'
+                      }).then(() => {
+                        localStorage.removeItem('pending_invite_role');
+                        if (refreshUser) refreshUser();
+                        navigate('StudentOnboarding');
+                      });
+                    } else {
+                      setError('Students must use their @ufl.edu email address.');
+                    }
+                  }
+                }}
                 className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
                   selectedRole === 'gator'
                     ? 'border-blue-500 bg-blue-50'
@@ -625,15 +647,7 @@ export default function GatorAuth() {
                     <p className="text-sm text-slate-600">Find jobs, internships & roommates</p>
                     <p className="text-xs text-orange-600 mt-1 font-medium">Requires @ufl.edu email</p>
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 ${
-                    selectedRole === 'gator' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
-                  }`}>
-                    {selectedRole === 'gator' && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      </div>
-                    )}
-                  </div>
+                  <ArrowRight className="w-5 h-5 text-slate-400" />
                 </div>
               </button>
 
@@ -673,7 +687,19 @@ export default function GatorAuth() {
 
                 {/* Alumni Option */}
                 <button
-                  onClick={() => setSelectedRole('alumni')}
+                  onClick={() => {
+                    setSelectedRole('alumni');
+                    localStorage.setItem('pending_invite_role', 'alumni');
+                    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    if (!user) {
+                      setStep('oauth');
+                    } else {
+                      const hasInviteCode = localStorage.getItem('pending_invite_code');
+                      if (!hasInviteCode) {
+                        navigate('GatorInviteCode');
+                      }
+                    }
+                  }}
                   className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
                     selectedRole === 'alumni'
                       ? 'border-blue-500 bg-blue-50'
@@ -688,15 +714,7 @@ export default function GatorAuth() {
                       <h3 className="font-bold text-lg text-slate-900">I'm a UF Alumni</h3>
                       <p className="text-sm text-slate-600">Give back & help UF students get hired</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 ${
-                      selectedRole === 'alumni' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'
-                    }`}>
-                      {selectedRole === 'alumni' && (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-white" />
-                        </div>
-                      )}
-                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-400" />
                   </div>
                 </button>
 
