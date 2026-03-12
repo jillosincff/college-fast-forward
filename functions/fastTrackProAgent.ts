@@ -1537,23 +1537,21 @@ Return as JSON with these exact fields:`,
       return Response.json({ success: true, response: `Here's your connection request for **${rN}**:`, message_type: 'outreach_draft', payload: { recipient: rN, recipient_title: rT, recipient_company: rC, channel: 'LinkedIn', subject: '', message: cRes.message || '', ask_type: 'connection_request', suggested_next_steps: [`Find more alumni at ${rC || 'their company'} →`, 'Research another company →'] } });
     }
 
-    // 8. ALUMNI DISCOVERY (checked before outreach to prevent misclassification)
+    // 7.8 ALUMNI BY ROLE
+    const alumniRole = detectAlumniByRole(resolvedMessage);
+    if (alumniRole) {
+      console.log('Intent: alumni_by_role for', alumniRole);
+      const webRes = await base44.integrations.Core.InvokeLLM({ prompt: `Find people who attended the University of Florida (UF, Gainesville) and currently work as ${alumniRole} or in ${alumniRole}-related roles. Search LinkedIn, professional directories, company pages.\n\n${UF_FILTER}\n\nReturn up to 10 results with: full name, exact current role title, company, location, UF degree info, LinkedIn URL.`, add_context_from_internet: true, model: 'gemini_3_flash' });
+      const parsed = await base44.integrations.Core.InvokeLLM({ prompt: `Parse into structured alumni profiles for UF alumni working as ${alumniRole}.\n\n${profileContext}\n\n${UF_FILTER}\n- Include alumni across ALL companies (role-based search)\n- Match score: 65 base, +10 exact role, +5 target industry\n- DEDUPLICATE\n\nRESEARCH:\n${String(typeof webRes==='string'?webRes:JSON.stringify(webRes)).substring(0,4000)}`, response_json_schema:{type:"object",properties:{alumni:{type:"array",items:{type:"object",properties:{name:{type:"string"},role_title:{type:"string"},company:{type:"string"},degree_info:{type:"string"},location:{type:"string"},match_score:{type:"integer"},linkedin_url:{type:"string"}},required:["name","role_title","company","match_score"]}}},required:["alumni"]}});
+      let rA=(parsed.alumni||[]).filter(a=>!NON_UF_SCHOOLS.some(s=>(a.degree_info||'').toLowerCase().includes(s)));const sn=new Set();rA=rA.filter(a=>{const k=`${(a.name||'').toLowerCase()}_${(a.role_title||'').toLowerCase()}`;if(sn.has(k))return false;sn.add(k);return true;});
+      if(rA.length>0)rA=await crossReferenceCFF(base44,rA);
+      if(rA.length>0){saveAlumniCache(base44,rA);trackActivity(base44,user.email,profile.id,'alumni_view',alumniRole);const t=rA[0],tf=t.name?.split(' ')[0]||'';return Response.json({success:true,response:`I found **${rA.length} UF alumni** working in **${alumniRole}**:`,message_type:'alumni_card',payload:{alumni:rA,cached:false,role_search:true,role_search_term:alumniRole,top_match:t.name,recommendation_reason:`${tf} at ${t.company} could give you real insight into ${alumniRole}`,suggested_actions:[`Draft message to ${tf} →`,`Tell me more about careers in ${alumniRole} →`,`Find alumni in related fields →`]}});}
+      return Response.json({success:true,response:`I couldn't find verified UF alumni working as **${alumniRole}**. Try a broader search like "Find alumni in healthcare" or a company-specific search.`,message_type:'career_advice',payload:{suggested_actions:['Find alumni in related fields →','Help me explore career paths →']}});
+    }
+    // 8. ALUMNI DISCOVERY
     let alumniCompany = detectAlumniQuery(resolvedMessage);
-    if (alumniCompany === 'RESOLVE_FROM_CONTEXT') {
-      alumniCompany = resolveCompanyFromContext(conversation_history) || null;
-    }
-
-    // LAYER 2: Confirmation gate for unknown companies (alumni path)
-    if (alumniCompany && !isConfirmation && shouldConfirmCompany(alumniCompany, targetCompanies)) {
-      console.log(`[Layer2] Unknown company "${alumniCompany}" in alumni query — asking confirmation`);
-      return Response.json({
-        success: true,
-        response: `Just to make sure — did you want me to find UF alumni at a company called **"${titleCase(alumniCompany)}"**? Or were you asking me to do something else?\n\nYou can say:\n→ **"Yes, research ${titleCase(alumniCompany)}"** to continue\n→ Or tell me the specific company name you meant`,
-        message_type: 'text',
-        payload: {}
-      });
-    }
-
+    if (alumniCompany === 'RESOLVE_FROM_CONTEXT') alumniCompany = resolveCompanyFromContext(conversation_history) || null;
+    if (alumniCompany && !isConfirmation && shouldConfirmCompany(alumniCompany, targetCompanies)) { console.log(`[Layer2] Unknown company "${alumniCompany}" — asking confirmation`); return Response.json({success:true,response:`Just to make sure — did you want me to find UF alumni at **"${titleCase(alumniCompany)}"**?\n\n→ **"Yes, research ${titleCase(alumniCompany)}"** to continue\n→ Or tell me the specific company name`,message_type:'text',payload:{}}); }
     if (alumniCompany) {
       console.log('Intent: alumni_discovery for', alumniCompany);
       alumniCompany = titleCase(alumniCompany);
