@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const { dry_run = false, batch_size = 50 } = await req.json().catch(() => ({}));
+    const { dry_run = false, batch_size = 25, delay_ms = 1500 } = await req.json().catch(() => ({}));
 
     console.log(`=== FASTIQ Intro Email Campaign ===`);
     console.log(`Mode: ${dry_run ? 'DRY RUN' : 'LIVE SEND'}`);
