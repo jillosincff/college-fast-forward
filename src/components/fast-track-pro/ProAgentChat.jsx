@@ -39,6 +39,7 @@ function getSuggestedPrompts(profile) {
     prompts.push({ icon: '🔍', text: "Help me find companies to target", category: 'find' });
     prompts.push({ icon: '🏢', text: "What mid-size companies should I look at?", category: 'find' });
   }
+  prompts.push({ icon: '👤', text: "Find alumni who are product managers", category: 'find' });
   prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
   prompts.push({ icon: '📬', text: "Draft follow-up messages for stale outreach", category: 'find' });
   prompts.push({ icon: '🎉', text: "I got a reply from a contact — help me respond", category: 'find' });
