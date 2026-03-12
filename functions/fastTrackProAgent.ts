@@ -676,7 +676,7 @@ Return the intent and any extracted entity (company name, person name, etc).`,
     response_json_schema: {
       type: "object",
       properties: {
-        intent: { type: "string", enum: ["alumni_discovery", "company_intel", "outreach_draft", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
+        intent: { type: "string", enum: ["alumni_discovery", "alumni_by_role", "company_intel", "outreach_draft", "roadmap", "resume_review", "resume_match", "resume_tailor", "interview_prep", "linkedin_review", "salary_negotiation", "cover_letter", "opportunity_discovery", "career_advice"] },
         company: { type: "string", description: "Company name if relevant, empty string if not" },
         person: { type: "string", description: "Person name if relevant (for outreach), empty string if not" },
         confidence: { type: "string", enum: ["high", "medium", "low"] },
