@@ -189,17 +189,22 @@ function calculateParentMatchScore(helpRequest, parentExpertise) {
   }
   
   // ═══════════════════════════════════════════════════════
-  // TIER 3: INDUSTRY MATCH (0-15 points) - NICE TO HAVE
+  // TIER 3: INDUSTRY MATCH (0-20 points) - BROADENED
   // ═══════════════════════════════════════════════════════
-  if (helpRequest.industry === parentExpertise.industry) {
-    score += 15;
+  if (helpRequest.industry && parentExpertise.industry && 
+      helpRequest.industry.toLowerCase() === parentExpertise.industry.toLowerCase()) {
+    score += 20;
     reasons.push(`${parentExpertise.industry} industry expert`);
   } else if (isRelatedIndustry(helpRequest.industry, parentExpertise.industry)) {
-    score += 8;
+    score += 12;
     reasons.push(`Related industry (${parentExpertise.industry})`);
+  } else if (isCompanyRelevantToStudent(parentExpertise, helpRequest)) {
+    // Parent's company/role is directly relevant even if industry label doesn't match
+    score += 15;
+    reasons.push(`Works at ${parentExpertise.current_company || 'a relevant company'}`);
   } else {
     // Everyone gets SOME points - general career advice is valuable
-    score += 2;
+    score += 3;
     reasons.push('General career expertise');
   }
   
