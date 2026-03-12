@@ -1174,6 +1174,9 @@ CRITICAL POSITION TYPE CONTEXT:
             if (contextOverrideCompany && contextOverrideIntent === 'alumni_discovery') {
               resolvedMessage = `Find UF alumni at ${contextOverrideCompany}`;
               console.log(`Context override: alumni_discovery → "${resolvedMessage}"`);
+            } else if (contextOverrideIntent === 'alumni_by_role' && contextOverridePerson) {
+              resolvedMessage = `Find alumni who are ${contextOverridePerson}`;
+              console.log(`Context override: alumni_by_role → "${resolvedMessage}"`);
             } else if (contextOverrideCompany && contextOverrideIntent === 'company_intel') {
               resolvedMessage = `Research ${contextOverrideCompany} hiring`;
               console.log(`Context override: company_intel → "${resolvedMessage}"`);
