@@ -242,8 +242,8 @@ Deno.serve(async (req) => {
           totalSent++;
           console.log(`  ✅ Sent to ${student.email} (${student.firstName})`);
 
-          // Rate limit: 2 second delay between emails
-          await sleep(2000);
+          // Rate limit delay between emails
+          await sleep(delay_ms);
         } catch (err) {
           totalFailed++;
           console.error(`  ❌ Failed for ${student.email}:`, err.message);
