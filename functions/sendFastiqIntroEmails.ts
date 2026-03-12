@@ -171,7 +171,8 @@ Deno.serve(async (req) => {
       // If that fails, try poster_first_name but clean it
       if (firstName === 'there' && jr.poster_first_name) {
         const cleaned = jr.poster_first_name.replace(/,/g, '').trim();
-        if (cleaned && !/\d/.test(cleaned)) {
+        // Only use if it looks like a real name (not a username)
+        if (cleaned && !/\d/.test(cleaned) && !cleaned.includes('.') && !(cleaned === cleaned.toLowerCase() && cleaned.length > 7)) {
           firstName = cleaned;
         }
       }
