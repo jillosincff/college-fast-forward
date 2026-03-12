@@ -364,7 +364,8 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
                     <Badge title="Match strength based on your interests + UF connection" className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0 flex-shrink-0 cursor-help">{a.match_score}%</Badge>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 truncate">{a.role_title} at {titleCase(a.company)}</p>
+                <p className="text-xs text-slate-500 truncate">{a.role_title}{a.company ? ` at ${titleCase(a.company)}` : ''}</p>
+                {a.location && data?.role_search && <p className="text-[10px] text-slate-400 truncate">📍 {a.location}</p>}
                 {/* Degree info + confidence-aware verification */}
                 {a.degree_info && a.uf_verified !== false && (
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
