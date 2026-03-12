@@ -39,9 +39,53 @@ const RELATED_MAJORS = [
 ];
 
 function isRelatedIndustry(industry1, industry2) {
-  return RELATED_INDUSTRIES.some(group => 
-    group.includes(industry1) && group.includes(industry2)
-  );
+  if (!industry1 || !industry2) return false;
+  const i1 = industry1.toLowerCase().trim();
+  const i2 = industry2.toLowerCase().trim();
+  
+  // Exact match (case-insensitive)
+  if (i1 === i2) return true;
+  
+  // Check predefined related groups
+  const groupMatch = RELATED_INDUSTRIES.some(group => {
+    const lower = group.map(g => g.toLowerCase());
+    return lower.includes(i1) && lower.includes(i2);
+  });
+  if (groupMatch) return true;
+  
+  // Keyword-based fuzzy matching — does parent's industry/company/role relate to student's target?
+  // e.g. student wants "marketing", parent works in "Media & Entertainment" → keywords overlap
+  for (const [, keywords] of Object.entries(INDUSTRY_KEYWORDS)) {
+    const i1Matches = keywords.some(k => i1.includes(k) || k.includes(i1));
+    const i2Matches = keywords.some(k => i2.includes(k) || k.includes(i2));
+    if (i1Matches && i2Matches) return true;
+  }
+  
+  return false;
+}
+
+// Check if a parent's company or role is relevant to a student's description/major
+function isCompanyRelevantToStudent(parentExpertise, helpRequest) {
+  const company = (parentExpertise.current_company || '').toLowerCase();
+  const role = (parentExpertise.current_role || '').toLowerCase();
+  const desc = (helpRequest.description || '').toLowerCase();
+  const major = (helpRequest.student_major || '').toLowerCase();
+  
+  // Sports-related companies are relevant to sport management students
+  const sportsKeywords = ['espn', 'nike', 'nfl', 'nba', 'mlb', 'nhl', 'mls', 'pga', 'ufc', 'wwe', 'fox sports', 'turner sports', 'under armour', 'adidas', 'fanatics', 'ticketmaster', 'live nation', 'img', 'octagon', 'wasserman', 'caa sports', 'endeavor', 'disney', 'comcast', 'nbcuniversal'];
+  const isSportsMajor = major.includes('sport') || major.includes('athletic') || desc.includes('sport') || desc.includes('athletic');
+  
+  if (isSportsMajor && sportsKeywords.some(k => company.includes(k) || role.includes(k))) {
+    return true;
+  }
+  
+  // Check if company/role keywords appear in the student's description
+  if (desc && company) {
+    const companyWords = company.split(/\s+/).filter(w => w.length > 3);
+    if (companyWords.some(w => desc.includes(w))) return true;
+  }
+  
+  return false;
 }
 
 function isRelatedMajor(major1, major2) {
