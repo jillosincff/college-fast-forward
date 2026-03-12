@@ -136,6 +136,8 @@ Deno.serve(async (req) => {
     const EXCLUDED_EMAILS = new Set([
       'jill@uffastforward.com',
       'jill@collegefastforward.com',
+      'teststudent@ufl.edu',
+      'testparent@gmail.com',
     ]);
 
     // Step 4: Build final send list
