@@ -110,15 +110,16 @@ function detectOpportunityDiscovery(message) {
   return patterns.some(p => p.test(message));
 }
 
+function detectAlumniByRole(msg) {
+  if (detectBatchTargetCommand(msg)) return null;
+  if (/(?:alumni|gators?|people)\s+(?:at|from|who work at|working at)\s+[A-Z]\w/i.test(msg)) return null;
+  const ps = [/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:who\s+are|that\s+are|working\s+as)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:in|doing)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:show|find|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:who\s+(?:are|became))\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:in|who\s+are|working\s+as)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i];
+  for (const p of ps) { const m = msg.match(p); if (m) { let r = m[1]?.trim().replace(/[?.!]+$/,'').replace(/\s+/g,' '); if (!r||r.length<2) continue; if (isWellKnownCompany(r)) return null; if (['a','the','my','your','it','that','this'].includes(r.toLowerCase())) continue; return r; } }
+  return null;
+}
 function detectCareerEventsQuery(message) {
   const lower = message.toLowerCase();
-  return /(?:career|uf|upcoming)\s+(?:events?|fairs?|treks?|workshops?)/i.test(message) ||
-    /(?:events?|fairs?|treks?|workshops?)\s+(?:at|from|on|this|next)\s+/i.test(message) ||
-    /(?:career center|career connections)\s+(?:events?|schedule|calendar)/i.test(message) ||
-    /(?:what|any|are there)\s+(?:uf\s+)?(?:career\s+)?(?:events?|fairs?|treks?)/i.test(message) ||
-    lower.includes('career fair') || lower.includes('career trek') || lower.includes('career event') ||
-    lower.includes('job fair') || lower.includes('career workshop') ||
-    (lower.includes('events') && (lower.includes('uf') || lower.includes('university') || lower.includes('career') || lower.includes('upcoming')));
+  return /(?:career|uf|upcoming)\s+(?:events?|fairs?|treks?|workshops?)/i.test(message)||/(?:events?|fairs?|treks?|workshops?)\s+(?:at|from|on|this|next)\s+/i.test(message)||/(?:career center|career connections)\s+(?:events?|schedule|calendar)/i.test(message)||/(?:what|any|are there)\s+(?:uf\s+)?(?:career\s+)?(?:events?|fairs?|treks?)/i.test(message)||lower.includes('career fair')||lower.includes('career trek')||lower.includes('career event')||lower.includes('job fair')||lower.includes('career workshop')||(lower.includes('events')&&(lower.includes('uf')||lower.includes('university')||lower.includes('career')||lower.includes('upcoming')));
 }
 
 // LAYER 1 — COMPANY NAME VALIDATION
