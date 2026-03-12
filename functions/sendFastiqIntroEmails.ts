@@ -156,14 +156,16 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Resolve first name with multiple fallbacks
-      let firstName = jr.poster_first_name;
-      if (!firstName || firstName === firstName.toUpperCase()) {
-        firstName = parseFirstName(jr.poster_name);
-      }
-      if (!firstName || firstName === 'there') {
-        // Try to find the user record for a better name
-        firstName = 'there';
+      // Resolve first name — poster_first_name is often buggy (contains last name)
+      // Trust poster_name ("LastName, FirstName") parsed by our helper first
+      let firstName = parseFirstName(jr.poster_name);
+      
+      // If that fails, try poster_first_name but clean it
+      if (firstName === 'there' && jr.poster_first_name) {
+        const cleaned = jr.poster_first_name.replace(/,/g, '').trim();
+        if (cleaned && !/\d/.test(cleaned)) {
+          firstName = cleaned;
+        }
       }
       
       toSend.push({
