@@ -126,14 +126,25 @@ Deno.serve(async (req) => {
     const alreadyActiveFastiq = new Set(fastiqProfiles.map(p => p.user_email?.toLowerCase()));
     console.log(`Already active FASTIQ (skip): ${alreadyActiveFastiq.size}`);
 
+    // Exclusion list — admin/test accounts that shouldn't get outreach
+    const EXCLUDED_EMAILS = new Set([
+      'jill@uffastforward.com',
+      'jill@collegefastforward.com',
+    ]);
+
     // Step 4: Build final send list
     const toSend = [];
     let skippedAlreadyEmailed = 0;
     let skippedAlreadyFastiq = 0;
-    let skippedNoEmail = 0;
+    let skippedExcluded = 0;
 
     for (const [email, jr] of studentMap) {
       const emailLower = email.toLowerCase();
+
+      if (EXCLUDED_EMAILS.has(emailLower)) {
+        skippedExcluded++;
+        continue;
+      }
 
       if (alreadyEmailed.has(emailLower)) {
         skippedAlreadyEmailed++;
@@ -145,7 +156,15 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const firstName = jr.poster_first_name || parseFirstName(jr.poster_name) || parseFirstName(jr.created_by?.split('@')[0]);
+      // Resolve first name with multiple fallbacks
+      let firstName = jr.poster_first_name;
+      if (!firstName || firstName === firstName.toUpperCase()) {
+        firstName = parseFirstName(jr.poster_name);
+      }
+      if (!firstName || firstName === 'there') {
+        // Try to find the user record for a better name
+        firstName = 'there';
+      }
       
       toSend.push({
         email: emailLower,
