@@ -18,8 +18,12 @@ function parseFirstName(fullName) {
   // Handle normal "FirstName LastName" format
   const first = name.split(' ')[0];
   
-  // If it looks like an email username (contains digits or dots), return 'there'
+  // If it looks like an email username (contains digits, dots, or is all lowercase with 8+ chars), return 'there'
   if (/\d/.test(first) || first.includes('.') || first.includes('@')) {
+    return 'there';
+  }
+  // All-lowercase single word longer than 7 chars is likely a username, not a name
+  if (first === first.toLowerCase() && first.length > 7 && !name.includes(' ')) {
     return 'there';
   }
   
