@@ -668,7 +668,9 @@ CRITICAL RULES:
   - If assistant suggested "Want me to find UF alumni there?" and user says "yes" or "sure" → intent is "alumni_discovery" with company from previous context
 - If the message is a standalone request, classify normally.
 
-Possible intents: alumni_discovery, company_intel, outreach_draft, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
+Possible intents: alumni_discovery, alumni_by_role, company_intel, outreach_draft, roadmap, resume_review, resume_match, resume_tailor, interview_prep, linkedin_review, salary_negotiation, cover_letter, opportunity_discovery, career_advice
+- alumni_discovery: find alumni at a SPECIFIC COMPANY (e.g. "find alumni at Amazon")
+- alumni_by_role: find alumni with a specific JOB TITLE or PROFESSION across all companies (e.g. "find alumni who are chiropractors", "find alumni in finance", "find alumni working as product managers")
 
 Return the intent and any extracted entity (company name, person name, etc).`,
     response_json_schema: {
