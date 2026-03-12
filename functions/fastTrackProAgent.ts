@@ -113,7 +113,7 @@ function detectOpportunityDiscovery(message) {
 function detectAlumniByRole(msg) {
   if (detectBatchTargetCommand(msg)) return null;
   if (/(?:alumni|gators?|people)\s+(?:at|from|who work at|working at)\s+[A-Z]\w/i.test(msg)) return null;
-  const ps = [/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:who\s+are|that\s+are|working\s+as)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:in|doing)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:show|find|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:who\s+(?:are|became))\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i,/(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:in|who\s+are|working\s+as)\s+(.{3,60}?)(?:\s+(?:near|around)\s+|$|\?|!)/i];
+  const ps = [/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:who\s+are|that\s+are|working\s+as)\s+([\w\s/&-]{2,60})/i,/(?:find|show|search|discover|look for)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?|people)\s+(?:in|doing)\s+([\w\s/&-]{2,60})/i,/(?:show|find|any)\s+(?:me\s+)?(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:who\s+(?:are|became))\s+([\w\s/&-]{2,60})/i,/(?:uf\s+)?(?:alumni|gators?|grads?)\s+(?:in|who\s+are|working\s+as)\s+([\w\s/&-]{2,60})/i];
   for (const p of ps) { const m = msg.match(p); if (m) { let r = m[1]?.trim().replace(/[?.!]+$/,'').replace(/\s+/g,' '); if (!r||r.length<2) continue; if (isWellKnownCompany(r)) return null; if (['a','the','my','your','it','that','this'].includes(r.toLowerCase())) continue; return r; } }
   return null;
 }
