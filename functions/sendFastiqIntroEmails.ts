@@ -177,10 +177,11 @@ Deno.serve(async (req) => {
     console.log(`Students to email: ${toSend.length}`);
     console.log(`Skipped (already emailed): ${skippedAlreadyEmailed}`);
     console.log(`Skipped (already on FASTIQ): ${skippedAlreadyFastiq}`);
+    console.log(`Skipped (excluded accounts): ${skippedExcluded}`);
 
     if (dry_run) {
       console.log(`\n=== DRY RUN — No emails sent ===`);
-      console.log(`Would send to:`, toSend.map(s => s.email));
+      console.log(`Would send to:`, toSend.map(s => `${s.email} (${s.firstName})`));
       return Response.json({
         success: true,
         dry_run: true,
@@ -189,6 +190,7 @@ Deno.serve(async (req) => {
         to_send: toSend.length,
         skipped_already_emailed: skippedAlreadyEmailed,
         skipped_already_fastiq: skippedAlreadyFastiq,
+        skipped_excluded: skippedExcluded,
         recipients: toSend.map(s => ({ email: s.email, firstName: s.firstName })),
       });
     }
