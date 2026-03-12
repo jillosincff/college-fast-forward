@@ -31,11 +31,13 @@ const INDUSTRY_KEYWORDS = {
 
 const RELATED_MAJORS = [
   ['Computer Science', 'Information Systems', 'Data Science', 'Software Engineering'],
-  ['Marketing', 'Business Administration', 'Communications', 'Advertising'],
+  ['Marketing', 'Business Administration', 'Communications', 'Advertising', 'Public Relations'],
   ['Finance', 'Accounting', 'Economics', 'Business Administration'],
   ['Engineering', 'Computer Science', 'Physics', 'Mathematics'],
   ['Biology', 'Chemistry', 'Pre-Med', 'Healthcare Administration'],
-  ['Psychology', 'Sociology', 'Social Work', 'Human Resources']
+  ['Psychology', 'Sociology', 'Social Work', 'Human Resources'],
+  ['Sport Management', 'Business Administration', 'Marketing', 'Hospitality Management', 'Event Management', 'Recreation', 'Communications'],
+  ['Journalism', 'Communications', 'Media', 'Public Relations', 'Marketing'],
 ];
 
 function isRelatedIndustry(industry1, industry2) {
