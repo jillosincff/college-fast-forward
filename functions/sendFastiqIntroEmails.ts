@@ -4,7 +4,26 @@ const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastfor
 
 function parseFirstName(fullName) {
   if (!fullName) return 'there';
-  return fullName.split(' ')[0];
+  const name = fullName.trim();
+  
+  // Handle "LastName, FirstName" format
+  if (name.includes(',')) {
+    const parts = name.split(',').map(p => p.trim());
+    // Return the second part (first name) if it exists
+    if (parts[1]) return parts[1].split(' ')[0];
+    // Fallback to first part without the comma
+    return parts[0];
+  }
+  
+  // Handle normal "FirstName LastName" format
+  const first = name.split(' ')[0];
+  
+  // If it looks like an email username (contains digits or dots), return 'there'
+  if (/\d/.test(first) || first.includes('.') || first.includes('@')) {
+    return 'there';
+  }
+  
+  return first;
 }
 
 function buildIntroEmail(firstName) {
