@@ -64,32 +64,70 @@ Example: For "Software Engineer at Google", return:
       persona: 'parent'
     });
 
-    // Score each parent based on profile match
+    // Also get alumni users
+    const alumni = await base44.asServiceRole.entities.User.filter({
+      persona: 'alumni'
+    });
+    const allHelpers = [...parents, ...alumni];
+
+    // Related industry groups for broader matching
+    const RELATED_INDUSTRY_GROUPS = [
+      ['technology & software', 'engineering'],
+      ['finance & banking', 'consulting', 'real estate'],
+      ['marketing', 'media & entertainment', 'advertising', 'communications', 'pr', 'digital marketing'],
+      ['healthcare', 'non-profit', 'education'],
+      ['law & legal', 'government', 'consulting'],
+      ['retail', 'hospitality', 'manufacturing'],
+      ['media & entertainment', 'hospitality', 'retail', 'marketing'],
+    ];
+
+    // Sports-adjacent companies — relevant for sport management students
+    const SPORTS_KEYWORDS = ['espn', 'nike', 'nfl', 'nba', 'mlb', 'nhl', 'mls', 'pga', 'ufc', 'fox sports', 'under armour', 'adidas', 'fanatics', 'ticketmaster', 'live nation', 'img', 'octagon', 'wasserman', 'disney', 'comcast', 'nbcuniversal'];
+
+    const requestDesc = (request.description || '').toLowerCase();
+    const requestIndustry = (request.target_industry || '').toLowerCase();
+    const studentMajor = (request.student_major || '').toLowerCase();
+    const isSportsRelated = studentMajor.includes('sport') || requestDesc.includes('sport') || requestDesc.includes('athletic');
+
+    function isRelatedIndustry(i1, i2) {
+      if (!i1 || !i2) return false;
+      const a = i1.toLowerCase(), b = i2.toLowerCase();
+      if (a === b) return true;
+      return RELATED_INDUSTRY_GROUPS.some(g => g.includes(a) && g.includes(b));
+    }
+
+    // Score each helper based on profile match
     const scoredParents = [];
     
-    for (const parent of parents) {
-      if (!parent.profile_completed || !parent.current_company || !parent.job_title) {
+    for (const parent of allHelpers) {
+      // Relaxed filter: only skip if we have truly nothing to work with
+      if (!parent.job_title && !parent.current_company && !parent.industry && !parent.bio) {
         continue;
       }
 
-      const parentProfile = `${parent.job_title} at ${parent.current_company}. ${parent.industry || ''}. ${parent.bio || ''}`;
+      const parentProfile = `${parent.job_title || ''} at ${parent.current_company || ''}. ${parent.industry || ''}. ${parent.bio || ''}`.toLowerCase();
       
       let score = 0;
       const matchReasons = [];
 
-      // Check for keyword matches
-      for (const term of matchingParentsResult.key_terms) {
-        if (parentProfile.toLowerCase().includes(term.toLowerCase())) {
+      // Check for keyword matches from LLM analysis
+      for (const term of (matchingParentsResult.key_terms || [])) {
+        if (parentProfile.includes(term.toLowerCase())) {
           score += 10;
           matchReasons.push(term);
         }
       }
 
-      // Industry match
-      if (parent.industry && request.target_industry && 
-          parent.industry.toLowerCase().includes(request.target_industry.toLowerCase())) {
+      // Exact industry match
+      if (parent.industry && requestIndustry && 
+          parent.industry.toLowerCase().includes(requestIndustry)) {
         score += 20;
         matchReasons.push(`${parent.industry} industry`);
+      }
+      // Related industry match (broadened)
+      else if (parent.industry && requestIndustry && isRelatedIndustry(requestIndustry, parent.industry.toLowerCase())) {
+        score += 12;
+        matchReasons.push(`Related field (${parent.industry})`);
       }
 
       // Company match (exact or similar)
@@ -97,6 +135,22 @@ Example: For "Software Engineer at Google", return:
           parent.current_company.toLowerCase().includes(request.target_company.toLowerCase())) {
         score += 30;
         matchReasons.push(`works at ${parent.current_company}`);
+      }
+
+      // Sports adjacency — a parent at ESPN/Nike/etc is valuable to a sports management student
+      if (isSportsRelated && parent.current_company) {
+        const company = parent.current_company.toLowerCase();
+        if (SPORTS_KEYWORDS.some(k => company.includes(k))) {
+          score += 25;
+          matchReasons.push(`works at ${parent.current_company} (sports-adjacent)`);
+        }
+      }
+
+      // BROADENED: If still 0 score but parent has substantial experience, give base points
+      // Any parent willing to help has value — general career advice matters
+      if (score === 0 && (parent.job_title || parent.current_company)) {
+        score += 3;
+        matchReasons.push('General career experience');
       }
 
       if (score > 0) {
@@ -109,9 +163,9 @@ Example: For "Software Engineer at Google", return:
       }
     }
 
-    // Sort by score and take top 5
+    // Sort by score and take top 10 (increased from 5)
     scoredParents.sort((a, b) => b.score - a.score);
-    const topMatches = scoredParents.slice(0, 5);
+    const topMatches = scoredParents.slice(0, 10);
 
     // Send notifications to matched parents
     const notificationPromises = topMatches.map(async ({ parent, matchSummary }) => {
