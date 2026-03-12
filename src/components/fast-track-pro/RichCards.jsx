@@ -313,7 +313,9 @@ export function AlumniListCard({ data, onDraftMessage, onResearchCompany }) {
     <Card className="p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 mt-2 mb-1">
       <div className="flex items-center gap-2 mb-2">
         <Users className="w-4 h-4 text-purple-600" />
-        <span className="text-xs font-semibold text-purple-700 uppercase">UF Alumni Found</span>
+        <span className="text-xs font-semibold text-purple-700 uppercase">
+          {data?.role_search ? `UF ALUMNI IN ${(data.role_search_term || '').toUpperCase()}` : 'UF Alumni Found'}
+        </span>
         {cffCount > 0 && (
           <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0 border-0">
             {cffCount} CFF Member{cffCount > 1 ? 's' : ''}
