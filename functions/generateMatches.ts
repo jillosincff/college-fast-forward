@@ -2,10 +2,32 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const RELATED_INDUSTRIES = [
   ['Technology & Software', 'Engineering'],
-  ['Finance & Banking', 'Consulting'],
-  ['Marketing', 'Media & Entertainment'],
-  ['Healthcare', 'Non-Profit']
+  ['Finance & Banking', 'Consulting', 'Real Estate'],
+  ['Marketing', 'Media & Entertainment', 'Advertising', 'Communications', 'PR', 'Digital Marketing'],
+  ['Healthcare', 'Non-Profit', 'Education'],
+  ['Law & Legal', 'Government', 'Consulting'],
+  ['Retail', 'Hospitality', 'Manufacturing'],
+  // Sports/entertainment adjacencies — a parent at ESPN in finance is still valuable to a sports student
+  ['Media & Entertainment', 'Hospitality', 'Retail', 'Marketing'],
 ];
+
+// Broader keyword-based industry matching for edge cases (e.g. "Sport Management" student)
+const INDUSTRY_KEYWORDS = {
+  'marketing': ['marketing', 'advertising', 'media', 'communications', 'pr', 'digital', 'brand', 'content', 'social media'],
+  'media & entertainment': ['media', 'entertainment', 'sports', 'broadcasting', 'film', 'music', 'gaming', 'events', 'recreation'],
+  'technology & software': ['tech', 'software', 'engineering', 'data', 'ai', 'cloud', 'cyber', 'it'],
+  'finance & banking': ['finance', 'banking', 'investment', 'accounting', 'insurance', 'wealth', 'private equity', 'venture'],
+  'consulting': ['consulting', 'advisory', 'strategy', 'management consulting'],
+  'healthcare': ['health', 'medical', 'pharma', 'biotech', 'hospital', 'clinical'],
+  'law & legal': ['law', 'legal', 'attorney', 'compliance', 'regulatory'],
+  'education': ['education', 'teaching', 'academic', 'university', 'school'],
+  'real estate': ['real estate', 'property', 'construction', 'development'],
+  'hospitality': ['hospitality', 'hotel', 'restaurant', 'tourism', 'travel', 'events'],
+  'retail': ['retail', 'ecommerce', 'consumer', 'merchandise'],
+  'non-profit': ['nonprofit', 'non-profit', 'ngo', 'charity', 'foundation'],
+  'government': ['government', 'public', 'policy', 'federal', 'state'],
+  'manufacturing': ['manufacturing', 'supply chain', 'logistics', 'operations'],
+};
 
 const RELATED_MAJORS = [
   ['Computer Science', 'Information Systems', 'Data Science', 'Software Engineering'],
