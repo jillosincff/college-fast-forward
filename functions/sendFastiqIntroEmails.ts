@@ -101,7 +101,9 @@ Deno.serve(async (req) => {
       const answers = jr.answer_count || 0;
       const messages = jr.messages_count || 0;
       const intros = jr.intros_count || 0;
-      return answers === 0 && messages === 0 && intros === 0;
+      // Only student posts (not alumni career requests or parent posts)
+      const isStudentPost = jr.poster_type === 'student' || !jr.poster_type;
+      return answers === 0 && messages === 0 && intros === 0 && isStudentPost && !jr.is_alumni_career_request;
     });
     console.log(`Zero-response JobRequests: ${zeroResponseRequests.length}`);
 
