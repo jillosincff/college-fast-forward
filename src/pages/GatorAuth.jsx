@@ -699,9 +699,14 @@ export default function GatorAuth() {
                 {/* Alumni Option */}
                 <button
                   onClick={() => {
+                    console.log('🔵 [GatorAuth] Alumni button clicked');
                     setSelectedRole('alumni');
-                    localStorage.setItem('pending_invite_role', 'alumni');
-                    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    try {
+                      localStorage.setItem('pending_invite_role', 'alumni');
+                      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    } catch (e) {
+                      console.warn('localStorage unavailable:', e);
+                    }
                     if (!user) {
                       setStep('oauth');
                     } else {
