@@ -94,7 +94,8 @@ export default function LandingHero({ stats, onClaim }) {
           <AlumniTeaserDemo />
 
           <motion.p
-            className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4 mt-10"
+            className="text-[20px] sm:text-[22px] font-bold tracking-wide cursor-pointer underline-offset-4 hover:underline mt-10"
+            style={{ color: '#FA4616' }}
             whileHover={{ scale: 1.03, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
