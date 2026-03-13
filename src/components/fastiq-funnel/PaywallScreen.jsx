@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Zap, Lock, Loader2, Shield, ArrowLeft, Users } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
 import { navigate } from '@/components/utils/navigation';
+import { onboardFromQuiz } from '@/functions/onboardFromQuiz';
+import { useToast } from '@/components/ui/use-toast';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -23,6 +25,48 @@ export default function PaywallScreen() {
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const { toast } = useToast();
+
+  // On mount: check if returning from successful checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    if (params.get('checkout') === 'success') {
+      persistQuizAnswers();
+    }
+  }, []);
+
+  async function persistQuizAnswers() {
+    // Recover quiz answers from sessionStorage (survives Stripe redirect)
+    const stored = sessionStorage.getItem('fastiq_quiz_answers');
+    const quizAnswers = stored ? JSON.parse(stored) : buildQuizPayload();
+
+    try {
+      await onboardFromQuiz({ quizAnswers });
+      sessionStorage.removeItem('fastiq_quiz_answers');
+      toast({
+        title: 'Welcome! Your profile is set up',
+        description: 'Check your alumni matches — they\'re ready for you.',
+      });
+      // Redirect to FASTIQ dashboard
+      navigate('FastIQ');
+    } catch (err) {
+      console.error('Failed to persist quiz answers:', err);
+      // Still redirect — profile can be completed later
+      navigate('FastIQ');
+    }
+  }
+
+  function buildQuizPayload() {
+    return {
+      major: answers.major,
+      gradYear: answers.grad_year,
+      targets: answers.companies || [],
+      locationPref: answers.location,
+      jobType: answers.role_type,
+      interests: answers.interests || [],
+      industries: answers.industries || [],
+    };
+  }
 
   const totalMatches = matchData?.totalMatches || 18;
   const major = answers.major || 'your major';
@@ -32,6 +76,10 @@ export default function PaywallScreen() {
   const handleCheckout = async () => {
     setCheckingOut(true);
     setCheckoutError('');
+
+    // Save quiz answers to sessionStorage so they survive the Stripe redirect
+    sessionStorage.setItem('fastiq_quiz_answers', JSON.stringify(buildQuizPayload()));
+
     try {
       const baseUrl = window.location.origin;
       const plan = selectedPlan === 'annual' ? 'fastiq_annual' : 'fastiq_monthly';
