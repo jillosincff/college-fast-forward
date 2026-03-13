@@ -3,52 +3,57 @@ import { motion } from 'framer-motion';
 
 const FULL_MESSAGE = `Hey Sarah, I'm a UF '27 Marketing major and saw you're a VP Strategy at Google. I loved your work on the Pixel campaign — would love 15 minutes of your time to get your advice as a fellow Gator. No pressure at all.`;
 const SIGNATURE = "— Alex, UF '27";
-const TYPING_SPEED = 18; // ms per character
+const TYPING_SPEED = 35;
 
-export default function TypewriterMessage({ inView }) {
+export default function TypewriterMessage() {
   const [displayed, setDisplayed] = useState('');
   const [showSignature, setShowSignature] = useState(false);
-  const [started, setStarted] = useState(false);
-  const indexRef = useRef(0);
+  const [hasPlayed, setHasPlayed] = useState(false);
+  const containerRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (!inView || started) return;
-    setStarted(true);
-    setDisplayed('');
-    indexRef.current = 0;
+    if (!containerRef.current || hasPlayed) return;
 
-    const interval = setInterval(() => {
-      indexRef.current += 1;
-      if (indexRef.current >= FULL_MESSAGE.length) {
-        setDisplayed(FULL_MESSAGE);
-        clearInterval(interval);
-        setTimeout(() => setShowSignature(true), 300);
-        return;
-      }
-      setDisplayed(FULL_MESSAGE.slice(0, indexRef.current));
-    }, TYPING_SPEED);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasPlayed) {
+          setHasPlayed(true);
+          observer.disconnect();
+          // Start typing
+          let idx = 0;
+          intervalRef.current = setInterval(() => {
+            idx += 1;
+            if (idx >= FULL_MESSAGE.length) {
+              setDisplayed(FULL_MESSAGE);
+              clearInterval(intervalRef.current);
+              setTimeout(() => setShowSignature(true), 400);
+              return;
+            }
+            setDisplayed(FULL_MESSAGE.slice(0, idx));
+          }, TYPING_SPEED);
+        }
+      },
+      { threshold: 0.2 }
+    );
 
-    return () => clearInterval(interval);
-  }, [inView, started]);
+    observer.observe(containerRef.current);
+    return () => {
+      observer.disconnect();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [hasPlayed]);
 
-  // Reset when scrolled away
-  useEffect(() => {
-    if (!inView) {
-      setStarted(false);
-      setDisplayed('');
-      setShowSignature(false);
-      indexRef.current = 0;
-    }
-  }, [inView]);
-
-  const isTyping = started && displayed.length < FULL_MESSAGE.length;
+  const isTyping = hasPlayed && displayed.length < FULL_MESSAGE.length;
+  const isDone = displayed.length >= FULL_MESSAGE.length;
 
   return (
-    <div className="max-w-lg mx-auto mt-10">
+    <div ref={containerRef} className="max-w-lg mx-auto mt-10">
+      {/* Label pill */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={hasPlayed ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.3 }}
         className="text-center mb-4"
       >
         <span
@@ -64,26 +69,24 @@ export default function TypewriterMessage({ inView }) {
         </span>
       </motion.div>
 
+      {/* Message box */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, delay: 0.15 }}
+        initial={{ opacity: 0, y: 14 }}
+        animate={hasPlayed ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.4, delay: 0.1 }}
         className="rounded-2xl p-6 sm:p-7"
         style={{
-          background: 'rgba(255,255,255,0.07)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(250,70,22,0.2)',
           boxShadow: '0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
       >
-        <p className="text-white text-[15px] sm:text-[16px] leading-[1.7] font-medium text-left min-h-[96px]">
+        <p className="text-white text-[16px] leading-[1.7] font-medium text-left min-h-[96px]">
           {displayed}
-          {isTyping && (
-            <span
-              className="inline-block w-[2px] h-[18px] bg-[#FA4616] ml-0.5 align-middle"
-              style={{ animation: 'blink 0.6s step-end infinite' }}
-            />
+          {(isTyping || !isDone) && (
+            <span className="typewriter-cursor" />
           )}
         </p>
 
@@ -100,7 +103,16 @@ export default function TypewriterMessage({ inView }) {
       </motion.div>
 
       <style>{`
-        @keyframes blink {
+        .typewriter-cursor {
+          display: inline-block;
+          width: 2px;
+          height: 18px;
+          background: #FA4616;
+          margin-left: 2px;
+          vertical-align: middle;
+          animation: cursorBlink 0.6s step-end infinite;
+        }
+        @keyframes cursorBlink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
