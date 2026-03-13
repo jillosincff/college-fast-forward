@@ -12,17 +12,17 @@ const stagger = {
 
 const testimonials = [
   {
-    quote: "My son was paralyzed. FASTIQ found 4 UF alumni at places he wanted — he sent the messages and has two coffee chats next week. I finally slept.",
+    quote: "I was a wreck every time I called. FASTIQ found 5 UF alumni at places he wanted — he sent the messages and has two interviews. I finally slept.",
     name: "Karen",
     label: "UF Mom",
   },
   {
-    quote: "I was losing my mind asking 'what's the plan?' every call. This thing gave her a list and drafts. She's actually doing something now.",
+    quote: "My daughter was paralyzed about internships. This thing wrote everything. She has coffee chats lined up now — and I'm not panicking anymore.",
     name: "Mike",
     label: "UF Dad",
   },
   {
-    quote: "She was crying about internships. FASTIQ wrote the messages — she has an interview. Worth every cent.",
+    quote: "She was crying about having nothing. FASTIQ gave her a list and drafts. She's moving forward — worth every penny.",
     name: "Lisa",
     label: "UF Parent",
   },
@@ -71,18 +71,18 @@ export default function ParentRelief({ onCTA }) {
           {/* Body */}
           <motion.div variants={fadeUp} className="mt-8 space-y-5 text-[14px] sm:text-[15px] text-white/50 leading-relaxed max-w-2xl mx-auto text-left sm:text-center">
             <p>
-              You see the stress in their voice. You see them refreshing Handshake at 1&nbsp;a.m. You hear the silence when you ask <span className="text-white/70">"any updates?"</span>
+              You see the stress in their voice. Late nights on Handshake. Dodging your questions.
               <br />
-              You're spending a fortune on tuition and terrified they'll graduate with nothing lined up — or worse, move back home with no direction.
+              You're spending a fortune on college and terrified they'll graduate with nothing lined up — or move back home with no direction.
             </p>
 
             <p>
-              <span className="text-white/70 font-semibold">FASTIQ gives them something real to act on right now:</span>
+              <span className="text-white/70 font-semibold">FASTIQ is the plan you can both believe in:</span>
             </p>
             <ul className="space-y-2 pl-0 list-none">
               <li className="flex items-start gap-2">
                 <span className="text-[#FA4616] mt-0.5">•</span>
-                <span>It finds <span className="text-white/70">actual UF grads</span> already working at the companies they're targeting (or should be).</span>
+                <span>It finds real UF alumni already working at the companies they're targeting (or should be).</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#FA4616] mt-0.5">•</span>
@@ -95,7 +95,9 @@ export default function ParentRelief({ onCTA }) {
             </ul>
 
             <p className="text-white/60">
-              No fake promises. No generic advice. Just real connections and real messages that turn <span className="text-white/80 font-medium">"I have no one to ask"</span> into <span className="text-[#FA4616] font-medium">"I just got a reply from a Gator at Amazon."</span>
+              You stop asking <span className="text-white/70">"any updates?"</span> every call because you can see it happening.
+              <br />
+              They stop feeling like the only one without a plan because someone finally gave them a real shot.
             </p>
           </motion.div>
 
@@ -116,7 +118,7 @@ export default function ParentRelief({ onCTA }) {
                 boxShadow: '0 0 30px rgba(250,70,22,0.25), 0 4px 16px rgba(250,70,22,0.2)',
               }}
             >
-              Activate FASTIQ for Your Student – 7-Day Free Trial
+              Activate FASTIQ for My Student – Start 7-Day Free Trial
             </button>
           </motion.div>
         </motion.div>
