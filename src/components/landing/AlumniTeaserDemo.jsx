@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ALUMNI = [
@@ -29,134 +29,58 @@ const ALUMNI = [
 ];
 
 const TYPE_SPEED = 25;
-const PAUSE_AFTER_TYPE = 1800;
-const HAND_MOVE_DURATION = 600;
+const DEFAULT_CARD = 1; // Google
 
 export default function AlumniTeaserDemo() {
-  const [demoActive, setDemoActive] = useState(true);
-  const [demoCardIdx, setDemoCardIdx] = useState(-1);
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [activeCard, setActiveCard] = useState(DEFAULT_CARD);
   const [typedText, setTypedText] = useState('');
   const [showSig, setShowSig] = useState(false);
-  const [showInstruction, setShowInstruction] = useState(true);
-  const [handPos, setHandPos] = useState({ x: 0, y: -40 });
-  const cardRefs = useRef([]);
-  const containerRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const timerRef = useRef(null);
   const abortRef = useRef(false);
 
-  // Get card center position relative to container
-  const getCardCenter = useCallback((idx) => {
-    const card = cardRefs.current[idx];
-    const container = containerRef.current;
-    if (!card || !container) return { x: 0, y: 0 };
-    const cRect = container.getBoundingClientRect();
-    const kRect = card.getBoundingClientRect();
-    return {
-      x: kRect.left - cRect.left + kRect.width / 2 - 12,
-      y: kRect.top - cRect.top + kRect.height / 2 - 12,
-    };
-  }, []);
+  const typeMessage = (msg) => {
+    // Clear any running animation
+    abortRef.current = true;
+    clearTimeout(timerRef.current);
 
-  // Type a message character by character
-  const typeMessage = useCallback((msg, onDone) => {
-    let idx = 0;
+    // Reset and start fresh
+    abortRef.current = false;
     setTypedText('');
     setShowSig(false);
+    setIsTyping(true);
+
+    let idx = 0;
     const tick = () => {
       if (abortRef.current) return;
       idx += 1;
       if (idx > msg.length) {
         setTypedText(msg);
-        setTimeout(() => {
-          if (!abortRef.current) setShowSig(true);
-          setTimeout(() => { if (!abortRef.current) onDone(); }, PAUSE_AFTER_TYPE);
-        }, 300);
+        setIsTyping(false);
+        setTimeout(() => { if (!abortRef.current) setShowSig(true); }, 300);
         return;
       }
       setTypedText(msg.slice(0, idx));
-      setTimeout(tick, TYPE_SPEED);
+      timerRef.current = setTimeout(tick, TYPE_SPEED);
     };
-    setTimeout(tick, 200);
+    timerRef.current = setTimeout(tick, 150);
+  };
+
+  // Start with default card message on mount
+  useEffect(() => {
+    typeMessage(ALUMNI[DEFAULT_CARD].message);
+    return () => { abortRef.current = true; clearTimeout(timerRef.current); };
   }, []);
 
-  // Run the demo sequence
-  useEffect(() => {
-    abortRef.current = false;
-    let cancelled = false;
-
-    const sleep = (ms) => new Promise(r => {
-      const t = setTimeout(r, ms);
-      // No cleanup needed, abortRef handles it
-    });
-
-    const runDemo = async () => {
-      await sleep(800);
-      if (abortRef.current) return;
-
-      for (let i = 0; i < ALUMNI.length; i++) {
-        if (abortRef.current) return;
-        // Move hand to card
-        const pos = getCardCenter(i);
-        setHandPos(pos);
-        setDemoCardIdx(i);
-        await sleep(HAND_MOVE_DURATION + 200);
-        if (abortRef.current) return;
-
-        // Type the message
-        await new Promise((resolve) => {
-          typeMessage(ALUMNI[i].message, resolve);
-        });
-        if (abortRef.current) return;
-      }
-
-      // Demo complete
-      if (!abortRef.current) {
-        setDemoActive(false);
-        setDemoCardIdx(-1);
-        setShowInstruction(false);
-      }
-    };
-
-    runDemo();
-
-    return () => { abortRef.current = true; };
-  }, [getCardCenter, typeMessage]);
-
-  // Active card = demo card or hovered card
-  const activeCard = demoActive ? demoCardIdx : hoveredCard;
-  const activeAlumni = activeCard !== null && activeCard >= 0 ? ALUMNI[activeCard] : null;
-  const isTyping = activeAlumni && typedText.length < activeAlumni.message.length;
-
-  // When user hovers after demo, show that card's message instantly
   const handleMouseEnter = (i) => {
-    if (demoActive) return;
-    setHoveredCard(i);
-    setTypedText(ALUMNI[i].message);
-    setShowSig(true);
+    setActiveCard(i);
+    typeMessage(ALUMNI[i].message);
   };
 
-  const handleMouseLeave = () => {
-    if (demoActive) return;
-    setHoveredCard(null);
-  };
+  const activeAlumni = ALUMNI[activeCard];
 
   return (
-    <div ref={containerRef} className="relative">
-      {/* Instruction text */}
-      <AnimatePresence>
-        {showInstruction && demoActive && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="text-center text-white/40 text-sm mb-5 italic"
-          >
-            Watch how FASTIQ writes the message for you…
-          </motion.p>
-        )}
-      </AnimatePresence>
-
+    <div>
       {/* Cards row */}
       <div className="flex items-center justify-center gap-3 sm:gap-5 mb-4">
         {ALUMNI.map((a, i) => {
@@ -164,9 +88,7 @@ export default function AlumniTeaserDemo() {
           return (
             <div
               key={i}
-              ref={el => cardRefs.current[i] = el}
               onMouseEnter={() => handleMouseEnter(i)}
-              onMouseLeave={handleMouseLeave}
               className="flex-1 rounded-2xl px-3 sm:px-5 py-5 sm:py-7 text-center cursor-default transition-all duration-300"
               style={{
                 border: `1px solid ${isActive ? 'rgba(250,70,22,0.5)' : 'rgba(250,70,22,0.35)'}`,
@@ -210,27 +132,8 @@ export default function AlumniTeaserDemo() {
         })}
       </div>
 
-      {/* Animated hand cursor */}
-      <AnimatePresence>
-        {demoActive && demoCardIdx >= 0 && (
-          <motion.div
-            initial={{ opacity: 0, x: handPos.x, y: handPos.y }}
-            animate={{ opacity: 1, x: handPos.x, y: handPos.y }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: 'spring', stiffness: 120, damping: 18, mass: 0.8 }}
-            className="absolute pointer-events-none z-20"
-            style={{
-              filter: 'drop-shadow(0 0 10px rgba(250,70,22,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
-            }}
-          >
-            <span className="text-[28px] block" style={{ transform: 'rotate(-15deg)' }}>👆</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Message box */}
       <div className="max-w-lg mx-auto mt-8">
-        {/* Pill label */}
         <div className="text-center mb-4">
           <span
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
@@ -245,32 +148,27 @@ export default function AlumniTeaserDemo() {
           </span>
         </div>
 
-        {/* Glass message box */}
         <div
-          className="rounded-2xl p-6 sm:p-7 transition-all duration-300"
+          className="rounded-2xl p-6 sm:p-7"
           style={{
             background: 'rgba(255,255,255,0.08)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             border: '1px solid rgba(250,70,22,0.2)',
-            boxShadow: activeCard !== null && activeCard >= 0
-              ? '0 0 30px rgba(250,70,22,0.15), 0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
-              : '0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+            boxShadow: '0 0 30px rgba(250,70,22,0.1), 0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
         >
           <p
             className="text-left min-h-[96px]"
-            style={{ color: '#FFFFFF', fontSize: '16px', lineHeight: 1.7, fontWeight: 500 }}
+            style={{ color: '#FFFFFF', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}
           >
-            {typedText || (
-              <span className="text-white/30 italic">Hover a card to see the message…</span>
-            )}
-            {isTyping && demoActive && (
+            {typedText}
+            {isTyping && (
               <span
                 className="inline-block align-middle ml-0.5"
                 style={{
                   width: '2px',
-                  height: '18px',
+                  height: '20px',
                   background: '#FA4616',
                   animation: 'twBlink 0.6s step-end infinite',
                 }}
@@ -278,16 +176,16 @@ export default function AlumniTeaserDemo() {
             )}
           </p>
 
-          <AnimatePresence>
-            {showSig && activeAlumni && (
+          <AnimatePresence mode="wait">
+            {showSig && (
               <motion.p
                 key={activeCard}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-sm font-semibold mt-4 text-left"
-                style={{ color: '#CBD5E1' }}
+                className="font-semibold mt-4 text-left"
+                style={{ color: '#CBD5E1', fontSize: '14px' }}
               >
                 {activeAlumni.signature}
               </motion.p>
