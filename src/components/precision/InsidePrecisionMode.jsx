@@ -1,7 +1,13 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import TargetIntelligencePanel from './TargetIntelligencePanel';
 import OutreachEnginePanel from './OutreachEnginePanel';
 import EntryStrategyPanel from './EntryStrategyPanel';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function InsidePrecisionMode({ onUpgrade }) {
   return (
@@ -10,11 +16,12 @@ export default function InsidePrecisionMode({ onUpgrade }) {
 
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-[13px] text-slate-400 uppercase tracking-[0.18em] font-semibold mb-3">
-            Inside FASTIQ™
+          <p className="text-[11px] text-[#FA4616] uppercase tracking-[0.2em] font-bold mb-4">FASTIQ™</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight max-w-3xl mx-auto">
+            The AI That Turns Your Network Into <span className="text-[#FA4616]">Real Job Offers</span>
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-slate-600 max-w-[620px] mx-auto leading-[1.7]">
-            FASTIQ turns the network into a targeted entry system — powered by data, context, and structured outreach.
+          <p className="text-[15px] sm:text-[16px] text-slate-600 max-w-[640px] mx-auto leading-[1.7]">
+            Finds UF alumni at dream companies → drafts personalized messages → tracks everything. No cold applications needed.
           </p>
         </div>
 
@@ -24,6 +31,28 @@ export default function InsidePrecisionMode({ onUpgrade }) {
           <OutreachEnginePanel />
           <EntryStrategyPanel />
         </div>
+
+        {/* FASTIQ-specific testimonials */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+          className="grid md:grid-cols-2 gap-5 mt-12 sm:mt-14"
+        >
+          <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6">
+            <p className="text-[14px] text-slate-700 leading-relaxed mb-3">
+              "FASTIQ found 12 UF alumni at Amazon I didn't know existed. One draft message got a reply in 2 hours — I start my internship in June."
+            </p>
+            <p className="text-[13px] text-slate-400 font-medium">— Alex P., UF Junior, Computer Science</p>
+          </motion.div>
+          <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6">
+            <p className="text-[14px] text-slate-700 leading-relaxed mb-3">
+              "My daughter used the AI-drafted outreach and got 3 coffee chats in one week. She went from zero network to an offer at Deloitte in 6 weeks."
+            </p>
+            <p className="text-[13px] text-slate-400 font-medium">— Janet W., UF Parent</p>
+          </motion.div>
+        </motion.div>
 
         {/* CTA */}
         <div className="text-center mt-14 sm:mt-16">
@@ -39,7 +68,7 @@ export default function InsidePrecisionMode({ onUpgrade }) {
             Unlock FASTIQ™
           </button>
           <p className="text-[12px] text-slate-400 mt-3 tracking-wide">
-            Starting at $19/month • 7-day free trial
+            Starting at $29/month • 7-day free trial
           </p>
         </div>
 

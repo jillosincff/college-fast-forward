@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Check, Lock, Zap, Target, Compass } from "lucide-react";
+import { ArrowRight, Check, Lock, Zap, Target, Compass, Lightbulb } from "lucide-react";
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
 import { motion } from 'framer-motion';
@@ -300,26 +300,32 @@ export default function LandingPage() {
                 <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_known_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full sm:w-auto inline-flex flex-col items-center justify-center gap-1 px-8 py-4 rounded-xl text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
                       boxShadow: '0 0 30px rgba(250,70,22,0.3)',
                     }}
                   >
-                    <Target className="w-5 h-5" />
-                    I know my dream companies
+                    <span className="inline-flex items-center gap-2 text-[15px] font-bold">
+                      <Target className="w-5 h-5" />
+                      I know my dream companies
+                    </span>
+                    <span className="text-[11px] text-white/60 font-medium">Get your personalized alumni list in minutes</span>
                   </button>
 
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_explorer_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full sm:w-auto inline-flex flex-col items-center justify-center gap-1 px-8 py-4 rounded-xl text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
                       boxShadow: '0 0 30px rgba(6,182,212,0.2)',
                     }}
                   >
-                    <Compass className="w-5 h-5" />
-                    Help me figure it out
+                    <span className="inline-flex items-center gap-2 text-[15px] font-bold">
+                      <Lightbulb className="w-5 h-5" />
+                      Help me figure it out
+                    </span>
+                    <span className="text-[11px] text-white/60 font-medium">Discover career paths & alumni matches first</span>
                   </button>
                 </motion.div>
 
@@ -874,6 +880,10 @@ export default function LandingPage() {
                   {
                     q: "Why is it free for the first 1,000?",
                     a: "Founding members are helping us build something special. You're not just joining a network — you're creating it. In exchange for being early and helping us grow, you get free access forever. Once we hit 1,000, new members pay $9/month. FASTIQ AI Career Center is $29/month. The earlier you join, the more you save."
+                  },
+                  {
+                    q: "What if my student doesn't know what companies to target?",
+                    a: "No problem — choose 'Help me figure it out' to discover career paths and alumni matches first. FASTIQ guides them step-by-step based on their interests and major, then shows them UF alumni who can open doors in those industries."
                   }
                 ].map((item, i) => (
                   <AccordionItem key={i} value={`item-${i}`} className="border rounded-xl px-6">

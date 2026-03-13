@@ -65,7 +65,7 @@ export default function DualPathEntry() {
             </div>
             <div>
               <p className="text-white font-bold text-[16px] mb-1">I know my dream companies</p>
-              <p className="text-white/50 text-[13px] leading-snug">Unlock alumni at your specific target companies — Amazon, Google, Goldman, whoever.</p>
+              <p className="text-white/50 text-[13px] leading-snug">Get your personalized alumni list in minutes — Amazon, Google, Goldman, whoever.</p>
             </div>
           </div>
         </button>
@@ -81,8 +81,8 @@ export default function DualPathEntry() {
               <Compass className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <p className="text-white font-bold text-[16px] mb-1">I have no idea where to start</p>
-              <p className="text-white/50 text-[13px] leading-snug">We'll suggest career paths and companies based on your interests, then show you alumni who can help.</p>
+              <p className="text-white font-bold text-[16px] mb-1">Help me figure it out</p>
+              <p className="text-white/50 text-[13px] leading-snug">Discover career paths & alumni matches first — we'll guide you step by step.</p>
             </div>
           </div>
         </button>
