@@ -71,7 +71,7 @@ export default function ParentRelief({ onCTA }) {
           {/* Body */}
           <motion.div variants={fadeUp} className="mt-8 space-y-5 text-[14px] sm:text-[15px] text-white/50 leading-relaxed max-w-2xl mx-auto text-left sm:text-center">
             <p>
-              You see the stress in their voice. Late nights on Handshake. Dodging your questions.
+              You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere.
               <br />
               You're spending a fortune on college and terrified they'll graduate with nothing lined up — or move back home with no direction.
             </p>
@@ -86,11 +86,11 @@ export default function ParentRelief({ onCTA }) {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#FA4616] mt-0.5">•</span>
-                <span>It writes the exact messages they can copy-paste and send today — no awkward cold outreach.</span>
+                <span>It writes the exact messages they can send today — no awkward cold outreach.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#FA4616] mt-0.5">•</span>
-                <span>It tracks replies, follow-ups, and progress — so you both see momentum instead of silence.</span>
+                <span>It shows progress you can both see: messages sent, replies received, coffee chats booked.</span>
               </li>
             </ul>
 

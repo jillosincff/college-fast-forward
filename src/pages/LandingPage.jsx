@@ -117,8 +117,8 @@ export default function LandingPage() {
         </nav>
 
         {/* HERO SECTION */}
-        <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ background: 'linear-gradient(180deg, #0021A5 0%, #0A1628 100%)' }}>
-          <div className="max-w-4xl mx-auto text-center">
+        <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ backgroundColor: '#0021A5' }}>
+          <div className="max-w-5xl mx-auto text-center">
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -132,82 +132,69 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl mb-5 leading-tight font-extrabold px-4"
-              style={{ lineHeight: 1.1 }}
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight font-extrabold px-4"
             >
-              <span className="text-white">It's mid-March and your kid still </span>
-              <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
-                has zero plans for summer.
-              </span>
+              Imagine having thousands of friends<br className="hidden sm:block" /> helping your kid land a job.
             </motion.h1>
 
-            <motion.div 
+            <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-sm sm:text-base md:text-lg text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed px-4 space-y-4"
+              transition={{ delay: 0.15 }}
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-extrabold mb-4 px-4"
             >
-              <p>Your friends are posting offers. Your parents keep asking questions. You have no real experience, no connections, and no clue how to fix it.</p>
-              <p className="text-white/50 italic">It's not what you know — it's who you know.</p>
-              <p className="text-white/70 font-medium">
-                FASTIQ finds real UF grads already inside the companies everyone wants… messages them for you… and gets your foot in the door — bypassing thousands of other cold applicants.
-              </p>
-            </motion.div>
-
-            {/* Dual CTAs */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4 mb-6 px-4"
-            >
-              <button
-                onClick={() => { trackEvent('hero_known_clicked'); setShowFunnel(true); }}
-                className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-                  boxShadow: '0 0 40px rgba(250,70,22,0.3), 0 4px 20px rgba(250,70,22,0.25)',
-                }}
-              >
-                <span className="flex items-start gap-2.5">
-                  <span className="text-xl mt-0.5">🔥</span>
-                  <span className="text-[15px] sm:text-[16px] font-bold text-white leading-snug">
-                    I know where I want to work… but I don't know a single person there
-                  </span>
-                </span>
-                <span className="block text-[12px] text-white/50 mt-2 ml-8">
-                  Get your hidden UF connections instantly
-                </span>
-              </button>
-
-              <button
-                onClick={() => { trackEvent('hero_explorer_clicked'); setShowFunnel(true); }}
-                className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
-                  boxShadow: '0 0 30px rgba(6,182,212,0.2), 0 4px 16px rgba(6,182,212,0.15)',
-                }}
-              >
-                <span className="flex items-start gap-2.5">
-                  <span className="text-xl mt-0.5">🤔</span>
-                  <span className="text-[15px] sm:text-[16px] font-bold text-slate-900 leading-snug">
-                    I literally have no clue where to even start
-                  </span>
-                </span>
-                <span className="block text-[12px] text-slate-700/60 mt-2 ml-8">
-                  We'll figure out paths & matches together
-                </span>
-              </button>
-            </motion.div>
+              Now you do.
+            </motion.p>
 
             <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
+            >
+              College Fast Forward is a private network of {SCHOOL_NAME} parents and alumni who have pledged to help each other's kids — with real introductions, advice, and connections that change trajectories.
+            </motion.p>
+
+            {/* CTA Box - FREE Founding */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+              className="inline-block bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl max-w-md mx-4 w-full"
+            >
+              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-bold text-base sm:text-lg mb-2">
+                <span className="text-xl">🔥</span>
+                <span>{stats.spots_left} FREE founding spots left</span>
+              </div>
+              <p className="text-slate-500 text-sm mb-4">(of {FOUNDING_LIMIT})</p>
+              
+              <Button
+                onClick={handleGetInside}
+                size="lg"
+                className="bg-[#0021A5] hover:bg-[#001878] text-white px-6 sm:px-10 py-5 sm:py-7 text-lg sm:text-xl font-bold shadow-lg w-full min-h-[56px]"
+              >
+                Claim Your Free Spot
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2" />
+              </Button>
+              
+              <div className="mt-4 text-sm text-slate-600 space-y-1">
+                <p className="font-semibold">Founding members: FREE forever — seriously, no catch.</p>
+                <p className="text-slate-400">After 1,000: $9/mo · FASTIQ AI Career Center: $29/mo</p>
+              </div>
+            </motion.div>
+
+            {/* Testimonial preview */}
+            <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.35 }}
-              className="text-[12px] text-white/25 max-w-md mx-auto"
+              transition={{ delay: 0.4 }}
+              className="mt-12 max-w-2xl mx-auto"
             >
-              Takes 45 seconds · No sign-up needed · See real UF people at Amazon, Google, Nike, TikTok, wherever — free
-            </motion.p>
+              <p className="text-white/80 italic text-lg">
+                "My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own."
+              </p>
+              <p className="text-white/60 text-sm mt-2">— Dana G., UF Parent</p>
+            </motion.div>
           </div>
         </section>
 
@@ -241,10 +228,10 @@ export default function LandingPage() {
               className="flex flex-col items-center gap-3 mb-12"
             >
               {[
-                { emoji: '📄', text: 'Your kid applies to 200 jobs' },
-                { emoji: '🤖', text: 'AI rejects 98% before a human ever sees it' },
+                { emoji: '📄', text: 'They apply to 200+ jobs' },
+                { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
                 { emoji: '😔', text: 'They never hear back' },
-                { emoji: '📉', text: 'They watch friends get "connections" interviews' },
+                { emoji: '📉', text: 'They watch friends get "connection" interviews' },
                 { emoji: '❓', text: 'They wonder what they\'re doing wrong' },
               ].map((item, i) => (
                 <React.Fragment key={i}>
@@ -265,10 +252,10 @@ export default function LandingPage() {
               className="bg-slate-900 text-white rounded-2xl p-8 max-w-2xl mx-auto"
             >
               <p className="text-lg text-gray-100">
-                <strong className="text-white">Here's the truth:</strong> It doesn't matter how perfect the resume is. Without a warm connection, it goes into the same black hole as everyone else's.
+                <strong className="text-white">Here's the truth:</strong> A perfect resume means nothing without a warm connection. The students who land jobs have someone on the inside who cares enough to pick up the phone.
               </p>
-              <p className="text-gray-200 mt-4">
-                The students who land jobs? <strong className="text-white">They have someone on the inside who cares enough to pick up the phone.</strong>
+              <p className="text-gray-200 mt-4 font-semibold">
+                That's what CFF changes.
               </p>
             </motion.div>
           </div>
@@ -603,10 +590,7 @@ export default function LandingPage() {
               <p className="text-slate-700 mb-1">
                 <strong>{stats.total_families} parents</strong> have already taken the pledge.
               </p>
-              <p className="text-slate-600 mb-8">
-                Now it's your turn.
-              </p>
-              <p className="text-[#0021A5] font-bold text-xl mb-6">Now it's your turn.</p>
+              <p className="text-[#0021A5] font-bold text-xl mb-6 mt-4">Now it's your turn.</p>
               <Button
                 onClick={handleGetInside}
                 size="lg"
