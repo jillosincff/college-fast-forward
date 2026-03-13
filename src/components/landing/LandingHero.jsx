@@ -43,10 +43,10 @@ export default function LandingHero({ stats, onClaim }) {
           transition={{ delay: 0.16 }}
           className="max-w-xl mx-auto mb-14 px-2 space-y-2"
         >
-          <p className="text-white text-[17px] sm:text-[20px] leading-[1.6]">
+          <p className="text-white text-[18px] sm:text-[22px] leading-[1.6] font-medium">
             CFF is the private UF network where parents and alumni pledged to help each other's kids.
           </p>
-          <p className="text-[#E5E7EB] text-[17px] sm:text-[20px] leading-[1.6]">
+          <p className="text-[#E5E7EB] text-[18px] sm:text-[22px] leading-[1.6]">
             FASTIQ is the AI engine that actually delivers the results.
           </p>
         </motion.div>
@@ -152,12 +152,21 @@ export default function LandingHero({ stats, onClaim }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-16 max-w-lg mx-auto"
+          className="mt-20 max-w-lg mx-auto rounded-2xl p-8 border"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            borderColor: 'rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 30px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}
         >
-          <p className="text-white italic text-lg sm:text-[22px] leading-[1.6]">
+          <p className="text-white italic text-[18px] sm:text-[22px] leading-[1.6]">
             "My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own."
           </p>
-          <p className="text-[#E5E7EB] text-sm mt-4 font-medium">— Dana G., UF Parent</p>
+          <div className="flex items-center justify-center gap-3 mt-5">
+            <span className="w-8 h-8 rounded-full bg-[#FA4616]/20 flex items-center justify-center text-[#FA4616] text-sm font-bold">D</span>
+            <p className="text-[#E5E7EB] text-sm font-semibold">Dana G. <span className="text-white/40 font-normal">· UF Parent</span></p>
+          </div>
         </motion.div>
 
         {/* FASTIQ tease */}
