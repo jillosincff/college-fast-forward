@@ -14,7 +14,12 @@ const INTEREST_TO_INDUSTRY = {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (e) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
