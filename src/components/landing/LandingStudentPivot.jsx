@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap } from 'lucide-react';
 
 const fade = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
@@ -15,7 +14,7 @@ export default function LandingStudentPivot({ onFunnel }) {
       <motion.div
         initial="hidden" whileInView="visible" viewport={{ once: true }}
         variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-        className="relative z-10 max-w-2xl mx-auto px-4 py-24 sm:py-28 text-center"
+        className="relative z-10 max-w-2xl mx-auto px-4 py-28 sm:py-32 text-center"
       >
         <motion.div variants={fade} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/20 mb-8">
           <span className="text-[10px] font-bold text-[#06B6D4] uppercase tracking-wider">For Students</span>

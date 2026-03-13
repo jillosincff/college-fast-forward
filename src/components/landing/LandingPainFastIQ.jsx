@@ -1,65 +1,48 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
-import TargetIntelligencePanel from '@/components/precision/TargetIntelligencePanel';
 import OutreachEnginePanel from '@/components/precision/OutreachEnginePanel';
-import EntryStrategyPanel from '@/components/precision/EntryStrategyPanel';
 
 const fade = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
 };
 
-const stagger = {
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const painItems = [
-  { emoji: '📄', text: 'They apply to 200+ jobs' },
-  { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
-  { emoji: '😔', text: 'They never hear back while friends get "connection" interviews' },
-];
-
 export default function LandingPainFastIQ({ onFastIQ }) {
   return (
     <section className="relative">
 
-      {/* PAIN — light background */}
-      <div className="py-20 sm:py-28 px-4 bg-white">
-        <div className="max-w-3xl mx-auto text-center">
+      {/* PAIN — bold paragraph on white */}
+      <div className="py-24 sm:py-32 px-4 bg-white">
+        <div className="max-w-2xl mx-auto text-center">
           <motion.h2
             variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-3 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-8 tracking-tight"
           >
             Your Kid Is Invisible to Employers
           </motion.h2>
-          <motion.p variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="text-slate-500 text-base sm:text-lg mb-12"
-          >
-            (And it's not their fault — the system is broken.)
-          </motion.p>
 
-          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="flex flex-col items-center gap-2.5 mb-12"
+          <motion.div
+            variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
+            className="rounded-2xl p-6 sm:p-8 border border-slate-100"
+            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
           >
-            {painItems.map((item, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && <motion.span variants={fade} className="text-slate-300 text-lg">↓</motion.span>}
-                <motion.div variants={fade} className="flex items-center gap-3 bg-slate-50 rounded-xl px-6 py-4 border border-slate-100 w-full max-w-sm" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                  <span className="text-xl">{item.emoji}</span>
-                  <span className="text-slate-800 font-semibold text-[15px] sm:text-base">{item.text}</span>
-                </motion.div>
-              </React.Fragment>
-            ))}
+            <p className="text-slate-700 text-lg sm:text-xl leading-[1.8] font-medium">
+              Your kid applies to 200+ jobs. AI kills 98%. No callbacks. Friends get "connection" interviews while they get silence.
+            </p>
+            <p className="text-slate-900 text-lg sm:text-xl leading-[1.8] font-bold mt-4">
+              A perfect resume means nothing without a warm connection.{' '}
+              <span className="text-[#FA4616]">That's what CFF + FASTIQ fixes.</span>
+            </p>
           </motion.div>
         </div>
       </div>
 
-      {/* FASTIQ RELIEF */}
-      <div className="py-20 sm:py-28 px-4" style={{ backgroundColor: '#F8FAFC' }}>
-        <div className="max-w-5xl mx-auto">
+      {/* FASTIQ — single screenshot */}
+      <div className="py-24 sm:py-32 px-4" style={{ backgroundColor: '#F8FAFC' }}>
+        <div className="max-w-3xl mx-auto">
           <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-14"
           >
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FA4616]/10 border border-[#FA4616]/20 mb-5">
               <Zap className="w-3 h-3 text-[#FA4616]" />
@@ -76,18 +59,14 @@ export default function LandingPainFastIQ({ onFastIQ }) {
             </p>
           </motion.div>
 
-          {/* Screenshot panels */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-            <div className="rounded-2xl" style={{ boxShadow: '0 0 20px rgba(250,70,22,0.08), 0 2px 8px rgba(0,0,0,0.06)' }}>
-              <TargetIntelligencePanel />
-            </div>
-            <div className="rounded-2xl" style={{ boxShadow: '0 0 20px rgba(250,70,22,0.08), 0 2px 8px rgba(0,0,0,0.06)' }}>
-              <OutreachEnginePanel />
-            </div>
-            <div className="rounded-2xl" style={{ boxShadow: '0 0 20px rgba(250,70,22,0.08), 0 2px 8px rgba(0,0,0,0.06)' }}>
-              <EntryStrategyPanel />
-            </div>
-          </div>
+          {/* Single screenshot with orange glow */}
+          <motion.div
+            variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
+            className="max-w-xl mx-auto rounded-2xl overflow-hidden mb-14"
+            style={{ boxShadow: '0 0 40px rgba(250,70,22,0.12), 0 4px 20px rgba(0,0,0,0.08)', border: '1px solid rgba(250,70,22,0.15)' }}
+          >
+            <OutreachEnginePanel />
+          </motion.div>
 
           {/* CTA */}
           <div className="text-center">

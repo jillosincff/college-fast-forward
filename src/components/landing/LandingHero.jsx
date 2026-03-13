@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
 import { motion } from 'framer-motion';
 
+const blurredAlumni = [
+  { role: 'Marketing at Nike', year: "UF '22" },
+  { role: 'Software Engineer at Google', year: "UF '21" },
+  { role: 'Analyst at Goldman Sachs', year: "UF '23" },
+];
+
 export default function LandingHero({ stats, onClaim }) {
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-16 px-4" style={{ backgroundColor: '#0021A5' }}>
@@ -35,10 +41,10 @@ export default function LandingHero({ stats, onClaim }) {
           className="max-w-xl mx-auto mb-14 px-2 space-y-2"
         >
           <p className="text-[#E5E7EB] text-base sm:text-xl leading-relaxed">
-            CFF is the private UF network of parents and alumni who pledged to help each other's kids.
+            CFF is the private UF network where parents and alumni pledged to help each other's kids.
           </p>
           <p className="text-white/50 text-base sm:text-xl leading-relaxed">
-            FASTIQ is the AI engine that actually makes it happen.
+            FASTIQ is the AI engine that actually delivers the results.
           </p>
         </motion.div>
 
@@ -71,11 +77,41 @@ export default function LandingHero({ stats, onClaim }) {
           <p className="text-slate-400 text-xs mt-3">After 1,000 new members pay $9/mo</p>
         </motion.div>
 
+        {/* Blurred Alumni Teaser */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.32 }}
+          className="mt-12 max-w-lg mx-auto"
+        >
+          <div className="flex items-center justify-center gap-3 mb-4">
+            {blurredAlumni.map((a, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-xl px-3 py-3 border border-white/10 text-center"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 0 16px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="w-8 h-2 rounded-full bg-white/10 mx-auto mb-2" />
+                <p className="text-[#E5E7EB] text-[11px] sm:text-xs font-semibold leading-tight">{a.role}</p>
+                <p className="text-white/30 text-[10px] mt-0.5">{a.year}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-white/40 text-xs sm:text-sm leading-relaxed">
+            We already found real UF grads inside the companies kids are targeting.<br />
+            <span className="text-[#FA4616]/70 font-medium">Take the 45-second quiz to see yours.</span>
+          </p>
+        </motion.div>
+
         {/* Testimonial */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
+          transition={{ delay: 0.4 }}
           className="mt-14 max-w-lg mx-auto"
         >
           <p className="text-[#E5E7EB] italic text-lg sm:text-xl leading-relaxed">
@@ -88,7 +124,7 @@ export default function LandingHero({ stats, onClaim }) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.42 }}
+          transition={{ delay: 0.48 }}
           className="mt-10 flex items-center justify-center gap-2"
         >
           <Zap className="w-3.5 h-3.5 text-[#FA4616]" />
