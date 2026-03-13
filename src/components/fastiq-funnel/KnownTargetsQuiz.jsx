@@ -84,7 +84,7 @@ export default function KnownTargetsQuiz() {
     </QuizStep>,
 
     // Step 3: Target companies
-    <QuizStep key={2} questionNumber={3} totalQuestions={6} title="What are your dream companies?" subtitle="Add up to 5 companies" canNext={companies.length > 0} onNext={trackStep(3, nextStep)}>
+    <QuizStep key={2} questionNumber={3} totalQuestions={6} title="What are your dream companies?" subtitle="Add up to 5 companies" canNext={companies.length > 0 || companyInput.trim().length > 0} onNext={() => { flushCompanyInput(); trackStep(3, nextStep)(); }}>
       {/* Tags */}
       {companies.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
