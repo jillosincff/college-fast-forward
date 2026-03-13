@@ -249,23 +249,35 @@ function CTASection({ user, studentName, familyId }) {
   const [checkingOut, setCheckingOut] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('monthly');
 
+  const [checkoutError, setCheckoutError] = useState('');
+
   const handleCheckout = async () => {
     setCheckingOut(true);
+    setCheckoutError('');
     try {
       const baseUrl = window.location.origin;
       const plan = selectedPlan === 'annual' ? 'fastiq_annual' : 'fastiq_monthly';
       const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
-      const { data } = await createCheckoutSession({
+      const response = await createCheckoutSession({
         plan,
         successUrl: `${baseUrl}/#FastIQ?checkout=success`,
         cancelUrl: `${baseUrl}/#FastIQ?checkout=cancel`,
         metadata: { family_id: familyId || '' },
       });
-      if (data?.url) {
-        window.location.href = data.url;
+      const result = response?.data;
+      if (result?.url) {
+        window.location.href = result.url;
+        return; // Keep spinner while redirecting
       }
+      // No URL returned — show the error from backend
+      const errMsg = result?.error || 'Could not start checkout. Please try again.';
+      console.error('Checkout returned no URL:', result);
+      setCheckoutError(errMsg);
+      setCheckingOut(false);
     } catch (err) {
       console.error('Checkout failed:', err);
+      const errData = err?.response?.data;
+      setCheckoutError(errData?.error || 'Checkout failed. Please try again.');
       setCheckingOut(false);
     }
   };
