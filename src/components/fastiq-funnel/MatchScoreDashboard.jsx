@@ -8,7 +8,17 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
-function computeScore(answers) {
+function computeScore(answers, matchData) {
+  // If we have real match data, derive score from actual count
+  if (matchData?.totalMatches) {
+    const count = matchData.totalMatches;
+    // Scale: 1-5 matches = 70-75, 6-15 = 75-82, 16-30 = 82-88, 30+ = 88-94
+    if (count <= 5) return 70 + count;
+    if (count <= 15) return 75 + Math.floor((count - 5) * 0.7);
+    if (count <= 30) return 82 + Math.floor((count - 15) * 0.4);
+    return Math.min(88 + Math.floor((count - 30) * 0.2), 94);
+  }
+  // Fallback to answer-based heuristic
   let score = 45;
   if (answers.major) score += 8;
   if (answers.grad_year) score += 5;
@@ -24,8 +34,8 @@ function computeScore(answers) {
 export default function MatchScoreDashboard() {
   const { answers, matchData, setPhase, path } = useFunnel();
   const [displayScore, setDisplayScore] = useState(0);
-  const targetScore = computeScore(answers);
-  const totalMatches = matchData?.totalMatches || (12 + Math.floor(Math.random() * 15));
+  const targetScore = computeScore(answers, matchData);
+  const totalMatches = matchData?.totalMatches || 15;
   const warmIntros = Math.floor(totalMatches * 0.6);
 
   // Animate score counting up
@@ -120,20 +130,33 @@ export default function MatchScoreDashboard() {
       {/* Locked preview */}
       <motion.div variants={fadeUp} className="rounded-xl border border-white/10 p-5 mb-6 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)' }}>
         <div className="filter blur-[6px] select-none pointer-events-none">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-white/10" />
-            <div>
-              <p className="text-white text-[14px] font-semibold">Jessica M. — Senior PM at Amazon</p>
-              <p className="text-white/50 text-[12px]">UF '19 · Marketing Major · Open to coffee chats</p>
+          {(matchData?.teasers || []).slice(0, 2).map((t, i) => (
+            <div key={i} className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-white/10" />
+              <div>
+                <p className="text-white text-[14px] font-semibold">{t.blurredName || 'UF Alum'} — {t.roleTitle} at {t.company}</p>
+                <p className="text-white/50 text-[12px]">UF {t.gradYear || "'20"} · {t.matchReason || 'Alumni match'}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/10" />
-            <div>
-              <p className="text-white text-[14px] font-semibold">David R. — Analyst at Goldman Sachs</p>
-              <p className="text-white/50 text-[12px]">UF '21 · Finance Major · Can refer interns</p>
-            </div>
-          </div>
+          ))}
+          {(!matchData?.teasers || matchData.teasers.length === 0) && (
+            <>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-white/10" />
+                <div>
+                  <p className="text-white text-[14px] font-semibold">UF Alum — Senior PM at Amazon</p>
+                  <p className="text-white/50 text-[12px]">UF '19 · Open to coffee chats</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/10" />
+                <div>
+                  <p className="text-white text-[14px] font-semibold">UF Alum — Analyst at Goldman Sachs</p>
+                  <p className="text-white/50 text-[12px]">UF '21 · Can refer interns</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(15,23,42,0.6)' }}>
           <div className="text-center">
