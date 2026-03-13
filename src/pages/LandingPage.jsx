@@ -309,26 +309,43 @@ export default function LandingPage() {
                   </span>
                 </motion.p>
 
-                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_known_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5"
+                    className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
                       boxShadow: '0 0 40px rgba(250,70,22,0.3), 0 4px 20px rgba(250,70,22,0.25)',
                     }}
                   >
-                    <span className="text-lg">🔥</span>
-                    Show me I'm not totally screwed
+                    <span className="flex items-start gap-2.5">
+                      <span className="text-xl mt-0.5">🔥</span>
+                      <span className="text-[15px] sm:text-[16px] font-bold text-white leading-snug">
+                        I know where I want to work… but I don't know a single person there
+                      </span>
+                    </span>
+                    <span className="block text-[12px] text-white/50 mt-2 ml-8">
+                      Get your hidden UF connections instantly
+                    </span>
                   </button>
 
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_explorer_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 border-2 border-white/20 hover:border-white/30"
-                    style={{ background: 'rgba(255,255,255,0.06)' }}
+                    className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
+                      boxShadow: '0 0 30px rgba(6,182,212,0.2), 0 4px 16px rgba(6,182,212,0.15)',
+                    }}
                   >
-                    <span className="text-lg">😬</span>
-                    I literally have no idea — help
+                    <span className="flex items-start gap-2.5">
+                      <span className="text-xl mt-0.5">🤔</span>
+                      <span className="text-[15px] sm:text-[16px] font-bold text-slate-900 leading-snug">
+                        I literally have no clue where to even start
+                      </span>
+                    </span>
+                    <span className="block text-[12px] text-slate-700/60 mt-2 ml-8">
+                      We'll figure out paths & matches together
+                    </span>
                   </button>
                 </motion.div>
 
