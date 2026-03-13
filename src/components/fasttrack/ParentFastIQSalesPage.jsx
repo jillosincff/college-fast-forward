@@ -340,6 +340,11 @@ function CTASection({ user, studentName, familyId }) {
                 : 'Activate FASTIQ for Your Family — $29/month'}
           </button>
         </motion.div>
+        {checkoutError && (
+          <motion.div variants={fadeUp} className="mt-4 px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/25 max-w-md mx-auto">
+            <p className="text-[13px] text-red-300">{checkoutError}</p>
+          </motion.div>
+        )}
         <motion.p variants={fadeUp} className="text-[13px] text-white/40 mt-4">
           7-day free trial &bull; Cancel anytime &bull; Covers your entire family on CFF
         </motion.p>
