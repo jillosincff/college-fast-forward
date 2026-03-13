@@ -26,6 +26,7 @@ function FunnelRouter() {
   }
 }
 
+// Main funnel orchestrator
 export default function FastIQFunnel({ onClose }) {
   return (
     <FunnelProvider onClose={onClose}>
