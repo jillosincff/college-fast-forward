@@ -12,7 +12,6 @@ import LandingPainFastIQ from '@/components/landing/LandingPainFastIQ';
 import LandingParentRelief from '@/components/landing/LandingParentRelief';
 import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
 import LandingFooterCTA from '@/components/landing/LandingFooterCTA';
-import LandingPricing from '@/components/landing/LandingPricing';
 import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
 
 const SCHOOL_NAME = "UF";
@@ -90,10 +89,7 @@ export default function LandingPage() {
           <LandingStudentPivot onFunnel={handleFunnel} />
         )}
 
-        {/* 5 — PRICING */}
-        <LandingPricing stats={stats} onClaim={handleClaim} onFastIQ={handleFastIQ} />
-
-        {/* 6 — FOOTER CTA */}
+        {/* 5 — FOOTER CTA */}
         <LandingFooterCTA stats={stats} onClaim={handleClaim} onFAQ={() => setShowFAQ(!showFAQ)} showFAQ={showFAQ} />
 
         {/* FOOTER */}

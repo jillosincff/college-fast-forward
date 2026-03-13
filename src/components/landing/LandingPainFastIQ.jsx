@@ -18,7 +18,7 @@ const painItems = [
   { emoji: '📄', text: 'They apply to 200+ jobs' },
   { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
   { emoji: '😔', text: 'They never hear back' },
-  { emoji: '📉', text: 'They watch friends get "connection" interviews and wonder what they\'re doing wrong' },
+  { emoji: '📉', text: 'They watch friends get "connection" interviews' },
 ];
 
 export default function LandingPainFastIQ({ onFastIQ }) {

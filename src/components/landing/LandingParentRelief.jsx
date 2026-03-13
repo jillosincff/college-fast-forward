@@ -36,16 +36,8 @@ export default function LandingParentRelief({ onCTA }) {
             <p>
               You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere. You're spending a fortune on college and terrified they'll graduate with nothing lined up.
             </p>
-            <p className="text-white/70 font-semibold">FASTIQ is the plan you can both believe in:</p>
-            <ul className="space-y-2 pl-0 list-none">
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Finds real UF alumni already working at the companies they're targeting</span></li>
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Writes the exact messages they can copy-paste and send today — no awkward cold outreach</span></li>
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Shows progress you can both see: replies, chats, interviews</span></li>
-            </ul>
-            <p className="text-white/60">
-              You stop asking <span className="text-white/70">"any updates?"</span> because there's actual momentum.
-              <br />
-              They stop feeling invisible because someone finally gave them a real shot.
+            <p className="text-white/70">
+              FASTIQ is the plan you can both believe in: finds real UF alumni already working at the companies they're targeting, writes the exact messages they can send today, shows progress you can both see — so you stop asking <span className="text-white/80 font-medium">"any updates?"</span> and they stop feeling invisible.
             </p>
           </motion.div>
 

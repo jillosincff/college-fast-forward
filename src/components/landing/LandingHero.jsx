@@ -28,14 +28,19 @@ export default function LandingHero({ stats, onClaim }) {
           </span>
         </motion.h1>
 
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-10 px-2"
+          className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-10 px-2 space-y-4"
         >
-          College Fast Forward is the private network of UF parents and alumni who have pledged to help each other's kids — with real introductions, advice, and connections that actually change trajectories.
-        </motion.p>
+          <p>
+            College Fast Forward is the private network of UF parents and alumni who have pledged to help each other's kids — with real introductions, advice, and connections that change trajectories.
+          </p>
+          <p className="text-white/60">
+            FASTIQ is the AI engine inside that network that actually makes it work: finds real UF grads already inside your target companies, messages them for you, and gets your foot in the door — bypassing thousands of other cold applicants. No B.S. applications. No ghosting. Just real people helping real kids get in the door.
+          </p>
+        </motion.div>
 
         {/* CTA card */}
         <motion.div
