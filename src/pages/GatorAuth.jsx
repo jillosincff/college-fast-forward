@@ -680,9 +680,13 @@ export default function GatorAuth() {
                       console.log('🔵 [GatorAuth] No user, advancing to OAuth');
                       setStep('oauth');
                     } else {
-                      const hasInviteCode = localStorage.getItem('pending_invite_code');
+                      let hasInviteCode = null;
+                      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
                       if (!hasInviteCode) {
                         navigate('GatorInviteCode');
+                      } else {
+                        // Has invite code already — proceed with role assignment
+                        handleRoleSelect();
                       }
                     }
                   }}
