@@ -13,18 +13,6 @@ const blurredAlumni = [
 
 export default function LandingHero({ stats, onClaim }) {
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [teaserInView, setTeaserInView] = useState(false);
-  const teaserRef = React.useRef(null);
-
-  React.useEffect(() => {
-    if (!teaserRef.current) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setTeaserInView(entry.isIntersecting),
-      { threshold: 0.3 }
-    );
-    obs.observe(teaserRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
@@ -99,7 +87,6 @@ export default function LandingHero({ stats, onClaim }) {
 
         {/* Scanning + Blurred Alumni Teaser */}
         <motion.div
-          ref={teaserRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.32 }}
@@ -162,7 +149,7 @@ export default function LandingHero({ stats, onClaim }) {
           </div>
 
           {/* Typewriter payoff */}
-          <TypewriterMessage inView={teaserInView} />
+          <TypewriterMessage />
 
           <motion.p
             className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4 mt-10"
