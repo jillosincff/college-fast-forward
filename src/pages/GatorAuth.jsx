@@ -770,7 +770,7 @@ export default function GatorAuth() {
                 <button
                   onClick={() => {
                     // Clear any pending role and go straight to Google sign-in
-                    localStorage.removeItem('pending_invite_role');
+                    try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* private browsing */ }
                     handleGoogleSignIn(true); // true = returning user
                   }}
                   className="text-[#0021A5] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
