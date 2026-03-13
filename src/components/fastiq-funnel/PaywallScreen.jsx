@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Lock, Loader2, Shield, ArrowLeft, Users } from 'lucide-react';
+import { Check, Zap, Lock, Loader2, Shield, ArrowLeft, Users, LogIn } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
 import { navigate } from '@/components/utils/navigation';
 import { onboardFromQuiz } from '@/functions/onboardFromQuiz';
@@ -13,10 +13,10 @@ const fadeUp = {
 };
 
 const BENEFITS = [
-  'Full names, LinkedIn profiles, verified UF connection',
-  'Personalized outreach drafts (copy-paste ready)',
-  'Pipeline tracking + follow-up reminders',
-  'Weekly scout — new alumni matches delivered automatically',
+  'Full names & LinkedIn profiles for every match',
+  'Copy-paste outreach messages drafted by AI',
+  'Pipeline tracking + automatic follow-up nudges',
+  'Weekly scout — new alumni matches delivered to you',
   'Unlimited company research & salary intel',
 ];
 
@@ -26,7 +26,13 @@ export default function PaywallScreen() {
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const { toast } = useToast();
+
+  // Check auth status on mount
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => setIsAuthenticated(authed));
+  }, []);
 
   // On mount: track paywall view and check if returning from successful checkout
   useEffect(() => {
@@ -79,6 +85,16 @@ export default function PaywallScreen() {
   const scarcityCount = 3 + Math.floor(Math.random() * 8);
 
   const handleCheckout = async () => {
+    // Check auth first — redirect to sign in if needed
+    const authed = await base44.auth.isAuthenticated();
+    if (!authed) {
+      setIsAuthenticated(false);
+      sessionStorage.setItem('fastiq_quiz_answers', JSON.stringify(buildQuizPayload()));
+      sessionStorage.setItem('fastiq_checkout_plan', selectedPlan);
+      setCheckoutError('sign_in_required');
+      return;
+    }
+
     setCheckingOut(true);
     setCheckoutError('');
 
@@ -106,7 +122,14 @@ export default function PaywallScreen() {
       setCheckingOut(false);
     } catch (err) {
       const errData = err?.response?.data;
-      setCheckoutError(errData?.error || 'Checkout failed. Please try again.');
+      const errMsg = errData?.error || err?.message || '';
+      // Detect auth-related failures
+      if (errMsg.toLowerCase().includes('unauth') || errMsg.toLowerCase().includes('sign in') || err?.response?.status === 401) {
+        setIsAuthenticated(false);
+        setCheckoutError('sign_in_required');
+      } else {
+        setCheckoutError(errMsg || 'Checkout failed. Please try again.');
+      }
       setCheckingOut(false);
     }
   };
@@ -231,20 +254,44 @@ export default function PaywallScreen() {
         </button>
       </motion.div>
 
-      {checkoutError && (
+      {/* Auth prompt — shown when user needs to sign in */}
+      {(checkoutError === 'sign_in_required' || isAuthenticated === false) && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 px-5 py-4 rounded-xl border-2 border-orange-400/30"
+          style={{ background: 'linear-gradient(135deg, rgba(250,70,22,0.12) 0%, rgba(250,70,22,0.04) 100%)' }}
+        >
+          <p className="text-white font-semibold text-[14px] mb-1">Quick sign-in needed</p>
+          <p className="text-white/50 text-[13px] mb-3">Create a free account in 10 seconds — your quiz results are saved.</p>
+          <button
+            onClick={handleSignUpFirst}
+            className="w-full rounded-xl py-3 text-[14px] font-bold text-white flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+            style={{ background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)' }}
+          >
+            <LogIn className="w-4 h-4" /> Sign In to Continue →
+          </button>
+        </motion.div>
+      )}
+
+      {/* Generic checkout error */}
+      {checkoutError && checkoutError !== 'sign_in_required' && (
         <motion.div variants={fadeUp} className="mt-3 px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/25">
           <p className="text-[13px] text-red-300">{checkoutError}</p>
           <p className="text-[12px] text-red-300/60 mt-1">
-            You may need to <button onClick={handleSignUpFirst} className="underline hover:text-red-200" style={{ minHeight: 'auto', minWidth: 'auto' }}>sign in first</button> before checking out.
+            If this persists, try <button onClick={handleSignUpFirst} className="underline hover:text-red-200" style={{ minHeight: 'auto', minWidth: 'auto' }}>signing in first</button>.
           </p>
         </motion.div>
       )}
 
-      {/* Scarcity */}
-      <motion.div variants={fadeUp} className="text-center mt-5">
-        <p className="text-white/30 text-[12px] flex items-center justify-center gap-1.5">
+      {/* Social proof + Scarcity */}
+      <motion.div variants={fadeUp} className="text-center mt-5 space-y-1.5">
+        <p className="text-white/45 text-[12px] font-medium">
+          ✅ Already helped 47 UF students send 200+ intros
+        </p>
+        <p className="text-white/25 text-[11px] flex items-center justify-center gap-1.5">
           <Users className="w-3 h-3" />
-          Only {scarcityCount} {major} '{year} students unlocked their list this month
+          {scarcityCount} {major} '{year} students unlocked this month
         </p>
       </motion.div>
 
