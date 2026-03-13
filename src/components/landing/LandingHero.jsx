@@ -89,51 +89,62 @@ export default function LandingHero({ stats, onClaim }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.32 }}
-          className="mt-14 max-w-lg mx-auto"
+          className="mt-16 max-w-xl mx-auto"
         >
           <ScanningAnimation />
 
-          <p className="text-[#E5E7EB] text-[15px] sm:text-base leading-[1.6] mb-5">
-            We already found real UF grads inside the companies kids are targeting.
+          <p className="text-white text-[16px] sm:text-[18px] leading-[1.6] mb-7 font-medium">
+            We already found <span className="text-[#FA4616] font-bold">real UF grads</span> inside the companies kids are targeting.
           </p>
 
-          <div className="flex items-center justify-center gap-3 mb-5">
+          <div className="flex items-center justify-center gap-4 mb-7">
             {blurredAlumni.map((a, i) => (
               <motion.div
                 key={i}
                 onMouseEnter={() => setHoveredCard(i)}
                 onMouseLeave={() => setHoveredCard(null)}
-                whileHover={{ scale: 1.04, y: -2 }}
-                className="flex-1 rounded-xl px-3 py-4 border text-center cursor-default transition-all duration-300"
+                whileHover={{ scale: 1.06, y: -4 }}
+                className="flex-1 rounded-2xl px-4 py-6 border text-center cursor-default transition-all duration-300"
                 style={{
-                  borderColor: hoveredCard === i ? 'rgba(250,70,22,0.3)' : 'rgba(255,255,255,0.08)',
+                  borderColor: hoveredCard === i ? 'rgba(250,70,22,0.4)' : 'rgba(255,255,255,0.1)',
                   background: hoveredCard === i
-                    ? 'rgba(250,70,22,0.08)'
-                    : 'rgba(255,255,255,0.04)',
-                  backdropFilter: 'blur(12px)',
+                    ? 'rgba(250,70,22,0.12)'
+                    : 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(16px)',
                   boxShadow: hoveredCard === i
-                    ? '0 0 30px rgba(250,70,22,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
-                    : '0 0 16px rgba(255,255,255,0.02), inset 0 1px 0 rgba(255,255,255,0.06)',
+                    ? '0 0 40px rgba(250,70,22,0.25), 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    : '0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
                 }}
               >
-                <div className="text-lg mb-1.5">{a.icon}</div>
+                <div className="text-2xl mb-2">{a.icon}</div>
+                {/* Blurred name placeholder that reveals on hover */}
                 <div
-                  className="w-12 h-1.5 rounded-full mx-auto mb-2 transition-all duration-500"
+                  className="w-16 h-2 rounded-full mx-auto mb-3 transition-all duration-500"
                   style={{
                     background: hoveredCard === i
-                      ? 'linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15))'
+                      ? 'linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2))'
                       : 'rgba(255,255,255,0.08)',
+                    boxShadow: hoveredCard === i ? '0 0 8px rgba(255,255,255,0.15)' : 'none',
                   }}
                 />
-                <p className="text-white text-[12px] sm:text-[13px] font-semibold leading-tight">{a.role}</p>
-                <p className="text-white/40 text-[10px] mt-1 font-medium">{a.year}</p>
+                <p className="text-white text-[13px] sm:text-[14px] font-bold leading-tight">{a.role}</p>
+                <p
+                  className="text-[11px] mt-1.5 font-semibold transition-all duration-500"
+                  style={{ color: hoveredCard === i ? 'rgba(250,70,22,0.8)' : 'rgba(255,255,255,0.35)' }}
+                >
+                  {a.year}
+                </p>
               </motion.div>
             ))}
           </div>
 
-          <p className="text-[#FA4616] text-sm font-semibold tracking-wide">
+          <motion.p
+            className="text-[#FA4616] text-base sm:text-lg font-bold tracking-wide cursor-pointer"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+          >
             Take the 45-second quiz to see yours →
-          </p>
+          </motion.p>
         </motion.div>
 
         {/* Testimonial */}
