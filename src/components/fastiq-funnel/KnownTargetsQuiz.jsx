@@ -108,12 +108,12 @@ export default function KnownTargetsQuiz() {
       <p className="text-[12px] text-white/30 mt-2">Press Enter to add custom companies</p>
     </QuizStep>,
 
-    // Step 4: Location
-    <QuizStep key={3} questionNumber={4} totalQuestions={6} title="Where do you want to work?" canNext={!!answers.location} onNext={() => { nextStep(); setPhase('teaser'); }}>
+    // Step 4: Location — after this, show teaser
+    <QuizStep key={3} questionNumber={4} totalQuestions={6} title="Where do you want to work?" canNext={!!answers.location} onNext={() => setPhase('teaser')}>
       <ChipSelect options={LOCATIONS} selected={answers.location} onChange={(v) => updateAnswer('location', v)} />
     </QuizStep>,
 
-    // Step 5: Role type (after teaser)
+    // Step 5: Role type (after teaser break, step resumes at 4)
     <QuizStep key={4} questionNumber={5} totalQuestions={6} title="What type of role?" canNext={!!answers.role_type} onNext={nextStep}>
       <ChipSelect options={[
         { value: 'internship', label: '📋 Internship' },
