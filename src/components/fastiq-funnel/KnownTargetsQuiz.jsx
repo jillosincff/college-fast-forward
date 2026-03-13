@@ -126,7 +126,7 @@ export default function KnownTargetsQuiz() {
           </div>
         )}
       </div>
-      <p className="text-[12px] text-white/30 mt-2">Press Enter to add custom companies</p>
+      <p className="text-[12px] text-white/30 mt-2">Press Enter to add • Separate multiple with commas</p>
     </QuizStep>,
 
     // Step 4: Location — after this, show teaser
