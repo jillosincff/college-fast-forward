@@ -27,27 +27,28 @@ export default function LandingFooterCTA({ stats, onClaim, onFAQ, showFAQ }) {
   return (
     <>
       {/* Main CTA block */}
-      <section className="py-16 sm:py-20 px-4" style={{ backgroundColor: '#0021A5' }}>
+      <section className="py-20 sm:py-24 px-4" style={{ backgroundColor: '#0021A5' }}>
         <div className="max-w-md mx-auto text-center">
           <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <p className="text-[#FA4616] font-bold text-xl sm:text-2xl mb-3">
+            <p className="text-[#FA4616] font-bold text-xl sm:text-2xl mb-6">
               🔥 {stats.spots_left} FREE founding spots left — claim yours before they're gone.
             </p>
 
             <Button
               onClick={onClaim}
               size="lg"
-              className="bg-white text-[#0021A5] hover:bg-slate-100 w-full py-6 text-lg font-bold shadow-2xl min-h-[56px]"
+              className="bg-white text-[#0021A5] hover:bg-slate-100 w-full py-6 text-lg font-bold min-h-[56px]"
+              style={{ boxShadow: '0 4px 30px rgba(255,255,255,0.15)' }}
             >
               Claim Your Free Spot
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
 
-            <p className="text-white/50 text-xs mt-3">Founding members stay free forever.</p>
+            <p className="text-white/50 text-xs mt-4">Founding members stay free forever.</p>
 
             <button
               onClick={onFAQ}
-              className="mt-8 text-white/40 text-sm underline underline-offset-4 hover:text-white/60 transition-colors"
+              className="mt-10 text-white/40 text-sm underline underline-offset-4 hover:text-white/60 transition-colors"
               style={{ minHeight: 'auto', minWidth: 'auto' }}
             >
               Questions?
