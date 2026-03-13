@@ -654,11 +654,17 @@ export default function GatorAuth() {
               {/* Parent Option */}
                 <button
                   onClick={() => {
+                    console.log('🔵 [GatorAuth] Parent button clicked');
                     setSelectedRole('parent');
                     // Auto-advance: save role and proceed immediately
-                    localStorage.setItem('pending_invite_role', 'parent');
-                    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    try {
+                      localStorage.setItem('pending_invite_role', 'parent');
+                      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+                    } catch (e) {
+                      console.warn('localStorage unavailable:', e);
+                    }
                     if (!user) {
+                      console.log('🔵 [GatorAuth] No user, advancing to OAuth');
                       setStep('oauth');
                     } else {
                       const hasInviteCode = localStorage.getItem('pending_invite_code');
