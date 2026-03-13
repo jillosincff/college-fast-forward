@@ -120,13 +120,13 @@ export default function MatchScoreDashboard() {
         style={{ background: 'rgba(250,70,22,0.08)' }}
       >
         <div className="flex items-start gap-3">
-          <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+          <span className="text-[18px] mt-0.5 flex-shrink-0">🔥</span>
           <div>
             <p className="text-white font-semibold text-[14px] mb-0.5">
-              {warmIntros} warm intros waiting — summer roles close in 4–6 weeks
+              {warmIntros} warm intros ready NOW — most summer roles fill in the next 4–6 weeks
             </p>
             <p className="text-white/45 text-[12px]">
-              Students who unlock send 3.2× more messages and get 2.8× more replies
+              Unlock before they're gone. Students who act first get 3.2× more replies.
             </p>
           </div>
         </div>

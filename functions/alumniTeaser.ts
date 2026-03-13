@@ -96,13 +96,29 @@ Deno.serve(async (req) => {
             matchReason: `Works at ${top.company}${top.match_score ? ` · ${top.match_score}% match` : ''}`,
           });
         } else {
-          // Synthetic teaser if no real data
+          // Synthetic teaser with varied roles/years when no real data
+          const syntheticRoles = [
+            { role: 'Product Marketing Manager', year: "'21" },
+            { role: 'Software Engineer', year: "'19" },
+            { role: 'Strategy Consultant', year: "'22" },
+            { role: 'Financial Analyst', year: "'20" },
+            { role: 'Program Manager', year: "'23" },
+          ];
+          const syntheticReasons = [
+            `Strong match for your ${major || 'target'} background`,
+            `High response rate — open to coffee chats`,
+            `Referred 2 interns last cycle`,
+            `Active on CFF — recently helped a student`,
+            `Works in your target area`,
+          ];
+          const pick = syntheticRoles[teaserCards.length % syntheticRoles.length];
+          const reason = syntheticReasons[teaserCards.length % syntheticReasons.length];
           teaserCards.push({
             company,
-            roleTitle: 'Senior Professional',
+            roleTitle: `${pick.role}`,
             blurredName: 'UF Alum',
-            gradYear: "'20",
-            matchReason: `Works at ${company}`,
+            gradYear: pick.year,
+            matchReason: reason,
           });
         }
       }
@@ -172,15 +188,23 @@ Deno.serve(async (req) => {
           count: pathCount,
         });
       } else {
-        // Synthetic fallback
+        // Synthetic fallback with varied roles
         const fallbackCompany = (INDUSTRY_EXAMPLE_COMPANIES[mappedIndustries[0]] || ['Company'])[0];
+        const explorerRoles = [
+          { role: 'Associate Product Manager', year: "'22" },
+          { role: 'Marketing Analyst', year: "'21" },
+          { role: 'Investment Banking Analyst', year: "'23" },
+          { role: 'UX Researcher', year: "'20" },
+          { role: 'Data Scientist', year: "'19" },
+        ];
+        const pick = explorerRoles[paths.length % explorerRoles.length];
         paths.push({
           path: pathLabel,
           company: fallbackCompany,
-          roleTitle: 'Senior Professional',
+          roleTitle: pick.role,
           blurredName: 'UF Alum',
-          gradYear: "'20",
-          matchReason: `${pathLabel} at ${fallbackCompany}`,
+          gradYear: pick.year,
+          matchReason: `${pathLabel} at ${fallbackCompany} · High response rate`,
           count: pathCount,
         });
       }
