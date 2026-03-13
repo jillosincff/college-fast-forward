@@ -6,54 +6,40 @@ const SIGNATURE = "— Alex, UF '27";
 const TYPING_SPEED = 35;
 
 export default function TypewriterMessage() {
-  const [displayed, setDisplayed] = useState('');
+  const [charIndex, setCharIndex] = useState(0);
   const [showSignature, setShowSignature] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const containerRef = useRef(null);
-  const intervalRef = useRef(null);
+  const [started, setStarted] = useState(false);
+  const timerRef = useRef(null);
 
+  // Start typing after a 600ms delay once mounted
   useEffect(() => {
-    if (!containerRef.current || hasPlayed) return;
+    const delay = setTimeout(() => setStarted(true), 600);
+    return () => clearTimeout(delay);
+  }, []);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasPlayed) {
-          setHasPlayed(true);
-          observer.disconnect();
-          // Start typing
-          let idx = 0;
-          intervalRef.current = setInterval(() => {
-            idx += 1;
-            if (idx >= FULL_MESSAGE.length) {
-              setDisplayed(FULL_MESSAGE);
-              clearInterval(intervalRef.current);
-              setTimeout(() => setShowSignature(true), 400);
-              return;
-            }
-            setDisplayed(FULL_MESSAGE.slice(0, idx));
-          }, TYPING_SPEED);
-        }
-      },
-      { threshold: 0.2 }
-    );
+  // Typing loop
+  useEffect(() => {
+    if (!started) return;
+    if (charIndex >= FULL_MESSAGE.length) {
+      setTimeout(() => setShowSignature(true), 400);
+      return;
+    }
+    timerRef.current = setTimeout(() => {
+      setCharIndex(prev => prev + 1);
+    }, TYPING_SPEED);
+    return () => clearTimeout(timerRef.current);
+  }, [started, charIndex]);
 
-    observer.observe(containerRef.current);
-    return () => {
-      observer.disconnect();
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [hasPlayed]);
-
-  const isTyping = hasPlayed && displayed.length < FULL_MESSAGE.length;
-  const isDone = displayed.length >= FULL_MESSAGE.length;
+  const displayed = FULL_MESSAGE.slice(0, charIndex);
+  const isTyping = started && charIndex < FULL_MESSAGE.length;
 
   return (
-    <div ref={containerRef} className="max-w-lg mx-auto mt-10">
+    <div className="max-w-lg mx-auto mt-10">
       {/* Label pill */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={hasPlayed ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.3 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
         className="text-center mb-4"
       >
         <span
@@ -72,8 +58,8 @@ export default function TypewriterMessage() {
       {/* Message box */}
       <motion.div
         initial={{ opacity: 0, y: 14 }}
-        animate={hasPlayed ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
         className="rounded-2xl p-6 sm:p-7"
         style={{
           background: 'rgba(255,255,255,0.08)',
@@ -83,10 +69,21 @@ export default function TypewriterMessage() {
           boxShadow: '0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
       >
-        <p className="text-white text-[16px] leading-[1.7] font-medium text-left min-h-[96px]">
+        <p
+          className="text-left min-h-[96px]"
+          style={{ color: '#FFFFFF', fontSize: '16px', lineHeight: 1.7, fontWeight: 500 }}
+        >
           {displayed}
-          {(isTyping || !isDone) && (
-            <span className="typewriter-cursor" />
+          {isTyping && (
+            <span
+              className="inline-block align-middle ml-0.5"
+              style={{
+                width: '2px',
+                height: '18px',
+                background: '#FA4616',
+                animation: 'twCursorBlink 0.6s step-end infinite',
+              }}
+            />
           )}
         </p>
 
@@ -95,7 +92,8 @@ export default function TypewriterMessage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="text-[#CBD5E1] text-sm font-semibold mt-4 text-left"
+            className="text-sm font-semibold mt-4 text-left"
+            style={{ color: '#CBD5E1' }}
           >
             {SIGNATURE}
           </motion.p>
@@ -103,16 +101,7 @@ export default function TypewriterMessage() {
       </motion.div>
 
       <style>{`
-        .typewriter-cursor {
-          display: inline-block;
-          width: 2px;
-          height: 18px;
-          background: #FA4616;
-          margin-left: 2px;
-          vertical-align: middle;
-          animation: cursorBlink 0.6s step-end infinite;
-        }
-        @keyframes cursorBlink {
+        @keyframes twCursorBlink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
