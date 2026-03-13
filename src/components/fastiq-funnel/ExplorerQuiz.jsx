@@ -47,8 +47,8 @@ export default function ExplorerQuiz() {
       <ChipSelect options={GRAD_YEARS} selected={answers.grad_year} onChange={(v) => updateAnswer('grad_year', v)} />
     </QuizStep>,
 
-    // Q3: Interests
-    <QuizStep key={2} questionNumber={3} totalQuestions={4} title="What excites you most?" subtitle="Pick all that apply" canNext={(answers.interests || []).length > 0} onNext={() => { nextStep(); setPhase('teaser'); }}>
+    // Q3: Interests — triggers teaser reveal
+    <QuizStep key={2} questionNumber={3} totalQuestions={4} title="What excites you most?" subtitle="Pick all that apply" canNext={(answers.interests || []).length > 0} onNext={() => setPhase('teaser')}>
       <ChipSelect options={INTERESTS} selected={answers.interests} onChange={(v) => updateAnswer('interests', v)} multi />
     </QuizStep>,
 
