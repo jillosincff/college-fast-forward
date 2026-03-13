@@ -52,6 +52,21 @@ export default function KnownTargetsQuiz() {
     c => c.toLowerCase().includes(companyInput.toLowerCase()) && !companies.includes(c)
   ).slice(0, 6);
 
+  // Auto-parse comma/semicolon separated text into individual companies
+  const flushCompanyInput = () => {
+    if (!companyInput.trim()) return;
+    const names = companyInput.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+    let updated = [...companies];
+    for (const name of names) {
+      if (updated.length < 5 && !updated.includes(name)) {
+        updated.push(name);
+      }
+    }
+    updateAnswer('companies', updated);
+    setCompanyInput('');
+    setShowSuggestions(false);
+  };
+
   const trackStep = (stepNum, nextFn) => () => {
     base44.analytics.track({ eventName: 'quiz_step_completed', properties: { step: stepNum, path: 'known' } });
     nextFn();
