@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Check, Lock } from "lucide-react";
+import { ArrowRight, Check, Lock, Zap, Target, Compass } from "lucide-react";
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import InsidePrecisionMode from '@/components/precision/InsidePrecisionMode';
 import PricingTiers from '@/components/home/PricingTiers';
 import LiveNetworkStats from '@/components/landing/LiveNetworkStats';
+import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
 import {
   Accordion,
   AccordionContent,
@@ -70,6 +71,8 @@ export default function LandingPage() {
     trackEvent('cta_precision_mode_clicked');
     navigate('GatorAuth');
   };
+
+  const [showFunnel, setShowFunnel] = useState(false);
 
   const handleFastIQCTA = () => {
     trackEvent('cta_fastiq_clicked');
@@ -260,6 +263,72 @@ export default function LandingPage() {
         {/* INSIDE FASTIQ */}
         <section id="precision-mode">
           <InsidePrecisionMode onUpgrade={handlePrecisionUpgrade} />
+        </section>
+
+        {/* FASTIQ QUIZ FUNNEL */}
+        <section id="fastiq-quiz" className="relative">
+          {showFunnel ? (
+            <FastIQFunnel onClose={() => setShowFunnel(false)} />
+          ) : (
+            <div
+              className="relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 60%, #001872 100%)' }}
+            >
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 80%, rgba(250,70,22,0.06) 0%, transparent 60%)' }} />
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                className="relative z-10 max-w-3xl mx-auto px-4 sm:px-5 py-16 sm:py-20 text-center"
+              >
+                <motion.div
+                  variants={fadeInUp}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/25 mb-6"
+                >
+                  <Zap className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider">FASTIQ™ Career Engine</span>
+                </motion.div>
+
+                <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight leading-tight">
+                  Find UF alumni who can <span className="text-orange-400">open doors</span> at your dream companies
+                </motion.h2>
+                <motion.p variants={fadeInUp} className="text-white/55 text-base sm:text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+                  Take a 60-second quiz and see how many warm intros are waiting for you — no sign-up required.
+                </motion.p>
+
+                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    onClick={() => { trackEvent('fastiq_funnel_known_clicked'); setShowFunnel(true); }}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
+                      boxShadow: '0 0 30px rgba(250,70,22,0.3)',
+                    }}
+                  >
+                    <Target className="w-5 h-5" />
+                    I know my dream companies
+                  </button>
+
+                  <button
+                    onClick={() => { trackEvent('fastiq_funnel_explorer_clicked'); setShowFunnel(true); }}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
+                      boxShadow: '0 0 30px rgba(6,182,212,0.2)',
+                    }}
+                  >
+                    <Compass className="w-5 h-5" />
+                    Help me figure it out
+                  </button>
+                </motion.div>
+
+                <motion.p variants={fadeInUp} className="text-[12px] text-white/30 mt-6">
+                  Free quiz · No account needed · See results instantly
+                </motion.p>
+              </motion.div>
+            </div>
+          )}
         </section>
 
         {/* STATS SECTION */}
