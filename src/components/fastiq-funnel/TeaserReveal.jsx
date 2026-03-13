@@ -77,7 +77,7 @@ function generateTeasers(answers) {
 }
 
 export default function TeaserReveal() {
-  const { answers, setPhase, setStep, setMatchData } = useFunnel();
+  const { answers, setPhase, setStep, setMatchData, path, nextStep } = useFunnel();
   const [teasers, setTeasers] = useState(null);
   const [animating, setAnimating] = useState(true);
 
@@ -93,9 +93,13 @@ export default function TeaserReveal() {
   }, []);
 
   const handleContinue = () => {
-    // For known path: advance step to 4 (index) to show Q5 of 6
-    // For explorer path: advance step to 3 (index) to show Q4 of 4
-    const { path } = useFunnel();
+    // For known path: advance to step index 4 (Q5 of 6)
+    // For explorer path: advance to step index 3 (Q4 of 4)
+    if (path === 'known') {
+      setStep(4);
+    } else {
+      setStep(3);
+    }
     setPhase('quiz');
   };
 
