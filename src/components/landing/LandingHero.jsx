@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import ScanningAnimation from '@/components/landing/ScanningAnimation';
 
 const blurredAlumni = [
-  { role: 'Marketing at Nike', year: "UF '22", icon: '👟' },
-  { role: 'Software Engineer at Google', year: "UF '21", icon: '🔍' },
-  { role: 'Analyst at Goldman Sachs', year: "UF '23", icon: '📊' },
+  { role: 'Marketing at Nike', year: "UF '22", icon: '👟', color: '#FA4616' },
+  { role: 'Software Engineer at Google', year: "UF '21", icon: '🔍', color: '#4285F4' },
+  { role: 'Analyst at Goldman Sachs', year: "UF '23", icon: '📊', color: '#D4A843' },
 ];
 
 export default function LandingHero({ stats, onClaim }) {
@@ -93,44 +93,54 @@ export default function LandingHero({ stats, onClaim }) {
         >
           <ScanningAnimation />
 
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] mb-7 font-medium">
-            We already found <span className="text-[#FA4616] font-bold">real UF grads</span> inside the companies kids are targeting.
+          <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] mb-8 font-bold">
+            We already found <span className="text-[#FA4616]">real UF grads</span> inside the companies kids are targeting.
           </p>
 
-          <div className="flex items-center justify-center gap-4 mb-7">
+          <div className="flex items-center justify-center gap-5 mb-8">
             {blurredAlumni.map((a, i) => (
               <motion.div
                 key={i}
                 onMouseEnter={() => setHoveredCard(i)}
                 onMouseLeave={() => setHoveredCard(null)}
-                whileHover={{ scale: 1.06, y: -4 }}
-                className="flex-1 rounded-2xl px-4 py-6 border text-center cursor-default transition-all duration-300"
+                whileHover={{ scale: 1.08, y: -6 }}
+                className="flex-1 rounded-2xl px-5 py-7 text-center cursor-default transition-all duration-300"
                 style={{
-                  borderColor: hoveredCard === i ? 'rgba(250,70,22,0.4)' : 'rgba(255,255,255,0.1)',
+                  border: `1px solid ${hoveredCard === i ? 'rgba(250,70,22,0.5)' : 'rgba(250,70,22,0.35)'}`,
                   background: hoveredCard === i
-                    ? 'rgba(250,70,22,0.12)'
-                    : 'rgba(255,255,255,0.05)',
-                  backdropFilter: 'blur(16px)',
+                    ? 'rgba(250,70,22,0.15)'
+                    : 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
                   boxShadow: hoveredCard === i
-                    ? '0 0 40px rgba(250,70,22,0.25), 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    : '0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
+                    ? '0 0 22px 10px rgba(250,70,22,0.8), 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)'
+                    : '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                 }}
               >
-                <div className="text-2xl mb-2">{a.icon}</div>
+                <div
+                  className="text-[60px] leading-none mb-3 transition-all duration-500"
+                  style={{
+                    filter: hoveredCard === i
+                      ? `drop-shadow(0 0 12px ${a.color}80)`
+                      : `drop-shadow(0 0 6px ${a.color}40)`,
+                  }}
+                >
+                  {a.icon}
+                </div>
                 {/* Blurred name placeholder that reveals on hover */}
                 <div
-                  className="w-16 h-2 rounded-full mx-auto mb-3 transition-all duration-500"
+                  className="w-20 h-2.5 rounded-full mx-auto mb-3 transition-all duration-500"
                   style={{
                     background: hoveredCard === i
-                      ? 'linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2))'
-                      : 'rgba(255,255,255,0.08)',
-                    boxShadow: hoveredCard === i ? '0 0 8px rgba(255,255,255,0.15)' : 'none',
+                      ? 'linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25))'
+                      : 'rgba(255,255,255,0.1)',
+                    boxShadow: hoveredCard === i ? '0 0 12px rgba(255,255,255,0.2)' : 'none',
                   }}
                 />
-                <p className="text-white text-[13px] sm:text-[14px] font-bold leading-tight">{a.role}</p>
+                <p className="text-white text-[17px] sm:text-[21px] font-bold leading-tight">{a.role}</p>
                 <p
-                  className="text-[11px] mt-1.5 font-semibold transition-all duration-500"
-                  style={{ color: hoveredCard === i ? 'rgba(250,70,22,0.8)' : 'rgba(255,255,255,0.35)' }}
+                  className="text-sm mt-2 font-semibold transition-all duration-500"
+                  style={{ color: hoveredCard === i ? '#FA4616' : '#CBD5E1' }}
                 >
                   {a.year}
                 </p>
@@ -139,8 +149,8 @@ export default function LandingHero({ stats, onClaim }) {
           </div>
 
           <motion.p
-            className="text-[#FA4616] text-base sm:text-lg font-bold tracking-wide cursor-pointer"
-            whileHover={{ scale: 1.03 }}
+            className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4"
+            whileHover={{ scale: 1.03, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
             Take the 45-second quiz to see yours →
