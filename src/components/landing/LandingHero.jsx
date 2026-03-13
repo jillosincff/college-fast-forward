@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
 import { motion } from 'framer-motion';
 import ScanningAnimation from '@/components/landing/ScanningAnimation';
+import TypewriterMessage from '@/components/landing/TypewriterMessage';
 
 const blurredAlumni = [
   { role: 'Marketing at Nike', year: "UF '22", icon: '👟', color: '#FA4616' },
@@ -12,6 +13,18 @@ const blurredAlumni = [
 
 export default function LandingHero({ stats, onClaim }) {
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [teaserInView, setTeaserInView] = useState(false);
+  const teaserRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!teaserRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setTeaserInView(entry.isIntersecting),
+      { threshold: 0.3 }
+    );
+    obs.observe(teaserRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
@@ -86,18 +99,19 @@ export default function LandingHero({ stats, onClaim }) {
 
         {/* Scanning + Blurred Alumni Teaser */}
         <motion.div
+          ref={teaserRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.32 }}
-          className="mt-16 max-w-xl mx-auto"
+          className="mt-16 max-w-2xl mx-auto"
         >
           <ScanningAnimation />
 
-          <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] mb-8 font-bold">
-            We already found <span className="text-[#FA4616]">real UF grads</span> inside the companies kids are targeting.
+          <p className="text-white text-[20px] sm:text-[24px] leading-[1.5] mb-8 font-bold">
+            We found <span className="text-[#FA4616]">real UF alumni</span> already working inside the companies you're targeting.
           </p>
 
-          <div className="flex items-center justify-center gap-5 mb-8">
+          <div className="flex items-center justify-center gap-5 mb-4">
             {blurredAlumni.map((a, i) => (
               <motion.div
                 key={i}
@@ -127,7 +141,6 @@ export default function LandingHero({ stats, onClaim }) {
                 >
                   {a.icon}
                 </div>
-                {/* Blurred name placeholder that reveals on hover */}
                 <div
                   className="w-20 h-2.5 rounded-full mx-auto mb-3 transition-all duration-500"
                   style={{
@@ -148,12 +161,15 @@ export default function LandingHero({ stats, onClaim }) {
             ))}
           </div>
 
+          {/* Typewriter payoff */}
+          <TypewriterMessage inView={teaserInView} />
+
           <motion.p
-            className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4"
+            className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4 mt-10"
             whileHover={{ scale: 1.03, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
-            Take the 45-second quiz to see yours →
+            Take the 45-second quiz to see your own personalized message →
           </motion.p>
         </motion.div>
 
