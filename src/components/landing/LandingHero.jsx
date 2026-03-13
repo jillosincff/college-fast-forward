@@ -1,18 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
 import { motion } from 'framer-motion';
 import ScanningAnimation from '@/components/landing/ScanningAnimation';
-import TypewriterMessage from '@/components/landing/TypewriterMessage';
-
-const blurredAlumni = [
-  { role: 'Marketing at Nike', year: "UF '22", icon: '👟', color: '#FA4616' },
-  { role: 'Software Engineer at Google', year: "UF '21", icon: '🔍', color: '#4285F4' },
-  { role: 'Analyst at Goldman Sachs', year: "UF '23", icon: '📊', color: '#D4A843' },
-];
+import AlumniTeaserDemo from '@/components/landing/AlumniTeaserDemo';
 
 export default function LandingHero({ stats, onClaim }) {
-  const [hoveredCard, setHoveredCard] = useState(null);
 
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
@@ -98,58 +91,7 @@ export default function LandingHero({ stats, onClaim }) {
             We found <span className="text-[#FA4616]">real UF alumni</span> already working inside the companies you're targeting.
           </p>
 
-          <div className="flex items-center justify-center gap-5 mb-4">
-            {blurredAlumni.map((a, i) => (
-              <motion.div
-                key={i}
-                onMouseEnter={() => setHoveredCard(i)}
-                onMouseLeave={() => setHoveredCard(null)}
-                whileHover={{ scale: 1.08, y: -6 }}
-                className="flex-1 rounded-2xl px-5 py-7 text-center cursor-default transition-all duration-300"
-                style={{
-                  border: `1px solid ${hoveredCard === i ? 'rgba(250,70,22,0.5)' : 'rgba(250,70,22,0.35)'}`,
-                  background: hoveredCard === i
-                    ? 'rgba(250,70,22,0.15)'
-                    : 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
-                  boxShadow: hoveredCard === i
-                    ? '0 0 22px 10px rgba(250,70,22,0.8), 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)'
-                    : '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-                }}
-              >
-                <div
-                  className="text-[60px] leading-none mb-3 transition-all duration-500"
-                  style={{
-                    filter: hoveredCard === i
-                      ? `drop-shadow(0 0 12px ${a.color}80)`
-                      : `drop-shadow(0 0 6px ${a.color}40)`,
-                  }}
-                >
-                  {a.icon}
-                </div>
-                <div
-                  className="w-20 h-2.5 rounded-full mx-auto mb-3 transition-all duration-500"
-                  style={{
-                    background: hoveredCard === i
-                      ? 'linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25))'
-                      : 'rgba(255,255,255,0.1)',
-                    boxShadow: hoveredCard === i ? '0 0 12px rgba(255,255,255,0.2)' : 'none',
-                  }}
-                />
-                <p className="text-white text-[17px] sm:text-[21px] font-bold leading-tight">{a.role}</p>
-                <p
-                  className="text-sm mt-2 font-semibold transition-all duration-500"
-                  style={{ color: hoveredCard === i ? '#FA4616' : '#CBD5E1' }}
-                >
-                  {a.year}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Typewriter payoff */}
-          <TypewriterMessage />
+          <AlumniTeaserDemo />
 
           <motion.p
             className="text-[#FA4616] text-[19px] sm:text-[23px] font-bold tracking-wide cursor-pointer hover:underline underline-offset-4 mt-10"
