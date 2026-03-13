@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Lock, Sparkles, Users } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
 import { alumniTeaser } from '@/functions/alumniTeaser';
+import { base44 } from '@/api/base44Client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -42,6 +43,10 @@ export default function TeaserReveal() {
   const [teasers, setTeasers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    base44.analytics.track({ eventName: 'teaser_reveal_viewed', properties: { path: path || 'unknown' } });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

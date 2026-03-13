@@ -3,6 +3,7 @@ import { useFunnel } from './FunnelContext';
 import QuizStep from './QuizStep';
 import ChipSelect from './ChipSelect';
 import { X } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const MAJORS = [
   'Business / Finance', 'Computer Science', 'Engineering', 'Marketing / Communications',

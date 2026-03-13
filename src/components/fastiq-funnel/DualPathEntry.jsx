@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Compass, Zap, X } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
+import { base44 } from '@/api/base44Client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -12,6 +13,7 @@ export default function DualPathEntry() {
   const { setPath, setPhase, onClose } = useFunnel();
 
   const choosePath = (p) => {
+    base44.analytics.track({ eventName: 'funnel_started', properties: { path: p } });
     setPath(p);
     setPhase('quiz');
   };

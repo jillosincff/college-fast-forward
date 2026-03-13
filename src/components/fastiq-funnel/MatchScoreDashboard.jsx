@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Users, MessageSquare, Clock, TrendingUp, Lock, ArrowRight } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
+import { base44 } from '@/api/base44Client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -37,6 +38,10 @@ export default function MatchScoreDashboard() {
   const targetScore = computeScore(answers, matchData);
   const totalMatches = matchData?.totalMatches || 15;
   const warmIntros = Math.floor(totalMatches * 0.6);
+
+  useEffect(() => {
+    base44.analytics.track({ eventName: 'match_score_viewed', properties: { score: targetScore, path: path || 'unknown' } });
+  }, []);
 
   // Animate score counting up
   useEffect(() => {

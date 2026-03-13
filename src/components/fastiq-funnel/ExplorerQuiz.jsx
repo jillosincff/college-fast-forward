@@ -2,6 +2,7 @@ import React from 'react';
 import { useFunnel } from './FunnelContext';
 import QuizStep from './QuizStep';
 import ChipSelect from './ChipSelect';
+import { base44 } from '@/api/base44Client';
 
 const MAJORS = [
   'Business / Finance', 'Computer Science', 'Engineering', 'Marketing / Communications',
@@ -36,24 +37,29 @@ const INDUSTRIES = [
 export default function ExplorerQuiz() {
   const { answers, updateAnswer, setPhase, step, nextStep } = useFunnel();
 
+  const trackStep = (stepNum, nextFn) => () => {
+    base44.analytics.track({ eventName: 'quiz_step_completed', properties: { step: stepNum, path: 'explorer' } });
+    nextFn();
+  };
+
   const steps = [
     // Q1: Major
-    <QuizStep key={0} questionNumber={1} totalQuestions={4} title="What's your major or intended major?" canNext={!!answers.major} onNext={nextStep}>
+    <QuizStep key={0} questionNumber={1} totalQuestions={4} title="What's your major or intended major?" canNext={!!answers.major} onNext={trackStep(1, nextStep)}>
       <ChipSelect options={MAJORS} selected={answers.major} onChange={(v) => updateAnswer('major', v)} />
     </QuizStep>,
 
     // Q2: Grad year
-    <QuizStep key={1} questionNumber={2} totalQuestions={4} title="When do you graduate?" canNext={!!answers.grad_year} onNext={nextStep}>
+    <QuizStep key={1} questionNumber={2} totalQuestions={4} title="When do you graduate?" canNext={!!answers.grad_year} onNext={trackStep(2, nextStep)}>
       <ChipSelect options={GRAD_YEARS} selected={answers.grad_year} onChange={(v) => updateAnswer('grad_year', v)} />
     </QuizStep>,
 
     // Q3: Interests — triggers teaser reveal
-    <QuizStep key={2} questionNumber={3} totalQuestions={4} title="What excites you most?" subtitle="Pick all that apply" canNext={(answers.interests || []).length > 0} onNext={() => setPhase('teaser')}>
+    <QuizStep key={2} questionNumber={3} totalQuestions={4} title="What excites you most?" subtitle="Pick all that apply" canNext={(answers.interests || []).length > 0} onNext={trackStep(3, () => setPhase('teaser'))}>
       <ChipSelect options={INTERESTS} selected={answers.interests} onChange={(v) => updateAnswer('interests', v)} multi />
     </QuizStep>,
 
     // Q4: Industries
-    <QuizStep key={3} questionNumber={4} totalQuestions={4} title="Curious about any of these industries?" subtitle="Pick all that apply" canNext={(answers.industries || []).length > 0} onNext={() => setPhase('score')}>
+    <QuizStep key={3} questionNumber={4} totalQuestions={4} title="Curious about any of these industries?" subtitle="Pick all that apply" canNext={(answers.industries || []).length > 0} onNext={trackStep(4, () => setPhase('score'))}>
       <ChipSelect options={INDUSTRIES} selected={answers.industries} onChange={(v) => updateAnswer('industries', v)} multi />
     </QuizStep>,
   ];

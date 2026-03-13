@@ -5,6 +5,7 @@ import { useFunnel } from './FunnelContext';
 import { navigate } from '@/components/utils/navigation';
 import { onboardFromQuiz } from '@/functions/onboardFromQuiz';
 import { useToast } from '@/components/ui/use-toast';
+import { base44 } from '@/api/base44Client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -27,11 +28,15 @@ export default function PaywallScreen() {
   const [showExitIntent, setShowExitIntent] = useState(false);
   const { toast } = useToast();
 
-  // On mount: check if returning from successful checkout
+  // On mount: track paywall view and check if returning from successful checkout
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
     if (params.get('checkout') === 'success') {
+      base44.analytics.track({ eventName: 'checkout_completed', properties: { plan: sessionStorage.getItem('fastiq_checkout_plan') || 'unknown' } });
+      sessionStorage.removeItem('fastiq_checkout_plan');
       persistQuizAnswers();
+    } else {
+      base44.analytics.track({ eventName: 'paywall_viewed', properties: {} });
     }
   }, []);
 
@@ -77,8 +82,10 @@ export default function PaywallScreen() {
     setCheckingOut(true);
     setCheckoutError('');
 
-    // Save quiz answers to sessionStorage so they survive the Stripe redirect
+    // Save quiz answers and plan to sessionStorage so they survive the Stripe redirect
     sessionStorage.setItem('fastiq_quiz_answers', JSON.stringify(buildQuizPayload()));
+    sessionStorage.setItem('fastiq_checkout_plan', selectedPlan);
+    base44.analytics.track({ eventName: 'checkout_started', properties: { plan: selectedPlan } });
 
     try {
       const baseUrl = window.location.origin;
