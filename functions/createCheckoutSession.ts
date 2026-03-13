@@ -25,7 +25,7 @@ const TIER_MAP = {
   fastiq_annual:  'fastiq',
 };
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 7; // 7-day free trial
 
 Deno.serve(async (req) => {
   try {
