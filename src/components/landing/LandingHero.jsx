@@ -22,25 +22,20 @@ export default function LandingHero({ stats, onClaim }) {
           transition={{ delay: 0.08 }}
           className="text-[26px] sm:text-4xl md:text-5xl lg:text-[56px] text-white font-extrabold leading-[1.1] mb-6 px-2"
         >
-          Imagine thousands of UF parents and alumni pledged to help your kid land a job.{' '}
+          Imagine having thousands of friends helping your kid land a job.{' '}
           <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
-            Now they are.
+            Now you do.
           </span>
         </motion.h1>
 
-        <motion.div
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-10 px-2 space-y-4"
+          className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-10 px-2"
         >
-          <p>
-            College Fast Forward is the private network of UF parents and alumni who have pledged to help each other's kids — with real introductions, advice, and connections that change trajectories.
-          </p>
-          <p className="text-white/60">
-            FASTIQ is the AI engine inside that network that actually makes it work: finds real UF grads already inside target companies, writes the messages your kid can send today, and tracks progress so you both see results instead of stress.
-          </p>
-        </motion.div>
+          College Fast Forward is the private network of UF parents and alumni who have pledged to help each other's kids — with real introductions, advice, and connections that actually change trajectories.
+        </motion.p>
 
         {/* CTA card */}
         <motion.div
@@ -54,7 +49,7 @@ export default function LandingHero({ stats, onClaim }) {
           </p>
           <p className="text-slate-400 text-sm mb-1">(of 1,000)</p>
           <p className="text-slate-600 text-sm mb-5 font-medium">
-            Founding members stay <strong className="text-slate-800">FREE forever</strong> — seriously, no catch.
+            Founding members stay <strong className="text-slate-800">FREE forever</strong> — no catch.
           </p>
 
           <Button

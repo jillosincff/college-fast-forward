@@ -38,12 +38,14 @@ export default function LandingParentRelief({ onCTA }) {
             </p>
             <p className="text-white/70 font-semibold">FASTIQ is the plan you can both believe in:</p>
             <ul className="space-y-2 pl-0 list-none">
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Finds real UF alumni at companies they're targeting (or should be)</span></li>
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Writes the exact messages they can send today — no awkward cold outreach</span></li>
-              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Shows progress you can both see: messages sent, replies received, coffee chats booked</span></li>
+              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Finds real UF alumni already working at the companies they're targeting</span></li>
+              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Writes the exact messages they can copy-paste and send today — no awkward cold outreach</span></li>
+              <li className="flex items-start gap-2"><span className="text-[#FA4616] mt-0.5">•</span><span>Shows progress you can both see: replies, chats, interviews</span></li>
             </ul>
             <p className="text-white/60">
-              You stop asking <span className="text-white/70">"any updates?"</span> every call because you can see it happening.
+              You stop asking <span className="text-white/70">"any updates?"</span> because there's actual momentum.
+              <br />
+              They stop feeling invisible because someone finally gave them a real shot.
             </p>
           </motion.div>
 

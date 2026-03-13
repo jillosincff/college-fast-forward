@@ -30,16 +30,12 @@ export default function LandingStudentPivot({ onFunnel }) {
           </span>
         </motion.h2>
 
-        <motion.p variants={fade} className="text-white/50 text-[14px] sm:text-[15px] mb-10 max-w-xl mx-auto leading-relaxed">
-          Your friends are posting offers. Your parents keep asking questions.
-          You have no experience, no connections, and no clue how to fix it.
-          <br /><br />
-          <span className="text-white/60 italic">It's not what you know — it's who you know.</span>
-          <br /><br />
-          <span className="text-white/70 font-medium">
+        <motion.div variants={fade} className="text-white/50 text-[14px] sm:text-[15px] mb-10 max-w-xl mx-auto leading-relaxed space-y-3">
+          <p>Your friends are posting offers. Your parents keep asking questions. You have no experience, no connections, and no clue how to fix it.</p>
+          <p className="text-white/70 font-medium">
             FASTIQ finds real UF grads inside your target companies, messages them for you, and gets your foot in the door — bypassing thousands of cold applicants.
-          </span>
-        </motion.p>
+          </p>
+        </motion.div>
 
         {/* Dual CTAs */}
         <motion.div variants={fade} className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">

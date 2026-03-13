@@ -18,8 +18,7 @@ const painItems = [
   { emoji: '📄', text: 'They apply to 200+ jobs' },
   { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
   { emoji: '😔', text: 'They never hear back' },
-  { emoji: '📉', text: 'Friends get "connection" interviews' },
-  { emoji: '❓', text: 'They wonder what they\'re doing wrong' },
+  { emoji: '📉', text: 'They watch friends get "connection" interviews and wonder what they\'re doing wrong' },
 ];
 
 export default function LandingPainFastIQ({ onFastIQ }) {
@@ -33,12 +32,12 @@ export default function LandingPainFastIQ({ onFastIQ }) {
             variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-2"
           >
-            Your Student Is Invisible to Employers
+            Your Kid Is Invisible to Employers
           </motion.h2>
           <motion.p variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="text-slate-500 text-base mb-10"
           >
-            (And it's not their fault. The system is broken.)
+            (And it's not their fault — the system is broken.)
           </motion.p>
 
           <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -56,11 +55,13 @@ export default function LandingPainFastIQ({ onFastIQ }) {
           </motion.div>
 
           <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="bg-slate-900 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto"
+            className="bg-slate-900 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto space-y-3"
           >
             <p className="text-gray-100 text-base leading-relaxed">
-              <strong className="text-white">Here's the truth:</strong> A perfect resume means nothing without a warm connection.{' '}
-              <span className="text-[#FA4616] font-semibold">FASTIQ changes that.</span>
+              <strong className="text-white">The truth:</strong> A perfect resume means nothing without a warm connection. The kids who land jobs have someone on the inside who cares enough to pick up the phone.
+            </p>
+            <p className="text-[#FA4616] font-semibold text-base">
+              That's what CFF + FASTIQ changes.
             </p>
           </motion.div>
         </div>
@@ -77,10 +78,10 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <span className="text-[10px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 max-w-2xl mx-auto leading-tight">
-              FASTIQ finds real UF grads already inside the companies your kid wants, messages them for you, and gets their foot in the door.
+              FASTIQ finds real UF grads already inside the companies your kid wants, messages them for you, and gets their foot in the door — bypassing thousands of other cold applicants.
             </h3>
-            <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              Bypassing thousands of other cold applicants — so you both see momentum instead of silence.
+            <p className="text-slate-700 text-sm sm:text-base max-w-xl mx-auto leading-relaxed font-medium">
+              No B.S. applications. No ghosting. Just real people helping real kids get in the door.
             </p>
           </motion.div>
 
