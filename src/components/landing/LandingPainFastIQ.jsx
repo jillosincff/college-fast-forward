@@ -59,7 +59,8 @@ export default function LandingPainFastIQ({ onFastIQ }) {
             className="bg-slate-900 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto"
           >
             <p className="text-gray-100 text-base leading-relaxed">
-              <strong className="text-white">Here's the truth:</strong> A perfect resume means nothing without a warm connection.
+              <strong className="text-white">Here's the truth:</strong> A perfect resume means nothing without a warm connection.{' '}
+              <span className="text-[#FA4616] font-semibold">FASTIQ changes that.</span>
             </p>
           </motion.div>
         </div>
@@ -76,10 +77,10 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <span className="text-[10px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 max-w-2xl mx-auto leading-tight">
-              FASTIQ finds real UF grads already inside the companies your kid wants — writes the messages — and tracks progress.
+              FASTIQ finds real UF grads already inside the companies your kid wants, messages them for you, and gets their foot in the door.
             </h3>
             <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              So you both see momentum instead of silence.
+              Bypassing thousands of other cold applicants — so you both see momentum instead of silence.
             </p>
           </motion.div>
 
