@@ -93,8 +93,10 @@ export default function TeaserReveal() {
   }, []);
 
   const handleContinue = () => {
+    // For known path: advance step to 4 (index) to show Q5 of 6
+    // For explorer path: advance step to 3 (index) to show Q4 of 4
+    const { path } = useFunnel();
     setPhase('quiz');
-    // Resume quiz at step 4 for known path (after teaser break)
   };
 
   if (animating) {
