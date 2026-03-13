@@ -105,7 +105,13 @@ export default function KnownTargetsQuiz() {
           value={companyInput}
           onChange={(e) => { setCompanyInput(e.target.value); setShowSuggestions(true); }}
           onFocus={() => setShowSuggestions(true)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && companyInput.trim()) { e.preventDefault(); addCompany(companyInput); }}}
+          onKeyDown={(e) => { 
+            if ((e.key === 'Enter' || e.key === ',') && companyInput.trim()) { 
+              e.preventDefault(); 
+              const val = companyInput.replace(/,/g, '').trim();
+              if (val) addCompany(val); 
+            }
+          }}
           placeholder={companies.length >= 5 ? 'Max 5 companies' : 'Type a company name...'}
           disabled={companies.length >= 5}
           className="w-full bg-white/8 border-2 border-white/15 rounded-xl px-4 py-3 text-white placeholder-white/30 text-[14px] focus:outline-none focus:border-orange-400/50 disabled:opacity-40"
