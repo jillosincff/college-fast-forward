@@ -52,19 +52,24 @@ export default function KnownTargetsQuiz() {
     c => c.toLowerCase().includes(companyInput.toLowerCase()) && !companies.includes(c)
   ).slice(0, 6);
 
+  const trackStep = (stepNum, nextFn) => () => {
+    base44.analytics.track({ eventName: 'quiz_step_completed', properties: { step: stepNum, path: 'known' } });
+    nextFn();
+  };
+
   const steps = [
     // Step 1: Major
-    <QuizStep key={0} questionNumber={1} totalQuestions={6} title="What's your major?" subtitle="Pick the closest match" canNext={!!answers.major} onNext={nextStep}>
+    <QuizStep key={0} questionNumber={1} totalQuestions={6} title="What's your major?" subtitle="Pick the closest match" canNext={!!answers.major} onNext={trackStep(1, nextStep)}>
       <ChipSelect options={MAJORS} selected={answers.major} onChange={(v) => updateAnswer('major', v)} />
     </QuizStep>,
 
     // Step 2: Grad year
-    <QuizStep key={1} questionNumber={2} totalQuestions={6} title="When do you graduate?" canNext={!!answers.grad_year} onNext={nextStep}>
+    <QuizStep key={1} questionNumber={2} totalQuestions={6} title="When do you graduate?" canNext={!!answers.grad_year} onNext={trackStep(2, nextStep)}>
       <ChipSelect options={GRAD_YEARS} selected={answers.grad_year} onChange={(v) => updateAnswer('grad_year', v)} />
     </QuizStep>,
 
     // Step 3: Target companies
-    <QuizStep key={2} questionNumber={3} totalQuestions={6} title="What are your dream companies?" subtitle="Add up to 5 companies" canNext={companies.length > 0} onNext={nextStep}>
+    <QuizStep key={2} questionNumber={3} totalQuestions={6} title="What are your dream companies?" subtitle="Add up to 5 companies" canNext={companies.length > 0} onNext={trackStep(3, nextStep)}>
       {/* Tags */}
       {companies.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
@@ -110,12 +115,12 @@ export default function KnownTargetsQuiz() {
     </QuizStep>,
 
     // Step 4: Location — after this, show teaser
-    <QuizStep key={3} questionNumber={4} totalQuestions={6} title="Where do you want to work?" canNext={!!answers.location} onNext={() => setPhase('teaser')}>
+    <QuizStep key={3} questionNumber={4} totalQuestions={6} title="Where do you want to work?" canNext={!!answers.location} onNext={trackStep(4, () => setPhase('teaser'))}>
       <ChipSelect options={LOCATIONS} selected={answers.location} onChange={(v) => updateAnswer('location', v)} />
     </QuizStep>,
 
     // Step 5: Role type (after teaser break, step resumes at 4)
-    <QuizStep key={4} questionNumber={5} totalQuestions={6} title="What type of role?" canNext={!!answers.role_type} onNext={nextStep}>
+    <QuizStep key={4} questionNumber={5} totalQuestions={6} title="What type of role?" canNext={!!answers.role_type} onNext={trackStep(5, nextStep)}>
       <ChipSelect options={[
         { value: 'internship', label: '📋 Internship' },
         { value: 'entry_level', label: '🎓 Entry-level / New Grad' },
@@ -125,7 +130,7 @@ export default function KnownTargetsQuiz() {
     </QuizStep>,
 
     // Step 6: Timeline
-    <QuizStep key={5} questionNumber={6} totalQuestions={6} title="How urgent is your search?" canNext={!!answers.timeline} onNext={() => setPhase('score')}>
+    <QuizStep key={5} questionNumber={6} totalQuestions={6} title="How urgent is your search?" canNext={!!answers.timeline} onNext={trackStep(6, () => setPhase('score'))}>
       <ChipSelect options={TIMELINES} selected={answers.timeline} onChange={(v) => updateAnswer('timeline', v)} />
     </QuizStep>,
   ];
