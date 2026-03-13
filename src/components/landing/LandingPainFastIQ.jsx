@@ -17,8 +17,7 @@ const stagger = {
 const painItems = [
   { emoji: '📄', text: 'They apply to 200+ jobs' },
   { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
-  { emoji: '😔', text: 'They never hear back' },
-  { emoji: '📉', text: 'They watch friends get "connection" interviews' },
+  { emoji: '😔', text: 'They never hear back while friends get "connection" interviews' },
 ];
 
 export default function LandingPainFastIQ({ onFastIQ }) {
@@ -66,7 +65,10 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <Zap className="w-3 h-3 text-[#FA4616]" />
               <span className="text-[10px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
-            <h3 className="text-xl sm:text-2xl md:text-[32px] font-extrabold text-slate-900 mb-5 max-w-2xl mx-auto leading-snug tracking-tight">
+            <h3
+              className="text-[22px] sm:text-[26px] md:text-[32px] font-extrabold text-slate-900 mb-5 max-w-2xl mx-auto leading-snug tracking-tight"
+              style={{ textShadow: '0 0 40px rgba(250,70,22,0.08)' }}
+            >
               FASTIQ finds real UF grads already inside the companies your kid wants, messages them for you, and gets their foot in the door — bypassing thousands of other cold applicants.
             </h3>
             <p className="text-slate-600 text-sm sm:text-[15px] max-w-md mx-auto leading-relaxed font-semibold tracking-wide uppercase">
