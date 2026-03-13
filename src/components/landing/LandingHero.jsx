@@ -87,8 +87,8 @@ export default function LandingHero({ stats, onClaim }) {
         >
           <ScanningAnimation />
 
-          <p className="text-white text-[20px] sm:text-[24px] leading-[1.5] mb-8 font-bold">
-            We found <span className="text-[#FA4616]">real UF alumni</span> already working inside the companies you're targeting.
+          <p className="text-white text-[22px] sm:text-[26px] leading-[1.4] mb-8 font-black tracking-tight">
+            We found <span className="text-[#FA4616]">real UF alumni</span> that work at your target companies.
           </p>
 
           <AlumniTeaserDemo />
@@ -99,7 +99,7 @@ export default function LandingHero({ stats, onClaim }) {
             whileHover={{ scale: 1.03, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
-            Take the 45-second quiz to see your own personalized message →
+            Take the 45-second quiz to find UF alumni at your target companies and get the messages written for you →
           </motion.p>
         </motion.div>
 
