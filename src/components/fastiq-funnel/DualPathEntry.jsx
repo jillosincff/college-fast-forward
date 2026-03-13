@@ -61,8 +61,10 @@ export default function DualPathEntry() {
         Your friends are posting offers. Your parents keep asking questions.
         You have no real experience, no connections, and no clue how to fix it.
         <br className="hidden sm:block" /><br className="hidden sm:block" />
+        <span className="text-white/60 italic">It's not what you know — it's who you know.</span>
+        <br className="hidden sm:block" /><br className="hidden sm:block" />
         <span className="text-white/70 font-medium">
-          FASTIQ finds actual UF people already working at the places you want — and writes the message you can send today so you don't end up waitressing again.
+          We find real UF alumni already inside your target companies, message them for you, and get your foot in the door — bypassing thousands of other cold applicants.
         </span>
       </motion.p>
 

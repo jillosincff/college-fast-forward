@@ -184,7 +184,7 @@ export default function TeaserReveal() {
 
       {/* Body */}
       <motion.p variants={fadeUp} className="text-center text-white/50 text-[14px] sm:text-[15px] leading-relaxed mb-8 max-w-md mx-auto">
-        We just checked for UF people already working at places kids in your major are losing sleep over.
+        We just looked for real UF grads already inside the places kids in your major are stressing about.
         Here's what's actually waiting if you message them before summer closes:
       </motion.p>
 

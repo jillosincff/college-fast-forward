@@ -301,11 +301,13 @@ export default function LandingPage() {
                 </motion.h2>
 
                 <motion.p variants={fadeInUp} className="text-white/50 text-[14px] sm:text-[16px] mb-10 max-w-xl mx-auto leading-relaxed">
-                  Your friends are posting offers. Your parents keep asking.
-                  You have no experience, no connections, and no clue how to fix it.
+                  Your friends are posting offers. Your parents keep asking questions.
+                  You have no real experience, no connections, and no clue how to fix it.
+                  <br /><br />
+                  <span className="text-white/60 italic">It's not what you know — it's who you know.</span>
                   <br /><br />
                   <span className="text-white/70 font-medium">
-                    We find actual UF grads at the places you want and write the message you can send today.
+                    We find real UF alumni already inside your target companies, message them for you, and get your foot in the door — bypassing thousands of other cold applicants.
                   </span>
                 </motion.p>
 
