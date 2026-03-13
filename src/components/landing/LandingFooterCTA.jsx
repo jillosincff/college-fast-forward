@@ -30,11 +30,14 @@ export default function LandingFooterCTA({ stats, onClaim, onFAQ, showFAQ }) {
       <section className="py-16 sm:py-20 px-4" style={{ backgroundColor: '#0021A5' }}>
         <div className="max-w-md mx-auto text-center">
           <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <p className="text-[#FA4616] font-bold text-xl sm:text-2xl mb-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+              Your kid's future. Your peace of mind.
+            </h2>
+            <p className="text-[#FA4616] font-bold text-lg sm:text-xl mb-2">
               🔥 {stats.spots_left} FREE founding spots left
             </p>
-            <p className="text-white/70 text-sm mb-6">
-              {stats.total_families} families already joined. After 1,000 — $9/month.
+            <p className="text-white/60 text-sm mb-6">
+              Claim yours before they're gone.
             </p>
 
             <Button
