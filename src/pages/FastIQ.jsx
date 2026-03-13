@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import ProAssessment from '../components/fast-track-pro/ProAssessment';
 import FastIQCommandCenter from '../components/fastiq/FastIQCommandCenter';
 import ProAgentChat from '../components/fast-track-pro/ProAgentChat';
@@ -14,10 +15,38 @@ export default function FastIQ() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('loading');
   const [chatInitialMessage, setChatInitialMessage] = useState('');
+  const { toast } = useToast();
+  const onboardHandled = useRef(false);
 
-  // Check for ?view=alerts URL param
+  // Check for URL params
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const highlightAlerts = urlParams.get('view') === 'alerts';
+  const isCheckoutSuccess = urlParams.get('checkout') === 'success';
+
+  // Handle post-checkout quiz answer persistence
+  useEffect(() => {
+    if (!isCheckoutSuccess || onboardHandled.current || !user) return;
+    onboardHandled.current = true;
+
+    const stored = sessionStorage.getItem('fastiq_quiz_answers');
+    if (!stored) return;
+
+    (async () => {
+      try {
+        const { onboardFromQuiz } = await import('@/functions/onboardFromQuiz');
+        await onboardFromQuiz({ quizAnswers: JSON.parse(stored) });
+        sessionStorage.removeItem('fastiq_quiz_answers');
+        toast({
+          title: 'Welcome! Your profile is set up',
+          description: 'Check your alumni matches — they\'re ready for you.',
+        });
+      } catch (err) {
+        console.error('Post-checkout onboarding failed:', err);
+      }
+      // Clean up URL
+      window.location.hash = 'FastIQ';
+    })();
+  }, [isCheckoutSuccess, user]);
 
   // P0 FIX: Only compute isParent when user is confirmed loaded (not undefined)
   const isParent = user ? (user.persona === 'parent' || user.roles?.includes('parent')) : false;
