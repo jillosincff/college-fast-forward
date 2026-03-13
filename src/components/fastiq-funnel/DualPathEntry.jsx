@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Compass, Zap, X } from 'lucide-react';
+import { Flame, X } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
 import { base44 } from '@/api/base44Client';
 
@@ -23,7 +23,7 @@ export default function DualPathEntry() {
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-      className="relative max-w-xl mx-auto px-5 py-10 text-center"
+      className="relative max-w-2xl mx-auto px-5 py-10 sm:py-16 text-center"
     >
       {onClose && (
         <button
@@ -35,61 +35,66 @@ export default function DualPathEntry() {
         </button>
       )}
 
-      <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/25 mb-6">
-        <Zap className="w-3.5 h-3.5 text-orange-400" />
-        <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider">FASTIQ™ Quiz</span>
+      {/* Subtle badge */}
+      <motion.div variants={fadeUp} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
+        <Flame className="w-3 h-3 text-orange-400" />
+        <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">FASTIQ™</span>
       </motion.div>
 
-      <motion.h2
+      {/* Headline */}
+      <motion.h1
         variants={fadeUp}
-        className="text-[22px] sm:text-[30px] font-extrabold text-white mb-3 tracking-tight"
-        style={{ lineHeight: 1.15 }}
+        className="text-[28px] sm:text-[38px] md:text-[46px] font-extrabold tracking-tight mb-5"
+        style={{ lineHeight: 1.1 }}
       >
-        Let's find your <span className="text-orange-400">alumni network.</span>
-      </motion.h2>
+        <span className="text-white">It's mid-March and you still</span>{' '}
+        <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
+          have zero plans for summer.
+        </span>
+      </motion.h1>
 
-      <motion.p variants={fadeUp} className="text-[14px] sm:text-[16px] text-white/55 mb-10 max-w-md mx-auto leading-relaxed">
-        Answer a few quick questions and we'll show you UF alumni who can open doors at your target companies.
+      {/* Subheadline */}
+      <motion.p
+        variants={fadeUp}
+        className="text-[14px] sm:text-[16px] md:text-[17px] text-white/50 mb-10 max-w-xl mx-auto leading-relaxed"
+      >
+        Your friends are posting offers. Your parents keep asking questions.
+        You have no real experience, no connections, and no clue how to fix it.
+        <br className="hidden sm:block" /><br className="hidden sm:block" />
+        <span className="text-white/70 font-medium">
+          FASTIQ finds actual UF people already working at the places you want — and writes the message you can send today so you don't end up waitressing again.
+        </span>
       </motion.p>
 
-      <motion.div variants={fadeUp} className="space-y-4">
-        {/* Path A */}
+      {/* CTAs */}
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
+        {/* Primary CTA */}
         <button
           onClick={() => choosePath('known')}
-          className="w-full group rounded-2xl p-5 sm:p-6 text-left transition-all duration-200 border-2 border-orange-500/30 hover:border-orange-400 hover:scale-[1.01]"
-          style={{ background: 'linear-gradient(135deg, rgba(250,70,22,0.12) 0%, rgba(250,70,22,0.04) 100%)' }}
+          className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5"
+          style={{
+            background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
+            boxShadow: '0 0 40px rgba(250,70,22,0.3), 0 4px 20px rgba(250,70,22,0.25)',
+          }}
         >
-          <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(250,70,22,0.2)' }}>
-              <Target className="w-5 h-5 text-orange-400" />
-            </div>
-            <div>
-              <p className="text-white font-bold text-[16px] mb-1">I know my dream companies</p>
-              <p className="text-white/50 text-[13px] leading-snug">Get your personalized alumni list in minutes — Amazon, Google, Goldman, whoever.</p>
-            </div>
-          </div>
+          <span className="text-lg">🔥</span>
+          Show me I'm not totally screwed
         </button>
 
-        {/* Path B */}
+        {/* Secondary CTA */}
         <button
           onClick={() => choosePath('explorer')}
-          className="w-full group rounded-2xl p-5 sm:p-6 text-left transition-all duration-200 border-2 border-cyan-500/30 hover:border-cyan-400 hover:scale-[1.01]"
-          style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.04) 100%)' }}
+          className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 border-2 border-white/20 hover:border-white/30"
+          style={{ background: 'rgba(255,255,255,0.06)' }}
         >
-          <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.2)' }}>
-              <Compass className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-white font-bold text-[16px] mb-1">Help me figure it out</p>
-              <p className="text-white/50 text-[13px] leading-snug">Discover career paths & alumni matches first — we'll guide you step by step.</p>
-            </div>
-          </div>
+          <span className="text-lg">😬</span>
+          I literally have no idea — help
         </button>
       </motion.div>
 
-      <motion.p variants={fadeUp} className="text-[12px] text-white/30 mt-8">
-        Takes 60 seconds · No sign-up required to see results
+      {/* Micro-text */}
+      <motion.p variants={fadeUp} className="text-[12px] text-white/25 max-w-md mx-auto leading-relaxed">
+        Takes 45 seconds · No sign-up needed · See real UF people at Amazon, Google, Nike, TikTok, wherever — free
       </motion.p>
     </motion.div>
   );

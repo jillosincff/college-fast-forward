@@ -272,7 +272,7 @@ export default function LandingPage() {
           ) : (
             <div
               className="relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 60%, #001872 100%)' }}
+              style={{ background: 'linear-gradient(180deg, #0A1628 0%, #0F172A 100%)' }}
             >
               <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 80%, rgba(250,70,22,0.06) 0%, transparent 60%)' }} />
               <motion.div
@@ -280,57 +280,60 @@ export default function LandingPage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-                className="relative z-10 max-w-3xl mx-auto px-4 sm:px-5 py-16 sm:py-20 text-center"
+                className="relative z-10 max-w-2xl mx-auto px-4 sm:px-5 py-16 sm:py-20 text-center"
               >
-                <motion.div
-                  variants={fadeInUp}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/25 mb-6"
-                >
-                  <Zap className="w-3.5 h-3.5 text-orange-400" />
-                  <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider">FASTIQ™ Career Engine</span>
+                {/* Subtle badge */}
+                <motion.div variants={fadeInUp} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
+                  <Zap className="w-3 h-3 text-orange-400" />
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">FASTIQ™</span>
                 </motion.div>
 
-                <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-                  Find UF alumni who can <span className="text-orange-400">open doors</span> at your dream companies
+                {/* Raw headline */}
+                <motion.h2
+                  variants={fadeInUp}
+                  className="text-2xl sm:text-3xl md:text-[42px] font-extrabold tracking-tight mb-5"
+                  style={{ lineHeight: 1.1 }}
+                >
+                  <span className="text-white">It's mid-March and you still </span>
+                  <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
+                    have zero plans for summer.
+                  </span>
                 </motion.h2>
-                <motion.p variants={fadeInUp} className="text-white/55 text-base sm:text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-                  Take a 60-second quiz and see how many warm intros are waiting for you — no sign-up required.
+
+                <motion.p variants={fadeInUp} className="text-white/50 text-[14px] sm:text-[16px] mb-10 max-w-xl mx-auto leading-relaxed">
+                  Your friends are posting offers. Your parents keep asking.
+                  You have no experience, no connections, and no clue how to fix it.
+                  <br /><br />
+                  <span className="text-white/70 font-medium">
+                    We find actual UF grads at the places you want and write the message you can send today.
+                  </span>
                 </motion.p>
 
-                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_known_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto inline-flex flex-col items-center justify-center gap-1 px-8 py-4 rounded-xl text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5"
                     style={{
                       background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-                      boxShadow: '0 0 30px rgba(250,70,22,0.3)',
+                      boxShadow: '0 0 40px rgba(250,70,22,0.3), 0 4px 20px rgba(250,70,22,0.25)',
                     }}
                   >
-                    <span className="inline-flex items-center gap-2 text-[15px] font-bold">
-                      <Target className="w-5 h-5" />
-                      I know my dream companies
-                    </span>
-                    <span className="text-[11px] text-white/60 font-medium">Get your personalized alumni list in minutes</span>
+                    <span className="text-lg">🔥</span>
+                    Show me I'm not totally screwed
                   </button>
 
                   <button
                     onClick={() => { trackEvent('fastiq_funnel_explorer_clicked'); setShowFunnel(true); }}
-                    className="w-full sm:w-auto inline-flex flex-col items-center justify-center gap-1 px-8 py-4 rounded-xl text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                      background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
-                      boxShadow: '0 0 30px rgba(6,182,212,0.2)',
-                    }}
+                    className="w-full sm:w-auto px-7 py-4 rounded-xl text-[15px] sm:text-[16px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 border-2 border-white/20 hover:border-white/30"
+                    style={{ background: 'rgba(255,255,255,0.06)' }}
                   >
-                    <span className="inline-flex items-center gap-2 text-[15px] font-bold">
-                      <Lightbulb className="w-5 h-5" />
-                      Help me figure it out
-                    </span>
-                    <span className="text-[11px] text-white/60 font-medium">Discover career paths & alumni matches first</span>
+                    <span className="text-lg">😬</span>
+                    I literally have no idea — help
                   </button>
                 </motion.div>
 
-                <motion.p variants={fadeInUp} className="text-[12px] text-white/30 mt-6">
-                  Free quiz · No account needed · See results instantly
+                <motion.p variants={fadeInUp} className="text-[12px] text-white/25 mt-6 max-w-md mx-auto">
+                  Takes 45 seconds · No sign-up needed · See real UF people at Amazon, Google, Nike, TikTok, wherever — free
                 </motion.p>
               </motion.div>
             </div>
