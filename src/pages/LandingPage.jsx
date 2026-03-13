@@ -12,6 +12,7 @@ import InsidePrecisionMode from '@/components/precision/InsidePrecisionMode';
 import PricingTiers from '@/components/home/PricingTiers';
 import LiveNetworkStats from '@/components/landing/LiveNetworkStats';
 import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
+import ParentRelief from '@/components/landing/ParentRelief';
 import {
   Accordion,
   AccordionContent,
@@ -264,6 +265,9 @@ export default function LandingPage() {
         <section id="precision-mode">
           <InsidePrecisionMode onUpgrade={handlePrecisionUpgrade} />
         </section>
+
+        {/* PARENT RELIEF */}
+        <ParentRelief onCTA={handleFastIQCTA} />
 
         {/* FASTIQ QUIZ FUNNEL */}
         <section id="fastiq-quiz" className="relative">
