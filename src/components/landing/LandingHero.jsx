@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export default function LandingHero({ stats, onClaim }) {
   return (
-    <section className="min-h-screen flex flex-col justify-center pt-16 pb-12 px-4" style={{ backgroundColor: '#0021A5' }}>
+    <section className="min-h-screen flex flex-col justify-center pt-24 sm:pt-28 pb-12 px-4" style={{ backgroundColor: '#0021A5' }}>
       <div className="max-w-4xl mx-auto text-center w-full">
 
         <motion.p
