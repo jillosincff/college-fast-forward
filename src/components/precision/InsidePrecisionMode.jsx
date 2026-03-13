@@ -16,13 +16,18 @@ export default function InsidePrecisionMode({ onUpgrade }) {
 
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <p className="text-[11px] text-[#FA4616] uppercase tracking-[0.2em] font-bold mb-4">FASTIQ™</p>
+          <p className="text-[11px] text-[#FA4616] uppercase tracking-[0.2em] font-bold mb-4">INSIDE CFF</p>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight max-w-3xl mx-auto">
-            The AI That Turns Your Network Into <span className="text-[#FA4616]">Real Job Offers</span>
+            FASTIQ™ — The AI That Makes the Network <span className="text-[#FA4616]">Actually Work</span>
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-slate-600 max-w-[640px] mx-auto leading-[1.7]">
-            Finds UF alumni at dream companies → drafts personalized messages → tracks everything. No cold applications needed.
+          <p className="text-[15px] sm:text-[16px] text-slate-600 max-w-[640px] mx-auto leading-[1.7] mb-6">
+            FASTIQ turns the parent/alumni pledge into real job offers — powered by data, context, and structured outreach.
           </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-3 sm:gap-6 text-[14px] text-slate-700 font-medium max-w-xl mx-auto">
+            <span className="flex items-center gap-1.5"><span className="text-[#FA4616]">•</span> Finds real UF grads at target companies</span>
+            <span className="flex items-center gap-1.5"><span className="text-[#FA4616]">•</span> Writes copy-paste messages</span>
+            <span className="flex items-center gap-1.5"><span className="text-[#FA4616]">•</span> Tracks replies & progress</span>
+          </div>
         </div>
 
         {/* Panels */}
