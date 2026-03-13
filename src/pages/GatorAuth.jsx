@@ -722,9 +722,12 @@ export default function GatorAuth() {
                     if (!user) {
                       setStep('oauth');
                     } else {
-                      const hasInviteCode = localStorage.getItem('pending_invite_code');
+                      let hasInviteCode = null;
+                      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
                       if (!hasInviteCode) {
                         navigate('GatorInviteCode');
+                      } else {
+                        handleRoleSelect();
                       }
                     }
                   }}
