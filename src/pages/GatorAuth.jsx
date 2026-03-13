@@ -309,14 +309,18 @@ export default function GatorAuth() {
     
     // Save role to localStorage BEFORE OAuth redirect (only if role selected)
     // This survives the OAuth redirect (mobile browsers may clear sessionStorage)
-    if (selectedRole) {
-      localStorage.setItem('pending_invite_role', selectedRole);
-      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-      console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
-    } else {
-      // Returning user - clear any stale pending role
-      localStorage.removeItem('pending_invite_role');
-      console.log('🔐 [GatorAuth] Returning user sign-in (no role pre-selected)');
+    try {
+      if (selectedRole) {
+        localStorage.setItem('pending_invite_role', selectedRole);
+        localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+        console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
+      } else {
+        // Returning user - clear any stale pending role
+        localStorage.removeItem('pending_invite_role');
+        console.log('🔐 [GatorAuth] Returning user sign-in (no role pre-selected)');
+      }
+    } catch (e) {
+      console.warn('localStorage unavailable in handleGoogleSignIn:', e);
     }
     
     // CRITICAL: Ensure we use the app's actual origin, not any redirect URL
