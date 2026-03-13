@@ -117,8 +117,8 @@ export default function LandingPage() {
         </nav>
 
         {/* HERO SECTION */}
-        <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ backgroundColor: '#0021A5' }}>
-          <div className="max-w-5xl mx-auto text-center">
+        <section className="pt-20 sm:pt-28 pb-12 sm:pb-20 px-3 sm:px-4" style={{ background: 'linear-gradient(180deg, #0021A5 0%, #0A1628 100%)' }}>
+          <div className="max-w-4xl mx-auto text-center">
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -132,69 +132,82 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight font-extrabold px-4"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl mb-5 leading-tight font-extrabold px-4"
+              style={{ lineHeight: 1.1 }}
             >
-              Imagine having thousands of friends<br />helping your kid land a job.
+              <span className="text-white">It's mid-March and your kid still </span>
+              <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
+                has zero plans for summer.
+              </span>
             </motion.h1>
 
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-extrabold mb-4 px-4"
-            >
-              Now you do.
-            </motion.p>
-
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="text-sm sm:text-base md:text-lg text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
-            >
-              College Fast Forward is a private network of {SCHOOL_NAME} parents and alumni who've pledged to help each other's students succeed — with real introductions, real advice, and real connections to people who can change their trajectory.
-            </motion.p>
-
-            {/* CTA Box - FREE Founding */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="inline-block bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl max-w-md mx-4 w-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-sm sm:text-base md:text-lg text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed px-4 space-y-4"
             >
-              <div className="flex items-center justify-center gap-2 text-[#FA4616] font-bold text-base sm:text-lg mb-2">
-                <span className="text-xl">🔥</span>
-                <span>{stats.spots_left} FREE founding spots left</span>
-              </div>
-              <p className="text-slate-500 text-sm mb-4">(of {FOUNDING_LIMIT})</p>
-              
-              <Button
-                onClick={handleGetInside}
-                size="lg"
-                className="bg-[#0021A5] hover:bg-[#001878] text-white px-6 sm:px-10 py-5 sm:py-7 text-lg sm:text-xl font-bold shadow-lg w-full min-h-[56px]"
-              >
-                Claim Your Free Spot
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2" />
-              </Button>
-              
-              <div className="mt-4 text-sm text-slate-600 space-y-1">
-                <p className="font-semibold">Founding members: FREE forever. Seriously, locked in for life.</p>
-                <p className="text-slate-400">After 1,000: $9/mo · FASTIQ AI Career Center: $29/mo</p>
-              </div>
+              <p>Your friends are posting offers. Your parents keep asking questions. You have no real experience, no connections, and no clue how to fix it.</p>
+              <p className="text-white/50 italic">It's not what you know — it's who you know.</p>
+              <p className="text-white/70 font-medium">
+                FASTIQ finds real UF grads already inside the companies everyone wants… messages them for you… and gets your foot in the door — bypassing thousands of other cold applicants.
+              </p>
             </motion.div>
 
-            {/* Testimonial preview */}
+            {/* Dual CTAs */}
             <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4 mb-6 px-4"
+            >
+              <button
+                onClick={() => { trackEvent('hero_known_clicked'); setShowFunnel(true); }}
+                className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
+                  boxShadow: '0 0 40px rgba(250,70,22,0.3), 0 4px 20px rgba(250,70,22,0.25)',
+                }}
+              >
+                <span className="flex items-start gap-2.5">
+                  <span className="text-xl mt-0.5">🔥</span>
+                  <span className="text-[15px] sm:text-[16px] font-bold text-white leading-snug">
+                    I know where I want to work… but I don't know a single person there
+                  </span>
+                </span>
+                <span className="block text-[12px] text-white/50 mt-2 ml-8">
+                  Get your hidden UF connections instantly
+                </span>
+              </button>
+
+              <button
+                onClick={() => { trackEvent('hero_explorer_clicked'); setShowFunnel(true); }}
+                className="flex-1 sm:max-w-[320px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
+                  boxShadow: '0 0 30px rgba(6,182,212,0.2), 0 4px 16px rgba(6,182,212,0.15)',
+                }}
+              >
+                <span className="flex items-start gap-2.5">
+                  <span className="text-xl mt-0.5">🤔</span>
+                  <span className="text-[15px] sm:text-[16px] font-bold text-slate-900 leading-snug">
+                    I literally have no clue where to even start
+                  </span>
+                </span>
+                <span className="block text-[12px] text-slate-700/60 mt-2 ml-8">
+                  We'll figure out paths & matches together
+                </span>
+              </button>
+            </motion.div>
+
+            <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-12 max-w-2xl mx-auto"
+              transition={{ delay: 0.35 }}
+              className="text-[12px] text-white/25 max-w-md mx-auto"
             >
-              <p className="text-white/80 italic text-lg">
-                "My daughter landed an internship with a legal marketing firm — through a connection she never would have found on a job board."
-              </p>
-              <p className="text-white/60 text-sm mt-2">— Sarah M., UF Parent</p>
-            </motion.div>
+              Takes 45 seconds · No sign-up needed · See real UF people at Amazon, Google, Nike, TikTok, wherever — free
+            </motion.p>
           </div>
         </section>
 
@@ -228,10 +241,10 @@ export default function LandingPage() {
               className="flex flex-col items-center gap-3 mb-12"
             >
               {[
-                { emoji: '📄', text: 'They apply to 200 jobs' },
-                { emoji: '🤖', text: 'AI rejects 98% before a human sees it' },
+                { emoji: '📄', text: 'Your kid applies to 200 jobs' },
+                { emoji: '🤖', text: 'AI rejects 98% before a human ever sees it' },
                 { emoji: '😔', text: 'They never hear back' },
-                { emoji: '📉', text: 'They watch friends with "connections" get interviews' },
+                { emoji: '📉', text: 'They watch friends get "connections" interviews' },
                 { emoji: '❓', text: 'They wonder what they\'re doing wrong' },
               ].map((item, i) => (
                 <React.Fragment key={i}>
@@ -252,7 +265,7 @@ export default function LandingPage() {
               className="bg-slate-900 text-white rounded-2xl p-8 max-w-2xl mx-auto"
             >
               <p className="text-lg text-gray-100">
-                <strong className="text-white">Here's the truth:</strong> It doesn't matter how perfect their resume is. Without a warm connection, their resume goes into the same black hole as everyone else's.
+                <strong className="text-white">Here's the truth:</strong> It doesn't matter how perfect the resume is. Without a warm connection, it goes into the same black hole as everyone else's.
               </p>
               <p className="text-gray-200 mt-4">
                 The students who land jobs? <strong className="text-white">They have someone on the inside who cares enough to pick up the phone.</strong>
@@ -414,7 +427,7 @@ export default function LandingPage() {
                 The only difference? Someone cared enough to make an introduction.
               </p>
               <p className="text-[#0021A5] font-semibold mt-4 text-lg">
-                That's what this network does. We turn your student from a stranger into a referral.
+                That's what FASTIQ does. We turn your kid from a stranger into a referral.
               </p>
             </motion.div>
           </div>
@@ -556,7 +569,7 @@ export default function LandingPage() {
                   "I'll respond when a student reaches out.",
                   "I'll share what I know.",
                   "I'll open doors when I can.",
-                  "I'll help other people's kids the way I'd want someone to help mine."
+                  "I'll help other people's kids the way I want someone to help mine."
                 ].map((line, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-[#0021A5] mt-0.5 flex-shrink-0" />
@@ -574,10 +587,10 @@ export default function LandingPage() {
               className="space-y-3 mb-10"
             >
               <p className="text-slate-600 text-lg">
-                That's it. No algorithms. No AI matching you with strangers who don't care.
+                No algorithms. No matching strangers who don't care.
               </p>
               <p className="text-slate-800 font-semibold text-lg">
-                Just a community of parents who show up for each other's students.
+                Just a community of parents who show up for each other's kids.
               </p>
             </motion.div>
 
@@ -588,10 +601,10 @@ export default function LandingPage() {
               viewport={{ once: true }}
             >
               <p className="text-slate-700 mb-1">
-                <strong>{stats.total_families} parents</strong> have already taken this pledge.
+                <strong>{stats.total_families} parents</strong> have already taken the pledge.
               </p>
               <p className="text-slate-600 mb-8">
-                Your student is already benefiting from their generosity.
+                Now it's your turn.
               </p>
               <p className="text-[#0021A5] font-bold text-xl mb-6">Now it's your turn.</p>
               <Button
@@ -763,17 +776,17 @@ export default function LandingPage() {
                 {
                   num: '1',
                   title: 'Join & Connect Your Student',
-                  desc: 'Sign up in 2 minutes. Share your professional background. Link your student. Take the pledge.'
+                  desc: "Sign up in 2 minutes. Link your student's background. Take the pledge."
                 },
                 {
                   num: '2',
-                  title: 'Your Student Gets Matched Instantly',
-                  desc: "We connect them with parents and alumni whose experience fits exactly what they need. They message directly. No cold outreach."
+                  title: 'Your Student Gets Matched',
+                  desc: "We connect them with parents and alumni whose kids need help — no cold outreach."
                 },
                 {
                   num: '3',
-                  title: 'You Help Theirs, They Help Yours',
-                  desc: `Answer a student's question. Make an introduction. Every action earns Karma that makes YOUR student more visible to the ${stats.total_families} parents who pledged to help.`
+                  title: 'You Help Theirs. They Help Yours.',
+                  desc: `Answer a student's question. Make an introduction. Watch karma build — your kid becomes visible to ${stats.total_families} top families.`
                 }
               ].map((step, i) => (
                 <motion.div key={i} variants={fadeInUp} className="text-center">
@@ -793,7 +806,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-center text-[#FA4616] font-semibold text-lg mt-10"
             >
-              Your student could have their first warm intro by tonight.
+              Your kid could have their first warm intro tonight.
             </motion.p>
           </div>
         </section>
@@ -818,7 +831,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
             >
-              If everyone had access, it wouldn't work. The power of this network is that every person in it <strong className="text-white">chose to be here</strong>. They're not browsing. They're not passive. They pledged to show up for each other's students.
+              If everyone had access, it wouldn't work. The power of this network is that every family is invested. They pledged to show up for each other's kids.
             </motion.p>
 
             <motion.p 
@@ -828,7 +841,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
             >
-              That's why we keep it exclusive. {SCHOOL_NAME} families only. Capped membership. <strong className="text-white">Real people who actually care.</strong>
+              That's why we keep it exclusive — {SCHOOL_NAME} families only. Capped membership. <strong className="text-white">Real people who actually care.</strong>
             </motion.p>
 
             <motion.div 
@@ -842,9 +855,9 @@ export default function LandingPage() {
                 🔥 {stats.spots_left} FREE FOUNDING SPOTS LEFT
               </div>
               <p className="text-slate-600 mb-6">
-                {stats.total_families} families already claimed their free spot. Once the 1,000 founding spots are gone, new members pay $9/month.
+                {stats.total_families} families already joined. Once the 1,000 founding spots are gone, new members pay $9/month.
               </p>
-              <p className="text-green-600 font-semibold mb-4">Get in now. Stay free forever.</p>
+              <p className="text-green-600 font-semibold mb-4">Get in now. Stay forever free.</p>
               <Button
                 onClick={handleGetInside}
                 size="lg"
@@ -954,16 +967,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-white text-lg md:text-xl mb-2 max-w-2xl mx-auto"
             >
-              Inside CFF, <strong>{stats.total_families} other {SCHOOL_NAME} parents</strong> have done the same. And they've pledged to use all of it to help each other's students succeed.
-            </motion.p>
-            <motion.p 
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-white font-bold text-xl md:text-2xl mb-8"
-            >
-              Your kid deserves that kind of network behind them.
+              Inside FASTIQ, your kid gets to use them — so they don't have to start from zero.
             </motion.p>
             
             <motion.div
