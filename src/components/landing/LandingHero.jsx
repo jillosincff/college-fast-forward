@@ -43,10 +43,10 @@ export default function LandingHero({ stats, onClaim }) {
           transition={{ delay: 0.16 }}
           className="max-w-xl mx-auto mb-14 px-2 space-y-2"
         >
-          <p className="text-white text-[18px] sm:text-[22px] leading-[1.6] font-medium">
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] font-medium">
             CFF is the private UF network where parents and alumni pledged to help each other's kids.
           </p>
-          <p className="text-[#E5E7EB] text-[18px] sm:text-[22px] leading-[1.6]">
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
             FASTIQ is the AI engine that actually delivers the results.
           </p>
         </motion.div>
@@ -74,7 +74,7 @@ export default function LandingHero({ stats, onClaim }) {
           <Button
             onClick={onClaim}
             size="lg"
-            className="bg-[#0021A5] hover:bg-[#001878] text-white w-full py-6 text-lg font-bold min-h-[56px]"
+            className="bg-[#0021A5] hover:bg-[#001878] text-white w-full py-6 text-lg font-bold min-h-[56px] transition-all duration-300 hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
             style={{ boxShadow: '0 4px 24px rgba(0,33,165,0.4), 0 0 40px rgba(0,33,165,0.15)' }}
           >
             Claim Your Free Spot
@@ -93,7 +93,7 @@ export default function LandingHero({ stats, onClaim }) {
         >
           <ScanningAnimation />
 
-          <p className="text-white text-[16px] sm:text-[18px] leading-[1.6] mb-7 font-medium">
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] mb-7 font-medium">
             We already found <span className="text-[#FA4616] font-bold">real UF grads</span> inside the companies kids are targeting.
           </p>
 

@@ -32,10 +32,10 @@ export default function LandingParentRelief({ onCTA }) {
           </motion.h2>
 
           <motion.div variants={fade} className="mt-12 max-w-2xl mx-auto text-left sm:text-center space-y-5">
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
               You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere. You're spending a fortune on college and terrified they'll graduate with nothing lined up.
             </p>
-            <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65]">
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
               FASTIQ is the plan you can both believe in: finds real UF alumni already working at the companies they're targeting, writes the exact messages they can send today, shows progress you can both see — so you stop asking <span className="text-white font-semibold">"any updates?"</span> and they stop feeling invisible.
             </p>
           </motion.div>
@@ -52,7 +52,7 @@ export default function LandingParentRelief({ onCTA }) {
                   boxShadow: '0 0 30px rgba(250,70,22,0.06), inset 0 1px 0 rgba(255,255,255,0.06)',
                 }}
               >
-                <p className="text-white text-[17px] sm:text-[18px] leading-[1.6] italic">"{q.text}"</p>
+                <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] italic">"{q.text}"</p>
                 <div className="flex items-center gap-2.5 mt-5">
                   <span className="w-9 h-9 rounded-full bg-[#FA4616]/20 flex items-center justify-center text-[#FA4616] text-sm font-bold">{q.name[0]}</span>
                   <span className="text-white text-sm font-semibold">{q.name}</span>
@@ -66,7 +66,7 @@ export default function LandingParentRelief({ onCTA }) {
           <motion.div variants={fade} className="mt-16">
             <button
               onClick={onCTA}
-              className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+              className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
               style={{
                 background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
                 boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
