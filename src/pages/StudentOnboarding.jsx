@@ -293,13 +293,13 @@ export default function StudentOnboarding() {
   if (step === 1) {
     const dmSans = "'DM Sans', system-ui, sans-serif";
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', minHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Progress bar */}
         <StudentStep1ProgressBar currentStep={1} />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'row' }} className="flex-col lg:flex-row">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'row', minHeight: 0 }} className="flex-col lg:flex-row">
           {/* LEFT PANEL — value proposition (hidden on mobile) */}
-          <div className="hidden lg:flex" style={{ width: '45%', minHeight: 'calc(100vh - 52px)' }}>
+          <div className="hidden lg:flex" style={{ width: '45%' }}>
             <StudentStep1LeftPanel />
           </div>
 
@@ -320,7 +320,7 @@ export default function StudentOnboarding() {
           </div>
 
           {/* RIGHT PANEL — form */}
-          <div className="lg:w-[55%] w-full" style={{ background: '#fff', padding: '40px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="lg:w-[55%] w-full" style={{ background: '#f4f2ee', padding: '40px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ maxWidth: 440, margin: '0 auto', width: '100%' }}>
               {/* Header */}
               <div style={{ marginBottom: 32 }}>
@@ -419,20 +419,29 @@ export default function StudentOnboarding() {
                   onClick={handleNext}
                   disabled={!isStep1Valid}
                   style={{
-                    width: '100%', padding: '16px 0', borderRadius: 12, border: 'none',
-                    fontFamily: dmSans, fontSize: 16, fontWeight: 600,
+                    width: '100%', padding: '16px 0', borderRadius: 100, border: 'none',
+                    fontFamily: dmSans, fontSize: 15, fontWeight: 500,
                     cursor: isStep1Valid ? 'pointer' : 'not-allowed',
-                    background: isStep1Valid ? '#E85D20' : '#e2e8f0',
-                    color: isStep1Valid ? '#fff' : '#94a3b8',
+                    background: isStep1Valid ? '#E85D20' : 'rgba(0,0,0,0.08)',
+                    color: isStep1Valid ? '#fff' : '#bbb',
                     transition: 'all 0.2s',
-                    minHeight: 'auto',
+                    minHeight: 48,
+                    WebkitTapHighlightColor: 'transparent',
                   }}
+                  onMouseEnter={e => { if (isStep1Valid) e.currentTarget.style.background = '#d44e14'; }}
+                  onMouseLeave={e => { if (isStep1Valid) e.currentTarget.style.background = '#E85D20'; }}
                 >
                   Continue →
                 </button>
 
                 <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#94a3b8', textAlign: 'center' }}>
-                  Join nearly <span style={{ fontWeight: 500, color: '#64748b' }}>1,000</span> students already connecting
+                  Join <span style={{ fontWeight: 500, color: '#64748b' }}>nearly 1,000</span> UF students and families already connecting
+                </p>
+
+                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb', textAlign: 'center', marginTop: 4 }}>
+                  By continuing you agree to our{' '}
+                  <a href="#Terms" style={{ color: '#aaa', textDecoration: 'underline' }}>Terms</a> and{' '}
+                  <a href="#Privacy" style={{ color: '#aaa', textDecoration: 'underline' }}>Privacy Policy</a>
                 </p>
               </div>
             </div>

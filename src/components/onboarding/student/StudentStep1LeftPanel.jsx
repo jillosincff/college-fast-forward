@@ -40,14 +40,15 @@ export default function StudentStep1LeftPanel() {
     <div
       style={{
         width: '100%',
-        height: '100%',
+        minHeight: '100%',
         background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 30%, #0821A5 70%, #0821A5 100%)',
         position: 'relative',
         overflow: 'hidden',
-        padding: '48px 44px',
+        padding: '48px 44px 40px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
+        boxSizing: 'border-box',
       }}
     >
       {/* radial glow */}
