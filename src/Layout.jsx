@@ -111,7 +111,6 @@ const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
 const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
-const Opportunities = React.lazy(() => import('./pages/Opportunities'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
 const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
@@ -343,8 +342,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
         { name: 'Community', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
-        { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator'] },
-        { name: 'Opportunities', page: 'Opportunities', icon: Briefcase, roles: ['parent', 'alumni'] },
+        { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
               { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator', 'parent'] },
         { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent', 'alumni'] },
@@ -739,10 +737,10 @@ const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Opportunities', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
-const authOnlyPages = ['Opportunities', 'CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
+const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
 
 const isUserVerified = (user) => {
   if (!user) return false;
@@ -793,7 +791,7 @@ const getPageComponent = (pageName) => {
     case 'Connections': return Connections;
 
     case 'CompanyProfile': return CompanyProfile;
-    case 'Opportunities': return Opportunities;
+    case 'Opportunities': return MyApplications;
     case 'PostOpportunity': return PostOpportunity;
     case 'PostRequest': return PostRequest;
 
@@ -1158,7 +1156,7 @@ function AppContent() {
       }
       
       // Redirect to pledge from dashboard pages
-      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Favorites', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
+      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Favorites', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
       if (dashboardAndMainPages.includes(currentPage)) {
         console.log('🔄 [Pledge] Existing parent needs pledge, redirecting to ParentPledge');
         navigate('ParentPledge');
@@ -1412,7 +1410,7 @@ function AppContent() {
   // Pages that support pull-to-refresh (main feed / list pages)
   const pullRefreshPages = [
     'Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections',
-    'Opportunities', 'GatorDirectory', 'MyMessages', 'Insights',
+    'GatorDirectory', 'MyMessages', 'Insights',
     'MyRequests', 'MyApplications', 'Favorites', 'Notifications'
   ];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
