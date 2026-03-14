@@ -74,29 +74,31 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* 1 — HERO (hook + CTA) */}
+        {/* 1 — HERO */}
         <LandingHero stats={stats} onClaim={handleClaim} />
 
         {/* 2 — THE PROBLEM */}
         <LandingPainFastIQ onFastIQ={handleClaim} />
 
-        {/* 2.5 — TWO PRODUCTS CLARITY */}
+        {/* 3 — TWO PRODUCTS */}
         <LandingTwoProducts onClaim={handleClaim} onFastIQ={handleClaim} />
 
-        {/* 3 — EMPATHY: For Parents Who Are Freaking Out */}
-        <LandingParentRelief onCTA={handleClaim} />
-
-        {/* 4 — SOCIAL PROOF */}
-        <LandingTestimonials onClaim={handleClaim} />
-
-        {/* 5 — URGENCY: Student seasonal push */}
+        {/* 4 — QUIZ */}
         {showFunnel ? (
           <FastIQFunnel onClose={() => setShowFunnel(false)} />
         ) : (
           <LandingStudentPivot onFunnel={handleFunnel} />
         )}
 
-        {/* 6 — HOW IT WORKS (for parents) */}
+        {/* 5 — FASTIQ INTRO (inside PainFastIQ above) */}
+
+        {/* 6 — EMPATHY */}
+        <LandingParentRelief onCTA={handleClaim} />
+
+        {/* 7 — SOCIAL PROOF */}
+        <LandingTestimonials onClaim={handleClaim} />
+
+        {/* 8 — HOW IT WORKS */}
         <LandingHowItWorks onClaim={handleClaim} />
 
         {/* 7 — FINAL CTA */}
