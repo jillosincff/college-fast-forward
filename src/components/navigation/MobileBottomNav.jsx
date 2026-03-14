@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { LayoutDashboard, MessageSquare, Users, Mail, Zap } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Users, Mail, Zap, Briefcase } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
 export default function MobileBottomNav({ user, currentPage }) {
@@ -19,7 +19,7 @@ export default function MobileBottomNav({ user, currentPage }) {
     { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
     { name: 'Ask', icon: MessageSquare, page: 'Connections' },
     { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
-    { name: 'Pipeline', icon: LayoutDashboard, page: 'MyApplications' },
+    { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
     { name: 'Messages', icon: Mail, page: 'MyMessages' },
   ], [user]);
 
