@@ -20,42 +20,35 @@ const dmSans = "var(--font-body, 'DM Sans', sans-serif)";
 export default function LandingHero({ stats, onClaim }) {
   useEffect(() => { ensureFonts(); }, []);
 
-  const spotsText = stats.spots_left > 0
-    ? `ONLY ${stats.spots_left} FREE FOUNDING SPOTS LEFT`
-    : 'LIMITED FREE FOUNDING SPOTS REMAINING';
-
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 25%, #0821A5 60%, #0821A5 100%)', position: 'relative', overflow: 'hidden' }}>
       {/* radial warm glow overlay */}
       <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, rgba(8,33,165,0.0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* Urgency eyebrow */}
+        {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <button
-            onClick={onClaim}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full transition-all hover:scale-105"
+          <span
+            className="inline-flex items-center gap-2 rounded-full"
             style={{
               fontFamily: dmSans,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 500,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              color: '#E85D20',
-              background: 'rgba(232,93,32,0.1)',
-              border: '0.5px solid rgba(232,93,32,0.25)',
-              minHeight: 'auto',
+              color: 'rgba(255,255,255,0.85)',
+              background: 'rgba(255,255,255,0.1)',
+              border: '0.5px solid rgba(255,255,255,0.2)',
+              padding: '6px 16px',
             }}
           >
-            {spotsText}
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ display: 'inline' }}>
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', flexShrink: 0 }} />
+            Exclusively for UF Families
+          </span>
         </motion.div>
 
         {/* Headline — Playfair Display */}
@@ -145,7 +138,7 @@ export default function LandingHero({ stats, onClaim }) {
           <PrimaryCTA text="Claim Your Free Spot" onClick={onClaim} />
 
           <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.45)', marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-            <span>🔥</span> Free founding spots are limited. After that, $9/month.
+            Join nearly 1,000 UF families already on the platform.
           </p>
         </motion.div>
 
