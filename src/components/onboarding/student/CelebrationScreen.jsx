@@ -206,36 +206,72 @@ export default function CelebrationScreen({ user }) {
             )}
 
             {/* Primary CTA */}
-            <button
-              onClick={handleSeeMatches}
-              style={{
-                width: '100%', padding: '15px 0', borderRadius: 100, border: 'none',
-                background: orange, color: '#fff',
-                fontFamily: dmSans, fontSize: 15, fontWeight: 500,
-                cursor: 'pointer', minHeight: 48,
-                transition: 'background 0.2s',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
-              onMouseLeave={e => e.currentTarget.style.background = orange}
-            >
-              See my matches →
-            </button>
-
-            {/* Secondary link */}
-            <button
-              onClick={handleDashboard}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-                color: 'rgba(244,240,232,0.4)',
-                display: 'block', width: 'auto', minHeight: 44,
-                margin: '8px auto 0',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              Go to my dashboard →
-            </button>
+            {validMatches.length > 0 ? (
+              <>
+                <button
+                  onClick={handleSeeMatches}
+                  style={{
+                    width: '100%', padding: '15px 0', borderRadius: 100, border: 'none',
+                    background: orange, color: '#fff',
+                    fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+                    cursor: 'pointer', minHeight: 48,
+                    transition: 'background 0.2s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
+                  onMouseLeave={e => e.currentTarget.style.background = orange}
+                >
+                  See my matches →
+                </button>
+                <button
+                  onClick={handleDashboard}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+                    color: 'rgba(244,240,232,0.4)',
+                    display: 'block', width: 'auto', minHeight: 44,
+                    margin: '8px auto 0',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  Go to my dashboard →
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.55)', marginBottom: 20, lineHeight: 1.7 }}>
+                  We're still finding the right people for you. Your matches will appear on your dashboard shortly.
+                </p>
+                <button
+                  onClick={handleDashboard}
+                  style={{
+                    width: '100%', padding: '15px 0', borderRadius: 100, border: 'none',
+                    background: orange, color: '#fff',
+                    fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+                    cursor: 'pointer', minHeight: 48,
+                    transition: 'background 0.2s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
+                  onMouseLeave={e => e.currentTarget.style.background = orange}
+                >
+                  Go to my dashboard →
+                </button>
+                <button
+                  onClick={() => navigate('GatorDirectory')}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+                    color: 'rgba(244,240,232,0.4)',
+                    display: 'block', width: 'auto', minHeight: 44,
+                    margin: '8px auto 0',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  Browse the directory →
+                </button>
+              </>
+            )}
 
             {/* FASTIQ upsell */}
             <div className="celeb-upsell" style={{
