@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, TestTube, Mail, Lightbulb, ArrowLeft, Trash2, Zap } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, TestTube, Mail, ArrowLeft, Trash2, Zap } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
@@ -142,7 +142,7 @@ const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
 const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
 const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
-const Insights = React.lazy(() => import('./pages/Insights'));
+// Insights page removed — redirects to Dashboard
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
 const FastIQ = React.lazy(() => import('./pages/FastIQ'));
@@ -735,7 +735,7 @@ const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
@@ -826,7 +826,7 @@ const getPageComponent = (pageName) => {
     case 'GatorParentInvite': return GatorParentInvite;
     case 'ReferralAnswer': return ReferralAnswer;
     case 'MatchesReview': return MatchesReview;
-      case 'Insights': return Insights;
+      case 'Insights': return Dashboard; // Redirected — Insights removed
       case 'ParentPledge': return ParentPledge;
     case 'SubmitFeedback': return SubmitFeedback;
     case 'FastIQ': return FastIQ;
