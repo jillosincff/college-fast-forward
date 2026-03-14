@@ -6,10 +6,7 @@ Deno.serve(async (req) => {
   const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
 
   try {
-    const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-    }
+    // Called by trusted scheduled automation — no user auth required
 
     // Get all FASTIQ profiles with active users
     const profiles = await base44.asServiceRole.entities.FastTrackProProfile.filter({}, '-updated_date', 500);

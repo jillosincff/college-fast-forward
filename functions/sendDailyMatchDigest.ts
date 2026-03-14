@@ -20,10 +20,7 @@ function formatIndustry(ind) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const currentUser = await base44.auth.me();
-    if (currentUser?.role !== 'admin') {
-      return Response.json({ error: 'Admin only' }, { status: 403 });
-    }
+    // Called by trusted scheduled automation — no user auth required
 
     const { dryRun = false, limit = 100 } = await req.json().catch(() => ({}));
     const now = new Date();

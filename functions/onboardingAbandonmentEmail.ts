@@ -6,10 +6,7 @@ Deno.serve(async (req) => {
   const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
 
   try {
-    const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-    }
+    // Called by trusted scheduled automation — no user auth required
 
     // Find users who created accounts 20-28 hours ago and haven't completed onboarding
     const now = Date.now();

@@ -103,11 +103,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Verify admin access
-    const currentUser = await base44.auth.me();
-    if (!currentUser?.roles?.includes('admin') && currentUser?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Called by trusted scheduled automation — no user auth required
     
     const { dryRun = false, limit = 50 } = await req.json().catch(() => ({}));
     
