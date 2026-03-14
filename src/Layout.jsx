@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
 import { Button as ShadButton } from '@/components/ui/button';
-import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, Bookmark, TestTube, Mail, Lightbulb, ArrowLeft, Trash2, Zap } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, MessageSquare, LogOut, User as UserIcon, FileText, Menu, Bell, TestTube, Mail, Lightbulb, ArrowLeft, Trash2, Zap } from 'lucide-react';
 import UserAvatar from './components/common/UserAvatar';
 import {
   DropdownMenu,
@@ -124,7 +124,6 @@ const MessageComposer = React.lazy(() => import('./pages/MessageComposer'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 import TestingDashboard from './pages/TestingDashboard';
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
-const Favorites = React.lazy(() => import('./pages/Favorites'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
 
 const Terms = React.lazy(() => import('./pages/Terms'));
@@ -689,7 +688,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     <DropdownMenuItem onClick={() => onNavigate('MyApplications')}><FileText className="mr-2 h-4 w-4" />My Pipeline</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyRequests')}><FileText className="mr-2 h-4 w-4" />My Requests</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyMessages')}><MessageSquare className="mr-2 h-4 w-4" />My Messages</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onNavigate('Favorites')}><Bookmark className="mr-2 h-4 w-4" />My Favorites</DropdownMenuItem>
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onNavigate('AdminSetup')} className="text-orange-600 focus:bg-orange-50 focus:text-orange-700">
                         <UserIcon className="mr-2 h-4 w-4" />
@@ -737,7 +736,7 @@ const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
@@ -810,7 +809,6 @@ const getPageComponent = (pageName) => {
     case 'MessageComposer': return MessageComposer;
     case 'TestingDashboard': return TestingDashboard;
     case 'AdminSetup': return AdminSetup;
-    case 'Favorites': return Favorites;
     case 'Privacy': return Privacy;
     case 'Terms': return Terms;
     case 'CookiePolicy': return CookiePolicy;
@@ -1156,7 +1154,7 @@ function AppContent() {
       }
       
       // Redirect to pledge from dashboard pages
-      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Favorites', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
+      const dashboardAndMainPages = ['Dashboard', 'ParentDashboard', 'LandingPage', 'Connections', 'GatorDirectory', 'MyMessages', 'Insights', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
       if (dashboardAndMainPages.includes(currentPage)) {
         console.log('🔄 [Pledge] Existing parent needs pledge, redirecting to ParentPledge');
         navigate('ParentPledge');
@@ -1411,7 +1409,7 @@ function AppContent() {
   const pullRefreshPages = [
     'Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections',
     'GatorDirectory', 'MyMessages', 'Insights',
-    'MyRequests', 'MyApplications', 'Favorites', 'Notifications'
+    'MyRequests', 'MyApplications', 'Notifications'
   ];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
