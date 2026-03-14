@@ -1,487 +1,224 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Users, MessageSquare, ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
-import { trackEvent } from '@/components/utils/analytics';
-import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import { base44 } from '@/api/base44Client';
 import { getUserMessages } from '@/functions/getUserMessages';
-import { getUserCount } from '@/functions/getUserCount';
+import { Loader2 } from 'lucide-react';
 
-// Components
-import NewUserWelcome from '@/components/dashboard/student/NewUserWelcome';
-import WaitingForMatches from '@/components/dashboard/student/WaitingForMatches';
-import WaitingForResponses from '@/components/dashboard/student/WaitingForResponses';
-import MoreMatchesPrompt from '@/components/dashboard/student/MoreMatchesPrompt';
-import MatchesSection from '@/components/dashboard/student/MatchesSection';
-import CompactOpportunities from '@/components/dashboard/student/CompactOpportunities';
-import CompactChallenge from '@/components/dashboard/student/CompactChallenge';
-import FamilyBoostStatus from '@/components/dashboard/student/FamilyBoostStatus';
+import DashboardNav from '@/components/dashboard-v2/DashboardNav';
+import DashboardHero from '@/components/dashboard-v2/DashboardHero';
+import NextActionCard from '@/components/dashboard-v2/NextActionCard';
+import MatchesSectionV2 from '@/components/dashboard-v2/MatchesSection';
+import MessagesSectionV2 from '@/components/dashboard-v2/MessagesSection';
+import KarmaStrip from '@/components/dashboard-v2/KarmaStrip';
+import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
-import FirstMessageNudgeModal from '@/components/onboarding/student/FirstMessageNudgeModal';
-import FoundingMemberBanner from '@/components/dashboard/student/FoundingMemberBanner';
-import DashboardHeader from '@/components/dashboard/student/DashboardHeader';
-import AllCaughtUpState from '@/components/dashboard/student/states/AllCaughtUpState';
-import FamilyKarmaCard from '@/components/karma/FamilyKarmaCard';
-import ActivationWelcomeBannerStudent from '@/components/dashboard/student/ActivationWelcomeBannerStudent';
-import StudentKarmaCard from '@/components/dashboard/student/StudentKarmaCard';
-import HelpFellowGatorSection from '@/components/dashboard/student/HelpFellowGatorSection';
-import ShareWhatYouLearnedCard from '@/components/dashboard/student/ShareWhatYouLearnedCard';
-import ShareOfferDataCard from '@/components/dashboard/student/ShareOfferDataCard';
-import PostJobGigCard from '@/components/dashboard/student/PostJobGigCard';
-// New 1F/1G components
-import RequestWithResponses from '@/components/dashboard/student/RequestWithResponses';
-import InviteParentsCard from '@/components/dashboard/student/InviteParentsCard';
-import ExploreSection from '@/components/dashboard/student/ExploreSection';
-import PullToRefresh from '@/components/common/PullToRefresh';
-import FastIQBanner from '@/components/dashboard/student/FastIQBanner';
-import FastIQWeeklyBrief from '@/components/dashboard/student/FastIQWeeklyBrief';
-import RecentFeedbackCard from '@/components/dashboard/student/RecentFeedbackCard';
-import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
-import StudentKarmaExplainer from '@/components/karma/StudentKarmaExplainer';
+import NewUserWelcome from '@/components/dashboard/student/NewUserWelcome';
+
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+const FONT_LINK_ID = 'dash-v2-fonts';
+function ensureFonts() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_LINK_ID)) return;
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+  document.head.appendChild(link);
+}
+
+const STYLE_ID = 'dash-v2-keyframes';
+function ensureKeyframes() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(STYLE_ID)) return;
+  const s = document.createElement('style');
+  s.id = STYLE_ID;
+  s.textContent = `
+    @keyframes dashFadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .dash-fade { animation: dashFadeUp 0.4s ease both; }
+  `;
+  document.head.appendChild(s);
+}
 
 export default function Dashboard() {
   const { user, isLoading, refreshUser } = useAuth();
-  const [opportunities, setOpportunities] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showLogIntroModal, setShowLogIntroModal] = useState(false);
-  const [showFirstMessageNudge, setShowFirstMessageNudge] = useState(false);
   const [helpRequest, setHelpRequest] = useState(null);
   const [matches, setMatches] = useState([]);
-  const [networkStats, setNetworkStats] = useState({
-    totalUsers: 0,
-    activeRequests: 0,
-    spotsLeft: 0
-  });
   const [myActiveQuestions, setMyActiveQuestions] = useState(0);
-  const [linkedParents, setLinkedParents] = useState([]);
-  
-  const loadStartedRef = React.useRef(false);
+  const [fastiqStats, setFastiqStats] = useState({ newOpportunities: 0, newAlumni: 0 });
+  const loadStartedRef = useRef(false);
 
-  // Determine user journey state
-  const getUserState = () => {
-    if (!helpRequest && myActiveQuestions === 0) return 'new_user';
-    if (helpRequest && matches.length === 0) return 'waiting_for_matches';
-    if (matches.length > 0) {
-      const messagedCount = matches.filter(m => 
-        m.status === 'student_connected' || m.status === 'intro_made'
-      ).length;
-      if (messagedCount === 0) return 'has_matches_not_messaged';
-      const unreadResponses = messages.filter(m => !m.is_read).length;
-      if (unreadResponses > 0) return 'has_unread_responses';
-      // Has messaged but no responses yet
-      if (messagedCount > 0) return 'waiting_for_responses';
-      return 'all_caught_up';
-    }
-    return 'new_user';
-  };
+  useEffect(() => { ensureFonts(); ensureKeyframes(); }, []);
 
+  // Route guards
   useEffect(() => {
     if (isLoading) return;
-    if (!user) {
-      navigate('LandingPage');
-      return;
-    }
-
-    if (user.persona === 'parent') {
-      navigate('ParentDashboard');
-      return;
-    } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+    if (!user) { navigate('LandingPage'); return; }
+    if (user.persona === 'parent') { navigate('ParentDashboard'); return; }
+    if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
       navigate(user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard');
       return;
-    } else if (user.roles?.includes('admin')) {
-      navigate('AdminDashboard');
-      return;
     }
-
+    if (user.roles?.includes('admin')) { navigate('AdminDashboard'); return; }
     if (loadStartedRef.current) return;
     loadStartedRef.current = true;
-    
     localStorage.setItem('cff:seenDashboard', 'true');
     loadDashboardData();
   }, [user, isLoading]);
 
   const loadDashboardData = async () => {
     setLoadingData(true);
-    
-    // LOAD HELP REQUEST FIRST
+
+    // Help request
     let foundRequest = null;
-    
     try {
       const jobRequests = await base44.entities.JobRequest.filter(
-        { created_by: user.email, status: 'active' },
-        '-created_date',
-        1
+        { created_by: user.email, status: 'active' }, '-created_date', 1
       );
-      if (jobRequests?.length > 0) {
-        foundRequest = jobRequests[0];
-      }
-    } catch (e) {
-      console.error('JobRequest filter failed:', e);
-    }
-    
+      if (jobRequests?.length > 0) foundRequest = jobRequests[0];
+    } catch (e) { console.error('JobRequest filter failed:', e); }
+
     if (!foundRequest) {
       try {
-        const allAccessible = await base44.entities.HelpRequest.list('-created_date', 50);
-        const activeOnes = (allAccessible || []).filter(r => 
-          r.status === 'active' && 
+        const all = await base44.entities.HelpRequest.list('-created_date', 50);
+        const mine = (all || []).filter(r =>
+          r.status === 'active' &&
           (r.student_email === user.email || r.created_by === user.email || r.student_id === user.id)
         );
-        if (activeOnes.length > 0) {
-          foundRequest = activeOnes[0];
-        }
-      } catch (e) {
-        console.error('HelpRequest list failed:', e);
-      }
+        if (mine.length > 0) foundRequest = mine[0];
+      } catch (e) { console.error('HelpRequest list failed:', e); }
     }
-    
     setHelpRequest(foundRequest || null);
-    
+
     // Count active questions
-    let totalActiveQuestions = 0;
+    let totalQ = 0;
     try {
-      const myJobRequests = await base44.entities.JobRequest.filter(
-        { created_by: user.email, status: 'active' }
-      );
-      totalActiveQuestions += myJobRequests?.length || 0;
-      
-      const myJobRequestsByPoster = await base44.entities.JobRequest.filter(
-        { poster_email: user.email, status: 'active' }
-      );
-      const jobRequestIds = new Set((myJobRequests || []).map(r => r.id));
-      (myJobRequestsByPoster || []).forEach(r => {
-        if (!jobRequestIds.has(r.id)) totalActiveQuestions++;
-      });
-      
-      const myHelpRequests = await base44.entities.HelpRequest.filter(
-        { student_email: user.email, status: 'active' }
-      );
-      totalActiveQuestions += myHelpRequests?.length || 0;
-    } catch (e) {
-      console.error('Failed to count active questions:', e);
-    }
-    setMyActiveQuestions(totalActiveQuestions);
-    
+      const jrs = await base44.entities.JobRequest.filter({ created_by: user.email, status: 'active' });
+      totalQ += jrs?.length || 0;
+      const jrsByPoster = await base44.entities.JobRequest.filter({ poster_email: user.email, status: 'active' });
+      const ids = new Set((jrs || []).map(r => r.id));
+      (jrsByPoster || []).forEach(r => { if (!ids.has(r.id)) totalQ++; });
+      const hrs = await base44.entities.HelpRequest.filter({ student_email: user.email, status: 'active' });
+      totalQ += hrs?.length || 0;
+    } catch (e) { console.error('Count questions failed:', e); }
+    setMyActiveQuestions(totalQ);
+
     try {
-      // Fetch user counts (with timeout to prevent hanging)
+      // Messages
       try {
-        const countPromise = getUserCount();
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
-        const response = await Promise.race([countPromise, timeoutPromise]);
-        const data = response.data;
-        setNetworkStats({
-          totalUsers: data?.totalUsers || data?.count || 226,
-          activeRequests: data?.activeRequests || 15,
-          spotsLeft: data?.spotsLeft || 774
-        });
-      } catch (error) {
-        console.error('Failed to fetch network stats:', error);
-        setNetworkStats({ totalUsers: 226, activeRequests: 15, spotsLeft: 774 });
-      }
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+        const { data: msgRes } = await Promise.race([getUserMessages(), timeout]);
+        setMessages(msgRes?.messages || []);
+      } catch (e) { setMessages([]); }
 
-      // Fetch messages (with timeout)
-      try {
-        const msgPromise = getUserMessages();
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
-        const { data: messagesResponse } = await Promise.race([msgPromise, timeoutPromise]);
-        setMessages(messagesResponse?.messages || []);
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
-        setMessages([]);
-      }
-
-      // Fetch opportunities
-      try {
-        const opps = await base44.entities.Opportunity.filter({ status: 'active' }, '-created_date', 3);
-        setOpportunities(opps || []);
-      } catch (error) {
-        console.error('Failed to fetch opportunities:', error);
-        setOpportunities([]);
-      }
-
-      // Fetch matches
+      // Matches
       let studentMatches = [];
       try {
-        studentMatches = await base44.entities.Match.filter(
-          { student_email: user.email },
-          '-match_score',
-          50
-        );
-        
+        studentMatches = await base44.entities.Match.filter({ student_email: user.email }, '-match_score', 50);
         if ((!studentMatches || studentMatches.length === 0) && foundRequest) {
-          studentMatches = await base44.entities.Match.filter(
-            { help_request_id: foundRequest.id },
-            '-match_score',
-            50
-          );
+          studentMatches = await base44.entities.Match.filter({ help_request_id: foundRequest.id }, '-match_score', 50);
         }
-        
-        if ((!studentMatches || studentMatches.length === 0) && foundRequest?.student_id) {
-          studentMatches = await base44.entities.Match.filter(
-            { student_id: foundRequest.student_id },
-            '-match_score',
-            50
-          );
+        if (!studentMatches?.length) {
+          studentMatches = await base44.entities.Match.filter({ student_id: user.id }, '-match_score', 50);
         }
-        
-        if ((!studentMatches || studentMatches.length === 0)) {
-          studentMatches = await base44.entities.Match.filter(
-            { student_id: user.id },
-            '-match_score',
-            50
-          );
-        }
-      } catch (error) {
-        console.error('Failed to fetch matches:', error);
-        studentMatches = [];
-      }
+      } catch (e) { studentMatches = []; }
       setMatches(studentMatches || []);
 
-      // Load linked parents (with timeout)
+      // FASTIQ stats
       try {
-        const parentPromise = base44.functions.invoke('getLinkedParents', {});
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
-        const parentsResult = await Promise.race([parentPromise, timeoutPromise]);
-        if (parentsResult.data?.parents) {
-          setLinkedParents(parentsResult.data.parents);
+        const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
+        const profile = profiles?.[0];
+        if (profile) {
+          setFastiqStats({
+            newOpportunities: profile.new_alerts_count || 0,
+            newAlumni: profile.alumni_discovered || 0,
+          });
         }
-      } catch (e) {
-        console.log('Could not load linked parents:', e);
-      }
-
+      } catch (e) { /* non-critical */ }
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error('Dashboard data load error:', error);
     } finally {
       setLoadingData(false);
       setInitialLoadComplete(true);
-      
-      // Check if should show first message nudge (has matches but hasn't messaged)
-      if (studentMatches?.length > 0) {
-        const hasMessaged = studentMatches.some(m => 
-          m.status === 'student_connected' || m.status === 'intro_made'
-        );
-        if (!hasMessaged && !localStorage.getItem('firstMessageNudgeDismissed')) {
-          // Small delay to let dashboard render first
-          setTimeout(() => setShowFirstMessageNudge(true), 1000);
-        }
-      }
     }
   };
 
   if (isLoading || !user || !initialLoadComplete) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-50">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading your dashboard...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f4f2ee' }}>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#E85D20', margin: '0 auto 12px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888' }}>Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
-  const userState = getUserState();
-  const unreadMessages = messages.filter(m => !m.is_read);
-  const unreadCount = unreadMessages.length;
-  const messagedMatches = matches.filter(m => 
-    m.status === 'student_connected' || m.status === 'intro_made'
-  );
-  const messagesSentCount = messagedMatches.length;
-  const unmessagedMatches = matches.filter(m => 
-    m.status !== 'student_connected' && m.status !== 'intro_made'
-  );
+  const isNewUser = !helpRequest && myActiveQuestions === 0;
 
-  const firstName = user.first_name || (() => {
-    const fn = user.full_name?.trim() || '';
-    if (fn.includes(',')) {
-      return fn.split(',')[1]?.trim().split(/\s+/)[0] || 'Gator';
-    }
-    return fn.split(/\s+/)[0] || 'Gator';
-  })();
-
-  const handlePullRefresh = async () => {
-    loadStartedRef.current = false;
-    await loadDashboardData();
+  const onMessageMatch = (match) => {
+    const name = match.parent_name || match.peer_name || 'Helper';
+    const email = match.parent_email || match.peer_email;
+    navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
   };
 
   return (
-    <PullToRefresh onRefresh={handlePullRefresh} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 pb-24 md:pb-8 overflow-x-hidden">
-      
-      {/* Founding Member Banner */}
-      <FoundingMemberBanner spotsLeft={networkStats.spotsLeft} />
+    <div style={{ minHeight: '100vh', background: '#f4f2ee' }}>
+      {/* Nav */}
+      <DashboardNav user={user} currentPage="Dashboard" />
 
-      {/* FASTIQ Banner — always visible at top */}
-      <FastIQBanner user={user} />
+      {/* Hero */}
+      <div className="dash-fade" style={{ animationDelay: '0s' }}>
+        <DashboardHero user={user} fastiqStats={fastiqStats} />
+      </div>
 
-      {/* 1. HERO: Welcome + UF · Major · Class Year + Stats */}
-      {userState !== 'new_user' && (
-        <DashboardHeader 
-          firstName={firstName}
-          user={user}
-          stats={{
-            activeQuestions: myActiveQuestions,
-            totalMatches: matches.length,
-            messagesSent: messagesSentCount,
-            unreadResponses: unreadCount,
-            activeConversations: messagedMatches.length,
-            studentKarma: user?.student_karma || 0,
-          }}
-          state={userState === 'waiting_for_matches' ? 'waiting_matches' : 
-                 userState === 'all_caught_up' ? 'all_caught_up' : 'default'}
-        />
-      )}
+      {/* Body */}
+      <div className="dash-body" style={{ maxWidth: 860, margin: '0 auto', padding: '24px 24px 60px' }}>
+        <style>{`
+          @media(max-width:768px) {
+            .dash-body { padding: 16px 16px 48px !important; }
+          }
+        `}</style>
 
-      {/* Main Content — Ordered per 1G spec */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
-        
-        {/* Activation Banner (if applicable) */}
-        <ActivationWelcomeBannerStudent user={user} />
-
-        {/* FASTIQ Weekly Scout Brief */}
-        <FastIQWeeklyBrief user={user} />
-
-        {/* New user state gets its own welcome flow */}
-        {userState === 'new_user' && (
-          <NewUserWelcome user={user} />
-        )}
-
-        {/* 2-3. YOUR HELP REQUEST + RESPONSES INLINE */}
-        {helpRequest && (
-          <RequestWithResponses helpRequest={helpRequest} user={user} />
-        )}
-
-        {/* Waiting states */}
-        {userState === 'waiting_for_matches' && (
-          <WaitingForMatches helpRequest={helpRequest} />
-        )}
-        {userState === 'waiting_for_responses' && (
-          <WaitingForResponses messagedMatches={messagedMatches} />
-        )}
-
-        {/* Matches section when available */}
-        {matches.length > 0 && userState === 'has_matches_not_messaged' && (
-          <MatchesSection 
-            matches={matches} 
-            user={user}
-            onMessageMatch={(match) => {
-              const name = match.helper_name || match.parent_name || 'Helper';
-              const email = match.helper_email || match.parent_email;
-              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-            }}
-          />
-        )}
-
-        {/* More matches prompt */}
-        {unmessagedMatches.length > 0 && (userState === 'waiting_for_responses' || userState === 'has_unread_responses') && (
-          <MoreMatchesPrompt 
-            unmessagedMatches={unmessagedMatches}
-            totalMatches={matches.length}
-            isWaitingForResponses={userState === 'waiting_for_responses'}
-            onMessageMatch={(match) => {
-              const name = match.helper_name || match.parent_name || 'Helper';
-              const email = match.helper_email || match.parent_email;
-              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-            }}
-          />
-        )}
-
-        {/* All caught up state */}
-        {userState === 'all_caught_up' && (
-          <AllCaughtUpState 
-            conversations={messagedMatches}
-            opportunities={opportunities}
-            challenge={{
-              introsLogged: user?.challenge_intros_logged || 0,
-              goal: 3,
-              daysRemaining: 30,
-            }}
-            student={user}
-            unmessagedMatches={unmessagedMatches}
-            totalMatches={matches.length}
-            linkedParents={linkedParents}
-            onMessageMatch={(match) => {
-              const name = match.helper_name || match.parent_name || 'Helper';
-              const email = match.helper_email || match.parent_email;
-              navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-            }}
-            onLogIntro={() => setShowLogIntroModal(true)}
-            onInviteParent={() => setShowInviteModal(true)}
-          />
-        )}
-
-        {/* Recent Feedback */}
-        <RecentFeedbackCard user={user} />
-
-        {/* Student Karma Explainer (first visit) */}
-        <StudentKarmaExplainer user={user} />
-
-        {/* Student Karma Card */}
-        <StudentKarmaCard user={user} onInviteParent={() => setShowInviteModal(true)} />
-
-        {/* 4. 💬 HELP A FELLOW GATOR (+5 karma) */}
-        <HelpFellowGatorSection user={user} />
-
-        {/* 5. 👨‍👩‍👧 INVITE YOUR PARENTS / Family Network */}
-        <InviteParentsCard linkedParents={linkedParents} onInviteParent={() => setShowInviteModal(true)} />
-
-        {/* Family Boost Status */}
-        {(user?.boost_level > 0 || linkedParents.length > 0 || user?.family_group_id) && (
-          <FamilyBoostStatus 
-            boostLevel={user?.boost_level || user?.karma_boost || 0}
-            boostExpiresAt={user?.boost_expires_at || user?.boosted_until}
-            boostedByParentEmail={user?.boosted_by_parent_email || linkedParents?.[0]?.email}
-            boostedByParentName={linkedParents?.[0]?.full_name}
-            parentKarma={user?.family_karma || linkedParents?.[0]?.karma_points || 0}
-            linkedParents={linkedParents}
-          />
-        )}
-
-        {/* 6. 📝 SHARE WHAT YOU LEARNED (+10 karma) */}
-        <ShareWhatYouLearnedCard user={user} />
-
-        {/* 7. 💰 SHARE YOUR OFFER DATA (+25 karma) */}
-        <ShareOfferDataCard user={user} />
-
-        {/* 8. 💼 POST A JOB/GIG (+10 karma) */}
-        <PostJobGigCard />
-
-        {/* 9. EXPLORE */}
-        <ExploreSection />
-
-        {/* Family Karma (if applicable) */}
-        {(user?.family_karma > 0 || linkedParents.length > 0) && (
-          <FamilyKarmaCard user={user} viewMode="student" />
-        )}
-
-        {/* Family Leaderboard */}
-        {(user?.family_group_id || linkedParents.length > 0) && (
-          <FamilyLeaderboard user={user} />
-        )}
-
-        {/* 10. MORE TOOLS */}
-        <details className="group bg-white rounded-xl shadow-lg border-2 border-slate-100 overflow-hidden">
-          <summary className="cursor-pointer p-5 hover:bg-slate-50 transition-colors list-none flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900">More Tools</h3>
-            <ChevronDown className="w-5 h-5 text-slate-400 transform group-open:rotate-180 transition-transform" />
-          </summary>
-          <div className="p-5 pt-0 border-t border-slate-100">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <Button onClick={() => navigate('MyMessages')} variant="outline" className="justify-start h-auto py-4">
-                <MessageSquare className="w-5 h-5 mr-2" /> My Messages
-              </Button>
-              <Button onClick={() => navigate('MyApplications')} variant="outline" className="justify-start h-auto py-4">
-                <Users className="w-5 h-5 mr-2" /> My Applications
-              </Button>
-              <Button onClick={() => navigate('Profile')} variant="outline" className="justify-start h-auto py-4">
-                <Users className="w-5 h-5 mr-2" /> My Profile
-              </Button>
-            </div>
+        {/* New user welcome */}
+        {isNewUser && (
+          <div className="dash-fade" style={{ animationDelay: '0.08s', marginBottom: 20 }}>
+            <NewUserWelcome user={user} />
           </div>
-        </details>
+        )}
+
+        {/* Section 1: Next Action */}
+        {!isNewUser && (
+          <div className="dash-fade" style={{ animationDelay: '0.08s', marginBottom: 20 }}>
+            <NextActionCard messages={messages} matches={matches} />
+          </div>
+        )}
+
+        {/* Section 2: Matches */}
+        {matches.length > 0 && (
+          <div className="dash-fade" style={{ animationDelay: '0.14s', marginBottom: 20 }}>
+            <MatchesSectionV2 matches={matches} user={user} onMessageMatch={onMessageMatch} />
+          </div>
+        )}
+
+        {/* Section 3: Messages */}
+        <div className="dash-fade" style={{ animationDelay: '0.2s', marginBottom: 20 }}>
+          <MessagesSectionV2 messages={messages} />
+        </div>
+
+        {/* Section 4: Karma */}
+        <div className="dash-fade" style={{ animationDelay: '0.26s', marginBottom: 20 }}>
+          <KarmaStrip user={user} />
+        </div>
       </div>
 
       {/* Modals */}
@@ -494,7 +231,6 @@ export default function Dashboard() {
           await loadDashboardData();
         }}
       />
-
       {showLogIntroModal && (
         <LogIntroModal
           isOpen={showLogIntroModal}
@@ -509,23 +245,6 @@ export default function Dashboard() {
           }}
         />
       )}
-
-      {/* First Message Nudge Modal */}
-      {showFirstMessageNudge && unmessagedMatches.length > 0 && (
-        <FirstMessageNudgeModal
-          topMatch={unmessagedMatches[0]}
-          allMatchesCount={matches.length}
-          onMessage={(match) => {
-            const name = match.helper_name || match.parent_name || 'Helper';
-            const email = match.helper_email || match.parent_email;
-            navigate(`MessageComposer?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&matchId=${match.id}`);
-          }}
-          onBrowse={() => {
-            document.querySelector('[class*="MatchesSection"]')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          onClose={() => setShowFirstMessageNudge(false)}
-        />
-      )}
-    </PullToRefresh>
+    </div>
   );
 }
