@@ -78,7 +78,7 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
         {/* eyebrow */}
         <div style={{ textAlign: 'center', marginBottom: 14, ...fadeUp(0) }}>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20' }}>
-            Two powerful things. One platform.
+            Two powerful networks. One mission.
           </span>
         </div>
 
