@@ -285,7 +285,7 @@ export default function StudentOnboarding() {
   // Validation for each step
   const isStep1Valid = major.trim().length > 0 && gradYear;
   const isStep2Valid = industries.length > 0 && seeking.length > 0;
-  const isStep3Valid = helpNeeded.length > 0 && helpRequest.trim().length >= 20;
+  const isStep3Valid = questionCategory && helpRequest.trim().length >= 10;
 
   // STEP 1: About You - High-Energy Two-Column Layout
   if (step === 1) {
