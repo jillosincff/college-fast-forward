@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PrimaryCTA, SecondaryCTA } from '@/components/landing/LandingCTAButton';
 
 const FONT_LINK_ID = 'two-products-fonts';
 function ensureFonts() {
@@ -133,7 +134,7 @@ function NetworkCard({ features, onClaim, style }) {
         ))}
       </div>
 
-      <CTAButton text="Explore the Network" dark onClick={onClaim} />
+      <SecondaryCTA text="Explore the Network" onClick={onClaim} fullWidth />
     </div>
   );
 }
@@ -164,7 +165,7 @@ function FastIQCard({ features, onClaim, style }) {
         ))}
       </div>
 
-      <CTAButton text="Unlock FASTIQ" dark={false} onClick={onClaim} />
+      <PrimaryCTA text="Unlock FASTIQ" onClick={onClaim} fullWidth />
     </div>
   );
 }
@@ -181,54 +182,5 @@ function FeatureItem({ text, variant }) {
       </div>
       <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', lineHeight: 1.5 }}>{text}</span>
     </div>
-  );
-}
-
-/* ── CTA button ───────────────────────────────────── */
-function CTAButton({ text, dark, onClick }) {
-  const baseBg = dark ? 'rgba(255,255,255,0.08)' : '#E85D20';
-  const hoverBg = dark ? 'rgba(255,255,255,0.13)' : '#d44e14';
-  const borderStyle = dark ? '0.5px solid rgba(255,255,255,0.15)' : 'none';
-  const color = dark ? '#f4f0e8' : '#fff';
-
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = hoverBg;
-        e.currentTarget.style.transform = 'translateY(-1px)';
-        const arrow = e.currentTarget.querySelector('.tp-arrow');
-        if (arrow) arrow.style.transform = 'translateX(3px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = baseBg;
-        e.currentTarget.style.transform = 'translateY(0)';
-        const arrow = e.currentTarget.querySelector('.tp-arrow');
-        if (arrow) arrow.style.transform = 'translateX(0)';
-      }}
-      style={{
-        fontFamily: dmSans,
-        fontSize: 15,
-        fontWeight: 500,
-        color,
-        background: baseBg,
-        border: borderStyle,
-        borderRadius: 100,
-        padding: '14px 28px',
-        width: '100%',
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        transition: 'background 0.2s ease, transform 0.15s ease',
-        minHeight: 'auto',
-      }}
-    >
-      {text}
-      <svg className="tp-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 0.15s ease' }}>
-        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </button>
   );
 }

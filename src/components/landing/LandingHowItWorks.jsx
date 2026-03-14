@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PrimaryCTA, SecondaryCTA } from '@/components/landing/LandingCTAButton';
 
 /* ── fonts ─────────────────────────────────────────── */
 const FONT_LINK_ID = 'hiw-fonts';
@@ -314,44 +315,10 @@ function PanelContent({ panel, onClaim }) {
           transition: 'opacity 0.45s ease 0.26s, transform 0.45s ease 0.26s',
         }}
       >
-        <button
-          onClick={onClaim}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = isDark ? '#333' : '#d44e14';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            const arrow = e.currentTarget.querySelector('.hiw-arrow');
-            if (arrow) arrow.style.transform = 'translateX(3px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = isDark ? '#2a2a2a' : '#E85D20';
-            e.currentTarget.style.transform = 'translateY(0)';
-            const arrow = e.currentTarget.querySelector('.hiw-arrow');
-            if (arrow) arrow.style.transform = 'translateX(0)';
-          }}
-          style={{
-            fontFamily: dmSans,
-            fontSize: 16,
-            fontWeight: 500,
-            color: '#fff',
-            background: isDark ? '#2a2a2a' : '#E85D20',
-            borderRadius: 100,
-            padding: '16px 40px',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            transition: 'background 0.2s ease, transform 0.15s ease',
-            minHeight: 'auto',
-            minWidth: 'auto',
-            width: 'auto',
-          }}
-        >
-          {panel.cta.text}
-          <svg className="hiw-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 0.15s ease' }}>
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        {isDark
+          ? <SecondaryCTA text={panel.cta.text} onClick={onClaim} />
+          : <PrimaryCTA text={panel.cta.text} onClick={onClaim} />
+        }
       </div>
     </div>
   );

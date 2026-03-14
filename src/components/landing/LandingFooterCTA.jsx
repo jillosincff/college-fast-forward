@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const fade = {
   hidden: { opacity: 0, y: 20 },
@@ -18,15 +17,7 @@ export default function LandingFooterCTA({ stats, onClaim, onFAQ }) {
           </p>
           <p className="text-white/60 text-[18px] mb-10 leading-[1.6]">After that it's $9/month.</p>
 
-          <Button
-            onClick={onClaim}
-            size="lg"
-            className="bg-white text-[#0021A5] hover:bg-slate-100 w-full py-6 text-lg font-bold min-h-[56px] transition-all duration-300 hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
-            style={{ boxShadow: '0 4px 30px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.08)' }}
-          >
-            Claim Your Free Spot
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          <PrimaryCTA text="Claim Your Free Spot" onClick={onClaim} />
 
           <p className="text-[#E5E7EB]/50 text-xs mt-4">Founding members stay free forever.</p>
 
