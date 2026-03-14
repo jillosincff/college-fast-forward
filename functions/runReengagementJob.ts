@@ -1,20 +1,29 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
+const APP = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
+const DM = "'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+const PF = "'Playfair Display',Georgia,'Times New Roman',serif";
+const YR = new Date().getFullYear();
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
+const emailWrap = (pre, body, unsub) => `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<span style="display:none;font-size:1px;color:#f4f2ee;max-height:0;overflow:hidden;">${pre}&zwnj;&nbsp;</span>
+</head><body style="margin:0;padding:0;background-color:#f4f2ee;font-family:${DM};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f2ee;"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+<tr><td style="background-color:#0d1117;border-radius:16px 16px 0 0;padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><span style="font-family:${DM};font-size:18px;font-weight:600;color:#f4f0e8;">C<span style="color:#E85D20;">FF</span></span><span style="font-family:${DM};font-size:11px;font-weight:400;color:rgba(244,240,232,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-left:12px;">College Fast Forward</span></td><td align="right"></td></tr></table></td></tr>
+<tr><td style="background-color:#fff;padding:36px 32px;">${body}</td></tr>
+<tr><td style="background-color:#0d1117;border-radius:0 0 16px 16px;padding:20px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.3);line-height:1.6;">&copy; ${YR} College Fast Forward.<br><a href="${unsub||APP+'/#ProfileEdit'}" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Unsubscribe</a> &middot; <a href="${APP}/#ProfileEdit" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Email preferences</a> &middot; <a href="${APP}" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Visit CFF</a></td><td align="right" style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.2);">University of Florida &middot; ${YR}</td></tr></table></td></tr>
+</table></td></tr></table></body></html>`;
+
+const personCardHtml = (initials, name, role, company, detail, msgUrl, first) => `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f2ee;border-radius:12px;margin:8px 0;"><tr><td style="padding:14px 16px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="vertical-align:top;width:40px;"><div style="width:40px;height:40px;border-radius:50%;background-color:#0d1117;color:#fff;font-family:${DM};font-size:13px;font-weight:500;text-align:center;line-height:40px;display:inline-block;">${initials}</div></td><td style="padding-left:12px;vertical-align:top;"><p style="font-family:${DM};font-size:14px;font-weight:500;color:#1a1a1a;margin:0 0 2px;">${name}</p><p style="font-family:${DM};font-size:12px;font-weight:300;color:#888;margin:0 0 6px;">${[role,company].filter(Boolean).join(' &middot; ')}</p>${detail?`<p style="font-family:${DM};font-size:12px;font-weight:300;color:#aaa;margin:0;">${detail}</p>`:''}</td>${msgUrl?`<td align="right" style="vertical-align:middle;padding-left:16px;"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#0d1117;border-radius:100px;padding:7px 16px;"><a href="${msgUrl}" style="font-family:${DM};font-size:12px;font-weight:500;color:#fff;text-decoration:none;">Message ${first||'them'}</a></td></tr></table></td>`:''}</tr></table></td></tr></table>`;
 
 // Subject lines per spec
 const subjectLineVariants = {
-  day7: [
-    (data) => `A UF student needs someone in ${data.industry}`,
-  ],
-  day21: [
-    (data) => `${data.count} UF students are looking for someone with your background`,
-  ],
-  day45: [
-    (data) => `We miss you, ${data.firstName} — UF students still need help`,
-  ]
+  day7: [(data) => `You have ${data.count} new matches waiting`],
+  day21: [(data) => `${data.count} people in the network can help you right now`],
+  day45: [(data) => `Your account is still here — and so are your matches`],
 };
 
 function getDaysSince(dateStr) {
@@ -406,130 +415,45 @@ Deno.serve(async (req) => {
 });
 
 function buildReengagementEmailHtml(emailType, data) {
-  const { parentFirstName, primaryIndustry, questions, count, unsubscribeUrl, dashboardUrl, communityUrl, newMemberCount, memberCount, totalQuestionsAnswered } = data;
+  const { parentFirstName, questions, count, unsubscribeUrl, dashboardUrl, communityUrl, newMemberCount, memberCount, totalQuestionsAnswered } = data;
+  const divider = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid rgba(0,0,0,0.06);font-size:0;">&nbsp;</td></tr></table>`;
 
-  // ── 9A: 7-Day — single matched question, minimal ──
   if (emailType === 'day7') {
-    const q = questions[0];
-    const preheader = `A student posted a question right in your area — still unanswered.`;
+    const personCards = questions.slice(0, 3).map(q => {
+      const ini = (q.studentName||'S').charAt(0).toUpperCase();
+      return personCardHtml(ini, q.studentName, q.major, '', `Posted ${q.timeAgo}`, q.url, q.studentName);
+    }).join('');
 
-    return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-    </div>
-    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
-      <p style="font-size: 16px;">It's been a few days — meanwhile, a student posted a question right in your area:</p>
-
-      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
-        <div style="margin-bottom: 8px;">
-          <strong style="color: #111827; font-size: 15px;">${q.studentName}</strong>
-          <span style="color: #6b7280; font-size: 13px;"> · ${q.major}</span>
-        </div>
-        <p style="color: #374151; font-style: italic; margin: 0 0 12px 0; font-size: 15px;">"${q.preview}"</p>
-        <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">⏰ Unanswered · Posted ${q.timeAgo}</p>
-        <div style="text-align: center;">
-          <a href="${q.url}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Help ${q.studentName} →</a>
-        </div>
-      </div>
-
-      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— The CFF Team</p>
-    </div>
-    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
-    </div>
-  </div>
-</body></html>`;
+    const body = `
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;"><span style="color:#1a1a1a;">${count} people are ready to</span> <span style="font-style:italic;font-weight:400;color:#E85D20;">help you.</span></h1>
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">You haven&rsquo;t logged in for a few days. Your matches haven&rsquo;t gone anywhere &mdash; and some of them are waiting to hear from you.</p>
+${personCards}
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;"><a href="${communityUrl}" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">Message a match &rarr;</a></td></tr></table>`;
+    return emailWrap(`${count} new matches waiting for you.`, body, unsubscribeUrl);
   }
 
-  // ── 9B: 21-Day — growth stats + numbered question list ──
   if (emailType === 'day21') {
-    const questionList = questions.slice(0, 3).map((q, i) => `
-      <tr><td style="padding: 10px 0; ${i < Math.min(questions.length, 3) - 1 ? 'border-bottom: 1px solid #f3f4f6;' : ''}">
-        <span style="color: #6b7280; font-size: 14px;">${i + 1}.</span>
-        <span style="color: #374151; font-style: italic; font-size: 14px;">"${q.preview}"</span>
-      </td></tr>`).join('');
+    const personCards = questions.slice(0, 3).map(q => {
+      const ini = (q.studentName||'S').charAt(0).toUpperCase();
+      return personCardHtml(ini, q.studentName, q.major, '', `&ldquo;${q.preview}&rdquo;`, q.url, q.studentName);
+    }).join('');
 
-    const preheader = `The UF network has been growing — ${count} students have questions that match your expertise.`;
-
-    return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-    </div>
-    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
-      <p style="font-size: 16px;">The UF network has been growing — <strong>${newMemberCount}</strong> new members joined this month.</p>
-      <p style="font-size: 16px;">Right now, <strong>${count}</strong> students have questions that match your expertise:</p>
-
-      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 8px 0; margin: 20px 0;">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-          ${questionList}
-        </table>
-      </div>
-
-      <div style="text-align: center; margin: 24px 0;">
-        <a href="${communityUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See All Questions →</a>
-      </div>
-
-      <p style="font-size: 16px;">Your experience matters more than you think.</p>
-      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— Jill, CFF Founder</p>
-    </div>
-    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
-    </div>
-  </div>
-</body></html>`;
+    const body = `
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;"><span style="color:#1a1a1a;">${count} people in the network can</span> <span style="font-style:italic;font-weight:400;color:#E85D20;">help you right now.</span></h1>
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">The UF network has grown to <strong style="font-weight:500;color:#1a1a1a;">${memberCount}</strong> members. <strong style="font-weight:500;color:#1a1a1a;">${newMemberCount}</strong> joined this month alone. Your matches haven&rsquo;t gone anywhere.</p>
+${personCards}
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;"><a href="${communityUrl}" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">Message a match &rarr;</a></td></tr></table>`;
+    return emailWrap(`${count} people in the network can help you right now.`, body, unsubscribeUrl);
   }
 
-  // ── 9C: 45-Day FINAL — personal from Jill, explicit unsubscribe, hard stop ──
-  const preheader = `This is the last time I'll nudge you — I promise.`;
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}</span>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-    </div>
-    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${parentFirstName},</p>
-      <p style="font-size: 16px;">This is the last time I'll nudge you — I promise.</p>
-      <p style="font-size: 16px;">Since you joined, the UF network has grown to <strong>${memberCount}</strong> members. <strong>${totalQuestionsAnswered}</strong> questions have been answered and students are landing internships through warm introductions.</p>
-      <p style="font-size: 16px;">If you have 5 minutes, even once a month, it makes a difference:</p>
-
-      <div style="text-align: center; margin: 24px 0;">
-        <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">See What's New →</a>
-      </div>
-
-      <p style="font-size: 16px;">If you'd rather not hear from us, no hard feelings:</p>
-
-      <div style="text-align: center; margin: 16px 0 24px 0;">
-        <a href="${unsubscribeUrl}" style="display: inline-block; background: #f3f4f6; color: #6b7280; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; border: 1px solid #d1d5db;">Unsubscribe from nudges →</a>
-      </div>
-
-      <p style="font-size: 14px; color: #6b7280; margin: 16px 0 0 0;">— Jill</p>
-    </div>
-    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${unsubscribeUrl}" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
-    </div>
-  </div>
-</body></html>`;
+  // 45-day — final
+  const body = `
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;">Your account is still here &mdash; and so are your matches.</h1>
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">Since you joined, the UF network has grown to <strong style="font-weight:500;color:#1a1a1a;">${memberCount}</strong> members. <strong style="font-weight:500;color:#1a1a1a;">${totalQuestionsAnswered}</strong> questions have been answered. Students are landing internships through warm introductions.</p>
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">If you have 5 minutes, even once a month, it makes a difference:</p>
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;"><a href="${dashboardUrl}" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">See What&rsquo;s New &rarr;</a></td></tr></table>
+${divider}
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">If you&rsquo;d rather not hear from us, no hard feelings:</p>
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="border:1px solid rgba(232,93,32,0.4);border-radius:100px;padding:13px 32px;"><a href="${unsubscribeUrl}" style="font-family:${DM};font-size:15px;font-weight:400;color:#E85D20;text-decoration:none;">Unsubscribe from nudges &rarr;</a></td></tr></table>`;
+  return emailWrap(`This is the last time we'll reach out — your matches are still here.`, body, unsubscribeUrl);
 }
