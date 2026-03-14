@@ -104,11 +104,13 @@ export default function MatchesReview() {
     setSending(true);
     try {
       // Create a conversation and send message
+      const recipientEmail = currentMatch.parent_email || currentMatch.peer_email || currentMatch.helper_email;
+      const recipientName = currentMatch.parent_name || currentMatch.peer_name || currentMatch.helper_name;
       const conversation = await base44.entities.Conversation.create({
-        participant_emails: [user.email, currentMatch.helper_email || currentMatch.parent_email],
+        participant_emails: [user.email, recipientEmail],
         participant_names: {
           [user.email]: user.full_name,
-          [currentMatch.helper_email || currentMatch.parent_email]: currentMatch.helper_name || currentMatch.parent_name
+          [recipientEmail]: recipientName
         },
         subject: 'Connection from CFF',
         last_message_preview: message.substring(0, 100),
@@ -120,7 +122,7 @@ export default function MatchesReview() {
         conversation_id: conversation.id,
         sender_email: user.email,
         sender_name: user.full_name,
-        recipient_email: currentMatch.helper_email || currentMatch.parent_email,
+        recipient_email: recipientEmail,
         subject: 'Connection from CFF',
         body: message,
         is_read: false
