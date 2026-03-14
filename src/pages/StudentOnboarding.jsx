@@ -13,6 +13,7 @@ import {
 import { JobRequest } from '@/entities/JobRequest';
 import confetti from 'canvas-confetti';
 import CelebrationScreen from '@/components/onboarding/student/CelebrationScreen';
+import AskFirstQuestion from '@/components/onboarding/student/AskFirstQuestion';
 
 export default function StudentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -30,9 +31,11 @@ export default function StudentOnboarding() {
   const [industries, setIndustries] = useState([]);
   const [seeking, setSeeking] = useState([]);
   
-  // Step 3: Help Needed
+  // Step 3: Question (new flow)
   const [helpNeeded, setHelpNeeded] = useState([]);
   const [helpRequest, setHelpRequest] = useState('');
+  const [questionCategory, setQuestionCategory] = useState('');
+  const [questionContext, setQuestionContext] = useState('');
   const [preferredLocation, setPreferredLocation] = useState('');
   const [targetTimeline, setTargetTimeline] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
