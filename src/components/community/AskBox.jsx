@@ -44,7 +44,7 @@ export default function AskBox({ onOpenModal, selectedCategory, onCategorySelect
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; }}
         >
-          What do you need help with?
+          Have another question for the network?
         </button>
       </div>
 
@@ -71,6 +71,11 @@ export default function AskBox({ onOpenModal, selectedCategory, onCategorySelect
           );
         })}
       </div>
+
+      {/* Subline */}
+      <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb', fontStyle: 'italic', margin: '0 0 16px' }}>
+        Your onboarding question is already posted. Ask as many follow-up questions as you want.
+      </p>
 
       {/* Divider */}
       <div style={{ height: '0.5px', background: 'rgba(0,0,0,0.06)' }} />
