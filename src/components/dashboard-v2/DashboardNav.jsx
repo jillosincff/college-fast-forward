@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Menu, X, User, FileText, MessageSquare, Bookmark, LayoutDashboard, LogOut, Trash2, TestTube } from 'lucide-react';
+import { Menu, X, User, FileText, MessageSquare, LayoutDashboard, LogOut, Trash2, TestTube } from 'lucide-react';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -131,7 +131,7 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
                 { icon: FileText, label: 'My Pipeline', page: 'MyApplications' },
                 { icon: FileText, label: 'My Requests', page: 'MyRequests' },
                 { icon: MessageSquare, label: 'My Messages', page: 'MyMessages' },
-                { icon: Bookmark, label: 'My Favorites', page: 'Favorites' },
+
               ].map(item => (
                 <button key={item.page} onClick={() => { navigate(item.page); setMenuOpen(false); }} style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%',
