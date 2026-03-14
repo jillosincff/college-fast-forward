@@ -1,83 +1,208 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 
-const fade = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
+const FONT_LINK_ID = 'parent-relief-fonts';
+function ensureFonts() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_LINK_ID)) return;
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href =
+    'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+  document.head.appendChild(link);
+}
+
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+const STATS = [
+  { number: 'Nearly 1,000', label: 'families already on the platform' },
+  { number: '48hrs', label: 'avg. time to first warm intro' },
+  { number: '10+', label: 'universities and growing' },
+];
 
 export default function LandingParentRelief({ onCTA }) {
+  const sectionRef = useRef(null);
+  const [vis, setVis] = useState(false);
+
+  useEffect(() => { ensureFonts(); }, []);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
+      { threshold: 0.1 },
+    );
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const fadeUp = (delay) => ({
+    opacity: vis ? 1 : 0,
+    transform: vis ? 'translateY(0)' : 'translateY(16px)',
+    transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`,
+  });
+
   return (
-    <section className="py-36 sm:py-48 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
-      <div className="max-w-2xl mx-auto">
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true }}
-          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-          className="text-center"
+    <section
+      ref={sectionRef}
+      style={{
+        background: '#0d1117',
+        padding: '80px 48px 88px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* radial glow */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: -60,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 700,
+          height: 500,
+          background: 'radial-gradient(ellipse at center, rgba(220,85,30,0.06), transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+
+        {/* headline */}
+        <h2 style={{ fontFamily: dmSans, fontWeight: 600, fontSize: 'clamp(36px, 5vw, 52px)', lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: 32, ...fadeUp(0) }}>
+          <span style={{ color: '#f4f0e8' }}>For Parents Who Are</span>
+          <br />
+          <span style={{ color: '#E85D20' }}>Freaking Out</span>
+        </h2>
+
+        {/* divider */}
+        <div style={{ width: 48, height: 2, background: '#E85D20', borderRadius: 1, margin: '0 auto 36px', ...fadeUp(0.05) }} />
+
+        {/* body copy 1 */}
+        <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, textAlign: 'center', marginBottom: 20, ...fadeUp(0.1) }}>
+          You're watching your kid spend hours applying to everything and hearing nothing back. You want to help — but you don't have connections at the companies they're interested in. And that feeling of helplessness is the worst part.
+        </p>
+
+        {/* pivot line */}
+        <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 17, color: '#E85D20', lineHeight: 1.5, marginBottom: 24, ...fadeUp(0.15) }}>
+          That's exactly why we built this.
+        </p>
+
+        {/* body copy 2 */}
+        <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, textAlign: 'center', marginBottom: 52, ...fadeUp(0.18) }}>
+          College Fast Forward connects your student to a community of UF parents and alumni who've pledged to help — people who work in the fields your kid is exploring, who remember what it felt like to be starting out, and who've committed to showing up when a student reaches out.
+          <br /><br />
+          And if nobody in the community is exactly the right fit? <b style={{ fontWeight: 400, color: 'rgba(244,240,232,0.9)' }}>FASTIQ goes further</b> — finding UF alumni worldwide who share your student's school, their values, and a reason to help.
+        </p>
+
+        {/* pull quote block */}
+        <div
+          style={{
+            background: 'rgba(232,93,32,0.06)',
+            border: '0.5px solid rgba(232,93,32,0.2)',
+            borderRadius: 20,
+            padding: '44px 40px',
+            position: 'relative',
+            overflow: 'hidden',
+            marginBottom: 52,
+            ...fadeUp(0.22),
+          }}
         >
-          {/* Headline */}
-          <motion.h2 variants={fade} className="text-[32px] sm:text-5xl md:text-[56px] font-black text-white mb-4 leading-[1.08] tracking-tight">
-            For Parents Who Are{' '}
-            <span className="text-[#FA4616] relative">
-              Freaking Out
-              <span className="absolute -bottom-2 left-0 w-full h-[3px] rounded-full bg-[#FA4616]/50" />
-            </span>
-          </motion.h2>
-
-          {/* Empathy copy */}
-          <motion.div variants={fade} className="mt-14 max-w-xl mx-auto text-left sm:text-center space-y-7">
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              You're watching your kid spend hours on Handshake, applying to everything, hearing nothing back.
-            </p>
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              You feel helpless because you don't have any contacts in their target industry.
-            </p>
-            <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold">
-              That's why we built this.
-            </p>
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              CFF connects your student to thousands of parents and alumni who <span className="font-bold text-white">HAVE</span> those connections — people who work at the companies your kid dreams about, and who've agreed to help.
-            </p>
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              And FASTIQ — our AI career engine — goes even further. It searches the entire web to find alumni from their school at any company, then writes a personalized warm intro they can send with one tap.
-            </p>
-          </motion.div>
-
-          {/* A-ha moment */}
-          <motion.div
-            variants={fade}
-            className="mt-14 rounded-2xl p-7 sm:p-9 border max-w-xl mx-auto"
+          {/* decorative quote mark */}
+          <span
+            aria-hidden
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              borderColor: 'rgba(250,70,22,0.15)',
-              backdropFilter: 'blur(12px)',
-              boxShadow: '0 0 40px rgba(250,70,22,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
+              position: 'absolute',
+              top: -20,
+              left: 24,
+              fontFamily: playfair,
+              fontSize: 120,
+              color: '#E85D20',
+              opacity: 0.12,
+              lineHeight: 1,
+              pointerEvents: 'none',
+              userSelect: 'none',
             }}
           >
-            <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] font-bold">
-              If you can't directly help your kid,
-            </p>
-            <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold mt-2">
-              we'll find someone who can.
-            </p>
-          </motion.div>
+            &ldquo;
+          </span>
 
-          {/* CTA */}
-          <motion.div variants={fade} className="mt-14">
-            <button
-              onClick={onCTA}
-              className="inline-flex items-center gap-2 px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
-              style={{
-                background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-                boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-              }}
-            >
-              Get FASTIQ Free for My Student
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </motion.div>
-        </motion.div>
+          {/* quote text */}
+          <p style={{ position: 'relative', zIndex: 1, fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(22px, 3.5vw, 30px)', color: '#f4f0e8', lineHeight: 1.35, letterSpacing: '-0.01em', marginBottom: 6 }}>
+            If you can't directly help your kid,
+            <br />
+            <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>
+              we'll find someone who can.
+            </span>
+          </p>
+
+          {/* attribution */}
+          <p style={{ position: 'relative', zIndex: 1, fontFamily: dmSans, fontSize: 12, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(244,240,232,0.3)', margin: 0 }}>
+            The College Fast Forward Promise
+          </p>
+        </div>
+
+        {/* trust signals row */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap', alignItems: 'center', marginBottom: 44, ...fadeUp(0.28) }}>
+          {STATS.map((s, i) => (
+            <React.Fragment key={s.number}>
+              {i > 0 && (
+                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0, alignSelf: 'center' }} />
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#E85D20', lineHeight: 1 }}>{s.number}</span>
+                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.35)', letterSpacing: '0.04em', textAlign: 'center', maxWidth: 110, lineHeight: 1.4 }}>{s.label}</span>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* CTA block */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, ...fadeUp(0.33) }}>
+          <button
+            onClick={onCTA}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#d44e14';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              const arrow = e.currentTarget.querySelector('.pr-arrow');
+              if (arrow) arrow.style.transform = 'translateX(3px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#E85D20';
+              e.currentTarget.style.transform = 'translateY(0)';
+              const arrow = e.currentTarget.querySelector('.pr-arrow');
+              if (arrow) arrow.style.transform = 'translateX(0)';
+            }}
+            style={{
+              fontFamily: dmSans,
+              fontSize: 16,
+              fontWeight: 500,
+              color: '#fff',
+              background: '#E85D20',
+              borderRadius: 100,
+              padding: '16px 40px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              transition: 'all 0.2s ease',
+              minHeight: 'auto',
+              minWidth: 'auto',
+              width: 'auto',
+            }}
+          >
+            Join the Network — $9/month
+            <svg className="pr-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 0.15s ease' }}>
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.25)', lineHeight: 1.6, margin: 0 }}>
+            Cancel anytime. No contracts. Takes <b style={{ fontWeight: 400, color: 'rgba(244,240,232,0.4)' }}>30 seconds</b> to join.
+          </p>
+        </div>
       </div>
     </section>
   );
