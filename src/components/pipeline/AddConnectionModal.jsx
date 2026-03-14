@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { dmSans, playfair, STAGES } from './PipelineConstants';
 
+// Only outside-CFF sources shown in modal — CFF connections auto-populate
 const SOURCES = [
-  { key: 'top_match', label: 'Top Match' },
-  { key: 'strong_match', label: 'Strong Match' },
-  { key: 'fastiq', label: 'FASTIQ' },
-  { key: 'community', label: 'Community' },
-  { key: 'manual', label: 'Manual' },
+  { key: 'manual', label: 'Career Fair' },
+  { key: 'manual', label: 'Family/Friend' },
+  { key: 'manual', label: 'LinkedIn' },
+  { key: 'manual', label: 'Other' },
 ];
 
 export default function AddConnectionModal({ onClose, onSubmit }) {
@@ -52,7 +52,10 @@ export default function AddConnectionModal({ onClose, onSubmit }) {
         background: '#fff', borderRadius: 20, padding: 32, maxWidth: 480, width: '100%',
         maxHeight: '90vh', overflowY: 'auto',
       }}>
-        <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 20 }}>Add a Connection</h2>
+        <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 6 }}>Track an Outside Connection</h2>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', lineHeight: 1.5, marginBottom: 20 }}>
+          For connections made outside CFF — career fairs, family friends, LinkedIn, etc.
+        </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Name */}
@@ -67,15 +70,7 @@ export default function AddConnectionModal({ onClose, onSubmit }) {
             <input value={form.roleCompany} onChange={e => setForm({ ...form, roleCompany: e.target.value })} placeholder="e.g. Marketing Director · Publicis Group" style={inputStyle} />
           </div>
 
-          {/* Source */}
-          <div>
-            <label style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#888', display: 'block', marginBottom: 6 }}>How did you connect?</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {SOURCES.map(s => (
-                <button key={s.key} onClick={() => setForm({ ...form, source: s.key })} style={pillStyle(form.source === s.key)}>{s.label}</button>
-              ))}
-            </div>
-          </div>
+          {/* Source is always 'manual' for outside connections — no selector needed */}
 
           {/* Stage */}
           <div>

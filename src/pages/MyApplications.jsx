@@ -31,6 +31,7 @@ export default function MyApplicationsPage() {
   const [statsFilter, setStatsFilter] = useState(null);
   const [tab, setTab] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  const [matchCount, setMatchCount] = useState(0);
 
   useEffect(() => {
     if (!document.getElementById('pipeline-fonts')) {
@@ -49,8 +50,12 @@ export default function MyApplicationsPage() {
 
   const loadConnections = async () => {
     setLoading(true);
-    const data = await base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date');
+    const [data, matches] = await Promise.all([
+      base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date'),
+      base44.entities.Match.filter({ student_email: user.email }, '-match_score', 50).catch(() => []),
+    ]);
     setConnections(data || []);
+    setMatchCount(matches?.length || 0);
     setLoading(false);
   };
 
@@ -109,32 +114,25 @@ export default function MyApplicationsPage() {
         </button>
 
         {/* Page header */}
-        <div className="pipeline-header" style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28,
-          animation: 'pipelineFadeUp 0.4s ease both',
-        }}>
-          <div>
-            <h1 style={{
-              fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#1a1a1a',
-              letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 6,
-            }}>
-              My <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Connection Pipeline</span>
-            </h1>
-            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', lineHeight: 1.5, margin: 0 }}>
-              Track every warm connection — from first message to offer. This is how careers actually start.
-            </p>
-          </div>
-          <button onClick={() => setShowModal(true)} className="pipeline-add-btn" style={{
-            background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-            borderRadius: 100, padding: '10px 20px', border: 'none', cursor: 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: 6, transition: 'all 0.2s',
-            whiteSpace: 'nowrap', minHeight: 'auto', width: 'auto', flexShrink: 0,
+        <div style={{ marginBottom: 28, animation: 'pipelineFadeUp 0.4s ease both' }}>
+          <h1 style={{
+            fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#1a1a1a',
+            letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 6,
+          }}>
+            My <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Connection Pipeline</span>
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', lineHeight: 1.5, margin: 0, marginBottom: 8 }}>
+            Your pipeline updates automatically when you message a match or FASTIQ makes an intro. Every warm connection tracked in one place.
+          </p>
+          <button onClick={() => setShowModal(true)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#aaa',
+            transition: 'color 0.2s', minHeight: 'auto', width: 'auto',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#aaa'; }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round"><path d="M7 2v10M2 7h10" /></svg>
-            Add Connection
+            + Track an outside connection
           </button>
         </div>
 
@@ -160,25 +158,60 @@ export default function MyApplicationsPage() {
             </div>
           ))
         ) : connections.length === 0 ? (
-          /* Empty state */
+          /* Empty state — Version A or B based on match count */
           <div style={{
             background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 16,
             padding: '48px 32px', textAlign: 'center',
           }}>
-            <h3 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 8 }}>Your pipeline is empty.</h3>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6, marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
-              Every warm intro starts with a first message. Go to your matches and start a conversation — it'll show up here automatically.
-            </p>
-            <button onClick={() => navigate('MyMatches')} style={{
-              background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-              borderRadius: 100, padding: '10px 24px', border: 'none', cursor: 'pointer',
-              transition: 'background 0.2s', minHeight: 'auto',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
-            >
-              Go to My Matches →
-            </button>
+            {matchCount > 0 ? (
+              <>
+                <h3 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 8 }}>
+                  You have {matchCount} match{matchCount !== 1 ? 'es' : ''} waiting.
+                </h3>
+                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6, maxWidth: 400, margin: '0 auto 20px' }}>
+                  You haven't messaged anyone yet. Every conversation you start will automatically show up here — so you can track where things stand and what to do next.
+                </p>
+                <button onClick={() => navigate('Dashboard')} style={{
+                  background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+                  borderRadius: 100, padding: '10px 24px', border: 'none', cursor: 'pointer',
+                  transition: 'background 0.2s', minHeight: 'auto',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
+                >
+                  Start a Conversation →
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 8 }}>Your pipeline is empty.</h3>
+                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6, maxWidth: 400, margin: '0 auto 20px' }}>
+                  Message a match and they'll automatically appear here. This is how you track every warm connection from first hello to offer.
+                </p>
+                <button onClick={() => navigate('MyMatches')} style={{
+                  background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+                  borderRadius: 100, padding: '10px 24px', border: 'none', cursor: 'pointer',
+                  transition: 'background 0.2s', minHeight: 'auto',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
+                >
+                  Go to My Matches →
+                </button>
+              </>
+            )}
+            <div style={{ marginTop: 12 }}>
+              <button onClick={() => setShowModal(true)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#aaa',
+                transition: 'color 0.2s', minHeight: 'auto', width: 'auto',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#aaa'; }}
+              >
+                or track an outside connection →
+              </button>
+            </div>
           </div>
         ) : (
           /* Filter returned no results */
@@ -195,8 +228,7 @@ export default function MyApplicationsPage() {
         @keyframes pipelineFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @media(max-width:768px) {
-          .pipeline-header { flex-direction: column !important; gap: 16px !important; }
-          .pipeline-add-btn { width: 100% !important; justify-content: center !important; }
+          /* responsive adjustments handled inline */
         }
       `}</style>
     </div>

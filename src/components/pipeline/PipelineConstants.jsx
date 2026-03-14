@@ -11,9 +11,14 @@ export const STAGES = [
 ];
 
 export const SOURCE_LABELS = {
-  top_match: 'Top Match', strong_match: 'Strong Match', fastiq: 'FASTIQ',
-  community: 'Community', manual: 'Manual', cff: 'Community',
+  top_match: 'Match', strong_match: 'Match', fastiq: 'FASTIQ',
+  community: 'Community', manual: 'Outside CFF', cff: 'Community',
+  match: 'Match', outside: 'Outside CFF',
 };
+
+export function isCFFSource(source) {
+  return ['top_match', 'strong_match', 'fastiq', 'community', 'match', 'cff'].includes(source);
+}
 
 export const AVATAR_COLORS = ['#0d1117', '#2a4a8a', '#3a5a3a', '#4a3a6a', '#c62828', '#5a4a2a'];
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { dmSans, STAGES, AVATAR_COLORS, SOURCE_LABELS, getStage, daysSince, firstName } from './PipelineConstants';
+import { dmSans, STAGES, AVATAR_COLORS, SOURCE_LABELS, getStage, daysSince, firstName, isCFFSource } from './PipelineConstants';
 import { navigate } from '@/components/utils/navigation';
 
 function getNextAction(conn) {
@@ -144,34 +144,49 @@ export default function PipelineCard({ conn, index, onUpdateStage }) {
         </div>
       </div>
 
-      {/* Update stage link */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+      {/* Update stage link — hidden by default, visible on hover */}
+      <div className="pipeline-stage-toggle" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6, flexDirection: 'column', alignItems: 'flex-end' }}>
         {!showStages ? (
           <button onClick={() => setShowStages(true)} style={{
             background: 'none', border: 'none', fontFamily: dmSans, fontSize: 11, fontWeight: 400,
             color: '#bbb', cursor: 'pointer', minHeight: 'auto', width: 'auto', padding: 0,
-          }}>Update stage →</button>
+            opacity: 0, pointerEvents: 'none', transition: 'opacity 0.2s ease',
+          }} className="pipeline-stage-btn">Update stage →</button>
         ) : (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {STAGES.filter(s => s.key !== 'no_response').map(s => (
-              <button key={s.key} onClick={() => { onUpdateStage(conn.id, s.key); setShowStages(false); }} style={{
-                fontFamily: dmSans, fontSize: 10, fontWeight: 500, padding: '3px 10px',
-                borderRadius: 100, cursor: 'pointer', minHeight: 'auto', width: 'auto',
-                background: conn.status === s.key ? s.bg : 'rgba(0,0,0,0.03)',
-                color: conn.status === s.key ? s.color : '#888',
-                border: `0.5px solid ${conn.status === s.key ? s.border : 'rgba(0,0,0,0.08)'}`,
-                transition: 'all 0.15s',
-              }}>{s.label}</button>
-            ))}
+          <div style={{ width: '100%' }}>
+            {isCFFSource(conn.alumni_source) && (
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb', fontStyle: 'italic', marginBottom: 8, textAlign: 'right' }}>
+                FASTIQ tracks this automatically — only update manually if needed.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              {STAGES.filter(s => s.key !== 'no_response').map(s => (
+                <button key={s.key} onClick={() => { onUpdateStage(conn.id, s.key); setShowStages(false); }} style={{
+                  fontFamily: dmSans, fontSize: 10, fontWeight: 500, padding: '3px 10px',
+                  borderRadius: 100, cursor: 'pointer', minHeight: 'auto', width: 'auto',
+                  background: conn.status === s.key ? s.bg : 'rgba(0,0,0,0.03)',
+                  color: conn.status === s.key ? s.color : '#888',
+                  border: `0.5px solid ${conn.status === s.key ? s.border : 'rgba(0,0,0,0.08)'}`,
+                  transition: 'all 0.15s',
+                }}>{s.label}</button>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
       <style>{`
+        /* Show "Update stage" on card hover */
+        div:hover > .pipeline-stage-toggle .pipeline-stage-btn {
+          opacity: 1 !important;
+          pointer-events: all !important;
+        }
         @media(max-width:768px) {
           .pipeline-card-right { flex-wrap: wrap !important; gap: 8px !important; }
           .pipeline-action-row { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
           .pipeline-action-row button { width: 100% !important; text-align: center !important; }
+          /* Always visible on mobile since no hover */
+          .pipeline-stage-btn { opacity: 1 !important; pointer-events: all !important; }
         }
       `}</style>
     </div>
