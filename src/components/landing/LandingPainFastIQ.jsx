@@ -146,19 +146,6 @@ export default function LandingPainFastIQ({ onFastIQ }) {
         </div>
       </div>
 
-      {/* Pain block CTA */}
-      <div className="pb-16 px-4 text-center" style={{ background: '#0A1628' }}>
-        <button
-          onClick={onFastIQ}
-          className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
-          style={{
-            background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-            boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-          }}
-        >
-          Claim Your Free Spot →
-        </button>
-      </div>
     </section>
   );
 }
