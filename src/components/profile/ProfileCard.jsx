@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
+
+function FastiqBadge({ isMyProfile }) {
+  const [showTip, setShowTip] = useState(false);
+  return (
+    <div style={{ position: 'relative', width: 'fit-content', marginTop: 8 }}
+      onMouseEnter={() => { if (!isMyProfile) setShowTip(true); }}
+      onMouseLeave={() => setShowTip(false)}
+    >
+      {/* Tooltip */}
+      {showTip && (
+        <div style={{
+          position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+          marginBottom: 6, background: '#0d1117', borderRadius: 8, padding: '6px 12px',
+          maxWidth: 220, textAlign: 'center', whiteSpace: 'normal',
+          fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#f4f0e8',
+          pointerEvents: 'none', opacity: 1, animation: 'tipFadeIn 0.15s ease',
+        }}>
+          This student has an AI career agent working for them 24/7
+        </div>
+      )}
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        background: 'rgba(232,93,32,0.08)', border: '0.5px solid rgba(232,93,32,0.25)',
+        borderRadius: 100, padding: '4px 12px',
+      }}>
+        <span className="fastiq-profile-dot" style={{
+          width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', flexShrink: 0,
+        }} />
+        <span style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 500,
+          textTransform: 'uppercase', letterSpacing: '0.06em', color: '#E85D20',
+        }}>FASTIQ™ Active</span>
+      </span>
+      <style>{`
+        @keyframes fastiqProfilePulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .fastiq-profile-dot { animation: fastiqProfilePulse 2s ease-in-out infinite; }
+        @keyframes tipFadeIn { from{opacity:0} to{opacity:1} }
+      `}</style>
+    </div>
+  );
+}
 
 // SVG icons (stroke-based, 12x12)
 const BriefcaseIcon = () => (
