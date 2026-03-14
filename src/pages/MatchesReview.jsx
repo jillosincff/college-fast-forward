@@ -318,15 +318,16 @@ export default function MatchesReview() {
   }
 
   // Main match review UI
-  const displayName = currentMatch.helper_name || currentMatch.parent_name || 'Professional';
+  const isPeer = currentMatch.match_type === 'peer';
+  const displayName = currentMatch.parent_name || currentMatch.peer_name || currentMatch.helper_name || 'Professional';
   const firstName = getFirstName(displayName);
-  const title = currentMatch.helper_title || currentMatch.parent_title || currentMatch.job_title || '';
-  const company = currentMatch.helper_company || currentMatch.parent_company || currentMatch.company || '';
+  const title = currentMatch.parent_role || currentMatch.helper_title || currentMatch.parent_title || currentMatch.job_title || (isPeer ? currentMatch.peer_major : '') || '';
+  const company = currentMatch.parent_company || currentMatch.helper_company || currentMatch.company || (isPeer ? currentMatch.peer_year : '') || '';
   const matchReasons = currentMatch.match_reasons || currentMatch.matchReasons || [];
   const studentsHelped = currentMatch.students_helped_count || 0;
   const bio = currentMatch.bio || currentMatch.helper_bio || '';
   const linkedinUrl = currentMatch.linkedin_url || currentMatch.helper_linkedin_url || '';
-  const yearsExp = currentMatch.years_experience || currentMatch.helper_years_experience || '';
+  const yearsExp = currentMatch.parent_years_experience || currentMatch.years_experience || currentMatch.helper_years_experience || '';
   const photoUrl = currentMatch.profile_image_url || currentMatch.helper_photo_url || '';
 
   // Top 3 flow - show only first 3 matches
