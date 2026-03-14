@@ -162,9 +162,11 @@ export default function CelebrationScreen({ user }) {
         {!loading && (
           <div style={{ animation: 'celebFadeUp 0.5s 0.15s ease both' }}>
             {/* Match count */}
-            <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: orange, marginBottom: 24 }}>
-              {displayCount} {displayCount === 1 ? 'person' : 'people'} ready to help you
-            </p>
+            {validMatches.length > 0 && (
+              <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: orange, marginBottom: 24 }}>
+                {validMatches.length} {validMatches.length === 1 ? 'person' : 'people'} ready to help you
+              </p>
+            )}
 
             {/* Top 3 match cards */}
             {validMatches.length > 0 && (
