@@ -1,26 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 const fade = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-const stagger = {
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const quotes = [
-  { text: "I was a wreck every time I called. FASTIQ found 5 UF alumni at places he wanted — he sent the messages and has two interviews. I finally slept.", name: "Karen", label: "UF Mom" },
-  { text: "My daughter was paralyzed about internships. This thing wrote everything. She has coffee chats lined up now — and I'm not panicking anymore.", name: "Mike", label: "UF Dad" },
-];
-
 export default function LandingParentRelief({ onCTA }) {
   return (
-    <section className="py-48 sm:py-60 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
-      <div className="max-w-3xl mx-auto">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center">
-
+    <section className="py-36 sm:py-48 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
+      <div className="max-w-2xl mx-auto">
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+          className="text-center"
+        >
+          {/* Headline */}
           <motion.h2 variants={fade} className="text-[32px] sm:text-5xl md:text-[56px] font-black text-white mb-4 leading-[1.08] tracking-tight">
             For Parents Who Are{' '}
             <span className="text-[#FA4616] relative">
@@ -29,48 +25,53 @@ export default function LandingParentRelief({ onCTA }) {
             </span>
           </motion.h2>
 
-          <motion.div variants={fade} className="mt-12 max-w-2xl mx-auto text-left sm:text-center space-y-5">
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
-              You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere. You're spending a fortune on college and terrified they'll graduate with nothing lined up.
+          {/* Empathy copy */}
+          <motion.div variants={fade} className="mt-14 max-w-xl mx-auto text-left sm:text-center space-y-7">
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
+              You're watching your kid spend hours on Handshake, applying to everything, hearing nothing back.
             </p>
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
-              FASTIQ is the plan you can both believe in: finds real UF alumni already working at the companies they're targeting, writes the messages they can send today, shows progress you can both see — so you stop asking <span className="text-white font-semibold">"any updates?"</span> and they stop feeling invisible.
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
+              You'd help if you could — but your network is in accounting, not their target industry. You can't make introductions to people you don't know.
+            </p>
+            <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold">
+              That's why we built this.
+            </p>
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
+              CFF connects your student to thousands of parents and alumni who <span className="font-bold text-white">HAVE</span> those connections. And FASTIQ — our AI career engine — searches the entire web to find alumni from their school at any company, then drafts a personalized warm intro they can send with one tap.
             </p>
           </motion.div>
 
-          {/* Quotes */}
-          <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-20">
-            {quotes.map((q) => (
-              <motion.div key={q.name} variants={fade}
-                className="border rounded-2xl p-7 text-left transition-all duration-300 hover:border-[#FA4616]/20"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: '0 0 30px rgba(250,70,22,0.06), inset 0 1px 0 rgba(255,255,255,0.06)',
-                }}
-              >
-                <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] italic">"{q.text}"</p>
-                <div className="flex items-center gap-2.5 mt-5">
-                  <span className="w-9 h-9 rounded-full bg-[#FA4616]/20 flex items-center justify-center text-[#FA4616] text-sm font-bold">{q.name[0]}</span>
-                  <span className="text-white text-sm font-semibold">{q.name}</span>
-                  <span className="text-white/50 text-xs">· {q.label}</span>
-                </div>
-              </motion.div>
-            ))}
+          {/* A-ha moment */}
+          <motion.div
+            variants={fade}
+            className="mt-14 rounded-2xl p-7 sm:p-9 border max-w-xl mx-auto"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              borderColor: 'rgba(250,70,22,0.15)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 0 40px rgba(250,70,22,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
+            }}
+          >
+            <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] font-bold">
+              You don't need to know someone at Google.
+            </p>
+            <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold mt-2">
+              FASTIQ will find a fellow Gator who works there.
+            </p>
           </motion.div>
 
           {/* CTA */}
-          <motion.div variants={fade} className="mt-16">
+          <motion.div variants={fade} className="mt-14">
             <button
               onClick={onCTA}
-              className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
+              className="inline-flex items-center gap-2 px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
               style={{
                 background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
                 boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
               }}
             >
-              Claim Your Free Spot →
+              Get FASTIQ Free for My Student
+              <ArrowRight className="w-5 h-5" />
             </button>
           </motion.div>
         </motion.div>
