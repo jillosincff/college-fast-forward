@@ -8,6 +8,7 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import LandingHero from '@/components/landing/LandingHero';
+import LandingTrustBar from '@/components/landing/LandingTrustBar';
 import LandingPainBlock from '@/components/landing/LandingPainBlock';
 import LandingFastIQIntro from '@/components/landing/LandingFastIQIntro';
 import LandingParentRelief from '@/components/landing/LandingParentRelief';
@@ -77,6 +78,9 @@ export default function LandingPage() {
 
         {/* 1 — HERO */}
         <LandingHero stats={stats} onClaim={handleClaim} />
+
+        {/* TRUST BAR */}
+        <LandingTrustBar />
 
         {/* 2 — YOUR KID IS INVISIBLE */}
         <LandingPainBlock onCTA={handleClaim} />
