@@ -1446,7 +1446,7 @@ function AppContent() {
   // Pages that support pull-to-refresh (main feed / list pages)
   const pullRefreshPages = [
     'Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections',
-    'GatorDirectory', 'MyMessages', 'Insights',
+    'GatorDirectory', 'MyMessages',
     'MyRequests', 'MyApplications', 'Notifications'
   ];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
