@@ -71,7 +71,7 @@ export default function LandingPage() {
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleClaim} />
 
         {/* 1 — HERO */}
-        <LandingHero stats={stats} onClaim={handleClaim} />
+        <LandingHero onClaim={handleClaim} />
 
         {/* TRUST BAR */}
         <LandingTrustBar />
