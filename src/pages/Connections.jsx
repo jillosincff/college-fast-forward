@@ -182,7 +182,6 @@ export default function ConnectionsPage() {
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
       <DashboardNav user={user} currentPage="Ask the Network" />
 
-      {(
         <main style={{ flex: 1, maxWidth: 1040, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
           {/* Header */}
           <div style={{ marginBottom: 28, animation: 'atnFadeUp 0.4s ease both' }}>
@@ -279,7 +278,7 @@ export default function ConnectionsPage() {
             </div>
           </div>
         </main>
-      <DarkFooter />
+        <DarkFooter />
 
       <PostQuestionModal
         open={showModal}
