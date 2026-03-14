@@ -14,13 +14,11 @@ import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
 import LandingFooterCTA from '@/components/landing/LandingFooterCTA';
 import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
 
-const SCHOOL_NAME = "UF";
 const FOUNDING_LIMIT = 1000;
 
 export default function LandingPage() {
   const [stats, setStats] = useState({ spots_left: 46, total_families: 954 });
   const [showFunnel, setShowFunnel] = useState(false);
-  const [showFAQ, setShowFAQ] = useState(false);
 
   useEffect(() => {
     sessionStorage.removeItem('oauth_redirect_in_progress');
@@ -76,13 +74,13 @@ export default function LandingPage() {
         {/* 1 — HERO */}
         <LandingHero stats={stats} onClaim={handleClaim} />
 
-        {/* 2 — PAIN + FASTIQ RELIEF */}
+        {/* 2 — PAIN + FASTIQ PROOF */}
         <LandingPainFastIQ onFastIQ={handleFastIQ} />
 
         {/* 3 — PARENT RELIEF */}
         <LandingParentRelief onCTA={handleFastIQ} />
 
-        {/* 4 — STUDENT PIVOT (with funnel) */}
+        {/* 4 — STUDENT PIVOT */}
         {showFunnel ? (
           <FastIQFunnel onClose={() => setShowFunnel(false)} />
         ) : (
@@ -90,7 +88,7 @@ export default function LandingPage() {
         )}
 
         {/* 5 — FOOTER CTA */}
-        <LandingFooterCTA stats={stats} onClaim={handleClaim} onFAQ={() => setShowFAQ(!showFAQ)} showFAQ={showFAQ} />
+        <LandingFooterCTA stats={stats} onClaim={handleClaim} onFAQ={() => {}} />
 
         {/* FOOTER */}
         <footer className="py-8 text-center" style={{ backgroundColor: '#060B18' }}>
