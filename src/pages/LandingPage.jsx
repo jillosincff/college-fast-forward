@@ -13,6 +13,7 @@ import LandingParentRelief from '@/components/landing/LandingParentRelief';
 import LandingTestimonials from '@/components/landing/LandingTestimonials';
 import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
+import LandingTwoProducts from '@/components/landing/LandingTwoProducts';
 import LandingFooterCTA from '@/components/landing/LandingFooterCTA';
 import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
 
