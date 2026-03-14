@@ -334,7 +334,7 @@ Deno.serve(async (req) => {
           preview: truncate(q.description, 120),
           helpTypes: (q.help_types || []).slice(0, 2).map(formatHelpType).join(', '),
           timeAgo: formatTimeAgo(q.created_date),
-          url: `${APP_BASE_URL}/#QuestionDetail?id=${q.id}&type=${q.role ? 'job' : 'help'}&utm_source=reengagement&utm_campaign=${emailType}`
+          url: `${APP}/#QuestionDetail?id=${q.id}&type=${q.role ? 'job' : 'help'}&utm_source=reengagement&utm_medium=email&utm_campaign=${emailType}`
         }));
         
         if (dryRun) {
@@ -349,9 +349,9 @@ Deno.serve(async (req) => {
           primaryIndustry,
           questions: formattedQuestions,
           count: matchedQuestions.length,
-          unsubscribeUrl: `${APP_BASE_URL}/#UnsubscribeReengagement?userId=${user.id}`,
-          dashboardUrl: `${APP_BASE_URL}/#ParentDashboard?utm_source=reengagement&utm_campaign=${emailType}`,
-          communityUrl: `${APP_BASE_URL}/#Connections?utm_source=reengagement&utm_campaign=${emailType}`,
+          unsubscribeUrl: `${APP}/#UnsubscribeReengagement?userId=${user.id}`,
+          dashboardUrl: `${APP}/#ParentDashboard?utm_source=reengagement&utm_medium=email&utm_campaign=${emailType}`,
+          communityUrl: `${APP}/#Connections?utm_source=reengagement&utm_medium=email&utm_campaign=${emailType}`,
           newMemberCount: newMembersThisMonth,
           memberCount: totalMemberCount,
           totalQuestionsAnswered,
