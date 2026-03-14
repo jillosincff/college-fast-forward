@@ -688,7 +688,7 @@ export default function GatorAuth() {
       {
         id: 'alumni',
         name: "I'm a UF Alumni",
-        desc: "Give back. One conversation changes a student's career.",
+        desc: "Give back or get help with your own career.",
         iconBg: 'rgba(255,255,255,0.06)',
         iconBorder: 'rgba(255,255,255,0.1)',
         icon: <AwardSVG />,
