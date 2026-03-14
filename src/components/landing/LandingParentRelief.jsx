@@ -11,15 +11,13 @@ const stagger = {
 };
 
 const quotes = [
-  { text: "I called six friends in finance before finding CFF. Wish I had this sooner.", name: "Rob K.", label: "UF Parent, Finance" },
-  { text: "My son went from zero replies to three interviews in two weeks. This is magic.", name: "Lisa M.", label: "UF Parent, Tech" },
-  { text: "I didn't know how to help. Now I actually can. CFF gave me a way in.", name: "Sarah T.", label: "UF Parent, Healthcare" },
-  { text: "The FASTIQ outreach draft was better than anything I could have written myself.", name: "Mike D.", label: "UF Parent, Law" },
+  { text: "I was a wreck every time I called. FASTIQ found 5 UF alumni at places he wanted — he sent the messages and has two interviews. I finally slept.", name: "Karen", label: "UF Mom" },
+  { text: "My daughter was paralyzed about internships. This thing wrote everything. She has coffee chats lined up now — and I'm not panicking anymore.", name: "Mike", label: "UF Dad" },
 ];
 
 export default function LandingParentRelief({ onCTA }) {
   return (
-    <section className="py-36 sm:py-44 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
+    <section className="py-40 sm:py-48 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
       <div className="max-w-3xl mx-auto">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center">
 
@@ -32,16 +30,16 @@ export default function LandingParentRelief({ onCTA }) {
           </motion.h2>
 
           <motion.div variants={fade} className="mt-12 max-w-2xl mx-auto text-left sm:text-center space-y-5">
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
               You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere. You're spending a fortune on college and terrified they'll graduate with nothing lined up.
             </p>
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
-              FASTIQ is the plan you can both believe in: finds real UF alumni already working at the companies they're targeting, writes the exact messages they can send today, shows progress you can both see — so you stop asking <span className="text-white font-semibold">"any updates?"</span> and they stop feeling invisible.
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
+              FASTIQ is the plan you can both believe in: finds real UF alumni already working at the companies they're targeting, writes the messages they can send today, shows progress you can both see — so you stop asking <span className="text-white font-semibold">"any updates?"</span> and they stop feeling invisible.
             </p>
           </motion.div>
 
           {/* Quotes */}
-          <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-18" style={{ marginTop: '4.5rem' }}>
+          <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-20">
             {quotes.map((q) => (
               <motion.div key={q.name} variants={fade}
                 className="border rounded-2xl p-7 text-left transition-all duration-300 hover:border-[#FA4616]/20"

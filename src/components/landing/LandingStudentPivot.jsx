@@ -14,7 +14,7 @@ export default function LandingStudentPivot({ onFunnel }) {
       <motion.div
         initial="hidden" whileInView="visible" viewport={{ once: true }}
         variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-        className="relative z-10 max-w-2xl mx-auto px-4 py-36 sm:py-44 text-center"
+        className="relative z-10 max-w-2xl mx-auto px-4 py-40 sm:py-48 text-center"
       >
         <motion.div variants={fade} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/20 mb-8"
           style={{ boxShadow: '0 0 20px rgba(6,182,212,0.08)' }}
@@ -32,8 +32,10 @@ export default function LandingStudentPivot({ onFunnel }) {
         </motion.h2>
 
         <motion.div variants={fade} className="mb-14 max-w-xl mx-auto space-y-5">
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">Your friends are posting offers. Your parents keep asking questions. You have no experience, no connections, and no clue how to fix it.</p>
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] font-medium">
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
+            Your friends are posting offers. Your parents keep asking questions. You have no experience, no connections, and no clue how to fix it.
+          </p>
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.65] font-medium">
             FASTIQ finds real UF grads inside your target companies, messages them for you, and gets your foot in the door — bypassing thousands of cold applicants.
           </p>
         </motion.div>

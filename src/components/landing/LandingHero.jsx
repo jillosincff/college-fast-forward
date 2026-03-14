@@ -2,15 +2,13 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
 import { motion } from 'framer-motion';
-import ScanningAnimation from '@/components/landing/ScanningAnimation';
-import AlumniTeaserDemo from '@/components/landing/AlumniTeaserDemo';
 
 export default function LandingHero({ stats, onClaim }) {
-
   return (
-    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-20 px-4" style={{ backgroundColor: '#0021A5' }}>
+    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ backgroundColor: '#0021A5' }}>
       <div className="max-w-4xl mx-auto text-center w-full">
 
+        {/* Eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -19,11 +17,12 @@ export default function LandingHero({ stats, onClaim }) {
           Only UF Families Can Access
         </motion.p>
 
+        {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
-          className="text-[30px] sm:text-5xl md:text-6xl lg:text-[68px] text-white font-black leading-[1.06] mb-8 px-2 tracking-tight"
+          className="text-[32px] sm:text-5xl md:text-6xl lg:text-[68px] text-white font-black leading-[1.06] mb-10 px-2 tracking-tight"
         >
           Imagine having thousands of friends helping your kid land a job.{' '}
           <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #FA4616, #F97316)' }}>
@@ -31,21 +30,22 @@ export default function LandingHero({ stats, onClaim }) {
           </span>
         </motion.h1>
 
+        {/* Subheadline — two clear paragraphs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="max-w-xl mx-auto mb-14 px-2 space-y-2"
+          className="max-w-2xl mx-auto mb-16 px-2 space-y-4"
         >
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6] font-medium">
-            CFF is the private UF network where parents and alumni pledged to help each other's kids.
+          <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65] font-medium">
+            CFF is the private UF network where parents and alumni pledged to help each other's kids — real introductions, advice, and connections that change trajectories.
           </p>
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.6]">
-            FASTIQ is the AI engine that actually delivers the results.
+          <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65]">
+            FASTIQ is the AI engine that actually makes it happen: finds real UF grads already inside target companies, writes the messages your kid can send today, and tracks progress so you both see results instead of stress.
           </p>
         </motion.div>
 
-        {/* CTA card */}
+        {/* Urgency CTA card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -62,7 +62,7 @@ export default function LandingHero({ stats, onClaim }) {
           </p>
           <p className="text-slate-400 text-sm mb-1">(of 1,000)</p>
           <p className="text-slate-600 text-sm mb-5 font-medium">
-            Founding members stay <strong className="text-slate-800">FREE forever</strong> — no catch.
+            Founding members stay <strong className="text-slate-800">FREE forever</strong> — no catch. After 1,000 new members pay $9/mo.
           </p>
 
           <Button
@@ -74,41 +74,14 @@ export default function LandingHero({ stats, onClaim }) {
             Claim Your Free Spot
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
-
-          <p className="text-slate-400 text-xs mt-3">After 1,000 new members pay $9/mo</p>
-        </motion.div>
-
-        {/* Scanning + Blurred Alumni Teaser */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.32 }}
-          className="mt-16 max-w-2xl mx-auto"
-        >
-          <ScanningAnimation />
-
-          <p className="text-white text-[22px] sm:text-[26px] leading-[1.4] mb-8 font-black tracking-tight">
-            We found <span className="text-[#FA4616]">real UF alumni</span> that work at your target companies.
-          </p>
-
-          <AlumniTeaserDemo />
-
-          <motion.p
-            className="text-[20px] sm:text-[22px] font-bold tracking-wide cursor-pointer underline-offset-4 hover:underline mt-10"
-            style={{ color: '#FA4616' }}
-            whileHover={{ scale: 1.03, x: 4 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Take the 45-second quiz to find UF alumni at your target companies and get the messages written for you →
-          </motion.p>
         </motion.div>
 
         {/* Testimonial */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-20 max-w-lg mx-auto rounded-2xl p-8 border"
+          transition={{ delay: 0.36 }}
+          className="mt-16 max-w-lg mx-auto rounded-2xl p-8 border"
           style={{
             background: 'rgba(255,255,255,0.04)',
             borderColor: 'rgba(255,255,255,0.08)',
@@ -116,7 +89,7 @@ export default function LandingHero({ stats, onClaim }) {
             boxShadow: '0 4px 30px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
           }}
         >
-          <p className="text-white italic text-[18px] sm:text-[22px] leading-[1.6]">
+          <p className="text-white italic text-[18px] sm:text-[20px] leading-[1.6]">
             "My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own."
           </p>
           <div className="flex items-center justify-center gap-3 mt-5">
@@ -125,15 +98,15 @@ export default function LandingHero({ stats, onClaim }) {
           </div>
         </motion.div>
 
-        {/* FASTIQ tease */}
+        {/* FASTIQ badge */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.48 }}
-          className="mt-12 flex items-center justify-center gap-2"
+          transition={{ delay: 0.44 }}
+          className="mt-10 flex items-center justify-center gap-2"
         >
           <Zap className="w-3.5 h-3.5 text-[#FA4616]" />
-          <span className="text-[#E5E7EB]/60 text-xs font-medium tracking-wide">Powered by FASTIQ™ — the AI that makes it actually work</span>
+          <span className="text-[#E5E7EB]/50 text-xs font-medium tracking-wide">Powered by FASTIQ™ — the AI that actually makes it work</span>
         </motion.div>
       </div>
     </section>
