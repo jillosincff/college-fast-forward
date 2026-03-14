@@ -745,11 +745,6 @@ const isUserVerified = (user) => {
   
   const email = user.email?.toLowerCase() || '';
   
-  // @ufl.edu emails are always verified - instant access
-  if (email.endsWith('@ufl.edu')) {
-    return true;
-  }
-  
   // Admins are always verified
   if (user.roles?.includes('admin')) return true;
   
