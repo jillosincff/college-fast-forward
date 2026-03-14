@@ -17,7 +17,7 @@ const quotes = [
 
 export default function LandingParentRelief({ onCTA }) {
   return (
-    <section className="py-40 sm:py-48 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
+    <section className="py-48 sm:py-60 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
       <div className="max-w-3xl mx-auto">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center">
 

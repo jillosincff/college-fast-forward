@@ -10,7 +10,7 @@ const fade = {
 
 export default function LandingFooterCTA({ stats, onClaim, onFAQ }) {
   return (
-    <section className="py-36 sm:py-44 px-4" style={{ backgroundColor: '#0021A5' }}>
+    <section className="py-44 sm:py-56 px-4" style={{ backgroundColor: '#0021A5' }}>
       <div className="max-w-md mx-auto text-center">
         <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <p className="text-white text-[20px] sm:text-[22px] font-bold mb-3 leading-[1.6]">
