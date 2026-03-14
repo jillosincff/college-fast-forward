@@ -12,10 +12,7 @@ import AskBox from '@/components/community/AskBox';
 import PostQuestionModal from '@/components/community/PostQuestionModal';
 import NetworkPostCard from '@/components/community/NetworkPostCard';
 import NetworkSidebar from '@/components/community/NetworkSidebar';
-import CommunityTabs from '@/components/community/CommunityTabs';
-import SalaryBrowse from '@/components/community/SalaryBrowse';
-import InterviewBrowse from '@/components/community/InterviewBrowse';
-import AICareerAdvisor from '@/components/ai-advisor/AICareerAdvisor';
+
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -38,11 +35,7 @@ const CATEGORY_MAP = {
 
 export default function ConnectionsPage() {
   const { user } = useAuth();
-  const getInitialTab = () => {
-    const p = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    return p.get('tab') || 'questions';
-  };
-  const [activeTab, setActiveTab] = useState(getInitialTab());
+
   const [requests, setRequests] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -119,11 +112,6 @@ export default function ConnectionsPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    window.history.replaceState(null, '', `${window.location.hash.split('?')[0]}?tab=${tab}`);
-  };
-
   const handleOpenModal = (cat) => {
     setModalCategory(cat || '');
     setShowModal(true);
@@ -194,18 +182,7 @@ export default function ConnectionsPage() {
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
       <DashboardNav user={user} currentPage="Ask the Network" />
 
-      {/* Community tabs */}
-      <div style={{ background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
-        <div style={{ maxWidth: 1040, margin: '0 auto', padding: '0 24px' }}>
-          <CommunityTabs activeTab={activeTab} onTabChange={handleTabChange} />
-        </div>
-      </div>
-
-      {activeTab === 'salaries' && <div style={{ maxWidth: 1040, margin: '0 auto', padding: '24px 24px' }}><SalaryBrowse /></div>}
-      {activeTab === 'interviews' && <div style={{ maxWidth: 1040, margin: '0 auto', padding: '24px 24px' }}><InterviewBrowse /></div>}
-      {activeTab === 'ai-advisor' && <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 24px' }}><AICareerAdvisor /></div>}
-
-      {activeTab === 'questions' && (
+      {(
         <main style={{ flex: 1, maxWidth: 1040, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
           {/* Header */}
           <div style={{ marginBottom: 28, animation: 'atnFadeUp 0.4s ease both' }}>
@@ -302,8 +279,6 @@ export default function ConnectionsPage() {
             </div>
           </div>
         </main>
-      )}
-
       <DarkFooter />
 
       <PostQuestionModal
