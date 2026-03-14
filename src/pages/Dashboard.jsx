@@ -123,15 +123,12 @@ export default function Dashboard() {
         setMessages(msgRes?.messages || []);
       } catch (e) { setMessages([]); }
 
-      // Matches
+      // Matches — query by student_id first (student_email may be null on older matches)
       let studentMatches = [];
       try {
-        studentMatches = await base44.entities.Match.filter({ student_email: user.email }, '-match_score', 50);
-        if ((!studentMatches || studentMatches.length === 0) && foundRequest) {
-          studentMatches = await base44.entities.Match.filter({ help_request_id: foundRequest.id }, '-match_score', 50);
-        }
+        studentMatches = await base44.entities.Match.filter({ student_id: user.id }, '-match_score', 50);
         if (!studentMatches?.length) {
-          studentMatches = await base44.entities.Match.filter({ student_id: user.id }, '-match_score', 50);
+          studentMatches = await base44.entities.Match.filter({ student_email: user.email }, '-match_score', 50);
         }
       } catch (e) { studentMatches = []; }
       setMatches(studentMatches || []);
