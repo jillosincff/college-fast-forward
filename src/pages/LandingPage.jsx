@@ -8,7 +8,8 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import LandingHero from '@/components/landing/LandingHero';
-import LandingPainFastIQ from '@/components/landing/LandingPainFastIQ';
+import LandingPainBlock from '@/components/landing/LandingPainBlock';
+import LandingFastIQIntro from '@/components/landing/LandingFastIQIntro';
 import LandingParentRelief from '@/components/landing/LandingParentRelief';
 import LandingTestimonials from '@/components/landing/LandingTestimonials';
 import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
@@ -77,8 +78,8 @@ export default function LandingPage() {
         {/* 1 — HERO */}
         <LandingHero stats={stats} onClaim={handleClaim} />
 
-        {/* 2 — THE PROBLEM */}
-        <LandingPainFastIQ onFastIQ={handleClaim} />
+        {/* 2 — YOUR KID IS INVISIBLE */}
+        <LandingPainBlock onCTA={handleClaim} />
 
         {/* 3 — TWO PRODUCTS */}
         <LandingTwoProducts onClaim={handleClaim} onFastIQ={handleClaim} />
@@ -90,12 +91,13 @@ export default function LandingPage() {
           <LandingStudentPivot onFunnel={handleFunnel} />
         )}
 
-        {/* 5 — FASTIQ INTRO (inside PainFastIQ above) */}
+        {/* 5 — FASTIQ INTRO */}
+        <LandingFastIQIntro onCTA={handleClaim} />
 
-        {/* 6 — EMPATHY */}
+        {/* 6 — FOR PARENTS */}
         <LandingParentRelief onCTA={handleClaim} />
 
-        {/* 7 — SOCIAL PROOF */}
+        {/* 7 — TESTIMONIALS */}
         <LandingTestimonials onClaim={handleClaim} />
 
         {/* 8 — HOW IT WORKS */}
