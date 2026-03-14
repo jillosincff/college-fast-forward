@@ -69,12 +69,9 @@ export default function CelebrationScreen({ user }) {
   };
 
   const validMatches = matches.filter(m => {
-    const name = m.helper_name || m.parent_name || '';
+    const name = m.parent_name || m.peer_name || m.helper_name || '';
     return name && !name.toLowerCase().includes('professional') && !name.toLowerCase().includes('test') && name.trim().length > 2;
   });
-
-  // Never show 0 — use platform-wide fallback of 12
-  const displayCount = validMatches.length > 0 ? validMatches.length : 12;
 
   const handleSeeMatches = () => {
     trackEvent('celebration_cta_clicked', { user_id: user?.id, match_count: validMatches.length });
@@ -173,9 +170,9 @@ export default function CelebrationScreen({ user }) {
             {validMatches.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
                 {validMatches.slice(0, 3).map((match, i) => {
-                  const name = match.helper_name || match.parent_name || '';
-                  const role = match.parent_role || match.helper_title || '';
-                  const company = match.parent_company || match.helper_company || '';
+                  const name = match.parent_name || match.peer_name || match.helper_name || '';
+                  const role = match.parent_role || match.helper_title || (match.peer_major ? match.peer_major : '') || '';
+                  const company = match.parent_company || match.helper_company || (match.peer_year ? match.peer_year : '') || '';
                   return (
                     <div key={i} style={{
                       background: 'rgba(255,255,255,0.05)',
