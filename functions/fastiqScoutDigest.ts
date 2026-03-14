@@ -7,7 +7,6 @@ Deno.serve(async (req) => {
 
   try {
     // Called by trusted scheduled automation — no user auth required
-
     // Find profiles with new scouted opportunities
     const profiles = await base44.asServiceRole.entities.FastTrackProProfile.filter({}, '-updated_date', 500);
     const profilesWithAlerts = (profiles || []).filter(p =>
