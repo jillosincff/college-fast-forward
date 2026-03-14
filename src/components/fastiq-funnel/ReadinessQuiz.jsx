@@ -390,8 +390,16 @@ function ResultsScreen({ answerIndices }) {
       </div>
 
       {/* score circle */}
-      <div style={{ position: 'relative', width: 160, height: 160, margin: '0 auto 24px', ...fadeUp(0.05) }}>
-        <svg width="160" height="160" style={{ transform: 'rotate(-90deg)' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .quiz-score-circle { width: 120px !important; height: 120px !important; }
+          .quiz-score-circle svg { width: 120px !important; height: 120px !important; }
+          .quiz-score-circle svg circle { cx: 60; cy: 60; r: 52; }
+          .quiz-paywall-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="quiz-score-circle" style={{ position: 'relative', width: 160, height: 160, margin: '0 auto 24px', ...fadeUp(0.05) }}>
+        <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
           <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="8" />
           <circle
             cx="80" cy="80" r="70" fill="none"
@@ -491,7 +499,7 @@ function PaywallBlock({ fadeUp }) {
       </div>
 
       {/* CTA grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+      <div className="quiz-paywall-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {/* network */}
         <button
           onClick={() => handleCTA('network')}

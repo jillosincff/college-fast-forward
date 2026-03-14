@@ -34,7 +34,7 @@ export default function LandingPainBlock({ onCTA }) {
         <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16"
+          className="pain-stats-grid grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16"
         >
           {painStats.map((s) => (
             <motion.div
