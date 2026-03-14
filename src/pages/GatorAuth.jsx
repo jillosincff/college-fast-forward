@@ -65,7 +65,7 @@ function AuthPageShell({ children }) {
 
 function AuthCard({ children, delay = 0 }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 24, padding: '48px 40px', animation: `authFadeUp 0.4s ease both ${delay}s` }}>
+    <div style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 24, padding: '48px 40px', animation: `authFadeUp 0.4s ease both ${delay}s` }}>
       <style>{`@media (max-width: 480px) { .auth-card-inner { padding: 36px 24px !important; } }`}</style>
       {children}
     </div>
@@ -126,7 +126,7 @@ function RoleCard({ role, index, onClick }) {
       {/* text */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8' }}>{role.name}</span>
-        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.45)', lineHeight: 1.4 }}>{role.desc}</span>
+        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.4 }}>{role.desc}</span>
         {role.encouraged && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#E85D20', marginTop: 4 }}>{role.encouraged}</span>}
       </div>
       {/* arrow */}
