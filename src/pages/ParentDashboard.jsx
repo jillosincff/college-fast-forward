@@ -372,7 +372,7 @@ export default function ParentDashboard() {
                 ) : !showStudentLinking ? (
                   <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-3 text-white border border-white/20">
                     <span style={{ color: '#FA4616' }}>💡</span>
-                    <span className="text-sm">Every answer you give earns karma and helps a Gator get closer to their dream job</span>
+                    <span className="text-sm">Every answer you give earns karma and helps a student get closer to their dream job</span>
                   </div>
                 ) : null}
               </div>
