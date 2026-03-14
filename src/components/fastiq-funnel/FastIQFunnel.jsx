@@ -1,26 +1,16 @@
 import React from 'react';
 import { FunnelProvider, useFunnel } from './FunnelContext';
 import DualPathEntry from './DualPathEntry';
-import KnownTargetsQuiz from './KnownTargetsQuiz';
-import ExplorerQuiz from './ExplorerQuiz';
-import TeaserReveal from './TeaserReveal';
-import MatchScoreDashboard from './MatchScoreDashboard';
-import PaywallScreen from './PaywallScreen';
+import ReadinessQuiz from './ReadinessQuiz';
 
 function FunnelRouter() {
-  const { phase, path } = useFunnel();
+  const { phase } = useFunnel();
 
   switch (phase) {
     case 'entry':
       return <DualPathEntry />;
     case 'quiz':
-      return path === 'known' ? <KnownTargetsQuiz /> : <ExplorerQuiz />;
-    case 'teaser':
-      return <TeaserReveal />;
-    case 'score':
-      return <MatchScoreDashboard />;
-    case 'paywall':
-      return <PaywallScreen />;
+      return <ReadinessQuiz />;
     default:
       return <DualPathEntry />;
   }
