@@ -219,17 +219,20 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
           background: '#0d1117', borderTop: '0.5px solid rgba(255,255,255,0.08)',
           padding: '8px 0', zIndex: 99,
         }}>
-          {NAV_LINKS.map(l => (
+          {NAV_LINKS.map(l => {
+            const mActive = l.page === currentPage || l.label === currentPage;
+            return (
             <button key={l.page} onClick={() => { navigate(l.page); setMobileOpen(false); }} style={{
               display: 'block', width: '100%', textAlign: 'left', padding: '12px 32px',
               background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: dmSans, fontSize: 14, fontWeight: l.page === currentPage ? 500 : 400,
-              color: l.page === currentPage ? '#f4f0e8' : 'rgba(244,240,232,0.45)',
+              fontFamily: dmSans, fontSize: 14, fontWeight: mActive ? 500 : 400,
+              color: mActive ? '#f4f0e8' : 'rgba(244,240,232,0.45)',
               minHeight: 'auto',
             }}>
               {l.label}
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
 
