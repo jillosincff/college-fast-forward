@@ -2,12 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
-import ChipSelector from '@/components/onboarding/ChipSelector';
 import { 
-  INDUSTRIES, 
-  STUDENT_SEEKING, 
-  STUDENT_HELP_NEEDED,
   GRAD_YEARS 
 } from '@/components/onboarding/onboardingOptions';
 import { JobRequest } from '@/entities/JobRequest';
