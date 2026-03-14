@@ -8,6 +8,14 @@ const STEPS = [
   { label: 'Matches', num: 3 },
 ];
 
+function CheckmarkSVG() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M4 8l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 export default function StudentStep1ProgressBar({ currentStep = 1 }) {
   return (
     <div style={{
@@ -16,6 +24,7 @@ export default function StudentStep1ProgressBar({ currentStep = 1 }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0,
     }}>
       {STEPS.map((s, i) => {
+        const isCompleted = s.num < currentStep;
         const isActive = s.num <= currentStep;
         const isLineComplete = s.num < currentStep;
         const isLast = i === STEPS.length - 1;
@@ -31,7 +40,7 @@ export default function StudentStep1ProgressBar({ currentStep = 1 }) {
                 fontFamily: dmSans, fontSize: 12, fontWeight: 500,
                 transition: 'all 0.3s ease',
               }}>
-                {s.num}
+                {isCompleted ? <CheckmarkSVG /> : s.num}
               </div>
               <span style={{
                 fontFamily: dmSans, fontSize: 12, fontWeight: 400,

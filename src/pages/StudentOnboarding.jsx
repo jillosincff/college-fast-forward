@@ -16,6 +16,7 @@ import CelebrationScreen from '@/components/onboarding/student/CelebrationScreen
 import AskFirstQuestion from '@/components/onboarding/student/AskFirstQuestion';
 import StudentStep1LeftPanel from '@/components/onboarding/student/StudentStep1LeftPanel';
 import StudentStep1ProgressBar from '@/components/onboarding/student/StudentStep1ProgressBar';
+import StudentStep2Interests from '@/components/onboarding/student/StudentStep2Interests';
 
 export default function StudentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -449,60 +450,15 @@ export default function StudentOnboarding() {
   // STEP 2: Interests
   if (step === 2) {
     return (
-      <OnboardingLayout
-        currentStep={2}
-        totalSteps={3}
+      <StudentStep2Interests
+        industries={industries}
+        onIndustriesChange={setIndustries}
+        seeking={seeking}
+        onSeekingChange={setSeeking}
         onNext={handleNext}
         onBack={handleBack}
-        nextDisabled={!isStep2Valid}
-      >
-        <div className="max-w-lg mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-xl font-bold text-slate-800 mb-2">
-              What kind of work interests you?
-            </h1>
-            <p className="text-slate-600">
-              We'll match you with parents and alumni who work in these fields.
-            </p>
-            <p className="text-slate-400 text-sm mt-1">
-              Select all that apply
-            </p>
-          </div>
-
-          <div className="space-y-8">
-            {/* Industries */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                Industries
-              </label>
-              <ChipSelector
-                options={INDUSTRIES}
-                selected={industries}
-                onChange={setIndustries}
-                multiple={true}
-                columns={2}
-              />
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-slate-200"></div>
-
-            {/* What are you looking for */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                What are you looking for?
-              </label>
-              <ChipSelector
-                options={STUDENT_SEEKING}
-                selected={seeking}
-                onChange={setSeeking}
-                multiple={true}
-                columns={2}
-              />
-            </div>
-          </div>
-        </div>
-      </OnboardingLayout>
+        isValid={isStep2Valid}
+      />
     );
   }
 
