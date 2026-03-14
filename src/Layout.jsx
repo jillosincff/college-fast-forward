@@ -835,6 +835,36 @@ const getPageComponent = (pageName) => {
   }
 };
 
+// Track email click-throughs when users arrive via UTM links
+function trackEmailClickthrough(user) {
+  try {
+    if (!user?.email) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const hashParams = new URLSearchParams(hashPart);
+    const utmSource = urlParams.get('utm_source') || hashParams.get('utm_source');
+    const utmCampaign = urlParams.get('utm_campaign') || hashParams.get('utm_campaign');
+
+    if (!utmSource) return;
+    // Only track email-related UTM sources
+    const emailSources = ['daily_digest', 'reengagement', 'answer_notification', 'weekly_digest', 'fastiq_unanswered_trigger'];
+    if (!emailSources.includes(utmSource)) return;
+
+    // Prevent duplicate tracking per session
+    const trackKey = `email_click_${utmSource}_${Date.now().toString(36).slice(0, 4)}`;
+    if (sessionStorage.getItem('email_click_tracked')) return;
+    sessionStorage.setItem('email_click_tracked', 'true');
+
+    import('@/functions/trackEmailClick').then(({ trackEmailClick }) => {
+      trackEmailClick({ utm_source: utmSource, utm_campaign: utmCampaign || '', page: window.location.hash })
+        .then(() => console.log('📩 Email click tracked:', utmSource))
+        .catch(e => console.log('Email click tracking failed (non-critical):', e.message));
+    }).catch(() => {});
+  } catch (e) {
+    console.log('Email click tracking error (non-critical):', e.message);
+  }
+}
+
 // Capture UTM parameters from newsletter links (runs once on app load)
 function captureUTMParams(user) {
   try {
@@ -906,6 +936,15 @@ function AppContent() {
       captureUTMParams(user);
     }
   }, []);
+
+  // Track email click-throughs when user is authenticated
+  const emailClickRef = React.useRef(false);
+  useEffect(() => {
+    if (user && !emailClickRef.current) {
+      emailClickRef.current = true;
+      trackEmailClickthrough(user);
+    }
+  }, [user]);
 
   // CRITICAL: Detect OAuth callback via is_new_user param (before any other routing)
   // But DON'T immediately route - let the normal routing logic handle it after user is loaded
