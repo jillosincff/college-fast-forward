@@ -11,6 +11,7 @@ import NextActionCard from '@/components/dashboard-v2/NextActionCard';
 import MatchesSectionV2 from '@/components/dashboard-v2/MatchesSection';
 import MessagesSectionV2 from '@/components/dashboard-v2/MessagesSection';
 import KarmaStrip from '@/components/dashboard-v2/KarmaStrip';
+import HelpRequestCard from '@/components/dashboard-v2/HelpRequestCard';
 import ParentInviteCard from '@/components/dashboard-v2/ParentInviteCard';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
@@ -207,30 +208,35 @@ export default function Dashboard() {
 
         {/* Section 1: Next Action */}
         {!isNewUser && (
-          <div className="dash-fade" style={{ animationDelay: '0.08s', marginBottom: 20 }}>
+          <div className="dash-fade" style={{ animationDelay: '0.06s', marginBottom: 20 }}>
             <NextActionCard messages={messages} matches={matches} />
           </div>
         )}
 
         {/* Section 2: Matches */}
         {matches.length > 0 && (
-          <div className="dash-fade" style={{ animationDelay: '0.14s', marginBottom: 20 }}>
+          <div className="dash-fade" style={{ animationDelay: '0.12s', marginBottom: 20 }}>
             <MatchesSectionV2 matches={matches} user={user} onMessageMatch={onMessageMatch} />
           </div>
         )}
 
-        {/* Section 3: Parent Invite */}
-        <div className="dash-fade" style={{ animationDelay: '0.2s', marginBottom: 20 }}>
+        {/* Section 3: Help Request */}
+        <div className="dash-fade" style={{ animationDelay: '0.18s', marginBottom: 20 }}>
+          <HelpRequestCard helpRequest={helpRequest} user={user} />
+        </div>
+
+        {/* Section 4: Parent Invite */}
+        <div className="dash-fade" style={{ animationDelay: '0.24s', marginBottom: 20 }}>
           <ParentInviteCard user={user} linkedParents={linkedParents} onInviteParent={() => setShowInviteModal(true)} />
         </div>
 
-        {/* Section 4: Messages */}
-        <div className="dash-fade" style={{ animationDelay: '0.26s', marginBottom: 20 }}>
+        {/* Section 5: Messages */}
+        <div className="dash-fade" style={{ animationDelay: '0.30s', marginBottom: 20 }}>
           <MessagesSectionV2 messages={messages} />
         </div>
 
-        {/* Section 5: Karma */}
-        <div className="dash-fade" style={{ animationDelay: '0.32s', marginBottom: 20 }}>
+        {/* Section 6: Karma */}
+        <div className="dash-fade" style={{ animationDelay: '0.36s', marginBottom: 20 }}>
           <KarmaStrip user={user} />
         </div>
       </div>
