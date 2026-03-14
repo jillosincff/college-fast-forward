@@ -80,6 +80,9 @@ export default function LandingPage() {
         {/* 2 — THE PROBLEM */}
         <LandingPainFastIQ onFastIQ={handleClaim} />
 
+        {/* 2.5 — TWO PRODUCTS CLARITY */}
+        <LandingTwoProducts onClaim={handleClaim} onFastIQ={handleClaim} />
+
         {/* 3 — EMPATHY: For Parents Who Are Freaking Out */}
         <LandingParentRelief onCTA={handleClaim} />
 
