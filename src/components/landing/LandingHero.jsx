@@ -17,7 +17,7 @@ function ensureFonts() {
 const playfair = "var(--font-display, 'Playfair Display', serif)";
 const dmSans = "var(--font-body, 'DM Sans', sans-serif)";
 
-export default function LandingHero({ stats, onClaim }) {
+export default function LandingHero({ onClaim }) {
   useEffect(() => { ensureFonts(); }, []);
 
   return (
