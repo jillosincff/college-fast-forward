@@ -151,6 +151,7 @@ export default function ProfileCard({ user, isMyProfile }) {
                 {user.current_position}{user.current_company ? ` at ${user.current_company}` : ''}
               </p>
             )}
+            {user.fastiqActive && <FastiqBadge isMyProfile={isMyProfile} />}
           </div>
           {isMyProfile && (
             <button onClick={() => navigate('ProfileEdit')} style={{
