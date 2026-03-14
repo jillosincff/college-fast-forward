@@ -9,9 +9,10 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 const NAV_LINKS = [
   { label: 'Dashboard', page: 'Dashboard' },
   { label: 'Ask the Network', page: 'Connections' },
-  { label: 'Directory', page: 'GatorDirectory' },
-  { label: 'Messages', page: 'MyMessages' },
+  { label: 'UF Directory', page: 'GatorDirectory' },
   { label: 'Pipeline', page: 'MyApplications' },
+  { label: 'Messages', page: 'MyMessages' },
+  { label: 'FASTIQ', page: 'FastIQ' },
 ];
 
 export default function DashboardNav({ user, currentPage = 'Dashboard' }) {

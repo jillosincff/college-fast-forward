@@ -29,6 +29,7 @@ import PledgeReminderBanner from '@/components/dashboard/parent/PledgeReminderBa
 import SkippedPledgeQuestionBanner from '@/components/dashboard/parent/SkippedPledgeQuestionBanner';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import FamilyLeaderboard from '@/components/karma/FamilyLeaderboard';
+import StudentHelpNeedsChart from '@/components/dashboard/parent/StudentHelpNeedsChart';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -507,6 +508,9 @@ export default function ParentDashboard() {
               />
             )
           )}
+
+          {/* ========== WHERE STUDENTS NEED HELP ========== */}
+          <StudentHelpNeedsChart />
 
           {/* ========== WEEKLY STATS ========== */}
           <WeeklyStatsPanel />

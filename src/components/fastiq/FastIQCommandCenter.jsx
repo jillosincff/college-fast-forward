@@ -12,6 +12,8 @@ import QuickActionsGrid from './QuickActionsGrid';
 import AddTargetsModal from './AddTargetsModal';
 import ProfileEditModal from './ProfileEditModal';
 import PastResearchSection from './PastResearchSection';
+import InterviewPrepTab from './InterviewPrepTab';
+import AskFastIQChat from './AskFastIQChat';
 
 function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   if (weeklyStats?._noTargets) {
@@ -263,6 +265,9 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
       {/* CONTENT — structured top-to-bottom flow */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
 
+        {/* ASK FASTIQ — persistent AI chat */}
+        <AskFastIQChat />
+
         {/* SECTION 1 — WHAT'S NEW (only when there IS something new) */}
         <div ref={alertsRef}>
           <WhatsNewSection
@@ -319,6 +324,11 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
             setRefreshKey(prev => prev + 1);
           }}
         />
+
+        {/* SECTION — INTERVIEW PREP */}
+        <div style={{ marginTop: 32 }}>
+          <InterviewPrepTab />
+        </div>
 
         <div style={{ textAlign: 'center', padding: '40px 0 10px', fontSize: 12, color: '#64748B' }}>
           FASTIQ™ by College Fast Forward · Because applying isn't a strategy.

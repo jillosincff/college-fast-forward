@@ -343,8 +343,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
-              { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator', 'parent'] },
-        { name: 'Insights', page: 'Insights', icon: Lightbulb, roles: ['gator', 'parent', 'alumni'] },
+        { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator', 'parent'] },
             ], []);
 
   const filteredNavItems = useMemo(() => {

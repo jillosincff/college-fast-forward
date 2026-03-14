@@ -19,7 +19,7 @@ export default function MobileBottomNav({ user, currentPage }) {
     { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
     { name: 'Ask', icon: MessageSquare, page: 'Connections' },
     { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
-    { name: 'Directory', icon: Users, page: 'GatorDirectory' },
+    { name: 'Pipeline', icon: LayoutDashboard, page: 'MyApplications' },
     { name: 'Messages', icon: Mail, page: 'MyMessages' },
   ], [user]);
 
