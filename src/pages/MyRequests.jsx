@@ -40,7 +40,14 @@ export default function MyRequestsPage() {
     const allHelp = [...(helpByCreator || []), ...(helpByStudent || [])];
     const uniqueJob = Array.from(new Map(allJob.map(r => [r.id, { ...r, _type: 'job' }])).values());
     const uniqueHelp = Array.from(new Map(allHelp.map(r => [r.id, { ...r, _type: 'help' }])).values());
-    const all = [...uniqueJob, ...uniqueHelp].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    // Sort: active first, then expired, then resolved at bottom — within each group by date desc
+    const statusOrder = { active: 0, expired: 1, closed: 1, resolved: 2 };
+    const all = [...uniqueJob, ...uniqueHelp].sort((a, b) => {
+      const oa = statusOrder[a.status] ?? 0;
+      const ob = statusOrder[b.status] ?? 0;
+      if (oa !== ob) return oa - ob;
+      return new Date(b.created_date) - new Date(a.created_date);
+    });
     setRequests(all);
     setLoading(false);
   }, [user?.email]);
@@ -73,8 +80,15 @@ export default function MyRequestsPage() {
 
   const handleRenew = async (request) => {
     const entity = request._type === 'help' ? base44.entities.HelpRequest : base44.entities.JobRequest;
-    await entity.update(request.id, { status: 'active' });
-    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: 'active' } : r));
+    const now = new Date().toISOString();
+    await entity.update(request.id, { status: 'active', renewed_at: now });
+    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: 'active', renewed_at: now } : r));
+  };
+
+  const handleResolve = async (request) => {
+    const entity = request._type === 'help' ? base44.entities.HelpRequest : base44.entities.JobRequest;
+    await entity.update(request.id, { status: 'resolved' });
+    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: 'resolved' } : r));
   };
 
   const handleViewResponses = (request) => {
@@ -150,6 +164,7 @@ export default function MyRequestsPage() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onRenew={handleRenew}
+                onResolve={handleResolve}
                 onViewResponses={handleViewResponses}
               />
             ))}

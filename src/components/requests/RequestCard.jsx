@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
+const EXPIRY_DAYS = 30;
 
 function formatIndustry(val) {
   if (!val || val === '' || val === null) return null;
@@ -15,13 +16,27 @@ function getQuestionText(req) {
   return `"${trimmed}${text.length > 120 ? '...' : ''}"`;
 }
 
-export default function RequestCard({ request, index, onEdit, onDelete, onRenew, onViewResponses }) {
+function computeStatus(request) {
+  if (request.status === 'resolved') return 'resolved';
+  if (request.status === 'expired' || request.status === 'closed') return 'expired';
+  // Check 30-day auto-expiry for active requests
+  if (request.status === 'active') {
+    const baseDate = request.renewed_at || request.created_date;
+    const expiryDate = new Date(baseDate);
+    expiryDate.setDate(expiryDate.getDate() + EXPIRY_DAYS);
+    if (new Date() > expiryDate) return 'expired';
+  }
+  return 'active';
+}
+
+export default function RequestCard({ request, index, onEdit, onDelete, onRenew, onResolve, onViewResponses }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const status = request.status || 'active';
+  const status = computeStatus(request);
   const isActive = status === 'active';
-  const isExpired = status === 'expired' || status === 'closed';
+  const isExpired = status === 'expired';
+  const isResolved = status === 'resolved';
 
   const replyCount = request.answer_count || request.response_count || request.messages_count || request.comments_count || 0;
   const viewCount = request.view_count || request.views_count || 0;
@@ -29,7 +44,9 @@ export default function RequestCard({ request, index, onEdit, onDelete, onRenew,
   const industry = formatIndustry(request.industry || request.target_industry);
   const postedAgo = moment(request.created_date).fromNow();
 
-  const leftBorder = isActive ? '3px solid #4CAF50' : '3px solid rgba(0,0,0,0.15)';
+  const leftBorder = isResolved ? '3px solid #4CAF50'
+    : isActive ? '3px solid #4CAF50'
+    : '3px solid rgba(0,0,0,0.15)';
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -39,7 +56,7 @@ export default function RequestCard({ request, index, onEdit, onDelete, onRenew,
   return (
     <div style={{
       background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: isActive || isExpired ? '0 14px 14px 0' : 14,
+      borderRadius: (isActive || isExpired || isResolved) ? '0 14px 14px 0' : 14,
       borderLeft: leftBorder, padding: '20px 22px',
       transition: 'border-color 0.2s, transform 0.2s, opacity 0.25s',
       opacity: deleting ? 0 : 1, transform: deleting ? 'translateY(-8px)' : 'none',
@@ -66,6 +83,12 @@ export default function RequestCard({ request, index, onEdit, onDelete, onRenew,
                 background: 'rgba(0,0,0,0.04)', color: '#aaa', border: '0.5px solid rgba(0,0,0,0.1)',
               }}>Expired</span>
             )}
+            {isResolved && (
+              <span style={{
+                fontFamily: dmSans, fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 100,
+                background: 'rgba(76,175,80,0.08)', color: '#2e7d32', border: '0.5px solid rgba(76,175,80,0.2)',
+              }}>Resolved</span>
+            )}
             <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb' }}>Posted {postedAgo}</span>
           </div>
 
@@ -88,10 +111,19 @@ export default function RequestCard({ request, index, onEdit, onDelete, onRenew,
             </span>
           )}
 
-          {/* Expiry notice */}
+          {/* Expiry notice — dynamic copy */}
           {isExpired && (
             <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#aaa', fontStyle: 'italic', marginTop: 6, marginBottom: 0 }}>
-              This request expired. Renew it to make it visible to the network again.
+              {replyCount > 0
+                ? `Your question reached ${viewCount} view${viewCount !== 1 ? 's' : ''} and ${replyCount} response${replyCount !== 1 ? 's' : ''}. Still need help? Renew it to stay visible to the network.`
+                : 'Your question expired before getting a response. Renew it with more detail to get better results.'}
+            </p>
+          )}
+
+          {/* Resolved notice */}
+          {isResolved && (
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#aaa', fontStyle: 'italic', marginTop: 6, marginBottom: 0 }}>
+              This question was marked resolved.
             </p>
           )}
         </div>
@@ -119,15 +151,26 @@ export default function RequestCard({ request, index, onEdit, onDelete, onRenew,
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; e.currentTarget.style.color = '#888'; }}
           >Edit</button>
           {isExpired && (
-            <button onClick={() => onRenew(request)} style={{
-              background: '#E85D20', border: 'none', color: '#fff',
-              fontFamily: dmSans, fontSize: 12, fontWeight: 500,
-              borderRadius: 100, padding: '6px 14px', cursor: 'pointer', transition: 'background 0.2s',
-              minHeight: 'auto', width: 'auto',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
-            >Renew</button>
+            <>
+              <button onClick={() => onRenew(request)} style={{
+                background: '#E85D20', border: 'none', color: '#fff',
+                fontFamily: dmSans, fontSize: 12, fontWeight: 500,
+                borderRadius: 100, padding: '6px 14px', cursor: 'pointer', transition: 'background 0.2s',
+                minHeight: 'auto', width: 'auto',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
+              >Renew</button>
+              <button onClick={() => onResolve(request)} style={{
+                background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.1)',
+                color: '#888', fontFamily: dmSans, fontSize: 12, fontWeight: 400,
+                borderRadius: 100, padding: '6px 14px', cursor: 'pointer', transition: 'all 0.2s',
+                minHeight: 'auto', width: 'auto',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.08)'; e.currentTarget.style.color = '#555'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; e.currentTarget.style.color = '#888'; }}
+              >Mark Resolved</button>
+            </>
           )}
           {!confirmDelete ? (
             <button onClick={() => setConfirmDelete(true)} style={{
