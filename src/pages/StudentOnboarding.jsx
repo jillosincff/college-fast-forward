@@ -145,10 +145,12 @@ export default function StudentOnboarding() {
       const firstName = nameParts[0] || 'Student';
       const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
       
+      const fullDescription = helpRequest.trim() + (questionContext.trim() ? '\n\n' + questionContext.trim() : '');
       const jobRequestData = {
         role: 'Student Question',
         title: helpRequest.trim(),
-        description: helpRequest.trim(),
+        description: fullDescription,
+        category: questionCategory,
         target_industry: industries[0] || 'Other',
         poster_type: 'student',
         // CRITICAL: Always store poster_email so answer notifications can reach the student
@@ -165,7 +167,7 @@ export default function StudentOnboarding() {
         role_type: 'full_time',
         target_helpers: ['alumni', 'parents'],
         resume_url: resumeUrl,
-        help_types: helpNeeded,
+        help_types: questionCategory ? [questionCategory] : helpNeeded,
         start_timing: targetTimeline || '',
         location_preference: preferredLocation.trim() || ''
       };
