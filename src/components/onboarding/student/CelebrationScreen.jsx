@@ -100,20 +100,20 @@ export default function CelebrationScreen({ user }) {
   // "Building matches" fallback screen (shown if matches genuinely empty after timeout)
   if (!loading && showFallback && validMatches.length === 0) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 40px' }}>
+      <div style={{ minHeight: '100vh', minHeight: '100dvh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 20px', boxSizing: 'border-box', overflowX: 'hidden' }}>
         <style>{`@keyframes celebPulse{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}`}</style>
-        <div style={{ maxWidth: 480, textAlign: 'center' }}>
-          <div style={{ width: 60, height: 60, borderRadius: '50%', background: orange, margin: '0 auto 24px', animation: 'celebPulse 2s ease-in-out infinite', opacity: 0.8 }} />
-          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em', marginBottom: 16 }}>
+        <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: orange, margin: '0 auto 24px', animation: 'celebPulse 2s ease-in-out infinite', opacity: 0.8 }} />
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(22px, 5vw, 28px)', color: '#f4f0e8', letterSpacing: '-0.02em', marginBottom: 16 }}>
             We're building your matches.
           </h1>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.55)', lineHeight: 1.7, marginBottom: 36 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.55)', lineHeight: 1.7, marginBottom: 32, padding: '0 8px' }}>
             With nearly 1,000 UF families on the platform, we're finding the people best suited to help you. Check your dashboard in a few minutes.
           </p>
-          <button onClick={handleDashboard} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: 'none', background: orange, color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBottom: 12, minHeight: 'auto' }}>
+          <button onClick={handleDashboard} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: 'none', background: orange, color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBottom: 12, minHeight: 48, WebkitTapHighlightColor: 'transparent' }}>
             Go to my dashboard →
           </button>
-          <button onClick={handleDirectory} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: '0.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'rgba(244,240,232,0.6)', fontFamily: dmSans, fontSize: 15, fontWeight: 400, cursor: 'pointer', minHeight: 'auto' }}>
+          <button onClick={handleDirectory} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: '0.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'rgba(244,240,232,0.6)', fontFamily: dmSans, fontSize: 15, fontWeight: 400, cursor: 'pointer', minHeight: 48, WebkitTapHighlightColor: 'transparent' }}>
             Browse the directory →
           </button>
         </div>
@@ -122,10 +122,11 @@ export default function CelebrationScreen({ user }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 24px' }}>
+    <div style={{ minHeight: '100vh', minHeight: '100dvh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 20px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <style>{`
         @keyframes celebShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes celebFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:480px){.celeb-upsell{margin-left:-4px;margin-right:-4px}}
       `}</style>
       <div style={{ maxWidth: 560, width: '100%', textAlign: 'center' }}>
 
@@ -212,8 +213,9 @@ export default function CelebrationScreen({ user }) {
                 width: '100%', padding: '15px 0', borderRadius: 100, border: 'none',
                 background: orange, color: '#fff',
                 fontFamily: dmSans, fontSize: 15, fontWeight: 500,
-                cursor: 'pointer', minHeight: 'auto',
+                cursor: 'pointer', minHeight: 48,
                 transition: 'background 0.2s',
+                WebkitTapHighlightColor: 'transparent',
               }}
               onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
               onMouseLeave={e => e.currentTarget.style.background = orange}
@@ -227,17 +229,18 @@ export default function CelebrationScreen({ user }) {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-                color: 'rgba(244,240,232,0.4)', marginTop: 12,
-                display: 'block', width: 'auto', minHeight: 'auto',
-                margin: '12px auto 0',
+                color: 'rgba(244,240,232,0.4)',
+                display: 'block', width: 'auto', minHeight: 44,
+                margin: '8px auto 0',
+                WebkitTapHighlightColor: 'transparent',
               }}
             >
               Go to my dashboard →
             </button>
 
             {/* FASTIQ upsell */}
-            <div style={{
-              marginTop: 32, background: 'rgba(232,93,32,0.08)',
+            <div className="celeb-upsell" style={{
+              marginTop: 28, background: 'rgba(232,93,32,0.08)',
               border: '0.5px solid rgba(232,93,32,0.2)',
               borderRadius: 12, padding: '14px 16px', textAlign: 'left',
             }}>
@@ -246,7 +249,7 @@ export default function CelebrationScreen({ user }) {
               </p>
               <button
                 onClick={() => navigate('FastIQ')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: orange, marginTop: 6, padding: 0, minHeight: 'auto', width: 'auto' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: orange, marginTop: 6, padding: 0, minHeight: 44, width: 'auto', WebkitTapHighlightColor: 'transparent' }}
               >
                 Learn about FASTIQ →
               </button>

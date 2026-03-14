@@ -46,13 +46,13 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
   const isQuestion = question.trim().endsWith('?');
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto', width: '100%' }}>
+    <div style={{ maxWidth: 560, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 4vw, 26px)', lineHeight: 1.2, letterSpacing: '-0.01em', marginBottom: 8 }}>
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <h1 style={{ fontSize: 'clamp(20px, 4vw, 26px)', lineHeight: 1.2, letterSpacing: '-0.01em', marginBottom: 8 }}>
           <span style={{ fontFamily: playfair, fontWeight: 700, color: '#1a1a1a' }}>Ask your first question.</span>
         </h1>
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6, padding: '0 4px' }}>
           Parents and alumni in this network will answer from real experience. The more specific you are, the better the answer.
         </p>
       </div>
@@ -62,7 +62,7 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
         <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 10 }}>
           What kind of help do you need? <span style={{ color: '#ef4444' }}>*</span>
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {CATEGORIES.map(cat => (
             <button
               key={cat.id}
@@ -70,12 +70,13 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
               data-chip="true"
               onClick={() => onCategoryChange(cat.id)}
               style={{
-                padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                padding: '10px 14px', borderRadius: 12, cursor: 'pointer',
                 fontFamily: dmSans, fontSize: 13, fontWeight: 400,
                 background: category === cat.id ? 'rgba(232,93,32,0.08)' : '#fff',
                 color: category === cat.id ? orange : '#555',
                 border: `0.5px solid ${category === cat.id ? 'rgba(232,93,32,0.4)' : 'rgba(0,0,0,0.1)'}`,
-                transition: 'all 0.2s', minHeight: 'auto',
+                transition: 'all 0.15s', minHeight: 44,
+                WebkitTapHighlightColor: 'transparent',
               }}
             >
               {cat.label}
@@ -102,8 +103,9 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
                   style={{
                     textAlign: 'left', fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#555',
                     background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 12,
-                    padding: '12px 16px', cursor: 'pointer', lineHeight: 1.5,
-                    transition: 'all 0.2s', minHeight: 'auto', width: '100%',
+                    padding: '12px 14px', cursor: 'pointer', lineHeight: 1.5,
+                    transition: 'all 0.15s', minHeight: 44, width: '100%',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.02)'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.background = '#fff'; }}

@@ -463,11 +463,18 @@ export default function StudentOnboarding() {
   const step3Valid = isStep3Valid || helpRequest === '__SKIP__';
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
-      <style>{`@keyframes s3FadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@media(max-width:768px){.step3-container{padding:32px 20px 60px !important}.step3-buttons{flex-direction:column-reverse !important}.step3-buttons button{width:100% !important}}`}</style>
+    <div style={{ minHeight: '100vh', minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: '#f4f2ee', overflowX: 'hidden' }}>
+      <style>{`
+        @keyframes s3FadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:640px){
+          .step3-container{padding:24px 16px 40px !important}
+          .step3-buttons{flex-direction:column-reverse !important;gap:10px !important}
+          .step3-buttons button{width:100% !important;flex:none !important}
+        }
+      `}</style>
       <StudentStep1ProgressBar currentStep={3} />
 
-      <div className="step3-container" style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '48px 24px 80px' }}>
+      <div className="step3-container" style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '40px 24px 60px', boxSizing: 'border-box' }}>
         <div style={{ animation: 's3FadeUp 0.4s ease both' }}>
           <AskFirstQuestion
             question={helpRequest}
@@ -532,7 +539,7 @@ export default function StudentOnboarding() {
         )}
 
         {/* Button row */}
-        <div className="step3-buttons" style={{ display: 'flex', gap: 12, marginTop: 28, animation: 's3FadeUp 0.4s 0.2s ease both' }}>
+        <div className="step3-buttons" style={{ display: 'flex', gap: 12, marginTop: 24, animation: 's3FadeUp 0.4s 0.2s ease both' }}>
           <button
             type="button"
             onClick={handleBack}
@@ -540,7 +547,8 @@ export default function StudentOnboarding() {
               background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.1)',
               color: '#888', fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 400,
               borderRadius: 100, padding: '13px 24px', cursor: 'pointer',
-              transition: 'all 0.2s', minHeight: 'auto',
+              transition: 'all 0.15s', minHeight: 48,
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             ← Back
@@ -555,7 +563,8 @@ export default function StudentOnboarding() {
               color: (step3Valid && !loading) ? '#fff' : '#bbb',
               fontFamily: "'DM Sans'", fontSize: 15, fontWeight: 500,
               cursor: (step3Valid && !loading) ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s', minHeight: 'auto',
+              transition: 'all 0.15s', minHeight: 48,
+              WebkitTapHighlightColor: 'transparent',
             }}
             onMouseEnter={e => { if (step3Valid && !loading) e.currentTarget.style.background = orangeHoverColor; }}
             onMouseLeave={e => { if (step3Valid && !loading) e.currentTarget.style.background = orangeColor; }}
