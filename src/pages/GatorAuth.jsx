@@ -19,7 +19,7 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const S = {
   headline: { fontFamily: playfair, fontWeight: 700, fontSize: 36, color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 8, textAlign: 'center' },
-  subhead: { fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.4)', lineHeight: 1.6, textAlign: 'center', marginTop: 10, marginBottom: 36 },
+  subhead: { fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.55)', lineHeight: 1.6, textAlign: 'center', marginTop: 10, marginBottom: 36 },
   finePrint: { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.2)', lineHeight: 1.6, textAlign: 'center' },
   primaryBtn: { fontFamily: dmSans, fontSize: 16, fontWeight: 500, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 100, padding: '16px 40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', transition: 'background 0.2s', minHeight: 'auto' },
   googleBtn: { fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8', background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 100, padding: '16px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', transition: 'all 0.2s', minHeight: 'auto' },
@@ -75,11 +75,12 @@ function AuthCard({ children, delay = 0 }) {
 function LogoBlock({ delay = 0.05 }) {
   return (
     <div style={{ textAlign: 'center', marginBottom: 32, animation: `authFadeUp 0.4s ease both ${delay}s` }}>
-      <img
-        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-        alt="CFF"
-        style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain', margin: '0 auto 10px', display: 'block' }}
-      />
+      {/* CFF monogram mark — text only, no white box */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, marginBottom: 10 }}>
+        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em' }}>C</span>
+        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#E85D20', letterSpacing: '-0.02em' }}>F</span>
+        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em' }}>F</span>
+      </div>
       <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(244,240,232,0.3)' }}>
         College Fast Forward
       </span>

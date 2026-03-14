@@ -735,6 +735,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
+const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
 const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'Opportunities', 'Insights', 'MyRequests', 'MyImpact', 'MyApplications', 'Favorites', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ'];
@@ -1465,7 +1466,7 @@ function AppContent() {
           <MobileBottomNav user={user} currentPage={resolvedPage} />
         )}
 
-        {resolvedPage !== 'LandingPage' && (
+        {resolvedPage !== 'LandingPage' && !hideFooterPages.includes(resolvedPage) && (
           <footer className="bg-slate-100 border-t border-slate-200 mt-12">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
               <p>&copy; {new Date().getFullYear()} College Fast Forward. All Rights Reserved.</p>
