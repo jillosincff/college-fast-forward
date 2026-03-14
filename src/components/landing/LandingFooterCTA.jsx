@@ -1,35 +1,169 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
+import React, { useEffect, useRef, useState } from 'react';
+import { PrimaryCTA, SecondaryCTA } from '@/components/landing/LandingCTAButton';
 
-const fade = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
+const FONT_LINK_ID = 'footer-cta-fonts';
+function ensureFonts() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_LINK_ID)) return;
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href =
+    'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+  document.head.appendChild(link);
+}
 
-export default function LandingFooterCTA({ stats, onClaim, onFAQ }) {
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+export default function LandingFooterCTA({ stats, onClaim }) {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+
+  useEffect(() => { ensureFonts(); }, []);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
+      { threshold: 0.15 },
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const fadeUp = (delay) => ({
+    opacity: vis ? 1 : 0,
+    transform: vis ? 'translateY(0)' : 'translateY(14px)',
+    transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`,
+  });
+
   return (
-    <section className="py-44 sm:py-56 px-4" style={{ backgroundColor: '#0021A5' }}>
-      <div className="max-w-md mx-auto text-center">
-        <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-          <p className="text-white text-[20px] sm:text-[22px] font-bold mb-3 leading-[1.6]">
-            Only <span className="text-[#FA4616]">{stats.spots_left}</span> founding spots left at <span className="font-black">FREE forever</span> pricing.
-          </p>
-          <p className="text-white/60 text-[18px] mb-10 leading-[1.6]">After that it's $9/month.</p>
+    <>
+      {/* Pre-footer conversion block */}
+      <section
+        ref={ref}
+        style={{
+          background: '#0d1117',
+          borderTop: '0.5px solid rgba(255,255,255,0.08)',
+          padding: '72px 48px 64px',
+          textAlign: 'center',
+        }}
+      >
+        {/* Headline */}
+        <h2
+          style={{
+            fontFamily: playfair,
+            fontWeight: 700,
+            fontSize: 'clamp(30px, 4vw, 44px)',
+            color: '#f4f0e8',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.15,
+            marginBottom: 16,
+            ...fadeUp(0),
+          }}
+        >
+          Your student's career starts with{' '}
+          <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>
+            one conversation.
+          </span>
+        </h2>
 
-          <PrimaryCTA text="Claim Your Free Spot" onClick={onClaim} />
+        {/* Subhead */}
+        <p
+          style={{
+            fontFamily: dmSans,
+            fontSize: 17,
+            fontWeight: 300,
+            color: 'rgba(244,240,232,0.5)',
+            maxWidth: 520,
+            margin: '0 auto 36px',
+            lineHeight: 1.7,
+            ...fadeUp(0.08),
+          }}
+        >
+          Nearly 1,000 UF families have already found their people on College Fast Forward. The right intro is waiting.
+        </p>
 
-          <p className="text-[#E5E7EB]/50 text-xs mt-4">Founding members stay free forever.</p>
+        {/* CTA grid */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 12,
+            marginBottom: 20,
+            flexWrap: 'wrap',
+            ...fadeUp(0.16),
+          }}
+        >
+          <SecondaryCTA text="Join the Network — $9/month" onClick={onClaim} />
+          <PrimaryCTA text="Unlock FASTIQ — $29/month" onClick={onClaim} />
+        </div>
 
-          <button
-            onClick={onFAQ}
-            className="mt-10 text-[#E5E7EB]/40 text-sm underline underline-offset-4 hover:text-white/60 transition-colors"
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-          >
-            Questions?
-          </button>
-        </motion.div>
-      </div>
-    </section>
+        {/* Fine print */}
+        <p
+          style={{
+            fontFamily: dmSans,
+            fontSize: 13,
+            fontWeight: 300,
+            color: 'rgba(244,240,232,0.25)',
+            margin: 0,
+            ...fadeUp(0.22),
+          }}
+        >
+          Cancel anytime. No contracts. Takes 30 seconds.
+        </p>
+      </section>
+
+      {/* Standard footer links */}
+      <footer
+        style={{
+          background: '#080c10',
+          padding: '24px 48px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        {/* Left: wordmark */}
+        <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(244,240,232,0.4)' }}>
+          College Fast Forward
+        </span>
+
+        {/* Center: nav links */}
+        <nav style={{ display: 'flex', gap: 24 }}>
+          {[
+            { label: 'Privacy', href: '#Privacy' },
+            { label: 'Terms', href: '#Terms' },
+            { label: 'Cookies', href: '#CookiePolicy' },
+          ].map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              style={{
+                fontFamily: dmSans,
+                fontSize: 13,
+                fontWeight: 300,
+                color: 'rgba(244,240,232,0.25)',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
+                minHeight: 'auto',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(244,240,232,0.5)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(244,240,232,0.25)'; }}
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Right: copyright */}
+        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.2)' }}>
+          © {new Date().getFullYear()} College Fast Forward. All rights reserved.
+        </span>
+      </footer>
+    </>
   );
 }

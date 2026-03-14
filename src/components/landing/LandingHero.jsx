@@ -8,8 +8,10 @@ export default function LandingHero({ stats, onClaim }) {
     : 'LIMITED FREE FOUNDING SPOTS REMAINING';
 
   return (
-    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ backgroundColor: '#0021A5' }}>
-      <div className="max-w-3xl mx-auto text-center w-full">
+    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ backgroundColor: '#0021A5', position: 'relative', overflow: 'hidden' }}>
+      {/* gradient fade into dark sections below */}
+      <div aria-hidden style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, transparent, #0d1117)', pointerEvents: 'none', zIndex: 1 }} />
+      <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 2 }}>
 
         {/* Urgency top bar */}
         <motion.div
@@ -28,7 +30,9 @@ export default function LandingHero({ stats, onClaim }) {
             }}
           >
             {spotsText}
-            <ArrowRight className="w-3.5 h-3.5" />
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ display: 'inline' }}>
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </motion.div>
 

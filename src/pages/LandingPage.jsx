@@ -102,32 +102,7 @@ export default function LandingPage() {
         <LandingHowItWorks onClaim={handleClaim} />
 
         {/* 7 — FINAL CTA */}
-        <LandingFooterCTA stats={stats} onClaim={handleClaim} onFAQ={() => {}} />
-
-        {/* FOOTER */}
-        <footer className="py-8 text-center" style={{ backgroundColor: '#060B18' }}>
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-center gap-6 mb-6">
-              {[
-                { num: '1', text: 'Join & Connect' },
-                { num: '2', text: 'Get Matched' },
-                { num: '3', text: 'Help Each Other' },
-              ].map((s) => (
-                <div key={s.num} className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#0021A5] text-white text-xs font-bold flex items-center justify-center">{s.num}</span>
-                  <span className="text-white/50 text-xs font-medium hidden sm:inline">{s.text}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-white/40 text-sm mb-2">© {new Date().getFullYear()} College Fast Forward. All Rights Reserved.</p>
-            <p className="text-white/30 text-xs mb-4">Not affiliated with or endorsed by the University of Florida.</p>
-            <div className="flex justify-center gap-6 text-xs">
-              <a href="#Terms" className="text-white/40 hover:text-white transition-colors">Terms</a>
-              <a href="#Privacy" className="text-white/40 hover:text-white transition-colors">Privacy</a>
-              <a href="#CookiePolicy" className="text-white/40 hover:text-white transition-colors">Cookies</a>
-            </div>
-          </div>
-        </footer>
+        <LandingFooterCTA stats={stats} onClaim={handleClaim} />
       </div>
     </>
   );
