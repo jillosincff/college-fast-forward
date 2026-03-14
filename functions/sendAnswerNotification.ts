@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 <a href="${answerUrl}" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">Read the full answer &rarr;</a>
 </td></tr></table>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid rgba(0,0,0,0.06);font-size:0;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid #edeceb;font-size:0;">&nbsp;</td></tr></table>
 <p style="font-family:${DM};font-size:12px;font-weight:300;color:#aaa;line-height:1.6;margin:0;">Reply to keep the conversation going &mdash; parents who get a response are 4x more likely to make an introduction.</p>`;
 
     const html = emailWrap(preheader, content);

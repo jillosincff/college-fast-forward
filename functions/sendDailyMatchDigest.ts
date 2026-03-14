@@ -134,7 +134,7 @@ ${`<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0
 <p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:0 0 16px;">These questions match your background. Even 2&ndash;3 sentences makes a difference &mdash; and earns you karma points.</p>
 ${cards}
 <table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;"><a href="${APP}/#Connections?utm_source=daily_digest&utm_medium=email&utm_campaign=daily_digest" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">See all questions &rarr;</a></td></tr></table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid rgba(0,0,0,0.06);font-size:0;">&nbsp;</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid #edeceb;font-size:0;">&nbsp;</td></tr></table>
 <p style="font-family:${DM};font-size:12px;font-weight:300;color:#aaa;line-height:1.6;margin:0;">You&rsquo;re receiving this because you&rsquo;re a CFF member. Answer questions to earn karma and move up the leaderboard.</p>`;
 
         const subject = `${matched.length} students need your help today`;
