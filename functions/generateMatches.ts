@@ -11,6 +11,47 @@ const RELATED_INDUSTRIES = [
   ['Media & Entertainment', 'Hospitality', 'Retail', 'Marketing'],
 ];
 
+// Adjacent industry map for fallback matching (student-facing IDs → formal names)
+const ADJACENCY_MAP = {
+  'tech': ['Consulting', 'Engineering', 'Technology & Software', 'Finance & Banking'],
+  'Technology & Software': ['Consulting', 'Engineering', 'Finance & Banking'],
+  'finance': ['Consulting', 'Technology & Software', 'Real Estate', 'Government', 'Finance & Banking'],
+  'Finance & Banking': ['Consulting', 'Technology & Software', 'Real Estate', 'Government'],
+  'marketing': ['Media & Entertainment', 'Consulting', 'Technology & Software', 'Marketing'],
+  'Marketing': ['Media & Entertainment', 'Consulting', 'Technology & Software'],
+  'healthcare': ['Non-Profit', 'Government', 'Education', 'Healthcare'],
+  'Healthcare': ['Non-Profit', 'Government', 'Education'],
+  'law': ['Government', 'Finance & Banking', 'Consulting', 'Law & Legal'],
+  'Law & Legal': ['Government', 'Finance & Banking', 'Consulting'],
+  'engineering': ['Technology & Software', 'Consulting', 'Engineering'],
+  'Engineering': ['Technology & Software', 'Consulting'],
+  'education': ['Non-Profit', 'Government', 'Education'],
+  'Education': ['Non-Profit', 'Government'],
+  'real_estate': ['Finance & Banking', 'Law & Legal', 'Government', 'Real Estate'],
+  'Real Estate': ['Finance & Banking', 'Law & Legal', 'Government'],
+  'nonprofit': ['Government', 'Education', 'Healthcare', 'Non-Profit'],
+  'Non-Profit': ['Government', 'Education', 'Healthcare'],
+  'government': ['Law & Legal', 'Non-Profit', 'Education', 'Government'],
+  'Government': ['Law & Legal', 'Non-Profit', 'Education'],
+  'media': ['Marketing', 'Technology & Software', 'Media & Entertainment'],
+  'Media & Entertainment': ['Marketing', 'Technology & Software'],
+  'startups': ['Technology & Software', 'Marketing', 'Finance & Banking', 'Consulting'],
+  'consulting': ['Finance & Banking', 'Technology & Software', 'Marketing', 'Law & Legal', 'Consulting'],
+  'Consulting': ['Finance & Banking', 'Technology & Software', 'Marketing', 'Law & Legal'],
+  'other': ['Consulting', 'Technology & Software', 'Marketing'],
+  'Other': ['Consulting', 'Technology & Software', 'Marketing'],
+};
+
+function getAdjacentIndustries(selectedIndustries) {
+  const adjacent = new Set();
+  (selectedIndustries || []).forEach(industry => {
+    (ADJACENCY_MAP[industry] || ADJACENCY_MAP[industry?.toLowerCase()] || []).forEach(adj => adjacent.add(adj));
+  });
+  // Remove the student's own selected industries
+  (selectedIndustries || []).forEach(i => adjacent.delete(i));
+  return Array.from(adjacent);
+}
+
 // Broader keyword-based industry matching for edge cases (e.g. "Sport Management" student)
 const INDUSTRY_KEYWORDS = {
   'marketing': ['marketing', 'advertising', 'media', 'communications', 'pr', 'digital', 'brand', 'content', 'social media'],
@@ -424,6 +465,12 @@ Deno.serve(async (req) => {
     }
     
     const allScoredParents = [];
+    const studentIndustries = helpRequests[0]?.industry ? [helpRequests[0].industry] : [];
+    const adjacentIndustries = getAdjacentIndustries(studentIndustries);
+    
+    console.log(`[generateMatches] Student industries: ${JSON.stringify(studentIndustries)}`);
+    console.log(`[generateMatches] Adjacent industries: ${JSON.stringify(adjacentIndustries)}`);
+    console.log(`[generateMatches] Total parent profiles available: ${parentProfiles.length}`);
     
     // Score ALL parents for the help request
     for (const helpRequest of helpRequests) {
@@ -441,12 +488,23 @@ Deno.serve(async (req) => {
         
         const { score, reasons, category } = calculateParentMatchScore(helpRequest, parent);
         
+        // Determine match tier for logging
+        const parentIndustry = (parent.industry || '').toLowerCase();
+        const requestIndustry = (helpRequest.industry || '').toLowerCase();
+        let matchTier = 3; // fallback
+        if (parentIndustry && requestIndustry && parentIndustry === requestIndustry) {
+          matchTier = 1; // exact
+        } else if (isRelatedIndustry(helpRequest.industry, parent.industry)) {
+          matchTier = 2; // related/adjacent
+        }
+        
         allScoredParents.push({
           helpRequest,
           parent,
           score,
           reasons,
-          category
+          category,
+          matchTier
         });
       }
     }
@@ -454,12 +512,24 @@ Deno.serve(async (req) => {
     // Sort by score (highest first)
     allScoredParents.sort((a, b) => b.score - a.score);
     
+    const tier1Count = allScoredParents.filter(m => m.matchTier === 1).length;
+    const tier2Count = allScoredParents.filter(m => m.matchTier === 2).length;
+    const tier3Count = allScoredParents.filter(m => m.matchTier === 3).length;
+    console.log(`[generateMatches] Tiers: ${tier1Count} exact, ${tier2Count} adjacent, ${tier3Count} fallback (total ${allScoredParents.length})`);
+    
+    // Log admin alert if 0 exact matches
+    if (tier1Count === 0 && helpRequests.length > 0) {
+      console.log(`[ADMIN ALERT] Student ${helpRequests[0].student_name || helpRequests[0].student_id} completed onboarding with ZERO exact industry matches. Industries: ${JSON.stringify(studentIndustries)}. Using fallback.`);
+    }
+    
     // CRITICAL: Always take TOP 10 parents (more options = better)
     // But boost requests from students with active karma boosts get more matches
     const karmaBoost = helpRequests[0]?.karma_boost || 0;
     const boostActive = karmaBoost > 0 && (!helpRequests[0]?.boosted_until || new Date(helpRequests[0].boosted_until) > new Date());
-    const MIN_MATCHES = boostActive ? Math.min(15, allScoredParents.length) : 10;
-    const topParentMatches = allScoredParents.slice(0, MIN_MATCHES);
+    const TARGET_MATCHES = boostActive ? 15 : 10;
+    // CRITICAL: Never return 0 matches — with 600+ parents someone can always help
+    const MIN_MATCHES = Math.min(TARGET_MATCHES, allScoredParents.length);
+    const topParentMatches = allScoredParents.slice(0, Math.max(MIN_MATCHES, Math.min(5, allScoredParents.length)));
     
     const matchesData = [];
     

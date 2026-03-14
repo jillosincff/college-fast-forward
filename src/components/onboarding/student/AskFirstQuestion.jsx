@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+const orange = '#E85D20';
 
 const CATEGORIES = [
-  { id: 'networking', label: 'Networking & Outreach', icon: '🤝' },
-  { id: 'career_path', label: 'Career Path Exploration', icon: '🧭' },
-  { id: 'first_job', label: 'First Job Advice', icon: '💼' },
-  { id: 'industry', label: 'Industry-Specific', icon: '🏢' },
+  { id: 'networking', label: 'Networking & Outreach' },
+  { id: 'career_path', label: 'Career Path Exploration' },
+  { id: 'first_job', label: 'First Job Advice' },
+  { id: 'industry', label: 'Industry-Specific' },
 ];
 
 const INSPIRATION = {
@@ -40,24 +42,25 @@ const PLACEHOLDERS = {
 };
 
 export default function AskFirstQuestion({ question, onQuestionChange, category, onCategoryChange, context, onContextChange, location, onLocationChange, timeline, onTimelineChange }) {
-  // Real-time feedback
   const isStatement = question.length > 10 && !question.trim().endsWith('?');
   const isQuestion = question.trim().endsWith('?');
 
   return (
-    <div className="max-w-lg mx-auto">
-      <div className="text-center mb-6">
-        <div className="text-4xl mb-3">💬</div>
-        <h1 className="text-xl font-bold text-slate-800 mb-2">Ask your first question</h1>
-        <p className="text-slate-600 text-sm">
+    <div style={{ maxWidth: 560, margin: '0 auto', width: '100%' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <h1 style={{ fontSize: 'clamp(22px, 4vw, 26px)', lineHeight: 1.2, letterSpacing: '-0.01em', marginBottom: 8 }}>
+          <span style={{ fontFamily: playfair, fontWeight: 700, color: '#1a1a1a' }}>Ask your first question.</span>
+        </h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6 }}>
           Parents and alumni in this network will answer from real experience. The more specific you are, the better the answer.
         </p>
       </div>
 
       {/* Category selection */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-700 mb-3">
-          What kind of help do you need? <span className="text-red-500">*</span>
+      <div style={{ marginBottom: 24 }}>
+        <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 10 }}>
+          What kind of help do you need? <span style={{ color: '#ef4444' }}>*</span>
         </label>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map(cat => (
@@ -66,34 +69,44 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
               type="button"
               data-chip="true"
               onClick={() => onCategoryChange(cat.id)}
-              className={`chip-btn px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm inline-flex items-center gap-2 ${
-                category === cat.id
-                  ? 'bg-orange-50 border-[#E85D20] text-[#E85D20] shadow-md'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-              }`}
+              style={{
+                padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                fontFamily: dmSans, fontSize: 13, fontWeight: 400,
+                background: category === cat.id ? 'rgba(232,93,32,0.08)' : '#fff',
+                color: category === cat.id ? orange : '#555',
+                border: `0.5px solid ${category === cat.id ? 'rgba(232,93,32,0.4)' : 'rgba(0,0,0,0.1)'}`,
+                transition: 'all 0.2s', minHeight: 'auto',
+              }}
             >
-              <span>{cat.icon}</span> {cat.label}
+              {cat.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Inspiration chips + Question field (only after category selected) */}
+      {/* Content after category */}
       {category && (
-        <div className="space-y-5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Inspiration chips */}
           <div>
-            <p className="text-xs text-slate-500 mb-3">
-              💡 Here are some questions that get great responses. Tap one to use it as a starting point:
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#aaa', marginBottom: 10 }}>
+              Here are some questions that get great responses. Tap one to use it:
             </p>
-            <div className="flex flex-col gap-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {INSPIRATION[category]?.map((chip, i) => (
                 <button
                   key={i}
                   type="button"
                   data-chip="true"
                   onClick={() => onQuestionChange(chip)}
-                  className="text-left text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 hover:border-[#E85D20] hover:text-[#E85D20] hover:bg-orange-50/50 transition-all leading-relaxed"
+                  style={{
+                    textAlign: 'left', fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#555',
+                    background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 12,
+                    padding: '12px 16px', cursor: 'pointer', lineHeight: 1.5,
+                    transition: 'all 0.2s', minHeight: 'auto', width: '100%',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.02)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.background = '#fff'; }}
                 >
                   "{chip}"
                 </button>
@@ -103,46 +116,57 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
 
           {/* Question textarea */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Your question <span className="text-red-500">*</span>
+            <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+              Your question <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <textarea
               value={question}
               onChange={e => { if (e.target.value.length <= 300) onQuestionChange(e.target.value); }}
               placeholder={PLACEHOLDERS[category] || 'What do you need help with?'}
               rows={4}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base resize-none focus:border-[#E85D20] focus:outline-none transition-colors"
+              style={{
+                width: '100%', padding: '12px 16px', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: 12,
+                fontFamily: dmSans, fontSize: 14, fontWeight: 300, resize: 'none', outline: 'none',
+                transition: 'border-color 0.2s', lineHeight: 1.6,
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
+              onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
               maxLength={300}
             />
-            <div className="flex justify-between items-center mt-1.5">
-              {/* Real-time feedback */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
               <div>
                 {isStatement && question.length > 10 && (
-                  <p className="text-xs text-[#E85D20] italic animate-fade-in-up">
-                    💡 Try phrasing this as a question — it gets 3x more responses.
+                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: orange, fontStyle: 'italic' }}>
+                    Try phrasing this as a question — it gets 3x more responses.
                   </p>
                 )}
                 {isQuestion && question.length > 10 && (
-                  <p className="text-xs text-green-600">
+                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#22c55e' }}>
                     ✓ Great — that's a question people can actually answer.
                   </p>
                 )}
               </div>
-              <span className="text-xs text-slate-400">{question.length} / 300</span>
+              <span style={{ fontFamily: dmSans, fontSize: 11, color: '#bbb' }}>{question.length} / 300</span>
             </div>
           </div>
 
-          {/* Context (optional) */}
+          {/* Context */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              A little more context <span className="font-normal text-slate-400">(optional)</span>
+            <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+              A little more context <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
             </label>
             <textarea
               value={context}
               onChange={e => { if (e.target.value.length <= 200) onContextChange(e.target.value); }}
               placeholder="Your year, major, what you've already tried, what you're hoping to get out of an answer..."
               rows={3}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base resize-none focus:border-[#0021A5] focus:outline-none transition-colors"
+              style={{
+                width: '100%', padding: '12px 16px', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: 12,
+                fontFamily: dmSans, fontSize: 14, fontWeight: 300, resize: 'none', outline: 'none',
+                transition: 'border-color 0.2s', lineHeight: 1.6,
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
+              onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
               maxLength={200}
             />
           </div>
@@ -150,25 +174,37 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
           {/* Location + Timeline */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Where? <span className="font-normal text-slate-400">(optional)</span>
+              <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                Where? <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
               </label>
               <input
                 type="text"
                 value={location}
                 onChange={e => onLocationChange(e.target.value)}
                 placeholder="e.g. Miami, Remote, Anywhere"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none"
+                style={{
+                  width: '100%', padding: '12px 16px', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: 12,
+                  fontFamily: dmSans, fontSize: 14, fontWeight: 300, outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
+                onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                When? <span className="font-normal text-slate-400">(optional)</span>
+              <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                When? <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
               </label>
               <select
                 value={timeline}
                 onChange={e => onTimelineChange(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none bg-white"
+                style={{
+                  width: '100%', padding: '12px 16px', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: 12,
+                  fontFamily: dmSans, fontSize: 14, fontWeight: 300, outline: 'none', background: '#fff',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
+                onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
               >
                 <option value="">Not sure yet</option>
                 <option value="summer">Summer 2026</option>
@@ -179,18 +215,26 @@ export default function AskFirstQuestion({ question, onQuestionChange, category,
             </div>
           </div>
 
-          {/* Info */}
-          <div className="bg-blue-50 rounded-xl p-4 space-y-2">
-            <div className="flex items-start gap-2">
-              <span className="text-blue-500">📄</span>
-              <p className="text-sm text-slate-600">
-                <strong className="text-slate-700">This will be posted</strong> to the community feed where parents & alumni can see it.
+          {/* Info box — orange tinted */}
+          <div style={{
+            background: 'rgba(232,93,32,0.04)', border: '0.5px solid rgba(232,93,32,0.12)',
+            borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 2 }}>
+                <circle cx="8" cy="8" r="6" stroke={orange} strokeWidth="1.5"/>
+                <path d="M8 5v3M8 10v1" stroke={orange} strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#555', margin: 0, lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 500, color: '#333' }}>This will be posted</span> to the community feed where parents & alumni can see it.
               </p>
             </div>
-            <div className="flex items-start gap-2">
-              <span className="text-blue-500">✏️</span>
-              <p className="text-sm text-slate-600">
-                <strong className="text-slate-700">You can edit anytime</strong> from your dashboard.
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 2 }}>
+                <path d="M11 2L14 5 5 14H2v-3L11 2z" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#555', margin: 0, lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 500, color: '#333' }}>You can edit anytime</span> from your dashboard.
               </p>
             </div>
           </div>

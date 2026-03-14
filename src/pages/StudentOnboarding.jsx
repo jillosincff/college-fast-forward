@@ -462,80 +462,113 @@ export default function StudentOnboarding() {
     );
   }
 
-  // STEP 3: Ask First Question (new category-first flow with inspiration chips)
+  // STEP 3: Ask First Question
+  const orangeColor = '#E85D20';
+  const orangeHoverColor = '#d44e14';
+  const step3Valid = isStep3Valid || helpRequest === '__SKIP__';
+
   return (
-    <OnboardingLayout
-      currentStep={3}
-      totalSteps={3}
-      onNext={handleFinish}
-      onBack={handleBack}
-      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : 'Post my question →'}
-      nextDisabled={!isStep3Valid || loading}
-    >
-      <AskFirstQuestion
-        question={helpRequest}
-        onQuestionChange={setHelpRequest}
-        category={questionCategory}
-        onCategoryChange={setQuestionCategory}
-        context={questionContext}
-        onContextChange={setQuestionContext}
-        location={preferredLocation}
-        onLocationChange={setPreferredLocation}
-        timeline={targetTimeline}
-        onTimelineChange={setTargetTimeline}
-      />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
+      <style>{`@keyframes s3FadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@media(max-width:768px){.step3-container{padding:32px 20px 60px !important}.step3-buttons{flex-direction:column-reverse !important}.step3-buttons button{width:100% !important}}`}</style>
+      <StudentStep1ProgressBar currentStep={3} />
 
-      {/* Skip option */}
-      <div className="text-center mt-4">
-        <button
-          type="button"
-          onClick={() => {
-            // Skip question posting - just complete onboarding
-            setHelpRequest('__SKIP__');
-            setQuestionCategory('networking');
-          }}
-          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', width: 'auto' }}
-        >
-          Skip for now — I'll post a question later
-        </button>
-      </div>
-
-      {/* Resume Upload - OPTIONAL */}
-      {questionCategory && helpRequest.trim().length >= 10 && helpRequest !== '__SKIP__' && (
-        <div className="max-w-lg mx-auto mt-6">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Upload your resume <span className="text-slate-400 font-normal">(optional)</span>
-          </label>
-          <div
-            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-              resumeFile ? 'border-green-300 bg-green-50' : 'border-slate-300 hover:border-[#0021A5] hover:bg-blue-50/50'
-            }`}
-            onClick={() => document.getElementById('resume-upload').click()}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={handleResumeDrop}
-          >
-            <input id="resume-upload" type="file" accept=".pdf,.doc,.docx" onChange={handleResumeChange} className="hidden" />
-            {resumeFile ? (
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-2xl">📄</span>
-                <div className="text-left">
-                  <p className="font-medium text-slate-800">{resumeFile.name}</p>
-                  <p className="text-xs text-slate-500">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-                <button type="button" onClick={(e) => { e.stopPropagation(); setResumeFile(null); }} className="ml-4 p-1 text-slate-400 hover:text-red-500">✕</button>
-              </div>
-            ) : (
-              <>
-                <div className="text-3xl mb-2">📄</div>
-                <p className="font-medium text-slate-700">Drag & drop your resume here</p>
-                <p className="text-sm text-slate-500">or click to browse</p>
-                <p className="text-xs text-slate-400 mt-2">PDF, DOC, DOCX (max 5MB)</p>
-              </>
-            )}
-          </div>
+      <div className="step3-container" style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '48px 24px 80px' }}>
+        <div style={{ animation: 's3FadeUp 0.4s ease both' }}>
+          <AskFirstQuestion
+            question={helpRequest}
+            onQuestionChange={setHelpRequest}
+            category={questionCategory}
+            onCategoryChange={setQuestionCategory}
+            context={questionContext}
+            onContextChange={setQuestionContext}
+            location={preferredLocation}
+            onLocationChange={setPreferredLocation}
+            timeline={targetTimeline}
+            onTimelineChange={setTargetTimeline}
+          />
         </div>
-      )}
-    </OnboardingLayout>
+
+        {/* Skip option */}
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <button
+            type="button"
+            onClick={() => { setHelpRequest('__SKIP__'); setQuestionCategory('networking'); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 300, color: '#bbb', minHeight: 'auto', width: 'auto' }}
+          >
+            Skip for now — I'll post a question later
+          </button>
+        </div>
+
+        {/* Resume Upload */}
+        {questionCategory && helpRequest.trim().length >= 10 && helpRequest !== '__SKIP__' && (
+          <div style={{ maxWidth: 560, margin: '24px auto 0' }}>
+            <label style={{ display: 'block', fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+              Upload your resume <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
+            </label>
+            <div
+              style={{
+                border: `2px dashed ${resumeFile ? '#86efac' : 'rgba(0,0,0,0.12)'}`,
+                borderRadius: 12, padding: 24, textAlign: 'center', cursor: 'pointer',
+                background: resumeFile ? '#f0fdf4' : '#fff',
+                transition: 'all 0.2s',
+              }}
+              onClick={() => document.getElementById('resume-upload').click()}
+              onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={handleResumeDrop}
+            >
+              <input id="resume-upload" type="file" accept=".pdf,.doc,.docx" onChange={handleResumeChange} className="hidden" />
+              {resumeFile ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 24 }}>📄</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <p style={{ fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 500, color: '#1e293b', margin: 0 }}>{resumeFile.name}</p>
+                    <p style={{ fontFamily: "'DM Sans'", fontSize: 12, color: '#94a3b8', margin: 0 }}>{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <button type="button" onClick={e => { e.stopPropagation(); setResumeFile(null); }} style={{ marginLeft: 16, padding: 4, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', width: 'auto' }}>✕</button>
+                </div>
+              ) : (
+                <>
+                  <p style={{ fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 400, color: '#555', margin: '0 0 4px' }}>Drag & drop your resume here</p>
+                  <p style={{ fontFamily: "'DM Sans'", fontSize: 12, color: '#aaa', margin: 0 }}>PDF, DOC, DOCX (max 5MB)</p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Button row */}
+        <div className="step3-buttons" style={{ display: 'flex', gap: 12, marginTop: 28, animation: 's3FadeUp 0.4s 0.2s ease both' }}>
+          <button
+            type="button"
+            onClick={handleBack}
+            style={{
+              background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.1)',
+              color: '#888', fontFamily: "'DM Sans'", fontSize: 14, fontWeight: 400,
+              borderRadius: 100, padding: '13px 24px', cursor: 'pointer',
+              transition: 'all 0.2s', minHeight: 'auto',
+            }}
+          >
+            ← Back
+          </button>
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={!step3Valid || loading}
+            style={{
+              flex: 1, borderRadius: 100, padding: 13, border: 'none',
+              background: (step3Valid && !loading) ? orangeColor : 'rgba(0,0,0,0.06)',
+              color: (step3Valid && !loading) ? '#fff' : '#bbb',
+              fontFamily: "'DM Sans'", fontSize: 15, fontWeight: 500,
+              cursor: (step3Valid && !loading) ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s', minHeight: 'auto',
+            }}
+            onMouseEnter={e => { if (step3Valid && !loading) e.currentTarget.style.background = orangeHoverColor; }}
+            onMouseLeave={e => { if (step3Valid && !loading) e.currentTarget.style.background = orangeColor; }}
+          >
+            {loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : 'Post my question →'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

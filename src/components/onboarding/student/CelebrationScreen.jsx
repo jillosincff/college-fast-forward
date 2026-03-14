@@ -1,35 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import confetti from 'canvas-confetti';
 import { trackEvent } from '@/components/utils/analytics';
 
-const UF_BLUE = '#0021A5';
-const UF_ORANGE = '#FA4616';
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const orange = '#E85D20';
 
-export default function CelebrationScreen({ user, onContinue }) {
+const AVATAR_COLORS = [
+  'linear-gradient(135deg, #1a237e, #3949ab)',
+  'linear-gradient(135deg, #004d40, #00897b)',
+  'linear-gradient(135deg, #4a148c, #7b1fa2)',
+  'linear-gradient(135deg, #b71c1c, #e53935)',
+  'linear-gradient(135deg, #0d47a1, #1976d2)',
+];
+
+function ShimmerCard() {
+  return (
+    <div style={{
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'celebShimmer 1.5s infinite',
+      height: 72, borderRadius: 14,
+    }} />
+  );
+}
+
+export default function CelebrationScreen({ user }) {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Handle "Last, First" format (e.g., "Osinoff, Lindsey" -> "Lindsey")
+  const [showFallback, setShowFallback] = useState(false);
+  const fallbackTimer = useRef(null);
+
   const fullName = user?.full_name || '';
-  const firstName = fullName.includes(',') 
+  const firstName = fullName.includes(',')
     ? fullName.split(',')[1]?.trim().split(/\s+/)[0] || 'Gator'
     : fullName.split(/\s+/)[0] || 'Gator';
 
   useEffect(() => {
-    // Fire confetti
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.5 },
-      colors: [UF_BLUE, UF_ORANGE, '#FF6B35', '#FFD700']
-    });
-
-    // Load matches
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: ['#0021A5', '#E85D20', '#FF6B35', '#FFD700'] });
     loadMatches();
-    
     trackEvent('celebration_screen_viewed', { user_id: user?.id });
+
+    // After 8s if still loading, show fallback
+    fallbackTimer.current = setTimeout(() => {
+      setShowFallback(true);
+      setLoading(false);
+    }, 8000);
+
+    return () => clearTimeout(fallbackTimer.current);
   }, []);
 
   const loadMatches = async () => {
@@ -43,130 +63,196 @@ export default function CelebrationScreen({ user, onContinue }) {
     } catch (e) {
       console.error('Failed to load matches:', e);
     } finally {
+      clearTimeout(fallbackTimer.current);
       setLoading(false);
     }
   };
 
+  const validMatches = matches.filter(m => {
+    const name = m.helper_name || m.parent_name || '';
+    return name && !name.toLowerCase().includes('professional') && !name.toLowerCase().includes('test') && name.trim().length > 2;
+  });
+
+  // Never show 0 — use platform-wide fallback of 12
+  const displayCount = validMatches.length > 0 ? validMatches.length : 12;
+
   const handleSeeMatches = () => {
-    trackEvent('celebration_cta_clicked', { user_id: user?.id, match_count: validMatches.length, top3_shown: validMatches.slice(0, 3).map(m => m.id) });
-    // Store valid matches in sessionStorage for the review screen
+    trackEvent('celebration_cta_clicked', { user_id: user?.id, match_count: validMatches.length });
     sessionStorage.setItem('onboarding_matches', JSON.stringify(validMatches));
     navigate('MatchesReview');
   };
 
-  const handleSkipToDashboard = () => {
-    trackEvent('celebration_skip_to_dashboard', { user_id: user?.id, match_count: validMatches.length });
+  const handleDashboard = () => {
+    trackEvent('celebration_skip_to_dashboard', { user_id: user?.id });
     sessionStorage.removeItem('onboarding_matches');
     navigate('Dashboard');
   };
 
-  // Filter out invalid matches (no real name)
-  const validMatches = matches.filter(m => {
-    const name = m.helper_name || m.parent_name || '';
-    return name && 
-      !name.toLowerCase().includes('professional') && 
-      !name.toLowerCase().includes('test') &&
-      name.trim().length > 2;
-  });
+  const handleDirectory = () => {
+    navigate('GatorDirectory');
+  };
 
   const getInitials = (name) => {
     if (!name) return 'UF';
     return name.split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-  const getShortTitle = (match) => {
-    const title = match.helper_title || match.parent_title || match.title || '';
-    if (!title) return '';
-    return title.replace('Director', 'Dir').replace('Manager', 'Mgr').replace('Vice President', 'VP').split(' ').slice(0, 2).join(' ');
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-orange-50/30 flex items-center justify-center p-4">
-      <div className="max-w-xl w-full text-center">
-        
-        {/* Celebration header */}
-        <div className="text-6xl mb-4 animate-bounce">🎉</div>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          You're all set, {firstName}!
-        </h1>
-        
-        {loading ? (
-          <p className="text-lg text-gray-600 mb-2">
-            Finding people who can help you...
+  // "Building matches" fallback screen (shown if matches genuinely empty after timeout)
+  if (!loading && showFallback && validMatches.length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 40px' }}>
+        <style>{`@keyframes celebPulse{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}`}</style>
+        <div style={{ maxWidth: 480, textAlign: 'center' }}>
+          <div style={{ width: 60, height: 60, borderRadius: '50%', background: orange, margin: '0 auto 24px', animation: 'celebPulse 2s ease-in-out infinite', opacity: 0.8 }} />
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em', marginBottom: 16 }}>
+            We're building your matches.
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.55)', lineHeight: 1.7, marginBottom: 36 }}>
+            With nearly 1,000 UF families on the platform, we're finding the people best suited to help you. Check your dashboard in a few minutes.
           </p>
-        ) : (
-          <>
-            <p className="text-lg text-gray-600 mb-2">
-              Your question is live and <span className="font-bold text-[#0021A5]">{validMatches.length} {validMatches.length === 1 ? 'person' : 'people'}</span> can help you.
-            </p>
-            {validMatches.length >= 3 && (
-              <p className="text-gray-500 mb-6">
-                We picked your top 3 to start with:
-              </p>
-            )}
-          </>
-        )}
-
-        {/* Top 3 Preview Card */}
-        <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-6 shadow-xl">
-          {/* Top 3 avatars with names, titles, companies */}
-          {!loading && validMatches.length > 0 && (
-            <div className="flex justify-center gap-6 mb-6">
-              {validMatches.slice(0, 3).map((match, i) => {
-                const name = match.helper_name || match.parent_name || '';
-                const photoUrl = match.profile_image_url || match.helper_photo_url || '';
-                const title = match.helper_title || match.parent_title || match.job_title || '';
-                const company = match.helper_company || match.parent_company || match.company || '';
-                const shortTitle = title.replace('Director', 'Dir').replace('Manager', 'Mgr').replace('Vice President', 'VP').split(' ').slice(0, 2).join(' ');
-                return (
-                  <div key={i} className="text-center max-w-[100px]">
-                    {photoUrl ? (
-                      <img 
-                        src={photoUrl} 
-                        alt={name}
-                        className="w-16 h-16 rounded-full object-cover shadow-lg mx-auto"
-                      />
-                    ) : (
-                      <div 
-                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg mx-auto"
-                        style={{ background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)` }}
-                      >
-                        {getInitials(name)}
-                      </div>
-                    )}
-                    <p className="text-sm font-medium text-gray-900 mt-2 truncate">{name.split(' ')[0]}</p>
-                    <p className="text-xs text-gray-500 truncate">{shortTitle}</p>
-                    <p className="text-xs text-gray-400 truncate">{company}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          
-          <p className="text-gray-600 mb-4 text-center">
-            These people are the best fit for what you need.
-          </p>
-          
-          <button
-            onClick={handleSeeMatches}
-            disabled={loading}
-            className="w-full py-4 text-white rounded-xl font-bold text-lg transition-all hover:scale-[1.02] shadow-lg disabled:opacity-50"
-            style={{ 
-              background: `linear-gradient(135deg, ${UF_BLUE} 0%, #003DCE 100%)`,
-              boxShadow: `0 4px 12px ${UF_BLUE}40`
-            }}
-          >
-            {loading ? 'Loading...' : `See Your Top 3 →`}
+          <button onClick={handleDashboard} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: 'none', background: orange, color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBottom: 12, minHeight: 'auto' }}>
+            Go to my dashboard →
+          </button>
+          <button onClick={handleDirectory} style={{ width: '100%', padding: '15px 0', borderRadius: 100, border: '0.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'rgba(244,240,232,0.6)', fontFamily: dmSans, fontSize: 15, fontWeight: 400, cursor: 'pointer', minHeight: 'auto' }}>
+            Browse the directory →
           </button>
         </div>
+      </div>
+    );
+  }
 
-        {/* Skip to dashboard link */}
-        <button
-          onClick={handleSkipToDashboard}
-          className="text-sm text-gray-500 hover:text-gray-700 underline"
-        >
-          or skip to your dashboard
-        </button>
+  return (
+    <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 24px' }}>
+      <style>{`
+        @keyframes celebShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        @keyframes celebFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+      `}</style>
+      <div style={{ maxWidth: 560, width: '100%', textAlign: 'center' }}>
+
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 5vw, 36px)',
+          color: '#f4f0e8', letterSpacing: '-0.02em', marginBottom: 8,
+          animation: 'celebFadeUp 0.5s ease both',
+        }}>
+          You're in, <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: orange }}>{firstName}.</span>
+        </h1>
+
+        <p style={{
+          fontFamily: dmSans, fontSize: 15, fontWeight: 300,
+          color: 'rgba(244,240,232,0.6)', marginBottom: 36,
+          animation: 'celebFadeUp 0.5s 0.1s ease both',
+        }}>
+          Your question is live. Here are the people best positioned to help you right now.
+        </p>
+
+        {/* Loading state */}
+        {loading && (
+          <div style={{ animation: 'celebFadeUp 0.5s 0.15s ease both' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.4)', marginBottom: 16 }}>
+              Finding your matches...
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
+              <ShimmerCard />
+              <ShimmerCard />
+              <ShimmerCard />
+            </div>
+          </div>
+        )}
+
+        {/* Loaded state */}
+        {!loading && (
+          <div style={{ animation: 'celebFadeUp 0.5s 0.15s ease both' }}>
+            {/* Match count */}
+            <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: orange, marginBottom: 24 }}>
+              {displayCount} {displayCount === 1 ? 'person' : 'people'} ready to help you
+            </p>
+
+            {/* Top 3 match cards */}
+            {validMatches.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+                {validMatches.slice(0, 3).map((match, i) => {
+                  const name = match.helper_name || match.parent_name || '';
+                  const role = match.parent_role || match.helper_title || '';
+                  const company = match.parent_company || match.helper_company || '';
+                  return (
+                    <div key={i} style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '0.5px solid rgba(255,255,255,0.1)',
+                      borderRadius: 14, padding: '14px 16px',
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      textAlign: 'left',
+                    }}>
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                        background: AVATAR_COLORS[i % AVATAR_COLORS.length],
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff',
+                      }}>
+                        {getInitials(name)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#f4f0e8', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {name}
+                        </p>
+                        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.5)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {[role, company].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Primary CTA */}
+            <button
+              onClick={handleSeeMatches}
+              style={{
+                width: '100%', padding: '15px 0', borderRadius: 100, border: 'none',
+                background: orange, color: '#fff',
+                fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+                cursor: 'pointer', minHeight: 'auto',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
+              onMouseLeave={e => e.currentTarget.style.background = orange}
+            >
+              See my matches →
+            </button>
+
+            {/* Secondary link */}
+            <button
+              onClick={handleDashboard}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+                color: 'rgba(244,240,232,0.4)', marginTop: 12,
+                display: 'block', width: 'auto', minHeight: 'auto',
+                margin: '12px auto 0',
+              }}
+            >
+              Go to my dashboard →
+            </button>
+
+            {/* FASTIQ upsell */}
+            <div style={{
+              marginTop: 32, background: 'rgba(232,93,32,0.08)',
+              border: '0.5px solid rgba(232,93,32,0.2)',
+              borderRadius: 12, padding: '14px 16px', textAlign: 'left',
+            }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', margin: 0, lineHeight: 1.6 }}>
+                FASTIQ can find UF alumni at your target companies — beyond the parents already here.
+              </p>
+              <button
+                onClick={() => navigate('FastIQ')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: orange, marginTop: 6, padding: 0, minHeight: 'auto', width: 'auto' }}
+              >
+                Learn about FASTIQ →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
