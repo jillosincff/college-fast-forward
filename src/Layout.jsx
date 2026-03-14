@@ -339,7 +339,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
   const allNavItems = useMemo(() => [
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
-        { name: 'Community', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
+        { name: 'Ask the Network', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
         { name: 'UF Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'parent', 'alumni'] },
         { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },

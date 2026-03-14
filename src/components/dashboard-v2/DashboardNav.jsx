@@ -8,7 +8,7 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const NAV_LINKS = [
   { label: 'Dashboard', page: 'Dashboard' },
-  { label: 'Community', page: 'Connections' },
+  { label: 'Ask the Network', page: 'Connections' },
   { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Messages', page: 'MyMessages' },
   { label: 'Pipeline', page: 'MyApplications' },

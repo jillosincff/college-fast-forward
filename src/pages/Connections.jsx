@@ -192,7 +192,7 @@ export default function ConnectionsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
-      <DashboardNav user={user} currentPage="Community" />
+      <DashboardNav user={user} currentPage="Ask the Network" />
 
       {/* Community tabs */}
       <div style={{ background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
