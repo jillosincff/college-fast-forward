@@ -54,11 +54,23 @@ export default function CelebrationScreen({ user }) {
 
   const loadMatches = async () => {
     try {
-      const studentMatches = await base44.entities.Match.filter(
-        { student_email: user?.email },
-        '-match_score',
-        50
-      );
+      // Try by student_id first (matches are generated with student_id, not always student_email)
+      let studentMatches = [];
+      if (user?.id) {
+        studentMatches = await base44.entities.Match.filter(
+          { student_id: user.id },
+          '-match_score',
+          50
+        );
+      }
+      // Fallback: try by student_email if no results
+      if ((!studentMatches || studentMatches.length === 0) && user?.email) {
+        studentMatches = await base44.entities.Match.filter(
+          { student_email: user.email },
+          '-match_score',
+          50
+        );
+      }
       setMatches(studentMatches || []);
     } catch (e) {
       console.error('Failed to load matches:', e);

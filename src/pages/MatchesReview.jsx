@@ -54,11 +54,22 @@ export default function MatchesReview() {
       // Fetch fresh from API (retry up to 3 times with delay for match generation)
       let studentMatches = [];
       for (let attempt = 0; attempt < 3; attempt++) {
-        studentMatches = await base44.entities.Match.filter(
-          { student_email: user?.email },
-          '-match_score',
-          50
-        );
+        // Try by student_id first (matches are generated with student_id, not always student_email)
+        if (user?.id) {
+          studentMatches = await base44.entities.Match.filter(
+            { student_id: user.id },
+            '-match_score',
+            50
+          );
+        }
+        // Fallback: try by student_email
+        if ((!studentMatches || studentMatches.length === 0) && user?.email) {
+          studentMatches = await base44.entities.Match.filter(
+            { student_email: user.email },
+            '-match_score',
+            50
+          );
+        }
         const filtered = filterValidMatches(studentMatches || []);
         if (filtered.length > 0) {
           setMatches(filtered);
