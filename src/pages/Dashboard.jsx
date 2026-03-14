@@ -11,6 +11,7 @@ import NextActionCard from '@/components/dashboard-v2/NextActionCard';
 import MatchesSectionV2 from '@/components/dashboard-v2/MatchesSection';
 import MessagesSectionV2 from '@/components/dashboard-v2/MessagesSection';
 import KarmaStrip from '@/components/dashboard-v2/KarmaStrip';
+import ParentInviteCard from '@/components/dashboard-v2/ParentInviteCard';
 import InviteParentModal from '@/components/dashboard/InviteParentModal';
 import LogIntroModal from '@/components/challenge/LogIntroModal';
 import NewUserWelcome from '@/components/dashboard/student/NewUserWelcome';
@@ -55,6 +56,7 @@ export default function Dashboard() {
   const [matches, setMatches] = useState([]);
   const [myActiveQuestions, setMyActiveQuestions] = useState(0);
   const [fastiqStats, setFastiqStats] = useState({ newOpportunities: 0, newAlumni: 0 });
+  const [linkedParents, setLinkedParents] = useState([]);
   const loadStartedRef = useRef(false);
 
   useEffect(() => { ensureFonts(); ensureKeyframes(); }, []);
@@ -144,6 +146,13 @@ export default function Dashboard() {
           });
         }
       } catch (e) { /* non-critical */ }
+
+      // Linked parents
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+        const result = await Promise.race([base44.functions.invoke('getLinkedParents', {}), timeout]);
+        if (result.data?.parents) setLinkedParents(result.data.parents);
+      } catch (e) { /* non-critical */ }
     } catch (error) {
       console.error('Dashboard data load error:', error);
     } finally {
@@ -210,13 +219,18 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Section 3: Messages */}
+        {/* Section 3: Parent Invite */}
         <div className="dash-fade" style={{ animationDelay: '0.2s', marginBottom: 20 }}>
+          <ParentInviteCard user={user} linkedParents={linkedParents} onInviteParent={() => setShowInviteModal(true)} />
+        </div>
+
+        {/* Section 4: Messages */}
+        <div className="dash-fade" style={{ animationDelay: '0.26s', marginBottom: 20 }}>
           <MessagesSectionV2 messages={messages} />
         </div>
 
-        {/* Section 4: Karma */}
-        <div className="dash-fade" style={{ animationDelay: '0.26s', marginBottom: 20 }}>
+        {/* Section 5: Karma */}
+        <div className="dash-fade" style={{ animationDelay: '0.32s', marginBottom: 20 }}>
           <KarmaStrip user={user} />
         </div>
       </div>
