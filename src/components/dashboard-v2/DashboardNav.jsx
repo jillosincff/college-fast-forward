@@ -64,7 +64,7 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
         {/* Desktop links */}
         <div className="hidden md:flex" style={{ gap: 24, display: 'flex', alignItems: 'center' }}>
           {NAV_LINKS.map(l => {
-            const active = l.page === currentPage;
+            const active = l.page === currentPage || l.label === currentPage;
             return (
               <button key={l.page} onClick={() => navigate(l.page)} style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
