@@ -37,11 +37,14 @@ export default function LandingHero({ stats, onClaim }) {
           transition={{ delay: 0.16 }}
           className="max-w-2xl mx-auto mb-16 px-2 space-y-4"
         >
-          <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65] font-medium">
-            CFF is the private UF network where parents and alumni pledged to help each other's kids — real introductions, advice, and connections that change trajectories.
+          <p className="text-white text-[18px] sm:text-[20px] leading-[1.65] font-semibold">
+            They say job searching is a numbers game. We don't play games when it comes to our kids.
           </p>
           <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65]">
-            FASTIQ is the AI engine that actually makes it happen: finds real UF grads already inside target companies, writes the messages your kid can send today, and tracks progress so you both see results instead of stress.
+            Research shows 70–85% of jobs are filled through networking (LinkedIn, BLS) — not cold applications. CFF is the private UF network where parents and alumni pledged to help each other's kids.
+          </p>
+          <p className="text-[#E5E7EB] text-[18px] sm:text-[20px] leading-[1.65]">
+            FASTIQ is the AI engine that actually delivers: finds real UF grads already inside target companies, drafts highly-responsive messages to them, and gets your kid in the door — instantly.
           </p>
         </motion.div>
 

@@ -30,6 +30,9 @@ export default function LandingPainFastIQ({ onFastIQ }) {
             <p className="text-slate-700 text-[18px] sm:text-[20px] leading-[1.7] font-medium">
               They apply to 200+ jobs. AI rejects 98%. No callbacks. Friends get "connection" interviews while they get silence.
             </p>
+            <p className="text-slate-700 text-[18px] sm:text-[20px] leading-[1.7] mt-4">
+              Referrals are the #1 source of hires (Jobvite). Students don't lack opportunity — they lack access to the networks where opportunities live.
+            </p>
             <p className="text-slate-900 text-[18px] sm:text-[20px] leading-[1.7] font-bold mt-5">
               A perfect resume means nothing without a warm connection.{' '}
               <span className="text-[#FA4616]">FASTIQ changes that.</span>
@@ -51,7 +54,7 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <span className="text-[11px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
             <p className="text-slate-900 text-[20px] sm:text-[22px] leading-[1.55] font-bold max-w-2xl mx-auto">
-              FASTIQ finds real UF grads already inside your target companies, messages them for you, and gets their foot in the door — bypassing thousands of other cold applicants.
+              FASTIQ finds real UF grads already inside your target companies, drafts highly-responsive messages to them, and gets your kid in the door — bypassing thousands of other cold applicants.
             </p>
           </motion.div>
 
