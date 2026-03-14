@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: 'Community', page: 'Connections' },
   { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Messages', page: 'MyMessages' },
-  { label: 'Opportunities', page: 'Opportunities' },
+  { label: 'Pipeline', page: 'MyApplications' },
 ];
 
 export default function DashboardNav({ user, currentPage = 'Dashboard' }) {

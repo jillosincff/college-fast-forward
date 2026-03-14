@@ -687,7 +687,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     <DropdownMenuLabel>{user?.full_name || user?.email || 'My Account'}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onNavigate('Profile')}><UserIcon className="mr-2 h-4 w-4" />Profile</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onNavigate('MyApplications')}><FileText className="mr-2 h-4 w-4" />My Applications</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onNavigate('MyApplications')}><FileText className="mr-2 h-4 w-4" />My Pipeline</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyRequests')}><FileText className="mr-2 h-4 w-4" />My Requests</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyMessages')}><MessageSquare className="mr-2 h-4 w-4" />My Messages</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('Favorites')}><Bookmark className="mr-2 h-4 w-4" />My Favorites</DropdownMenuItem>
@@ -1398,7 +1398,7 @@ function AppContent() {
   const PageComponent = getPageComponent(resolvedPage);
   // Show header for all authenticated pages except onboarding/auth flows
   // Hide layout header on pages that render their own nav (Dashboard v2)
-  const pagesWithOwnNav = ['Dashboard', 'Profile'];
+  const pagesWithOwnNav = ['Dashboard', 'Profile', 'MyApplications'];
   const showHeader = user && 
                      resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
