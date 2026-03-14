@@ -104,6 +104,7 @@ export default function LandingHowItWorks({ onClaim }) {
   return (
     <section
       ref={sectionRef}
+      className="landing-hiw"
       style={{
         background: '#0d1117',
         padding: '72px 24px 80px',
@@ -111,6 +112,16 @@ export default function LandingHowItWorks({ onClaim }) {
         overflow: 'hidden',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-hiw { padding: 56px 24px !important; }
+          .hiw-tabs { flex-direction: column !important; }
+          .hiw-tabs button { min-width: 100% !important; }
+          .hiw-cards-grid { grid-template-columns: 1fr !important; }
+          .hiw-stats-row { flex-direction: column !important; gap: 16px !important; }
+          .hiw-stats-row .hiw-stat-sep { display: none !important; }
+        }
+      `}</style>
       {/* glow */}
       <div
         aria-hidden
@@ -146,7 +157,7 @@ export default function LandingHowItWorks({ onClaim }) {
         </div>
 
         {/* ── tabs ────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 44, flexWrap: 'wrap', ...fadeUp(0.15) }}>
+        <div className="hiw-tabs" style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 44, flexWrap: 'wrap', ...fadeUp(0.15) }}>
           {TABS.map((t) => (
             <TabButton key={t.id} tab={t} active={activeTab === t.id} onClick={() => switchTab(t.id)} />
           ))}
@@ -162,11 +173,11 @@ export default function LandingHowItWorks({ onClaim }) {
 /* ── stats row ────────────────────────────────────── */
 function StatsRow() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap', alignItems: 'center' }}>
+    <div className="hiw-stats-row" style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap', alignItems: 'center' }}>
       {STATS.map((s, i) => (
         <React.Fragment key={s.number}>
           {i > 0 && (
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0 }} />
+            <div className="hiw-stat-sep" style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0 }} />
           )}
           <div style={{ textAlign: 'center', padding: '4px 0' }}>
             <div style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#E85D20', lineHeight: 1 }}>{s.number}</div>
@@ -273,7 +284,7 @@ function PanelContent({ panel, onClaim }) {
       )}
 
       {/* cards grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 16 }}>
+      <div className="hiw-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 16 }}>
         {panel.cards.map((c, i) => (
           <div
             key={c.title}

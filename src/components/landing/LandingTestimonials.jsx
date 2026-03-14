@@ -69,6 +69,7 @@ export default function LandingTestimonials({ onClaim }) {
   return (
     <section
       ref={sectionRef}
+      className="landing-testimonials"
       style={{
         background: '#0d1117',
         padding: '72px 48px 80px',
@@ -76,6 +77,12 @@ export default function LandingTestimonials({ onClaim }) {
         position: 'relative',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-testimonials { padding: 56px 24px !important; }
+          .testimonial-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       {/* radial glow */}
       <div
         aria-hidden
@@ -133,7 +140,7 @@ export default function LandingTestimonials({ onClaim }) {
       </div>
 
       {/* ── cards grid ────────────────────────────── */}
-      <div
+      <div className="testimonial-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',

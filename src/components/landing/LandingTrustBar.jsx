@@ -10,7 +10,7 @@ const ITEMS = [
 
 export default function LandingTrustBar() {
   return (
-    <div
+    <div className="landing-trust-bar"
       style={{
         display: 'flex',
         flexDirection: 'row',
@@ -24,30 +24,27 @@ export default function LandingTrustBar() {
         padding: '16px 40px',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-trust-bar {
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 16px 24px !important;
+          }
+          .landing-trust-bar .trust-sep { display: none !important; }
+          .landing-trust-bar .trust-text { font-size: 12px !important; }
+        }
+      `}</style>
       {ITEMS.map((text, i) => (
         <React.Fragment key={text}>
           {i > 0 && (
-            <div
-              style={{
-                width: 1,
-                height: 16,
-                background: 'rgba(255,255,255,0.08)',
-                flexShrink: 0,
-              }}
+            <div className="trust-sep"
+              style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }}
             />
           )}
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <div
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                background: '#E85D20',
-                opacity: 0.7,
-                flexShrink: 0,
-              }}
-            />
-            <span
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20', opacity: 0.7, flexShrink: 0 }} />
+            <span className="trust-text"
               style={{
                 fontFamily: "'DM Sans', system-ui, sans-serif",
                 fontSize: 13,

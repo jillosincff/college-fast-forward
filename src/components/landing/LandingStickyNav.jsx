@@ -28,7 +28,14 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
         transition: 'transform 0.3s ease',
       }}
     >
-      <div
+      <style>{`
+        @media (max-width: 768px) {
+          .sticky-nav-wrap { padding: 12px 16px !important; }
+          .sticky-nav-signin { display: none !important; }
+          .sticky-nav-trust { display: none !important; }
+        }
+      `}</style>
+      <div className="sticky-nav-wrap"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -42,9 +49,8 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
           College Fast Forward
         </span>
 
-        {/* Center — trust snippet (hidden on mobile) */}
-        <span
-          className="hidden md:block"
+        {/* Center — trust snippet */}
+        <span className="sticky-nav-trust"
           style={{
             fontFamily: dmSans,
             fontSize: 13,
@@ -58,7 +64,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
 
         {/* Right — buttons */}
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <button
+          <button className="sticky-nav-signin"
             onClick={onSignIn}
             style={{
               fontFamily: dmSans,

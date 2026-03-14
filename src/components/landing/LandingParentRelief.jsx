@@ -46,6 +46,7 @@ export default function LandingParentRelief({ onCTA }) {
   return (
     <section
       ref={sectionRef}
+      className="landing-parent-relief"
       style={{
         background: '#0d1117',
         padding: '80px 48px 88px',
@@ -53,6 +54,13 @@ export default function LandingParentRelief({ onCTA }) {
         overflow: 'hidden',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-parent-relief { padding: 56px 24px !important; }
+          .pr-stats-row { flex-direction: column !important; gap: 16px !important; }
+          .pr-stats-row .pr-stat-sep { display: none !important; }
+        }
+      `}</style>
       {/* radial glow */}
       <div
         aria-hidden
@@ -145,11 +153,11 @@ export default function LandingParentRelief({ onCTA }) {
         </div>
 
         {/* trust signals row */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap', alignItems: 'center', marginBottom: 44, ...fadeUp(0.28) }}>
+        <div className="pr-stats-row" style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap', alignItems: 'center', marginBottom: 44, ...fadeUp(0.28) }}>
           {STATS.map((s, i) => (
             <React.Fragment key={s.number}>
               {i > 0 && (
-                <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0, alignSelf: 'center' }} />
+                <div className="pr-stat-sep" style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0, alignSelf: 'center' }} />
               )}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#E85D20', lineHeight: 1 }}>{s.number}</span>

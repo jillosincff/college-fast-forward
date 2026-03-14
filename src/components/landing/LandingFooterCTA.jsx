@@ -42,6 +42,7 @@ export default function LandingFooterCTA({ stats, onClaim }) {
       {/* Pre-footer conversion block */}
       <section
         ref={ref}
+        className="landing-footer-cta"
         style={{
           background: '#0d1117',
           borderTop: '0.5px solid rgba(255,255,255,0.08)',
@@ -49,8 +50,17 @@ export default function LandingFooterCTA({ stats, onClaim }) {
           textAlign: 'center',
         }}
       >
+        <style>{`
+          @media (max-width: 768px) {
+            .landing-footer-cta { padding: 56px 24px !important; }
+            .landing-footer-cta .footer-cta-headline { font-size: clamp(26px, 6vw, 36px) !important; }
+            .footer-cta-grid { flex-direction: column-reverse !important; width: 100% !important; }
+            .footer-cta-grid > * { width: 100% !important; }
+            .landing-footer-links { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; padding: 24px 24px !important; }
+          }
+        `}</style>
         {/* Headline */}
-        <h2
+        <h2 className="footer-cta-headline"
           style={{
             fontFamily: playfair,
             fontWeight: 700,
@@ -85,7 +95,7 @@ export default function LandingFooterCTA({ stats, onClaim }) {
         </p>
 
         {/* CTA grid */}
-        <div
+        <div className="footer-cta-grid"
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -116,7 +126,7 @@ export default function LandingFooterCTA({ stats, onClaim }) {
       </section>
 
       {/* Standard footer links */}
-      <footer
+      <footer className="landing-footer-links"
         style={{
           background: '#080c10',
           padding: '24px 48px',

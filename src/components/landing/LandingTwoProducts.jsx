@@ -54,6 +54,7 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
   return (
     <section
       ref={ref}
+      className="landing-two-products"
       style={{
         background: '#0d1117',
         padding: '80px 24px 88px',
@@ -61,6 +62,14 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
         overflow: 'hidden',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-two-products { padding: 56px 24px !important; }
+          .tp-grid { grid-template-columns: 1fr !important; }
+          .tp-connector-circle { display: none !important; }
+          .tp-connector-line { display: block !important; }
+        }
+      `}</style>
       {/* dual glow */}
       <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 60% at 25% 50%, rgba(255,255,255,0.02), transparent), radial-gradient(ellipse 60% 60% at 75% 50%, rgba(232,93,32,0.06), transparent)' }} />
 
@@ -85,13 +94,16 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
         </div>
 
         {/* cards grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, maxWidth: 900, margin: '0 auto 52px', position: 'relative' }}>
+        <div className="tp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, maxWidth: 900, margin: '0 auto 52px', position: 'relative' }}>
 
-          {/* center connector */}
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 36, height: 36, borderRadius: '50%', background: '#0d1117', border: '0.5px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'rgba(244,240,232,0.3)', zIndex: 2, lineHeight: 1 }}>+</div>
+          {/* center connector (desktop) */}
+          <div className="tp-connector-circle" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 36, height: 36, borderRadius: '50%', background: '#0d1117', border: '0.5px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'rgba(244,240,232,0.3)', zIndex: 2, lineHeight: 1 }}>+</div>
 
           {/* left card */}
           <NetworkCard features={NETWORK_FEATURES} onClaim={onClaim} style={fadeUp(0.14)} />
+
+          {/* mobile divider */}
+          <div className="tp-connector-line" style={{ display: 'none', height: '0.5px', background: 'rgba(255,255,255,0.08)' }} />
 
           {/* right card */}
           <FastIQCard features={FASTIQ_FEATURES} onClaim={onFastIQ || onClaim} style={fadeUp(0.22)} />
