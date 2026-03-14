@@ -1397,7 +1397,7 @@ function AppContent() {
   const PageComponent = getPageComponent(resolvedPage);
   // Show header for all authenticated pages except onboarding/auth flows
   // Hide layout header on pages that render their own nav (Dashboard v2)
-  const pagesWithOwnNav = ['Dashboard', 'Profile', 'MyApplications'];
+  const pagesWithOwnNav = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests'];
   const showHeader = user && 
                      resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
