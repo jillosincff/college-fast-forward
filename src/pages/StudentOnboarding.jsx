@@ -139,12 +139,13 @@ export default function StudentOnboarding() {
       
       await base44.auth.updateMe(updateData);
 
-      // Post the help request to All Questions (REQUIRED now)
-      // Include student academic info for rich display on QuestionCard
+      // Post the help request to All Questions (skip if student chose to skip)
+      const skipped = helpRequest === '__SKIP__';
       const nameParts = (user?.full_name || 'Student').trim().split(/\s+/);
       const firstName = nameParts[0] || 'Student';
       const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
       
+      if (!skipped) {
       const fullDescription = helpRequest.trim() + (questionContext.trim() ? '\n\n' + questionContext.trim() : '');
       const jobRequestData = {
         role: 'Student Question',
@@ -173,6 +174,7 @@ export default function StudentOnboarding() {
       };
       
       await JobRequest.create(jobRequestData);
+      } // end if (!skipped)
 
       // Create ActivationPrompt for tracking first meaningful action
       // Student just posted a question during onboarding — that counts as activation
