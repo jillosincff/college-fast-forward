@@ -99,10 +99,33 @@ export default function MatchesSectionV2({ matches, user, onMessageMatch }) {
     m.status === 'student_connected' || m.status === 'intro_made'
   ).length;
 
-  // Filter out incomplete profiles, limit to 3
+  // Filter out current user and incomplete profiles, deduplicate, limit to 3
+  const userEmail = user?.email?.toLowerCase();
+  const userId = user?.id;
+  const seen = new Set();
   const visible = (matches || [])
-    .filter(m => (m.parent_name || m.peer_name) && (m.parent_name || m.peer_name) !== 'UF Professional')
+    .filter(m => {
+      // Exclude self-matches
+      if (m.parent_email?.toLowerCase() === userEmail || m.peer_email?.toLowerCase() === userEmail) return false;
+      if (m.parent_id === userId || m.peer_id === userId) return false;
+      // Exclude incomplete profiles
+      const name = m.parent_name || m.peer_name;
+      if (!name || name === 'UF Professional') return false;
+      // Deduplicate by email
+      const key = (m.parent_email || m.peer_email || m.id)?.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
     .slice(0, 3);
+
+  // Count all valid (non-self) matches for the header
+  const totalValid = (matches || []).filter(m => {
+    if (m.parent_email?.toLowerCase() === userEmail || m.peer_email?.toLowerCase() === userEmail) return false;
+    if (m.parent_id === userId || m.peer_id === userId) return false;
+    const name = m.parent_name || m.peer_name;
+    return name && name !== 'UF Professional';
+  }).length;
 
   if (visible.length === 0) return null;
 
@@ -111,7 +134,7 @@ export default function MatchesSectionV2({ matches, user, onMessageMatch }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#1a1a1a' }}>
-          {matches.length} people ready to help you
+          {totalValid} people ready to help you
         </span>
         <button onClick={() => navigate('MyMatches')} style={{
           background: 'none', border: 'none', cursor: 'pointer',

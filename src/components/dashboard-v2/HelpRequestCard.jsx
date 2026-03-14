@@ -48,22 +48,25 @@ function EmptyState() {
 
 export default function HelpRequestCard({ helpRequest, user }) {
   const [latestReply, setLatestReply] = useState(null);
+  const [replyCount, setReplyCount] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (!helpRequest) return;
-    loadLatestReply();
+    loadReplies();
   }, [helpRequest?.id]);
 
-  const loadLatestReply = async () => {
+  const loadReplies = async () => {
     if (!helpRequest?.id) return;
     const isJob = helpRequest.role !== undefined;
     try {
       if (isJob) {
-        const answers = await base44.entities.JobAnswer.filter({ job_request_id: helpRequest.id }, '-created_date', 1);
+        const answers = await base44.entities.JobAnswer.filter({ job_request_id: helpRequest.id }, '-created_date', 50);
+        setReplyCount(answers?.length || 0);
         if (answers?.[0]) setLatestReply(answers[0]);
       } else {
-        const answers = await base44.entities.Answer.filter({ question_id: helpRequest.id }, '-created_date', 1);
+        const answers = await base44.entities.Answer.filter({ question_id: helpRequest.id }, '-created_date', 50);
+        setReplyCount(answers?.length || 0);
         if (answers?.[0]) setLatestReply(answers[0]);
       }
     } catch { /* non-critical */ }
@@ -82,7 +85,8 @@ export default function HelpRequestCard({ helpRequest, user }) {
   const isJob = helpRequest?.role !== undefined;
   const questionText = helpRequest?.description || '';
   const postedAgo = helpRequest?.created_date ? moment(helpRequest.created_date).fromNow() : '';
-  const responseCount = (helpRequest?.answer_count || helpRequest?.offers_count || 0);
+  // Use live reply count from our query, fallback to entity counts
+  const responseCount = replyCount || helpRequest?.answer_count || helpRequest?.offers_count || 0;
   const viewCount = (helpRequest?.view_count || helpRequest?.views_count || 0);
   const isActive = helpRequest?.status === 'active';
 
