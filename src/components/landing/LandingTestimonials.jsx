@@ -1,82 +1,403 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 
-const fade = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
-
-const quotes = [
+const CARDS = [
   {
-    text: "I was a wreck every time I called. FASTIQ found 5 UF alumni at places he wanted — he sent the messages and has two interviews. I finally slept.",
-    name: "Karen",
-    label: "UF Mom",
+    type: 'student',
+    quote: 'I spent weeks messaging people on LinkedIn and literally got no replies. I messaged 8 people on FASTIQ and 6 of them got right back to me. Total game-changer.',
+    stat: { number: '6 of 8', label: 'replied' },
+    initial: 'T',
+    name: 'Tyler B.',
+    role: 'UF Senior · Business',
   },
   {
-    text: "My daughter was paralyzed about internships. This thing wrote everything. She has coffee chats lined up now — and I'm not panicking anymore.",
-    name: "Mike",
-    label: "UF Dad",
+    type: 'student',
+    quote: 'Honestly, I had no clue how to start my job search. I reached out to several parents on here and they went out of their way to talk to me. It was actually incredible.',
+    stat: null,
+    initial: 'S',
+    name: 'Sofia L.',
+    role: 'UF Junior · Communications',
   },
   {
-    text: "My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own.",
-    name: "Dana G.",
-    label: "UF Parent",
+    type: 'parent',
+    quote: 'My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own. Worth every penny.',
+    stat: null,
+    initial: 'D',
+    name: 'Dana G.',
+    role: 'UF Parent',
   },
 ];
 
+/* ── fonts (loaded once) ───────────────────────────── */
+const FONT_LINK_ID = 'testimonials-fonts';
+function ensureFonts() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_LINK_ID)) return;
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href =
+    'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+  document.head.appendChild(link);
+}
+
+/* ── shared font stacks ────────────────────────────── */
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+/* ── component ─────────────────────────────────────── */
 export default function LandingTestimonials({ onClaim }) {
+  const sectionRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    ensureFonts();
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.15 },
+    );
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const fadeUp = (delay) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? 'translateY(0)' : 'translateY(16px)',
+    transition: `opacity 0.55s ease ${delay}s, transform 0.55s ease ${delay}s`,
+  });
+
   return (
-    <section className="py-44 sm:py-56 px-4" style={{ background: 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)' }}>
-      <div className="max-w-3xl mx-auto">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }}
-          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-          className="text-center"
+    <section
+      ref={sectionRef}
+      style={{
+        background: '#0d1117',
+        padding: '72px 48px 80px',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      {/* radial glow */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: '-100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 700,
+          height: 400,
+          background: 'radial-gradient(ellipse at center, rgba(220,85,30,0.07), transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── headline ──────────────────────────────── */}
+      <div style={{ textAlign: 'center', marginBottom: 52, position: 'relative', ...fadeUp(0) }}>
+        <h2
+          style={{
+            fontFamily: playfair,
+            fontWeight: 700,
+            fontSize: 'clamp(36px, 5vw, 52px)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+            margin: 0,
+          }}
         >
-          <motion.h2 variants={fade} className="text-[28px] sm:text-4xl md:text-[48px] font-black text-white mb-16 tracking-tight leading-[1.1]">
-            Real Parents.{' '}
-            <span className="text-[#FA4616]">Real Results.</span>
-          </motion.h2>
+          <span style={{ color: '#f4f0e8' }}>One Intro </span>
+          <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>
+            Changed Everything.
+          </span>
+        </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16">
-            {quotes.map((q) => (
-              <motion.div
-                key={q.name}
-                variants={fade}
-                className="border rounded-2xl p-6 text-left transition-all duration-300 hover:border-[#FA4616]/25"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: '0 0 30px rgba(250,70,22,0.05), inset 0 1px 0 rgba(255,255,255,0.06)',
-                }}
-              >
-                <p className="text-white text-[16px] sm:text-[17px] leading-[1.6] italic mb-5">"{q.text}"</p>
-                <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-full bg-[#FA4616]/20 flex items-center justify-center text-[#FA4616] text-xs font-bold">{q.name[0]}</span>
-                  <span className="text-white text-sm font-semibold">{q.name}</span>
-                  <span className="text-white/40 text-xs">· {q.label}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <div
+          style={{
+            width: 40,
+            height: 2,
+            background: '#E85D20',
+            borderRadius: 1,
+            margin: '18px auto 0',
+          }}
+        />
 
-          {/* CTA */}
-          <motion.div variants={fade}>
-            <button
-              onClick={onClaim}
-              className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-                boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-              }}
-            >
-              Join These Families
-              <ArrowRight className="w-5 h-5 ml-2 inline" />
-            </button>
-          </motion.div>
-        </motion.div>
+        <p
+          style={{
+            fontFamily: dmSans,
+            fontSize: 15,
+            fontWeight: 300,
+            color: 'rgba(244,240,232,0.4)',
+            marginTop: 16,
+          }}
+        >
+          From students who got unstuck — and the parents who made it happen.
+        </p>
+      </div>
+
+      {/* ── cards grid ────────────────────────────── */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: 20,
+          marginBottom: 52,
+          position: 'relative',
+        }}
+      >
+        {CARDS.map((c, i) => (
+          <Card key={c.name} card={c} style={fadeUp(0.1 + i * 0.1)} />
+        ))}
+      </div>
+
+      {/* ── CTA ───────────────────────────────────── */}
+      <div style={{ textAlign: 'center', ...fadeUp(0.42) }}>
+        <button
+          onClick={onClaim}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#d44e14';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            const arrow = e.currentTarget.querySelector('.cta-arrow');
+            if (arrow) arrow.style.transform = 'translateX(3px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#E85D20';
+            e.currentTarget.style.transform = 'translateY(0)';
+            const arrow = e.currentTarget.querySelector('.cta-arrow');
+            if (arrow) arrow.style.transform = 'translateX(0)';
+          }}
+          style={{
+            fontFamily: dmSans,
+            fontSize: 16,
+            fontWeight: 500,
+            color: '#fff',
+            background: '#E85D20',
+            borderRadius: 100,
+            padding: '16px 40px',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'background 0.2s ease, transform 0.15s ease',
+            minHeight: 'auto',
+            minWidth: 'auto',
+            width: 'auto',
+          }}
+        >
+          Join These Families
+          <svg
+            className="cta-arrow"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            style={{ transition: 'transform 0.15s ease' }}
+          >
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
     </section>
+  );
+}
+
+/* ── single card ──────────────────────────────────── */
+function Card({ card, style }) {
+  const isStudent = card.type === 'student';
+
+  return (
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        border: '0.5px solid rgba(255,255,255,0.10)',
+        borderRadius: 16,
+        padding: '28px 26px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        transition: 'background 0.25s, border-color 0.25s',
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+        e.currentTarget.style.borderColor = 'rgba(232,93,32,0.35)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)';
+      }}
+    >
+      <div>
+        {/* badge */}
+        <Badge type={card.type} />
+
+        {/* decorative quote mark */}
+        <span
+          style={{
+            fontFamily: playfair,
+            fontSize: 56,
+            lineHeight: 0.5,
+            color: '#E85D20',
+            opacity: 0.4,
+            display: 'block',
+            marginBottom: 10,
+            userSelect: 'none',
+          }}
+        >
+          &ldquo;
+        </span>
+
+        {/* quote text */}
+        <p
+          style={{
+            fontFamily: isStudent ? dmSans : playfair,
+            fontSize: isStudent ? 15.5 : 16,
+            fontWeight: isStudent ? 400 : 400,
+            fontStyle: isStudent ? 'normal' : 'italic',
+            color: '#ddd8cc',
+            lineHeight: 1.7,
+            margin: 0,
+          }}
+        >
+          {card.quote}
+        </p>
+
+        {/* stat badge (card 1 only) */}
+        {card.stat && (
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: 6,
+              background: 'rgba(232,93,32,0.1)',
+              border: '0.5px solid rgba(232,93,32,0.25)',
+              borderRadius: 8,
+              padding: '7px 12px',
+              marginTop: 14,
+              marginBottom: 20,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: playfair,
+                fontSize: 22,
+                fontWeight: 700,
+                color: '#E85D20',
+                lineHeight: 1,
+              }}
+            >
+              {card.stat.number}
+            </span>
+            <span
+              style={{
+                fontFamily: dmSans,
+                fontSize: 12,
+                fontWeight: 400,
+                color: 'rgba(232,93,32,0.8)',
+              }}
+            >
+              {card.stat.label}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* footer */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 11,
+          alignItems: 'center',
+          borderTop: '0.5px solid rgba(255,255,255,0.08)',
+          paddingTop: 18,
+          marginTop: card.stat ? 0 : 20,
+        }}
+      >
+        {/* avatar */}
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            background: isStudent ? '#E85D20' : '#3a3a3a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: dmSans,
+            fontSize: 13,
+            fontWeight: 500,
+            color: '#fff',
+            flexShrink: 0,
+          }}
+        >
+          {card.initial}
+        </div>
+
+        <div>
+          <span
+            style={{
+              fontFamily: dmSans,
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#f4f0e8',
+              display: 'block',
+              lineHeight: 1.3,
+            }}
+          >
+            {card.name}
+          </span>
+          <span
+            style={{
+              fontFamily: dmSans,
+              fontSize: 12,
+              fontWeight: 300,
+              color: 'rgba(244,240,232,0.4)',
+              letterSpacing: '0.02em',
+              display: 'block',
+              lineHeight: 1.4,
+            }}
+          >
+            {card.role}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── badge pill ───────────────────────────────────── */
+function Badge({ type }) {
+  const isStudent = type === 'student';
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        borderRadius: 100,
+        padding: '4px 10px',
+        fontFamily: dmSans,
+        fontSize: 11,
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+        marginBottom: 18,
+        width: 'fit-content',
+        background: isStudent ? 'rgba(232,93,32,0.12)' : 'rgba(255,255,255,0.07)',
+        color: isStudent ? '#E85D20' : 'rgba(244,240,232,0.55)',
+        border: isStudent
+          ? '0.5px solid rgba(232,93,32,0.3)'
+          : '0.5px solid rgba(255,255,255,0.15)',
+      }}
+    >
+      <span
+        style={{
+          width: 5,
+          height: 5,
+          borderRadius: '50%',
+          background: 'currentColor',
+          opacity: 0.8,
+        }}
+      />
+      {type === 'student' ? 'Student' : 'Parent'}
+    </div>
   );
 }
