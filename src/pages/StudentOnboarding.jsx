@@ -575,226 +575,80 @@ export default function StudentOnboarding() {
     );
   }
 
-  // STEP 3: Help Request (REQUIRED) + Resume Upload
+  // STEP 3: Ask First Question (new category-first flow with inspiration chips)
   return (
     <OnboardingLayout
       currentStep={3}
       totalSteps={3}
       onNext={handleFinish}
       onBack={handleBack}
-      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : (matchCount ? `See ${matchCount} people who can help →` : 'Find My Matches →')}
+      nextLabel={loading ? (resumeUploading ? 'Uploading resume...' : 'Finding matches...') : 'Post my question →'}
       nextDisabled={!isStep3Valid || loading}
     >
-      <div className="max-w-lg mx-auto">
-        
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="text-4xl mb-3">🎯</div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">
-            What do you need help with?
-          </h1>
-          <p className="text-slate-600">
-            This is how parents and alumni find you!
-          </p>
-          <p className="text-slate-500 text-sm mt-1">
-            Your request will appear in the community feed where people can offer advice and connections.
-          </p>
-        </div>
+      <AskFirstQuestion
+        question={helpRequest}
+        onQuestionChange={setHelpRequest}
+        category={questionCategory}
+        onCategoryChange={setQuestionCategory}
+        context={questionContext}
+        onContextChange={setQuestionContext}
+        location={preferredLocation}
+        onLocationChange={setPreferredLocation}
+        timeline={targetTimeline}
+        onTimelineChange={setTargetTimeline}
+      />
 
-        <div className="space-y-6">
-          
-          {/* Help Categories */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">
-              What kind of help do you need? <span className="text-slate-400 font-normal">(select all that apply)</span>
-            </label>
-            <ChipSelector
-              options={STUDENT_HELP_NEEDED}
-              selected={helpNeeded}
-              onChange={setHelpNeeded}
-              multiple={true}
-              columns={1}
-            />
-          </div>
-
-          {/* Location and Timeline Row - Both Optional */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Preferred Location */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Where are you looking to work? <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={preferredLocation}
-                onChange={(e) => setPreferredLocation(e.target.value)}
-                placeholder="e.g., NYC, Remote, Anywhere"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none"
-                maxLength={100}
-              />
-            </div>
-
-            {/* Timeline */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                When do you want to start? <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <select
-                value={targetTimeline}
-                onChange={(e) => setTargetTimeline(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                         focus:border-[#0021A5] focus:outline-none bg-white"
-              >
-                {TIMELINE_OPTIONS.map(opt => (
-                  <option key={opt.id} value={opt.id}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          {/* Helpful tip for non-job-seekers */}
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3 text-sm text-blue-700">
-            💡 <span className="font-medium">Not job hunting yet?</span> No problem — you can still get career advice, resume feedback, and industry insights.
-          </div>
-
-          {/* Help Request - REQUIRED */}
-          <div className="bg-gradient-to-r from-blue-50 to-orange-50 border-2 border-[#0021A5] rounded-2xl p-4 shadow-sm">
-            <label className="block text-sm font-bold text-[#0021A5] mb-2">
-              ⭐ Tell us what you're looking for: <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              value={helpRequest}
-              onChange={(e) => setHelpRequest(e.target.value)}
-              placeholder={`Be specific! The more detail, the better help you'll get.
-
-e.g., "I'm a junior marketing major looking for summer internships in tech. I'd love advice on breaking into product marketing and help with my resume."`}
-              className={`
-                w-full px-4 py-4 border-2 rounded-xl text-base
-                resize-none h-36 focus:outline-none transition-colors
-                ${helpRequest.trim().length < 20 
-                  ? 'border-slate-200 focus:border-[#0021A5]' 
-                  : 'border-green-300 focus:border-green-500 bg-green-50/50'
-                }
-              `}
-              maxLength={500}
-            />
-            <div className="flex justify-between items-center mt-2">
-              <p className={`text-xs ${helpRequest.trim().length < 20 ? 'text-amber-600' : 'text-green-600 font-medium'}`}>
-                {helpRequest.trim().length < 20 
-                  ? `Please write at least 20 characters (${helpRequest.trim().length}/20)` 
-                  : '✓ Looks good!'
-                }
-              </p>
-              <p className="text-xs text-slate-400">{helpRequest.length}/500</p>
-            </div>
-          </div>
-
-          {/* Clickable Examples */}
-          <div>
-            <p className="text-xs text-slate-500 mb-2">💡 Click an example to get started:</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setHelpRequest("I'm a junior studying " + (major || "[major]") + " and looking for summer internships in " + (industries[0] || "[industry]") + ". I'd love advice on how to stand out and any connections in the field.")}
-                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
-              >
-                → "I'm looking for internships and want advice on how to stand out..."
-              </button>
-              <button
-                type="button"
-                onClick={() => setHelpRequest("I'm graduating in " + (gradYear || "[year]") + " and have two job offers - one pays more but the other has better growth potential. I could really use advice from someone who's been in this situation.")}
-                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
-              >
-                → "I have two job offers and need help deciding..."
-              </button>
-              <button
-                type="button"
-                onClick={() => setHelpRequest("I'm interested in " + (industries[0] || "consulting") + " but not sure how to break in. I'd love to connect with someone who works in the field and learn about different career paths.")}
-                className="text-left text-xs text-[#0021A5] hover:text-[#001580] hover:underline block"
-              >
-                → "I want to break into consulting and need guidance..."
-              </button>
-            </div>
-          </div>
-
-          {/* Info Box */}
-          <div className="bg-blue-50 rounded-xl p-4 space-y-2">
-            <div className="flex items-start gap-2">
-              <span className="text-blue-500">📄</span>
-              <p className="text-sm text-slate-600">
-                <strong className="text-slate-700">This will be posted</strong> to the community feed where parents & alumni can see it and help.
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-blue-500">✏️</span>
-              <p className="text-sm text-slate-600">
-                <strong className="text-slate-700">You can edit this anytime</strong> from your dashboard.
-              </p>
-            </div>
-          </div>
-
-          {/* Resume Upload - OPTIONAL */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Upload your resume <span className="text-slate-400 font-normal">(optional)</span>
-            </label>
-            
-            <div 
-              className={`
-                border-2 border-dashed rounded-xl p-6 text-center cursor-pointer
-                transition-colors
-                ${resumeFile 
-                  ? 'border-green-300 bg-green-50' 
-                  : 'border-slate-300 hover:border-[#0021A5] hover:bg-blue-50/50'
-                }
-              `}
-              onClick={() => document.getElementById('resume-upload').click()}
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDrop={handleResumeDrop}
-            >
-              <input
-                id="resume-upload"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleResumeChange}
-                className="hidden"
-              />
-              
-              {resumeFile ? (
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-2xl">📄</span>
-                  <div className="text-left">
-                    <p className="font-medium text-slate-800">{resumeFile.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setResumeFile(null); }}
-                    className="ml-4 p-1 text-slate-400 hover:text-red-500"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="text-3xl mb-2">📄</div>
-                  <p className="font-medium text-slate-700">Drag & drop your resume here</p>
-                  <p className="text-sm text-slate-500">or click to browse</p>
-                  <p className="text-xs text-slate-400 mt-2">PDF, DOC, DOCX (max 5MB)</p>
-                </>
-              )}
-            </div>
-            
-            <p className="text-xs text-slate-500 mt-2">
-              💡 Adding your resume helps parents give you specific feedback on your experience.
-            </p>
-          </div>
-
-        </div>
+      {/* Skip option */}
+      <div className="text-center mt-4">
+        <button
+          type="button"
+          onClick={() => {
+            // Skip question posting - just complete onboarding
+            setHelpRequest('__SKIP__');
+            setQuestionCategory('networking');
+          }}
+          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', width: 'auto' }}
+        >
+          Skip for now — I'll post a question later
+        </button>
       </div>
+
+      {/* Resume Upload - OPTIONAL */}
+      {questionCategory && helpRequest.trim().length >= 10 && helpRequest !== '__SKIP__' && (
+        <div className="max-w-lg mx-auto mt-6">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Upload your resume <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <div
+            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+              resumeFile ? 'border-green-300 bg-green-50' : 'border-slate-300 hover:border-[#0021A5] hover:bg-blue-50/50'
+            }`}
+            onClick={() => document.getElementById('resume-upload').click()}
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onDrop={handleResumeDrop}
+          >
+            <input id="resume-upload" type="file" accept=".pdf,.doc,.docx" onChange={handleResumeChange} className="hidden" />
+            {resumeFile ? (
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-2xl">📄</span>
+                <div className="text-left">
+                  <p className="font-medium text-slate-800">{resumeFile.name}</p>
+                  <p className="text-xs text-slate-500">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setResumeFile(null); }} className="ml-4 p-1 text-slate-400 hover:text-red-500">✕</button>
+              </div>
+            ) : (
+              <>
+                <div className="text-3xl mb-2">📄</div>
+                <p className="font-medium text-slate-700">Drag & drop your resume here</p>
+                <p className="text-sm text-slate-500">or click to browse</p>
+                <p className="text-xs text-slate-400 mt-2">PDF, DOC, DOCX (max 5MB)</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </OnboardingLayout>
   );
 }
