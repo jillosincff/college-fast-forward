@@ -16,12 +16,14 @@ export default function LandingStudentPivot({ onFunnel }) {
         variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
         className="relative z-10 max-w-2xl mx-auto px-4 py-48 sm:py-60 text-center"
       >
+        {/* Badge */}
         <motion.div variants={fade} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/20 mb-8"
           style={{ boxShadow: '0 0 20px rgba(6,182,212,0.08)' }}
         >
           <span className="text-[11px] font-bold text-[#06B6D4] uppercase tracking-wider">For Students</span>
         </motion.div>
 
+        {/* Headline */}
         <motion.h2 variants={fade}
           className="text-[32px] sm:text-5xl md:text-[52px] font-black text-white tracking-tight mb-8 leading-[1.08]"
         >
@@ -31,52 +33,38 @@ export default function LandingStudentPivot({ onFunnel }) {
           </span>
         </motion.h2>
 
-        <motion.div variants={fade} className="mb-14 max-w-xl mx-auto space-y-5">
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.65]">
-            Your friends are posting offers. Your parents keep asking questions. You have no experience, no connections, and no clue how to fix it.
-          </p>
-          <p className="text-white text-[18px] sm:text-[20px] leading-[1.65] font-medium">
-            FASTIQ finds real UF grads inside your target companies, messages them for you, and gets your foot in the door — bypassing thousands of cold applicants.
+        {/* Reframe quote */}
+        <motion.div variants={fade} className="max-w-xl mx-auto mb-14">
+          <p
+            className="text-[17px] sm:text-[19px] leading-[1.7] italic"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", color: 'rgba(244,240,232,0.65)' }}
+          >
+            "You're not behind because you're not trying hard enough. You're behind because nobody taught you how this actually works."
           </p>
         </motion.div>
 
-        {/* Dual CTAs */}
-        <motion.div variants={fade} className="flex flex-col sm:flex-row items-stretch justify-center gap-5">
+        {/* Single CTA */}
+        <motion.div variants={fade}>
           <button
-            onClick={() => onFunnel('known')}
-            className="flex-1 sm:max-w-[300px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.03] active:scale-[0.98]"
+            onClick={() => onFunnel('quiz')}
+            className="inline-flex items-center gap-2 rounded-xl px-10 py-5 text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
               boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
             }}
           >
-            <span className="flex items-start gap-2.5">
-              <span className="text-xl mt-0.5">🔥</span>
-              <span className="text-[16px] sm:text-[17px] font-bold text-white leading-snug">
-                I know where I want to work… but I don't know a single person there
-              </span>
-            </span>
-          </button>
-
-          <button
-            onClick={() => onFunnel('explorer')}
-            className="flex-1 sm:max-w-[300px] rounded-xl px-6 py-5 text-left transition-all hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
-              boxShadow: '0 4px 30px rgba(6,182,212,0.3), 0 0 60px rgba(6,182,212,0.08)',
-            }}
-          >
-            <span className="flex items-start gap-2.5">
-              <span className="text-xl mt-0.5">😬</span>
-              <span className="text-[16px] sm:text-[17px] font-bold text-slate-900 leading-snug">
-                I literally have no clue where to even start
-              </span>
-            </span>
+            Find out where you actually stand →
           </button>
         </motion.div>
 
+        {/* Stats row */}
         <motion.p variants={fade} className="text-[#E5E7EB]/40 text-sm mt-7">
-          Takes 45 seconds · No sign-up needed · See real UF alumni at Amazon, Google, Nike, TikTok — free
+          Takes 2 minutes · 9 questions · No BS — just the truth about where you stand
+        </motion.p>
+
+        {/* Fine print */}
+        <motion.p variants={fade} className="text-[#E5E7EB]/25 text-xs mt-3">
+          Free to take
         </motion.p>
       </motion.div>
     </section>
