@@ -331,30 +331,18 @@ export default function GatorAuth() {
           try {
             console.log('🔄 [GatorAuth] Applying pending role:', pendingRole);
             
-            // For UFL students with gator role, apply directly
-            // For others, they should have gone through invite code first
-            if (pendingRole === 'gator' && isUFLStudent) {
+            // Students with gator role - apply directly (any email allowed)
+            if (pendingRole === 'gator') {
               await base44.auth.updateMe({
                 persona: 'gator',
                 roles: ['gator'],
                 onboarding_completed: false,
                 is_new_signup: true,
-                invite_code_used: 'ufl_direct'
+                invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
               });
               localStorage.removeItem('pending_invite_role');
               if (refreshUser) await refreshUser();
               navigate('StudentOnboarding');
-              return;
-            }
-            
-            // CRITICAL: Students MUST use @ufl.edu email - no invite code workaround
-            if (pendingRole === 'gator' && !isUFLStudent) {
-              console.log('🚫 [GatorAuth] Non-UFL email trying to register as student - blocked');
-              localStorage.removeItem('pending_invite_role');
-              localStorage.removeItem('pending_invite_code');
-              setError('Students must use their @ufl.edu email address. Please sign out and register with your UFL email, or select Parent/Alumni if that\'s your role.');
-              setStep('role-select');
-              processingRef.current = false;
               return;
             }
             
@@ -525,16 +513,16 @@ export default function GatorAuth() {
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
     const hasInviteCode = localStorage.getItem('pending_invite_code');
     
-    // UFL Students selecting gator can proceed directly (no invite code needed)
-    if (selectedRole === 'gator' && isUFLStudent) {
+    // Students selecting gator can proceed directly (any email allowed)
+    if (selectedRole === 'gator') {
       try {
-        console.log('🎓 [GatorAuth] UFL student selecting gator role, proceeding directly');
+        console.log('🎓 [GatorAuth] Student selecting gator role, proceeding directly');
         await base44.auth.updateMe({
           persona: 'gator',
           roles: ['gator'],
           onboarding_completed: false,
           is_new_signup: true,
-          invite_code_used: 'ufl_direct'
+          invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
         });
         localStorage.removeItem('pending_invite_role');
         if (refreshUser) await refreshUser();
@@ -543,14 +531,6 @@ export default function GatorAuth() {
         console.error('Failed to set role:', err);
         setLoading(false);
       }
-      return;
-    }
-    
-    // CRITICAL: Students MUST use @ufl.edu email - no exceptions
-    if (selectedRole === 'gator' && !isUFLStudent) {
-      console.log('🚫 [GatorAuth] Non-UFL email trying to register as student - blocked');
-      setError('Students must use their @ufl.edu email address. If you\'re a parent or alumni, please select the appropriate role.');
-      setLoading(false);
       return;
     }
     
@@ -666,13 +646,7 @@ export default function GatorAuth() {
             Works with any email — Gmail, UFL, Outlook, etc.
           </p>
 
-          {selectedRole === 'gator' && (
-            <div style={{ background: 'rgba(232,93,32,0.08)', border: '0.5px solid rgba(232,93,32,0.2)', borderRadius: 12, padding: '12px 16px', textAlign: 'center', marginBottom: 20 }}>
-              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#E85D20' }}>
-                🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
-              </p>
-            </div>
-          )}
+
 
           <button
             onClick={() => setStep('role-select')}
@@ -698,7 +672,7 @@ export default function GatorAuth() {
         id: 'gator',
         name: "I'm a UF Student",
         desc: 'Find warm intros, build your network, and land the job.',
-        encouraged: 'UF email encouraged',
+        encouraged: 'Any email works',
         iconBg: 'rgba(232,93,32,0.1)',
         iconBorder: 'rgba(232,93,32,0.2)',
         icon: <GradCapSVG />,
@@ -736,19 +710,15 @@ export default function GatorAuth() {
 
       if (roleId === 'gator') {
         const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-        if (isUFLStudent) {
-          setLoading(true);
-          base44.auth.updateMe({
-            persona: 'gator', roles: ['gator'], onboarding_completed: false,
-            is_new_signup: true, invite_code_used: 'ufl_direct'
-          }).then(() => {
-            localStorage.removeItem('pending_invite_role');
-            if (refreshUser) refreshUser();
-            navigate('StudentOnboarding');
-          });
-        } else {
-          setError('Students must use their @ufl.edu email address.');
-        }
+        setLoading(true);
+        base44.auth.updateMe({
+          persona: 'gator', roles: ['gator'], onboarding_completed: false,
+          is_new_signup: true, invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
+        }).then(() => {
+          localStorage.removeItem('pending_invite_role');
+          if (refreshUser) refreshUser();
+          navigate('StudentOnboarding');
+        });
         return;
       }
 
