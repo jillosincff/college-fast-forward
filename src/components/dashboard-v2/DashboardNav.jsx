@@ -128,7 +128,7 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
               </div>
               {[
                 { icon: User, label: 'Profile', page: 'Profile' },
-                { icon: FileText, label: 'My Applications', page: 'MyApplications' },
+                { icon: FileText, label: 'My Pipeline', page: 'MyApplications' },
                 { icon: FileText, label: 'My Requests', page: 'MyRequests' },
                 { icon: MessageSquare, label: 'My Messages', page: 'MyMessages' },
                 { icon: Bookmark, label: 'My Favorites', page: 'Favorites' },
