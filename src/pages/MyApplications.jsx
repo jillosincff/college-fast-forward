@@ -1,220 +1,204 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { OpportunityApplication } from '@/entities/OpportunityApplication';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Building, Clock, FileText, RefreshCw, AlertCircle } from 'lucide-react';
-import CompanyLogo from '@/components/opportunities/CompanyLogo';
-import { formatDistanceToNow } from 'date-fns';
-import { navigate as customNavigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
+import DashboardNav from '@/components/dashboard-v2/DashboardNav';
+import DarkFooter from '@/components/common/DarkFooter';
+import PipelineStatsRow from '@/components/pipeline/PipelineStatsRow';
+import PipelineFilterRow from '@/components/pipeline/PipelineFilterRow';
+import PipelineCard from '@/components/pipeline/PipelineCard';
+import AddConnectionModal from '@/components/pipeline/AddConnectionModal';
+import { daysSince } from '@/components/pipeline/PipelineConstants';
 
-const statusStyles = {
-  applied: 'bg-blue-100 text-blue-800',
-  in_review: 'bg-yellow-100 text-yellow-800',
-  replied: 'bg-purple-100 text-purple-800',
-  interview: 'bg-green-100 text-green-800',
-  closed: 'bg-gray-100 text-gray-800',
-};
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
 
-const StatusBadge = ({ status }) => (
-  <Badge className={`${statusStyles[status] || statusStyles.closed} border-transparent text-xs`}>
-    {status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-  </Badge>
-);
+const STAGE_ORDER = ['matched', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'offer'];
 
-const ApplicationItem = ({ application }) => {
-  // Use snapshot data from the application record
-  const title = application.opportunity_title || '(Opportunity no longer available)';
-  const company = application.opportunity_company || 'Unknown Company';
-  const isDeleted = application.opportunity_deleted;
-
-  // Format the date properly - ensure it's always "ago"
-  const getTimeAgo = () => {
-    try {
-      const createdDate = new Date(application.created_date);
-      const now = new Date();
-      
-      // If date seems to be in the future (shouldn't happen), show "just now"
-      if (createdDate > now) {
-        return 'just now';
-      }
-      
-      // Calculate time difference in seconds
-      const diffInSeconds = Math.floor((now - createdDate) / 1000);
-      
-      if (diffInSeconds < 10) {
-        return 'a few seconds ago';
-      } else if (diffInSeconds < 60) {
-        return `${diffInSeconds} seconds ago`;
-      } else if (diffInSeconds < 120) {
-        return 'a minute ago';
-      } else if (diffInSeconds < 3600) {
-        const minutes = Math.floor(diffInSeconds / 60);
-        return `${minutes} minutes ago`;
-      } else if (diffInSeconds < 7200) {
-        return 'an hour ago';
-      } else if (diffInSeconds < 86400) {
-        const hours = Math.floor(diffInSeconds / 3600);
-        return `${hours} hours ago`;
-      } else {
-        return formatDistanceToNow(createdDate, { addSuffix: true });
-      }
-    } catch (error) {
-      return 'recently';
-    }
-  };
-
-  return (
-    <div className={`p-4 border-b border-gray-200 last:border-b-0 ${isDeleted ? 'bg-gray-50' : 'hover:bg-gray-50'} transition-colors`}>
-      <div className="flex items-center gap-4">
-        <CompanyLogo name={company} className="w-12 h-12 flex-shrink-0" />
-        <div className="flex-grow">
-          <h3 className={`font-semibold ${isDeleted ? 'text-gray-500 italic' : 'text-gray-900'}`}>{title}</h3>
-          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-            <Building className="w-3 h-3" />
-            <span>{company}</span>
-            <span className="text-gray-300">|</span>
-            <Clock className="w-3 h-3" />
-            <span>Applied {getTimeAgo()}</span>
-          </div>
-        </div>
-        <div className="flex-shrink-0">
-          {isDeleted ? (
-            <Badge className="bg-gray-100 text-gray-600 border-transparent text-xs">
-              Archived
-            </Badge>
-          ) : (
-            <StatusBadge status={application.status} />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+function needsAction(conn) {
+  if (conn.status === 'matched' && !conn.reached_out_date) return true;
+  if (conn.status === 'messaged' && daysSince(conn.status_date) >= 7) return true;
+  if (conn.status === 'replied' && daysSince(conn.replied_date) >= 7) return true;
+  if (conn.status === 'coffee_chat') return true;
+  return false;
+}
 
 export default function MyApplicationsPage() {
   const { user } = useAuth();
-  const [applications, setApplications] = useState([]);
+  const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchApplications = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Fetch applications using both methods
-      const [byId, byEmail] = await Promise.all([
-        OpportunityApplication.filter({ applicant_id: user.id }, '-created_date').catch(() => []),
-        OpportunityApplication.filter({ created_by: user.email }, '-created_date').catch(() => [])
-      ]);
-      
-      // Merge and deduplicate
-      const allApps = [...byId];
-      const existingIds = new Set(byId.map(app => app.id));
-      
-      byEmail.forEach(app => {
-        if (!existingIds.has(app.id)) {
-          allApps.push(app);
-        }
-      });
-      
-      // No need to fetch opportunities - we have snapshot data
-      setApplications(allApps);
-
-    } catch (error) {
-      console.error("Failed to fetch applications:", error);
-      setError(error.message || 'Failed to load applications');
-      setApplications([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+  const [showModal, setShowModal] = useState(false);
+  const [statsFilter, setStatsFilter] = useState(null);
+  const [tab, setTab] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
 
   useEffect(() => {
-    fetchApplications();
-  }, [fetchApplications]);
+    if (!document.getElementById('pipeline-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'pipeline-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+      document.head.appendChild(link);
+    }
+  }, []);
 
-  const handleGoBack = () => {
-    // Navigate to the appropriate dashboard based on user persona
-    let dashboardPage = 'Dashboard';
-    if (user?.persona === 'parent') dashboardPage = 'ParentDashboard';
-    else if (user?.persona === 'alumni') dashboardPage = 'AlumniDashboard';
-    else if (user?.persona === 'admin') dashboardPage = 'AdminDashboard';
-    
-    customNavigate(dashboardPage);
+  useEffect(() => {
+    if (!user?.email) return;
+    loadConnections();
+  }, [user?.email]);
+
+  const loadConnections = async () => {
+    setLoading(true);
+    const data = await base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date');
+    setConnections(data || []);
+    setLoading(false);
   };
 
-  if (!user) {
-    return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Please log in to view your applications.</p>
-        </div>
-      </div>
-    );
+  const handleAddConnection = async (data) => {
+    const created = await base44.entities.NetworkingPipeline.create({ ...data, user_email: user.email });
+    setConnections(prev => [created, ...prev]);
+  };
+
+  const handleUpdateStage = async (id, newStage) => {
+    const updates = { status: newStage, status_date: new Date().toISOString() };
+    if (newStage === 'messaged') updates.reached_out_date = new Date().toISOString();
+    if (newStage === 'replied') updates.replied_date = new Date().toISOString();
+    if (newStage === 'coffee_chat') updates.interview_date = new Date().toISOString();
+    if (newStage === 'offer') updates.offer_date = new Date().toISOString();
+
+    await base44.entities.NetworkingPipeline.update(id, updates);
+    setConnections(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  // Filter + sort
+  let filtered = [...connections];
+
+  // Stats filter (by stage)
+  if (statsFilter && statsFilter !== 'all') {
+    filtered = filtered.filter(c => c.status === statsFilter);
   }
 
-  return (
-    <div className="bg-gray-50 min-h-screen py-6 sm:py-12 overflow-x-hidden">
-      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8">
-        <Button
-          variant="ghost"
-          onClick={handleGoBack}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
-        </Button>
+  // Tab filter
+  if (tab === 'needs_action') filtered = filtered.filter(needsAction);
+  else if (tab === 'matched') filtered = filtered.filter(c => c.status === 'matched');
+  else if (tab === 'in_progress') filtered = filtered.filter(c => ['messaged', 'replied', 'coffee_chat'].includes(c.status));
+  else if (tab === 'won') filtered = filtered.filter(c => ['intro_made', 'offer'].includes(c.status));
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-3 text-2xl">
-              <FileText className="w-6 h-6 text-blue-600" />
-              My Applications
-            </CardTitle>
-            <Button variant="outline" size="sm" onClick={fetchApplications} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            {error ? (
-              <div className="p-8 text-center">
-                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Error Loading Applications</h3>
-                <p className="text-sm text-gray-600 mb-4">{error}</p>
-                <Button onClick={fetchApplications}>Try Again</Button>
-              </div>
-            ) : loading ? (
-              <div className="p-8 text-center text-gray-500">
-                <RefreshCw className="w-8 h-8 mx-auto text-gray-400 animate-spin mb-4" />
-                <p>Loading your applications...</p>
-              </div>
-            ) : applications.length > 0 ? (
-              <div className="divide-y divide-gray-200">
-                {applications.map(app => (
-                  <ApplicationItem key={app.id} application={app} />
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-gray-500">
-                <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-2">No Applications Yet</h3>
-                <p className="text-sm mb-4">When you apply for opportunities, they will appear here.</p>
-                <Button onClick={() => customNavigate('Opportunities')}>Find Opportunities</Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+  // Sort
+  if (sortBy === 'stage') filtered.sort((a, b) => STAGE_ORDER.indexOf(a.status) - STAGE_ORDER.indexOf(b.status));
+  else if (sortBy === 'name') filtered.sort((a, b) => (a.alumni_name || '').localeCompare(b.alumni_name || ''));
+  else filtered.sort((a, b) => new Date(b.status_date || b.created_date) - new Date(a.status_date || a.created_date));
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+      <DashboardNav user={user} currentPage="Pipeline" />
+
+      <main style={{ flex: 1, maxWidth: 900, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
+        {/* Back link */}
+        <button onClick={() => navigate('Dashboard')} style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24,
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888',
+          transition: 'color 0.2s', minHeight: 'auto', width: 'auto', padding: 0,
+        }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#888'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          Back to Dashboard
+        </button>
+
+        {/* Page header */}
+        <div className="pipeline-header" style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28,
+          animation: 'pipelineFadeUp 0.4s ease both',
+        }}>
+          <div>
+            <h1 style={{
+              fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#1a1a1a',
+              letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 6,
+            }}>
+              My <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Connection Pipeline</span>
+            </h1>
+            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', lineHeight: 1.5, margin: 0 }}>
+              Track every warm connection — from first message to offer. This is how careers actually start.
+            </p>
+          </div>
+          <button onClick={() => setShowModal(true)} className="pipeline-add-btn" style={{
+            background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+            borderRadius: 100, padding: '10px 20px', border: 'none', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: 6, transition: 'all 0.2s',
+            whiteSpace: 'nowrap', minHeight: 'auto', width: 'auto', flexShrink: 0,
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; e.currentTarget.style.transform = 'none'; }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round"><path d="M7 2v10M2 7h10" /></svg>
+            Add Connection
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div style={{ animation: 'pipelineFadeUp 0.4s ease 0.06s both' }}>
+          <PipelineStatsRow connections={connections} activeFilter={statsFilter} onFilter={setStatsFilter} />
+        </div>
+
+        {/* Filters */}
+        <div style={{ animation: 'pipelineFadeUp 0.4s ease 0.1s both' }}>
+          <PipelineFilterRow activeTab={tab} onTabChange={setTab} sortBy={sortBy} onSortChange={setSortBy} />
+        </div>
+
+        {/* Cards */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 48 }}>
+            <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
+          </div>
+        ) : filtered.length > 0 ? (
+          filtered.map((conn, i) => (
+            <div key={conn.id} style={{ animation: `pipelineFadeUp 0.4s ease ${0.14 + i * 0.04}s both` }}>
+              <PipelineCard conn={conn} index={i} onUpdateStage={handleUpdateStage} />
+            </div>
+          ))
+        ) : connections.length === 0 ? (
+          /* Empty state */
+          <div style={{
+            background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 16,
+            padding: '48px 32px', textAlign: 'center',
+          }}>
+            <h3 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 8 }}>Your pipeline is empty.</h3>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', lineHeight: 1.6, marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
+              Every warm intro starts with a first message. Go to your matches and start a conversation — it'll show up here automatically.
+            </p>
+            <button onClick={() => navigate('MyMatches')} style={{
+              background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+              borderRadius: 100, padding: '10px 24px', border: 'none', cursor: 'pointer',
+              transition: 'background 0.2s', minHeight: 'auto',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#d44e14'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#E85D20'; }}
+            >
+              Go to My Matches →
+            </button>
+          </div>
+        ) : (
+          /* Filter returned no results */
+          <div style={{ textAlign: 'center', padding: 32 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888' }}>No connections match this filter.</p>
+          </div>
+        )}
+      </main>
+
+      <DarkFooter />
+      {showModal && <AddConnectionModal onClose={() => setShowModal(false)} onSubmit={handleAddConnection} />}
+
+      <style>{`
+        @keyframes pipelineFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media(max-width:768px) {
+          .pipeline-header { flex-direction: column !important; gap: 16px !important; }
+          .pipeline-add-btn { width: 100% !important; justify-content: center !important; }
+        }
+      `}</style>
     </div>
   );
 }
