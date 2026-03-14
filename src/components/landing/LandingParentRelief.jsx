@@ -70,7 +70,7 @@ export default function LandingParentRelief({ onCTA }) {
                 boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
               }}
             >
-              Activate FASTIQ for My Student – Start 7-Day Free Trial
+              Claim Your Free Spot →
             </button>
           </motion.div>
         </motion.div>

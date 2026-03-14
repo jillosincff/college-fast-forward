@@ -10,7 +10,9 @@ import { toast } from 'sonner';
 import LandingHero from '@/components/landing/LandingHero';
 import LandingPainFastIQ from '@/components/landing/LandingPainFastIQ';
 import LandingParentRelief from '@/components/landing/LandingParentRelief';
+import LandingTestimonials from '@/components/landing/LandingTestimonials';
 import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
+import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
 import LandingFooterCTA from '@/components/landing/LandingFooterCTA';
 import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
 
@@ -71,23 +73,29 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* 1 — HERO */}
+        {/* 1 — HERO (hook + CTA) */}
         <LandingHero stats={stats} onClaim={handleClaim} />
 
-        {/* 2 — PAIN + FASTIQ PROOF */}
-        <LandingPainFastIQ onFastIQ={handleFastIQ} />
+        {/* 2 — THE PROBLEM */}
+        <LandingPainFastIQ onFastIQ={handleClaim} />
 
-        {/* 3 — PARENT RELIEF */}
-        <LandingParentRelief onCTA={handleFastIQ} />
+        {/* 3 — EMPATHY: For Parents Who Are Freaking Out */}
+        <LandingParentRelief onCTA={handleClaim} />
 
-        {/* 4 — STUDENT PIVOT */}
+        {/* 4 — SOCIAL PROOF */}
+        <LandingTestimonials onClaim={handleClaim} />
+
+        {/* 5 — URGENCY: Student seasonal push */}
         {showFunnel ? (
           <FastIQFunnel onClose={() => setShowFunnel(false)} />
         ) : (
           <LandingStudentPivot onFunnel={handleFunnel} />
         )}
 
-        {/* 5 — FOOTER CTA */}
+        {/* 6 — HOW IT WORKS (for parents) */}
+        <LandingHowItWorks onClaim={handleClaim} />
+
+        {/* 7 — FINAL CTA */}
         <LandingFooterCTA stats={stats} onClaim={handleClaim} onFAQ={() => {}} />
 
         {/* FOOTER */}
