@@ -27,14 +27,12 @@ export default function MatchesReview() {
   // Filter out invalid matches (no real name, test users, etc.)
   const filterValidMatches = (rawMatches) => {
     return rawMatches.filter(match => {
-      const name = match.helper_name || match.parent_name || '';
+      const name = match.parent_name || match.peer_name || match.helper_name || '';
       const hasRealName = name && 
         !name.toLowerCase().includes('professional') && 
         !name.toLowerCase().includes('test') &&
         name.trim().length > 2;
-      const hasJobInfo = match.helper_title || match.parent_title || match.job_title || 
-                         match.helper_company || match.parent_company || match.company;
-      return hasRealName && hasJobInfo;
+      return hasRealName;
     });
   };
 
