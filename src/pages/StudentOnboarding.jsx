@@ -14,6 +14,8 @@ import { JobRequest } from '@/entities/JobRequest';
 import confetti from 'canvas-confetti';
 import CelebrationScreen from '@/components/onboarding/student/CelebrationScreen';
 import AskFirstQuestion from '@/components/onboarding/student/AskFirstQuestion';
+import StudentStep1LeftPanel from '@/components/onboarding/student/StudentStep1LeftPanel';
+import StudentStep1ProgressBar from '@/components/onboarding/student/StudentStep1ProgressBar';
 
 export default function StudentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -291,225 +293,152 @@ export default function StudentOnboarding() {
   const isStep2Valid = industries.length > 0 && seeking.length > 0;
   const isStep3Valid = questionCategory && helpRequest.trim().length >= 10;
 
-  // STEP 1: About You - High-Energy Two-Column Layout
+  // STEP 1: About You - Two-Column Layout
   if (step === 1) {
+    const dmSans = "'DM Sans', system-ui, sans-serif";
     return (
-      <div className="min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
-        {/* LEFT SIDE - The Hook (Hidden on mobile, shows condensed version) */}
-        <div className="lg:w-[45%] bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#0021A5] text-white p-4 sm:p-6 lg:p-10 flex flex-col justify-center">
-          
-          {/* Progress Bar - Mobile & Desktop */}
-          <div className="flex items-center justify-center gap-2 mb-6 lg:mb-8">
-            <div className="flex items-center gap-1 text-sm">
-              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">👤</span>
-              <span className="hidden sm:inline text-white/80">You</span>
-            </div>
-            <div className="w-8 h-0.5 bg-white/30"></div>
-            <div className="flex items-center gap-1 text-sm opacity-50">
-              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🎯</span>
-              <span className="hidden sm:inline text-white/60">Goals</span>
-            </div>
-            <div className="w-8 h-0.5 bg-white/30"></div>
-            <div className="flex items-center gap-1 text-sm opacity-50">
-              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🎉</span>
-              <span className="hidden sm:inline text-white/60">Matches</span>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {/* Progress bar */}
+        <StudentStep1ProgressBar currentStep={1} />
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'row' }} className="flex-col lg:flex-row">
+          {/* LEFT PANEL — value proposition (hidden on mobile) */}
+          <div className="hidden lg:flex" style={{ width: '45%', minHeight: 'calc(100vh - 52px)' }}>
+            <StudentStep1LeftPanel />
+          </div>
+
+          {/* Mobile condensed value prop */}
+          <div className="lg:hidden" style={{ background: 'linear-gradient(to bottom, #0d1117, #0821A5)', padding: '28px 24px 20px', textAlign: 'center' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>For UF Students</p>
+            <p style={{ fontFamily: dmSans, fontSize: 20, fontWeight: 600, color: '#f4f0e8', lineHeight: 1.25, marginBottom: 4 }}>
+              You've discovered the secret:
+            </p>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 20, fontWeight: 400, fontStyle: 'italic', color: '#E85D20', lineHeight: 1.25, marginBottom: 12 }}>
+              access beats resumes.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.08)', borderRadius: 100, padding: '5px 14px' }}>🔑 Skip the black hole</span>
+              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.08)', borderRadius: 100, padding: '5px 14px' }}>🤝 Warm intros</span>
+              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.08)', borderRadius: 100, padding: '5px 14px' }}>⚡ 1,000 connections</span>
             </div>
           </div>
 
-          {/* Mobile: Condensed Content */}
-          <div className="lg:hidden text-center mb-6">
-            <h1 className="text-xl font-bold mb-2">Welcome to College Fast Forward</h1>
-            <p className="text-2xl font-black text-[#FA4616] mb-3">
-              Access beats resumes.
-            </p>
-            <p className="text-white/80 text-sm mb-4">
-              70-80% of jobs are filled through referrals. CFF gives you direct access to 500+ parents & alumni.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 text-sm">
-              <span className="bg-white/10 px-3 py-1.5 rounded-full">🔑 Skip the black hole</span>
-              <span className="bg-white/10 px-3 py-1.5 rounded-full">🤝 Warm intros</span>
-              <span className="bg-white/10 px-3 py-1.5 rounded-full">🚀 500+ connections</span>
-            </div>
-          </div>
-
-          {/* Desktop: Full Content */}
-          <div className="hidden lg:block space-y-6">
-            <div>
-              <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
-              <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
-            </div>
-            
-            {/* The Big Statement */}
-            <div className="py-4">
-              <p className="text-3xl lg:text-4xl font-black leading-tight text-white">
-                You've discovered the secret:{' '}
-                <span className="text-[#FA4616] inline-block animate-pulse">access beats resumes.</span>
-              </p>
-            </div>
-            
-            {/* The Problem */}
-            <div className="bg-white/10 rounded-xl p-4 border-l-4 border-[#FA4616]">
-              <p className="text-white/90">
-                <strong className="text-white">70-80% of jobs are filled through referrals.</strong>{' '}
-                But your network is full of people your own age—not hiring managers.
-              </p>
-            </div>
-            
-            {/* The Solution */}
-            <p className="text-lg text-white/90">
-              CFF gives you an <strong className="text-white">unfair advantage</strong>: a pooled community of parents and alumni{' '}
-              <strong className="text-white">ready to open doors for you.</strong>
-            </p>
-            
-            {/* Value Props - Animated */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-                <span className="text-2xl">🔑</span>
-                <span className="font-semibold">Skip the resume black hole</span>
-              </div>
-              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-                <span className="text-2xl">🤝</span>
-                <span className="font-semibold">Get warm intros to decision-makers</span>
-              </div>
-              <div className="flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transform transition-all hover:bg-white/10 hover:translate-x-1">
-                <span className="text-2xl">🚀</span>
-                <span className="font-semibold">Access 500+ parents & alumni connections</span>
-              </div>
-            </div>
-            
-            {/* Quote */}
-            <div className="pt-4 border-t border-white/20">
-              <p className="text-sm text-white/80 italic leading-relaxed">
-                "Think of CFF as a master key to a neighborhood of closed doors. Instead of standing on the sidewalk hoping someone notices your resume, you now have neighbors ready to walk you inside."
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT SIDE - The Form */}
-        <div className="lg:w-[55%] bg-white p-4 sm:p-6 lg:p-10 flex flex-col justify-center">
-          <div className="max-w-md mx-auto w-full">
-            {/* Form Header */}
-            <div className="mb-8">
-              <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-1">
-                Let's get to know you
-              </h2>
-              <p className="text-slate-500">
-                Takes 2 minutes.
-              </p>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  What's your major? <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={major}
-                  onChange={(e) => setMajor(e.target.value)}
-                  placeholder="e.g., Computer Science, Business, Psychology"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                           focus:border-[#0021A5] focus:outline-none transition-colors"
-                />
-              </div>
-
-              {/* Minor - Optional */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Minor <span className="font-normal text-slate-400">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={minor}
-                  onChange={(e) => setMinor(e.target.value)}
-                  placeholder="e.g., Economics, Spanish"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                           focus:border-[#0021A5] focus:outline-none transition-colors"
-                />
-              </div>
-
-              {/* Pre-Professional Track */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Pre-professional track <span className="font-normal text-slate-400">(if applicable)</span>
-                </label>
-                <select
-                  value={preTrack}
-                  onChange={(e) => setPreTrack(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                           focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
-                >
-                  {PRE_TRACKS.map(track => (
-                    <option key={track.id} value={track.id}>{track.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">
-                  When do you graduate? <span className="text-red-500">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {GRAD_YEARS.map(year => (
-                    <button
-                      key={year}
-                      type="button"
-                      data-chip="true"
-                      onClick={() => setGradYear(year)}
-                      className={`
-                        chip-btn px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm
-                        ${gradYear === year
-                          ? 'bg-blue-50 border-[#0021A5] text-[#0021A5] shadow-md'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                        }
-                      `}
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Optional Referral Code */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Referral code <span className="font-normal text-slate-400">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={referralCode}
-                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                  placeholder="e.g., UF-JOHN"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base
-                           focus:border-[#0021A5] focus:outline-none uppercase transition-colors"
-                  maxLength={20}
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Got a code from a friend or ambassador? Enter it here.
+          {/* RIGHT PANEL — form */}
+          <div className="lg:w-[55%] w-full" style={{ background: '#fff', padding: '40px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ maxWidth: 440, margin: '0 auto', width: '100%' }}>
+              {/* Header */}
+              <div style={{ marginBottom: 32 }}>
+                <h2 style={{ fontFamily: dmSans, fontSize: 22, fontWeight: 600, color: '#1e293b', marginBottom: 4 }}>
+                  Let's get to know you
+                </h2>
+                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#94a3b8' }}>
+                  Takes 2 minutes.
                 </p>
               </div>
 
-              {/* CTA Button */}
-              <button
-                onClick={handleNext}
-                disabled={!isStep1Valid}
-                className={`
-                  w-full py-4 rounded-xl font-bold text-lg transition-all
-                  ${isStep1Valid
-                    ? 'bg-[#FA4616] text-white hover:bg-[#E03E14] shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }
-                `}
-              >
-                Continue →
-              </button>
+              {/* Form */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div>
+                  <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                    What's your major? <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={major}
+                    onChange={(e) => setMajor(e.target.value)}
+                    placeholder="e.g., Computer Science, Business, Psychology"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
 
-              {/* Social Proof */}
-              <p className="text-center text-sm text-slate-500">
-                Join <span className="font-semibold text-slate-700">500+</span> students already connecting
-              </p>
+                <div>
+                  <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                    Minor <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={minor}
+                    onChange={(e) => setMinor(e.target.value)}
+                    placeholder="e.g., Economics, Spanish"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                    Pre-professional track <span style={{ fontWeight: 300, color: '#94a3b8' }}>(if applicable)</span>
+                  </label>
+                  <select
+                    value={preTrack}
+                    onChange={(e) => setPreTrack(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none transition-colors bg-white"
+                  >
+                    {PRE_TRACKS.map(track => (
+                      <option key={track.id} value={track.id}>{track.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 10 }}>
+                    When do you graduate? <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {GRAD_YEARS.map(year => (
+                      <button
+                        key={year}
+                        type="button"
+                        data-chip="true"
+                        onClick={() => setGradYear(year)}
+                        className={`chip-btn px-4 py-2.5 rounded-xl font-medium transition-all border-2 text-sm ${
+                          gradYear === year
+                            ? 'bg-blue-50 border-[#0021A5] text-[#0021A5] shadow-md'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#334155', marginBottom: 8 }}>
+                    Referral code <span style={{ fontWeight: 300, color: '#94a3b8' }}>(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    placeholder="e.g., UF-JOHN"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-base focus:border-[#0021A5] focus:outline-none uppercase transition-colors"
+                    maxLength={20}
+                  />
+                  <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#94a3b8', marginTop: 4 }}>
+                    Got a code from a friend or ambassador? Enter it here.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  disabled={!isStep1Valid}
+                  style={{
+                    width: '100%', padding: '16px 0', borderRadius: 12, border: 'none',
+                    fontFamily: dmSans, fontSize: 16, fontWeight: 600,
+                    cursor: isStep1Valid ? 'pointer' : 'not-allowed',
+                    background: isStep1Valid ? '#E85D20' : '#e2e8f0',
+                    color: isStep1Valid ? '#fff' : '#94a3b8',
+                    transition: 'all 0.2s',
+                    minHeight: 'auto',
+                  }}
+                >
+                  Continue →
+                </button>
+
+                <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#94a3b8', textAlign: 'center' }}>
+                  Join nearly <span style={{ fontWeight: 500, color: '#64748b' }}>1,000</span> students already connecting
+                </p>
+              </div>
             </div>
           </div>
         </div>
