@@ -111,7 +111,10 @@ export default function QuestionsPage() {
       const [jobRequests, helpRequests, directoryResponse] = await Promise.all([
         JobRequest.filter({ status: 'active' }, '-created_date', 200),
         HelpRequest.filter({ status: 'active' }, '-created_date', 200),
-        base44.functions.invoke('getDirectoryUsers', {})
+        base44.functions.invoke('getDirectoryUsers', {}).catch(e => {
+          console.log('Directory users fetch failed (non-critical):', e.message);
+          return { data: { data: [] } };
+        })
       ]);
       
       // Normalize HelpRequest to match JobRequest structure
