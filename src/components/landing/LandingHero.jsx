@@ -1,7 +1,6 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { motion } from 'framer-motion';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 export default function LandingHero({ stats, onClaim }) {
   const spotsText = stats.spots_left > 0
@@ -81,20 +80,9 @@ export default function LandingHero({ stats, onClaim }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          className="max-w-sm mx-auto"
+          className="flex flex-col items-center"
         >
-          <Button
-            onClick={onClaim}
-            size="lg"
-            className="w-full py-6 text-lg font-bold min-h-[56px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-              boxShadow: '0 4px 30px rgba(250,70,22,0.4), 0 0 60px rgba(250,70,22,0.15)',
-            }}
-          >
-            Claim Your Free Spot
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          <PrimaryCTA text="Claim Your Free Spot" onClick={onClaim} />
 
           <p className="text-white/60 text-sm mt-4 flex items-center justify-center gap-1.5">
             <span>🔥</span> Free founding spots are limited. After that, $9/month.

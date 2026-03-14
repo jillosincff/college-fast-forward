@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const CARDS = [
   {
@@ -148,51 +149,7 @@ export default function LandingTestimonials({ onClaim }) {
 
       {/* ── CTA ───────────────────────────────────── */}
       <div style={{ textAlign: 'center', ...fadeUp(0.42) }}>
-        <button
-          onClick={onClaim}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#d44e14';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            const arrow = e.currentTarget.querySelector('.cta-arrow');
-            if (arrow) arrow.style.transform = 'translateX(3px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#E85D20';
-            e.currentTarget.style.transform = 'translateY(0)';
-            const arrow = e.currentTarget.querySelector('.cta-arrow');
-            if (arrow) arrow.style.transform = 'translateX(0)';
-          }}
-          style={{
-            fontFamily: dmSans,
-            fontSize: 16,
-            fontWeight: 500,
-            color: '#fff',
-            background: '#E85D20',
-            borderRadius: 100,
-            padding: '16px 40px',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            transition: 'background 0.2s ease, transform 0.15s ease',
-            minHeight: 'auto',
-            minWidth: 'auto',
-            width: 'auto',
-          }}
-        >
-          Join These Families
-          <svg
-            className="cta-arrow"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            style={{ transition: 'transform 0.15s ease' }}
-          >
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <PrimaryCTA text="Join These Families" onClick={onClaim} />
       </div>
     </section>
   );

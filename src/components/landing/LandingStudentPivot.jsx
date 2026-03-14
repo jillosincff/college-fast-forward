@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const fade = {
   hidden: { opacity: 0, y: 20 },
@@ -45,16 +46,7 @@ export default function LandingStudentPivot({ onFunnel }) {
 
         {/* Single CTA */}
         <motion.div variants={fade}>
-          <button
-            onClick={() => onFunnel('quiz')}
-            className="inline-flex items-center gap-2 rounded-xl px-10 py-5 text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-              boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-            }}
-          >
-            Find out where you actually stand →
-          </button>
+          <PrimaryCTA text="Find out where you actually stand" onClick={() => onFunnel('quiz')} />
         </motion.div>
 
         {/* Stats row */}

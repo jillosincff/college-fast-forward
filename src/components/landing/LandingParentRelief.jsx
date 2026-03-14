@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const FONT_LINK_ID = 'parent-relief-fonts';
 function ensureFonts() {
@@ -160,44 +161,7 @@ export default function LandingParentRelief({ onCTA }) {
 
         {/* CTA block */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, ...fadeUp(0.33) }}>
-          <button
-            onClick={onCTA}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#d44e14';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              const arrow = e.currentTarget.querySelector('.pr-arrow');
-              if (arrow) arrow.style.transform = 'translateX(3px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#E85D20';
-              e.currentTarget.style.transform = 'translateY(0)';
-              const arrow = e.currentTarget.querySelector('.pr-arrow');
-              if (arrow) arrow.style.transform = 'translateX(0)';
-            }}
-            style={{
-              fontFamily: dmSans,
-              fontSize: 16,
-              fontWeight: 500,
-              color: '#fff',
-              background: '#E85D20',
-              borderRadius: 100,
-              padding: '16px 40px',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              transition: 'all 0.2s ease',
-              minHeight: 'auto',
-              minWidth: 'auto',
-              width: 'auto',
-            }}
-          >
-            Join the Network — $9/month
-            <svg className="pr-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 0.15s ease' }}>
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          <PrimaryCTA text="Join the Network — $9/month" onClick={onCTA} />
 
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.25)', lineHeight: 1.6, margin: 0 }}>
             Cancel anytime. No contracts. Takes <b style={{ fontWeight: 400, color: 'rgba(244,240,232,0.4)' }}>30 seconds</b> to join.

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import InteractiveTeaserDemo from '@/components/landing/InteractiveTeaserDemo';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const fade = {
   hidden: { opacity: 0, y: 24 },
@@ -34,16 +35,7 @@ export default function LandingFastIQIntro({ onCTA }) {
         </motion.div>
 
         <div className="text-center">
-          <button
-            onClick={onCTA}
-            className="px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
-            style={{
-              background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-              boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-            }}
-          >
-            Claim Your Free Spot →
-          </button>
+          <PrimaryCTA text="Claim Your Free Spot" onClick={onCTA} />
         </div>
       </div>
     </div>

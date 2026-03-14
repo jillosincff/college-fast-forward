@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
 
 const fade = {
   hidden: { opacity: 0, y: 24 },
@@ -81,17 +81,7 @@ export default function LandingPainBlock({ onCTA }) {
         </motion.p>
 
         <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-          <button
-            onClick={onCTA}
-            className="inline-flex items-center gap-2 px-10 py-5 rounded-xl text-[17px] font-bold text-white transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_8px_4px_rgba(250,70,22,0.35)]"
-            style={{
-              background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
-              boxShadow: '0 4px 30px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1)',
-            }}
-          >
-            See How It Works
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          <PrimaryCTA text="See How It Works" onClick={onCTA} />
         </motion.div>
       </div>
     </div>
