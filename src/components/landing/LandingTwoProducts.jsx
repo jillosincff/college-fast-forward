@@ -56,7 +56,7 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
       ref={ref}
       className="landing-two-products"
       style={{
-        background: '#0d1117',
+        background: '#0a1016',
         padding: '80px 24px 88px',
         position: 'relative',
         overflow: 'hidden',

@@ -71,7 +71,7 @@ export default function LandingTestimonials({ onClaim }) {
       ref={sectionRef}
       className="landing-testimonials"
       style={{
-        background: '#0d1117',
+        background: '#0a1016',
         padding: '72px 48px 80px',
         overflow: 'hidden',
         position: 'relative',

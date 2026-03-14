@@ -44,7 +44,7 @@ export default function LandingFooterCTA({ stats, onClaim }) {
         ref={ref}
         className="landing-footer-cta"
         style={{
-          background: '#0d1117',
+          background: '#0a1016',
           borderTop: '0.5px solid rgba(255,255,255,0.08)',
           padding: '72px 48px 64px',
           textAlign: 'center',
