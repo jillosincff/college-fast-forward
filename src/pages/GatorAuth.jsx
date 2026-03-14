@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Loader2, GraduationCap, Heart, ArrowRight, Award } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -439,46 +438,27 @@ export default function GatorAuth() {
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'welcome-back') {
-    // Both parents and alumni go to ParentDashboard
     const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' || 
                               user?.roles?.includes('parent') || user?.roles?.includes('alumni');
     const dashboardUrl = isParentOrAlumni ? 'ParentDashboard' : 'Dashboard';
-    
-    // Auto-redirect handled by useEffect above (prevents memory leak)
+    const firstName = user?.first_name || (user?.full_name && user.full_name.includes(' ') ? user.full_name.split(' ')[0] : null) || 'there';
     
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-lg text-center">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">👋</span>
-            </div>
-            
-            <h1 className="text-2xl font-bold text-slate-900 mb-3">
-              Welcome back, {user?.first_name || (user?.full_name && user.full_name.includes(' ') ? user.full_name.split(' ')[0] : null) || 'there'}!
-            </h1>
-            <p className="text-slate-600 mb-6">
-              You're already registered. Taking you to your dashboard...
-            </p>
-            
-            <div className="flex items-center justify-center gap-2 text-slate-500 mb-6">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Redirecting...</span>
-            </div>
-            
-            <Button
-              onClick={() => navigate(dashboardUrl)}
-              className="w-full h-12"
-              style={{ backgroundColor: '#0021A5' }}
-            >
-              Go to Dashboard Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+      <AuthPageShell>
+        <AuthCard>
+          <LogoBlock />
+          <h1 style={S.headline}>Welcome back, {firstName}.</h1>
+          <p style={S.subhead}>You're already registered. Taking you to your dashboard...</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '24px 0' }}>
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(244,240,232,0.4)' }} />
+            <span style={{ ...S.finePrint, fontSize: 14 }}>Redirecting...</span>
           </div>
-        </div>
-      </div>
+          <button onClick={() => navigate(dashboardUrl)} style={S.primaryBtn}>
+            Go to Dashboard Now
+            <ArrowSVG color="#fff" />
+          </button>
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 
@@ -488,14 +468,12 @@ export default function GatorAuth() {
   
   if (step === null || step === 'processing' || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
-          <p className="text-white text-lg font-semibold">Setting up your account...</p>
+      <AuthPageShell>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#E85D20', margin: '0 auto 16px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.5)' }}>Setting up your account...</p>
         </div>
-      </div>
+      </AuthPageShell>
     );
   }
 
@@ -504,54 +482,35 @@ export default function GatorAuth() {
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'oauth') {
+    const roleLabel = selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alumni';
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-lg text-center">
-          
-          <div className="flex justify-center mb-6">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl flex items-center justify-center">
-              <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-                alt="College Fast Forward"
-                className="w-20 h-20 object-contain rounded-full"
-              />
-            </div>
-          </div>
+      <AuthPageShell>
+        <AuthCard delay={0}>
+          <LogoBlock delay={0.05} />
+          <h1 style={{ ...S.headline, animDelay: '0.1s' }}>Almost there.</h1>
+          <p style={{ ...S.subhead, marginBottom: 32 }}>Sign in to continue as {roleLabel}</p>
 
-          <h1 className="text-3xl font-bold text-white mb-3">
-            Almost there!
-          </h1>
-          <p className="text-white/85 text-lg mb-8">
-            Sign in to continue as {selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alumni'}
-          </p>
-
-          <Button
+          <button
             onClick={() => handleGoogleSignIn(false)}
             disabled={loading}
-            className="w-full max-w-sm mx-auto h-14 text-base font-semibold bg-white text-slate-800 hover:bg-slate-50 shadow-lg mb-4"
+            style={{ ...S.googleBtn, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
           >
             {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Connecting...
-              </>
+              <><Loader2 className="w-5 h-5 animate-spin" style={{ color: '#f4f0e8', marginRight: 10 }} />Connecting...</>
             ) : (
-              <>
-                <GoogleIcon />
-                Continue with Google
-              </>
+              <><GoogleIcon /><span>Continue with Google</span></>
             )}
-          </Button>
+          </button>
 
-          <p className="text-white/70 text-sm mb-6">
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)', textAlign: 'center', marginTop: 12, marginBottom: 20 }}>
             Works with any email — Gmail, UFL, Outlook, etc.
           </p>
 
           {selectedRole === 'gator' && (
-            <div className="bg-white/10 rounded-xl p-4 max-w-sm mx-auto mb-6">
-              <p className="text-amber-300 text-sm font-medium">
+            <div style={{ background: 'rgba(232,93,32,0.08)', border: '0.5px solid rgba(232,93,32,0.2)', borderRadius: 12, padding: '12px 16px', textAlign: 'center', marginBottom: 20 }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#E85D20' }}>
                 🎓 <strong>UF Students:</strong> Use your @ufl.edu email for instant access
               </p>
             </div>
@@ -559,19 +518,15 @@ export default function GatorAuth() {
 
           <button
             onClick={() => setStep('role-select')}
-            className="text-white/60 text-sm hover:text-white/80 underline"
+            style={{ ...S.linkBtn, display: 'block', margin: '0 auto 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)', textDecoration: 'underline', minHeight: 'auto', width: 'auto' }}
           >
             ← Back to role selection
           </button>
 
-          <p className="text-white/50 text-xs mt-8 max-w-xs mx-auto">
-            By continuing, you agree to our{' '}
-            <button onClick={() => navigate('Terms')} className="text-white/70 underline bg-transparent border-none p-0 cursor-pointer">Terms</button> and{' '}
-            <button onClick={() => navigate('Privacy')} className="text-white/70 underline bg-transparent border-none p-0 cursor-pointer">Privacy Policy</button>
-          </p>
-
-        </div>
-      </div>
+          <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+          <FinePrint />
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 
@@ -580,222 +535,136 @@ export default function GatorAuth() {
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'role-select') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 overflow-x-hidden" style={{
-        background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-      }}>
-        <div className="w-full max-w-lg">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 shadow-lg flex items-center justify-center">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-                  alt="College Fast Forward"
-                  className="w-16 h-16 object-contain rounded-full"
-                />
-              </div>
-            </div>
-            
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-                {error}
-              </div>
-            )}
-            
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                Welcome to College Fast Forward
-              </h1>
-              <p className="text-slate-600">
-                Tap your role to get started
-              </p>
-            </div>
+    const roles = [
+      {
+        id: 'gator',
+        name: "I'm a UF Student",
+        desc: 'Find warm intros, build your network, and land the job.',
+        encouraged: 'UF email encouraged',
+        iconBg: 'rgba(232,93,32,0.1)',
+        iconBorder: 'rgba(232,93,32,0.2)',
+        icon: <GradCapSVG />,
+      },
+      {
+        id: 'parent',
+        name: "I'm a UF Parent",
+        desc: "Support your student's career journey. Take the pledge.",
+        iconBg: 'rgba(255,255,255,0.06)',
+        iconBorder: 'rgba(255,255,255,0.1)',
+        icon: <HeartSVG />,
+      },
+      {
+        id: 'alumni',
+        name: "I'm a UF Alumni",
+        desc: "Give back. One conversation changes a student's career.",
+        iconBg: 'rgba(255,255,255,0.06)',
+        iconBorder: 'rgba(255,255,255,0.1)',
+        icon: <AwardSVG />,
+      },
+    ];
 
-            <div className="space-y-4 mb-8">
-              
-              {/* Student Option */}
+    const handleCardClick = (roleId) => {
+      console.log('🔵 [GatorAuth]', roleId, 'button clicked');
+      setSelectedRole(roleId);
+      try {
+        localStorage.setItem('pending_invite_role', roleId);
+        localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+      } catch (e) { console.warn('localStorage unavailable:', e); }
+
+      if (!user) {
+        setStep('oauth');
+        return;
+      }
+
+      if (roleId === 'gator') {
+        const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
+        if (isUFLStudent) {
+          setLoading(true);
+          base44.auth.updateMe({
+            persona: 'gator', roles: ['gator'], onboarding_completed: false,
+            is_new_signup: true, invite_code_used: 'ufl_direct'
+          }).then(() => {
+            localStorage.removeItem('pending_invite_role');
+            if (refreshUser) refreshUser();
+            navigate('StudentOnboarding');
+          });
+        } else {
+          setError('Students must use their @ufl.edu email address.');
+        }
+        return;
+      }
+
+      // Parent / Alumni
+      let hasInviteCode = null;
+      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
+      if (!hasInviteCode) {
+        navigate('GatorInviteCode');
+      } else {
+        handleRoleSelect();
+      }
+    };
+
+    return (
+      <AuthPageShell>
+        <AuthCard delay={0}>
+          <LogoBlock delay={0.05} />
+
+          {error && (
+            <div style={{ background: 'rgba(220,38,38,0.1)', border: '0.5px solid rgba(220,38,38,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#f87171', lineHeight: 1.5 }}>{error}</p>
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center', marginBottom: 8, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.1s' }}>
+            <h1 style={S.headline}>Welcome.</h1>
+            <p style={S.subhead}>You're in the right place. Tell us who you are.</p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+            {roles.map((r, i) => (
+              <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />
+            ))}
+          </div>
+
+          {loading && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#E85D20' }} />
+              <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.4)' }}>Setting up...</span>
+            </div>
+          )}
+
+          <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+          <FinePrint />
+
+          <div style={{ textAlign: 'center', marginTop: 16, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.3s' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
+              Already have an account?{' '}
               <button
                 onClick={() => {
-                  console.log('🔵 [GatorAuth] Student button clicked');
-                  setSelectedRole('gator');
-                  try {
-                    localStorage.setItem('pending_invite_role', 'gator');
-                    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-                  } catch (e) {
-                    console.warn('localStorage unavailable:', e);
-                  }
-                  if (!user) {
-                    setStep('oauth');
-                  } else {
-                    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-                    if (isUFLStudent) {
-                      setLoading(true);
-                      base44.auth.updateMe({
-                        persona: 'gator', roles: ['gator'], onboarding_completed: false,
-                        is_new_signup: true, invite_code_used: 'ufl_direct'
-                      }).then(() => {
-                        localStorage.removeItem('pending_invite_role');
-                        if (refreshUser) refreshUser();
-                        navigate('StudentOnboarding');
-                      });
-                    } else {
-                      setError('Students must use their @ufl.edu email address.');
-                    }
-                  }
+                  try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* private browsing */ }
+                  handleGoogleSignIn(true);
                 }}
-                className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                  selectedRole === 'gator'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E85D20', minHeight: 'auto', width: 'auto', padding: 0 }}
+                onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-slate-900">I'm a UF Student</h3>
-                    <p className="text-sm text-slate-600">Find jobs, internships & roommates</p>
-                    <p className="text-xs text-orange-600 mt-1 font-medium">Requires @ufl.edu email</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-slate-400" />
-                </div>
+                Sign in here →
               </button>
-
-              {/* Parent Option */}
-                <button
-                  onClick={() => {
-                    console.log('🔵 [GatorAuth] Parent button clicked');
-                    setSelectedRole('parent');
-                    // Auto-advance: save role and proceed immediately
-                    try {
-                      localStorage.setItem('pending_invite_role', 'parent');
-                      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-                    } catch (e) {
-                      console.warn('localStorage unavailable:', e);
-                    }
-                    if (!user) {
-                      console.log('🔵 [GatorAuth] No user, advancing to OAuth');
-                      setStep('oauth');
-                    } else {
-                      let hasInviteCode = null;
-                      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
-                      if (!hasInviteCode) {
-                        navigate('GatorInviteCode');
-                      } else {
-                        // Has invite code already — proceed with role assignment
-                        handleRoleSelect();
-                      }
-                    }
-                  }}
-                  className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                    selectedRole === 'parent'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-red-500 fill-red-500" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-slate-900">I'm a UF Parent</h3>
-                      <p className="text-sm text-slate-600">Support your student's career journey</p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
-                  </div>
-                </button>
-
-                {/* Alumni Option */}
-                <button
-                  onClick={() => {
-                    console.log('🔵 [GatorAuth] Alumni button clicked');
-                    setSelectedRole('alumni');
-                    try {
-                      localStorage.setItem('pending_invite_role', 'alumni');
-                      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-                    } catch (e) {
-                      console.warn('localStorage unavailable:', e);
-                    }
-                    if (!user) {
-                      setStep('oauth');
-                    } else {
-                      let hasInviteCode = null;
-                      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
-                      if (!hasInviteCode) {
-                        navigate('GatorInviteCode');
-                      } else {
-                        handleRoleSelect();
-                      }
-                    }
-                  }}
-                  className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                    selectedRole === 'alumni'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Award className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-slate-900">I'm a UF Alumni</h3>
-                      <p className="text-sm text-slate-600">Give back & help UF students get hired</p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
-                  </div>
-                </button>
-
-            </div>
-
-            {loading && (
-              <div className="flex items-center justify-center gap-2 text-slate-500 py-3">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm">Setting up...</span>
-              </div>
-            )}
-            
-            <p className="text-slate-400 text-xs mt-6 text-center">
-              By continuing, you agree to our{' '}
-              <button onClick={() => navigate('Terms')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Terms</button> and{' '}
-              <button onClick={() => navigate('Privacy')} className="text-slate-500 underline bg-transparent border-none p-0 cursor-pointer">Privacy Policy</button>
             </p>
-            
-            <div className="text-center mt-6 pt-4 border-t border-slate-200">
-              <p className="text-slate-600 text-sm">
-                Already have an account?{' '}
-                <button
-                  onClick={() => {
-                    // Clear any pending role and go straight to Google sign-in
-                    try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* private browsing */ }
-                    handleGoogleSignIn(true); // true = returning user
-                  }}
-                  className="text-[#0021A5] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
-                >
-                  Sign in here →
-                </button>
-              </p>
-            </div>
-
           </div>
-        </div>
-      </div>
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 
   // Fallback
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)'
-    }}>
-      <div className="text-center">
-        <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
-        <p className="text-white text-lg">Loading...</p>
+    <AuthPageShell>
+      <div style={{ textAlign: 'center' }}>
+        <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#E85D20', margin: '0 auto 16px' }} />
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.5)' }}>Loading...</p>
       </div>
-    </div>
+    </AuthPageShell>
   );
 }
 
