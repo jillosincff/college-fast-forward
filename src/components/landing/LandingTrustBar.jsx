@@ -46,10 +46,10 @@ export default function LandingTrustBar() {
             <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20', opacity: 0.7, flexShrink: 0 }} />
             <span className="trust-text"
               style={{
-                fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontFamily: "var(--font-body, 'DM Sans', sans-serif)",
                 fontSize: 13,
-                fontWeight: 400,
-                color: 'rgba(244,240,232,0.4)',
+                fontWeight: 300,
+                color: 'rgba(244,240,232,0.35)',
                 letterSpacing: '0.02em',
                 whiteSpace: 'nowrap',
               }}

@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Landing page design tokens ────────────────────── */
+:root {
+  --color-bg-primary: #0d1117;
+  --color-bg-secondary: #0a1016;
+  --color-bg-deep: #080c10;
+  --color-orange: #E85D20;
+  --color-orange-hover: #d44e14;
+  --color-text-primary: #f4f0e8;
+  --color-text-secondary: rgba(244,240,232,0.6);
+  --color-text-muted: rgba(244,240,232,0.35);
+  --color-text-hint: rgba(244,240,232,0.25);
+  --color-border-subtle: rgba(255,255,255,0.08);
+  --color-border-default: rgba(255,255,255,0.1);
+  --color-border-emphasis: rgba(255,255,255,0.2);
+  --color-orange-subtle: rgba(232,93,32,0.08);
+  --color-orange-border: rgba(232,93,32,0.25);
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 100px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
