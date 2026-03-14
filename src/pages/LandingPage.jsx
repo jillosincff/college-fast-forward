@@ -8,6 +8,7 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import LandingHero from '@/components/landing/LandingHero';
+import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import LandingTrustBar from '@/components/landing/LandingTrustBar';
 import LandingPainBlock from '@/components/landing/LandingPainBlock';
 import LandingFastIQIntro from '@/components/landing/LandingFastIQIntro';
@@ -66,15 +67,8 @@ export default function LandingPage() {
 
       <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0A1628' }}>
 
-        {/* NAV */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0021A5]/95 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-            <span className="text-white font-bold text-base sm:text-lg tracking-tight">College Fast Forward</span>
-            <Button onClick={handleSignIn} variant="ghost" className="text-white hover:bg-white/10 font-semibold">
-              Sign In
-            </Button>
-          </div>
-        </nav>
+        {/* STICKY NAV (appears after scroll) */}
+        <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleClaim} />
 
         {/* 1 — HERO */}
         <LandingHero stats={stats} onClaim={handleClaim} />
