@@ -42,17 +42,35 @@ export default function MatchesReview() {
       const cached = sessionStorage.getItem('onboarding_matches');
       if (cached) {
         const parsed = JSON.parse(cached);
-        setMatches(filterValidMatches(parsed));
-        setLoading(false);
-        return;
+        const filtered = filterValidMatches(parsed);
+        if (filtered.length > 0) {
+          setMatches(filtered);
+          setLoading(false);
+          return;
+        }
+        // Empty after filtering — fall through to fresh fetch
       }
       
-      // Otherwise fetch fresh
-      const studentMatches = await base44.entities.Match.filter(
-        { student_email: user?.email },
-        '-match_score',
-        50
-      );
+      // Fetch fresh from API (retry up to 3 times with delay for match generation)
+      let studentMatches = [];
+      for (let attempt = 0; attempt < 3; attempt++) {
+        studentMatches = await base44.entities.Match.filter(
+          { student_email: user?.email },
+          '-match_score',
+          50
+        );
+        const filtered = filterValidMatches(studentMatches || []);
+        if (filtered.length > 0) {
+          setMatches(filtered);
+          setLoading(false);
+          return;
+        }
+        // Wait before retrying (matches may still be generating)
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 3000));
+        }
+      }
+      // After all retries, use whatever we got
       setMatches(filterValidMatches(studentMatches || []));
     } catch (e) {
       console.error('Failed to load matches:', e);
