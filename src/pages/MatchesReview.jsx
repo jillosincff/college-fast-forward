@@ -68,7 +68,7 @@ export default function MatchesReview() {
   // Pre-fill message when match changes
   useEffect(() => {
     if (currentMatch && user) {
-      const firstName = getFirstName(currentMatch.helper_name || currentMatch.parent_name);
+      const firstName = getFirstName(currentMatch.parent_name || currentMatch.peer_name || currentMatch.helper_name);
       const studentMajor = user.major || '';
       const studentYear = user.graduation_year || '';
       
