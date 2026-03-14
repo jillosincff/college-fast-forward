@@ -56,10 +56,10 @@ export default function LandingParentRelief({ onCTA }) {
             }}
           >
             <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] font-bold">
-              You don't need to know someone at Google.
+              If you can't directly help your kid,
             </p>
             <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold mt-2">
-              FASTIQ will find a fellow Gator who works there.
+              we'll find someone who can.
             </p>
           </motion.div>
 
