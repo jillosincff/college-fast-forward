@@ -31,13 +31,16 @@ export default function LandingParentRelief({ onCTA }) {
               You're watching your kid spend hours on Handshake, applying to everything, hearing nothing back.
             </p>
             <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              You'd help if you could — but your network is in accounting, not their target industry. You can't make introductions to people you don't know.
+              You feel helpless because you don't have any contacts in their target industry.
             </p>
             <p className="text-[#FA4616] text-[20px] sm:text-[22px] leading-[1.6] font-bold">
               That's why we built this.
             </p>
             <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
-              CFF connects your student to thousands of parents and alumni who <span className="font-bold text-white">HAVE</span> those connections. And FASTIQ — our AI career engine — searches the entire web to find alumni from their school at any company, then drafts a personalized warm intro they can send with one tap.
+              CFF connects your student to thousands of parents and alumni who <span className="font-bold text-white">HAVE</span> those connections — people who work at the companies your kid dreams about, and who've agreed to help.
+            </p>
+            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7]">
+              And FASTIQ — our AI career engine — goes even further. It searches the entire web to find alumni from their school at any company, then writes a personalized warm intro they can send with one tap.
             </p>
           </motion.div>
 
