@@ -25,10 +25,10 @@ export default function LandingHero({ stats, onClaim }) {
     : 'LIMITED FREE FOUNDING SPOTS REMAINING';
 
   return (
-    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ backgroundColor: '#0021A5', position: 'relative', overflow: 'hidden' }}>
-      {/* gradient fade into dark sections below */}
-      <div aria-hidden style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, transparent, #0d1117)', pointerEvents: 'none', zIndex: 1 }} />
-      <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 2 }}>
+    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 25%, #0821A5 60%, #0821A5 100%)', position: 'relative', overflow: 'hidden' }}>
+      {/* radial warm glow overlay */}
+      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, rgba(8,33,165,0.0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 1 }}>
 
         {/* Urgency eyebrow */}
         <motion.div

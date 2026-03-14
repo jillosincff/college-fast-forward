@@ -18,7 +18,7 @@ export default function LandingTrustBar() {
         alignItems: 'center',
         flexWrap: 'wrap',
         gap: 32,
-        background: 'rgba(255,255,255,0.03)',
+        background: 'linear-gradient(to bottom, #0821A5 0%, #0d1117 100%)',
         borderTop: '0.5px solid rgba(255,255,255,0.06)',
         borderBottom: '0.5px solid rgba(255,255,255,0.06)',
         padding: '16px 40px',
