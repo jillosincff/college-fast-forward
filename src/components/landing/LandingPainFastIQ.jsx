@@ -118,7 +118,7 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <span className="text-[11px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
             <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] font-bold max-w-2xl mx-auto">
-              FASTIQ finds real UF grads already inside your target companies, drafts highly-responsive messages to them, and gets your kid in the door — bypassing thousands of other cold applicants.
+              FASTIQ finds real UF grads at your kid's dream companies, writes the perfect intro message, and gets them in the door — bypassing thousands of cold applicants.
             </p>
           </motion.div>
 
@@ -145,7 +145,6 @@ export default function LandingPainFastIQ({ onFastIQ }) {
           </div>
         </div>
       </div>
-
     </section>
   );
 }
