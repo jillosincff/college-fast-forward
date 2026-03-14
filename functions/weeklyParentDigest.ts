@@ -1,182 +1,118 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+const APP = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
+const SGK = Deno.env.get("SENDGRID_API_KEY");
+const DM = "'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+const PF = "'Playfair Display',Georgia,'Times New Roman',serif";
+const YR = new Date().getFullYear();
+
+const emailWrap = (pre, body, unsub) => `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<span style="display:none;font-size:1px;color:#f4f2ee;max-height:0;overflow:hidden;">${pre}&zwnj;&nbsp;</span>
+</head><body style="margin:0;padding:0;background-color:#f4f2ee;font-family:${DM};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f2ee;"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+<tr><td style="background-color:#0d1117;border-radius:16px 16px 0 0;padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><span style="font-family:${DM};font-size:18px;font-weight:600;color:#f4f0e8;">C<span style="color:#E85D20;">FF</span></span><span style="font-family:${DM};font-size:11px;font-weight:400;color:rgba(244,240,232,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-left:12px;">College Fast Forward</span></td><td align="right"></td></tr></table></td></tr>
+<tr><td style="background-color:#fff;padding:36px 32px;">${body}</td></tr>
+<tr><td style="background-color:#0d1117;border-radius:0 0 16px 16px;padding:20px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.3);line-height:1.6;">&copy; ${YR} College Fast Forward.<br><a href="${unsub||APP+'/#ProfileEdit'}" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Unsubscribe</a> &middot; <a href="${APP}/#ProfileEdit" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Email preferences</a> &middot; <a href="${APP}" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Visit CFF</a></td><td align="right" style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.2);">University of Florida &middot; ${YR}</td></tr></table></td></tr>
+</table></td></tr></table></body></html>`;
+
+const qCard = (cat, text, name, year, major, url, karma) => `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-left:3px solid #E85D20;background:#fff;border-radius:0 12px 12px 0;margin:8px 0;"><tr><td style="padding:14px 16px;">
+${cat?`<p style="font-family:${DM};font-size:10px;font-weight:500;color:#E85D20;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;">${cat}</p>`:''}
+<p style="font-family:${PF};font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.4;margin:0 0 6px;">${text}</p>
+<p style="font-family:${DM};font-size:12px;font-weight:300;color:#888;margin:0 0 10px;">${[name,year,major].filter(Boolean).join(' &middot; ')}</p>
+<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#E85D20;border-radius:100px;padding:6px 16px;"><a href="${url}" style="font-family:${DM};font-size:12px;font-weight:500;color:#fff;text-decoration:none;">Answer this +${karma||5} karma &rarr;</a></td></tr></table>
+</td></tr></table>`;
+
+const CATS = { networking:'Networking & Outreach', career_path:'Career Path', first_job:'First Job Advice', industry:'Industry-Specific' };
+function firstName(n) { if (!n) return 'there'; if (n.includes(',')) { const p=n.split(','); return (p[1]||'').trim().split(/\s+/)[0]||'there'; } return n.split(' ')[0]; }
+function trunc(s,m) { return !s?'':s.length>m?s.substring(0,m-3)+'...':s; }
+
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
-  const APP_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
-  const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
-
   try {
-    // Called by trusted scheduled automation — no user auth required
+    const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
 
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const [allUsers, recentQ, recentA, allPrefs, allDigests] = await Promise.all([
+      base44.asServiceRole.entities.User.filter({}, '-updated_date', 500),
+      base44.asServiceRole.entities.JobRequest.filter({ status:'active', poster_type:'student' }, '-created_date', 100),
+      base44.asServiceRole.entities.Answer.filter({}, '-created_date', 500),
+      base44.asServiceRole.entities.EmailPreference.filter({}, undefined, 500),
+      base44.asServiceRole.entities.ReengagementEmail.filter({ email_type:'weekly_parent_digest' }, '-sent_at', 500),
+    ]);
 
-    // Get all parents with completed onboarding — batch to avoid rate limits
-    const allUsers = await base44.asServiceRole.entities.User.filter({}, '-updated_date', 500);
-    const parents = (allUsers || []).filter(u =>
-      (u.persona === 'parent' || u.roles?.includes('parent')) &&
-      u.onboarding_completed !== false &&
-      u.email && !u.email.includes('service+')
-    );
+    const parents = (allUsers||[]).filter(u => (u.persona==='parent'||u.roles?.includes('parent')) && u.onboarding_completed!==false && u.email && !u.email.includes('service+'));
+    const thisWeekQ = (recentQ||[]).filter(q => q.created_date && new Date(q.created_date).toISOString()>=oneWeekAgo && !q.is_alumni_career_request);
+    const prefsMap = new Map((allPrefs||[]).map(p => [p.user_email, p]));
 
-    // Get this week's questions
-    const recentQuestions = await base44.asServiceRole.entities.JobRequest.filter(
-      { status: 'active', poster_type: 'student' },
-      '-created_date',
-      100
-    );
-    const thisWeekQuestions = (recentQuestions || []).filter(q =>
-      q.created_date && new Date(q.created_date).toISOString() >= oneWeekAgo &&
-      !q.is_alumni_career_request
-    );
+    let sent = 0, skipped = 0;
+    for (const parent of parents.slice(0, 50)) {
+      const pr = prefsMap.get(parent.email);
+      if (pr?.all_emails===false || pr?.weekly_digest===false) { skipped++; continue; }
+      if ((allDigests||[]).some(e => e.user_email===parent.email && e.sent_at && e.sent_at>=oneWeekAgo)) { skipped++; continue; }
+      if (sent > 0 && sent % 10 === 0) await new Promise(r => setTimeout(r, 1000));
 
-    // Get all answers for karma counting  
-    const recentAnswers = await base44.asServiceRole.entities.Answer.filter({}, '-created_date', 500);
-
-    // Pre-fetch email prefs and existing digests in bulk to reduce per-parent queries
-    const allPrefs = await base44.asServiceRole.entities.EmailPreference.filter({}, undefined, 500);
-    const prefsMap = new Map((allPrefs || []).map(p => [p.user_email, p]));
-
-    const allDigests = await base44.asServiceRole.entities.ReengagementEmail.filter({ email_type: 'weekly_parent_digest' }, '-sent_at', 500);
-
-    let sent = 0;
-    let skipped = 0;
-
-    // Limit to 50 parents per run to avoid timeouts
-    const batchParents = parents.slice(0, 50);
-
-    for (const parent of batchParents) {
-      // Check email preferences from pre-fetched map
-      const prefs = prefsMap.get(parent.email);
-      if (prefs?.all_emails === false || prefs?.weekly_digest === false) {
-        skipped++;
-        continue;
-      }
-
-      // Check if already sent this week from pre-fetched data
-      const alreadySentThisWeek = (allDigests || []).some(e => 
-        e.user_email === parent.email && e.sent_at && e.sent_at >= oneWeekAgo
-      );
-      if (alreadySentThisWeek) {
-        skipped++;
-        continue;
-      }
-
-      // Find questions matching parent's industry
-      const parentIndustry = parent.industries?.[0] || parent.industry;
-      // Small delay between sends to avoid rate limits
-      if (sent > 0 && sent % 10 === 0) {
-        await new Promise(r => setTimeout(r, 1000));
-      }
-
-      const matchedQuestions = parentIndustry
-        ? thisWeekQuestions.filter(q => q.target_industry?.toLowerCase().includes(parentIndustry.toLowerCase()))
-        : thisWeekQuestions;
-
-      // Count parent's karma (answers)
-      const parentAnswers = (recentAnswers || []).filter(a => a.answerer_email === parent.email);
-      const karmaScore = parentAnswers.length * 15;
-      const studentsHelped = new Set(parentAnswers.map(a => a.question_id)).size;
-
-      // Find a featured unanswered question
-      const unanswered = (matchedQuestions.length > 0 ? matchedQuestions : thisWeekQuestions)
-        .filter(q => (q.answer_count || 0) === 0);
+      const pInd = parent.industries?.[0] || parent.industry;
+      const matchedQ = pInd ? thisWeekQ.filter(q => q.target_industry?.toLowerCase().includes(pInd.toLowerCase())) : thisWeekQ;
+      const pAnswers = (recentA||[]).filter(a => a.answerer_email===parent.email);
+      const karma = pAnswers.length * 15;
+      const helped = new Set(pAnswers.map(a => a.question_id)).size;
+      const unanswered = (matchedQ.length>0?matchedQ:thisWeekQ).filter(q => (q.answer_count||0)===0);
       const featured = unanswered[0];
 
-      const firstName = (() => {
-        const fn = parent.full_name?.trim() || '';
-        if (fn.includes(',')) return fn.split(',')[1]?.trim().split(/\s+/)[0] || 'there';
-        return fn.split(/\s+/)[0] || 'there';
-      })();
+      const fn = firstName(parent.full_name);
+      const subject = `Your weekly roundup — ${thisWeekQ.length} students need answers`;
+      const preheader = featured ? `${firstName(featured.poster_name)} asked a question in your field. Can you help?` : `${thisWeekQ.length} new questions this week.`;
 
-      const subject = `This week at UF — ${thisWeekQuestions.length} students who need your help`;
+      // Stats row
+      const stats = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;"><tr>
+<td width="30%" align="center" style="padding:16px;background:#f4f2ee;border-radius:12px;"><p style="font-family:${PF};font-size:24px;font-weight:700;color:#E85D20;margin:0 0 4px;">${thisWeekQ.length}</p><p style="font-family:${DM};font-size:11px;font-weight:300;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin:0;">Questions this week</p></td>
+<td width="5%"></td>
+<td width="30%" align="center" style="padding:16px;background:#f4f2ee;border-radius:12px;"><p style="font-family:${PF};font-size:24px;font-weight:700;color:#E85D20;margin:0 0 4px;">${helped}</p><p style="font-family:${DM};font-size:11px;font-weight:300;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin:0;">You've helped</p></td>
+<td width="5%"></td>
+<td width="30%" align="center" style="padding:16px;background:#f4f2ee;border-radius:12px;"><p style="font-family:${PF};font-size:24px;font-weight:700;color:#E85D20;margin:0 0 4px;">${karma}</p><p style="font-family:${DM};font-size:11px;font-weight:300;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin:0;">Your karma</p></td>
+</tr></table>`;
 
-      const featuredHtml = featured ? `
-        <div style="background: #FFF7ED; border: 2px solid #FA4616; padding: 20px; border-radius: 12px; margin: 24px 0;">
-          <p style="color: #FA4616; font-weight: 700; margin: 0 0 8px 0;">🌟 Question of the Week</p>
-          <p style="color: #1E293B; font-size: 15px; margin: 0 0 12px 0;">"${(featured.title || featured.description || '').substring(0, 150)}"</p>
-          <p style="color: #64748B; font-size: 13px; margin: 0 0 12px 0;">— ${featured.poster_name || 'A UF Student'} · ${featured.student_major || ''} ${featured.student_year ? `'${featured.student_year}` : ''}</p>
-          <a href="${APP_URL}/#QuestionDetail?id=${featured.id}" style="display: inline-block; background: #FA4616; color: white; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-weight: 600;">Answer This Question (+15 karma) →</a>
-        </div>
-      ` : '';
+      const featuredCard = featured ? qCard(
+        CATS[featured.category] || '',
+        trunc(featured.title || featured.description, 120),
+        firstName(featured.poster_name), featured.student_year||'', featured.student_major||'',
+        `${APP}/#QuestionDetail?id=${featured.id}&utm_source=weekly_digest&utm_medium=email&utm_campaign=weekly_digest`, 15
+      ) : '';
 
-      const htmlBody = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #0021A5 0%, #001580 100%); padding: 32px 24px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 22px;">Your Weekly CFF Digest 📬</h1>
-          </div>
-          <div style="padding: 32px 24px;">
-            <p style="color: #334155; font-size: 16px; line-height: 1.6;">
-              Hi ${firstName}, here's what happened this week in the CFF network:
-            </p>
-            
-            <div style="display: flex; gap: 12px; margin: 24px 0;">
-              <div style="flex: 1; background: #F0F9FF; border-radius: 12px; padding: 16px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #0021A5;">${thisWeekQuestions.length}</div>
-                <div style="color: #64748B; font-size: 13px;">New Questions</div>
-              </div>
-              <div style="flex: 1; background: #FFF7ED; border-radius: 12px; padding: 16px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #FA4616;">${karmaScore}</div>
-                <div style="color: #64748B; font-size: 13px;">Your Karma</div>
-              </div>
-              <div style="flex: 1; background: #F0FDF4; border-radius: 12px; padding: 16px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #16A34A;">${studentsHelped}</div>
-                <div style="color: #64748B; font-size: 13px;">Students Helped</div>
-              </div>
-            </div>
+      const extraCards = (matchedQ.length>0?matchedQ:thisWeekQ).filter(q => q.id !== featured?.id).slice(0, 2).map(q =>
+        qCard(CATS[q.category]||'', trunc(q.title||q.description,100), firstName(q.poster_name), q.student_year||'', q.student_major||'', `${APP}/#QuestionDetail?id=${q.id}&utm_source=weekly_digest&utm_medium=email&utm_campaign=weekly_digest`, 5)
+      ).join('');
 
-            ${matchedQuestions.length > 0 ? `
-              <p style="color: #334155; font-size: 15px;">
-                <strong>${matchedQuestions.length} new questions</strong> match your ${parentIndustry || ''} background this week.
-              </p>
-            ` : ''}
+      const divider = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid rgba(0,0,0,0.06);font-size:0;">&nbsp;</td></tr></table>`;
 
-            ${featuredHtml}
+      const body = `
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;">This week in the network.</h1>
+${stats}
+${divider}
+${featured ? `<h2 style="font-family:${PF};font-size:20px;font-weight:700;color:#1a1a1a;letter-spacing:-0.01em;line-height:1.3;margin:0 0 6px;">A question that matches your background:</h2>${featuredCard}
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;"><a href="${APP}/#QuestionDetail?id=${featured.id}&utm_source=weekly_digest&utm_medium=email&utm_campaign=weekly_digest" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">Answer this question &rarr;</a></td></tr></table>` : ''}
+${extraCards ? `${divider}<h2 style="font-family:${PF};font-size:20px;font-weight:700;color:#1a1a1a;margin:0 0 6px;">More questions this week:</h2>${extraCards}
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="background-color:#0d1117;border-radius:100px;padding:14px 32px;"><a href="${APP}/#Connections?utm_source=weekly_digest&utm_medium=email&utm_campaign=weekly_digest" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">See all questions &rarr;</a></td></tr></table>` : ''}
+${divider}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;"><tr><td style="border-left:3px solid #E85D20;padding:12px 16px;background-color:#fff9f7;"><p style="font-family:${DM};font-size:14px;font-weight:400;color:#555;line-height:1.65;margin:0;">Every answer you give earns karma &mdash; and helps a student who&rsquo;s counting on this network.</p></td></tr></table>`;
 
-            <div style="text-align: center; margin: 24px 0;">
-              <a href="${APP_URL}/#ParentDashboard" style="display: inline-block; background: #0021A5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 700;">Go to Dashboard →</a>
-            </div>
-          </div>
-          <div style="background: #F8FAFC; padding: 20px 24px; text-align: center; border-top: 1px solid #E2E8F0;">
-            <p style="color: #94A3B8; font-size: 12px; margin: 0;">College Fast Forward — The Private Career Network for UF Families</p>
-          </div>
-        </div>
-      `;
+      const html = emailWrap(preheader, body);
 
-      const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SENDGRID_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: parent.email }] }],
-          from: { email: 'notifications@collegefastforward.com', name: 'College Fast Forward' },
-          subject,
-          content: [{ type: 'text/html', value: htmlBody }]
-        })
+        headers: { 'Authorization': `Bearer ${SGK}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ personalizations:[{to:[{email:parent.email}]}], from:{email:'notifications@collegefastforward.com',name:'College Fast Forward'}, subject, content:[{type:'text/html',value:html}] })
       });
 
-      await base44.asServiceRole.entities.ReengagementEmail.create({
-        user_id: parent.id,
-        user_email: parent.email,
-        email_type: 'weekly_parent_digest',
-        status: sgResponse.ok ? 'sent' : 'failed',
-        sent_at: new Date().toISOString()
-      });
-
-      await base44.asServiceRole.entities.EmailLog.create({
-        user_email: parent.email,
-        email_type: 'weekly_parent_digest',
-        subject,
-        status: sgResponse.ok ? 'sent' : 'failed',
-        sent_at: new Date().toISOString(),
-        persona: 'parent'
-      });
-
-      if (sgResponse.ok) sent++;
+      await Promise.all([
+        base44.asServiceRole.entities.ReengagementEmail.create({ user_id:parent.id, user_email:parent.email, email_type:'weekly_parent_digest', status:sgRes.ok?'sent':'failed', sent_at:new Date().toISOString() }),
+        base44.asServiceRole.entities.EmailLog.create({ user_email:parent.email, email_type:'weekly_parent_digest', subject, status:sgRes.ok?'sent':'failed', sent_at:new Date().toISOString(), persona:'parent' })
+      ]);
+      if (sgRes.ok) sent++;
     }
-
-    return Response.json({ success: true, totalParents: parents.length, sent, skipped });
+    return Response.json({ success:true, totalParents:parents.length, sent, skipped });
   } catch (error) {
     console.error('weeklyParentDigest error:', error);
     return Response.json({ error: error.message }, { status: 500 });

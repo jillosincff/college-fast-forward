@@ -1,138 +1,79 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg";
+const APP = Deno.env.get("APP_BASE_URL") || "https://www.collegefastforward.com";
+const DM = "'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+const PF = "'Playfair Display',Georgia,'Times New Roman',serif";
+const YR = new Date().getFullYear();
 
-function truncate(str, max) {
-  if (!str) return '';
-  return str.length > max ? str.substring(0, max) + '...' : str;
-}
+const emailWrap = (pre, body) => `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<span style="display:none;font-size:1px;color:#f4f2ee;max-height:0;overflow:hidden;">${pre}&zwnj;&nbsp;</span>
+</head><body style="margin:0;padding:0;background-color:#f4f2ee;font-family:${DM};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f2ee;"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+<tr><td style="background-color:#0d1117;border-radius:16px 16px 0 0;padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><span style="font-family:${DM};font-size:18px;font-weight:600;color:#f4f0e8;">C<span style="color:#E85D20;">FF</span></span><span style="font-family:${DM};font-size:11px;font-weight:400;color:rgba(244,240,232,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-left:12px;">College Fast Forward</span></td><td align="right"></td></tr></table></td></tr>
+<tr><td style="background-color:#fff;padding:36px 32px;">${body}</td></tr>
+<tr><td style="background-color:#0d1117;border-radius:0 0 16px 16px;padding:20px 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.3);line-height:1.6;">&copy; ${YR} College Fast Forward.<br><a href="${APP}/#ProfileEdit" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Unsubscribe</a> &middot; <a href="${APP}/#ProfileEdit" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Email preferences</a></td><td align="right" style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.2);">University of Florida &middot; ${YR}</td></tr></table></td></tr>
+</table></td></tr></table></body></html>`;
+
+function trunc(s,m) { return !s?'':s.length>m?s.substring(0,m-3)+'...':s; }
+function initials(name) { return (name||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]?.toUpperCase()).join(''); }
 
 Deno.serve(async (req) => {
-    try {
-        const body = await req.json();
+  try {
+    const body = await req.json();
+    const { questionId, questionType, questionTitle, posterEmail, posterName, answererName, answererEmail, answererTitle, answererCompany, answererPersona, answerId, answerPreview } = body;
+    if (!posterEmail || !answererName || !answerPreview || !questionTitle) return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    if (posterEmail === answererEmail) return Response.json({ success: true, skipped: true, reason: 'Self-answer' });
 
-        const {
-            questionId,
-            questionType,
-            questionTitle,
-            posterEmail,
-            posterName,
-            answererName,
-            answererEmail,
-            answererTitle,
-            answererCompany,
-            answererPersona,
-            answerId,
-            answerPreview
-        } = body;
+    const base44 = createClientFromRequest(req);
+    const canSendResult = await base44.functions.invoke('emailHelpers', { action: 'canSendEmail', userEmail: posterEmail, emailType: 'new_answer' });
+    if (!canSendResult.data?.canSend) return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
 
-        if (!posterEmail || !answererName || !answerPreview || !questionTitle) {
-            return Response.json({ 
-                error: 'Missing required fields',
-                required: ['posterEmail', 'answererName', 'answerPreview', 'questionTitle']
-            }, { status: 400 });
-        }
+    const aFirst = (answererName||'Someone').split(' ')[0];
+    const answererRole = answererPersona==='parent'?'UF Parent':answererPersona==='alumni'?'UF Alumni':'Community Member';
+    const qPreview = trunc(questionTitle, 120);
+    const aPreview = trunc(answerPreview, 150);
+    const answerUrl = `${APP}/#QuestionDetail?id=${questionId}&type=${questionType||'help'}&utm_source=answer_notification&utm_medium=email&utm_campaign=answer_notification`;
 
-        // Don't notify if the author answered their own question
-        if (posterEmail === answererEmail) {
-            return Response.json({ success: true, skipped: true, reason: 'Self-answer' });
-        }
+    const subject = `${answererName} just answered your question`;
+    const preheader = trunc(answerPreview, 100);
 
-        const base44 = createClientFromRequest(req);
+    const content = `
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;"><span style="color:#1a1a1a;">${aFirst} answered</span> <span style="font-style:italic;font-weight:400;color:#E85D20;">your question.</span></h1>
 
-        // Anti-spam + preferences via shared helper
-        const canSendResult = await base44.functions.invoke('emailHelpers', {
-          action: 'canSendEmail', userEmail: posterEmail, emailType: 'new_answer'
-        });
-        if (!canSendResult.data?.canSend) {
-          return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
-        }
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;"><tr>
+<td style="border-left:3px solid #E85D20;padding:12px 16px;background-color:#fff9f7;">
+<p style="font-family:${DM};font-size:14px;font-weight:400;color:#555;line-height:1.65;margin:0;font-style:italic;">&ldquo;${qPreview}&rdquo;</p>
+</td></tr></table>
 
-        // Build display values
-        const firstName = (posterName || 'there').split(' ')[0];
-        const answererFirstName = (answererName || 'Someone').split(' ')[0];
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f2ee;border-radius:12px;margin:8px 0;"><tr><td style="padding:14px 16px;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+<td style="vertical-align:top;width:40px;"><div style="width:40px;height:40px;border-radius:50%;background-color:#0d1117;color:#fff;font-family:${DM};font-size:13px;font-weight:500;text-align:center;line-height:40px;display:inline-block;">${initials(answererName)}</div></td>
+<td style="padding-left:12px;vertical-align:top;">
+<p style="font-family:${DM};font-size:14px;font-weight:500;color:#1a1a1a;margin:0 0 2px;">${answererName}</p>
+<p style="font-family:${DM};font-size:12px;font-weight:300;color:#888;margin:0;">${[answererRole, answererTitle, answererCompany].filter(Boolean).join(' &middot; ')}</p>
+</td></tr></table></td></tr></table>
 
-        const answererRole = answererPersona === 'parent' ? 'UF Parent'
-            : answererPersona === 'alumni' ? 'UF Alumni'
-            : 'UF Student';
+<p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:16px 0;">&ldquo;${aPreview}&rdquo;</p>
 
-        const questionPreview = truncate(questionTitle, 120);
-        const displayAnswer = truncate(answerPreview, 150);
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr>
+<td style="background-color:#E85D20;border-radius:100px;padding:14px 32px;">
+<a href="${answerUrl}" style="font-family:${DM};font-size:15px;font-weight:500;color:#fff;text-decoration:none;">Read the full answer &rarr;</a>
+</td></tr></table>
 
-        const answerUrl = `${APP_BASE_URL}/#QuestionDetail?id=${questionId}&type=${questionType || 'help'}&utm_source=answer_notification`;
-        const thankUrl = `${APP_BASE_URL}/#QuestionDetail?id=${questionId}&type=${questionType || 'help'}&thank=${answerId || ''}&utm_source=answer_notification`;
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr><td style="border-top:1px solid rgba(0,0,0,0.06);font-size:0;">&nbsp;</td></tr></table>
+<p style="font-family:${DM};font-size:12px;font-weight:300;color:#aaa;line-height:1.6;margin:0;">Reply to keep the conversation going &mdash; parents who get a response are 4x more likely to make an introduction.</p>`;
 
-        const subject = `${answererName} answered your question!`;
+    const html = emailWrap(preheader, content);
 
-        const emailHtml = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${answererName} (${answererRole}) just responded to your question.</span>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; background: #f3f4f6; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 28px; text-align: center; border-radius: 12px 12px 0 0;">
-      <img src="${LOGO_URL}" alt="College Fast Forward" style="height: 60px; margin-bottom: 8px;" />
-    </div>
-    <div style="background: #fff; padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-      <p style="font-size: 18px; color: #111827; margin: 0 0 16px 0;">Hi ${firstName},</p>
-      <p style="font-size: 16px;">${answererName} (${answererRole}) just responded to your question:</p>
+    await base44.asServiceRole.integrations.Core.SendEmail({ to: posterEmail, subject, body: html, from_name: 'College Fast Forward' });
+    try { await base44.asServiceRole.entities.EmailLog.create({ user_email: posterEmail, email_type: 'new_answer', subject, status: 'sent', sent_at: new Date().toISOString(), metadata: { questionId, answererName, answerId } }); } catch {}
 
-      <div style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; padding: 20px 0; margin: 20px 0;">
-        <p style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 6px 0;">Your question:</p>
-        <p style="color: #374151; font-style: italic; margin: 0 0 20px 0; font-size: 15px;">"${questionPreview}"</p>
-
-        <p style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 6px 0;">Their answer:</p>
-        <p style="color: #374151; font-style: italic; margin: 0; font-size: 15px;">"${displayAnswer}"</p>
-      </div>
-
-      <div style="text-align: center; margin: 0 0 28px 0;">
-        <a href="${answerUrl}" style="display: inline-block; background: linear-gradient(135deg, #FA4616, #FF6B3D); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px;">Read Full Answer →</a>
-      </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0 0 20px 0;" />
-
-      <p style="font-size: 15px; color: #374151; margin: 0 0 16px 0;">Was this helpful? Let them know — it encourages them to help more students.</p>
-
-      <div style="text-align: center; margin: 0 0 24px 0;">
-        <a href="${thankUrl}" style="display: inline-block; background: #0021A5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">👍 Thank ${answererFirstName} →</a>
-      </div>
-
-      <p style="font-size: 14px; color: #6b7280;">— The CFF Team</p>
-    </div>
-    <div style="background: #f9fafb; padding: 20px 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; text-align: center;">
-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">College Fast Forward</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">8731 Lewis River Road, Delray Beach, FL 33446</p>
-      <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0 0;"><a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Unsubscribe</a> · <a href="${APP_BASE_URL}/#ProfileEdit" style="color: #9ca3af;">Email Preferences</a></p>
-    </div>
-  </div>
-</body>
-</html>`;
-
-        await base44.asServiceRole.integrations.Core.SendEmail({
-            to: posterEmail,
-            subject,
-            body: emailHtml,
-            from_name: 'College Fast Forward'
-        });
-
-        // Log the email
-        try {
-            await base44.asServiceRole.entities.EmailLog.create({
-                user_email: posterEmail,
-                email_type: 'new_answer',
-                subject,
-                status: 'sent',
-                sent_at: new Date().toISOString(),
-                metadata: { questionId, answererName, answerId }
-            });
-        } catch (logErr) { console.log('Email log failed:', logErr.message); }
-
-        return Response.json({ success: true, emailSent: true, questionId });
-
-    } catch (error) {
-        console.error('Answer notification error:', error);
-        return Response.json({ error: error.message }, { status: 500 });
-    }
+    return Response.json({ success: true, emailSent: true, questionId });
+  } catch (error) {
+    console.error('Answer notification error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
