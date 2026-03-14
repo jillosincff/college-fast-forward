@@ -13,9 +13,166 @@ console.log('🔵 [GatorAuth] Module loaded');
  * 3. Auto-routing (authenticated users with persona)
  */
 
+/* ── design tokens ──────────────────────────────────── */
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+const S = {
+  headline: { fontFamily: playfair, fontWeight: 700, fontSize: 36, color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 8, textAlign: 'center' },
+  subhead: { fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.4)', lineHeight: 1.6, textAlign: 'center', marginTop: 10, marginBottom: 36 },
+  finePrint: { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.2)', lineHeight: 1.6, textAlign: 'center' },
+  primaryBtn: { fontFamily: dmSans, fontSize: 16, fontWeight: 500, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 100, padding: '16px 40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', transition: 'background 0.2s', minHeight: 'auto' },
+  googleBtn: { fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8', background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 100, padding: '16px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', transition: 'all 0.2s', minHeight: 'auto' },
+};
+
+const FONT_LINK_ID = 'gator-auth-fonts';
+function ensureFonts() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_LINK_ID)) return;
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+  document.head.appendChild(link);
+}
+
+const STYLE_TAG_ID = 'gator-auth-keyframes';
+function ensureKeyframes() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(STYLE_TAG_ID)) return;
+  const style = document.createElement('style');
+  style.id = STYLE_TAG_ID;
+  style.textContent = `
+    @keyframes authFadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/* ── shared shell ───────────────────────────────────── */
+function AuthPageShell({ children }) {
+  React.useEffect(() => { ensureFonts(); ensureKeyframes(); }, []);
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
+      {/* radial glow */}
+      <div aria-hidden style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)', width: 600, height: 600, background: 'radial-gradient(ellipse at center, rgba(220,85,30,0.07), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 480 }}>{children}</div>
+    </div>
+  );
+}
+
+function AuthCard({ children, delay = 0 }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 24, padding: '48px 40px', animation: `authFadeUp 0.4s ease both ${delay}s` }}>
+      <style>{`@media (max-width: 480px) { .auth-card-inner { padding: 36px 24px !important; } }`}</style>
+      {children}
+    </div>
+  );
+}
+
+function LogoBlock({ delay = 0.05 }) {
+  return (
+    <div style={{ textAlign: 'center', marginBottom: 32, animation: `authFadeUp 0.4s ease both ${delay}s` }}>
+      <img
+        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+        alt="CFF"
+        style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain', margin: '0 auto 10px', display: 'block' }}
+      />
+      <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(244,240,232,0.3)' }}>
+        College Fast Forward
+      </span>
+    </div>
+  );
+}
+
+function FinePrint() {
+  return (
+    <p style={{ ...S.finePrint, marginBottom: 0 }}>
+      By continuing you agree to our{' '}
+      <button onClick={() => navigate('Terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.4)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Terms</button>
+      {' '}and{' '}
+      <button onClick={() => navigate('Privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.4)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Privacy Policy</button>
+    </p>
+  );
+}
+
+/* ── role card ──────────────────────────────────────── */
+function RoleCard({ role, index, onClick }) {
+  const [hovered, setHovered] = React.useState(false);
+  const delay = 0.15 + index * 0.05;
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 16, width: '100%',
+        background: hovered ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+        border: hovered ? '0.5px solid rgba(232,93,32,0.35)' : '0.5px solid rgba(255,255,255,0.1)',
+        borderRadius: 16, padding: '20px 20px', cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        transform: hovered ? 'translateX(3px)' : 'translateX(0)',
+        textAlign: 'left', minHeight: 'auto',
+        animation: `authFadeUp 0.4s ease both ${delay}s`,
+      }}
+    >
+      {/* icon */}
+      <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: role.iconBg, border: `0.5px solid ${role.iconBorder}` }}>
+        {role.icon}
+      </div>
+      {/* text */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8' }}>{role.name}</span>
+        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.45)', lineHeight: 1.4 }}>{role.desc}</span>
+        {role.encouraged && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#E85D20', marginTop: 4 }}>{role.encouraged}</span>}
+      </div>
+      {/* arrow */}
+      <ArrowSVG color={hovered ? 'rgba(232,93,32,0.8)' : 'rgba(244,240,232,0.25)'} />
+    </button>
+  );
+}
+
+/* ── SVG icons ──────────────────────────────────────── */
+function ArrowSVG({ color = 'rgba(244,240,232,0.25)' }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, transition: 'stroke 0.2s' }}>
+      <path d="M3 8h10M9 4l4 4-4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function GradCapSVG() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3L2 8l10 5 10-5-10-5z" />
+      <path d="M2 8v6c0 2 4 4 10 4s10-2 10-4V8" />
+      <path d="M22 8v6" />
+    </svg>
+  );
+}
+
+function HeartSVG() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(244,240,232,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+}
+
+function AwardSVG() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(244,240,232,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+    </svg>
+  );
+}
+
 function GoogleIcon() {
   return (
-    <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+    <svg width="20" height="20" viewBox="0 0 24 24">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
