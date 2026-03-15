@@ -26,8 +26,6 @@ function getKarmaLevel(pts) {
 }
 
 export default function ParentDashboardHero({ user, data, onLinkStudentClick }) {
-  const [tickerActivity, setTickerActivity] = useState(null);
-
   const firstName = (() => {
     const fn = user?.full_name;
     if (!fn?.trim()) return 'Parent';
@@ -56,27 +54,6 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
     const part = fn.trim().split(/\s+/)[0];
     return part?.length > 1 ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : null;
   })();
-
-  // Load recent activity for ticker
-  useEffect(() => {
-    (async () => {
-      try {
-        const answers = await base44.entities.Answer.list('-created_date', 5);
-        const recent = (answers || []).filter(a => {
-          const age = Date.now() - new Date(a.created_date).getTime();
-          return age < 48 * 60 * 60 * 1000 && a.answerer_persona === 'parent';
-        });
-        if (recent.length > 0) {
-          const a = recent[0];
-          const ago = Math.round((Date.now() - new Date(a.created_date).getTime()) / (1000 * 60 * 60));
-          setTickerActivity({
-            name: a.answerer_name?.split(' ')[0] || 'A parent',
-            timeAgo: ago < 1 ? 'just now' : `${ago}h ago`,
-          });
-        }
-      } catch {}
-    })();
-  }, []);
 
   return (
     <section style={{
@@ -188,38 +165,35 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="pd-quick-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+        {/* Progress Strip */}
+        <div className="pd-quick-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
           {[
-            { icon: <ChatBubbleSVG />, label: 'Answer a Question', karma: '+15' },
-            null, // divider
-            { icon: <PeopleSVG />, label: 'Make an Introduction', karma: '+10' },
-            null,
-            { icon: <ProfileSVG />, label: 'Complete Your Profile', karma: '+25' },
-          ].map((item, i) => {
-            if (!item) return <div key={`d${i}`} style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.15)', margin: '0 4px' }} />;
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: 'rgba(244,240,232,0.5)', transition: 'color 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#f4f0e8'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.5)'; }}
-              >
-                {item.icon}
-                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400 }}>{item.label}</span>
-                <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: orange, background: 'rgba(232,93,32,0.15)', borderRadius: 100, padding: '1px 6px' }}>{item.karma}</span>
+            { label: 'Answer a Question', karma: '+15' },
+            { label: 'Make an Introduction', karma: '+50' },
+            { label: 'Complete Your Profile', karma: '+25' },
+          ].map((step, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div style={{ width: 32, height: 1, background: 'rgba(255,255,255,0.15)', margin: '0 4px', flexShrink: 0 }} />
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: '50%',
+                  border: '1.5px solid rgba(255,255,255,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: dmSans, fontSize: 9, fontWeight: 500, color: 'rgba(244,240,232,0.4)',
+                  flexShrink: 0,
+                }}>{i + 1}</div>
+                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(244,240,232,0.5)', whiteSpace: 'nowrap' }}>{step.label}</span>
+                <span style={{
+                  fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: orange,
+                  background: 'rgba(232,93,32,0.15)', borderRadius: 100, padding: '1px 7px',
+                  whiteSpace: 'nowrap', flexShrink: 0,
+                }}>{step.karma}</span>
               </div>
-            );
-          })}
+            </React.Fragment>
+          ))}
         </div>
-
-        {/* Activity Ticker */}
-        {tickerActivity && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', animation: 'pdPulse 2s infinite' }} />
-            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.4)', margin: 0 }}>
-              <span style={{ fontWeight: 500, color: 'rgba(244,240,232,0.65)' }}>{tickerActivity.name}</span> answered a student question · {tickerActivity.timeAgo}
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );
