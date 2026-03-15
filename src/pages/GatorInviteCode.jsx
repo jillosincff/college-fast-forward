@@ -1,324 +1,258 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
-import { motion } from 'framer-motion';
-import { Lock, AlertCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+const orange = '#E85D20';
+const orangeHover = '#d44e14';
+
 export default function GatorInviteCode() {
   const { user } = useAuth();
-  const [inviteCode, setInviteCode] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isCheckingApproval, setIsCheckingApproval] = useState(true);
-  const [approvedInvite, setApprovedInvite] = useState(null);
-  
-  // Get the pending role from localStorage (set by GatorAuth)
-  // CRITICAL: Don't default to 'parent' - user explicitly selected their role
+  const [showJoinWithout, setShowJoinWithout] = useState(false);
+
   const pendingRole = localStorage.getItem('pending_invite_role');
-  console.log('🔍 [GatorInviteCode] pendingRole from localStorage:', pendingRole);
 
-  // Check if user has an approved invite request (auto-fill their code)
+  // Check for approved invite (auto-fill)
   useEffect(() => {
-    const checkApprovedInvite = async () => {
-      // Need user email to check
-      const emailToCheck = user?.email;
-      if (!emailToCheck) {
-        setIsCheckingApproval(false);
-        return;
-      }
-
+    if (!user?.email) return;
+    (async () => {
       try {
-        console.log('🔍 Checking for approved invite for:', emailToCheck);
-        const response = await base44.functions.invoke('checkApprovedInvite', {
-          email: emailToCheck
-        });
-
+        const response = await base44.functions.invoke('checkApprovedInvite', { email: user.email });
         if (response.data?.success && response.data?.has_approved_invite && response.data?.code_valid) {
-          console.log('✅ Found valid approved invite:', response.data.invite_code);
-          setApprovedInvite(response.data);
-          setInviteCode(response.data.invite_code);
-        } else if (response.data?.has_approved_invite && !response.data?.code_valid) {
-          console.log('⚠️ Approved invite but code invalid:', response.data.message);
-          // Don't set error - just let them request a new code
+          setReferralCode(response.data.invite_code);
         }
-      } catch (err) {
-        console.error('Failed to check approved invite:', err);
-        // Don't block - just let them enter code manually
-      } finally {
-        setIsCheckingApproval(false);
-      }
-    };
-
-    checkApprovedInvite();
+      } catch {}
+    })();
   }, [user?.email]);
 
-  // Check for expired pending invite on mount
+  // Clear stale pending data
   useEffect(() => {
-    const storedTimestamp = localStorage.getItem('pending_invite_timestamp');
-    
-    // Clear if older than 30 minutes
-    if (storedTimestamp && Date.now() - parseInt(storedTimestamp) > 30 * 60 * 1000) {
-      clearPendingInvite();
+    const ts = localStorage.getItem('pending_invite_timestamp');
+    if (ts && Date.now() - parseInt(ts) > 30 * 60 * 1000) {
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_invite_timestamp');
+      localStorage.removeItem('pending_invite_role');
     }
   }, []);
 
-  function clearPendingInvite() {
-    localStorage.removeItem('pending_invite_code');
-    localStorage.removeItem('pending_invite_timestamp');
-    localStorage.removeItem('pending_invite_role');
-    localStorage.removeItem('pending_invite_code_id');
-  }
-
-  function handleBack() {
-    clearPendingInvite();
-    navigate('GatorAuth');
-  }
-
   const handleContinue = async () => {
     setError('');
-    
-    const trimmedCode = inviteCode?.trim().toUpperCase();
-    
-    if (!trimmedCode) {
-      setError('Please enter your invite code');
+    setShowJoinWithout(false);
+    const trimmed = referralCode.trim().toUpperCase();
+
+    // If no code entered, skip straight to onboarding
+    if (!trimmed) {
+      proceedToOnboarding(null);
       return;
     }
 
-    if (trimmedCode.length < 4) {
-      setError('Invite codes are at least 4 characters');
-      return;
-    }
-    
     setIsVerifying(true);
-    console.log('📝 Verifying invite code:', trimmedCode);
-    
+
     try {
-      // Verify the invite code (with one retry on failure)
-      console.log('📞 Calling verifyInviteCode function...');
       let response;
       try {
-        response = await base44.functions.invoke('verifyInviteCode', {
-          code: trimmedCode
-        });
+        response = await base44.functions.invoke('verifyInviteCode', { code: trimmed });
       } catch (firstErr) {
-        console.warn('⚠️ First attempt failed, retrying in 2s...', firstErr.message);
         await new Promise(r => setTimeout(r, 2000));
-        response = await base44.functions.invoke('verifyInviteCode', {
-          code: trimmedCode
-        });
+        response = await base44.functions.invoke('verifyInviteCode', { code: trimmed });
       }
-      
-      console.log('📬 verifyInviteCode response:', response);
-      
+
       if (response.data?.success) {
-        // Store verified invite code with timestamp
-        // CRITICAL: User's role selection (pendingRole) takes precedence over invite code's role
-        // BUT: If user selected 'parent' but the code is specifically for 'alumni', use alumni
-        // This allows alumni-specific codes to work correctly
+        // Valid code — attribute and proceed
         const userSelectedRole = localStorage.getItem('pending_invite_role');
         const codeRole = response.data.role;
-        
-        // Determine final role:
-        // CRITICAL: User's explicit selection ALWAYS takes precedence
-        // If user selected 'parent', they are a parent - even if using an alumni code
-        // The code type doesn't change who they ARE
         const role = userSelectedRole || codeRole || 'parent';
-        console.log('✅ Code verified. Using role:', role, '(userSelectedRole:', userSelectedRole, ', codeRole:', codeRole, ')');
-        
-        localStorage.setItem('pending_invite_code', trimmedCode);
+
+        localStorage.setItem('pending_invite_code', trimmed);
         localStorage.setItem('pending_invite_role', role);
         localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-        
-        // Store code ID for later use
-        if (response.data.codeId) {
-          localStorage.setItem('pending_invite_code_id', response.data.codeId);
-        }
-        
-        // If user is already authenticated, go to GatorWelcome to apply role
-        // If not authenticated yet, go to GatorAuth which will show Google sign-in
+
         if (user) {
           navigate('GatorWelcome');
         } else {
           navigate('GatorAuth');
         }
       } else {
-        const errorMsg = response.data?.error || 'Invalid invite code. Please check and try again.';
-        console.error('❌ Code verification failed:', errorMsg);
-        setError(errorMsg);
+        // Invalid code — show subtle error but don't block
+        setError("That code doesn't look right.");
+        setShowJoinWithout(true);
         setIsVerifying(false);
       }
     } catch (err) {
-      console.error('Failed to verify invite code:', err);
-      console.error('Error details:', err.message, err.response?.data);
-      
-      // More specific error message based on error type
-      let errorMsg = 'Unable to verify code right now. Please wait a moment and try again.';
-      if (err.response?.status === 401 || err.message?.includes('401')) {
-        errorMsg = 'Session expired. Please refresh the page and try again.';
-      } else if (err.message?.includes('500') || err.message?.includes('Internal')) {
-        errorMsg = 'Our servers are temporarily busy. Please wait a few seconds and try again.';
-      } else if (err.message?.includes('network') || err.message?.includes('fetch') || err.message?.includes('Failed to fetch')) {
-        errorMsg = 'Network error. Please check your internet connection and try again.';
-      } else if (err.message?.includes('not deployed') || err.message?.includes('timeout')) {
-        errorMsg = 'Service is loading. Please wait a few seconds and try again.';
-      }
-      
-      setError(errorMsg);
+      // Network/server error — show subtle message, still allow proceeding
+      setError("That code doesn't look right.");
+      setShowJoinWithout(true);
       setIsVerifying(false);
     }
   };
 
-  const roleLabel = pendingRole === 'alumni' ? 'Alumni' : pendingRole === 'gator' ? 'Student' : 'Parent';
-  const roleEmoji = pendingRole === 'alumni' ? '🎓' : pendingRole === 'gator' ? '📚' : '👨‍👩‍👧';
+  const proceedToOnboarding = async (code) => {
+    // Try to attribute referral code to ambassador
+    if (code) {
+      try {
+        const ambassadors = await base44.entities.Ambassador.filter({ code: code });
+        if (ambassadors.length > 0) {
+          const amb = ambassadors[0];
+          await base44.entities.Ambassador.update(amb.id, { referral_count: (amb.referral_count || 0) + 1 });
+          if (user) {
+            await base44.auth.updateMe({ referral_code: code, referred_by: amb.id });
+          }
+        }
+      } catch (e) {
+        console.log('Ambassador attribution failed (non-critical):', e.message);
+      }
+    }
+
+    // Store role and proceed
+    const role = localStorage.getItem('pending_invite_role') || 'parent';
+    localStorage.setItem('pending_invite_role', role);
+    localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+
+    if (user) {
+      navigate('GatorWelcome');
+    } else {
+      navigate('GatorAuth');
+    }
+  };
+
+  const handleJoinWithoutCode = () => {
+    proceedToOnboarding(null);
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 overflow-x-hidden" style={{ 
-      background: 'linear-gradient(135deg, #0021A5 0%, #001580 100%)' 
+    <div style={{
+      minHeight: '100vh', background: '#0d1117',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '40px 20px',
     }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
-      >
-        {/* Back Button */}
-        <button 
-          onClick={handleBack}
-          className="mb-4 text-white/70 hover:text-white text-sm flex items-center gap-1 transition-colors"
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        @keyframes inviteFadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+        .invite-field:focus { border-color: rgba(232,93,32,0.4) !important; outline: none; }
+        .invite-field::placeholder { color: rgba(244,240,232,0.25); }
+      `}</style>
+
+      <div style={{
+        maxWidth: 480, width: '100%', padding: '80px 40px',
+        animation: 'inviteFadeUp 0.6s ease both',
+      }}>
+        {/* Logo */}
+        <div style={{ marginBottom: 40, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>College Fast</span>
+          <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: orange }}>F</span>
+          <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>orward</span>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{ marginBottom: 12 }}>
+          <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', display: 'block', lineHeight: 1.3 }}>
+            Welcome to{' '}
+          </span>
+          <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 28, color: orange }}>
+            College Fast Forward.
+          </span>
+        </h1>
+
+        {/* Subhead */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 14, fontWeight: 300,
+          color: 'rgba(244,240,232,0.55)', lineHeight: 1.7, marginBottom: 32,
+        }}>
+          Parents and alumni help each other's students land jobs through real connections. If you have a referral code, enter it below.
+        </p>
+
+        {/* Referral code field */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{
+            display: 'block', fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+            color: 'rgba(244,240,232,0.6)', marginBottom: 8,
+          }}>
+            Referral code <span style={{ fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>(optional)</span>
+          </label>
+          <input
+            className="invite-field"
+            style={{
+              width: '100%', background: 'rgba(255,255,255,0.06)',
+              border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 12,
+              padding: '12px 16px', fontFamily: dmSans, fontSize: 14, fontWeight: 300,
+              color: '#f4f0e8', boxSizing: 'border-box', transition: 'border-color 0.2s',
+            }}
+            value={referralCode}
+            onChange={e => { setReferralCode(e.target.value.toUpperCase()); setError(''); setShowJoinWithout(false); }}
+            placeholder="e.g. UF-SARAH"
+            onKeyDown={e => e.key === 'Enter' && handleContinue()}
+          />
+          {error ? (
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(229,57,53,0.7)', marginTop: 6 }}>
+              {error}
+            </p>
+          ) : (
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.3)', marginTop: 6 }}>
+              Have a code from an ambassador? Enter it to give them credit.
+            </p>
+          )}
+        </div>
+
+        {/* Continue button */}
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={isVerifying}
+          style={{
+            width: '100%', padding: 14, borderRadius: 100, border: 'none',
+            background: orange, color: '#fff',
+            fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+            cursor: 'pointer', transition: 'all 0.2s', minHeight: 'auto',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+          onMouseEnter={e => { if (!isVerifying) e.currentTarget.style.background = orangeHover; }}
+          onMouseLeave={e => { if (!isVerifying) e.currentTarget.style.background = orange; }}
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to role selection
+          {isVerifying ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : 'Join the Network →'}
         </button>
 
-        <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-xl">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-blue-100 rounded-2xl flex items-center justify-center">
-              <span className="text-3xl">{roleEmoji}</span>
-            </div>
-          </div>
+        {/* Join without code option */}
+        {showJoinWithout && (
+          <button
+            type="button"
+            onClick={handleJoinWithoutCode}
+            style={{
+              display: 'block', width: '100%', marginTop: 12, textAlign: 'center',
+              background: 'none', border: 'none',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+              color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
+              transition: 'color 0.2s', minHeight: 'auto',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
+          >
+            Join without a code →
+          </button>
+        )}
 
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2 text-slate-800">
-              {roleLabel} Invite Code
-            </h1>
-            <p className="text-gray-600">
-              Enter your invite code to join Gator Network
-            </p>
-          </div>
-
-          {/* Auto-detected approved invite banner */}
-          {approvedInvite && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl"
-            >
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-green-800">
-                    Good news! Your access was already approved 🎉
-                  </p>
-                  <p className="text-sm text-green-700 mt-1">
-                    We found your invite code. Just click "Continue" below!
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Code Input */}
-          <div className="space-y-4">
-            {isCheckingApproval ? (
-              <div className="flex items-center justify-center py-6 text-gray-500">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                Checking your account...
-              </div>
-            ) : (
-              <Input
-                value={inviteCode}
-                onChange={(e) => {
-                  setInviteCode(e.target.value.toUpperCase());
-                  setError('');
-                }}
-                placeholder="ENTER CODE"
-                className={`text-center text-xl font-mono tracking-wider border-2 rounded-xl py-6 uppercase ${
-                  approvedInvite 
-                    ? 'border-green-300 bg-green-50 focus:border-green-500' 
-                    : 'border-gray-200 focus:border-[#0021A5]'
-                }`}
-                autoFocus={!approvedInvite}
-                maxLength={20}
-                onKeyDown={(e) => e.key === 'Enter' && !isVerifying && handleContinue()}
-              />
-            )}
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
-              >
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
-              </motion.div>
-            )}
-
-            <button
-              onClick={handleContinue}
-              disabled={!inviteCode.trim() || isVerifying || isCheckingApproval}
-              className={`w-full rounded-xl py-4 text-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-                approvedInvite 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-[#0021A5] hover:bg-[#001580] text-white'
-              }`}
-            >
-              {isVerifying ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Verifying...
-                </>
-              ) : approvedInvite ? (
-                <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  Continue to Setup →
-                </>
-              ) : (
-                'Continue →'
-              )}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="px-3 text-gray-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-200"></div>
-          </div>
-
-          {/* Request Access */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500 mb-3">
-              Don't have an invite code?
-            </p>
-            <button
-              onClick={() => navigate('RequestInvite')}
-              className="text-[#FA4616] hover:text-orange-700 font-semibold text-sm transition-colors"
-            >
-              Request Access →
-            </button>
-          </div>
-
-          {/* Help Text */}
-          <p className="text-xs text-gray-400 text-center mt-6">
-            Invite codes are sent by email when your access is approved
-          </p>
-        </div>
-      </motion.div>
+        {/* Back link */}
+        <button
+          type="button"
+          onClick={() => { localStorage.removeItem('pending_invite_role'); navigate('GatorAuth'); }}
+          style={{
+            display: 'block', width: '100%', marginTop: 32, textAlign: 'center',
+            background: 'none', border: 'none',
+            fontFamily: dmSans, fontSize: 12, fontWeight: 300,
+            color: 'rgba(244,240,232,0.3)', cursor: 'pointer',
+            transition: 'color 0.2s', minHeight: 'auto',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.5)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.3)'; }}
+        >
+          ← Back to role selection
+        </button>
+      </div>
     </div>
   );
 }
