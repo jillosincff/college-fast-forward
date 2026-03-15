@@ -6,7 +6,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { code, skipUsageIncrement } = body;
 
-    console.log('🔑 Verifying invite code:', code, skipUsageIncrement ? '(re-verify, skip increment)' : '');
+    console.log('🔑 [v2] Verifying invite code:', code, skipUsageIncrement ? '(re-verify, skip increment)' : '');
 
     if (!code) {
       console.error('❌ No code provided');
