@@ -157,36 +157,38 @@ export default function ParentOnboarding() {
       <ParentProgressBar currentStep={step} />
 
       <div className="po-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
-        {/* Left panel */}
-        <div className="po-left hidden md:block" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
+        {/* Left panel — desktop */}
+        <div className="po-left" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
           <div style={{ height: '100%' }}>
             <LeftPanel />
           </div>
+        </div>
 
         {/* Mobile condensed header */}
-        <div className="po-mobile-header" style={{ display: 'none',
-            background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
-            padding: '24px 20px', minHeight: 180,
-          }}>
-            {step === 1 && (
-              <div style={{ textAlign: 'center' }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Help students find you</h2>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Set up your profile so students can reach out</p>
-              </div>
-            )}
-            {step === 2 && (
-              <div style={{ textAlign: 'center' }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>What's your background?</h2>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Help us match you with the right students</p>
-              </div>
-            )}
-            {step === 3 && (
-              <div style={{ textAlign: 'center' }}>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Link your student</h2>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Connect your accounts to activate Karma boosts</p>
-              </div>
-            )}
-          </div>
+        <div className="po-mobile-header" style={{
+          display: 'none',
+          background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
+          padding: '24px 20px', minHeight: 140,
+        }}>
+          {step === 1 && (
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Help students find you</h2>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Set up your profile so students can reach out</p>
+            </div>
+          )}
+          {step === 2 && (
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>What's your background?</h2>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Help us match you with the right students</p>
+            </div>
+          )}
+          {step === 3 && (
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Link your student</h2>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Connect your accounts to activate Karma boosts</p>
+            </div>
+          )}
+        </div>
 
         {/* Right panel */}
         <div className="po-right" style={{
