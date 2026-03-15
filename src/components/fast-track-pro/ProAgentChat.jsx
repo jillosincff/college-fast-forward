@@ -27,6 +27,7 @@ import InlineSuggestionButtons from './InlineSuggestionButtons';
 import ChatSidebar from './ChatSidebar';
 import ChatWelcome from './ChatWelcome';
 import MobileSidebarSheet from './MobileSidebarSheet';
+import ChatHeaderMenu from './ChatHeaderMenu';
 
 const dmSans = "'DM Sans', sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -275,7 +276,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
               boxShadow: '0 0 6px rgba(74,222,128,0.5)',
             }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span className="hidden md:inline" style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
               Active · Web search on
             </span>
@@ -292,6 +293,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
               <span style={{ width: 18, height: 1.5, background: 'rgba(244,240,232,0.4)', borderRadius: 1, display: 'block' }} />
               <span style={{ width: 18, height: 1.5, background: 'rgba(244,240,232,0.4)', borderRadius: 1, display: 'block' }} />
             </button>
+            <ChatHeaderMenu user={user} />
           </div>
         </div>
 
