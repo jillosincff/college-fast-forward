@@ -80,7 +80,8 @@ export default function FastIQ() {
       setChatInitialMessage(openChatWith);
       setView('chat');
     } else {
-      setView('dashboard');
+      // Reload profile to get fresh data then show dashboard
+      loadProfile();
     }
   };
 
