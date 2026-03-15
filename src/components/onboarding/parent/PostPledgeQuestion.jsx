@@ -64,7 +64,7 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
         question_type: 'JobRequest',
         answerer_user_id: user?.id,
         answerer_email: user?.email,
-        answerer_name: user?.full_name || 'A CFF Parent',
+        answerer_name: user?.full_name || 'A College Fast Forward Parent',
         answerer_title: formData?.jobTitle || user?.current_position || user?.job_title || '',
         answerer_company: formData?.company || user?.current_company || user?.company || '',
         answerer_years_experience: formData?.yearsExperience || user?.years_experience || '',
@@ -110,7 +110,7 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
       }}>
         <div className="text-center text-white">
           <div className="text-6xl mb-4">🎉</div>
-          <h1 className="text-3xl font-bold mb-2">You just helped a Gator!</h1>
+          <h1 className="text-3xl font-bold mb-2">You just helped a student!</h1>
           <p className="text-white/80 text-lg">+15 karma earned. Taking you to your dashboard...</p>
         </div>
       </div>
