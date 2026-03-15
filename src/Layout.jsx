@@ -744,9 +744,9 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
+const onboardingPages = ['StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
-const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
+const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
 const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
