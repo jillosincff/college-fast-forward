@@ -1,249 +1,225 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Loader2 } from 'lucide-react';
-import ParentProgressBar from './ParentProgressBar';
+import { motion } from 'framer-motion';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
+const dmSans = "'DM Sans', sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 const orange = '#E85D20';
-const orangeHover = '#d44e14';
 
-const PLEDGE_ITEMS = [
+const PLEDGES = [
   {
-    key: 'respond',
     title: 'Respond when a student reaches out to me',
-    subtitle: "Even a short answer can change someone's direction.",
+    subtitle: 'Even a short answer can change someone\'s direction.',
   },
   {
-    key: 'share',
     title: 'Share my expertise and experience',
     subtitle: 'What took me years to learn could save a student months of confusion.',
   },
   {
-    key: 'introductions',
     title: 'Make introductions when I can',
     subtitle: 'One email from me is worth 100 cold applications from them.',
   },
   {
-    key: 'help_others',
-    title: "Help other people's kids the way I'd want someone to help mine",
-    subtitle: "Because every student in this network is someone's son or daughter.",
+    title: 'Help other people\'s kids the way I\'d want someone to help mine',
+    subtitle: 'Because every student in this network is someone\'s son or daughter.',
   },
 ];
 
-function CheckmarkSVG() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-      <path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-
 export default function CFFPledgePage({ user, onComplete }) {
-  const [checks, setChecks] = useState({ respond: false, share: false, introductions: false, help_others: false });
-  const [parentCount, setParentCount] = useState(0);
+  const [checked, setChecked] = useState([false, false, false, false]);
+  const [parentCount, setParentCount] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [celebrated, setCelebrated] = useState(false);
-  const [buttonReady, setButtonReady] = useState(false);
-  const completedRef = useRef(false);
+
+  const allChecked = checked.every(Boolean);
+  const userName = user?.full_name?.split(' ')[0] || 'Parent';
 
   useEffect(() => {
-    async function loadCount() {
+    // Get actual parent count from the platform
+    const fetchCount = async () => {
       try {
-        const parents = await base44.entities.User.filter({ persona: 'parent' }, undefined, 1);
-        setParentCount(parents?.length ? 885 : 885);
+        const users = await base44.entities.User.list('-created_date', 1);
+        // Use GlobalCounter if available, otherwise fall back
+        try {
+          const counters = await base44.entities.GlobalCounter.filter({ counter_name: 'total_parents' });
+          if (counters.length > 0 && counters[0].count > 0) {
+            setParentCount(counters[0].count);
+            return;
+          }
+        } catch {}
+        // Fallback: count users with parent persona
+        try {
+          const parents = await base44.entities.User.filter({ persona: 'parent' });
+          setParentCount(parents.length || 0);
+        } catch {
+          setParentCount(0);
+        }
       } catch {
-        setParentCount(885);
-      }
-    }
-    loadCount();
-    // Activate button after 3 seconds
-    const timer = setTimeout(() => setButtonReady(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Also activate on scroll to bottom
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
-        setButtonReady(true);
+        setParentCount(0);
       }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    fetchCount();
   }, []);
 
-  const handlePledge = async () => {
-    if (!buttonReady || submitting || completedRef.current) return;
-    completedRef.current = true;
-    setSubmitting(true);
-
-    // Check all boxes simultaneously
-    setChecks({ respond: true, share: true, introductions: true, help_others: true });
-
-    // Wait for animation
-    await new Promise(r => setTimeout(r, 500));
-
-    await base44.auth.updateMe({ pledge_taken: true, pledge_taken_at: new Date().toISOString() });
-
-    try {
-      await base44.functions.invoke('awardKarma', {
-        parentUserId: user.id, parentEmail: user.email, parentName: user.full_name,
-        actionType: 'onboarding_complete', referenceType: 'pledge', referenceId: user.id,
-        description: 'Took the College Fast Forward Pledge',
-      });
-    } catch (e) { console.log('Pledge karma failed:', e.message); }
-
-    try { base44.analytics.track({ eventName: 'pledge_completed', properties: { user_id: user.id } }); } catch {}
-
-    setCelebrated(true);
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#0021A5', '#FA4616', '#FFD700'] });
-
-    setTimeout(() => onComplete(), 1800);
+  const toggleCheck = (index) => {
+    setChecked(prev => {
+      const next = [...prev];
+      next[index] = !next[index];
+      return next;
+    });
   };
 
-  const firstName = user?.full_name?.includes(',')
-    ? user.full_name.split(',')[1]?.trim().split(/\s+/)[0] || 'Parent'
-    : user?.full_name?.trim().split(/\s+/)[0] || 'Parent';
-
-  const allChecked = Object.values(checks).every(Boolean);
+  const handleSubmit = async () => {
+    if (!allChecked || submitting) return;
+    setSubmitting(true);
+    try {
+      await base44.auth.updateMe({ pledge_taken: true, pledge_taken_at: new Date().toISOString() });
+      base44.analytics.track({ eventName: 'pledge_completed', properties: { persona: 'parent' } });
+      onComplete();
+    } catch (err) {
+      console.error('Pledge save failed:', err);
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
+    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px 60px' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-        @keyframes pledgeFadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes pledgeCheckPop { 0%{transform:scale(0.9)} 60%{transform:scale(1.05)} 100%{transform:scale(1)} }
-        @media(max-width:768px) { .pledge-content { padding: 32px 20px !important; } }
+        .pledge-check { cursor: pointer; transition: all 0.15s ease; }
+        .pledge-check:hover { border-color: ${orange} !important; }
       `}</style>
 
-      <ParentProgressBar currentStep={4} />
-
-      <div className="pledge-content" style={{
-        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'flex-start', padding: '60px 32px',
-        maxWidth: 600, margin: '0 auto', width: '100%',
-        animation: 'pledgeFadeUp 0.5s ease both',
-      }}>
+      <div style={{ maxWidth: 640, width: '100%' }}>
         {/* Headline */}
-        <h1 style={{
-          fontFamily: playfair, fontWeight: 700, fontSize: 32, color: '#1a1a1a',
-          letterSpacing: '-0.02em', textAlign: 'center', marginBottom: 16,
-        }}>
-          The College Fast Forward Pledge
-        </h1>
-
-        {/* Intro */}
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#555', textAlign: 'center', lineHeight: 1.7, marginBottom: 16 }}>
-          Before you enter the network, we ask every parent to make the same promise.
-        </p>
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#555', textAlign: 'center', lineHeight: 1.7, marginBottom: 0 }}>
-          This is what makes College Fast Forward different from LinkedIn, from job boards, from everything else out there. We're not a platform. <span style={{ fontWeight: 600, color: '#1a1a1a' }}>We're a community of parents who actually care about each other's kids.</span>
-        </p>
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#555', textAlign: 'center', lineHeight: 1.7, marginTop: 12, marginBottom: 32 }}>
-          And it only works if everyone shows up.
-        </p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ textAlign: 'center', marginBottom: 32 }}>
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 32, color: '#1a1a2e', marginBottom: 12, lineHeight: 1.3 }}>
+            The College Fast Forward Pledge
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#666', lineHeight: 1.7, marginBottom: 16 }}>
+            Before you enter the network, we ask every parent to make the same promise.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#444', lineHeight: 1.7 }}>
+            This is what makes College Fast Forward different from LinkedIn, from job boards, from everything else out there. We're not a platform. <strong>We're a community of parents who actually care about each other's kids.</strong>
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: orange, marginTop: 12 }}>
+            And it only works if everyone shows up.
+          </p>
+        </motion.div>
 
         {/* Pledge card */}
-        <div style={{
-          width: '100%', background: '#fff',
-          border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 20,
-          padding: '28px 32px', boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-        }}>
-          <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 400, color: '#1a1a1a', marginBottom: 20 }}>
-            I, <span style={{ fontWeight: 600, color: orange }}>{firstName}</span>, pledge to:
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          style={{
+            background: '#fff', borderRadius: 16, padding: '32px 28px',
+            border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            marginBottom: 28,
+          }}
+        >
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: '#1a1a2e', marginBottom: 24 }}>
+            I, <span style={{ color: orange, fontWeight: 600 }}>{userName}</span>, pledge to:
           </p>
 
-          {PLEDGE_ITEMS.map((item, idx) => (
-            <div key={item.key} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 14,
-              padding: '12px 0',
-              borderBottom: idx < PLEDGE_ITEMS.length - 1 ? '0.5px solid rgba(0,0,0,0.05)' : 'none',
-            }}>
-              <div style={{
-                width: 20, height: 20, borderRadius: 5, flexShrink: 0, marginTop: 2,
-                background: checks[item.key] ? orange : '#fff',
-                border: `1.5px solid ${checks[item.key] ? orange : 'rgba(0,0,0,0.15)'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s ease',
-                animation: checks[item.key] ? 'pledgeCheckPop 0.2s ease' : 'none',
-              }}>
-                {checks[item.key] && <CheckmarkSVG />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {PLEDGES.map((pledge, i) => (
+              <div
+                key={i}
+                className="pledge-check"
+                onClick={() => toggleCheck(i)}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 14,
+                  cursor: 'pointer', userSelect: 'none',
+                }}
+              >
+                <div style={{
+                  width: 22, height: 22, borderRadius: 4, flexShrink: 0, marginTop: 1,
+                  border: checked[i] ? `2px solid ${orange}` : '2px solid #ccc',
+                  background: checked[i] ? orange : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s ease',
+                }}>
+                  {checked[i] && (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 7l3 3 5-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#1a1a2e', marginBottom: 2, lineHeight: 1.4 }}>
+                    {pledge.title}
+                  </p>
+                  <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', fontStyle: 'italic', lineHeight: 1.5 }}>
+                    {pledge.subtitle}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a', marginBottom: 3 }}>{item.title}</p>
-                <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', fontStyle: 'italic', lineHeight: 1.5 }}>{item.subtitle}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Social proof */}
-        <div style={{ marginTop: 28, textAlign: 'center' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#555' }}>
-            <span style={{ fontWeight: 600, color: orange }}>{parentCount.toLocaleString()} UF parents</span> have already made this promise.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: '#888', marginBottom: 20 }}>
-            Your student is already benefiting from their generosity.
-          </p>
-        </div>
+        {parentCount !== null && parentCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            style={{ textAlign: 'center', marginBottom: 24 }}
+          >
+            <p style={{ fontFamily: dmSans, fontSize: 14, color: '#555' }}>
+              <span style={{ color: orange, fontWeight: 700 }}>{parentCount.toLocaleString()} parents</span> have already made this promise.
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888' }}>
+              Your student is already benefiting from their generosity.
+            </p>
+          </motion.div>
+        )}
 
         {/* Testimonial */}
-        <div style={{
-          width: '100%', background: '#fff',
-          border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14,
-          padding: '20px 24px', marginBottom: 28,
-        }}>
-          <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 15, color: '#555', lineHeight: 1.7, margin: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            background: 'rgba(232,93,32,0.04)', borderRadius: 12,
+            padding: '20px 24px', marginBottom: 32,
+            borderLeft: `3px solid ${orange}`,
+          }}
+        >
+          <p style={{ fontFamily: playfair, fontSize: 15, fontStyle: 'italic', color: '#444', lineHeight: 1.7, marginBottom: 8 }}>
             "I joined College Fast Forward because someone helped my daughter land her first internship. Now I've helped 4 students I've never met. That's the deal."
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: orange, marginTop: 10 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: orange }}>
             — A College Fast Forward Parent
           </p>
-        </div>
+        </motion.div>
 
-        {/* Button */}
-        <AnimatePresence mode="wait">
-          {celebrated ? (
-            <motion.div
-              key="celebrated"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={{
-                width: '100%', textAlign: 'center', padding: 16, borderRadius: 100,
-                background: orange, color: '#fff',
-                fontFamily: dmSans, fontSize: 16, fontWeight: 600,
-              }}
-            >
-              Welcome to the family ✨
-            </motion.div>
-          ) : (
-            <button
-              type="button"
-              onClick={handlePledge}
-              disabled={!buttonReady || submitting}
-              style={{
-                width: '100%', padding: 16, borderRadius: 100, border: 'none',
-                background: buttonReady ? orange : 'rgba(0,0,0,0.06)',
-                color: buttonReady ? '#fff' : '#bbb',
-                fontFamily: dmSans, fontSize: 16, fontWeight: 600,
-                cursor: buttonReady ? 'pointer' : 'not-allowed',
-                transition: 'all 0.3s', minHeight: 'auto',
-              }}
-              onMouseEnter={e => { if (buttonReady) e.currentTarget.style.background = orangeHover; }}
-              onMouseLeave={e => { if (buttonReady) e.currentTarget.style.background = orange; }}
-            >
-              {submitting ? <Loader2 className="w-5 h-5 animate-spin" style={{ margin: '0 auto' }} /> : 'I Care. I Pledge. Let Me In. →'}
-            </button>
-          )}
-        </AnimatePresence>
-
-        {/* Fine print */}
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#aaa', textAlign: 'center', marginTop: 16, paddingBottom: 20 }}>
-          This isn't a legal contract — it's a promise to a community of parents who are counting on each other.
-        </p>
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          style={{ textAlign: 'center' }}
+        >
+          <button
+            onClick={handleSubmit}
+            disabled={!allChecked || submitting}
+            style={{
+              width: '100%', maxWidth: 480, padding: '16px 32px',
+              borderRadius: 100, border: 'none',
+              background: allChecked ? orange : '#ccc',
+              color: '#fff', fontFamily: dmSans, fontSize: 16, fontWeight: 600,
+              cursor: allChecked ? 'pointer' : 'default',
+              transition: 'all 0.2s', minHeight: 'auto',
+              opacity: submitting ? 0.7 : 1,
+            }}
+          >
+            {submitting ? 'Saving...' : 'I Care. I Pledge. Let Me In. →'}
+          </button>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#aaa', marginTop: 12 }}>
+            This isn't a legal contract — it's a promise to a community of parents who are counting on each other.
+          </p>
+        </motion.div>
       </div>
     </div>
   );
