@@ -59,6 +59,7 @@ export default function MyImpact() {
       helpOffersRes,
       karmaRes,
       allKarmaRes,
+      parentUsersRes,
       activeReqRes,
     ] = await Promise.all([
       base44.entities.Answer.filter({ answerer_email: user.email }, '-created_date', 500).catch(() => []),
@@ -79,6 +80,7 @@ export default function MyImpact() {
     setHelpOffers(helpOffersRes || []);
     setKarmaData((karmaRes || [])[0] || null);
     setAllKarmaFamilies(allKarmaRes || []);
+    setParentUsers(parentUsersRes || []);
     setActiveRequests(activeReqRes || []);
     setLoading(false);
   }, [user?.email, user?.id, user?.family_group_id]);
