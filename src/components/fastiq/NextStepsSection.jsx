@@ -189,10 +189,10 @@ function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
 }
 
 /* ─── Standard step card for steps 2, 3 ─── */
-function StepCard({ stepNumber, emoji, title, description, actions }) {
+function StepCard({ stepNumber, emoji, title, description, actions, _stacked }) {
   return (
     <div style={{
-      background: '#fff', borderRadius: 12, border: '1px solid #E2E8F0',
+      background: '#fff', borderRadius: 12, border: '0.5px solid rgba(0,0,0,0.08)',
       padding: '16px 18px', display: 'flex', alignItems: 'flex-start', gap: 14,
     }}>
       <div style={{
@@ -207,17 +207,23 @@ function StepCard({ stepNumber, emoji, title, description, actions }) {
           <span>{emoji}</span> {title}
         </p>
         <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>{description}</p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: _stacked ? 'column' : 'row', gap: 8, flexWrap: 'wrap' }}>
           {actions.map((a, i) => (
             <button
               key={i}
               onClick={a.onClick}
               style={{
-                padding: '7px 14px', borderRadius: 8, border: 'none',
-                background: i === 0 ? '#0021A5' : '#F1F5F9',
-                color: i === 0 ? '#fff' : '#475569',
-                fontSize: 12, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
+                padding: a.secondary ? '10px 14px' : (_stacked ? '12px 14px' : '7px 14px'),
+                borderRadius: _stacked ? 100 : 8,
+                border: a.secondary ? '0.5px solid rgba(0,0,0,0.12)' : 'none',
+                background: a.secondary ? 'rgba(0,0,0,0.04)' : (i === 0 ? '#E85D20' : '#F1F5F9'),
+                color: a.secondary ? '#555' : (i === 0 ? '#fff' : '#475569'),
+                fontSize: _stacked ? 14 : 12,
+                fontWeight: a.secondary ? 400 : (i === 0 && _stacked ? 500 : 700),
+                cursor: 'pointer', minHeight: 'auto',
                 whiteSpace: 'nowrap',
+                width: _stacked ? '100%' : 'auto',
+                fontFamily: "'DM Sans', sans-serif",
               }}
             >
               {a.label}
@@ -308,7 +314,7 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
     });
   }
 
-  // No resume
+  // No resume — FIX 6: Upload is primary, Build is secondary (stacked vertically via _stacked flag)
   if (!hasResume && secondarySteps.length < 2) {
     secondarySteps.push({
       emoji: '📄',
@@ -316,8 +322,9 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
       description: 'Your resume powers tailored applications, personalized outreach, and interview prep.',
       actions: [
         { label: 'Upload Resume →', onClick: () => onOpenChat('Help me upload my resume') },
-        { label: 'Build One With Me →', onClick: () => onOpenChat('Help me build a resume') },
+        { label: 'Build One With Me →', onClick: () => onOpenChat('Help me build a resume'), secondary: true },
       ],
+      _stacked: true,
     });
   }
 
