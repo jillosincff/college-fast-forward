@@ -1,5 +1,6 @@
 import React from 'react';
 
+/* Parent Dashboard Hero - dark gradient header */
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 const orange = '#E85D20';
