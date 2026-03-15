@@ -143,58 +143,37 @@ export default function ParentOnboarding() {
   // Steps 1–3: Two-column layout
   const LeftPanel = step === 1 ? ParentStep1LeftPanel : step === 2 ? ParentStep2LeftPanel : ParentStep3LeftPanel;
 
+  const mobileCSS = `
+    @media(max-width:768px) {
+      .po-layout { flex-direction: column !important; }
+      .po-left { display: none !important; }
+      .po-mobile-header { display: block !important; }
+      .po-right { padding: 24px 20px !important; }
+    }
+  `;
+
+  const mobileTitle = step === 1 ? 'Help students find you' : step === 2 ? "What's your background?" : 'Link your student';
+  const mobileSub = step === 1 ? 'Set up your profile so students can reach out' : step === 2 ? 'Help us match you with the right students' : 'Connect your accounts to activate Karma boosts';
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
-      <style>{`
-        @media(max-width:768px) {
-          .po-layout { flex-direction: column !important; }
-          .po-left { display: none !important; }
-          .po-mobile-header { display: block !important; }
-          .po-right { padding: 24px 20px !important; }
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: mobileCSS }} />
 
       <ParentProgressBar currentStep={step} />
 
       <div className="po-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
-        {/* Left panel — desktop */}
         <div className="po-left" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
           <div style={{ height: '100%' }}>
             <LeftPanel />
           </div>
         </div>
 
-        {/* Mobile condensed header */}
-        <div className="po-mobile-header" style={{
-          display: 'none',
-          background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
-          padding: '24px 20px', minHeight: 140,
-        }}>
-          {step === 1 && (
-            <div style={{ textAlign: 'center' }}>
-              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Help students find you</h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Set up your profile so students can reach out</p>
-            </div>
-          )}
-          {step === 2 && (
-            <div style={{ textAlign: 'center' }}>
-              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>What's your background?</h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Help us match you with the right students</p>
-            </div>
-          )}
-          {step === 3 && (
-            <div style={{ textAlign: 'center' }}>
-              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Link your student</h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Connect your accounts to activate Karma boosts</p>
-            </div>
-          )}
+        <div className="po-mobile-header" style={{ display: 'none', background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)', padding: '24px 20px', minHeight: 140, textAlign: 'center' }}>
+          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>{mobileTitle}</h2>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>{mobileSub}</p>
         </div>
 
-        {/* Right panel */}
-        <div className="po-right" style={{
-          flex: 1, background: '#f4f2ee',
-          padding: '48px 48px 60px', overflowY: 'auto',
-        }}>
+        <div className="po-right" style={{ flex: 1, background: '#f4f2ee', padding: '48px 48px 60px', overflowY: 'auto' }}>
           <div style={{ maxWidth: 520, margin: '0 auto' }}>
             {loading ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
@@ -204,27 +183,13 @@ export default function ParentOnboarding() {
             ) : (
               <>
                 {step === 1 && (
-                  <ParentOnboardingStep1
-                    formData={formData}
-                    onUpdate={updateFormData}
-                    onNext={() => setStep(2)}
-                    userName={user?.full_name}
-                  />
+                  <ParentOnboardingStep1 formData={formData} onUpdate={updateFormData} onNext={() => setStep(2)} userName={user?.full_name} />
                 )}
                 {step === 2 && (
-                  <ParentOnboardingStep2
-                    formData={formData}
-                    onUpdate={updateFormData}
-                    onNext={() => setStep(3)}
-                    onBack={() => setStep(1)}
-                  />
+                  <ParentOnboardingStep2 formData={formData} onUpdate={updateFormData} onNext={() => setStep(3)} onBack={() => setStep(1)} />
                 )}
                 {step === 3 && (
-                  <LinkStudentStep
-                    user={user}
-                    onNext={handleLinkStudentComplete}
-                    onSkip={handleLinkStudentSkip}
-                  />
+                  <LinkStudentStep user={user} onNext={handleLinkStudentComplete} onSkip={handleLinkStudentSkip} />
                 )}
               </>
             )}
