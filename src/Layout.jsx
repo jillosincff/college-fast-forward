@@ -115,6 +115,7 @@ const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
+const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding'));
 const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
@@ -806,6 +807,7 @@ const getPageComponent = (pageName) => {
     case 'WelcomeRole': return WelcomeRole;
     case 'StudentOnboarding': return StudentOnboarding;
     case 'Onboarding': return Onboarding;
+    case 'AlumniOnboarding': return AlumniOnboarding;
     case 'ParentOnboarding': return ParentOnboarding;
     case 'ShareExpertise': return ShareExpertise;
     case 'GatorDirectory': return GatorDirectory;
