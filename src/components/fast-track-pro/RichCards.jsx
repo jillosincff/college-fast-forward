@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import FollowCompanyButton from '@/components/fastiq/FollowCompanyButton';
 
 // Extract first name only, stripping titles like Dr., Mr., etc.
 function getFirstName(fullName) {
@@ -26,7 +27,7 @@ function toArray(val) {
   return [];
 }
 
-export function CompanyIntelCard({ data, onSendMessage }) {
+export function CompanyIntelCard({ data, onSendMessage, user }) {
   if (!data || typeof data !== 'object') return null;
 
   try {
@@ -63,7 +64,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           <div className="w-10 h-10 bg-[#0021A5] rounded-xl flex items-center justify-center">
             <Building2 className="w-5 h-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="font-bold text-slate-900">{titleCase(String(data.company || ''))}</p>
             <div className="flex items-center gap-2 flex-wrap mt-1">
               <Badge className={`text-xs ${os.bg}`}>{os.emoji} {os.label}</Badge>
@@ -72,6 +73,7 @@ export function CompanyIntelCard({ data, onSendMessage }) {
               )}
             </div>
           </div>
+          {user && data.company && <FollowCompanyButton companyName={titleCase(String(data.company))} user={user} />}
         </div>
 
         {/* Key stats row — focused on student-relevant roles */}
