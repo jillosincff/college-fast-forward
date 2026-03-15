@@ -26,11 +26,16 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         <span style={{ fontSize: 11, fontWeight: 500, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Sans', sans-serif" }}>
           Companies FASTIQ is watching ({meaningfulResearch.length})
         </span>
-        {!expanded && (
-          <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
-            — {pastResearch.slice(0, 2).map(r => `${r.company_name} intel`).join(', ')}{pastResearch.length > 2 ? ` +${pastResearch.length - 2} more` : ''}
-          </span>
-        )}
+        {!expanded && meaningfulResearch.length > 0 && (() => {
+          const uniqueNames = [...new Set(meaningfulResearch.map(r => r.company_name).filter(Boolean))];
+          const preview = uniqueNames.slice(0, 3).join(' · ');
+          const remaining = Math.max(0, uniqueNames.length - 3);
+          return (
+            <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
+              — {preview}{remaining > 0 ? ` +${remaining} more` : ''}
+            </span>
+          );
+        })()}
         {expanded
           ? <ChevronDown style={{ width: 14, height: 14, color: '#475569' }} />
           : <ChevronRight style={{ width: 14, height: 14, color: '#475569' }} />

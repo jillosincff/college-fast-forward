@@ -21,11 +21,13 @@ function HeroStatusLineInline({ lines = [] }) {
   }, [safeLines.length]);
 
   return (
-    <div style={{ height: 20, marginTop: 10, display: 'flex', alignItems: 'center' }}>
+    <div style={{ height: 20, display: 'flex', alignItems: 'center' }}>
       <span style={{
-        fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 500,
+        fontSize: 12, color: 'rgba(244,240,232,0.45)', fontWeight: 300,
+        fontFamily: "'DM Sans', sans-serif",
         transition: 'opacity 0.4s ease-in-out',
         opacity: visible ? 1 : 0,
+        lineHeight: 1.4,
       }}>
         {safeLines[currentIdx % safeLines.length]}
       </span>
@@ -139,7 +141,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
                 ))}
               </>
             ) : null}
-            {onEditProfile && (
+            {onEditProfile && targetCompanies.length > 0 && (
               <button
                 onClick={onEditProfile}
                 style={{
@@ -152,13 +154,19 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
               >
-                {targetCompanies.length > 0 ? '+ Edit' : '+ Add Targets'}
+                + Edit
               </button>
             )}
           </div>
 
-          {/* Line 5: Rotating status line */}
-          <HeroStatusLineInline lines={statusLines} />
+          {/* Line 5: Rotating status line with live pulse */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, height: 20 }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#4CAF50', flexShrink: 0,
+              animation: 'fiq-pulse-ring 2s infinite',
+            }} />
+            <HeroStatusLineInline lines={statusLines} />
+          </div>
         </div>
 
         {/* Progress Rings */}

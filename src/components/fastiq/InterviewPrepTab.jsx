@@ -122,7 +122,7 @@ export default function InterviewPrepTab() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 11, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>Interview Prep</h2>
+          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 11, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px', display: 'block' }}>Interview Prep</h2>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
             {items.length} questions from real companies — contributed by the network.
           </p>

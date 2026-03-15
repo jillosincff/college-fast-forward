@@ -89,9 +89,9 @@ const ICON_FN_MAP = {
 const ALL_ACTIONS = [
   { label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#0021A5', prompt: 'Find UF alumni at my target companies', primary: true },
   { label: 'Draft Intro', description: "I'll write a personalized message for you", color: '#FA4616', prompt: 'Draft an outreach message', primary: true },
-  { label: 'Resume Review & Tailor', description: 'Build, review, or customize your resume', color: '#8B5CF6', prompt: '__navigate_resume_tailoring__', primary: true },
+  { label: 'Resume Review & Tailor', description: 'Tailor your resume to any job listing', color: '#8B5CF6', prompt: '__navigate_resume_tailoring__', primary: true },
   { label: 'Mock Interview', description: 'Practice with FASTIQ as your interviewer', color: '#EF4444', prompt: '__navigate_mock_interview__', primary: true },
-  { label: 'Explore Careers', description: "Not sure what to do? Let's figure it out", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
+  { label: 'Explore Careers', description: "Not sure what direction to go? Let's explore", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
   { label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
   { label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: 'Review my LinkedIn profile', primary: false },
   { label: 'Cover Letter', description: 'Tailored to each job you apply for', color: '#EAB308', prompt: 'Write a cover letter for me', primary: false },
