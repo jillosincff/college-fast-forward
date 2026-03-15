@@ -34,7 +34,7 @@ import PullToRefresh from './components/common/PullToRefresh';
 // Child/detail pages that show a back button instead of the logo on mobile
 const childPages = [
   'QuestionDetail', 'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
-  'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches'
+  'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches', 'FollowedCompanies'
 ];
 
 const childPageTitles = {
@@ -48,6 +48,7 @@ const childPageTitles = {
   SubmitFeedback: 'Feedback',
   Notifications: 'Notifications',
   MyMatches: 'My Matches',
+  FollowedCompanies: 'My Companies',
 };
 
 const APP_VERSION = 'v1.1.7';
