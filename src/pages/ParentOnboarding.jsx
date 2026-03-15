@@ -187,7 +187,6 @@ export default function ParentOnboarding() {
               </div>
             )}
           </div>
-        </div>
 
         {/* Right panel */}
         <div className="po-right" style={{
