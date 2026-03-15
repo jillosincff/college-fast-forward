@@ -172,7 +172,7 @@ export default function ChatWelcome({ profile, onSend }) {
           <path d="M12 2L4 13h8l-2 7 10-12h-8l2-6z"/>
         </svg>
         <p className="fastiq-callout-text" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.6, margin: 0 }}>
-          CFF connects you with parents and alumni who've signed up. <span style={{ fontWeight: 500, color: '#f4f0e8' }}>FASTIQ goes further — searching the entire web to find UF alumni at any company.</span> That's your unfair advantage.
+          College Fast Forward connects you with parents and alumni who've signed up. <span style={{ fontWeight: 500, color: '#f4f0e8' }}>FASTIQ goes further — searching the entire web to find UF alumni at any company.</span> That's your unfair advantage.
         </p>
       </div>
     </div>

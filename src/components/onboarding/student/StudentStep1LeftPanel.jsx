@@ -121,7 +121,7 @@ export default function StudentStep1LeftPanel() {
           color: 'rgba(255,255,255,0.65)', lineHeight: 1.7,
           margin: '16px 0 24px',
         }}>
-          CFF gives you an{' '}
+          College Fast Forward gives you an{' '}
           <span style={{ fontWeight: 500, color: '#f4f0e8' }}>unfair advantage</span>{' '}
           — a community of UF parents and alumni who are{' '}
           <span style={{ fontWeight: 500, color: '#f4f0e8' }}>ready to open doors for you.</span>
@@ -157,7 +157,7 @@ export default function StudentStep1LeftPanel() {
           fontFamily: playfair, fontWeight: 400, fontStyle: 'italic',
           fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, margin: 0,
         }}>
-          "Think of CFF as a master key to a neighborhood of closed doors. Instead of standing on the sidewalk hoping someone notices your resume, you now have neighbors ready to walk you inside."
+          "Think of College Fast Forward as a master key to a neighborhood of closed doors. Instead of standing on the sidewalk hoping someone notices your resume, you now have neighbors ready to walk you inside."
         </p>
       </div>
     </div>

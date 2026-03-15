@@ -125,7 +125,7 @@ export default function LandingHero({ onClaim }) {
             padding: '0 8px',
           }}
         >
-          CFF is a private network where parents and alumni pledge to help each other's students — with real introductions, real advice, and real connections. Your network. Their network. Every student wins.
+          College Fast Forward is a private network where parents and alumni pledge to help each other's students — with real introductions, real advice, and real connections. Your network. Their network. Every student wins.
         </motion.p>
 
         {/* Primary CTA */}
