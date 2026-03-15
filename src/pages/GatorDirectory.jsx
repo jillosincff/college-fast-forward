@@ -271,20 +271,7 @@ export default function GatorDirectory() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer style={{
-        borderTop: '1px solid rgba(0,0,0,0.06)', background: '#f4f2ee',
-        padding: '24px', textAlign: 'center', marginTop: 'auto',
-      }}>
-        <p style={{ fontFamily: dmSans, fontSize: 12, color: '#999', marginBottom: 4 }}>
-          © {new Date().getFullYear()} College Fast Forward. All Rights Reserved.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-          <a href="#Terms" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="#Privacy" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="#CookiePolicy" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Cookie Policy</a>
-        </div>
-      </footer>
+      {/* Footer handled by layout — no duplicate here */}
 
       {/* Responsive grid styles */}
       <style>{`

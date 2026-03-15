@@ -17,22 +17,47 @@ function getAvatarColor(str) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
+// Detect if a name looks like a username/email prefix rather than a real name
+function looksLikeUsername(name) {
+  if (!name) return true;
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return true;
+  if (trimmed.includes('@')) return true;
+  // All lowercase with no spaces = likely a username (e.g. "amisokol", "alitloo")
+  if (trimmed === trimmed.toLowerCase() && !trimmed.includes(' ') && trimmed.length < 20) return true;
+  // Contains numbers mixed with letters and no spaces = likely auto-generated
+  if (/^[a-z0-9]+$/i.test(trimmed) && /\d/.test(trimmed) && !trimmed.includes(' ')) return true;
+  return false;
+}
+
+function hasRealName(user) {
+  // Check if user has a proper display name from any field
+  if (user?.first_name && user?.last_name && !looksLikeUsername(user.first_name)) return true;
+  const full = user?.full_name || '';
+  if (full.includes(' ') && !looksLikeUsername(full)) return true;
+  // Single word but capitalized properly (e.g. "Sarah") — allow it
+  if (full.length > 0 && full[0] === full[0].toUpperCase() && full !== full.toLowerCase()) return true;
+  return false;
+}
+
 function getInitials(user) {
+  if (!hasRealName(user)) return 'M';
   const name = user?.full_name || user?.first_name || '';
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   if (parts.length === 1 && parts[0].length >= 1) return parts[0][0].toUpperCase();
-  return '?';
+  return 'M';
 }
 
 function formatFirstL(user) {
+  if (!hasRealName(user)) return 'Member';
   const first = user?.first_name || '';
   const last = user?.last_name || '';
-  if (first && last) return `${first} ${last[0]}.`;
+  if (first && last && !looksLikeUsername(first)) return `${first} ${last[0]}.`;
   const full = user?.full_name || '';
   const parts = full.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-  if (parts.length === 1) return parts[0];
+  if (parts.length === 1 && !looksLikeUsername(parts[0])) return parts[0];
   return 'Member';
 }
 

@@ -33,7 +33,8 @@ function StatPill({ label, count, variant = 'dark' }) {
 export default function DirectoryHero({ stats, loading }) {
   return (
     <section style={{
-      background: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 60%, #0821A5 100%)',
+      backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
+      backgroundColor: '#0d1117',
       padding: '48px 24px 56px',
     }}>
       <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>

@@ -134,7 +134,7 @@ export default function DirectorySearchBar({
           fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#999',
           marginTop: 10, marginBottom: 0,
         }}>
-          Showing {resultCount} member{resultCount !== 1 ? 's' : ''}
+          {resultCount > 0 ? `${resultCount} member${resultCount !== 1 ? 's' : ''} found` : 'No members found'}
         </p>
       </div>
     </div>
