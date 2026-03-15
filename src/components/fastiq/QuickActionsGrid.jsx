@@ -38,9 +38,9 @@ const icons = {
       <rect x="2" y="2" width="16" height="16" rx="2" /><path d="M6 9v5M6 7v.5M10 14v-3c0-1 .5-2 2-2s2 1 2 2v3" />
     </svg>
   ),
-  coverLetter: (color) => (
+  applicationBoost: (color) => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="2" width="14" height="16" rx="1.5" /><path d="M7 7h6M7 10h6M7 13h4" />
+      <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z" />
     </svg>
   ),
   actionPlan: (color) => (
@@ -58,7 +58,7 @@ const ICON_BG_MAP = {
   'Explore Careers': 'rgba(255,167,38,0.08)',
   'Salary Intel': 'rgba(232,93,32,0.08)',
   'LinkedIn Review': 'rgba(33,150,243,0.08)',
-  'Cover Letter': 'rgba(156,39,176,0.08)',
+  'Application Boost': 'rgba(232,93,32,0.1)',
   'Action Plan': 'rgba(76,175,80,0.08)',
 };
 
@@ -70,7 +70,7 @@ const ICON_COLOR_MAP = {
   'Explore Careers': '#FFA726',
   'Salary Intel': '#E85D20',
   'LinkedIn Review': '#2196F3',
-  'Cover Letter': '#9C27B0',
+  'Application Boost': '#E85D20',
   'Action Plan': '#4CAF50',
 };
 
@@ -82,7 +82,7 @@ const ICON_FN_MAP = {
   'Explore Careers': icons.exploreCareers,
   'Salary Intel': icons.salaryIntel,
   'LinkedIn Review': icons.linkedin,
-  'Cover Letter': icons.coverLetter,
+  'Application Boost': icons.applicationBoost,
   'Action Plan': icons.actionPlan,
 };
 
@@ -93,8 +93,8 @@ const ALL_ACTIONS = [
   { label: 'Mock Interview', description: 'Practice with FASTIQ as your interviewer', color: '#EF4444', prompt: '__navigate_mock_interview__', primary: true },
   { label: 'Explore Careers', description: "Not sure what direction to go? Let's explore", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
   { label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
-  { label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: 'Review my LinkedIn profile', primary: false },
-  { label: 'Cover Letter', description: 'Tailored to each job you apply for', color: '#EAB308', prompt: 'Write a cover letter for me', primary: false },
+  { label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: '__navigate_linkedin_review__', primary: false },
+  { label: 'Application Boost', description: "Know what to write — and whether it's worth writing", color: '#E85D20', prompt: '__navigate_application_boost__', primary: false },
   { label: 'Action Plan', description: 'Your goals, milestones & activity', color: '#E85D20', prompt: '__navigate_action_plan__', primary: false },
 ];
 
@@ -108,6 +108,10 @@ function ActionCard({ action, onOpenChat }) {
       navigate('ResumeTailoring');
     } else if (action.prompt === '__navigate_mock_interview__') {
       navigate('MockInterview');
+    } else if (action.prompt === '__navigate_linkedin_review__') {
+      navigate('LinkedInReview');
+    } else if (action.prompt === '__navigate_application_boost__') {
+      navigate('ApplicationBoost');
     } else {
       onOpenChat(action.prompt);
     }
