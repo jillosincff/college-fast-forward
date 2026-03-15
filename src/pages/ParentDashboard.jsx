@@ -12,6 +12,7 @@ import ParentDashboardHero from '@/components/parent-dashboard/ParentDashboardHe
 import ParentProfileBanner from '@/components/parent-dashboard/ParentProfileBanner';
 import ParentQuestionsSection from '@/components/parent-dashboard/ParentQuestionsSection';
 import ParentLinkStudentCard from '@/components/parent-dashboard/ParentLinkStudentCard';
+import ParentRecentActivitySection from '@/components/parent-dashboard/ParentRecentActivitySection';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -72,6 +73,13 @@ export default function ParentDashboard() {
             <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.1s' }}>
               <ParentQuestionsSection data={data} user={user} />
             </div>
+
+            {/* Recent Activity — only shown if parent has sent messages */}
+            {data.sentMessages?.length > 0 && (
+              <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.14s' }}>
+                <ParentRecentActivitySection sentMessages={data.sentMessages} />
+              </div>
+            )}
 
             {/* Link Student Card — shows both linked and unlinked states */}
             <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.18s' }}>
