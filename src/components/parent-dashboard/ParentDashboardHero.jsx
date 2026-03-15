@@ -1,5 +1,4 @@
-import React from '../../react';
-
+import React from 'react';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
