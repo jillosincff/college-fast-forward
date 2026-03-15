@@ -1,723 +1,309 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Search, Users, Briefcase, MapPin, X, Frown, GraduationCap, Heart, Award, Filter, Crown, LayoutGrid, List } from 'lucide-react';
-import UserCard from '@/components/directory/UserCard';
-import MessageUserModal from '@/components/directory/MessageUserModal';
-import ProfileModal from '@/components/directory/ProfileModal';
 import { navigate } from '@/components/utils/navigation';
 import logger from '@/components/utils/logger';
-import { useAccessControl } from '@/components/access/useAccessControl';
 
-// --- Helper Component: Moved outside the main component ---
-const ErrorState = ({ error, onRetry }) => (
-  <div className="text-center py-16 col-span-full bg-white rounded-lg shadow-md">
-    <div className="inline-block p-4 bg-red-100 rounded-full mb-4">
-      <Frown className="w-10 h-10 text-red-500" />
-    </div>
-    <h3 className="text-xl font-semibold text-red-800">Oops! Something went wrong.</h3>
-    <p className="text-red-600 mt-2 max-w-md mx-auto">
-      We couldn't load the directory. This might be a temporary issue.
-    </p>
-    <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">{error}</p>
-    <div className="mt-6 space-x-4">
-      <Button onClick={onRetry} variant="secondary">
-        Try Again
-      </Button>
-      <Button onClick={() => navigate('Dashboard')}>
-        Go to Dashboard
-      </Button>
-    </div>
-  </div>
-);
+import DirectoryHero from '../components/directory/DirectoryHero';
+import DirectorySearchBar from '../components/directory/DirectorySearchBar';
+import DirectoryMemberCard from '../components/directory/DirectoryMemberCard';
+import DirectoryEmptyState from '../components/directory/DirectoryEmptyState';
+import DirectoryLoadMore from '../components/directory/DirectoryLoadMore';
+import MessageUserModal from '../components/directory/MessageUserModal';
+import ProfileModal from '../components/directory/ProfileModal';
 
+const PAGE_SIZE = 24;
+const dmSans = "'DM Sans', system-ui, sans-serif";
 
 export default function GatorDirectory() {
   const { user } = useAuth();
-  const accessInfo = useAccessControl(user);
   const [allUsers, setAllUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState({ 
-    members: 0, 
-    responseRate: 95, 
-    connections: 1247,
-    students: 0,
-    alumni: 0,
-    parents: 0,
-    gators: 0
-  });
+  const [stats, setStats] = useState({ members: 0, parents: 0, alumni: 0, students: 0 });
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({ 
-    persona: 'all', 
-    industry: 'all',
-    expertise: 'all',
-    canProvideReferrals: false,
-    waysToHelp: 'all'
-  });
+  const [filters, setFilters] = useState({ persona: 'all', industry: 'all', helpType: 'all' });
+  const [viewMode, setViewMode] = useState('grid');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState('all'); // 'matches' or 'all'
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [myMatches, setMyMatches] = useState([]);
 
-  // Scroll detection for sticky search bar
+  // Load fonts
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (!document.getElementById('directory-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'directory-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+      document.head.appendChild(link);
+    }
   }, []);
 
   const loadDirectoryData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      
       const rawResponse = await base44.functions.invoke('getDirectoryUsers', {});
-      
-      console.log('[GatorDirectory] Raw response type:', typeof rawResponse);
-      console.log('[GatorDirectory] Raw response keys:', rawResponse ? Object.keys(rawResponse) : 'null');
-      
-      // base44.functions.invoke returns axios response: { data: { success, data: [...] } }
-      // But in some cases it might return the body directly
+
       let usersArray = null;
-      
       if (rawResponse?.data?.data && Array.isArray(rawResponse.data.data)) {
-        // Standard axios shape: response.data.data
         usersArray = rawResponse.data.data;
       } else if (rawResponse?.data && Array.isArray(rawResponse.data)) {
-        // response.data is the array directly
         usersArray = rawResponse.data;
       } else if (Array.isArray(rawResponse)) {
-        // raw response is the array
         usersArray = rawResponse;
       } else if (rawResponse?.success && rawResponse?.data && Array.isArray(rawResponse.data)) {
-        // Body returned directly (no axios wrapper)
         usersArray = rawResponse.data;
       }
-      
-      console.log('[GatorDirectory] Parsed users array:', Array.isArray(usersArray), 'count:', usersArray?.length);
-      
+
       if (!usersArray || !Array.isArray(usersArray)) {
-        console.error('[GatorDirectory] Could not parse users. Raw:', JSON.stringify(rawResponse).substring(0, 500));
         throw new Error('Invalid data from server.');
       }
-      
-      // Accept users with full_name - persona may be normalized by the backend
+
       const validUsers = usersArray.filter(u => u && u.full_name);
       setAllUsers(validUsers);
-      
-      // Calculate persona breakdown - handle both 'student' and 'gator' personas
-      const studentCount = validUsers.filter(u => 
-        u.persona === 'student' || 
-        u.persona === 'gator' || 
+
+      const studentCount = validUsers.filter(u =>
+        u.persona === 'student' || u.persona === 'gator' ||
         (u.roles && (u.roles.includes('student') || u.roles.includes('gator')))
       ).length;
       const alumniCount = validUsers.filter(u => u.persona === 'alumni' || (u.roles && u.roles.includes('alumni'))).length;
       const parentCount = validUsers.filter(u => u.persona === 'parent' || (u.roles && u.roles.includes('parent'))).length;
-      
-      setStats(prev => ({ 
-        ...prev, 
-        members: validUsers.length,
-        students: studentCount,
-        alumni: alumniCount,
-        parents: parentCount,
-        gators: studentCount + alumniCount
-      }));
-      logger.info(`[GatorDirectory] Loaded ${validUsers.length} users.`);
 
-      // Load user's matches if they're a student
-      if (user?.persona === 'gator' || user?.persona === 'student') {
-        try {
-          const matches = await base44.entities.Match.filter({ student_id: user.id });
-          setMyMatches(matches || []);
-        } catch (matchErr) {
-          console.log('Could not load matches:', matchErr);
-        }
-      }
-
+      setStats({ members: validUsers.length, students: studentCount, alumni: alumniCount, parents: parentCount });
+      logger.info(`[Directory] Loaded ${validUsers.length} users.`);
     } catch (err) {
-      console.error("[GatorDirectory] Failed to load users:", err);
+      console.error('[Directory] Failed to load users:', err);
       setError(err.message || 'Please try again in a few minutes.');
     } finally {
       setLoading(false);
     }
   }, []);
 
+  useEffect(() => { loadDirectoryData(); }, [loadDirectoryData]);
+
+  // Listen for pull-to-refresh
   useEffect(() => {
-    loadDirectoryData();
+    const handler = () => loadDirectoryData();
+    document.addEventListener('cff:pull-refresh', handler);
+    return () => document.removeEventListener('cff:pull-refresh', handler);
   }, [loadDirectoryData]);
 
+  // Derive industries from data
   const industries = useMemo(() => {
-    const uniqueIndustries = [...new Set(allUsers.map(u => u.industry).filter(Boolean))];
-    return uniqueIndustries.sort();
+    const unique = [...new Set(allUsers.map(u => u.industry).filter(Boolean))];
+    return unique.sort();
   }, [allUsers]);
 
-  const expertiseAreas = useMemo(() => {
-    const allExpertise = allUsers
-      .filter(u => u.expertise_areas && u.expertise_areas.length > 0)
-      .flatMap(u => u.expertise_areas);
-    return [...new Set(allExpertise)].sort();
-  }, [allUsers]);
-
-  // Normalize ways_to_help values to display-friendly format
-  // These match the IDs from AlumniStep2Expertise onboarding
-  const normalizeWayToHelp = (value) => {
-    if (!value) return value;
-    const lowercaseValue = value.toLowerCase();
-    // Map all variations to consistent display names
-    const mappings = {
-      // From onboarding (AlumniStep2Expertise)
-      'introductions': 'Introductions',
-      'resume_feedback': 'Resume Review',
-      'career_advice': 'Career Advice',
-      'interview_prep': 'Interview Prep',
-      'job_leads': 'Job Leads',
-      'industry_insights': 'Industry Insights',
-      // Legacy/alternate values that might exist
-      'introduce': 'Introductions',
-      'share_leads': 'Job Leads',
-      'resume_review': 'Resume Review',
-      'mock_interview': 'Interview Prep',
-      'job_referral': 'Job Leads',
-      'networking': 'Introductions',
-      'mentorship': 'Career Advice',
-    };
-    return mappings[lowercaseValue] || value;
+  // Normalize help tag for matching
+  const normalizeHelpTag = (help) => {
+    const h = (help || '').toLowerCase().replace(/_/g, ' ');
+    if (h.includes('introduction') || h.includes('intro') || h.includes('networking')) return 'Intros';
+    if (h.includes('resume') || h.includes('linkedin')) return 'Resume Review';
+    if (h.includes('career') || h.includes('advice')) return 'Career Advice';
+    if (h.includes('interview') || h.includes('mock')) return 'Interview Prep';
+    if (h.includes('job') && (h.includes('lead') || h.includes('referral'))) return 'Job Referrals';
+    if (h.includes('industry') || h.includes('insight')) return 'Industry Insights';
+    return null;
   };
 
-  const waysToHelpOptions = useMemo(() => {
-    const allWaysToHelp = allUsers
-      .filter(u => u.ways_to_help && u.ways_to_help.length > 0)
-      .flatMap(u => u.ways_to_help)
-      .map(normalizeWayToHelp);
-    return [...new Set(allWaysToHelp)].filter(Boolean).sort();
-  }, [allUsers]);
-
-  useEffect(() => {
+  // Filtered & sorted users
+  const filteredUsers = useMemo(() => {
     let users = [...allUsers];
 
-    // Sort by access level: Premium/Founding first, then free users at bottom
+    // Sort: premium/founding first, then parents, then rest
     users.sort((a, b) => {
-      // Premium users (founding, subscribed, or parents) go first
-      const aIsPremium = a.is_founding_member || 
-                        a.subscription_status === 'active' || 
-                        a.subscription_tier === 'lifetime_family' ||
-                        a.persona === 'parent';
-      const bIsPremium = b.is_founding_member || 
-                        b.subscription_status === 'active' || 
-                        b.subscription_tier === 'lifetime_family' ||
-                        b.persona === 'parent';
-      
-      if (aIsPremium && !bIsPremium) return -1;
-      if (!aIsPremium && bIsPremium) return 1;
-      
-      // Within premium tier, founding members go first
+      const aP = a.is_founding_member || a.subscription_status === 'active' || a.persona === 'parent';
+      const bP = b.is_founding_member || b.subscription_status === 'active' || b.persona === 'parent';
+      if (aP && !bP) return -1;
+      if (!aP && bP) return 1;
       if (a.is_founding_member && !b.is_founding_member) return -1;
       if (!a.is_founding_member && b.is_founding_member) return 1;
-      
       return 0;
     });
 
+    // Search
     if (searchTerm) {
-      const lowercasedTerm = searchTerm.toLowerCase();
-      users = users.filter(user =>
-        user.full_name?.toLowerCase().includes(lowercasedTerm) ||
-        user.major?.toLowerCase().includes(lowercasedTerm) ||
-        user.company?.toLowerCase().includes(lowercasedTerm) ||
-        user.job_title?.toLowerCase().includes(lowercasedTerm) ||
-        user.expertise_areas?.some(e => e.toLowerCase().includes(lowercasedTerm)) ||
-        user.mentorship_topics?.some(m => m.toLowerCase().includes(lowercasedTerm))
+      const term = searchTerm.toLowerCase();
+      users = users.filter(u =>
+        u.full_name?.toLowerCase().includes(term) ||
+        u.company?.toLowerCase().includes(term) ||
+        u.job_title?.toLowerCase().includes(term) ||
+        u.industry?.toLowerCase().includes(term) ||
+        u.major?.toLowerCase().includes(term) ||
+        u.expertise_areas?.some(e => e.toLowerCase().includes(term))
       );
     }
 
-    if (filters.persona && filters.persona !== 'all') {
-      users = users.filter(user => user.persona === filters.persona);
+    // Role filter
+    if (filters.persona !== 'all') {
+      users = users.filter(u => {
+        if (filters.persona === 'student') return u.persona === 'student' || u.persona === 'gator';
+        return u.persona === filters.persona;
+      });
     }
 
-    if (filters.industry && filters.industry !== 'all') {
-      users = users.filter(user => user.industry === filters.industry);
+    // Industry filter
+    if (filters.industry !== 'all') {
+      users = users.filter(u => u.industry === filters.industry);
     }
 
-    if (filters.expertise && filters.expertise !== 'all') {
-      users = users.filter(user => 
-        user.expertise_areas?.includes(filters.expertise)
-      );
+    // Help type filter
+    if (filters.helpType !== 'all') {
+      users = users.filter(u => {
+        const allHelps = [...(u.ways_to_help || []), ...(u.primary_goal || [])];
+        if (u.can_provide_referrals) allHelps.push('job_referral');
+        return allHelps.some(h => normalizeHelpTag(h) === filters.helpType);
+      });
     }
 
-    if (filters.waysToHelp && filters.waysToHelp !== 'all') {
-      users = users.filter(user =>
-        user.ways_to_help?.some(w => normalizeWayToHelp(w) === filters.waysToHelp)
-      );
-    }
+    return users;
+  }, [allUsers, searchTerm, filters]);
 
-    if (filters.canProvideReferrals) {
-      users = users.filter(user => user.can_provide_referrals === true);
-    }
+  // Reset visible count when filters change
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, filters]);
 
-    // If "My Matches" tab is active, filter to only show matched users
-    if (activeTab === 'matches' && myMatches.length > 0) {
-      const matchedParentIds = myMatches.map(m => m.parent_id);
-      users = users.filter(u => matchedParentIds.includes(u.id));
-    }
+  const visibleUsers = filteredUsers.slice(0, visibleCount);
 
-    setFilteredUsers(users);
-  }, [searchTerm, filters, allUsers, activeTab, myMatches]);
+  const handleMessage = (u) => { setSelectedUser(u); setMessageModalOpen(true); };
+  const handleViewProfile = (userId) => { setSelectedProfileId(userId); setProfileModalOpen(true); };
+  const resetFilters = () => { setSearchTerm(''); setFilters({ persona: 'all', industry: 'all', helpType: 'all' }); };
 
-  const handleMessageUser = (user) => {
-    setSelectedUser(user);
-    setMessageModalOpen(true);
-  };
-  
-  const handleViewProfile = (userId) => {
-    setSelectedProfileId(userId);
-    setProfileModalOpen(true);
-  };
-  
-  const resetFilters = () => {
-    setSearchTerm('');
-    setFilters({ 
-      persona: 'all', 
-      industry: 'all',
-      expertise: 'all',
-      canProvideReferrals: false,
-      waysToHelp: 'all'
-    });
-  };
-  
-  const hasActiveFilters = searchTerm || 
-    filters.persona !== 'all' || 
-    filters.industry !== 'all' || 
-    filters.expertise !== 'all' ||
-    filters.waysToHelp !== 'all' ||
-    filters.canProvideReferrals;
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          width: 32, height: 32, border: '3px solid #E85D20',
+          borderTop: '3px solid transparent', borderRadius: '50%',
+          animation: 'dirSpin 0.8s linear infinite',
+        }} />
+        <style>{`@keyframes dirSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
-  const isStudent = user?.persona === 'gator';
+  if (error) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, padding: 24 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 16, color: '#333', textAlign: 'center' }}>
+          Something went wrong loading the directory.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888', textAlign: 'center' }}>{error}</p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={loadDirectoryData} style={{
+            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
+            background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 24px',
+            cursor: 'pointer', minHeight: 'auto',
+          }}>Try Again</button>
+          <button onClick={() => navigate('Dashboard')} style={{
+            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#333',
+            background: '#fff', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 8,
+            padding: '10px 24px', cursor: 'pointer', minHeight: 'auto',
+          }}>Go to Dashboard</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0A1F3D' }}>
-      {/* Hero Section - Gator Stadium Night Sky */}
-      <div className="relative text-white py-12 sm:py-20 px-3 sm:px-4 overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #001540 0%, #0021A5 50%, #002157 100%)',
-      }}>
-        {/* Stadium crowd texture overlay */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-        }} />
-        
-        {/* Atmospheric glow effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 right-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute bottom-10 left-1/4 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center">
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 sm:mb-3 leading-tight text-white tracking-tight">
-              UF Directory
-            </h1>
-            
-            {/* Subtitle with emphasis */}
-            <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 flex items-center justify-center gap-2 flex-wrap px-4">
-              <span className="text-white/90 font-medium">Invite-Only</span>
-              <span className="text-white/50">•</span>
-              <span className="text-[#FA4616] font-semibold">Parents open doors</span>
-            </p>
-            
-            {/* Big Counter Pills */}
-            <div className="mt-6 sm:mt-10 flex justify-center gap-3 sm:gap-4 flex-wrap px-4">
-              {/* UF Members Pill */}
-              <div className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-50 transition"></div>
-                <div className="relative px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#0021A5] rounded-full border-2 border-blue-400/50 shadow-xl">
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">{loading ? '...' : stats.gators}</div>
-                  <div className="text-xs sm:text-sm text-blue-200 font-medium uppercase tracking-wide">UF Members</div>
-                </div>
-              </div>
-              
-              {/* Parents Pill with BIGGER Glowing Crown */}
-              <div className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur opacity-40 group-hover:opacity-60 transition"></div>
-                <div className="relative px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#FA4616] rounded-full border-2 border-orange-400/50 shadow-xl">
-                  <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1">
-                    <div className="relative hidden sm:block">
-                      <div className="absolute inset-0 blur-sm">
-                        <Crown className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-300" />
-                      </div>
-                      <Crown className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-300 relative drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]" />
-                    </div>
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{loading ? '...' : stats.parents}</div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-orange-100 font-medium uppercase tracking-wide">UF Parents</div>
-                </div>
-              </div>
-            </div>
+    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+      {/* Hero */}
+      <DirectoryHero stats={stats} loading={loading} />
 
+      {/* Sticky search + filters */}
+      <DirectorySearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filters={filters}
+        onFilterChange={setFilters}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        industries={industries}
+        resultCount={filteredUsers.length}
+      />
 
-          </div>
-        </div>
-      </div>
-
-      {/* Sticky Search Bar with Tabs */}
-      <div className={`sticky top-0 z-100 transition-all duration-300 ${
-        isScrolled ? 'shadow-lg' : 'shadow-none'
-      }`} style={{ zIndex: 100 }}>
-        <div className="bg-white px-4 sm:px-6 lg:px-8 transition-all duration-300" style={{
-          padding: isScrolled ? '12px 2rem' : '1.5rem 2rem'
-        }}>
-          <div className="max-w-7xl mx-auto space-y-4">
-            {/* Tabs: My Matches vs All Members */}
-            {(user?.persona === 'gator' || user?.persona === 'student') && myMatches.length > 0 && (
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={() => setActiveTab('matches')}
-                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
-                    activeTab === 'matches'
-                      ? 'bg-[#FA4616] text-white shadow-lg'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  My Matches ({myMatches.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('all')}
-                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
-                    activeTab === 'all'
-                      ? 'bg-[#0021A5] text-white shadow-lg'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  All Members ({stats.members})
-                </button>
-              </div>
-            )}
-
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className={`absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 ${
-                isScrolled ? 'h-4 w-4' : 'h-5 w-5'
-              }`} />
-              <Input
-                id="search-directory"
-                placeholder="Search by name, company, industry..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-12 transition-all duration-300 border-2 border-slate-300 focus:border-[#0021A5] rounded-xl ${
-                  isScrolled ? 'h-11 text-sm' : 'h-14 text-base'
-                }`}
+      {/* Cards */}
+      <div style={{ maxWidth: 900, margin: '0 auto', width: '100%', padding: '24px 24px 60px' }}>
+        {filteredUsers.length === 0 ? (
+          <DirectoryEmptyState onClearFilters={resetFilters} />
+        ) : viewMode === 'grid' ? (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 16,
+          }}
+            className="directory-grid"
+          >
+            {visibleUsers.map(u => (
+              <DirectoryMemberCard
+                key={u.id}
+                user={u}
+                onMessage={handleMessage}
+                onViewProfile={handleViewProfile}
+                viewMode="grid"
               />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}>
+            {visibleUsers.map(u => (
+              <DirectoryMemberCard
+                key={u.id}
+                user={u}
+                onMessage={handleMessage}
+                onViewProfile={handleViewProfile}
+                viewMode="list"
+              />
+            ))}
+          </div>
+        )}
+
+        {filteredUsers.length > 0 && (
+          <DirectoryLoadMore
+            visibleCount={visibleCount}
+            totalCount={filteredUsers.length}
+            onLoadMore={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+          />
+        )}
       </div>
 
-      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0">
-          
-          {/* Filters Bar - Scrolls Normally */}
-          <div className="bg-white/95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-lg mb-6 sm:mb-8 border border-slate-200">
-            <div className="flex items-center justify-between mb-4 gap-2">
-              <p className="text-sm text-slate-600 font-medium hidden sm:block">
-                💡 <strong>Tip:</strong> Filter by role, industry, or help type to find the right connections!
-              </p>
-              
-              {/* View Toggle */}
-              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1 ml-auto">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${
-                    viewMode === 'grid' ? 'bg-white shadow-sm text-[#0021A5]' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                  title="Grid View"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${
-                    viewMode === 'list' ? 'bg-white shadow-sm text-[#0021A5]' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                  title="List View"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            
-            {/* Basic Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
-              <div>
-                <label htmlFor="filter-persona" className="block text-sm font-medium text-slate-700 mb-1">
-                  Role
-                </label>
-                <Select value={filters.persona} onValueChange={(value) => setFilters(f => ({ ...f, persona: value }))}>
-                  <SelectTrigger id="filter-persona" className="h-11">
-                    <SelectValue placeholder="Filter by role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="alumni">Alumni</SelectItem>
-                    <SelectItem value="parent">Parent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label htmlFor="filter-industry" className="block text-sm font-medium text-slate-700 mb-1">
-                  Industry
-                </label>
-                <Select value={filters.industry} onValueChange={(value) => setFilters(f => ({ ...f, industry: value }))}>
-                  <SelectTrigger id="filter-industry" className="h-11">
-                    <SelectValue placeholder="Filter by industry" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Industries</SelectItem>
-                    {industries.map(industry => (
-                      <SelectItem key={industry} value={industry}>{industry}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Help Type Filter - Moved to basic filters */}
-              {waysToHelpOptions.length > 0 && (
-                <div>
-                  <label htmlFor="filter-ways-to-help" className="block text-sm font-medium text-slate-700 mb-1">
-                    Help Type
-                  </label>
-                  <Select value={filters.waysToHelp} onValueChange={(value) => setFilters(f => ({ ...f, waysToHelp: value }))}>
-                    <SelectTrigger id="filter-ways-to-help" className="h-11">
-                      <SelectValue placeholder="Any type of help" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      {waysToHelpOptions.map(way => (
-                        <SelectItem key={way} value={way}>{way}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-
-            {/* Advanced Filters Toggle */}
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="text-slate-600 hover:text-slate-800"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                {showAdvancedFilters ? 'Hide' : 'More'} Filters
-              </Button>
-            </div>
-
-            {/* Advanced Filters - Collapsible */}
-            {showAdvancedFilters && (
-              <div className="pt-4 mt-4 border-t border-slate-200 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {expertiseAreas.length > 0 && (
-                    <div>
-                      <label htmlFor="filter-expertise" className="block text-sm font-medium text-slate-700 mb-1">
-                        <Award className="w-4 h-4 inline mr-1" />
-                        Expertise Area
-                      </label>
-                      <Select value={filters.expertise} onValueChange={(value) => setFilters(f => ({ ...f, expertise: value }))}>
-                        <SelectTrigger id="filter-expertise" className="h-11">
-                          <SelectValue placeholder="Any expertise" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Expertise Areas</SelectItem>
-                          {expertiseAreas.map(expertise => (
-                            <SelectItem key={expertise} value={expertise}>{expertise}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* Location filter placeholder - for future */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      Location (Coming Soon)
-                    </label>
-                    <Select disabled>
-                      <SelectTrigger className="h-11 opacity-50">
-                        <SelectValue placeholder="Any location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Can Provide Referrals Checkbox */}
-                <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                  <input
-                    type="checkbox"
-                    id="filter-referrals"
-                    checked={filters.canProvideReferrals}
-                    onChange={(e) => setFilters(f => ({ ...f, canProvideReferrals: e.target.checked }))}
-                    className="w-4 h-4 text-green-600"
-                  />
-                  <label htmlFor="filter-referrals" className="text-sm font-medium text-green-900">
-                    Can provide job referrals at their company
-                  </label>
-                </div>
-              </div>
-            )}
-
-            {/* Active Filters Display */}
-            {hasActiveFilters && (
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-slate-600 font-medium">Active filters:</span>
-                    {searchTerm && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1">
-                        Search: "{searchTerm}"
-                        <button onClick={() => setSearchTerm('')} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                    {filters.persona !== 'all' && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1">
-                        Role: {filters.persona}
-                        <button onClick={() => setFilters(f => ({ ...f, persona: 'all' }))} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                    {filters.industry !== 'all' && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1">
-                        Industry: {filters.industry}
-                        <button onClick={() => setFilters(f => ({ ...f, industry: 'all' }))} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                    {filters.expertise !== 'all' && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1 bg-purple-100 text-purple-800">
-                        Expertise: {filters.expertise}
-                        <button onClick={() => setFilters(f => ({ ...f, expertise: 'all' }))} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                    {filters.waysToHelp !== 'all' && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1 bg-blue-100 text-blue-800">
-                        Help: {filters.waysToHelp}
-                        <button onClick={() => setFilters(f => ({ ...f, waysToHelp: 'all' }))} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                    {filters.canProvideReferrals && (
-                      <Badge variant="secondary" className="pl-2 pr-1 py-1 bg-green-100 text-green-800">
-                        Can provide referrals
-                        <button onClick={() => setFilters(f => ({ ...f, canProvideReferrals: false }))} className="ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )}
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={resetFilters} className="text-blue-600 hover:text-blue-800">
-                    <X className="w-4 h-4 mr-1"/>
-                    Clear All
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Results Count */}
-          {!loading && !error && (
-            <div className="mb-6 flex items-center justify-between">
-              <p className="text-slate-600">
-                Showing <span className="font-semibold text-slate-900">{filteredUsers.length}</span> {filteredUsers.length === 1 ? 'member' : 'members'}
-                {activeTab === 'matches' && ' matched to your request'}
-              </p>
-            </div>
-          )}
-
-          {loading ? (
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 animate-pulse">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-slate-200 rounded-full"></div>
-                    <div className="flex-1 space-y-3">
-                      <div className="h-5 bg-slate-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <ErrorState error={error} onRetry={loadDirectoryData} />
-          ) : (
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map(directoryUser => (
-                  <UserCard 
-                    key={directoryUser.id} 
-                    user={directoryUser} 
-                    onMessage={handleMessageUser} 
-                    onViewProfile={handleViewProfile}
-                    isLimitedMode={accessInfo.isLimitedMode}
-                    viewMode={viewMode}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-16 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-[#FA4616]/30">
-                  <div className="mb-4">
-                    <div className="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full">
-                      <p className="text-white font-bold text-lg">
-                        Only {stats.members} Founding Members — be next
-                      </p>
-                    </div>
-                  </div>
-                  <Search className="mx-auto h-12 w-12 text-slate-400 mb-3" />
-                  <h3 className="mt-2 text-lg font-medium text-slate-900">No matches for your filters</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Try adjusting your search or filters.
-                  </p>
-                  {hasActiveFilters && (
-                    <Button onClick={resetFilters} className="mt-4" variant="outline">
-                      Clear All Filters
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+      {/* Footer */}
+      <footer style={{
+        borderTop: '1px solid rgba(0,0,0,0.06)', background: '#f4f2ee',
+        padding: '24px', textAlign: 'center', marginTop: 'auto',
+      }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: '#999', marginBottom: 4 }}>
+          © {new Date().getFullYear()} College Fast Forward. All Rights Reserved.
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+          <a href="#Terms" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Terms of Service</a>
+          <a href="#Privacy" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Privacy Policy</a>
+          <a href="#CookiePolicy" style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa', textDecoration: 'none' }}>Cookie Policy</a>
         </div>
-      </main>
-      
+      </footer>
+
+      {/* Responsive grid styles */}
+      <style>{`
+        .directory-grid {
+          grid-template-columns: repeat(3, 1fr) !important;
+        }
+        @media (max-width: 768px) {
+          .directory-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .directory-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
+      {/* Modals */}
       {selectedUser && (
         <MessageUserModal
           isOpen={isMessageModalOpen}
@@ -725,12 +311,11 @@ export default function GatorDirectory() {
           recipientUser={selectedUser}
         />
       )}
-      
-      <ProfileModal 
+      <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setProfileModalOpen(false)}
         userId={selectedProfileId}
-        onMessage={handleMessageUser}
+        onMessage={handleMessage}
       />
     </div>
   );
