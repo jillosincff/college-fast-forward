@@ -4,7 +4,6 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    
     // Verify user is authenticated
     const user = await base44.auth.me();
     if (!user) {
