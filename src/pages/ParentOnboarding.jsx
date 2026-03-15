@@ -157,8 +157,8 @@ export default function ParentOnboarding() {
 
       <div className="po-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
         {/* Left panel */}
-        <div className="po-left" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
-          <div className="hidden md:block" style={{ height: '100%' }}>
+        <div className="po-left hidden md:block" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
+          <div style={{ height: '100%' }}>
             <LeftPanel />
           </div>
           {/* Mobile condensed */}
