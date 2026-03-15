@@ -5,7 +5,7 @@ const ALL_ACTIONS = [
   { icon: '🔍', label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#0021A5', prompt: 'Find UF alumni at my target companies', primary: true },
   { icon: '✉️', label: 'Draft Intro', description: "I'll write a personalized message for you", color: '#FA4616', prompt: 'Draft an outreach message', primary: true },
   { icon: '📄', label: 'Resume Review & Tailor', description: 'Build, review, or customize your resume', color: '#8B5CF6', prompt: '__navigate_resume_tailoring__', primary: true },
-  { icon: '💼', label: 'Interview Prep', description: 'Company-specific questions and tips', color: '#EF4444', prompt: 'Prep me for an interview', primary: true },
+  { icon: '💼', label: 'Mock Interview', description: 'Practice with FASTIQ as your interviewer', color: '#EF4444', prompt: '__navigate_mock_interview__', primary: true },
   { icon: '🧭', label: 'Explore Careers', description: "Not sure what to do? Let's figure it out", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
   { icon: '💰', label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
   { icon: '🔗', label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: 'Review my LinkedIn profile', primary: false },
@@ -21,6 +21,8 @@ function ActionCard({ action, onOpenChat }) {
       navigate('ActionPlanTracker');
     } else if (action.prompt === '__navigate_resume_tailoring__') {
       navigate('ResumeTailoring');
+    } else if (action.prompt === '__navigate_mock_interview__') {
+      navigate('MockInterview');
     } else {
       onOpenChat(action.prompt);
     }
