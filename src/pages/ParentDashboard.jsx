@@ -10,7 +10,6 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 
 import ParentDashboardHero from '@/components/parent-dashboard/ParentDashboardHero';
 import ParentProfileBanner from '@/components/parent-dashboard/ParentProfileBanner';
-import ParentFirstActionCard from '@/components/parent-dashboard/ParentFirstActionCard';
 import ParentQuestionsSection from '@/components/parent-dashboard/ParentQuestionsSection';
 import ParentLinkStudentCard from '@/components/parent-dashboard/ParentLinkStudentCard';
 
@@ -69,13 +68,8 @@ export default function ParentDashboard() {
               <ParentProfileBanner user={user} profilePercent={profilePercent} />
             </div>
 
-            {/* First Action Card */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.1s' }}>
-              <ParentFirstActionCard user={user} answersGiven={data.studentsHelped} />
-            </div>
-
             {/* Questions Section */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.14s' }}>
+            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.1s' }}>
               <ParentQuestionsSection data={data} user={user} />
             </div>
 
