@@ -27,12 +27,12 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
           Companies FASTIQ is watching ({meaningfulResearch.length})
         </span>
         {!expanded && meaningfulResearch.length > 0 && (() => {
-          const uniqueNames = [...new Set(meaningfulResearch.map(r => r.company_name).filter(Boolean))];
+          const uniqueNames = [...new Set(meaningfulResearch.map(r => r.company_name).filter(n => n && n.length > 2))];
           const preview = uniqueNames.slice(0, 3).join(' · ');
           const remaining = Math.max(0, uniqueNames.length - 3);
           return (
             <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
-              — {preview}{remaining > 0 ? ` +${remaining} more` : ''}
+              — {preview}{remaining > 0 ? ` +${remaining} more` : ''} ›
             </span>
           );
         })()}
