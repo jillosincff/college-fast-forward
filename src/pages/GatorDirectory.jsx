@@ -224,6 +224,7 @@ export default function GatorDirectory() {
         onViewModeChange={setViewMode}
         industries={industries}
         resultCount={filteredUsers.length}
+        visibleCount={Math.min(visibleCount, filteredUsers.length)}
       />
 
       {/* Cards */}

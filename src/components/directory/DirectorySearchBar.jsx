@@ -18,6 +18,7 @@ export default function DirectorySearchBar({
   viewMode, onViewModeChange,
   industries,
   resultCount,
+  visibleCount,
 }) {
   const selectStyle = {
     fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#333',
@@ -134,7 +135,9 @@ export default function DirectorySearchBar({
           fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#999',
           marginTop: 10, marginBottom: 0,
         }}>
-          {resultCount > 0 ? `${resultCount} member${resultCount !== 1 ? 's' : ''} found` : 'No members found'}
+          {resultCount > 0
+            ? `Showing ${visibleCount || resultCount} of ${resultCount} member${resultCount !== 1 ? 's' : ''}`
+            : 'No members found'}
         </p>
       </div>
     </div>
