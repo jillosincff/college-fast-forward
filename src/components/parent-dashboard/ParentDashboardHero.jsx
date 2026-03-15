@@ -18,6 +18,49 @@ function getKarmaLevel(pts) {
   return 'Newcomer';
 }
 
+function ProgressStrip({ studentsHelped, profilePercent, introsMade }) {
+  const steps = [
+    { label: 'Answer a Question', karma: '+15', done: studentsHelped > 0 },
+    { label: 'Make an Introduction', karma: '+50', done: introsMade > 0 },
+    { label: 'Complete Your Profile', karma: '+25', done: profilePercent >= 100 },
+  ];
+  return (
+    <div className="pd-quick-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
+      {steps.map((step, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && (
+            <div style={{ width: 32, height: 1, background: step.done ? orange : 'rgba(255,255,255,0.15)', margin: '0 4px', flexShrink: 0 }} />
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%',
+              background: step.done ? orange : 'transparent',
+              border: step.done ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: dmSans, fontSize: 9, fontWeight: 500,
+              color: step.done ? '#fff' : 'rgba(244,240,232,0.4)',
+              flexShrink: 0,
+            }}>
+              {step.done ? (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 6l2.5 2.5L9 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              ) : i + 1}
+            </div>
+            <span style={{
+              fontFamily: dmSans, fontSize: 12, fontWeight: step.done ? 500 : 400,
+              color: step.done ? orange : 'rgba(244,240,232,0.5)', whiteSpace: 'nowrap',
+            }}>{step.label}</span>
+            <span style={{
+              fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: orange,
+              background: 'rgba(232,93,32,0.15)', borderRadius: 100, padding: '1px 7px',
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}>{step.karma}</span>
+          </div>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 export default function ParentDashboardHero({ user, data, onLinkStudentClick }) {
   const firstName = (() => {
     const fn = user?.full_name;
@@ -34,6 +77,7 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
   const karmaLevel = getKarmaLevel(karma);
   const hasLinkedStudent = !!data.linkedStudent;
   const studentsHelped = data.studentsHelped || 0;
+  const profilePercent = [user?.company, user?.linkedin_url, user?.title || user?.job_title, user?.profile_image, user?.bio].filter(Boolean).length * 20;
 
   const studentFirstName = (() => {
     const s = data.linkedStudent;
@@ -159,34 +203,7 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
         </div>
 
         {/* Progress Strip */}
-        <div className="pd-quick-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
-          {[
-            { label: 'Answer a Question', karma: '+15' },
-            { label: 'Make an Introduction', karma: '+50' },
-            { label: 'Complete Your Profile', karma: '+25' },
-          ].map((step, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && (
-                <div style={{ width: 32, height: 1, background: 'rgba(255,255,255,0.15)', margin: '0 4px', flexShrink: 0 }} />
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%',
-                  border: '1.5px solid rgba(255,255,255,0.25)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: dmSans, fontSize: 9, fontWeight: 500, color: 'rgba(244,240,232,0.4)',
-                  flexShrink: 0,
-                }}>{i + 1}</div>
-                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(244,240,232,0.5)', whiteSpace: 'nowrap' }}>{step.label}</span>
-                <span style={{
-                  fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: orange,
-                  background: 'rgba(232,93,32,0.15)', borderRadius: 100, padding: '1px 7px',
-                  whiteSpace: 'nowrap', flexShrink: 0,
-                }}>{step.karma}</span>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
+        <ProgressStrip studentsHelped={studentsHelped} profilePercent={profilePercent} introsMade={data.introsMade || 0} />
       </div>
     </section>
   );
