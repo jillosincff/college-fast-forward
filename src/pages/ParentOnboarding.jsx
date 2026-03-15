@@ -148,7 +148,8 @@ export default function ParentOnboarding() {
       <style>{`
         @media(max-width:768px) {
           .po-layout { flex-direction: column !important; }
-          .po-left { min-height: 200px !important; max-height: 280px !important; position: relative !important; }
+          .po-left { display: none !important; }
+          .po-mobile-header { display: block !important; }
           .po-right { padding: 24px 20px !important; }
         }
       `}</style>
