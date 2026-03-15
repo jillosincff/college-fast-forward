@@ -73,15 +73,15 @@ export default function ParentDashboard() {
               <ParentQuestionsSection data={data} user={user} />
             </div>
 
-            {/* Link Student Card — only shown if NOT linked */}
-            {!hasLinkedStudent && (
-              <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.18s' }}>
-                <ParentLinkStudentCard
-                  linkedStudent={null}
-                  onLinkClick={() => setShowLinkStudentModal(true)}
-                />
-              </div>
-            )}
+            {/* Link Student Card — shows both linked and unlinked states */}
+            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.18s' }}>
+              <ParentLinkStudentCard
+                linkedStudent={data.linkedStudent}
+                onLinkClick={() => setShowLinkStudentModal(true)}
+                familyKarma={data.familyKarma}
+                boostsThisWeek={data.boostsThisWeek}
+              />
+            </div>
           </div>
         </div>
       </PullToRefresh>
