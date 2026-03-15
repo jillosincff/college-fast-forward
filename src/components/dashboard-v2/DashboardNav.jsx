@@ -16,6 +16,11 @@ const NAV_LINKS = [
 ];
 
 export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
+  // Only render for student/gator users — parents and alumni use the layout header
+  const isStudent = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
+  const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' ||
+    user?.roles?.includes('parent') || user?.roles?.includes('alumni');
+  if (isParentOrAlumni && !isStudent) return null;
   const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
