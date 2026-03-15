@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { JobRequest } from '@/entities/JobRequest';
 import { JobAnswer } from '@/entities/JobAnswer';
 import { Opportunity } from '@/entities/Opportunity';
+import { Message } from '@/entities/Message';
 import { base44 } from '@/api/base44Client';
 
 // Scoring weights for question matching
@@ -101,12 +102,14 @@ export function useParentDashboardData(user) {
 
     try {
       // Parallel fetch all data
-      const [jobRequestsResult, opportunitiesResult, familyStudentsResult, familyKarmaResult, answersResult] = await Promise.allSettled([
+      const [jobRequestsResult, opportunitiesResult, familyStudentsResult, familyKarmaResult, answersResult, sentMessagesResult, receivedMessagesResult] = await Promise.allSettled([
         JobRequest.filter({ status: 'active' }),
         Opportunity.filter({ created_by: user.email }),
         base44.functions.invoke('getFamilyStudents', {}),
         base44.functions.invoke('getFamilyKarma', {}),
         JobAnswer.filter({ responder_email: user.email }),
+        Message.filter({ sender_email: user.email }, '-created_date', 10),
+        Message.filter({ recipient_email: user.email }, '-created_date', 50),
       ]);
 
       // Process linked students
@@ -211,8 +214,19 @@ export function useParentDashboardData(user) {
         studentsHelpedCount = Math.max(studentsHelpedCount, uniqueStudents.size);
       }
 
-      // Real activity feed (will be populated from real data in future)
-      const recentActivity = [];
+      // Build recent activity from sent messages
+      const sentMessages = sentMessagesResult.status === 'fulfilled' ? (sentMessagesResult.value || []) : [];
+      const receivedMessages = receivedMessagesResult.status === 'fulfilled' ? (receivedMessagesResult.value || []) : [];
+
+      // For each sent message, check if the recipient replied back
+      const receivedSenderEmails = new Set(receivedMessages.map(m => m.sender_email?.toLowerCase()));
+      const enrichedSentMessages = sentMessages.map(msg => ({
+        ...msg,
+        recipientName: msg.recipient_email?.split('@')[0] || 'Student',
+        hasReply: receivedSenderEmails.has(msg.recipient_email?.toLowerCase()),
+      }));
+
+      const recentActivity = enrichedSentMessages;
 
       setData({
         linkedStudent,
@@ -229,6 +243,7 @@ export function useParentDashboardData(user) {
         familyKarmaLevel,
         familyBoostMultiplier,
         recentActivity,
+        sentMessages: enrichedSentMessages,
         parentIndustry: user.industry || user.target_industry || null,
         boostsThisWeek: 0, // TODO: calculate from real boost data when available
         introsMade: 0, // TODO: calculate from real intro data when available
