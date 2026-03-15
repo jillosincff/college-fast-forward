@@ -11,6 +11,41 @@ const STAGES = [
 export default function PipelineBar({ counts, noResponseContacts = [], onOpenChat }) {
   const allZero = STAGES.every(s => (counts[s.key] || 0) === 0);
 
+  // FIX 2: Hide empty pipeline, show FASTIQ conversation starter instead
+  if (allZero && noResponseContacts.length === 0) {
+    return (
+      <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
+        <h2 style={{
+          fontSize: 11, fontWeight: 700, color: '#334155',
+          textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
+        }}>Your Pipeline</h2>
+        <div style={{
+          background: 'rgba(232,93,32,0.06)', border: '0.5px solid rgba(232,93,32,0.15)',
+          borderRadius: 14, padding: '16px 20px',
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+        }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>⚡</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 300, color: '#555', lineHeight: 1.6, margin: '0 0 12px' }}>
+              Your pipeline starts the moment you send your first message. Ready to find someone to reach out to?
+            </p>
+            <button
+              onClick={() => onOpenChat('Find me UF alumni at companies I should reach out to')}
+              style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
+                color: '#fff', background: '#E85D20', border: 'none',
+                borderRadius: 100, padding: '8px 20px', cursor: 'pointer',
+                minHeight: 'auto', width: 'auto', transition: 'background 0.2s',
+              }}
+            >
+              Find alumni to message →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
       <h2 style={{
@@ -21,26 +56,9 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
       {(
         <div style={{
           background: '#fff', borderRadius: 16, padding: '24px 16px',
-          border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center',
+          border: '0.5px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
-          {/* "Getting started" overlay for empty pipeline */}
-          {allZero && (
-            <div style={{
-              position: 'absolute', inset: 0, background: 'rgba(248,250,252,0.85)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 2, borderRadius: 16, backdropFilter: 'blur(2px)',
-            }}>
-              <div style={{ textAlign: 'center', padding: '0 20px' }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                  🚀 Your pipeline is ready
-                </p>
-                <p style={{ fontSize: 11, color: '#64748B', lineHeight: 1.5, maxWidth: 300, margin: '0 auto' }}>
-                  Find alumni at your target companies, send intros, and watch these numbers fill up as you build connections.
-                </p>
-              </div>
-            </div>
-          )}
           {STAGES.map((s, i) => {
             const count = counts[s.key] || 0;
             const active = count > 0;

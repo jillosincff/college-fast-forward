@@ -225,7 +225,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
     <div className="fiq-root">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=Space+Mono:wght@400;700&display=swap');
-        .fiq-root { font-family: 'DM Sans', sans-serif; background: #F8FAFC; min-height: 100vh; }
+        .fiq-root { font-family: 'DM Sans', sans-serif; background: #f4f2ee; min-height: 100vh; }
         .fiq-root * { box-sizing: border-box; }
         .fiq-mono { font-family: 'Space Mono', monospace; }
         @keyframes fiq-fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -260,13 +260,15 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           statusLines={buildStatusLines(pipelineData, newOpportunities, weeklyStats)}
           onEditProfile={() => setShowProfileEdit(true)}
         />
+        {/* FIX 4: Gradient transition from dark header to light body */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(to bottom, transparent, #f4f2ee)', pointerEvents: 'none' }} />
       </div>
 
       {/* CONTENT — structured top-to-bottom flow */}
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px 60px' }}>
 
-        {/* ASK FASTIQ — persistent AI chat */}
-        <AskFastIQChat />
+        {/* FIX 3: ASK FASTIQ — elevated to first interactive element */}
+        <AskFastIQChat onOpenChat={onOpenChat} />
 
         {/* SECTION 1 — WHAT'S NEW (only when there IS something new) */}
         <div ref={alertsRef}>
@@ -330,8 +332,9 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           <InterviewPrepTab />
         </div>
 
-        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontSize: 12, color: '#64748B' }}>
-          FASTIQ™ by College Fast Forward · Because applying isn't a strategy.
+        {/* FIX 9: FASTIQ-specific footer tagline */}
+        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: '#aaa' }}>
+          <span style={{ fontWeight: 500, color: '#E85D20' }}>FASTIQ™</span> by College Fast Forward. Because applying isn't a strategy.
         </div>
       </div>
 

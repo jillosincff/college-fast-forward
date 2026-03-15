@@ -55,8 +55,8 @@ export default function InterviewPrepTab() {
     })();
   }, []);
 
-  // Merge into unified list
-  const items = [
+  // Merge into unified list and filter out invalid entries
+  const rawItems = [
     ...(questions || []).filter(q => q.is_visible !== false).map(q => ({
       id: q.id, company: q.company || 'Unknown', type: q.question_type || 'other',
       level: q.experience_level || 'entry', text: q.question_text,
@@ -70,6 +70,13 @@ export default function InterviewPrepTab() {
       role: r.role, date: r.interview_date, difficulty: r.difficulty,
     })),
   ];
+
+  // FIX 1: Filter out empty/invalid interview question rows
+  const items = rawItems.filter(q =>
+    q.text && q.text.trim() !== '' &&
+    q.company && q.company !== 'Unknown' &&
+    !(q.type === 'other' && q.company === 'Unknown')
+  );
 
   // Top companies for filter
   const companyCount = {};
@@ -101,11 +108,14 @@ export default function InterviewPrepTab() {
     setSubmitting(false);
   };
 
+  // FIX 1: If no valid questions, hide entire section
   if (loading) {
     return <div style={{ textAlign: 'center', padding: 48 }}>
       <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
     </div>;
   }
+
+  if (items.length === 0) return null;
 
   return (
     <div>
@@ -114,7 +124,7 @@ export default function InterviewPrepTab() {
         <div>
           <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: '#1a1a1a', margin: '0 0 4px' }}>Interview Prep</h2>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
-            Real interview questions from real companies — contributed by the network.
+            {items.length} questions from real companies — contributed by the network.
           </p>
         </div>
         <button onClick={() => setShowShareModal(true)} style={{
