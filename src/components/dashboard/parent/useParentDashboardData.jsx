@@ -89,6 +89,7 @@ export function useParentDashboardData(user) {
     familyKarmaLevel: 'none',
     familyBoostMultiplier: 0,
     recentActivity: [],
+    sentMessages: [],
     parentIndustry: null,
   });
 
