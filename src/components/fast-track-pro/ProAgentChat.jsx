@@ -434,7 +434,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           background: '#0d1117', flexShrink: 0,
           paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
         }}>
-          <div style={{
+          <div className="fastiq-input-wrap" style={{
             display: 'flex', alignItems: 'flex-end', gap: 10,
             background: 'rgba(255,255,255,0.05)',
             border: '0.5px solid rgba(255,255,255,0.1)',
@@ -484,6 +484,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
             <button
               onClick={() => sendMessage()}
               disabled={!hasContent || isLoading}
+              className="fastiq-send-btn"
               style={{
                 width: 32, height: 32, borderRadius: '50%', border: 'none',
                 background: hasContent ? orange : 'rgba(232,93,32,0.3)',
@@ -500,7 +501,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
             </button>
           </div>
           {/* Disclaimer — below input, subtle */}
-          <p style={{
+          <p className="fastiq-disclaimer" style={{
             fontFamily: dmSans, fontSize: 10, fontWeight: 300,
             color: 'rgba(244,240,232,0.12)', textAlign: 'center',
             padding: '4px 0 8px', userSelect: 'none',
