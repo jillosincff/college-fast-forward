@@ -69,7 +69,7 @@ export default function MyImpact() {
         ? base44.entities.FamilyKarma.filter({ family_group_id: user.family_group_id }, undefined, 1).catch(() => [])
         : Promise.resolve([]),
       base44.entities.FamilyKarma.filter({}, '-this_month_karma', 20).catch(() => []),
-      base44.entities.User.filter({ persona: 'parent' }, undefined, 500).catch(() => []),
+      base44.entities.User.list('-created_date', 500).catch(() => []),
       base44.entities.HelpRequest.filter({ status: 'active' }, '-created_date', 500).catch(() => []),
     ]);
 
