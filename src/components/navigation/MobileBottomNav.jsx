@@ -15,13 +15,26 @@ export default function MobileBottomNav({ user, currentPage }) {
     return 'Dashboard';
   };
 
-  const tabs = useMemo(() => [
-    { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
-    { name: 'Ask', icon: MessageSquare, page: 'Connections' },
-    { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
-    { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
-    { name: 'Messages', icon: Mail, page: 'MyMessages' },
-  ], [user]);
+  const isParent = effectivePersona === 'parent' || user?.roles?.includes('parent');
+
+  const tabs = useMemo(() => {
+    if (isParent) {
+      return [
+        { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
+        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
+        { name: 'Directory', icon: Users, page: 'GatorDirectory' },
+        { name: 'Messages', icon: Mail, page: 'MyMessages' },
+        { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
+      ];
+    }
+    return [
+      { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
+      { name: 'Ask', icon: MessageSquare, page: 'Connections' },
+      { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
+      { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
+      { name: 'Messages', icon: Mail, page: 'MyMessages' },
+    ];
+  }, [user, isParent]);
 
   const isActive = (tabPage) => {
     if (tabPage === 'Dashboard' || tabPage === 'ParentDashboard' || tabPage === 'AlumniDashboard' || tabPage === 'AdminDashboard') {
