@@ -13,10 +13,6 @@ import ParentProfileBanner from '@/components/parent-dashboard/ParentProfileBann
 import ParentFirstActionCard from '@/components/parent-dashboard/ParentFirstActionCard';
 import ParentQuestionsSection from '@/components/parent-dashboard/ParentQuestionsSection';
 import ParentLinkStudentCard from '@/components/parent-dashboard/ParentLinkStudentCard';
-import ParentHelpNeedsChart from '@/components/parent-dashboard/ParentHelpNeedsChart';
-import ParentWeeklyCard from '@/components/parent-dashboard/ParentWeeklyCard';
-import ParentImpactSection from '@/components/parent-dashboard/ParentImpactSection';
-import ParentLeaderboard from '@/components/parent-dashboard/ParentLeaderboard';
 
 export default function ParentDashboard() {
   const { user, refreshUser } = useAuth();
@@ -83,33 +79,15 @@ export default function ParentDashboard() {
               <ParentQuestionsSection data={data} user={user} />
             </div>
 
-            {/* Link Student Card */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.18s' }}>
-              <ParentLinkStudentCard
-                linkedStudent={data.linkedStudent}
-                onLinkClick={() => setShowLinkStudentModal(true)}
-              />
-            </div>
-
-            {/* Help Needs Chart */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.22s' }}>
-              <ParentHelpNeedsChart />
-            </div>
-
-            {/* This Week in the Network */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.26s' }}>
-              <ParentWeeklyCard />
-            </div>
-
-            {/* Your Impact */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.30s' }}>
-              <ParentImpactSection user={user} data={data} />
-            </div>
-
-            {/* Family Leaderboard */}
-            <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.34s' }}>
-              <ParentLeaderboard user={user} />
-            </div>
+            {/* Link Student Card — only shown if NOT linked */}
+            {!hasLinkedStudent && (
+              <div style={{ animation: 'pdSectionFade 0.4s ease both', animationDelay: '0.18s' }}>
+                <ParentLinkStudentCard
+                  linkedStudent={null}
+                  onLinkClick={() => setShowLinkStudentModal(true)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </PullToRefresh>
