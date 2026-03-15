@@ -64,6 +64,10 @@ export default function FastIQ() {
     if (profiles.length > 0 && profiles[0].assessment_complete) {
       setProfile(profiles[0]);
       setView('dashboard');
+    } else if (user?.fastiq_setup_complete && profiles.length > 0) {
+      // Setup was completed but profile flag might be stale — go to dashboard
+      setProfile(profiles[0]);
+      setView('dashboard');
     } else {
       setView('assessment');
     }
