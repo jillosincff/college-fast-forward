@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { navigate } from '@/components/utils/navigation';
 
 const ALL_ACTIONS = [
   { icon: '🔍', label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#0021A5', prompt: 'Find UF alumni at my target companies', primary: true },
@@ -9,14 +10,23 @@ const ALL_ACTIONS = [
   { icon: '💰', label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
   { icon: '🔗', label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: 'Review my LinkedIn profile', primary: false },
   { icon: '📝', label: 'Cover Letter', description: 'Tailored to each job you apply for', color: '#EAB308', prompt: 'Write a cover letter for me', primary: false },
+  { icon: '📋', label: 'Action Plan', description: 'Your goals, milestones & activity', color: '#E85D20', prompt: '__navigate_action_plan__', primary: false },
 ];
 
 function ActionCard({ action, onOpenChat }) {
   const [hovered, setHovered] = useState(false);
 
+  const handleClick = () => {
+    if (action.prompt === '__navigate_action_plan__') {
+      navigate('ActionPlanTracker');
+    } else {
+      onOpenChat(action.prompt);
+    }
+  };
+
   return (
     <div
-      onClick={() => onOpenChat(action.prompt)}
+      onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
