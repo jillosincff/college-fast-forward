@@ -122,7 +122,7 @@ export default function InterviewPrepTab() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: '#1a1a1a', margin: '0 0 4px' }}>Interview Prep</h2>
+          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 11, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>Interview Prep</h2>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
             {items.length} questions from real companies — contributed by the network.
           </p>
@@ -204,6 +204,24 @@ export default function InterviewPrepTab() {
           </div>
         );
       })}
+
+      {/* Bottom contribute CTA */}
+      <div style={{ textAlign: 'center', padding: '20px 0 4px' }}>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#aaa', margin: '0 0 10px', lineHeight: 1.5 }}>
+          Know an interview question from a recent interview? Add it and help other students prepare.
+        </p>
+        <button
+          onClick={() => setShowShareModal(true)}
+          style={{
+            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E85D20',
+            background: 'none', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 100,
+            padding: '8px 20px', cursor: 'pointer', transition: 'all 0.2s',
+            minHeight: 'auto', width: 'auto',
+          }}
+        >
+          + Contribute a question →
+        </button>
+      </div>
 
       {/* Share modal */}
       <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
