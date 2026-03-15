@@ -237,8 +237,9 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
     return (
       <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#334155',
-          textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
+          fontSize: 11, fontWeight: 500, color: '#bbb',
+          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16,
+          fontFamily: "'DM Sans', sans-serif",
         }}>Target Companies</h2>
         <div style={{
           background: 'rgba(232,93,32,0.06)', border: '0.5px solid rgba(232,93,32,0.15)',
@@ -283,8 +284,9 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
     <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#334155',
-          textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
+          fontSize: 11, fontWeight: 500, color: '#bbb',
+          textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0,
+          fontFamily: "'DM Sans', sans-serif",
         }}>Target Companies</h2>
         <button
           onClick={onAddTargets}

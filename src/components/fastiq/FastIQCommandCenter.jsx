@@ -18,7 +18,6 @@ import AskFastIQChat from './AskFastIQChat';
 function buildStatusLines(pipelineData, newOpportunities, weeklyStats) {
   if (weeklyStats?._noTargets) {
     return [
-      '🎯 Add target companies to activate scanning',
       '⚡ FASTIQ monitors hiring signals, finds alumni, and scouts jobs for you',
     ];
   }

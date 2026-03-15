@@ -77,8 +77,9 @@ export default function QuickActionsGrid({ onOpenChat, isNewUser }) {
   return (
     <div className="fiq-animate fiq-delay-3" style={{ marginBottom: 32 }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: '#334155',
-        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14,
+        fontSize: 11, fontWeight: 500, color: '#bbb',
+        textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14,
+        fontFamily: "'DM Sans', sans-serif",
       }}>What Can I Help With?</h2>
 
       {isNewUser && (

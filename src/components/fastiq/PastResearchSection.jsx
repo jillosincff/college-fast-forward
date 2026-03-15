@@ -17,7 +17,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         }}
       >
         <span style={{ fontSize: 14 }}>📁</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: 11, fontWeight: 500, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Sans', sans-serif" }}>
           Past Research ({pastResearch.length})
         </span>
         {!expanded && (

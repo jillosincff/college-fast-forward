@@ -138,11 +138,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
                   </span>
                 ))}
               </>
-            ) : (
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>
-                No target companies set yet
-              </span>
-            )}
+            ) : null}
             {onEditProfile && (
               <button
                 onClick={onEditProfile}
@@ -179,9 +175,11 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
                 <div className="fiq-mono" style={{
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: 22, fontWeight: 700, color: '#fff',
+                  fontSize: 22, fontWeight: 700,
+                  color: r.value === 0 ? 'rgba(244,240,232,0.2)' : '#f4f0e8',
+                  fontFamily: r.value === 0 ? "'Playfair Display', Georgia, serif" : undefined,
                 }}>
-                  {r.value}
+                  {r.value === 0 ? '--' : r.value}
                 </div>
               </div>
               <div style={{

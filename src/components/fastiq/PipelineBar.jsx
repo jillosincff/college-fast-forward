@@ -16,8 +16,9 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
     return (
       <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
         <h2 style={{
-          fontSize: 11, fontWeight: 700, color: '#334155',
-          textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
+          fontSize: 11, fontWeight: 500, color: '#bbb',
+          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16,
+          fontFamily: "'DM Sans', sans-serif",
         }}>Your Pipeline</h2>
         <div style={{
           background: 'rgba(232,93,32,0.06)', border: '0.5px solid rgba(232,93,32,0.15)',

@@ -367,8 +367,9 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
       borderRadius: 16, padding: '20px 18px', border: '0.5px solid rgba(0,0,0,0.08)',
     }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: '#334155',
-        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12,
+        fontSize: 11, fontWeight: 500, color: '#bbb',
+        textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12,
+        fontFamily: "'DM Sans', sans-serif",
       }}>
         🎯 Your Next Steps
       </h2>

@@ -38,15 +38,14 @@ export default function AskFastIQChat({ onOpenChat }) {
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(0,0,0,0.08)',
+      background: '#ffffff', border: '0.5px solid rgba(0,0,0,0.08)',
       borderRadius: 16, padding: '20px 24px', marginBottom: 24,
-      backgroundColor: '#fff',
     }}>
       {/* Top row: icon + label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
         <span style={{ fontSize: 20 }}>⚡</span>
         <div>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#1a1a1a', margin: 0 }}>Ask FASTIQ™</p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a', margin: 0 }}>Ask FASTIQ™</p>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
             Ask anything about companies, careers, salaries, or interview prep.
           </p>
@@ -58,13 +57,13 @@ export default function AskFastIQChat({ onOpenChat }) {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
           {SUGGESTIONS.map((s, i) => (
             <button key={i} onClick={() => ask(s)} style={{
-              fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888',
-              background: 'rgba(0,0,0,0.03)', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 8,
-              padding: '7px 12px', cursor: 'pointer', transition: 'all 0.2s',
+              fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#555',
+              background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 8,
+              padding: '6px 12px', cursor: 'pointer', transition: 'all 0.2s',
               minHeight: 'auto', width: 'auto', textAlign: 'left',
             }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#888'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#555'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
             >{s}</button>
           ))}
         </div>
@@ -109,7 +108,7 @@ export default function AskFastIQChat({ onOpenChat }) {
           style={{
             flex: 1, padding: '11px 18px', border: '0.5px solid rgba(0,0,0,0.1)',
             borderRadius: 100, fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-            color: '#1a1a1a', outline: 'none', background: 'rgba(0,0,0,0.02)',
+            color: '#1a1a1a', outline: 'none', background: '#f4f2ee',
           }}
           onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
           onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
