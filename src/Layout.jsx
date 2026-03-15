@@ -1447,13 +1447,19 @@ function AppContent() {
   const PageComponent = getPageComponent(resolvedPage);
   // Show header for all authenticated pages except onboarding/auth flows
   // Hide layout header on pages that render their own nav (Dashboard v2)
-  const pagesWithOwnNav = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ'];
+  // Pages where student/gator users have DashboardNav (black bar) instead of layout header
+  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ'];
+  // Parents/alumni always use the layout header — only hide it for students on pages with DashboardNav
+  const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
+  const isParentOrAlumniUser = user?.persona === 'parent' || user?.persona === 'alumni' ||
+    user?.roles?.includes('parent') || user?.roles?.includes('alumni');
+  const hasOwnNav = isStudentUser && !isParentOrAlumniUser && studentOwnNavPages.includes(resolvedPage);
   const showHeader = user && 
                      resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
                      !onboardingPages.includes(resolvedPage) && 
                      !newUserFlowPages.includes(resolvedPage) &&
-                     !pagesWithOwnNav.includes(resolvedPage);
+                     !hasOwnNav;
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
