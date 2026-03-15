@@ -59,6 +59,7 @@ export default function DirectoryHero({ stats, loading }) {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
           <StatPill label="Members" count={loading ? null : stats.members} variant="dark" />
+          <StatPill label="Students" count={loading ? null : stats.students} variant="dark" />
           <StatPill label="Parents" count={loading ? null : stats.parents} variant="orange" />
           <StatPill label="Alumni" count={loading ? null : stats.alumni} variant="dark" />
         </div>
