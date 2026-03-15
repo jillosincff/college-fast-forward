@@ -4,7 +4,13 @@ import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 export default function PastResearchSection({ pastResearch, onReAddCompany, onOpenChat }) {
   const [expanded, setExpanded] = useState(false);
 
-  if (!pastResearch || pastResearch.length === 0) return null;
+  // FIX 6: Hide until there's real data (company with actual intel, not just cached empty records)
+  const meaningfulResearch = (pastResearch || []).filter(item => {
+    const intel = item.intel;
+    if (!intel) return false;
+    return (intel.hiring_signal || intel.open_roles_count > 0 || intel.entry_level_roles_count > 0 || intel.intern_roles_count > 0 || intel.intel_summary);
+  });
+  if (meaningfulResearch.length === 0) return null;
 
   return (
     <div className="fiq-animate fiq-delay-7" style={{ marginBottom: 32 }}>
@@ -18,7 +24,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
       >
         <span style={{ fontSize: 14 }}>📁</span>
         <span style={{ fontSize: 11, fontWeight: 500, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Sans', sans-serif" }}>
-          Past Research ({pastResearch.length})
+          Companies FASTIQ is watching ({meaningfulResearch.length})
         </span>
         {!expanded && (
           <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
@@ -40,7 +46,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
             Companies you previously researched that are no longer targets. Your data is preserved.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {pastResearch.map((item) => {
+            {meaningfulResearch.map((item) => {
               const name = item.company_name || 'Unknown';
               const alumni = item.alumni_count || 0;
               const reached = item.pipeline?.reached || 0;
