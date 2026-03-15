@@ -202,7 +202,7 @@ export default function PostPledgeQuestion({ user, formData, onComplete }) {
 
   /* ─── Main two-column layout ─── */
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'row' }}>
+    <div className="ppq-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'row' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         @keyframes ppqFadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
