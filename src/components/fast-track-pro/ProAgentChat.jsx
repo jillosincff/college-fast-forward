@@ -26,6 +26,7 @@ import FollowUpNudgeBanner from '@/components/fastiq/FollowUpNudgeBanner';
 import InlineSuggestionButtons from './InlineSuggestionButtons';
 import ChatSidebar from './ChatSidebar';
 import ChatWelcome from './ChatWelcome';
+import MobileSidebarSheet from './MobileSidebarSheet';
 
 const dmSans = "'DM Sans', sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -86,6 +87,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   const fileInputRef = useRef(null);
   const sentInitialRef = useRef(false);
   const [knownAlumni, setKnownAlumni] = useState([]);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   useEffect(() => { setCurrentProfile(initialProfile); }, [initialProfile]);
 
@@ -198,8 +200,31 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
         @keyframes fiqDotBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-4px)} }
+        @keyframes fastiqPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.85} }
         .fiq-chat-input:focus { outline: none; }
         .fiq-chat-input::placeholder { color: rgba(244,240,232,0.25); }
+        @media (max-width: 768px) {
+          .fastiq-prompt-text, .fastiq-chat-text { color: rgba(244,240,232,0.9) !important; }
+          .fastiq-prompt-card { min-height: 52px !important; padding: 14px 16px !important; }
+          .fastiq-prompt-card .fastiq-prompt-text { font-size: 15px !important; line-height: 1.5 !important; }
+          .fastiq-tool-card { min-height: 80px !important; padding: 16px !important; }
+          .fastiq-tools-grid { grid-template-columns: 1fr !important; }
+          .fastiq-section-label { font-size: 11px !important; letter-spacing: 0.1em !important; color: rgba(244,240,232,0.35) !important; }
+          .fastiq-welcome-headline { font-size: 22px !important; }
+          .fastiq-welcome-subhead { font-size: 17px !important; }
+          .fastiq-callout-text { font-size: 14px !important; line-height: 1.65 !important; }
+          .fiq-chat-input { font-size: 16px !important; }
+          .fastiq-disclaimer { font-size: 9px !important; color: rgba(244,240,232,0.08) !important; padding: 3px 0 6px !important; }
+          .fastiq-send-btn { width: 40px !important; height: 40px !important; }
+          .fastiq-input-wrap { padding: 12px 16px !important; }
+        }
+        @media (max-width: 380px) {
+          .fastiq-prompt-card .fastiq-prompt-text { font-size: 14px !important; }
+          .fastiq-welcome-headline { font-size: 20px !important; }
+        }
+        @media (min-width: 769px) {
+          .fiq-chat-input { font-size: 14px !important; }
+        }
       `}</style>
 
       {/* Left Sidebar — desktop only */}
@@ -214,6 +239,18 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
         />
       </div>
 
+      {/* Mobile sidebar bottom sheet */}
+      <MobileSidebarSheet
+        open={showMobileSidebar}
+        onClose={() => setShowMobileSidebar(false)}
+        profile={currentProfile}
+        onBack={onBack}
+        onResearchCompany={handleResearchCompany}
+        onRerunAssessment={onRerunAssessment}
+        onProfileUpdated={setCurrentProfile}
+        onOpenChat={(msg) => sendMessage(msg)}
+      />
+
       {/* Center Chat */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Chat header */}
@@ -225,12 +262,12 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Mobile back */}
             <button onClick={onBack} className="md:hidden" style={{
-              background: 'none', border: 'none', color: 'rgba(244,240,232,0.4)',
+              background: 'none', border: 'none', color: 'rgba(244,240,232,0.5)',
               cursor: 'pointer', padding: 0, marginRight: 4, minHeight: 'auto', width: 'auto',
               fontFamily: dmSans, fontSize: 13,
-            }}>←</button>
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+            }}>← FASTIQ</button>
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L4 13h8l-2 7 10-12h-8l2-6z"/>
             </svg>
             <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 16, color: '#f4f0e8' }}>FASTIQ™</span>
             <div style={{
@@ -238,9 +275,24 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
               boxShadow: '0 0 6px rgba(74,222,128,0.5)',
             }} />
           </div>
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
-            Active · Web search on
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="hidden md:inline" style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
+              Active · Web search on
+            </span>
+            {/* Mobile menu icon — opens sidebar sheet */}
+            <button
+              onClick={() => setShowMobileSidebar(true)}
+              className="md:hidden"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                minHeight: 'auto', width: 'auto', display: 'flex', flexDirection: 'column', gap: 3,
+              }}
+            >
+              <span style={{ width: 18, height: 1.5, background: 'rgba(244,240,232,0.4)', borderRadius: 1, display: 'block' }} />
+              <span style={{ width: 18, height: 1.5, background: 'rgba(244,240,232,0.4)', borderRadius: 1, display: 'block' }} />
+              <span style={{ width: 18, height: 1.5, background: 'rgba(244,240,232,0.4)', borderRadius: 1, display: 'block' }} />
+            </button>
+          </div>
         </div>
 
         {/* Messages area */}
