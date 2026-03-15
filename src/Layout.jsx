@@ -1181,8 +1181,8 @@ function AppContent() {
           navigate('ParentOnboarding');
           return;
         } else if (isAlumni) {
-          console.log('🔄 [Alumni Flow] -> Onboarding');
-          navigate('Onboarding');
+          console.log('🔄 [Alumni Flow] -> AlumniOnboarding');
+          navigate('AlumniOnboarding');
           return;
         } else if (user.persona === 'gator' || user.roles?.includes('gator')) {
           console.log('🔄 [Student Flow] -> StudentOnboarding');
