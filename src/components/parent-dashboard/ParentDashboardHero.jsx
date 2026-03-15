@@ -8,15 +8,7 @@ const orange = '#E85D20';
 function ChainLinkSVG() {
   return <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8 12l4-4M6 10L4 12a2.83 2.83 0 004 4l2-2M10 6l2-2a2.83 2.83 0 014 4l-2 2" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>;
 }
-function ChatBubbleSVG() {
-  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7a5 5 0 01-5 5H3l1.5-1.5A5 5 0 1112 7z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-}
-function PeopleSVG() {
-  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="5" cy="4.5" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M1 11.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><circle cx="10.5" cy="5" r="1.5" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/><path d="M11 8c1.1 0 2 .9 2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" opacity="0.6"/></svg>;
-}
-function ProfileSVG() {
-  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M2.5 12.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>;
-}
+
 
 function getKarmaLevel(pts) {
   if (pts >= 300) return 'Champion';
