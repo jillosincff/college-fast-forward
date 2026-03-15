@@ -73,29 +73,33 @@ export default function ChatWelcome({ profile, onSend }) {
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '40px 24px 32px' }}>
       {/* Hero */}
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style={{ margin: '0 auto 16px' }}>
-          <path d="M20 4l3 9h9l-7 6 3 9-8-6-8 6 3-9-7-6h9z" fill={orange} opacity="0.2"/>
-          <path d="M20 4l3 9h9l-7 6 3 9-8-6-8 6 3-9-7-6h9z" stroke={orange} strokeWidth="1.5" fill="none" strokeLinejoin="round">
-            <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
-          </path>
-        </svg>
-        <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#f4f0e8', margin: '0 0 8px' }}>
+        <div className="fastiq-welcome-icon" style={{
+          width: 48, height: 48, borderRadius: '50%',
+          background: 'rgba(232,93,32,0.15)', border: '0.5px solid rgba(232,93,32,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 20px', animation: 'fastiqPulse 2s ease infinite',
+        }}>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M12 2L4 13h8l-2 7 10-12h-8l2-6z" stroke={orange} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <h2 className="fastiq-welcome-headline" style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#f4f0e8', margin: '0 0 8px' }}>
           Your career center is ready.
         </h2>
-        <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 18, color: orange, margin: 0 }}>
+        <p className="fastiq-welcome-subhead" style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 18, color: orange, margin: 0 }}>
           What should we tackle first?
         </p>
       </div>
 
       {/* FIND OPPORTUNITIES */}
-      <p style={{
+      <p className="fastiq-section-label" style={{
         fontFamily: dmSans, fontSize: 10, fontWeight: 500,
         textTransform: 'uppercase', letterSpacing: '0.08em',
         color: 'rgba(244,240,232,0.25)', marginBottom: 10,
       }}>FIND OPPORTUNITIES</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
         {findPrompts.map((text, i) => (
-          <button key={i} onClick={() => onSend(text)} style={{
+          <button key={i} onClick={() => onSend(text)} className="fastiq-prompt-card" style={{
             display: 'flex', alignItems: 'center', gap: 12,
             background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)',
             borderRadius: 12, padding: '12px 16px', cursor: 'pointer',
@@ -105,21 +109,21 @@ export default function ChatWelcome({ profile, onSend }) {
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
           >
             <span style={{ flexShrink: 0 }}>{findPromptIcons[i] || findPromptIcons[0]}</span>
-            <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', flex: 1 }}>{text}</span>
+            <span className="fastiq-prompt-text" style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', flex: 1 }}>{text}</span>
             <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(244,240,232,0.2)' }}>→</span>
           </button>
         ))}
       </div>
 
       {/* CAREER TOOLS */}
-      <p style={{
+      <p className="fastiq-section-label" style={{
         fontFamily: dmSans, fontSize: 10, fontWeight: 500,
         textTransform: 'uppercase', letterSpacing: '0.08em',
         color: 'rgba(244,240,232,0.25)', marginBottom: 10,
       }}>CAREER TOOLS</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 24 }}>
+      <div className="fastiq-tools-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 24 }}>
         {toolCards.map((t, i) => (
-          <button key={i} onClick={() => onSend(t.prompt)} style={{
+          <button key={i} onClick={() => onSend(t.prompt)} className="fastiq-tool-card" style={{
             display: 'flex', flexDirection: 'column', gap: 8,
             background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)',
             borderRadius: 12, padding: '14px 16px', cursor: 'pointer',
@@ -143,7 +147,7 @@ export default function ChatWelcome({ profile, onSend }) {
       {/* Explore prompts — consistent style */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
         {explorePrompts.map((p, i) => (
-          <button key={i} onClick={() => onSend(p.text)} style={{
+          <button key={i} onClick={() => onSend(p.text)} className="fastiq-prompt-card" style={{
             display: 'flex', alignItems: 'center', gap: 12,
             background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)',
             borderRadius: 12, padding: '12px 16px', cursor: 'pointer',
@@ -153,7 +157,7 @@ export default function ChatWelcome({ profile, onSend }) {
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
           >
             <span style={{ flexShrink: 0 }}>{p.icon}</span>
-            <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', flex: 1 }}>{p.text}</span>
+            <span className="fastiq-prompt-text" style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', flex: 1 }}>{p.text}</span>
             <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(244,240,232,0.2)' }}>→</span>
           </button>
         ))}
@@ -164,10 +168,10 @@ export default function ChatWelcome({ profile, onSend }) {
         background: 'rgba(232,93,32,0.08)', border: '0.5px solid rgba(232,93,32,0.2)',
         borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'flex-start',
       }}>
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-          <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+          <path d="M12 2L4 13h8l-2 7 10-12h-8l2-6z"/>
         </svg>
-        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.6, margin: 0 }}>
+        <p className="fastiq-callout-text" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.6, margin: 0 }}>
           CFF connects you with parents and alumni who've signed up. <span style={{ fontWeight: 500, color: '#f4f0e8' }}>FASTIQ goes further — searching the entire web to find UF alumni at any company.</span> That's your unfair advantage.
         </p>
       </div>
