@@ -1,62 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Loader2, Check } from 'lucide-react';
-import PushNotificationPrompt from '@/components/notifications/PushNotificationPrompt';
-import ParentOnboardingStep1 from '@/components/onboarding/parent/ParentOnboardingStep1';
-import ParentOnboardingStep2 from '@/components/onboarding/parent/ParentOnboardingStep2';
-import ParentOnboardingSuccess from '@/components/onboarding/parent/ParentOnboardingSuccess';
-import Testimonial from '@/components/onboarding/parent/Testimonial';
-import LinkStudentStep from '@/components/onboarding/parent/LinkStudentStep';
-import CFFPledgePage from '@/components/onboarding/parent/CFFPledgePage';
-import PostPledgeQuestion from '@/components/onboarding/parent/PostPledgeQuestion';
+import { Loader2 } from 'lucide-react';
+import ParentProgressBar from '../components/onboarding/parent/ParentProgressBar';
+import ParentStep1LeftPanel from '../components/onboarding/parent/ParentStep1LeftPanel';
+import ParentStep2LeftPanel from '../components/onboarding/parent/ParentStep2LeftPanel';
+import ParentStep3LeftPanel from '../components/onboarding/parent/ParentStep3LeftPanel';
+import ParentOnboardingStep1 from '../components/onboarding/parent/ParentOnboardingStep1';
+import ParentOnboardingStep2 from '../components/onboarding/parent/ParentOnboardingStep2';
+import LinkStudentStep from '../components/onboarding/parent/LinkStudentStep';
+import CFFPledgePage from '../components/onboarding/parent/CFFPledgePage';
+import PostPledgeQuestion from '../components/onboarding/parent/PostPledgeQuestion';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
-  // Flow: 1=Profile, 2=Industry, 3=Link Student, 4=Pledge, 5=Post-Pledge Question
+
   const getInitialStep = () => {
-    // User took pledge but hasn't seen first question yet → go to question
     if (user?.pledge_taken === true && user?.first_question_shown === false) return 5;
-    // User completed onboarding (returning user) but hasn't taken pledge → go to pledge
     if (user?.onboarding_completed && !user?.pledge_taken) return 4;
-    // User completed profile steps but hasn't taken pledge yet → go to pledge
     if (!user?.pledge_taken && user?.current_position) return 4;
     return 1;
   };
+
   const [step, setStep] = useState(getInitialStep);
   const [loading, setLoading] = useState(false);
-  const [showPushPrompt, setShowPushPrompt] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
-  const [completionResult, setCompletionResult] = useState(null);
   const [linkedStudentEmail, setLinkedStudentEmail] = useState(null);
-  
-  // Form data across all steps
+
   const [formData, setFormData] = useState({
-    studentName: '',
-    jobTitle: '',
-    company: '',
-    yearsExperience: '',
-    industries: [],
-    waysToHelp: []
+    studentName: '', jobTitle: '', company: '', yearsExperience: '',
+    linkedinUrl: '', bio: '', industries: [], waysToHelp: [],
   });
 
-  const updateFormData = (updates) => {
-    setFormData(prev => ({ ...prev, ...updates }));
-  };
+  // Inject fonts
+  useEffect(() => {
+    if (!document.getElementById('parent-onboarding-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'parent-onboarding-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+      document.head.appendChild(link);
+    }
+  }, []);
+
+  const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const handleLinkStudentComplete = (result) => {
-    if (result?.studentEmail) {
-      setLinkedStudentEmail(result.studentEmail);
-    }
-    // After linking student, save profile and go to pledge (step 4)
+    if (result?.studentEmail) setLinkedStudentEmail(result.studentEmail);
     saveProfileAndGoToPledge();
   };
 
-  const handleLinkStudentSkip = () => {
-    // After skipping link, save profile and go to pledge (step 4)
-    saveProfileAndGoToPledge();
-  };
+  const handleLinkStudentSkip = () => saveProfileAndGoToPledge();
 
   const saveProfileAndGoToPledge = async () => {
     setLoading(true);
@@ -67,343 +61,171 @@ export default function ParentOnboarding() {
         job_title: formData.jobTitle?.trim() || undefined,
         company: formData.company?.trim() || undefined,
         years_experience: formData.yearsExperience || undefined,
+        linkedin_url: formData.linkedinUrl?.trim() || undefined,
+        bio: formData.bio?.trim() || undefined,
         industries: formData.industries,
         industry: formData.industries[0] || undefined,
         ways_to_help: formData.waysToHelp,
         expertise_areas: formData.waysToHelp,
         help_types: formData.waysToHelp,
-        visible_in_directory: true
+        visible_in_directory: true,
       };
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] === undefined) delete updateData[key];
-      });
+      Object.keys(updateData).forEach(key => { if (updateData[key] === undefined) delete updateData[key]; });
       await base44.auth.updateMe(updateData);
       if (refreshUser) await refreshUser();
-      setStep(4); // Go to pledge
+      setStep(4);
     } catch (error) {
       console.error('Failed to save profile:', error);
-      alert('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePledgeComplete = async () => {
-    // After pledge, go to post-pledge question screen (step 5)
-    setStep(5);
-  };
+  const handlePledgeComplete = () => setStep(5);
 
   const handlePostPledgeComplete = async (result) => {
     setLoading(true);
     try {
-      const updateData = {
-        onboarding_completed: true,
-        onboarding_completed_at: new Date().toISOString(),
-      };
-
-      // If they answered, mark it
-      if (result?.answered) {
-        updateData.onboarding_question_answered = true;
-      }
-
+      const updateData = { onboarding_completed: true, onboarding_completed_at: new Date().toISOString() };
+      if (result?.answered) updateData.onboarding_question_answered = true;
       await base44.auth.updateMe(updateData);
 
-      // Award karma for completing onboarding
       try {
         await base44.functions.invoke('awardKarma', {
-          parentUserId: user.id,
-          parentEmail: user.email,
-          parentName: user.full_name,
-          actionType: 'onboarding_complete',
-          referenceType: 'onboarding',
-          referenceId: user.id,
-          description: 'Completed parent onboarding'
+          parentUserId: user.id, parentEmail: user.email, parentName: user.full_name,
+          actionType: 'onboarding_complete', referenceType: 'onboarding', referenceId: user.id,
+          description: 'Completed parent onboarding',
         });
-      } catch (karmaErr) {
-        console.log('Onboarding karma failed (non-critical):', karmaErr.message);
-      }
+      } catch (e) { console.log('Onboarding karma failed:', e.message); }
 
-      // Send welcome email (fire-and-forget)
       try {
         base44.functions.invoke('sendWelcomeEmail', {
-          userId: user.id,
-          userEmail: user.email,
-          userName: user.full_name,
-          persona: 'parent',
-          userIndustries: user.industries || formData?.industries || [],
-        }).catch(e => console.log('Welcome email failed (non-critical):', e.message));
-      } catch (e) {
-        console.log('Welcome email trigger failed (non-critical):', e.message);
-      }
+          userId: user.id, userEmail: user.email, userName: user.full_name,
+          persona: 'parent', userIndustries: user.industries || formData?.industries || [],
+        }).catch(() => {});
+      } catch {}
 
-      // Clear pending invite data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 
-      // Create ActivationPrompt
       try {
         const utmSource = sessionStorage.getItem('utm_source');
         const utmCampaign = sessionStorage.getItem('utm_campaign');
         let source = 'organic';
-        if (utmSource === 'newsletter' && utmCampaign) {
-          source = `newsletter_${utmCampaign}`;
-        } else if (utmSource) {
-          source = utmSource;
-        }
+        if (utmSource === 'newsletter' && utmCampaign) source = `newsletter_${utmCampaign}`;
+        else if (utmSource) source = utmSource;
         await base44.entities.ActivationPrompt.create({
-          user_id: user.id,
-          user_type: 'parent',
-          user_email: user.email,
-          prompt_stage: 'welcome',
-          status: result?.answered ? 'acted' : 'pending',
-          action_taken: !!result?.answered,
-          action_type: result?.answered ? 'answered_question' : null,
-          acted_at: result?.answered ? new Date().toISOString() : null,
-          source,
+          user_id: user.id, user_type: 'parent', user_email: user.email,
+          prompt_stage: 'welcome', status: result?.answered ? 'acted' : 'pending',
+          action_taken: !!result?.answered, action_type: result?.answered ? 'answered_question' : null,
+          acted_at: result?.answered ? new Date().toISOString() : null, source,
         });
-      } catch (apErr) {
-        console.log('ActivationPrompt creation failed (non-critical):', apErr.message);
-      }
+      } catch {}
 
       if (refreshUser) await refreshUser();
-      setOnboardingComplete(true);
       navigate('ParentDashboard');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
-      alert('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Step 5: Post-pledge question
+  if (step === 5) return <PostPledgeQuestion user={user} formData={formData} onComplete={handlePostPledgeComplete} />;
 
+  // Step 4: Pledge (full screen)
+  if (step === 4) return <CFFPledgePage user={user} onComplete={handlePledgeComplete} />;
 
-  const goToDashboard = () => {
-    navigate('ParentDashboard');
-  };
-
-  // Step 5: Post-Pledge First Question (full screen)
-  if (step === 5) {
-    return <PostPledgeQuestion user={user} formData={formData} onComplete={handlePostPledgeComplete} />;
-  }
-
-  // Step 4: CFF Pledge (full screen, no nav, no progress bar)
-  if (step === 4) {
-    return <CFFPledgePage user={user} onComplete={handlePledgeComplete} />;
-  }
-
-  // Show push notification prompt after success screen
-  if (showPushPrompt && onboardingComplete) {
-    if (completionResult?.answeredQuestion) {
-      setTimeout(() => navigate('ParentDashboard'), 0);
-      return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-[#0021A5] animate-spin" />
-            <p className="text-slate-600">Taking you to your dashboard...</p>
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="max-w-lg w-full">
-          <ParentOnboardingSuccess 
-            result={completionResult}
-            onComplete={goToDashboard}
-          />
-          
-          <div className="mt-8">
-            <PushNotificationPrompt
-              user={user}
-              onComplete={goToDashboard}
-              onSkip={goToDashboard}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Progress bar — 3 visible steps (pledge + question are separate full-screen)
-  const totalVisibleSteps = 3;
-  const ProgressBar = () => (
-    <div className="flex items-center justify-center gap-2 mb-8">
-      {[1, 2, 3].map((s) => (
-        <div key={s} className="flex items-center">
-          <div className={`
-            w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
-            ${step > s ? 'bg-green-500 text-white' : step === s ? 'bg-[#0021A5] text-white' : 'bg-slate-200 text-slate-500'}
-          `}>
-            {step > s ? <Check className="w-4 h-4" /> : s}
-          </div>
-          {s < totalVisibleSteps && (
-            <div className={`w-8 h-1 mx-1 rounded ${step > s ? 'bg-green-500' : 'bg-slate-200'}`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  // Left side content
-  const LeftSideContent = () => {
-    if (step === 1) {
-      return (
-        <div className="space-y-5">
-          <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Welcome to</p>
-            <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
-          </div>
-          
-          <div className="py-3">
-            <p className="text-2xl lg:text-3xl font-black leading-tight text-white">
-              Let's set up your profile so we can connect you with students who need your expertise.
-            </p>
-          </div>
-          
-          <div className="bg-white/20 rounded-xl p-4 border-l-4 border-white">
-            <p className="text-white">
-              <strong>70-80% of jobs are filled through referrals.</strong>{' '}
-              Your single introduction could change a student's entire career trajectory.
-            </p>
-          </div>
-        </div>
-      );
-    }
-    
-    if (step === 2) {
-      return (
-        <div className="space-y-5">
-          <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 2 of 3</p>
-            <h1 className="text-3xl font-bold text-white">What's your background?</h1>
-          </div>
-          
-          <p className="text-xl text-white/90">
-            This helps us match you with students who can benefit from your experience.
-          </p>
-          
-          <div className="space-y-2 pt-4">
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">🎯</span>
-              <span className="font-semibold text-sm">We match you with students in YOUR industry</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white text-slate-800 rounded-lg px-4 py-3 shadow-sm">
-              <span className="text-xl">💫</span>
-              <span className="font-semibold text-sm">Your network is their opportunity</span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    if (step === 3) {
-      return (
-        <div className="space-y-5">
-          <div>
-            <p className="text-white/80 uppercase tracking-wider text-sm mb-2">Step 3 of 3</p>
-            <h1 className="text-3xl font-bold text-white">Link Your Student</h1>
-          </div>
-          
-          <p className="text-xl text-white/90">
-            Connect your account to your student so your Karma boosts their visibility.
-          </p>
-          
-          <div className="space-y-3 pt-4">
-            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
-              <span className="text-2xl">🔗</span>
-              <p className="text-white">Every time you help a student, YOUR student's questions move up in the feed</p>
-            </div>
-            <div className="flex items-start gap-3 bg-white/10 rounded-lg p-4">
-              <span className="text-2xl">⚡</span>
-              <p className="text-white">More Karma = higher boost multiplier = more visibility</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-
-  };
+  // Steps 1–3: Two-column layout
+  const LeftPanel = step === 1 ? ParentStep1LeftPanel : step === 2 ? ParentStep2LeftPanel : ParentStep3LeftPanel;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
-      {/* LEFT SIDE - UF Blue */}
-      <div className="lg:w-[45%] lg:sticky lg:top-0 lg:h-screen bg-gradient-to-br from-[#0021A5] via-[#001580] to-[#000F5C] text-white p-4 sm:p-6 lg:p-10 flex flex-col lg:justify-start lg:pt-10 lg:overflow-y-auto">
-        
-        <ProgressBar />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
+      <style>{`
+        @media(max-width:768px) {
+          .po-layout { flex-direction: column !important; }
+          .po-left { min-height: 200px !important; max-height: 280px !important; position: relative !important; }
+          .po-right { padding: 24px 20px !important; }
+        }
+      `}</style>
 
-        {/* Mobile: Condensed Content */}
-        <div className="lg:hidden text-center mb-6">
-          {step === 1 && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">Welcome to College Fast Forward</h1>
-              <p className="text-sm text-white/90">Let's set up your profile</p>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">What's your background?</h1>
-              <p className="text-sm text-white/90">Help us match you with the right students</p>
-            </>
-          )}
-          {step === 3 && (
-            <>
-              <h1 className="text-xl font-bold mb-2 text-white">Link Your Student</h1>
-              <p className="text-sm text-white/90">Connect your accounts to activate Karma boosts</p>
-            </>
-          )}
+      <ParentProgressBar currentStep={step} />
+
+      <div className="po-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
+        {/* Left panel */}
+        <div className="po-left" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
+          <div className="hidden md:block" style={{ height: '100%' }}>
+            <LeftPanel />
+          </div>
+          {/* Mobile condensed */}
+          <div className="md:hidden" style={{
+            background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
+            padding: '24px 20px', minHeight: 180,
+          }}>
+            {step === 1 && (
+              <div style={{ textAlign: 'center' }}>
+                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Help students find you</h2>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Set up your profile so students can reach out</p>
+              </div>
+            )}
+            {step === 2 && (
+              <div style={{ textAlign: 'center' }}>
+                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>What's your background?</h2>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Help us match you with the right students</p>
+              </div>
+            )}
+            {step === 3 && (
+              <div style={{ textAlign: 'center' }}>
+                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>Link your student</h2>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>Connect your accounts to activate Karma boosts</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Desktop: Full Content */}
-        <div className="hidden lg:block">
-          <LeftSideContent />
-        </div>
-      </div>
-
-      {/* RIGHT SIDE - Form */}
-      <div className="lg:w-[55%] bg-white p-4 sm:p-6 lg:p-10 lg:pt-10 overflow-y-auto">
-        <div className="max-w-xl mx-auto">
-          
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="w-8 h-8 text-[#0021A5] animate-spin mb-4" />
-              <p className="text-slate-600">Setting up your account...</p>
-            </div>
-          ) : (
-            <>
-              {step === 1 && (
-                <ParentOnboardingStep1
-                  formData={formData}
-                  onUpdate={updateFormData}
-                  onNext={() => setStep(2)}
-                  userName={user?.full_name}
-                />
-              )}
-
-              {step === 2 && (
-                <ParentOnboardingStep2
-                  formData={formData}
-                  onUpdate={updateFormData}
-                  onNext={() => setStep(3)}
-                  onBack={() => setStep(1)}
-                />
-              )}
-
-              {step === 3 && (
-                <LinkStudentStep
-                  user={user}
-                  onNext={handleLinkStudentComplete}
-                  onSkip={handleLinkStudentSkip}
-                />
-              )}
-            </>
-          )}
-
+        {/* Right panel */}
+        <div className="po-right" style={{
+          flex: 1, background: '#f4f2ee',
+          padding: '48px 48px 60px', overflowY: 'auto',
+        }}>
+          <div style={{ maxWidth: 520, margin: '0 auto' }}>
+            {loading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+                <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#E85D20', marginBottom: 12 }} />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 300, color: '#888' }}>Setting up your account...</p>
+              </div>
+            ) : (
+              <>
+                {step === 1 && (
+                  <ParentOnboardingStep1
+                    formData={formData}
+                    onUpdate={updateFormData}
+                    onNext={() => setStep(2)}
+                    userName={user?.full_name}
+                  />
+                )}
+                {step === 2 && (
+                  <ParentOnboardingStep2
+                    formData={formData}
+                    onUpdate={updateFormData}
+                    onNext={() => setStep(3)}
+                    onBack={() => setStep(1)}
+                  />
+                )}
+                {step === 3 && (
+                  <LinkStudentStep
+                    user={user}
+                    onNext={handleLinkStudentComplete}
+                    onSkip={handleLinkStudentSkip}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
