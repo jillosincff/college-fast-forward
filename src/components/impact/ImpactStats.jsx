@@ -1,71 +1,94 @@
-import { navigate } from '@/components/utils/navigation';
-import { Share2, Plus } from 'lucide-react';
+import React, { useState } from 'react';
 
-export default function ImpactStats({ stats }) {
-  const hasImpact = stats.helped > 0 || stats.intros > 0 || stats.opps > 0;
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
 
-  const handleShareBadge = () => {
-    // TODO: Implement badge sharing functionality
-    alert('Badge sharing coming soon!');
-  };
+const TIME_FILTERS = [
+  { id: '1m', label: '1M' },
+  { id: '3m', label: '3M' },
+  { id: '6m', label: '6M' },
+  { id: 'all', label: 'All' },
+];
 
-  const handlePostOpportunity = () => {
-    navigate('PostOpportunity');
-  };
+function StatTile({ label, value, delta }) {
+  const display = value == null || value === 0 ? '--' : value;
+  const showDelta = delta != null && delta !== 0;
 
   return (
-    <section className="space-y-5">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-          {hasImpact ? "Here’s the difference you’ve made" : "Your impact starts here"}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          {hasImpact
-            ? "Your intros, messages, and opportunities are opening doors for Gators."
-            : "Take your first step by posting an opportunity or replying to a student."}
-        </p>
+    <div style={{
+      flex: 1, minWidth: 120, position: 'relative',
+      padding: '20px 16px', textAlign: 'center',
+    }}>
+      {showDelta && (
+        <span style={{
+          position: 'absolute', top: 8, right: 8,
+          background: 'rgba(34,197,94,0.1)', color: '#16a34a',
+          fontFamily: dmSans, fontSize: 11, fontWeight: 500,
+          borderRadius: 100, padding: '2px 8px',
+        }}>
+          +{delta}
+        </span>
+      )}
+      <p style={{
+        fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#0d1117',
+        letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 6,
+      }}>
+        {display}
+      </p>
+      <p style={{
+        fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#888', margin: 0,
+      }}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+export default function ImpactStats({ stats, timeFilter, onTimeFilterChange }) {
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 16, border: '0.5px solid rgba(0,0,0,0.06)',
+      overflow: 'hidden',
+    }}>
+      {/* Time filter */}
+      <div style={{
+        display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0',
+      }}>
+        <div style={{
+          display: 'flex', gap: 4, background: 'rgba(0,0,0,0.03)',
+          borderRadius: 100, padding: 3,
+        }}>
+          {TIME_FILTERS.map(f => (
+            <button key={f.id} onClick={() => onTimeFilterChange(f.id)} style={{
+              fontFamily: dmSans, fontSize: 12, fontWeight: timeFilter === f.id ? 500 : 400,
+              color: timeFilter === f.id ? '#fff' : '#888',
+              background: timeFilter === f.id ? '#E85D20' : 'transparent',
+              border: 'none', borderRadius: 100, padding: '5px 12px',
+              cursor: 'pointer', transition: 'all 0.2s',
+              minHeight: 'auto', width: 'auto',
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-[#0021A5]">{stats.helped}</div>
-          <div className="mt-1 text-sm text-gray-600">Students Helped</div>
-        </div>
-        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-[#0021A5]">{stats.intros}</div>
-          <div className="mt-1 text-sm text-gray-600">Intros Sent</div>
-        </div>
-        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-[#0021A5]">{stats.opps}</div>
-          <div className="mt-1 text-sm text-gray-600">Opportunities Shared</div>
-        </div>
-        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-[#FA4616]">
-            {stats.streak > 0 ? `${stats.streak}-day` : "0-day"}
-          </div>
-          <div className="mt-1 text-sm text-gray-600">Streak</div>
-        </div>
+      {/* Stats grid */}
+      <div className="impact-stats-grid" style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        padding: '8px 8px 20px',
+      }}>
+        <StatTile label="Students Helped" value={stats.studentsHelped} delta={stats.studentsHelpedDelta} />
+        <StatTile label="Answers Given" value={stats.answersGiven} delta={stats.answersGivenDelta} />
+        <StatTile label="Intros Made" value={stats.introsMade} delta={stats.introsMadeDelta} />
+        <StatTile label="Success Rate" value={stats.successRate ? `${stats.successRate}%` : null} delta={stats.successRateDelta ? `${stats.successRateDelta}%` : null} />
       </div>
 
-      {/* CTA Row */}
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={handleShareBadge}
-          className="inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          <Share2 className="w-4 h-4 mr-2" />
-          Share Badge
-        </button>
-        <button
-          onClick={handlePostOpportunity}
-          className="inline-flex items-center rounded-xl bg-[#FA4616] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Post an Opportunity
-        </button>
-      </div>
-    </section>
+      <style>{`
+        @media(max-width:640px) {
+          .impact-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+        }
+      `}</style>
+    </div>
   );
 }
