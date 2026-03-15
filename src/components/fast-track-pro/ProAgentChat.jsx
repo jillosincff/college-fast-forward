@@ -58,13 +58,13 @@ function getSuggestedPrompts(profile) {
   return prompts;
 }
 
-function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated, onSendMessage }) {
+function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated, onSendMessage, user }) {
   if (!payload) return null;
   const handleDraftMessage = (name) => {
     if (onSendMessage && name) onSendMessage(`Draft a warm intro message to ${name}`);
   };
   switch (message_type) {
-    case 'company_intel': return <CompanyIntelCard data={payload} onSendMessage={onSendMessage} />;
+    case 'company_intel': return <CompanyIntelCard data={payload} onSendMessage={onSendMessage} user={user} />;
     case 'alumni_card': return <AlumniListCard data={payload} onDraftMessage={handleDraftMessage} onResearchCompany={onResearchCompany} />;
     case 'outreach_draft': case 'follow_up_draft': return <OutreachDraftCard data={payload} onSendMessage={onSendMessage} />;
     case 'roadmap': return <RoadmapTimelineCard data={payload} profileId={profileId} />;
@@ -506,6 +506,7 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
                         profile={currentProfile}
                         onProfileUpdated={setCurrentProfile}
                         onSendMessage={sendMessage}
+                        user={user}
                       />
                     )}
                   </div>
