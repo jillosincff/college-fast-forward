@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin, Upload } from 'lucide-react';
+import { Building2, Pencil, Check, X, Plus, ChevronDown, ChevronUp, ExternalLink, MapPin, Upload, ClipboardList } from 'lucide-react';
+import { navigate } from '@/components/utils/navigation';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import titleCase from '@/components/utils/titleCase';
@@ -333,6 +334,27 @@ export default function TargetsPanel({ profile, onResearchCompany, onRerunAssess
               )}
             </div>
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-slate-100" />
+
+        {/* Action Plan Link */}
+        <div className="px-4 py-3">
+          <button
+            onClick={() => navigate('ActionPlanTracker')}
+            className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 hover:border-orange-300 transition-colors text-left group"
+            style={{ minHeight: 'auto' }}
+          >
+            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="w-4 h-4 text-[#E85D20]" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-slate-800 block">My Action Plan</span>
+              <span className="text-[10px] text-slate-500">Goals, milestones & activity</span>
+            </div>
+            <span className="ml-auto text-[10px] text-orange-400 group-hover:text-orange-600">→</span>
+          </button>
         </div>
 
         {/* Divider */}
