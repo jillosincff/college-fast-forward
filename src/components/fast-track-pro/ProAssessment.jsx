@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { toast } from 'sonner';
 import titleCase from '@/components/utils/titleCase';
+import { generateActionPlan } from '@/functions/generateActionPlan';
 
 import FastIQSetupProgress from '@/components/fastiq-setup/FastIQSetupProgress';
 import FastIQStep1Confirm from '@/components/fastiq-setup/FastIQStep1Confirm';
@@ -107,6 +108,10 @@ export default function ProAssessment({ user, existingProfile, onComplete }) {
       });
 
       window.__fastiqProfile = profile;
+
+      // Auto-generate action plan in background
+      generateActionPlan({}).catch(e => console.log('Action plan auto-gen failed (non-critical):', e.message));
+
       setSaving(false);
       setShowActivation(true);
     } catch (err) {
