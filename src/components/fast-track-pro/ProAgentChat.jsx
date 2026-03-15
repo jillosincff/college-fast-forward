@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Send, Sparkles, Loader2, ArrowLeft, User, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { fastTrackProAgent } from '@/functions/fastTrackProAgent';
@@ -22,41 +20,16 @@ import ReplyResponseCard from './ReplyResponseCard';
 import ThankYouNoteCard from './ThankYouNoteCard';
 import OfferCelebrationCard from './OfferCelebrationCard';
 import NetworkThankYouCard from './NetworkThankYouCard';
-import TargetsPanel from './TargetsPanel';
 import titleCase from '@/components/utils/titleCase';
 import { matchPromptToOpener, getConversationalOpener } from '@/components/fastiq/conversationalOpeners';
 import FollowUpNudgeBanner from '@/components/fastiq/FollowUpNudgeBanner';
 import InlineSuggestionButtons from './InlineSuggestionButtons';
+import ChatSidebar from './ChatSidebar';
+import ChatWelcome from './ChatWelcome';
 
-function getSuggestedPrompts(profile) {
-  const hasTargets = (profile?.target_companies || []).length > 0;
-  const prompts = [];
-
-  if (hasTargets) {
-    prompts.push({ icon: '🏢', text: "Research my #1 target company — are they hiring?", category: 'find' });
-    prompts.push({ icon: '🔍', text: "Find UF alumni at my dream companies", category: 'find' });
-  } else {
-    prompts.push({ icon: '🔍', text: "Help me find companies to target", category: 'find' });
-    prompts.push({ icon: '🏢', text: "What mid-size companies should I look at?", category: 'find' });
-  }
-  prompts.push({ icon: '👤', text: "Find alumni who are product managers", category: 'find' });
-  prompts.push({ icon: '✉️', text: "Draft a warm intro message", category: 'find' });
-  prompts.push({ icon: '📬', text: "Draft follow-up messages for stale outreach", category: 'find' });
-  prompts.push({ icon: '🎉', text: "I got a reply from a contact — help me respond", category: 'find' });
-  prompts.push({ icon: '📄', text: "Review my resume", category: 'tools' });
-  prompts.push({ icon: '✨', text: "Tailor my resume for a job", category: 'tools' });
-  prompts.push({ icon: '💼', text: "Prep me for an interview", category: 'tools' });
-  prompts.push({ icon: '🔗', text: "Review my LinkedIn profile", category: 'tools' });
-  prompts.push({ icon: '🗺️', text: "Build my career action plan", category: 'tools' });
-  prompts.push({ icon: '💰', text: "What should I negotiate for salary?", category: 'tools' });
-  prompts.push({ icon: '🙏', text: "Draft a thank-you note after my interview", category: 'tools' });
-  prompts.push({ icon: '🎉', text: "I got a job offer!", category: 'tools' });
-  prompts.push({ icon: '❤️', text: "Thank everyone who helped me in my job search", category: 'tools' });
-  prompts.push({ icon: '📅', text: "What UF career events are coming up?", category: 'explore' });
-  prompts.push({ icon: '🧭', text: "Explore career paths for my major", category: 'explore' });
-
-  return prompts;
-}
+const dmSans = "'DM Sans', sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+const orange = '#E85D20';
 
 function RichCardRenderer({ message_type, payload, profileId, onResearchCompany, profile, onProfileUpdated, onSendMessage, user }) {
   if (!payload) return null;
@@ -82,43 +55,30 @@ function RichCardRenderer({ message_type, payload, profileId, onResearchCompany,
     case 'thank_you_note': return <ThankYouNoteCard data={payload} onSendMessage={onSendMessage} />;
     case 'offer_celebration': return <OfferCelebrationCard data={payload} onSendMessage={onSendMessage} />;
     case 'network_thank_you': return <NetworkThankYouCard data={payload} onSendMessage={onSendMessage} />;
-    case 'career_events': {
-      const actions = payload?.suggested_actions || [];
-      return actions.length > 0 ? (
-        <div className="mt-2">
-          <SuggestedActions actions={actions} onSendMessage={onSendMessage} accentColor="#0021A5" label="Next Steps" />
-        </div>
-      ) : null;
-    }
-    case 'career_advice': {
+    case 'career_events': case 'career_advice': {
       const actions = payload?.suggested_actions || payload?.suggested_next_steps || payload?.next_steps || [];
-      return actions.length > 0 ? (
-        <div className="mt-2">
-          <SuggestedActions actions={actions} onSendMessage={onSendMessage} accentColor="#0021A5" label="Suggested Actions" />
-        </div>
-      ) : null;
+      return actions.length > 0 ? <div className="mt-2"><SuggestedActions actions={actions} onSendMessage={onSendMessage} accentColor="#0021A5" label="Next Steps" /></div> : null;
     }
     default: return null;
   }
 }
 
 const mdComponents = {
-  h1: ({ children }) => <h3 className="text-base font-bold text-slate-900 mt-3 mb-2">{children}</h3>,
-  h2: ({ children }) => <h4 className="text-sm font-bold text-slate-900 mt-3 mb-1.5">{children}</h4>,
-  h3: ({ children }) => <h5 className="text-sm font-semibold text-slate-800 mt-2 mb-1">{children}</h5>,
-  p: ({ children }) => <p className="text-sm text-slate-700 mb-2 leading-relaxed">{children}</p>,
-  ul: ({ children }) => <ul className="text-sm mb-2 ml-4 list-disc">{children}</ul>,
-  ol: ({ children }) => <ol className="text-sm mb-2 ml-4 list-decimal">{children}</ol>,
-  li: ({ children }) => <li className="text-sm text-slate-700 mb-1">{children}</li>,
-  strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
-  a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#0021A5] underline">{children}</a>,
+  h1: ({ children }) => <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f4f0e8', marginTop: 12, marginBottom: 8 }}>{children}</h3>,
+  h2: ({ children }) => <h4 style={{ fontSize: 14, fontWeight: 700, color: '#f4f0e8', marginTop: 12, marginBottom: 6 }}>{children}</h4>,
+  h3: ({ children }) => <h5 style={{ fontSize: 13, fontWeight: 600, color: '#f4f0e8', marginTop: 8, marginBottom: 4 }}>{children}</h5>,
+  p: ({ children }) => <p style={{ fontSize: 14, color: 'rgba(244,240,232,0.8)', marginBottom: 8, lineHeight: 1.6, fontWeight: 300 }}>{children}</p>,
+  ul: ({ children }) => <ul style={{ fontSize: 14, marginBottom: 8, marginLeft: 16, listStyleType: 'disc' }}>{children}</ul>,
+  ol: ({ children }) => <ol style={{ fontSize: 14, marginBottom: 8, marginLeft: 16, listStyleType: 'decimal' }}>{children}</ol>,
+  li: ({ children }) => <li style={{ fontSize: 14, color: 'rgba(244,240,232,0.8)', marginBottom: 4, fontWeight: 300 }}>{children}</li>,
+  strong: ({ children }) => <strong style={{ fontWeight: 600, color: '#f4f0e8' }}>{children}</strong>,
+  a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: orange, textDecoration: 'underline' }}>{children}</a>,
 };
 
 export default function ProAgentChat({ user, profile: initialProfile, initialMessage, onBack, onRerunAssessment }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentProfile, setCurrentProfile] = useState(initialProfile);
   const [isUploading, setIsUploading] = useState(false);
   const chatEndRef = useRef(null);
@@ -127,10 +87,8 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   const sentInitialRef = useRef(false);
   const [knownAlumni, setKnownAlumni] = useState([]);
 
-  // Keep profile in sync
   useEffect(() => { setCurrentProfile(initialProfile); }, [initialProfile]);
 
-  // Load known alumni for quick-select suggestions
   useEffect(() => {
     if (!user?.email) return;
     const targets = (initialProfile?.target_companies || []).map(c => c.toLowerCase());
@@ -139,12 +97,10 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       .then(all => {
         const valid = (all || []).filter(a =>
           a.company && targets.includes(a.company.toLowerCase()) &&
-          new Date(a.expires_at) > new Date() &&
-          a.verified !== false
+          new Date(a.expires_at) > new Date() && a.verified !== false
         );
         setKnownAlumni(valid.slice(0, 5));
-      })
-      .catch(() => {});
+      }).catch(() => {});
   }, [user?.email, initialProfile?.target_companies]);
 
   useEffect(() => {
@@ -154,40 +110,20 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
   useEffect(() => {
     if (initialMessage && !sentInitialRef.current) {
       sentInitialRef.current = true;
-      // Check if initial message maps to a conversational opener
       const openerKey = matchPromptToOpener(initialMessage);
-      if (openerKey) {
-        startConversation(openerKey);
-      } else {
-        sendMessage(initialMessage);
-      }
+      if (openerKey) startConversation(openerKey);
+      else sendMessage(initialMessage);
     }
   }, [initialMessage]);
 
-  // P2 FIX: Removed buildConversationHistory — backend now uses DB as single source of truth
-
-  // P2 FIX: Persist messages with retry on failure
   const persistMessage = async (role, content, messageType) => {
     if (!user?.email) return;
-    const payload = {
-      user_email: user.email,
-      role,
-      content: (content || '').substring(0, 2000),
-      message_type: messageType || 'text',
-    };
-    try {
-      await base44.entities.ProAgentConversation.create(payload);
-    } catch (e) {
-      console.warn('Persist message failed, retrying:', e.message);
-      try {
-        await base44.entities.ProAgentConversation.create(payload);
-      } catch (e2) {
-        console.error('Persist message failed after retry:', e2.message);
-      }
+    const payload = { user_email: user.email, role, content: (content || '').substring(0, 2000), message_type: messageType || 'text' };
+    try { await base44.entities.ProAgentConversation.create(payload); } catch (e) {
+      try { await base44.entities.ProAgentConversation.create(payload); } catch (e2) { console.error('Persist failed:', e2.message); }
     }
   };
 
-  // P3 FIX: Start a conversational opener and persist both messages to DB for context
   const startConversation = async (openerKey) => {
     const opener = getConversationalOpener(openerKey, currentProfile);
     if (!opener) return;
@@ -196,156 +132,81 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
       { role: 'user', content: opener.userMessage },
       { role: 'assistant', content: opener.assistantMessage, message_type: 'text' },
     ]);
-    // Persist both messages to DB so backend has context for the follow-up
     await persistMessage('user', opener.userMessage, 'text');
     await persistMessage('assistant', opener.assistantMessage, 'text');
-
-    // CRITICAL: For multi-step flows, set active_flow on the profile so the
-    // backend routes follow-up messages directly to the flow handler
     if (openerKey === 'resume_builder' && currentProfile?.id) {
-      console.log('[ResumeBuilder] Setting active_flow on profile:', currentProfile.id);
       try {
-        await base44.entities.FastTrackProProfile.update(currentProfile.id, {
-          active_flow: 'resume_builder',
-          flow_step: 'contact_info',
-          flow_data: '{}'
-        });
+        await base44.entities.FastTrackProProfile.update(currentProfile.id, { active_flow: 'resume_builder', flow_step: 'contact_info', flow_data: '{}' });
         setCurrentProfile(prev => ({ ...prev, active_flow: 'resume_builder', flow_step: 'contact_info' }));
-      } catch (e) {
-        console.error('[ResumeBuilder] Failed to set active_flow:', e.message);
-      }
+      } catch (e) { console.error('Failed to set active_flow:', e.message); }
     }
   };
 
   const sendMessage = async (messageText) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
-
-    // Check if this prompt maps to a conversational opener
     const openerKey = matchPromptToOpener(text);
-    if (openerKey && messages.length === 0) {
-      // First interaction — start a conversation instead of hitting the API
-      startConversation(openerKey);
-      setInput('');
-      return;
-    }
-
-    const userMessage = { role: 'user', content: text };
-    setMessages(prev => [...prev, userMessage]);
+    if (openerKey && messages.length === 0) { startConversation(openerKey); setInput(''); return; }
+    setMessages(prev => [...prev, { role: 'user', content: text }]);
     setInput('');
     setIsLoading(true);
-
-    // P0 FIX: Await persist so backend has the message in DB when it reads history
     await persistMessage('user', text, 'text');
-
     try {
-      // Detect batch operations for longer timeout
       const isBatchOp = /(?:my|all|each|every)\s+(?:target\s+)?companies|(?:scan|research|check)\s+(?:\w+\s+){0,4}(?:my|all)\s+targets/i.test(text);
       const timeoutMs = isBatchOp ? 120000 : 90000;
-
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), timeoutMs)
-      );
-      // Send current message text as fallback context for the backend
-      const call = fastTrackProAgent({
-        message: text,
-      });
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs));
+      const call = fastTrackProAgent({ message: text });
       const res = await Promise.race([call, timeout]);
-
       const data = res.data;
       if (data?.success) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: data.response,
-          message_type: data.message_type || 'text',
-          payload: data.payload,
-        }]);
-        // Persist assistant response for context tracking
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response, message_type: data.message_type || 'text', payload: data.payload }]);
         persistMessage('assistant', data.response, data.message_type || 'text');
       } else {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: data?.error || 'Something went wrong. Please try again.',
-          message_type: 'text',
-        }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: data?.error || 'Something went wrong. Please try again.', message_type: 'text' }]);
       }
     } catch (err) {
       const errorMsg = err.message === 'timeout'
         ? "This is taking longer than expected — FASTIQ is doing deep research. You can wait or come back and I'll have results ready."
         : 'Something went wrong. Please try again.';
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: errorMsg,
-        message_type: 'text',
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg, message_type: 'text' }]);
+    } finally { setIsLoading(false); }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Reset input so user can re-upload same file
     e.target.value = '';
     setIsUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const fileName = file.name || 'resume';
-      sendMessage(`Here's my resume: [${fileName}](${file_url})\n\nPlease review it and give me feedback.`);
+      sendMessage(`Here's my resume: [${file.name || 'resume'}](${file_url})\n\nPlease review it and give me feedback.`);
     } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, the file upload failed. Please try again or paste your resume text directly.',
-        message_type: 'text',
-      }]);
-    } finally {
-      setIsUploading(false);
-    }
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, the file upload failed. Please try again or paste your resume text directly.', message_type: 'text' }]);
+    } finally { setIsUploading(false); }
   };
 
   const handleResearchCompany = (company) => {
     sendMessage(`Research ${titleCase(company)} for me — are they hiring? What roles, salary ranges, and interview process should I know about?`);
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-gradient-to-r from-[#0021A5] to-[#0033CC] px-4 py-3 flex items-center gap-3 shadow-md">
-        <button onClick={onBack} className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors" style={{ minHeight: 'auto', minWidth: 'auto' }}>
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
-        <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-white" />
-        </div>
-        <div>
-          <h2 className="text-white font-bold text-sm">FASTIQ™</h2>
-          <p className="text-white/60 text-xs">Your personal career center</p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            onClick={() => setSidebarOpen(prev => !prev)}
-            className="hidden md:flex w-8 h-8 bg-white/10 rounded-lg items-center justify-center hover:bg-white/20 transition-colors"
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-            title={sidebarOpen ? 'Hide targets' : 'Show targets'}
-          >
-            {sidebarOpen ? <ChevronLeft className="w-4 h-4 text-white" /> : <ChevronRight className="w-4 h-4 text-white" />}
-          </button>
-          <Badge className="bg-gradient-to-r from-[#0021A5] to-[#FA4616] text-white px-3 py-1 rounded-full text-xs font-bold border-0">FASTIQ</Badge>
-        </div>
-      </div>
+  const hasContent = input.trim().length > 0;
 
-      {/* Mobile: Collapsible Targets Panel at top */}
-      <div className="md:hidden">
-        <TargetsPanel
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: '#0d1117', fontFamily: dmSans, overflow: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
+        @keyframes fiqDotBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-4px)} }
+        .fiq-chat-input:focus { outline: none; }
+        .fiq-chat-input::placeholder { color: rgba(244,240,232,0.25); }
+      `}</style>
+
+      {/* Left Sidebar — desktop only */}
+      <div className="hidden md:flex">
+        <ChatSidebar
           profile={currentProfile}
+          onBack={onBack}
           onResearchCompany={handleResearchCompany}
           onRerunAssessment={onRerunAssessment}
           onProfileUpdated={setCurrentProfile}
@@ -353,237 +214,246 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
         />
       </div>
 
-      {/* Desktop: Sidebar + Chat layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Desktop Sidebar */}
-        {sidebarOpen && (
-          <div className="hidden md:block w-72 flex-shrink-0 border-r border-slate-200 overflow-y-auto bg-slate-50 p-3">
-            <TargetsPanel
-              profile={currentProfile}
-              onResearchCompany={handleResearchCompany}
-              onRerunAssessment={onRerunAssessment}
-              onProfileUpdated={setCurrentProfile}
-              onOpenChat={(msg) => sendMessage(msg)}
-            />
+      {/* Center Chat */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* Chat header */}
+        <div style={{
+          background: '#0d1117', borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+          padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Mobile back */}
+            <button onClick={onBack} className="md:hidden" style={{
+              background: 'none', border: 'none', color: 'rgba(244,240,232,0.4)',
+              cursor: 'pointer', padding: 0, marginRight: 4, minHeight: 'auto', width: 'auto',
+              fontFamily: dmSans, fontSize: 13,
+            }}>←</button>
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+            </svg>
+            <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 16, color: '#f4f0e8' }}>FASTIQ™</span>
+            <div style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#4ADE80',
+              boxShadow: '0 0 6px rgba(74,222,128,0.5)',
+            }} />
           </div>
-        )}
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
+            Active · Web search on
+          </span>
+        </div>
 
-        {/* Chat area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {/* Follow-up nudge banner */}
-            <FollowUpNudgeBanner userEmail={user?.email} onSendMessage={sendMessage} />
+        {/* Messages area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
+          <FollowUpNudgeBanner userEmail={user?.email} onSendMessage={sendMessage} />
 
-            {messages.length === 0 && !isLoading && (() => {
-              const allPrompts = getSuggestedPrompts(currentProfile);
-              const findPrompts = allPrompts.filter(p => p.category === 'find');
-              const toolPrompts = allPrompts.filter(p => p.category === 'tools');
-              const explorePrompts = allPrompts.filter(p => p.category === 'explore');
-              return (
-                <div className="py-6 max-w-lg mx-auto">
-                  <div className="text-center mb-6">
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#0021A5]/10 to-[#FA4616]/10 rounded-2xl flex items-center justify-center mx-auto mb-3 animate-bounce" style={{ animationDuration: '3s' }}>
-                      <Sparkles className="w-7 h-7 text-[#0021A5]" />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">Your career center is ready.</h3>
-                    <p className="text-sm font-semibold bg-gradient-to-r from-[#0021A5] to-[#FA4616] bg-clip-text text-transparent">What should we tackle first?</p>
-                    <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
-                      I find companies hiring in your field, discover UF alumni who can open doors — even ones not on CFF — and write you a message to reach out. No other tool does this.
-                    </p>
+          {messages.length === 0 && !isLoading && (
+            <ChatWelcome profile={currentProfile} onSend={sendMessage} />
+          )}
+
+          <AnimatePresence>
+            {messages.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ display: 'flex', gap: 12, marginBottom: 16, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}
+              >
+                {msg.role === 'assistant' && (
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0, marginTop: 4,
+                    background: 'rgba(232,93,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+                    </svg>
                   </div>
-
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">🔍 Find Opportunities</p>
-                  <div className="space-y-2 mb-4">
-                    {findPrompts.map((p, i) => (
-                      <button key={i} onClick={() => sendMessage(p.text)}
-                        className="flex items-center gap-3 w-full text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-[#0021A5]/30 hover:bg-blue-50/50 hover:-translate-y-0.5 transition-all"
-                        style={{ minHeight: 'auto', minWidth: 'auto' }}>
-                        <span className="text-lg flex-shrink-0">{p.icon}</span>
-                        <span className="text-sm text-slate-700 flex-1">{p.text}</span>
-                        <span className="text-slate-300 text-xs">→</span>
-                      </button>
-                    ))}
+                )}
+                <div style={{ maxWidth: '85%' }}>
+                  <div style={{
+                    borderRadius: 16, padding: '12px 16px',
+                    background: msg.role === 'user' ? orange : 'rgba(255,255,255,0.06)',
+                    border: msg.role === 'user' ? 'none' : '0.5px solid rgba(255,255,255,0.08)',
+                  }}>
+                    {msg.role === 'user' ? (
+                      <p style={{ fontSize: 14, lineHeight: 1.6, color: '#fff', margin: 0, fontWeight: 400 }}>{msg.content}</p>
+                    ) : (
+                      <>
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
+                        </div>
+                        {(!msg.message_type || msg.message_type === 'text') && (
+                          <InlineSuggestionButtons text={msg.content} onSendMessage={sendMessage} />
+                        )}
+                      </>
+                    )}
                   </div>
-
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">🛠️ Career Tools</p>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {toolPrompts.map((p, i) => (
-                      <button key={i} onClick={() => sendMessage(p.text)}
-                        className="flex items-center gap-2 text-left p-3 bg-white rounded-xl border border-slate-200 hover:border-[#0021A5]/30 hover:bg-blue-50/50 hover:-translate-y-0.5 transition-all"
-                        style={{ minHeight: 'auto', minWidth: 'auto' }}>
-                        <span className="text-base flex-shrink-0">{p.icon}</span>
-                        <span className="text-xs text-slate-700">{p.text}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {explorePrompts.length > 0 && (
-                    <>
-                      <div className="space-y-2 mb-4">
-                        {explorePrompts.map((p, i) => (
-                          <button key={i} onClick={() => sendMessage(p.text)}
-                            className="flex items-center gap-3 w-full text-left p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 hover:border-cyan-400 hover:-translate-y-0.5 transition-all"
-                            style={{ minHeight: 'auto', minWidth: 'auto' }}>
-                            <span className="text-lg flex-shrink-0">{p.icon}</span>
-                            <span className="text-sm text-slate-700 flex-1">{p.text}</span>
-                            <span className="text-cyan-400 text-xs">→</span>
+                  {/* Alumni quick-select chips */}
+                  {msg.role === 'assistant' && (msg.content?.includes('name, role, and company') || msg.content?.includes('name, role,')) && knownAlumni.filter(a => a.verified !== false).length > 0 && (
+                    <div style={{
+                      marginTop: 8, background: 'rgba(255,255,255,0.04)',
+                      border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12,
+                    }}>
+                      <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(244,240,232,0.25)', marginBottom: 8 }}>From your targets:</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {knownAlumni.filter(a => a.verified !== false).map((a, idx) => (
+                          <button
+                            key={a.id || idx}
+                            onClick={() => sendMessage(`Draft a warm intro message to ${a.name}, ${a.role_title || 'professional'} at ${titleCase(a.company)}`)}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              padding: '6px 10px', background: 'rgba(255,255,255,0.04)',
+                              border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 8,
+                              cursor: 'pointer', transition: 'all 0.2s', minHeight: 'auto', width: 'auto',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                          >
+                            <div>
+                              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#f4f0e8', display: 'block' }}>{a.name}</span>
+                              <span style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(244,240,232,0.4)' }}>{a.role_title} at {titleCase(a.company)}</span>
+                            </div>
+                            <span style={{ fontFamily: dmSans, fontSize: 10, color: orange, fontWeight: 500 }}>Draft →</span>
                           </button>
                         ))}
                       </div>
-                    </>
-                  )}
-
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                    <p className="text-xs text-amber-800 leading-relaxed">💡 CFF connects you with parents and alumni who've signed up. FASTIQ goes further — searching the entire web to find UF alumni at ANY company. That's your unfair advantage.</p>
-                  </div>
-                </div>
-              );
-            })()}
-
-            <AnimatePresence>
-              {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  {msg.role === 'assistant' && (
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <Sparkles className="w-4 h-4 text-white" />
                     </div>
                   )}
-                  <div className={`max-w-[85%] ${msg.role === 'user' ? '' : ''}`}>
-                    <div className={`rounded-2xl px-4 py-3 ${
-                      msg.role === 'user'
-                        ? 'bg-[#0021A5] text-white'
-                        : 'bg-white border border-slate-200 shadow-sm'
-                    }`}>
-                      {msg.role === 'user' ? (
-                        <p className="text-sm leading-relaxed text-white">{msg.content}</p>
-                      ) : (
-                        <>
-                          <div className="prose prose-sm prose-slate max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
-                          </div>
-                          {/* Inline suggestion buttons parsed from text */}
-                          {(!msg.message_type || msg.message_type === 'text') && (
-                            <InlineSuggestionButtons text={msg.content} onSendMessage={sendMessage} />
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {/* Quick-select alumni chips after outreach opener */}
-                    {msg.role === 'assistant' && (msg.content?.includes('name, role, and company') || msg.content?.includes('name, role,')) && knownAlumni.filter(a => a.verified !== false).length > 0 && (
-                      <div className="mt-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
-                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">From your targets:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {knownAlumni.filter(a => a.verified !== false).map((a, idx) => (
-                            <button
-                              key={a.id || idx}
-                              onClick={() => sendMessage(`Draft a warm intro message to ${a.name}, ${a.role_title || 'professional'} at ${titleCase(a.company)}`)}
-                              className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-blue-200 hover:border-[#0021A5] hover:bg-blue-50 transition-all text-left group"
-                              style={{ minHeight: 'auto', minWidth: 'auto' }}
-                            >
-                              <div>
-                                <span className="text-xs font-semibold text-slate-800 block">{a.name}</span>
-                                <span className="text-[10px] text-slate-500">{a.role_title} at {titleCase(a.company)}</span>
-                              </div>
-                              <span className="text-[10px] text-blue-500 font-semibold ml-1 group-hover:text-[#0021A5]">Draft →</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {/* Rich Card below the text bubble */}
-                    {msg.role === 'assistant' && msg.message_type && msg.message_type !== 'text' && (
-                      <RichCardRenderer
-                        message_type={msg.message_type}
-                        payload={msg.payload}
-                        profileId={currentProfile?.id}
-                        onResearchCompany={handleResearchCompany}
-                        profile={currentProfile}
-                        onProfileUpdated={setCurrentProfile}
-                        onSendMessage={sendMessage}
-                        user={user}
-                      />
-                    )}
-                  </div>
-                  {msg.role === 'user' && (
-                    <div className="w-8 h-8 bg-[#FA4616] rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
+                  {/* Rich cards */}
+                  {msg.role === 'assistant' && msg.message_type && msg.message_type !== 'text' && (
+                    <RichCardRenderer
+                      message_type={msg.message_type} payload={msg.payload}
+                      profileId={currentProfile?.id} onResearchCompany={handleResearchCompany}
+                      profile={currentProfile} onProfileUpdated={setCurrentProfile}
+                      onSendMessage={sendMessage} user={user}
+                    />
                   )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-
-            {isLoading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#0021A5] to-[#FA4616] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-[#0021A5] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                    <span className="text-sm text-slate-500">Thinking...</span>
+                {msg.role === 'user' && (
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0, marginTop: 4,
+                    background: 'rgba(244,240,232,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="rgba(244,240,232,0.5)" strokeWidth="1.5" strokeLinecap="round">
+                      <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/>
+                    </svg>
                   </div>
-                </div>
+                )}
               </motion.div>
-            )}
+            ))}
+          </AnimatePresence>
 
-            <div ref={chatEndRef} />
-          </div>
+          {/* Loading indicator */}
+          {isLoading && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                background: 'rgba(232,93,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+                </svg>
+              </div>
+              <div style={{
+                background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: '12px 16px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[0, 150, 300].map(delay => (
+                      <span key={delay} style={{
+                        width: 6, height: 6, borderRadius: '50%', background: orange,
+                        display: 'inline-block',
+                        animation: `fiqDotBounce 1.2s infinite ${delay}ms`,
+                      }} />
+                    ))}
+                  </div>
+                  <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(244,240,232,0.4)', fontWeight: 300 }}>Thinking...</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
 
-          {/* Input — uses env(safe-area-inset-bottom) for notched phones and keyboard */}
-          <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-4" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
-            <div className="max-w-4xl mx-auto flex items-end gap-2 bg-white border-2 border-slate-200 focus-within:border-[#0021A5] rounded-2xl p-2 transition-colors shadow-sm">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isLoading}
-                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all hover:bg-slate-100 text-slate-400 hover:text-[#0021A5]"
-                style={{ minHeight: 'auto', minWidth: 'auto', width: '40px' }}
-                title="Upload resume or file"
-              >
-                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
-              </button>
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask FASTIQ anything..."
-                rows={1}
-                className="flex-1 resize-none text-sm px-2 py-2 outline-none bg-transparent max-h-32 focus:ring-0 focus:outline-none border-none shadow-none"
-                style={{ minHeight: '40px' }}
-              />
-              <button
-                onClick={() => sendMessage()}
-                disabled={!input.trim() || isLoading}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
-                  input.trim() && !isLoading
-                    ? 'bg-[#0021A5] text-white hover:bg-[#001580] shadow-md'
-                    : 'bg-slate-100 text-slate-400'
-                }`}
-                style={{ minHeight: 'auto', minWidth: 'auto', width: '40px' }}
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-2">FASTIQ uses AI with web search. Verify important information independently.</p>
+        {/* Input area */}
+        <div style={{
+          padding: '16px 24px', borderTop: '0.5px solid rgba(255,255,255,0.06)',
+          background: '#0d1117', flexShrink: 0,
+          paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'flex-end', gap: 10,
+            background: 'rgba(255,255,255,0.05)',
+            border: '0.5px solid rgba(255,255,255,0.1)',
+            borderRadius: 14, padding: '10px 14px',
+            transition: 'border-color 0.2s',
+          }}
+            onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+          >
+            <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" className="hidden" onChange={handleFileUpload} />
+            {/* Paperclip */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isLoading}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                minHeight: 'auto', width: 'auto', flexShrink: 0, transition: 'color 0.2s',
+              }}
+            >
+              {isUploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'rgba(244,240,232,0.3)' }} />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="rgba(244,240,232,0.3)" strokeWidth="1.5" strokeLinecap="round"
+                  onMouseEnter={e => e.currentTarget.setAttribute('stroke', 'rgba(244,240,232,0.6)')}
+                  onMouseLeave={e => e.currentTarget.setAttribute('stroke', 'rgba(244,240,232,0.3)')}
+                >
+                  <path d="M13 8l-5 5a3 3 0 01-4.24-4.24l5-5a2 2 0 012.83 2.83l-5 5a1 1 0 01-1.42-1.42L10 5.5"/>
+                </svg>
+              )}
+            </button>
+            {/* Input */}
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask FASTIQ anything..."
+              rows={1}
+              className="fiq-chat-input"
+              style={{
+                background: 'none', border: 'none', outline: 'none',
+                fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#f4f0e8',
+                flex: 1, resize: 'none', minHeight: 22, maxHeight: 120, lineHeight: 1.5,
+              }}
+            />
+            {/* Send */}
+            <button
+              onClick={() => sendMessage()}
+              disabled={!hasContent || isLoading}
+              style={{
+                width: 32, height: 32, borderRadius: '50%', border: 'none',
+                background: hasContent ? orange : 'rgba(232,93,32,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: hasContent ? 'pointer' : 'default', flexShrink: 0,
+                transition: 'all 0.2s', minHeight: 'auto', minWidth: 'auto',
+              }}
+              onMouseEnter={e => { if (hasContent) e.currentTarget.style.background = '#d44e14'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = hasContent ? orange : 'rgba(232,93,32,0.3)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 8h12M10 4l4 4-4 4"/>
+              </svg>
+            </button>
           </div>
+          {/* Disclaimer — below input, subtle */}
+          <p style={{
+            fontFamily: dmSans, fontSize: 11, fontWeight: 300,
+            color: 'rgba(244,240,232,0.15)', textAlign: 'center', marginTop: 10,
+          }}>
+            FASTIQ uses AI with web search. Verify important information independently.
+          </p>
         </div>
       </div>
     </div>
