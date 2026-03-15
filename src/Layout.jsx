@@ -34,7 +34,7 @@ import PullToRefresh from './components/common/PullToRefresh';
 // Child/detail pages that show a back button instead of the logo on mobile
 const childPages = [
   'QuestionDetail', 'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
-  'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring'
+  'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview'
 ];
 
 const childPageTitles = {
@@ -51,6 +51,7 @@ const childPageTitles = {
   FollowedCompanies: 'My Companies',
   ActionPlanTracker: 'Action Plan',
   ResumeTailoring: 'Resume Tailoring',
+  MockInterview: 'Mock Interview',
 };
 
 const APP_VERSION = 'v1.1.7';
@@ -152,6 +153,7 @@ const FastIQ = React.lazy(() => import('./pages/FastIQ'));
 const FollowedCompanies = React.lazy(() => import('./pages/FollowedCompanies'));
 const ActionPlanTracker = React.lazy(() => import('./pages/ActionPlanTracker'));
 const ResumeTailoring = React.lazy(() => import('./pages/ResumeTailoring'));
+const MockInterview = React.lazy(() => import('./pages/MockInterview'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -741,7 +743,7 @@ const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'Onboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const adminPages = ['TestingDashboard'];
 // Pages that show bottom nav on mobile
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview'];
 // publicPages only used for routing logic, NOT for hiding header
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
@@ -834,6 +836,7 @@ const getPageComponent = (pageName) => {
     case 'FollowedCompanies': return FollowedCompanies;
     case 'ActionPlanTracker': return ActionPlanTracker;
     case 'ResumeTailoring': return ResumeTailoring;
+    case 'MockInterview': return MockInterview;
       default: return LandingPage;
   }
 };
