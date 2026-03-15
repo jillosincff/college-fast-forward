@@ -363,8 +363,8 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
 
   return (
     <div className="fiq-animate fiq-delay-2" style={{
-      marginBottom: 28, background: '#F0F4FA',
-      borderRadius: 16, padding: '20px 18px', border: '1px solid #E2E8F0',
+      marginBottom: 28, background: '#fff',
+      borderRadius: 16, padding: '20px 18px', border: '0.5px solid rgba(0,0,0,0.08)',
     }}>
       <h2 style={{
         fontSize: 11, fontWeight: 700, color: '#334155',
