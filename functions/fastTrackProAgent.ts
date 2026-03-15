@@ -1895,23 +1895,12 @@ Rules:
       const previousIntel = (cached && cached._expired) ? cached : null;
 
       const webResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Research ${detectedCompany} hiring activity as of March 2026. The student is specifically looking for: ${ptConfig.label}. Focus on ${ptConfig.searchTerms} positions and roles relevant to a ${studentMajor} major.${positionType === 'experienced' ? '' : ' Do NOT count senior/manager/director/VP roles in hiring score.'} Also find total roles, ${ptConfig.salaryType}, recent news, interview process.`,
+        prompt: `Research ${detectedCompany} hiring activity as of March 2026. The student is specifically looking for: ${ptConfig.label}. Focus on ${ptConfig.searchTerms} positions and roles relevant to a ${studentMajor} major.${positionType === 'experienced' ? '' : ' Do NOT count senior/manager/director/VP roles in hiring score.'} Also find total roles, ${ptConfig.salaryType}, recent news, interview process.\n\nAlso search for WARNING SIGNALS: "${detectedCompany} layoffs 2024 2025 2026", "${detectedCompany} hiring freeze", "${detectedCompany} financial trouble", "${detectedCompany} leadership changes". For each warning found, note the source and approximate date.`,
         add_context_from_internet: true,
       });
-
       const intel = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing FOCUSED ON ${ptConfig.label.toUpperCase()} ROLES.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nSCORING: hiring_score 0-100 based on ${ptConfig.searchTerms} availability. ${positionType === 'experienced' ? 'Include mid-level roles.' : 'Company with 150 senior roles but 0 matching positions = score <20.'} hiring_signal: hot only if matching positions actively hiring. salary_range: ${ptConfig.salaryType}. If company not real, set hiring_score=0 and company_summary="NOT_FOUND".`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            response: { type: "string" }, hiring_score: { type: "integer" }, hiring_signal: { type: "string", enum: ["hot","warm","cool"] },
-            salary_range: { type: "string" }, open_roles_count: { type: "integer" },
-            entry_level_roles_count: { type: "integer" }, intern_roles_count: { type: "integer" },
-            company_summary: { type: "string" },
-            recent_news: { type: "array", items: { type: "string" } }, interview_process: { type: "string" }
-          },
-          required: ["response","hiring_score","hiring_signal","salary_range","open_roles_count","entry_level_roles_count","intern_roles_count","company_summary"]
-        }
+        prompt: `You are FASTIQ.\n\n${profileContext}\n\nSynthesize research about ${detectedCompany} into a briefing FOCUSED ON ${ptConfig.label.toUpperCase()} ROLES.\n\nRESEARCH:\n${String(typeof webResult === 'string' ? webResult : JSON.stringify(webResult)).substring(0,4000)}\n\nSCORING: hiring_score 0-100 based on ${ptConfig.searchTerms} availability. ${positionType === 'experienced' ? 'Include mid-level roles.' : 'Company with 150 senior roles but 0 matching positions = score <20.'} hiring_signal: hot only if matching positions actively hiring. salary_range: ${ptConfig.salaryType}. If company not real, set hiring_score=0 and company_summary="NOT_FOUND".\n\nWARNING SIGNALS: For each warning found (layoffs, hiring freezes, leadership instability, financial distress), add to warning_signals array.\nOVERALL ADVISORY: overall_signal green/yellow/red, recommendation pursue/cautious/deprioritize, recommendation_text one honest sentence. If yellow/red, suggest 3 similar_companies.`,
+        response_json_schema: { type: "object", properties: { response:{type:"string"}, hiring_score:{type:"integer"}, hiring_signal:{type:"string",enum:["hot","warm","cool"]}, overall_signal:{type:"string",enum:["green","yellow","red"]}, recommendation:{type:"string",enum:["pursue","cautious","deprioritize"]}, recommendation_text:{type:"string"}, warning_signals:{type:"array",items:{type:"object",properties:{type:{type:"string"},text:{type:"string"},source:{type:"string"},date:{type:"string"}},required:["type","text"]}}, similar_companies:{type:"array",items:{type:"object",properties:{name:{type:"string"},reason:{type:"string"},signal:{type:"string",enum:["green","yellow"]},alumni_count:{type:"integer"}},required:["name","reason","signal"]}}, salary_range:{type:"string"}, open_roles_count:{type:"integer"}, entry_level_roles_count:{type:"integer"}, intern_roles_count:{type:"integer"}, company_summary:{type:"string"}, recent_news:{type:"array",items:{type:"string"}}, interview_process:{type:"string"} }, required: ["response","hiring_score","hiring_signal","overall_signal","recommendation","recommendation_text","salary_range","open_roles_count","entry_level_roles_count","intern_roles_count","company_summary"] }
       });
 
       // LAYER 3: Graceful recovery — if company not found or nonsensical results
@@ -1925,10 +1914,10 @@ Rules:
         });
       }
 
-      saveCompanyIntelCache(base44, detectedCompany, { hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range });
+      saveCompanyIntelCache(base44, detectedCompany, { hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, overall_signal: intel.overall_signal||'yellow', recommendation: intel.recommendation||'cautious', recommendation_text: intel.recommendation_text||'', warning_signals: intel.warning_signals||[], similar_companies: intel.similar_companies||[], summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count||0, intern_roles_count: intel.intern_roles_count||0, salary_range: intel.salary_range });
       trackActivity(base44, user.email, profile.id, 'company_search', detectedCompany);
-
       const news = Array.isArray(intel.recent_news) ? intel.recent_news : (intel.recent_news ? [intel.recent_news] : []);
+      const warnings = intel.warning_signals||[]; const similarCos = intel.similar_companies||[];
       const intelForAnalysis = { ...intel, recent_news: news };
       const memoryCtx = buildMemoryContext(previousIntel, intel, detectedCompany);
       const analysis = await runPersonalizedAnalysis(detectedCompany, intelForAnalysis, memoryCtx);
@@ -1955,7 +1944,7 @@ Rules:
       else { fActions.push(`Find UF alumni at ${detectedCompany} →`); fActions.push(`Find companies that ARE hiring ${jstConfig.noun} →`); }
       return Response.json({
         success: true, response: fResp, message_type: 'company_intel',
-        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count || 0, intern_roles_count: intel.intern_roles_count || 0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process || '', cached: false, personalized_analysis: analysis || null, alumni: fAlumni.length > 0 ? fAlumni : undefined, alumni_top_match: fAlumniGuidance?.top_match || undefined, suggested_actions: fActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
+        payload: { company: detectedCompany, hiring_score: intel.hiring_score, hiring_signal: intel.hiring_signal, overall_signal: intel.overall_signal||'yellow', recommendation: intel.recommendation||'cautious', recommendation_text: intel.recommendation_text||'', warning_signals: warnings, similar_companies: similarCos, company_summary: intel.company_summary, open_roles_count: intel.open_roles_count, entry_level_roles_count: intel.entry_level_roles_count||0, intern_roles_count: intel.intern_roles_count||0, salary_range: intel.salary_range, recent_news: news, interview_process: intel.interview_process||'', cached: false, personalized_analysis: analysis||null, alumni: fAlumni.length>0?fAlumni:undefined, alumni_top_match: fAlumniGuidance?.top_match||undefined, suggested_actions: fActions, position_type_label: ptConfig.label, roles_found_label: ptConfig.roleLabel, salary_label: ptConfig.salaryType }
       });
     }
 
