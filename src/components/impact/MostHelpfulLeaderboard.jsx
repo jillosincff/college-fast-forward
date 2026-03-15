@@ -51,10 +51,19 @@ export default function MostHelpfulLeaderboard({ families }) {
 
               {/* Name */}
               <span style={{
-                fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#1a1a1a',
+                fontFamily: dmSans, fontSize: 14,
+                fontWeight: family.isCurrentUser ? 600 : 400,
+                color: family.isCurrentUser ? '#E85D20' : '#1a1a1a',
                 flex: 1,
               }}>
-                {family.displayName || `A Family`}
+                {family.displayName || 'A Family'}
+                {family.isCurrentUser && (
+                  <span style={{
+                    fontFamily: dmSans, fontSize: 10, fontWeight: 500,
+                    color: '#E85D20', background: 'rgba(232,93,32,0.1)',
+                    borderRadius: 100, padding: '2px 8px', marginLeft: 8,
+                  }}>You</span>
+                )}
               </span>
 
               {/* Status */}
