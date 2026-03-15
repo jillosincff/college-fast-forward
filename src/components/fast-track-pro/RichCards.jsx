@@ -34,12 +34,22 @@ export function CompanyIntelCard({ data, onSendMessage }) {
     const recentNews = toArray(data.recent_news);
     const interviewTips = toArray(data.interview_tips);
     const signal = (typeof data.hiring_signal === 'string' ? data.hiring_signal : 'warm');
+    const overallSignal = data.overall_signal || (signal === 'hot' ? 'green' : signal === 'cool' ? 'red' : 'yellow');
     const signalConfig = {
       hot: { emoji: '🟢', label: 'Hot', bg: 'bg-green-100 text-green-700' },
       warm: { emoji: '🟡', label: 'Warm', bg: 'bg-yellow-100 text-yellow-700' },
       cool: { emoji: '🔴', label: 'Cool', bg: 'bg-red-100 text-red-700' },
     };
+    const overallSignalConfig = {
+      green: { emoji: '🟢', label: 'Actively Hiring', bg: 'bg-green-100 text-green-700', border: 'border-l-green-500' },
+      yellow: { emoji: '🟡', label: 'Mixed Signals', bg: 'bg-yellow-100 text-yellow-700', border: 'border-l-yellow-500' },
+      red: { emoji: '🔴', label: 'Proceed with Caution', bg: 'bg-red-100 text-red-700', border: 'border-l-red-500' },
+    };
     const s = signalConfig[signal] || signalConfig.warm;
+    const os = overallSignalConfig[overallSignal] || overallSignalConfig.yellow;
+    const warnings = Array.isArray(data.warning_signals) ? data.warning_signals : [];
+    const similarCompanies = Array.isArray(data.similar_companies) ? data.similar_companies : [];
+    const recommendationText = data.recommendation_text || '';
 
     const hiringScore = typeof data.hiring_score === 'number' ? data.hiring_score : null;
     const openRolesCount = typeof data.open_roles_count === 'number' ? data.open_roles_count : null;
@@ -55,7 +65,12 @@ export function CompanyIntelCard({ data, onSendMessage }) {
           </div>
           <div>
             <p className="font-bold text-slate-900">{titleCase(String(data.company || ''))}</p>
-            <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
+            <div className="flex items-center gap-2 flex-wrap mt-1">
+              <Badge className={`text-xs ${os.bg}`}>{os.emoji} {os.label}</Badge>
+              {overallSignal !== (signal === 'hot' ? 'green' : signal === 'cool' ? 'red' : 'yellow') && (
+                <Badge className={`text-xs ${s.bg}`}>{s.emoji} {s.label} Hiring</Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -124,6 +139,48 @@ export function CompanyIntelCard({ data, onSendMessage }) {
                 <li key={i} className="text-xs text-slate-600">• {String(n)}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Warning signals */}
+        {warnings.length > 0 && (
+          <div className="mt-3" style={{ background: 'rgba(229,57,53,0.06)', border: '0.5px solid rgba(229,57,53,0.15)', borderRadius: 8, padding: '10px 12px' }}>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'rgba(229,57,53,0.8)' }}>⚠️ Heads up</p>
+            {warnings.map((w, i) => (
+              <div key={i} className="mb-1 last:mb-0">
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(229,57,53,0.7)' }}>{String(w.text)}{w.date ? ` (${w.date})` : ''}</p>
+                {w.source && <a href={w.source} target="_blank" rel="noopener noreferrer" className="text-xs hover:underline" style={{ color: 'rgba(229,57,53,0.5)' }}>Source →</a>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* FASTIQ's take — recommendation */}
+        {recommendationText && (
+          <div className="mt-3" style={{ background: 'rgba(232,93,32,0.06)', border: '0.5px solid rgba(232,93,32,0.15)', borderRadius: 8, padding: '10px 12px' }}>
+            <p className="mb-1" style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(100,116,139,0.6)' }}>FASTIQ's take</p>
+            <p className="text-sm leading-relaxed italic text-slate-700">{recommendationText}</p>
+          </div>
+        )}
+
+        {/* Similar companies — shown when signal is red or no alumni */}
+        {similarCompanies.length > 0 && (overallSignal === 'red' || !(data.alumni && data.alumni.length > 0)) && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="text-xs text-slate-400 mb-2">Worth considering instead:</p>
+            <div className="flex flex-wrap gap-2">
+              {similarCompanies.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => onSendMessage && onSendMessage(`Research ${c.name} for me`)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-white/80 border border-slate-200 hover:border-[#FA4616]/30 hover:bg-orange-50 transition-all cursor-pointer"
+                  style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+                >
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${c.signal === 'green' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  <span className="font-medium text-slate-700">{c.name}</span>
+                  {c.alumni_count > 0 && <span className="text-slate-400">{c.alumni_count} alumni</span>}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
