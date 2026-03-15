@@ -109,10 +109,13 @@ export default function GatorInviteCode() {
       }
     }
 
-    // Store role and proceed
+    // Store role and code (use 'direct' when no code provided so routing doesn't block)
     const role = localStorage.getItem('pending_invite_role') || 'parent';
     localStorage.setItem('pending_invite_role', role);
+    localStorage.setItem('pending_invite_code', code || 'direct');
     localStorage.setItem('pending_invite_timestamp', Date.now().toString());
+    sessionStorage.setItem('pending_invite_role', role);
+    sessionStorage.setItem('pending_invite_code', code || 'direct');
 
     if (user) {
       navigate('GatorWelcome');
