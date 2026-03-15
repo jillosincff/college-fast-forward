@@ -209,18 +209,33 @@ export default function MyImpact() {
     return cats;
   }, [activeRequests]);
 
-  // Leaderboard families
+  // Leaderboard families — resolve real parent names
   const leaderboardFamilies = useMemo(() => {
+    // Build a lookup: parent_user_id → user record
+    const parentById = {};
+    (parentUsers || []).forEach(u => { parentById[u.id] = u; });
+
     return (allKarmaFamilies || [])
       .filter(f => (f.this_month_karma || 0) > 0)
       .sort((a, b) => (b.this_month_karma || 0) - (a.this_month_karma || 0))
-      .map((f, i) => ({
-        id: f.id,
-        displayName: `A Family`,
-        karma: f.this_month_karma || 0,
-        isCurrentUser: f.family_group_id === user?.family_group_id,
-      }));
-  }, [allKarmaFamilies, user?.family_group_id]);
+      .map(f => {
+        // Try to resolve parent name from user list
+        const parent = f.parent_user_id ? parentById[f.parent_user_id] : null;
+        let displayName = 'A Family';
+        if (parent?.full_name && !parent.full_name.includes('@')) {
+          // Show "The <LastName> Family"
+          const parts = parent.full_name.trim().split(/[\s,]+/).filter(Boolean);
+          const lastName = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+          displayName = `The ${lastName} Family`;
+        }
+        return {
+          id: f.id,
+          displayName,
+          karma: f.this_month_karma || 0,
+          isCurrentUser: f.family_group_id === user?.family_group_id,
+        };
+      });
+  }, [allKarmaFamilies, parentUsers, user?.family_group_id]);
 
   if (loading) {
     return (
