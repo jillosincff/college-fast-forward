@@ -86,7 +86,7 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
               minHeight: 'auto',
             }}
           >
-            ✨ Chat with FASTIQ →
+            ✨ Open Chat →
           </button>
         </div>
 

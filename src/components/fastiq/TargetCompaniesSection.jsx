@@ -232,6 +232,7 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
 }
 
 export default function TargetCompaniesSection({ companies, companyIntel, alumniCounts, onOpenChat, onAddTargets, positionType }) {
+  // FIX 5: Conversational empty state for no target companies
   if (!companies || companies.length === 0) {
     return (
       <div className="fiq-animate fiq-delay-5" style={{ marginBottom: 32 }}>
@@ -240,36 +241,39 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
           textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
         }}>Target Companies</h2>
         <div style={{
-          padding: '28px 20px', background: '#fff', borderRadius: 14,
-          border: '1.5px dashed #CBD5E1', textAlign: 'center',
+          background: 'rgba(232,93,32,0.06)', border: '0.5px solid rgba(232,93,32,0.15)',
+          borderRadius: 14, padding: '20px 24px', textAlign: 'center',
         }}>
-          <span style={{ fontSize: 28 }}>🎯</span>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#64748B', marginTop: 8, marginBottom: 4 }}>
-            Not sure where to start?
-          </p>
-          <p style={{ fontSize: 11, color: '#475569', marginBottom: 14, lineHeight: 1.5, maxWidth: 280, marginLeft: 'auto', marginRight: 'auto' }}>
-            Tell FASTIQ what kind of companies you're interested in and it will suggest matches, track hiring signals, and scout opportunities for you.
+          <p style={{
+            fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, fontStyle: 'italic',
+            fontSize: 15, color: '#666', lineHeight: 1.65, marginBottom: 16, marginTop: 0,
+            maxWidth: 360, marginLeft: 'auto', marginRight: 'auto',
+          }}>
+            "Not sure where to start? Tell me what kind of companies interest you and I'll find the right ones — along with UF alumni who work there."
           </p>
           <button
-            onClick={() => onOpenChat('Help me find companies to target')}
+            onClick={() => onOpenChat('Help me find target companies based on my major and interests')}
             style={{
-              padding: '10px 24px', borderRadius: 10, border: 'none',
-              background: 'linear-gradient(135deg, #0021A5, #FA4616)', color: '#fff', fontSize: 12, fontWeight: 700,
+              padding: '10px 24px', borderRadius: 100, border: 'none',
+              background: '#E85D20', color: '#fff', fontSize: 13, fontWeight: 500,
               cursor: 'pointer', minHeight: 'auto',
+              fontFamily: "'DM Sans', sans-serif",
+              transition: 'background 0.2s',
             }}
           >
             Help Me Find Companies →
           </button>
-          <button
-            onClick={onAddTargets}
-            style={{
-              display: 'block', margin: '10px auto 0', padding: '8px 20px', borderRadius: 8, border: 'none',
-              background: 'transparent', color: '#64748B', fontSize: 11, fontWeight: 600,
-              cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline',
-            }}
-          >
-            I already know my companies
-          </button>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 300,
+            color: '#999', marginTop: 10, marginBottom: 0,
+          }}>
+            or <span
+              onClick={onAddTargets}
+              style={{ textDecoration: 'underline', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#666'}
+              onMouseLeave={e => e.currentTarget.style.color = '#999'}
+            >add companies manually</span>
+          </p>
         </div>
       </div>
     );
