@@ -230,6 +230,8 @@ export function useParentDashboardData(user) {
         familyBoostMultiplier,
         recentActivity,
         parentIndustry: user.industry || user.target_industry || null,
+        boostsThisWeek: 0, // TODO: calculate from real boost data when available
+        introsMade: 0, // TODO: calculate from real intro data when available
       });
 
     } catch (error) {
