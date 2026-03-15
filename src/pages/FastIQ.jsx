@@ -48,11 +48,10 @@ export default function FastIQ() {
     })();
   }, [isCheckoutSuccess, user]);
 
-  // P0 FIX: Only compute isParent when user is confirmed loaded (not undefined)
   const isParent = user ? (user.persona === 'parent' || user.roles?.includes('parent')) : false;
 
   useEffect(() => {
-    if (user === undefined) return; // Auth still loading
+    if (user === undefined) return;
     if (!user) { setLoading(false); return; }
     if (isParent) { setLoading(false); return; }
     loadProfile();
@@ -65,7 +64,6 @@ export default function FastIQ() {
       setProfile(profiles[0]);
       setView('dashboard');
     } else if (user?.fastiq_setup_complete && profiles.length > 0) {
-      // Setup was completed but profile flag might be stale — go to dashboard
       setProfile(profiles[0]);
       setView('dashboard');
     } else {
@@ -80,7 +78,6 @@ export default function FastIQ() {
       setChatInitialMessage(openChatWith);
       setView('chat');
     } else {
-      // Reload profile to get fresh data then show dashboard
       loadProfile();
     }
   };
@@ -93,16 +90,14 @@ export default function FastIQ() {
   const handleBackFromChat = () => {
     setChatInitialMessage('');
     setView('dashboard');
-    loadProfile(); // Refresh profile data after chat session
+    loadProfile();
   };
 
-  // P2 FIX: Force command center data refetch after assessment re-run
   const handleAssessmentRerun = () => {
     setChatInitialMessage('');
     setView('assessment');
   };
 
-  // P0 FIX: Show loading while auth is resolving (user === undefined)
   if (user === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
@@ -147,8 +142,18 @@ export default function FastIQ() {
   }
 
   if (view === 'chat') {
+    // Fixed overlay covers EVERYTHING — footer, nav, body background
     return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: '#0d1117' }}>
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: '#0d1117',
+        zIndex: 9999,
+        overflow: 'hidden',
+      }}>
         <ProAgentChat
           user={user}
           profile={profile}

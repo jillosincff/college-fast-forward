@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import titleCase from '@/components/utils/titleCase';
-import { Input } from '@/components/ui/input';
 
 const dmSans = "'DM Sans', sans-serif";
 const orange = '#E85D20';
@@ -12,16 +11,17 @@ const TIMELINE_LABELS = {
   next_year: 'Next year', immediately: 'ASAP', '1_3_months': '1–3 months',
   '3_6_months': '3–6 months', '6_plus_months': '6+ months', exploring: 'Exploring',
 };
-
-function formatTimeline(value) {
-  if (!value) return '—';
-  if (TIMELINE_LABELS[value]) return TIMELINE_LABELS[value];
-  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
 const STAGE_LABELS = {
   just_starting: 'Just starting', applying: 'Applying',
   interviewing: 'Interviewing', have_offers: 'Have offers',
 };
+
+function formatTimeline(value) {
+  if (!value) return '—';
+  if (TIMELINE_LABELS[value]) return TIMELINE_LABELS[value];
+  // Generic formatter: "fall_2026" → "Fall 2026"
+  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
 
 export default function ChatSidebar({ profile, onBack, onResearchCompany, onRerunAssessment, onProfileUpdated, onOpenChat }) {
   const [companies, setCompanies] = useState([]);
@@ -56,9 +56,11 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
   const location = profile?.location_preference || '';
 
   const signalColor = (c) => {
-    const researched = researchedSet.has(c.toLowerCase());
-    return researched ? '#4ADE80' : 'rgba(244,240,232,0.2)';
+    return researchedSet.has(c.toLowerCase()) ? '#4ADE80' : 'rgba(244,240,232,0.2)';
   };
+
+  const emptyStyle = { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.2)', fontStyle: 'italic' };
+  const valueStyle = { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.5)' };
 
   return (
     <div style={{
@@ -112,16 +114,12 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
             {companies.map((c, i) => (
               <div
                 key={i}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '4px 0', cursor: 'pointer',
-                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer' }}
                 onMouseEnter={() => setHoveredIdx(i)}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
                 <div style={{
-                  width: 6, height: 6, borderRadius: '50%',
-                  background: signalColor(c), flexShrink: 0,
+                  width: 6, height: 6, borderRadius: '50%', background: signalColor(c), flexShrink: 0,
                   boxShadow: researchedSet.has(c.toLowerCase()) ? '0 0 6px rgba(74,222,128,0.5)' : 'none',
                 }} />
                 <button
@@ -153,7 +151,6 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
         )}
       </div>
 
-      {/* Divider */}
       <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />
 
       {/* YOUR PROFILE */}
@@ -172,7 +169,7 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
           ].map(([label, value]) => (
             <div key={label} style={{ display: 'flex', gap: 8 }}>
               <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.35)', width: 56, flexShrink: 0 }}>{label}</span>
-              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: value === '—' ? 'rgba(244,240,232,0.2)' : 'rgba(244,240,232,0.5)', fontStyle: value === '—' ? 'italic' : 'normal' }}>{value}</span>
+              <span style={value === '—' ? emptyStyle : valueStyle}>{value}</span>
             </div>
           ))}
         </div>
@@ -188,7 +185,6 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
         </button>
       </div>
 
-      {/* Divider */}
       <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />
 
       {/* MY ACTION PLAN */}
@@ -214,7 +210,6 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
         </button>
       </div>
 
-      {/* Divider */}
       <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />
 
       {/* MASTER RESUME */}
