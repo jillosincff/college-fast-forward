@@ -162,8 +162,9 @@ export default function ParentOnboarding() {
           <div style={{ height: '100%' }}>
             <LeftPanel />
           </div>
-          {/* Mobile condensed */}
-          <div className="md:hidden" style={{
+
+        {/* Mobile condensed header */}
+        <div className="po-mobile-header" style={{ display: 'none',
             background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
             padding: '24px 20px', minHeight: 180,
           }}>
