@@ -1364,8 +1364,8 @@ function AppContent() {
             destination = 'ParentOnboarding';
             console.log('➡️ [NeedsOnboarding] Parent → ParentOnboarding');
           } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-            destination = 'Onboarding';
-            console.log('➡️ [NeedsOnboarding] Alumni → Onboarding');
+            destination = 'AlumniOnboarding';
+            console.log('➡️ [NeedsOnboarding] Alumni → AlumniOnboarding');
           } else {
           // Fallback for unknown persona - go to GatorAuth
           destination = 'GatorAuth';
@@ -1426,7 +1426,7 @@ function AppContent() {
       if (isParent) {
         onboardingPage = 'ParentOnboarding';
       } else if (isAlumni) {
-        onboardingPage = 'Onboarding';
+        onboardingPage = 'AlumniOnboarding';
       }
       console.log('🔄 [Incomplete] Needs onboarding →', onboardingPage, '(persona:', user.persona, 'roles:', user.roles, ')');
       navigate(onboardingPage);
