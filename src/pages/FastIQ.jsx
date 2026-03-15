@@ -148,13 +148,15 @@ export default function FastIQ() {
 
   if (view === 'chat') {
     return (
-      <ProAgentChat
-        user={user}
-        profile={profile}
-        initialMessage={chatInitialMessage}
-        onBack={handleBackFromChat}
-        onRerunAssessment={handleAssessmentRerun}
-      />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: '#0d1117' }}>
+        <ProAgentChat
+          user={user}
+          profile={profile}
+          initialMessage={chatInitialMessage}
+          onBack={handleBackFromChat}
+          onRerunAssessment={handleAssessmentRerun}
+        />
+      </div>
     );
   }
 

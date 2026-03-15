@@ -12,6 +12,12 @@ const TIMELINE_LABELS = {
   next_year: 'Next year', immediately: 'ASAP', '1_3_months': '1–3 months',
   '3_6_months': '3–6 months', '6_plus_months': '6+ months', exploring: 'Exploring',
 };
+
+function formatTimeline(value) {
+  if (!value) return '—';
+  if (TIMELINE_LABELS[value]) return TIMELINE_LABELS[value];
+  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
 const STAGE_LABELS = {
   just_starting: 'Just starting', applying: 'Applying',
   interviewing: 'Interviewing', have_offers: 'Have offers',
@@ -45,7 +51,7 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
   };
 
   const industry = profile?.target_industry || '—';
-  const timeline = TIMELINE_LABELS[profile?.career_timeline] || profile?.career_timeline || '—';
+  const timeline = formatTimeline(profile?.career_timeline);
   const stage = STAGE_LABELS[profile?.current_stage] || profile?.current_stage || '—';
   const location = profile?.location_preference || '';
 
@@ -166,7 +172,7 @@ export default function ChatSidebar({ profile, onBack, onResearchCompany, onReru
           ].map(([label, value]) => (
             <div key={label} style={{ display: 'flex', gap: 8 }}>
               <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: 'rgba(244,240,232,0.35)', width: 56, flexShrink: 0 }}>{label}</span>
-              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.5)' }}>{value}</span>
+              <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: value === '—' ? 'rgba(244,240,232,0.2)' : 'rgba(244,240,232,0.5)', fontStyle: value === '—' ? 'italic' : 'normal' }}>{value}</span>
             </div>
           ))}
         </div>

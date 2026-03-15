@@ -21,6 +21,9 @@ const svgIcons = {
   heart: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 14s-6-4-6-8a3.5 3.5 0 017 0 3.5 3.5 0 017 0c0 4-6 8-6 8z"/></svg>,
   star: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1l2 5h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5z"/></svg>,
   peopleSm: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/></svg>,
+  thankNote: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4h12v8H2z"/><path d="M2 4l6 5 6-5"/></svg>,
+  offerStar: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1l1.8 4H14l-3.5 2.8 1.3 4.2L8 9.5l-3.8 2.5 1.3-4.2L2 5h4.2z"/></svg>,
+  thankHelpers: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.5 2.2-4 5-4s5 1.5 5 4"/><circle cx="11" cy="5" r="2"/><path d="M12 10c1.7.3 3 1.5 3 3"/></svg>,
 };
 
 const findPromptIcons = [
@@ -35,9 +38,9 @@ const toolCards = [
   { icon: svgIcons.linkedin, name: 'LinkedIn review', bg: 'rgba(34,211,238,0.15)', color: '#22D3EE', prompt: 'Review my LinkedIn profile' },
   { icon: svgIcons.checklist, name: 'Action plan', bg: 'rgba(74,222,128,0.15)', color: '#4ADE80', prompt: 'Build my career action plan' },
   { icon: svgIcons.chart, name: 'Salary intel', bg: 'rgba(232,93,32,0.15)', color: orange, prompt: 'What should I negotiate for salary?' },
-  { icon: svgIcons.heart, name: 'Thank-you note', bg: 'rgba(244,114,182,0.15)', color: '#F472B6', prompt: 'Draft a thank-you note after my interview' },
-  { icon: svgIcons.star, name: 'Got an offer!', bg: 'rgba(250,204,21,0.15)', color: '#FACC15', prompt: 'I got a job offer!' },
-  { icon: svgIcons.peopleSm, name: 'Thank my helpers', bg: 'rgba(139,92,246,0.15)', color: '#A78BFA', prompt: 'Thank everyone who helped me in my job search' },
+  { icon: svgIcons.thankNote, name: 'Thank-you note', bg: 'rgba(236,64,122,0.1)', color: '#ec407a', prompt: 'Draft a thank-you note after my interview' },
+  { icon: svgIcons.offerStar, name: 'Got an offer!', bg: 'rgba(255,193,7,0.1)', color: '#FFC107', prompt: 'I got a job offer!' },
+  { icon: svgIcons.thankHelpers, name: 'Thank my helpers', bg: 'rgba(156,39,176,0.1)', color: '#9c27b0', prompt: 'Thank everyone who helped me in my job search' },
 ];
 
 export default function ChatWelcome({ profile, onSend }) {
@@ -62,8 +65,8 @@ export default function ChatWelcome({ profile, onSend }) {
       ];
 
   const explorePrompts = [
-    { icon: svgIcons.crosshair, text: "What UF career events are coming up?" },
-    { icon: svgIcons.building, text: "Explore career paths for my major" },
+    { icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="rgba(244,240,232,0.4)" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2 6h12M6 2v12M10 2v12"/></svg>, text: "What UF career events are coming up?" },
+    { icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="rgba(244,240,232,0.4)" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 2a10 10 0 010 12M2 8h12"/><path d="M4 5a10 10 0 008 0M4 11a10 10 0 008 0"/></svg>, text: "Explore career paths for my major" },
   ];
 
   return (

@@ -449,8 +449,9 @@ export default function ProAgentChat({ user, profile: initialProfile, initialMes
           </div>
           {/* Disclaimer — below input, subtle */}
           <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 300,
-            color: 'rgba(244,240,232,0.15)', textAlign: 'center', marginTop: 10,
+            fontFamily: dmSans, fontSize: 10, fontWeight: 300,
+            color: 'rgba(244,240,232,0.12)', textAlign: 'center',
+            padding: '4px 0 8px', userSelect: 'none',
           }}>
             FASTIQ uses AI with web search. Verify important information independently.
           </p>
