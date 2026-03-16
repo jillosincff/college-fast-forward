@@ -1241,8 +1241,11 @@ function AppContent() {
           } else if (user.persona === 'parent' || user.roles?.includes('parent')) {
             destination = 'ParentDashboard';
           } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-            // Alumni helpers → ParentDashboard, Alumni seekers → AlumniDashboard
-            destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+            if (user.alumni_seniority === 'recent_grad') {
+              destination = 'Dashboard';
+            } else {
+              destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+            }
           }
           console.log('🔄 [LandingPage] Authenticated user → redirecting to:', destination);
         navigate(destination);
