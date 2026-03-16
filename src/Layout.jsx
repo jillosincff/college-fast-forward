@@ -514,7 +514,8 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                                 if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
                                 else if (user.persona === 'alumni') {
                                   if (user.alumni_seniority === 'recent_grad') targetPageForNav = 'Dashboard';
-                                  else targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+                                  else if (user.alumni_intent === 'help_students') targetPageForNav = 'ParentDashboard';
+                                  else targetPageForNav = 'Dashboard';
                                 }
                                 else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
                                 else targetPageForNav = 'Dashboard';
