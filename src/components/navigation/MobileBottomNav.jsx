@@ -11,38 +11,53 @@ export default function MobileBottomNav({ user, currentPage }) {
 
   const getDashboardPage = () => {
     if (user?.roles?.includes('admin')) return 'AdminDashboard';
-    if (effectivePersona === 'parent' || user?.roles?.includes('parent')) return 'ParentDashboard';
-    if (isRecentGradAlumni) return 'Dashboard';
-    if (effectivePersona === 'alumni' || user?.roles?.includes('alumni'))
-      return user?.alumni_intent === 'help_students' ? 'ParentDashboard' : 'Dashboard';
+    if (effectivePersona === 'parent') return 'ParentDashboard';
+    if (effectivePersona === 'alumni') {
+      if (isRecentGradAlumni) return 'RecentGradDashboard';
+      return 'AlumniDashboard'; // Established alumni always go to AlumniDashboard
+    }
+    if (user?.roles?.includes('parent')) return 'ParentDashboard';
+    if (user?.roles?.includes('alumni')) return 'AlumniDashboard';
     return 'Dashboard';
   };
 
-  const isAlumniHelper = effectivePersona === 'alumni' && user?.alumni_intent === 'help_students' && !isRecentGradAlumni;
-  const isParent = ((effectivePersona === 'parent' || user?.roles?.includes('parent')) && !isRecentGradAlumni) || isAlumniHelper;
+  const isEstablishedAlumni = effectivePersona === 'alumni' && !isRecentGradAlumni;
+  const isParent = (effectivePersona === 'parent' || user?.roles?.includes('parent')) && !isRecentGradAlumni;
 
   const tabs = useMemo(() => {
+    const dashPage = getDashboardPage();
     if (isParent) {
       return [
-        { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
+        { name: 'Home', icon: LayoutDashboard, page: dashPage },
         { name: 'Ask', icon: MessageSquare, page: 'Connections' },
         { name: 'Directory', icon: Users, page: 'GatorDirectory' },
         { name: 'Messages', icon: Mail, page: 'MyMessages' },
         { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
       ];
     }
+    if (isEstablishedAlumni) {
+      return [
+        { name: 'Home', icon: LayoutDashboard, page: dashPage },
+        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
+        { name: 'Directory', icon: Users, page: 'GatorDirectory' },
+        { name: 'Messages', icon: Mail, page: 'MyMessages' },
+        { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
+      ];
+    }
+    // Students and recent grad alumni
     return [
-      { name: 'Home', icon: LayoutDashboard, page: getDashboardPage() },
+      { name: 'Home', icon: LayoutDashboard, page: dashPage },
       { name: 'Ask', icon: MessageSquare, page: 'Connections' },
       { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
       { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
       { name: 'Messages', icon: Mail, page: 'MyMessages' },
     ];
-  }, [user, isParent]);
+  }, [user, isParent, isEstablishedAlumni]);
 
   const isActive = (tabPage) => {
-    if (tabPage === 'Dashboard' || tabPage === 'ParentDashboard' || tabPage === 'AlumniDashboard' || tabPage === 'AdminDashboard') {
-      return ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'AdminDashboard'].includes(currentPage);
+    const allDashboards = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'AdminDashboard'];
+    if (allDashboards.includes(tabPage)) {
+      return allDashboards.includes(currentPage);
     }
     return currentPage === tabPage;
   };
