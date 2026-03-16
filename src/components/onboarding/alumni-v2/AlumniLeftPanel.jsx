@@ -30,7 +30,89 @@ function Callout({ bold, body }) {
   );
 }
 
-export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
+// ═══════════════════════════════════════════
+// RECENT GRAD left panel content
+// ═══════════════════════════════════════════
+function RecentGradPanel({ step }) {
+  if (step === 1) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <h2 style={{ fontFamily: dmSans, fontWeight: 500, fontSize: 18, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
+          College Fast Forward
+        </h2>
+        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+          Let's start with your time at UF 🎓
+        </h1>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <BenefitCard emoji="🔗" text="Parents and alumni in this network have the connections you need" />
+          <BenefitCard emoji="✨" text="Your degree is your credibility — let's put it to work" />
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+          You just finished one chapter.
+        </h1>
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
+          Let's help you start the next one. Parents and alumni in this network have the connections you need.
+        </p>
+        <Callout
+          bold="You don't have to figure this out alone."
+          body="Real professionals who've been exactly where you are are already on this platform waiting to help."
+        />
+      </div>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+          Your parent could be your biggest asset.
+        </h1>
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
+          Parents on College Fast Forward are already opening doors for students like you. If yours isn't here yet — let's change that.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <BenefitCard emoji="🤝" text="Their network becomes your network" />
+          <BenefitCard emoji="🚀" text="Students with linked parents get more visibility in the feed" />
+        </div>
+      </div>
+    );
+  }
+
+  // Step 5 = Ready (RG)
+  if (step === 5) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+          You're all set! 🎉
+        </h1>
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
+          Parents and alumni are already here to help you.
+        </p>
+        <Callout
+          bold="What happens next?"
+          body="We'll match you with people who can help with exactly what you're looking for. You'll get notified when someone wants to connect."
+        />
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+          Join <span style={{ fontWeight: 700, color: '#fff' }}>200+ parents & alumni</span> already opening doors
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// ESTABLISHED left panel content
+// ═══════════════════════════════════════════
+function EstablishedPanel({ step, intent }) {
   const isHelper = intent === 'help_students';
 
   if (step === 1) {
@@ -102,22 +184,6 @@ export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
   }
 
   if (step === 5) {
-    if (isRecentGrad) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
-            How can the network help you?
-          </h1>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
-            As a recent grad, you have unique expertise to share — and a community ready to support your next step.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <BenefitCard emoji="🤝" text="Get matched with parents & alumni in your field" />
-            <BenefitCard emoji="💡" text="Share what you've learned with current students" />
-          </div>
-        </div>
-      );
-    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
@@ -135,22 +201,6 @@ export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
   }
 
   if (step === 7) {
-    if (isRecentGrad) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
-            You're all set! 🎉
-          </h1>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
-            As a recent grad, you'll have access to the full student toolkit — FASTIQ, networking, and a community ready to help.
-          </p>
-          <Callout
-            bold="What happens next?"
-            body="You'll land on the student dashboard with access to FASTIQ career tools, networking pipeline, and direct connections to parents and established alumni."
-          />
-        </div>
-      );
-    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
@@ -171,4 +221,9 @@ export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
   }
 
   return null;
+}
+
+export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
+  if (isRecentGrad) return <RecentGradPanel step={step} />;
+  return <EstablishedPanel step={step} intent={intent} />;
 }
