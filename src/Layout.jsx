@@ -1465,11 +1465,13 @@ function AppContent() {
   // Hide layout header on pages that render their own nav (Dashboard v2)
   // Pages where student/gator users have DashboardNav (black bar) instead of layout header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ'];
-  // Parents/alumni always use the layout header — only hide it for students on pages with DashboardNav
+  // Parents/alumni always use the layout header — only hide it for students and recent grad alumni on pages with DashboardNav
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
-  const isParentOrAlumniUser = user?.persona === 'parent' || user?.persona === 'alumni' ||
-    user?.roles?.includes('parent') || user?.roles?.includes('alumni');
-  const hasOwnNav = isStudentUser && !isParentOrAlumniUser && studentOwnNavPages.includes(resolvedPage);
+  const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
+  const isParentOrEstablishedAlumni = user?.persona === 'parent' || 
+    (user?.persona === 'alumni' && !isRecentGradAlumni) ||
+    user?.roles?.includes('parent');
+  const hasOwnNav = (isStudentUser || isRecentGradAlumni) && !isParentOrEstablishedAlumni && studentOwnNavPages.includes(resolvedPage);
   const showHeader = user && 
                      resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
