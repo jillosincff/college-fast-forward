@@ -5,21 +5,27 @@ import AlumniLeftPanel from './AlumniLeftPanel';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
-const STEP_LABELS = ['Details', 'About', 'Industry', 'Intent', 'Help', 'Pledge', 'Ready'];
+const STEP_LABELS_FULL = ['Details', 'About', 'Industry', 'Intent', 'Help', 'Pledge', 'Ready'];
+const STEP_LABELS_RECENT = ['Details', 'About', 'Industry', 'Help', 'Pledge', 'Ready'];
 
-function ProgressDots({ step, totalSteps }) {
+function ProgressDots({ step, totalSteps, isRecentGrad }) {
+  const labels = isRecentGrad ? STEP_LABELS_RECENT : STEP_LABELS_FULL;
+  // Map display index to actual step number for recent grads (skip step 4)
+  const stepMapping = isRecentGrad
+    ? [1, 2, 3, 5, 6, 7] // display positions map to these actual steps
+    : [1, 2, 3, 4, 5, 6, 7];
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32 }}>
-      {STEP_LABELS.map((label, i) => {
-        const num = i + 1;
-        const isCompleted = step > num;
-        const isActive = step === num;
+      {labels.map((label, i) => {
+        const actualStep = stepMapping[i];
+        const isCompleted = step > actualStep;
+        const isActive = step === actualStep;
         return (
           <React.Fragment key={i}>
             {i > 0 && (
               <div style={{
                 width: 16, height: 1.5,
-                background: step > num ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)',
+                background: step > actualStep ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)',
               }} />
             )}
             <div style={{
@@ -35,7 +41,7 @@ function ProgressDots({ step, totalSteps }) {
                 <span style={{
                   fontFamily: dmSans, fontSize: 11, fontWeight: 600,
                   color: isActive ? '#fff' : 'rgba(255,255,255,0.3)',
-                }}>{num}</span>
+                }}>{i + 1}</span>
               )}
             </div>
           </React.Fragment>
@@ -45,7 +51,7 @@ function ProgressDots({ step, totalSteps }) {
   );
 }
 
-export default function AlumniOnboardingLayout({ step, totalSteps, intent, children }) {
+export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRecentGrad, children }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
       <div className="ao-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
@@ -63,9 +69,13 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, child
             fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 16,
           }}>
-            {step === 1 ? 'WELCOME TO' : step === 7 ? 'FINAL STEP' : `STEP ${step} OF ${totalSteps}`}
+            {step === 1 ? 'WELCOME TO' : step === 7 ? 'FINAL STEP' : (() => {
+              // For recent grads, compute display step number (skip step 4)
+              const displayStep = isRecentGrad && step >= 5 ? step - 1 : step;
+              return `STEP ${displayStep} OF ${totalSteps}`;
+            })()}
           </p>
-          <AlumniLeftPanel step={step} intent={intent} />
+          <AlumniLeftPanel step={step} intent={intent} isRecentGrad={isRecentGrad} />
         </div>
 
         {/* MOBILE HEADER */}
@@ -74,7 +84,7 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, child
             backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
             padding: '24px 20px 20px', textAlign: 'center',
           }}>
-            <ProgressDots step={step} totalSteps={totalSteps} />
+            <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} />
           </div>
         </div>
 
