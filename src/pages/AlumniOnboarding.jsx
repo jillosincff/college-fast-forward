@@ -168,10 +168,9 @@ export default function AlumniOnboarding() {
 
   const goToDashboard = () => {
     if (isRecentGrad) {
-      navigate('Dashboard');
+      navigate('RecentGradDashboard');
     } else {
-      // Established alumni → parent-like dashboard
-      navigate('ParentDashboard');
+      navigate('AlumniDashboard');
     }
   };
 
