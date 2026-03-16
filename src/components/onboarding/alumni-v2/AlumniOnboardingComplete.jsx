@@ -9,7 +9,6 @@ export default function AlumniOnboardingComplete({ user, onDone }) {
   const [blocked, setBlocked] = useState(false);
 
   const handleEnable = async () => {
-    // Only trigger browser prompt when user explicitly clicks
     if (!('Notification' in window)) {
       onDone();
       return;
@@ -51,7 +50,7 @@ export default function AlumniOnboardingComplete({ user, onDone }) {
 
       {/* Notification card */}
       <div style={{
-        width: '100%', maxWidth: 480, background: '#fff', borderRadius: 20,
+        width: '100%', maxWidth: 500, background: '#fff', borderRadius: 20,
         border: '1px solid #e5e7eb', boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
         padding: '32px 28px', textAlign: 'center', marginBottom: 24,
       }}>
@@ -66,13 +65,13 @@ export default function AlumniOnboardingComplete({ user, onDone }) {
         <h3 style={{
           fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#1a1a1a', marginBottom: 8,
         }}>
-          🔔 Help students instantly
+          🔔 Get notified when someone can help
         </h3>
         <p style={{
           fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#666',
           lineHeight: 1.6, marginBottom: 24,
         }}>
-          Get notified when a student needs your expertise — respond in one tap and make a real impact. Max 2-3 alerts per week.
+          We'll alert you when a parent or alumni responds to your questions or reaches out to connect. Max 2–3 alerts per week.
         </p>
 
         <button
