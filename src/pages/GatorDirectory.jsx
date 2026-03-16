@@ -69,7 +69,8 @@ export default function GatorDirectory() {
 
       const studentCount = validUsers.filter(u =>
         u.persona === 'student' || u.persona === 'gator' ||
-        (u.roles && (u.roles.includes('student') || u.roles.includes('gator')))
+        (u.roles && (u.roles.includes('student') || u.roles.includes('gator'))) ||
+        (u.email && u.email.toLowerCase().endsWith('@ufl.edu'))
       ).length;
       const alumniCount = validUsers.filter(u => u.persona === 'alumni' || (u.roles && u.roles.includes('alumni'))).length;
       const parentCount = validUsers.filter(u => u.persona === 'parent' || (u.roles && u.roles.includes('parent'))).length;
