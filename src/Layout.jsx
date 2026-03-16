@@ -461,7 +461,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                            let targetPageForNav = item.page;
                             if (item.name === 'Dashboard') {
                                 if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
-                                else if (user.persona === 'alumni') targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+                                else if (user.persona === 'alumni') {
+                                  if (user.alumni_seniority === 'recent_grad') targetPageForNav = 'Dashboard';
+                                  else targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+                                }
                                 else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
                                 else targetPageForNav = 'Dashboard';
                             }
@@ -508,7 +511,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                           let targetPageForNav = item.page;
                           if (item.name === 'Dashboard') {
                                 if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
-                                else if (user.persona === 'alumni') targetPageForNav = 'ParentDashboard';
+                                else if (user.persona === 'alumni') {
+                                  if (user.alumni_seniority === 'recent_grad') targetPageForNav = 'Dashboard';
+                                  else targetPageForNav = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+                                }
                                 else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
                                 else targetPageForNav = 'Dashboard';
                             }
