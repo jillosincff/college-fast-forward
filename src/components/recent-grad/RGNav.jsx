@@ -42,12 +42,10 @@ export default function RGNav({ user, currentPage }) {
           onClick={() => navigate('RecentGradDashboard')}
           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
         >
-          <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
-            alt="CFF"
-            style={{ height: 40, objectFit: 'contain' }}
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
+          <span style={{
+            fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#fff',
+            letterSpacing: '-0.02em',
+          }}>CFF</span>
         </div>
 
         {/* Desktop nav links */}
