@@ -1380,10 +1380,15 @@ function AppContent() {
         } else if (effectiveRole === 'parent' || user.roles?.includes('parent')) {
           destination = 'ParentDashboard';
         } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-              // Alumni helpers → ParentDashboard (help students like parents)
-              // Alumni seekers → AlumniDashboard (need help like students)
-              destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+            // Recent grad alumni → Student Dashboard
+            // Alumni helpers → ParentDashboard (help students like parents)
+            // Alumni seekers → AlumniDashboard (need help like students)
+            if (user.alumni_seniority === 'recent_grad') {
+              destination = 'Dashboard';
             } else {
+              destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+            }
+          } else {
           destination = 'Dashboard';
         }
         console.log('➡️ [Onboarded] → Dashboard:', destination);
