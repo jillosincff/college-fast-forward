@@ -21,8 +21,9 @@ const SEEKER_PLEDGES = [
   { key: 'forward', title: 'Pay it forward when I land on my feet', sub: "Come back and help the next student when you're ready." },
 ];
 
-export default function AlumniStep6Pledge({ user, intent, onComplete, onBack }) {
-  const isSeeker = intent === 'seeking_help';
+export default function AlumniStep6Pledge({ user, intent, isRecentGrad, onComplete, onBack }) {
+  // Recent grads always use seeker pledge
+  const isSeeker = isRecentGrad || intent === 'seeking_help';
   const items = isSeeker ? SEEKER_PLEDGES : HELPER_PLEDGES;
 
   const initChecks = {};

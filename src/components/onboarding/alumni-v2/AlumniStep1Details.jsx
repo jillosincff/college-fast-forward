@@ -7,6 +7,13 @@ const currentYear = new Date().getFullYear();
 const gradYears = [];
 for (let y = currentYear; y >= 1960; y--) gradYears.push(y);
 
+function getSeniorityLabel(year) {
+  if (!year) return null;
+  const diff = currentYear - parseInt(year);
+  if (diff <= 2) return { label: 'Recent grad', sub: "We'll tailor your experience for early-career alumni.", color: '#E85D20' };
+  return { label: 'Established alumni', sub: 'Full onboarding with helper/seeker options.', color: '#0821A5' };
+}
+
 export default function AlumniStep1Details({ formData, onUpdate, onNext }) {
   const canProceed = formData.gradYear && formData.major.trim();
 
@@ -91,6 +98,25 @@ export default function AlumniStep1Details({ formData, onUpdate, onNext }) {
             List any graduate degrees with school and year
           </p>
         </div>
+
+        {/* Seniority indicator */}
+        {formData.gradYear && (() => {
+          const info = getSeniorityLabel(formData.gradYear);
+          if (!info) return null;
+          return (
+            <div style={{
+              background: `${info.color}08`, border: `1px solid ${info.color}25`,
+              borderRadius: 10, padding: '12px 16px',
+            }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: info.color, marginBottom: 2 }}>
+                {info.label}
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888', margin: 0 }}>
+                {info.sub}
+              </p>
+            </div>
+          );
+        })()}
 
         <button
           onClick={onNext}

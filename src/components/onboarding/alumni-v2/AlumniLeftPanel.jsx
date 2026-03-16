@@ -30,7 +30,7 @@ function Callout({ bold, body }) {
   );
 }
 
-export default function AlumniLeftPanel({ step, intent }) {
+export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
   const isHelper = intent === 'help_students';
 
   if (step === 1) {
@@ -102,6 +102,22 @@ export default function AlumniLeftPanel({ step, intent }) {
   }
 
   if (step === 5) {
+    if (isRecentGrad) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+            How can the network help you?
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
+            As a recent grad, you have unique expertise to share — and a community ready to support your next step.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <BenefitCard emoji="🤝" text="Get matched with parents & alumni in your field" />
+            <BenefitCard emoji="💡" text="Share what you've learned with current students" />
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
