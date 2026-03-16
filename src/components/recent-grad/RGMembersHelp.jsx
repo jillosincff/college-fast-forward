@@ -87,8 +87,25 @@ function MemberRow({ member, onMessage }) {
   );
 }
 
-export default function RGMembersHelp({ members, total, helpTags, onMessage }) {
-  if (!members || members.length === 0) return null;
+export default function RGMembersHelp({ members, total, helpTags, onMessage, loading }) {
+  // Always show section — with empty state if no members yet
+  if ((!members || members.length === 0) && !loading) {
+    return (
+      <div style={{
+        background: '#fff', borderRadius: 16, padding: '32px 20px',
+        border: '1px solid #e5e7eb', textAlign: 'center',
+      }}>
+        <h3 style={{
+          fontFamily: playfair, fontWeight: 700, fontSize: 20, color: '#1a1a1a', marginBottom: 8,
+        }}>Members Who Can Help You</h3>
+        <p style={{
+          fontFamily: dmSans, fontSize: 14, color: '#888', lineHeight: 1.6, marginBottom: 0,
+        }}>
+          Post a request to get matched with parents and alumni who can help with your career goals.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{

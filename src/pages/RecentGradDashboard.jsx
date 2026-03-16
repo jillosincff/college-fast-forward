@@ -182,7 +182,7 @@ export default function RecentGradDashboard() {
   const handleInviteParent = () => navigate('GatorParentInvite');
   const handleMessage = (member) => navigate('MessageComposer', { to: member.email });
 
-  if (loading && !user) {
+  if ((loading && !user) || !user) {
     return (
       <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -235,6 +235,7 @@ export default function RecentGradDashboard() {
           total={matches.length}
           helpTags={helpTags}
           onMessage={handleMessage}
+          loading={loading}
         />
 
         {/* Section 6 — Recent activity */}
