@@ -137,56 +137,70 @@ export default function InteractiveTeaserDemo() {
   const [scanDone, setScanDone] = useState(false);
   const [activeCard, setActiveCard] = useState(DEFAULT_CARD);
   const [typedText, setTypedText] = useState('');
-  const [showSig, setShowSig] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const timerRef = useRef(null);
   const abortRef = useRef(false);
+  const mountedRef = useRef(false);
 
-  const typeMessage = (msg) => {
+  // Stable fallback — never show a blank box
+  const fullMessage = ALUMNI[activeCard].message + ' ' + ALUMNI[activeCard].signature;
+  const displayText = typedText || fullMessage;
+
+  const typeMessage = (msg, sig) => {
+    // Abort any running animation
     abortRef.current = true;
     clearTimeout(timerRef.current);
+
+    const combined = msg + ' ' + sig;
+    // Reset
     abortRef.current = false;
     setTypedText('');
-    setShowSig(false);
     setIsTyping(true);
 
     let idx = 0;
     const tick = () => {
-      if (abortRef.current) return;
-      idx += 1;
-      if (idx > msg.length) {
-        setTypedText(msg);
+      if (abortRef.current) {
+        // On abort, show full message so box is never blank
+        setTypedText(combined);
         setIsTyping(false);
-        setTimeout(() => { if (!abortRef.current) setShowSig(true); }, 300);
         return;
       }
-      setTypedText(msg.slice(0, idx));
+      idx += 1;
+      if (idx > combined.length) {
+        setTypedText(combined);
+        setIsTyping(false);
+        return;
+      }
+      setTypedText(combined.slice(0, idx));
       timerRef.current = setTimeout(tick, TYPE_SPEED);
     };
-    timerRef.current = setTimeout(tick, 120);
+    // Start immediately — no delay
+    timerRef.current = setTimeout(tick, 0);
   };
 
+  // Start typing the default Google message IMMEDIATELY on mount
   useEffect(() => {
-    if (scanDone) {
-      typeMessage(ALUMNI[DEFAULT_CARD].message);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      const a = ALUMNI[DEFAULT_CARD];
+      typeMessage(a.message, a.signature);
     }
     return () => { abortRef.current = true; clearTimeout(timerRef.current); };
-  }, [scanDone]);
+  }, []);
 
   const handleCardHover = (i) => {
-    if (!scanDone) return;
+    if (i === activeCard && !isTyping) return; // already showing this card's completed message
     setActiveCard(i);
-    typeMessage(ALUMNI[i].message);
+    const a = ALUMNI[i];
+    typeMessage(a.message, a.signature);
   };
-
-  const activeAlumni = ALUMNI[activeCard];
 
   return (
     <div>
       {/* Scanning animation */}
       <ScanningAnimation onComplete={() => setScanDone(true)} />
 
-      {/* Cards */}
+      {/* Cards — fade in after scan, but message box is always visible */}
       <AnimatePresence>
         {scanDone && (
           <motion.div
@@ -250,69 +264,55 @@ export default function InteractiveTeaserDemo() {
                 );
               })}
             </div>
-
-            {/* Typewriter message */}
-            <div className="max-w-lg mx-auto mt-8">
-              <div className="text-center mb-4">
-                <span
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
-                  style={{
-                    color: '#FA4616',
-                    background: 'rgba(250,70,22,0.1)',
-                    border: '1px solid rgba(250,70,22,0.25)',
-                  }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FA4616] animate-pulse" />
-                  FASTIQ just wrote this for you…
-                </span>
-              </div>
-
-              <div
-                className="rounded-2xl p-6 sm:p-7"
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(250,70,22,0.2)',
-                  boxShadow: '0 0 30px rgba(250,70,22,0.1), 0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
-                }}
-              >
-                <p
-                  className="text-left min-h-[96px]"
-                  style={{ color: '#FFFFFF', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}
-                >
-                  {typedText}
-                  <span
-                    className="inline-block align-middle ml-0.5"
-                    style={{
-                      width: '2px',
-                      height: '18px',
-                      background: '#FA4616',
-                      animation: 'teaserBlink 0.6s step-end infinite',
-                    }}
-                  />
-                </p>
-
-                <AnimatePresence mode="wait">
-                  {showSig && (
-                    <motion.p
-                      key={activeCard}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="font-semibold mt-4 text-left"
-                      style={{ color: '#CBD5E1', fontSize: '14px' }}
-                    >
-                      {activeAlumni.signature}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Message box — ALWAYS visible, starts typing immediately on mount */}
+      <div className="max-w-lg mx-auto mt-8">
+        <div className="text-center mb-4">
+          <span
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
+            style={{
+              color: '#FA4616',
+              background: 'rgba(250,70,22,0.1)',
+              border: '1px solid rgba(250,70,22,0.25)',
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FA4616] animate-pulse" />
+            FASTIQ just wrote this for you…
+          </span>
+        </div>
+
+        <div
+          className="rounded-2xl p-6 sm:p-7"
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(250,70,22,0.2)',
+            boxShadow: '0 0 30px rgba(250,70,22,0.1), 0 4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+          }}
+        >
+          <p
+            className="text-left min-h-[96px]"
+            style={{ color: '#FFFFFF', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}
+          >
+            {displayText}
+            {isTyping && (
+              <span
+                className="inline-block align-middle ml-0.5"
+                style={{
+                  width: '2px',
+                  height: '18px',
+                  background: '#FA4616',
+                  animation: 'teaserBlink 0.6s step-end infinite',
+                }}
+              />
+            )}
+          </p>
+        </div>
+      </div>
 
       <style>{`
         @keyframes teaserBlink {
