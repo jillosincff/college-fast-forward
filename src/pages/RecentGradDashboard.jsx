@@ -10,6 +10,7 @@ import RGProfileNudge from '../components/recent-grad/RGProfileNudge';
 import RGActiveRequest from '../components/recent-grad/RGActiveRequest';
 import RGMembersHelp from '../components/recent-grad/RGMembersHelp';
 import RGRecentActivity from '../components/recent-grad/RGRecentActivity';
+import LinkParentModal from '../components/recent-grad/LinkParentModal';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
@@ -181,7 +182,7 @@ export default function RecentGradDashboard() {
 
   const handlePostRequest = () => navigate('PostRequest');
   const handleEditRequest = (req) => navigate('PostRequest', { edit: req.id });
-  const handleInviteParent = () => navigate('GatorParentInvite');
+  const handleInviteParent = () => setShowParentModal(true);
   const handleMessage = (member) => navigate('MessageComposer', { to: member.email });
 
   if ((loading && !user) || !user) {
@@ -245,6 +246,13 @@ export default function RecentGradDashboard() {
           <RGRecentActivity activities={recentActivities} />
         )}
       </div>
+
+      {/* Link Parent Modal */}
+      <LinkParentModal
+        open={showParentModal}
+        onOpenChange={setShowParentModal}
+        onLinked={() => { setShowParentModal(false); loadData(); }}
+      />
 
       {/* Footer */}
       <footer style={{
