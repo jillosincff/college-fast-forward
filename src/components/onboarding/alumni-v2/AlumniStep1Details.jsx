@@ -9,9 +9,9 @@ for (let y = currentYear; y >= 1960; y--) gradYears.push(y);
 
 function getSeniorityLabel(year) {
   if (!year) return null;
-  const diff = currentYear - parseInt(year);
-  if (diff <= 2) return { label: 'Recent grad', sub: "We'll tailor your experience for early-career alumni.", color: '#E85D20' };
-  return { label: 'Established alumni', sub: 'Full onboarding with helper/seeker options.', color: '#0821A5' };
+  const y = parseInt(year);
+  if (y >= currentYear - 1) return { label: 'Recent grad', sub: "We'll tailor your experience for early-career alumni — 6-step seeker path.", color: '#E85D20' };
+  return { label: 'Established alumni', sub: 'Full 7-step onboarding with helper/seeker options.', color: '#0821A5' };
 }
 
 export default function AlumniStep1Details({ formData, onUpdate, onNext }) {
@@ -29,7 +29,7 @@ export default function AlumniStep1Details({ formData, onUpdate, onNext }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
           <label style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>
-            What year did you graduate? <span style={{ color: '#E85D20' }}>*</span>
+            What year did you graduate? <span style={{ color: '#E85D20' }}>★</span>
           </label>
           <select
             value={formData.gradYear}
@@ -47,7 +47,7 @@ export default function AlumniStep1Details({ formData, onUpdate, onNext }) {
 
         <div>
           <label style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>
-            What was your major? <span style={{ color: '#E85D20' }}>*</span>
+            What was your major? <span style={{ color: '#E85D20' }}>★</span>
           </label>
           <input
             type="text"
