@@ -72,14 +72,14 @@ export default function LandingTestimonials({ onClaim }) {
       className="landing-testimonials"
       style={{
         background: '#0a1016',
-        padding: '72px 48px 80px',
+        padding: '96px 48px 104px',
         overflow: 'hidden',
         position: 'relative',
       }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-testimonials { padding: 56px 24px !important; }
+          .landing-testimonials { padding: 72px 24px !important; }
           .testimonial-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -169,14 +169,17 @@ function Card({ card, style }) {
   return (
     <div
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '0.5px solid rgba(255,255,255,0.10)',
+        background: 'rgba(255,255,255,0.05)',
+        border: '0.5px solid rgba(255,255,255,0.12)',
         borderRadius: 16,
         padding: '28px 26px 24px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        transition: 'background 0.25s, border-color 0.25s',
+        transition: 'all 0.3s ease',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
         ...style,
       }}
       onMouseEnter={(e) => {
@@ -215,7 +218,7 @@ function Card({ card, style }) {
             fontSize: isStudent ? 15.5 : 16,
             fontWeight: isStudent ? 400 : 400,
             fontStyle: isStudent ? 'normal' : 'italic',
-            color: '#ddd8cc',
+            color: 'rgba(255,255,255,0.9)',
             lineHeight: 1.7,
             margin: 0,
           }}

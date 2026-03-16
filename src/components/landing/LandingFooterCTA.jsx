@@ -46,13 +46,13 @@ export default function LandingFooterCTA({ stats, onClaim }) {
         style={{
           background: '#0a1016',
           borderTop: '0.5px solid rgba(255,255,255,0.08)',
-          padding: '72px 48px 64px',
+          padding: '96px 48px 80px',
           textAlign: 'center',
         }}
       >
         <style>{`
           @media (max-width: 768px) {
-            .landing-footer-cta { padding: 56px 24px !important; }
+            .landing-footer-cta { padding: 72px 24px !important; }
             .landing-footer-cta .footer-cta-headline { font-size: clamp(26px, 6vw, 36px) !important; }
             .footer-cta-grid { flex-direction: column-reverse !important; width: 100% !important; }
             .footer-cta-grid > * { width: 100% !important; }
@@ -82,12 +82,12 @@ export default function LandingFooterCTA({ stats, onClaim }) {
         <p
           style={{
             fontFamily: dmSans,
-            fontSize: 17,
+            fontSize: 19,
             fontWeight: 300,
-            color: 'rgba(244,240,232,0.5)',
+            color: '#FFFFFF',
             maxWidth: 520,
             margin: '0 auto 36px',
-            lineHeight: 1.7,
+            lineHeight: 1.6,
             ...fadeUp(0.08),
           }}
         >
