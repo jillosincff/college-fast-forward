@@ -232,25 +232,7 @@ export default function CFFPledgePage({ user, onComplete }) {
             {submitting ? 'Saving...' : allChecked ? 'I Care. I Pledge. Let Me In. →' : 'Check all pledges above to continue'}
           </button>
 
-          {/* Skip option */}
-          <button
-            onClick={async () => {
-              setSubmitting(true);
-              await base44.auth.updateMe({ pledge_taken: true, pledge_skipped: true, pledge_taken_at: new Date().toISOString() });
-              onComplete();
-            }}
-            disabled={submitting}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#aaa',
-              marginTop: 16, padding: '8px 16px', textDecoration: 'underline',
-              minHeight: 'auto',
-            }}
-          >
-            Skip for now →
-          </button>
-
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#aaa', marginTop: 8 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#aaa', marginTop: 12 }}>
             This isn't a legal contract — it's a promise to a community of parents who are counting on each other.
           </p>
         </motion.div>
