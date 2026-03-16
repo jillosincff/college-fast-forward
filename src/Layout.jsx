@@ -1474,10 +1474,10 @@ function AppContent() {
   // Parents/alumni always use the layout header — only hide it for students and recent grad alumni on pages with DashboardNav
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
-  const isParentOrEstablishedAlumni = user?.persona === 'parent' || 
-    (user?.persona === 'alumni' && !isRecentGradAlumni) ||
-    user?.roles?.includes('parent');
-  const hasOwnNav = (isStudentUser || isRecentGradAlumni) && !isParentOrEstablishedAlumni && studentOwnNavPages.includes(resolvedPage);
+  const isAlumniSeeker = user?.persona === 'alumni' && user?.alumni_intent !== 'help_students';
+  const isAlumniHelper = user?.persona === 'alumni' && user?.alumni_intent === 'help_students' && !isRecentGradAlumni;
+  const isParentOrAlumniHelper = user?.persona === 'parent' || isAlumniHelper || user?.roles?.includes('parent');
+  const hasOwnNav = (isStudentUser || isRecentGradAlumni || isAlumniSeeker) && !isParentOrAlumniHelper && studentOwnNavPages.includes(resolvedPage);
   const showHeader = user && 
                      resolvedPage !== 'LandingPage' && 
                      resolvedPage !== 'AdminSetup' && 
