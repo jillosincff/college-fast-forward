@@ -97,7 +97,7 @@ export default function NetworkSidebar({ stats, user, onFilterForParents }) {
             borderBottom: i < 3 ? '0.5px solid rgba(0,0,0,0.05)' : 'none',
           }}>
             <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888' }}>{row.label}</span>
-            <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 16, color: '#E85D20' }}>{row.value}</span>
+            <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 16, color: row.value > 0 ? '#E85D20' : 'rgba(0,0,0,0.15)' }}>{row.value > 0 ? row.value : '--'}</span>
           </div>
         ))}
       </div>
