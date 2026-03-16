@@ -725,12 +725,8 @@ function AppContent() {
       }
     }
 
-    // Force pledge for existing parents
-    if (user && (user.persona === 'parent' || user.roles?.includes('parent')) && user.onboarding_completed !== false && !user.pledge_taken) {
-      if (currentPage === 'ParentPledge') { setResolvedPage(currentPage); return; }
-      const mainPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard', 'LandingPage', 'Connections', 'GatorDirectory', 'MyMessages', 'Profile', 'ProfileEdit', 'MyRequests', 'MyImpact', 'MyApplications', 'MessageComposer', 'Notifications', 'MyMatches', 'PostRequest', 'PostOpportunity', 'QuestionDetail'];
-      if (mainPages.includes(currentPage)) { navigate('ParentPledge'); return; }
-    }
+    // Pledge page is part of onboarding flow only — never force returning users back to it
+    // Parents who haven't taken the pledge will see a gentle nudge on their dashboard instead
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') { setResolvedPage(currentPage); return; }
 
