@@ -22,13 +22,13 @@ const KARMA_VALUES = {
   opportunity_application: 10
 };
 
-// Level thresholds — STANDARD across all files
+// Level thresholds — MUST match frontend karmaConfig.js
+// Display: Bronze (<50) · Silver (50+) · Gold (150+) · Platinum (300+)
 const KARMA_TIERS = [
-  { name: 'none', threshold: 0, boost: 0 },
-  { name: 'active', threshold: 100, boost: 1 },
-  { name: 'engaged', threshold: 300, boost: 2 },
-  { name: 'priority', threshold: 500, boost: 3 },
-  { name: 'champion', threshold: 1000, boost: 5 }
+  { name: 'Bronze', threshold: 0, boost: 0 },
+  { name: 'Silver', threshold: 50, boost: 1 },
+  { name: 'Gold', threshold: 150, boost: 2 },
+  { name: 'Platinum', threshold: 300, boost: 3 }
 ];
 
 // Boost duration in hours
@@ -58,15 +58,14 @@ function getNextTier(totalKarma) {
       };
     }
   }
-  return { name: 'max', threshold: 1000, points_needed: 0, points_remaining: 0 };
+  return { name: 'max', threshold: 300, points_needed: 0, points_remaining: 0 };
 }
 
 function getBenefitLabel(tierName) {
   const benefits = {
-    active: 'Active Family badge',
-    engaged: 'Boosted visibility',
-    priority: 'Priority placement',
-    champion: 'Featured status'
+    Silver: 'Active Family badge',
+    Gold: 'Boosted visibility',
+    Platinum: 'Priority placement'
   };
   return benefits[tierName] || '';
 }
