@@ -1,379 +1,543 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertTriangle, Mail, Briefcase, GraduationCap, MapPin, Linkedin, MessageSquare, X, Handshake, Award, Building2, TrendingUp } from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { getDisplayName, getInitials } from '@/components/utils/nameUtils';
-import { formatLabel } from '@/components/utils/format';
+import { useAuth } from '@/components/auth/AuthContext';
+import { navigate } from '@/components/utils/navigation';
+import { X } from 'lucide-react';
+
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+
+const AVATAR_COLORS = [
+  '#E85D20', '#0821A5', '#6A2A60', '#16a34a', '#0891b2',
+  '#7c3aed', '#dc2626', '#ca8a04', '#4f46e5', '#059669',
+];
+
+function getAvatarColor(str) {
+  if (!str) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function getInitials(user) {
+  if (!user) return 'M';
+  const first = user.first_name || '';
+  const last = user.last_name || '';
+  if (first && last) return `${first[0]}${last[0]}`.toUpperCase();
+  const full = user.full_name || '';
+  const parts = full.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return 'M';
+}
+
+function getFirstL(user) {
+  if (!user) return 'Member';
+  const first = user.first_name || '';
+  const last = user.last_name || '';
+  if (first && last) return `${first} ${last[0]}.`;
+  const full = user.full_name || '';
+  const parts = full.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+  if (parts.length === 1) return parts[0];
+  return 'Member';
+}
+
+function getFirstName(user) {
+  if (!user) return 'them';
+  return user.first_name || (user.full_name || '').split(' ')[0] || 'them';
+}
+
+function getRoleBadge(user) {
+  const p = user?.persona;
+  if (p === 'parent') return { label: 'Parent', bg: '#E85D20', color: '#fff' };
+  if (p === 'alumni') {
+    const isHelper = user.alumni_intent === 'help_students' || (user.ways_to_help && user.ways_to_help.length > 0);
+    if (isHelper) return { label: 'Alumni · Helper', bg: '#0d1117', color: '#fff' };
+    return { label: 'Alumni · Seeker', bg: '#e5e7eb', color: '#555' };
+  }
+  return { label: 'Student', bg: '#e5e7eb', color: '#555' };
+}
+
+function normalizeHelpTag(h) {
+  const s = (h || '').toLowerCase().replace(/_/g, ' ');
+  if (s.includes('career') || s.includes('advice')) return 'Career Guidance';
+  if (s.includes('job') || s.includes('referral') || s.includes('lead') || s.includes('internship')) return 'Jobs & Referrals';
+  if (s.includes('resume') || s.includes('interview') || s.includes('linkedin')) return 'Resume & Interviews';
+  if (s.includes('industry') || s.includes('insight')) return 'Industry Insights';
+  if (s.includes('intro') || s.includes('networking') || s.includes('informational')) return 'Introductions';
+  return h ? h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
+}
+
+function getHelpTags(user) {
+  const tags = new Set();
+  (user?.ways_to_help || []).forEach(h => { const t = normalizeHelpTag(h); if (t) tags.add(t); });
+  (user?.mentorship_topics || []).forEach(h => { const t = normalizeHelpTag(h); if (t) tags.add(t); });
+  (user?.expertise_areas || []).forEach(h => { const t = normalizeHelpTag(h); if (t) tags.add(t); });
+  if (user?.can_provide_referrals) tags.add('Jobs & Referrals');
+  return Array.from(tags);
+}
 
 export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
+  const { user: currentUser } = useAuth();
   const [profileUser, setProfileUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bioExpanded, setBioExpanded] = useState(false);
 
   useEffect(() => {
     if (isOpen && userId) {
-      const fetchProfile = async () => {
-        setIsLoading(true);
-        setError(null);
-        setProfileUser(null);
-        try {
-          const response = await base44.functions.invoke('getPublicUserInfo', { userId });
-          
-          // response.data is the axios response body
-          const userData = response?.data;
-          if (userData && userData.id) {
-            setProfileUser(userData);
-          } else if (userData?.error) {
-            throw new Error(userData.error);
+      setLoading(true);
+      setError(null);
+      setProfileUser(null);
+      setBioExpanded(false);
+
+      base44.functions.invoke('getPublicUserInfo', { userId })
+        .then(response => {
+          const data = response?.data;
+          if (data && data.id) {
+            setProfileUser(data);
+          } else if (data?.error) {
+            setError(data.error);
           } else {
-            throw new Error('Could not load profile data');
+            setError('Could not load profile.');
           }
-        } catch (err) {
-          console.error("Failed to fetch profile for modal:", err);
-          setError("Could not load profile. The user may not exist or there was a network issue.");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchProfile();
+        })
+        .catch(err => {
+          console.error('ProfileModal fetch error:', err);
+          setError('Could not load profile.');
+        })
+        .finally(() => setLoading(false));
     }
   }, [isOpen, userId]);
 
-  const handleMessageClick = () => {
+  const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id;
+  const displayName = useMemo(() => getFirstL(profileUser), [profileUser]);
+  const firstName = useMemo(() => getFirstName(profileUser), [profileUser]);
+  const initials = useMemo(() => getInitials(profileUser), [profileUser]);
+  const avatarColor = useMemo(() => getAvatarColor(profileUser?.id || profileUser?.full_name), [profileUser]);
+  const roleBadge = useMemo(() => getRoleBadge(profileUser), [profileUser]);
+  const helpTags = useMemo(() => getHelpTags(profileUser), [profileUser]);
+
+  const isHelperOrParent = profileUser && (
+    profileUser.persona === 'parent' ||
+    (profileUser.persona === 'alumni' && profileUser.alumni_intent === 'help_students') ||
+    (profileUser.ways_to_help && profileUser.ways_to_help.length > 0)
+  );
+
+  const companyLine = useMemo(() => {
+    if (!profileUser) return '';
+    const company = profileUser.company || '';
+    const title = profileUser.job_title || '';
+    if (company && title) return `${company} · ${title}`;
+    return company || title || '';
+  }, [profileUser]);
+
+  const memberSince = useMemo(() => {
+    if (!profileUser?.created_date) return '';
+    try {
+      const d = new Date(profileUser.created_date);
+      return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } catch { return ''; }
+  }, [profileUser]);
+
+  const handleMessage = () => {
     if (onMessage && profileUser) {
       onMessage(profileUser);
       onClose();
     }
   };
-  
-  const getDefaultHeadline = (user) => {
-    if (!user) return '';
-    if (user.bio) return user.bio;
-    if (user.job_title && user.company) return `${user.job_title} at ${user.company}`;
-    if (user.major) return `${user.major} Major`;
-    switch (user.persona) {
-      case 'student': return 'Student';
-      case 'gator': return 'UF Gator';
-      case 'alumni': return 'UF Alumni';
-      case 'parent': return 'UF Parent';
-      default: return 'Gator Supporter';
-    }
-  };
 
-  const displayName = profileUser ? getDisplayName(profileUser) : 'Loading...';
-  const initials = profileUser ? getInitials(profileUser) : 'GU';
-
-  const isParentOrAlumni = profileUser && (profileUser.persona === 'alumni' || profileUser.persona === 'parent');
-  const hasExpertise = profileUser?.expertise_areas && profileUser.expertise_areas.length > 0;
-  const hasMentorshipTopics = profileUser?.mentorship_topics && profileUser.mentorship_topics.length > 0;
-  const hasWaysToHelp = profileUser?.ways_to_help && profileUser.ways_to_help.length > 0;
-  const hasCompanies = profileUser?.companies_worked_at && profileUser.companies_worked_at.length > 0;
-  const canProvideReferrals = profileUser?.can_provide_referrals === true;
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full">
-            <X className="h-4 w-4" />
-        </Button>
-        
-        {isLoading && (
-          <div className="flex flex-col items-center justify-center h-96 gap-4">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-            <p className="text-slate-600">Loading Profile...</p>
-          </div>
-        )}
-        
-        {error && !isLoading && (
-          <div className="flex flex-col items-center justify-center h-96 gap-4 text-center p-8">
-            <AlertTriangle className="w-12 h-12 text-red-500" />
-            <h2 className="text-xl font-bold text-slate-800">Error Loading Profile</h2>
-            <p className="text-slate-600 mt-2">{error}</p>
-            <Button onClick={onClose} className="mt-4">Close</Button>
-          </div>
-        )}
+    <>
+      {/* Overlay */}
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: 'rgba(13,17,23,0.6)',
+          animation: 'pmFadeIn 0.2s ease',
+        }}
+      />
 
-        {profileUser && !isLoading && (
-          <>
-            {/* Header with gradient */}
-            <div className="relative -mx-6 -mt-6 mb-6">
-              <div className="h-24 bg-gradient-to-r from-[#0021A5] to-[#FA4616]" />
-              <div className="absolute -bottom-12 left-6">
-                <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                  <AvatarImage src={profileUser?.profile_image} alt={displayName} />
-                  <AvatarFallback className="bg-[#0021A5] text-white text-2xl font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+      {/* Modal */}
+      <div style={{
+        position: 'fixed', zIndex: 9999,
+        // Desktop: centered
+        top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+        width: '100%', maxWidth: 600, maxHeight: '90vh',
+        borderRadius: 16, overflow: 'hidden',
+        background: '#fff', boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+        display: 'flex', flexDirection: 'column',
+        animation: 'pmSlideUp 0.25s ease',
+      }}
+        className="profile-modal-shell"
+      >
+        {/* Close button */}
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 12, right: 12, zIndex: 10,
+          background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+          width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
+          transition: 'background 0.15s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+        >
+          <X style={{ width: 16, height: 16, color: '#fff' }} />
+        </button>
+
+        {/* Scrollable content */}
+        <div style={{ overflowY: 'auto', flex: 1, position: 'relative' }} className="profile-modal-scroll">
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, flexDirection: 'column', gap: 12 }}>
+              <div style={{
+                width: 28, height: 28, border: '3px solid #E85D20',
+                borderTop: '3px solid transparent', borderRadius: '50%',
+                animation: 'pmSpin 0.8s linear infinite',
+              }} />
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888' }}>Loading profile…</p>
             </div>
+          )}
 
-            <div className="mt-14 px-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-slate-900">{displayName}</h2>
-                  <DialogDescription className="text-slate-600 mt-1">{getDefaultHeadline(profileUser)}</DialogDescription>
-                  {canProvideReferrals && (
-                    <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
-                      ✨ Can Provide Job Referrals
-                    </Badge>
+          {/* Error */}
+          {error && !loading && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, flexDirection: 'column', gap: 12, padding: 24 }}>
+              <p style={{ fontFamily: dmSans, fontSize: 14, color: '#333', textAlign: 'center' }}>Something went wrong.</p>
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: '#999', textAlign: 'center' }}>{error}</p>
+              <button onClick={onClose} style={{
+                fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
+                background: '#E85D20', border: 'none', borderRadius: 8,
+                padding: '8px 24px', cursor: 'pointer', minHeight: 'auto',
+              }}>Close</button>
+            </div>
+          )}
+
+          {/* Profile content */}
+          {profileUser && !loading && (
+            <>
+              {/* HEADER BAND */}
+              <div style={{
+                height: 100,
+                backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
+                position: 'relative', flexShrink: 0,
+              }} />
+
+              {/* AVATAR — overlaps band */}
+              <div style={{ padding: '0 24px', marginTop: -40, position: 'relative', zIndex: 2 }}>
+                <div style={{
+                  width: 80, height: 80, borderRadius: '50%', background: avatarColor,
+                  border: '3px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }}>
+                  <span style={{ fontFamily: dmSans, fontSize: 28, fontWeight: 600, color: '#fff' }}>{initials}</span>
+                </div>
+              </div>
+
+              {/* IDENTITY BLOCK */}
+              <div style={{ padding: '16px 24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <h2 style={{
+                    fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#1a1a1a',
+                    letterSpacing: '-0.02em', lineHeight: 1.2, margin: 0,
+                  }}>
+                    {displayName}
+                  </h2>
+                  <span style={{
+                    display: 'inline-block', marginTop: 6,
+                    fontFamily: dmSans, fontSize: 12, fontWeight: 500,
+                    background: roleBadge.bg, color: roleBadge.color,
+                    borderRadius: 100, padding: '3px 14px',
+                  }}>
+                    {roleBadge.label}
+                  </span>
+                  {companyLine && (
+                    <p style={{
+                      fontFamily: dmSans, fontSize: 13, color: '#888',
+                      marginTop: 6, margin: '6px 0 0',
+                    }}>
+                      {companyLine}
+                    </p>
                   )}
                 </div>
-                <div>
-                   <Button onClick={handleMessageClick} className="bg-blue-600 hover:bg-blue-700">
-                    <MessageSquare className="w-4 h-4 mr-2" /> Message
-                   </Button>
+
+                {/* Action button */}
+                <div style={{ flexShrink: 0 }}>
+                  {isOwnProfile ? (
+                    <button onClick={() => { onClose(); navigate('ProfileEdit'); }} style={{
+                      fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#333',
+                      background: '#fff', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 10,
+                      padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', width: 'auto',
+                    }}>
+                      Edit Profile
+                    </button>
+                  ) : (
+                    <button onClick={handleMessage} style={{
+                      fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
+                      background: '#E85D20', border: 'none', borderRadius: 10,
+                      padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', width: 'auto',
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      transition: 'opacity 0.15s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+                      onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      Message
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
-            
-            <div className="px-6 py-6 space-y-6">
-              {/* Expertise Profile Section - Prominent for Parents/Alumni */}
-              {isParentOrAlumni && (hasExpertise || hasMentorshipTopics || hasWaysToHelp) && (
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-6 border-2 border-purple-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Award className="w-6 h-6 text-purple-600" />
-                    <h3 className="text-xl font-bold text-purple-900">Expertise Profile</h3>
+
+              {/* BADGES ROW */}
+              {(profileUser.is_founding_member || profileUser.karma_level) && (
+                <div style={{ padding: '10px 24px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {profileUser.is_founding_member && (
+                    <span style={{
+                      fontFamily: dmSans, fontSize: 11, fontWeight: 500,
+                      color: '#92700c', background: 'rgba(202,138,4,0.1)',
+                      border: '1px solid rgba(202,138,4,0.2)', borderRadius: 100,
+                      padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4,
+                    }}>
+                      🏆 Founding Member
+                    </span>
+                  )}
+                  {profileUser.karma_level && (
+                    <span style={{
+                      fontFamily: dmSans, fontSize: 11, fontWeight: 500,
+                      color: '#666', background: 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.08)', borderRadius: 100,
+                      padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4,
+                    }}>
+                      ⭐ {profileUser.karma_level}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* HELP TYPE TAGS BLOCK */}
+              {helpTags.length > 0 && (
+                <div style={{
+                  margin: '16px 24px 0', padding: '16px 20px',
+                  background: '#f4f2ee', borderRadius: 12,
+                }}>
+                  <p style={{
+                    fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: '#999', marginBottom: 10, margin: '0 0 10px',
+                  }}>
+                    {isHelperOrParent ? 'HERE TO HELP WITH' : 'LOOKING FOR HELP WITH'}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {helpTags.map(tag => (
+                      <span key={tag} style={{
+                        fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#E85D20',
+                        border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100,
+                        padding: '4px 14px', background: '#fff',
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
                   </div>
+                </div>
+              )}
 
-                  {/* Expertise Areas */}
-                  {hasExpertise && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-purple-800 mb-2">Areas of Expertise</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {profileUser.expertise_areas.map((expertise, idx) => (
-                          <Badge key={idx} className="bg-purple-100 text-purple-800 border-purple-300">
-                            {formatLabel(expertise)}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Mentorship Topics */}
-                  {hasMentorshipTopics && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-2">Can Mentor On</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {profileUser.mentorship_topics.map((topic, idx) => (
-                          <Badge key={idx} className="bg-blue-100 text-blue-800 border-blue-300">
-                            {formatLabel(topic)}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Ways to Help */}
-                  {hasWaysToHelp && (
+              {/* PROFESSIONAL DETAILS BLOCK */}
+              {(companyLine || profileUser.major || profileUser.graduation_year || profileUser.linkedin_url || profileUser.industry || profileUser.bio) && (
+                <div style={{ margin: '16px 24px 0' }} className="profile-details-grid">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }} className="profile-two-col">
+                    {/* Left: Professional */}
                     <div>
-                      <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
-                        <Handshake className="w-4 h-4" />
-                        Ways I Can Help
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {profileUser.ways_to_help.map((help, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-green-800 bg-white/50 px-3 py-2 rounded-lg">
-                            <div className="w-1.5 h-1.5 bg-green-600 rounded-full flex-shrink-0" />
-                            <span>{formatLabel(help)}</span>
-                          </div>
-                        ))}
-                      </div>
+                      {(companyLine || profileUser.major || profileUser.graduation_year || profileUser.linkedin_url || profileUser.industry) && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {(profileUser.company || profileUser.job_title) && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: dmSans, fontSize: 14, color: '#333' }}>
+                              <span style={{ fontSize: 16 }}>🏢</span>
+                              <span>{profileUser.company}{profileUser.company && profileUser.job_title ? ' · ' : ''}{profileUser.job_title}</span>
+                            </div>
+                          )}
+                          {(profileUser.major || profileUser.graduation_year) && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: dmSans, fontSize: 14, color: '#333' }}>
+                              <span style={{ fontSize: 16 }}>🎓</span>
+                              <span>
+                                {profileUser.major}{profileUser.major && profileUser.graduation_year ? ' · ' : ''}
+                                {profileUser.graduation_year ? `Class of ${profileUser.graduation_year}` : ''}
+                              </span>
+                            </div>
+                          )}
+                          {profileUser.linkedin_url && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: dmSans, fontSize: 14 }}>
+                              <span style={{ fontSize: 16 }}>🔗</span>
+                              <a
+                                href={profileUser.linkedin_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#E85D20', textDecoration: 'none' }}
+                                onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
+                                onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
+                              >
+                                LinkedIn Profile →
+                              </a>
+                            </div>
+                          )}
+                          {profileUser.industry && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{
+                                fontFamily: dmSans, fontSize: 12, color: '#666',
+                                background: 'rgba(0,0,0,0.04)', borderRadius: 100,
+                                padding: '3px 12px',
+                              }}>
+                                {profileUser.industry}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
 
-              {/* Skills Section */}
-              {profileUser.skills && profileUser.skills.length > 0 && (
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    Skills & Expertise
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profileUser.skills.map((skill, idx) => (
-                      <Badge key={idx} className="bg-blue-100 text-blue-800 border-blue-300">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Industries of Interest */}
-              {profileUser.industries_of_interest && profileUser.industries_of_interest.length > 0 && (
-                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                  <h3 className="text-sm font-semibold text-purple-900 mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    Industries of Interest
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profileUser.industries_of_interest.map((industry, idx) => (
-                      <Badge key={idx} className="bg-purple-100 text-purple-800 border-purple-300">
-                        {industry}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Communication Preferences */}
-              {(profileUser.open_to_coffee_chats || profileUser.preferred_communication || profileUser.response_time) && (
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                  <h3 className="text-sm font-semibold text-green-900 mb-3">Communication Preferences</h3>
-                  <div className="space-y-2 text-sm">
-                    {profileUser.open_to_coffee_chats && (
-                      <div className="flex items-center gap-2 text-green-800">
-                        <div className="w-2 h-2 bg-green-600 rounded-full" />
-                        <span>Open to informal coffee chats</span>
-                      </div>
-                    )}
-                    {profileUser.preferred_communication && (
-                      <div className="flex items-center gap-2 text-green-800">
-                        <div className="w-2 h-2 bg-green-600 rounded-full" />
-                        <span>Prefers: {profileUser.preferred_communication}</span>
-                      </div>
-                    )}
-                    {profileUser.response_time && (
-                      <div className="flex items-center gap-2 text-green-800">
-                        <div className="w-2 h-2 bg-green-600 rounded-full" />
-                        <span>Usually responds within: {profileUser.response_time.replace('_', ' ')}</span>
+                    {/* Right: About (bio) */}
+                    {profileUser.bio && (
+                      <div>
+                        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#333', marginBottom: 6, margin: '0 0 6px' }}>About</p>
+                        <p style={{
+                          fontFamily: dmSans, fontSize: 15, color: '#555', lineHeight: 1.6, margin: 0,
+                          wordBreak: 'break-word',
+                        }}>
+                          {!bioExpanded && profileUser.bio.length > 300
+                            ? profileUser.bio.slice(0, 300) + '…'
+                            : profileUser.bio
+                          }
+                        </p>
+                        {profileUser.bio.length > 300 && (
+                          <button onClick={() => setBioExpanded(!bioExpanded)} style={{
+                            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E85D20',
+                            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                            marginTop: 4, minHeight: 'auto', width: 'auto',
+                          }}>
+                            {bioExpanded ? 'Show less' : 'Read more'}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Description of Work */}
-              {isParentOrAlumni && profileUser.description_of_work && (
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <h3 className="text-sm font-semibold text-slate-800 mb-2">About Their Work</h3>
-                  <p className="text-sm text-slate-700 leading-relaxed">
-                    {profileUser.description_of_work}
+              {/* ACTIVITY BLOCK — only for parents / alumni helpers with data */}
+              {isHelperOrParent && (profileUser.students_helped > 0 || profileUser.answers_given > 0 || profileUser.intros_made > 0) && (
+                <div style={{
+                  margin: '16px 24px 0', padding: '16px 20px',
+                  background: '#f4f2ee', borderRadius: 12,
+                }}>
+                  <p style={{
+                    fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: '#999', marginBottom: 12, margin: '0 0 12px',
+                  }}>
+                    NETWORK ACTIVITY
                   </p>
+                  <div style={{ display: 'flex', gap: 24 }}>
+                    <ActivityStat label="Students Helped" value={profileUser.students_helped} />
+                    <ActivityStat label="Answers Given" value={profileUser.answers_given} />
+                    <ActivityStat label="Intros Made" value={profileUser.intros_made} />
+                  </div>
+                  {profileUser.karma_level && profileUser.karma_points != null && (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{
+                        height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.06)',
+                        overflow: 'hidden',
+                      }}>
+                        <div style={{
+                          height: '100%', borderRadius: 2, background: '#E85D20',
+                          width: `${Math.min((profileUser.karma_points || 0) % 100, 100)}%`,
+                          transition: 'width 0.3s ease',
+                        }} />
+                      </div>
+                      <p style={{
+                        fontFamily: dmSans, fontSize: 11, color: '#888', marginTop: 6, margin: '6px 0 0',
+                      }}>
+                        {profileUser.karma_level} · {profileUser.karma_points || 0} points
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Professional Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold border-b pb-2 text-slate-800">Professional Details</h3>
-                  
-                  {profileUser.email && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span className="truncate">{profileUser.email}</span>
-                    </div>
-                  )}
-
-                  {(profileUser.job_title || profileUser.company) && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Briefcase className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span>
-                        {profileUser.job_title}
-                        {profileUser.job_title && profileUser.company && ' at '}
-                        {profileUser.company}
-                      </span>
-                    </div>
-                  )}
-
-                  {profileUser.industry && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <TrendingUp className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span>{profileUser.industry}</span>
-                    </div>
-                  )}
-
-                  {profileUser.years_of_experience && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Award className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span>{profileUser.years_of_experience} years of experience</span>
-                    </div>
-                  )}
-
-                  {(profileUser.graduation_year || profileUser.major) && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <GraduationCap className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span>
-                        {profileUser.major}
-                        {profileUser.major && profileUser.graduation_year && ' • '}
-                        {profileUser.graduation_year && `Class of ${profileUser.graduation_year}`}
-                      </span>
-                    </div>
-                  )}
-
-                  {(profileUser.location_city || profileUser.location_state) && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <span>
-                        {profileUser.location_city}
-                        {profileUser.location_city && profileUser.location_state && ', '}
-                        {profileUser.location_state}
-                      </span>
-                    </div>
-                  )}
-
-                  {profileUser.linkedin_url && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Linkedin className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <a 
-                        href={profileUser.linkedin_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-blue-600 hover:underline truncate"
-                      >
-                        LinkedIn Profile
-                      </a>
-                    </div>
-                  )}
-
-                  {/* Companies Worked At */}
-                  {hasCompanies && (
-                    <div className="pt-2 border-t">
-                      <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                        <Building2 className="w-4 h-4" />
-                        Notable Companies
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {profileUser.companies_worked_at.map((company, idx) => (
-                          <Badge key={idx} variant="outline" className="bg-slate-50">
-                            {company}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Column - Bio */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold border-b pb-2 text-slate-800">About</h3>
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                    {profileUser.bio || 'No bio provided.'}
+              {/* FOOTER ROW */}
+              <div style={{
+                padding: '16px 24px 20px', marginTop: 16,
+                borderTop: '1px solid rgba(0,0,0,0.06)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                {memberSince ? (
+                  <p style={{ fontFamily: dmSans, fontSize: 12, color: '#999', margin: 0 }}>
+                    Member since {memberSince}
                   </p>
-                </div>
-              </div>
+                ) : <span />}
 
-              {/* CTA to Message */}
-              <div className="pt-6 border-t">
-                <Button 
-                  onClick={handleMessageClick} 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-6"
-                  size="lg"
-                >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  Send {displayName.split(' ')[0]} a Message
-                </Button>
+                {!isOwnProfile && (
+                  <button onClick={handleMessage} style={{
+                    fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E85D20',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    minHeight: 'auto', width: 'auto',
+                  }}>
+                    Message {firstName} →
+                  </button>
+                )}
               </div>
-            </div>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+            </>
+          )}
+
+          {/* Bottom fade indicator */}
+          <div style={{
+            position: 'sticky', bottom: 0, left: 0, right: 0, height: 24,
+            background: 'linear-gradient(transparent, rgba(255,255,255,0.9))',
+            pointerEvents: 'none',
+          }} />
+        </div>
+      </div>
+
+      {/* Styles */}
+      <style>{`
+        @keyframes pmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pmSlideUp { from { opacity: 0; transform: translate(-50%, -48%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+        @keyframes pmSpin { to { transform: rotate(360deg); } }
+
+        /* Mobile: full screen drawer from bottom */
+        @media (max-width: 640px) {
+          .profile-modal-shell {
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            max-width: 100% !important;
+            max-height: 92vh !important;
+            border-radius: 20px 20px 0 0 !important;
+            animation: pmDrawerUp 0.3s ease !important;
+          }
+          .profile-two-col {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @keyframes pmDrawerUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      `}</style>
+    </>
+  );
+}
+
+function ActivityStat({ label, value }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <p style={{
+        fontFamily: playfair, fontWeight: 700, fontSize: 22, color: '#1a1a1a',
+        lineHeight: 1, margin: '0 0 4px',
+      }}>
+        {value > 0 ? value : '–'}
+      </p>
+      <p style={{ fontFamily: dmSans, fontSize: 11, color: '#888', margin: 0 }}>{label}</p>
+    </div>
   );
 }
