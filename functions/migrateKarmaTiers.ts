@@ -1,11 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 /**
- * One-time migration script: converts old karma tier names to new display tiers.
- * Old: none / active / engaged / priority / champion (thresholds 0/100/300/500/1000)
- * New: Bronze / Silver / Gold / Platinum (thresholds 0/50/150/300)
+ * One-time migration: converts old karma tier names to Bronze/Silver/Gold/Platinum.
  * 
- * Recalculates tier from actual point totals — doesn't just rename.
+ * Payload options:
+ *   { startOffset: 0, maxRecords: 50 }
+ * 
+ * Run multiple times with increasing startOffset to process all records
+ * without hitting rate limits. Each run processes up to maxRecords users.
  */
 
 const NEW_TIERS = [
@@ -24,11 +26,12 @@ function getTierForPoints(points) {
   return tier.name;
 }
 
-// Map old boost values to new
 function getBoostForTier(tierName) {
   const boosts = { Bronze: 0, Silver: 1, Gold: 2, Platinum: 3 };
   return boosts[tierName] ?? 0;
 }
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 Deno.serve(async (req) => {
   try {
@@ -38,113 +41,88 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const results = { users_updated: 0, families_updated: 0, users_skipped: 0, families_skipped: 0, errors: [] };
-    
-    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const body = await req.json().catch(() => ({}));
+    const startOffset = body.startOffset || 0;
+    const maxRecords = Math.min(body.maxRecords || 50, 100);
+    const migrateType = body.type || 'all'; // 'users', 'families', or 'all'
 
-    // ── 1. Migrate User records ──
-    console.log('Starting user karma migration...');
-    let offset = 0;
-    const batchSize = 50;
-    let hasMore = true;
+    const results = { users_updated: 0, families_updated: 0, users_skipped: 0, families_skipped: 0, errors: [], next_offset: startOffset };
 
-    while (hasMore) {
-      const users = await base44.asServiceRole.entities.User.list('-created_date', batchSize, offset);
-      if (!users || users.length === 0) { hasMore = false; break; }
+    // ── Users ──
+    if (migrateType === 'users' || migrateType === 'all') {
+      console.log(`Fetching users at offset ${startOffset}, max ${maxRecords}...`);
+      const users = await base44.asServiceRole.entities.User.list('-created_date', maxRecords, startOffset);
+      
+      if (users && users.length > 0) {
+        for (let i = 0; i < users.length; i++) {
+          const u = users[i];
+          try {
+            const points = u.karma_points || u.karma_earned || 0;
+            const currentLevel = u.karma_level || '';
 
-      for (const u of users) {
-        try {
-          const points = u.karma_points || u.karma_earned || 0;
-          const currentLevel = u.karma_level || '';
-          
-          // Skip if already has a valid new tier name
-          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
-            results.users_skipped++;
-            continue;
-          }
-
-          const newTier = getTierForPoints(points);
-          const updateData = { karma_level: newTier };
-          if (points > 0) {
-            updateData.karma_points = points;
-            updateData.karma_earned = points;
-          }
-
-          await base44.asServiceRole.entities.User.update(u.id, updateData);
-          results.users_updated++;
-          
-          if (results.users_updated % 25 === 0) {
-            console.log(`Migrated ${results.users_updated} users so far...`);
-            await sleep(1000); // Rate limit pause
-          }
-        } catch (e) {
-          if (e.message?.includes('Rate limit')) {
-            console.log('Rate limit hit, pausing 3s...');
-            await sleep(3000);
-            // Retry once
-            try {
-              const newTier = getTierForPoints(u.karma_points || u.karma_earned || 0);
-              await base44.asServiceRole.entities.User.update(u.id, { karma_level: newTier });
-              results.users_updated++;
-            } catch (e2) {
-              results.errors.push({ type: 'user', id: u.id, error: e2.message });
+            if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
+              results.users_skipped++;
+              continue;
             }
-          } else {
-            results.errors.push({ type: 'user', id: u.id, email: u.email, error: e.message });
+
+            const newTier = getTierForPoints(points);
+            await base44.asServiceRole.entities.User.update(u.id, {
+              karma_level: newTier,
+              ...(points > 0 ? { karma_points: points, karma_earned: points } : {}),
+            });
+            results.users_updated++;
+          } catch (e) {
+            results.errors.push({ type: 'user', id: u.id, error: e.message });
+          }
+
+          // Pause every 5 records to stay under rate limits
+          if ((i + 1) % 5 === 0) {
+            await sleep(2000);
+          }
+        }
+        results.next_offset = startOffset + users.length;
+        results.has_more_users = users.length === maxRecords;
+      } else {
+        results.has_more_users = false;
+      }
+    }
+
+    // ── FamilyKarma ──
+    if (migrateType === 'families' || migrateType === 'all') {
+      await sleep(2000);
+      console.log('Fetching FamilyKarma records...');
+      const families = await base44.asServiceRole.entities.FamilyKarma.list('-created_date', maxRecords, 0);
+
+      if (families && families.length > 0) {
+        for (let i = 0; i < families.length; i++) {
+          const fk = families[i];
+          try {
+            const points = fk.total_karma || 0;
+            const currentLevel = fk.karma_level || '';
+
+            if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
+              results.families_skipped++;
+              continue;
+            }
+
+            const newTier = getTierForPoints(points);
+            await base44.asServiceRole.entities.FamilyKarma.update(fk.id, {
+              karma_level: newTier,
+              boost_multiplier: getBoostForTier(newTier),
+            });
+            results.families_updated++;
+          } catch (e) {
+            results.errors.push({ type: 'family', id: fk.id, error: e.message });
+          }
+
+          if ((i + 1) % 5 === 0) {
+            await sleep(2000);
           }
         }
       }
-
-      await sleep(500); // Pause between batches
-      offset += batchSize;
-      if (users.length < batchSize) hasMore = false;
     }
 
-    // ── 2. Migrate FamilyKarma records ──
-    console.log('Starting FamilyKarma migration...');
-    offset = 0;
-    hasMore = true;
-
-    while (hasMore) {
-      const families = await base44.asServiceRole.entities.FamilyKarma.list('-created_date', batchSize, offset);
-      if (!families || families.length === 0) { hasMore = false; break; }
-
-      for (const fk of families) {
-        try {
-          const points = fk.total_karma || 0;
-          const currentLevel = fk.karma_level || '';
-
-          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
-            results.families_skipped++;
-            continue;
-          }
-
-          const newTier = getTierForPoints(points);
-          const newBoost = getBoostForTier(newTier);
-
-          await base44.asServiceRole.entities.FamilyKarma.update(fk.id, {
-            karma_level: newTier,
-            boost_multiplier: newBoost,
-          });
-          results.families_updated++;
-          
-          if (results.families_updated % 25 === 0) {
-            await sleep(1000);
-          }
-        } catch (e) {
-          if (e.message?.includes('Rate limit')) {
-            await sleep(3000);
-          }
-          results.errors.push({ type: 'family', id: fk.id, group: fk.family_group_id, error: e.message });
-        }
-      }
-
-      await sleep(500);
-      offset += batchSize;
-      if (families.length < batchSize) hasMore = false;
-    }
-
-    console.log('Migration complete:', JSON.stringify(results));
+    console.log('Batch complete:', JSON.stringify(results));
     return Response.json({ success: true, ...results });
   } catch (error) {
     console.error('Migration failed:', error);
