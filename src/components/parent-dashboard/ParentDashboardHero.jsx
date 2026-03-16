@@ -1,4 +1,6 @@
 import React from 'react';
+import { getKarmaDisplayInfo, KARMA_ACTION_POINTS } from '../karma/karmaConfig';
+import KarmaLadderTooltip from '../karma/KarmaLadderTooltip';
 
 /* Parent Dashboard Hero - dark gradient header */
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -11,18 +13,11 @@ function ChainLinkSVG() {
 }
 
 
-function getKarmaLevel(pts) {
-  if (pts >= 300) return 'Champion';
-  if (pts >= 150) return 'Advocate';
-  if (pts >= 50) return 'Connector';
-  return 'Newcomer';
-}
-
 function ProgressStrip({ studentsHelped, profilePercent, introsMade }) {
   const steps = [
-    { label: 'Answer a Question', karma: '+15', done: studentsHelped > 0 },
-    { label: 'Make an Introduction', karma: '+50', done: introsMade > 0 },
-    { label: 'Complete Your Profile', karma: '+25', done: profilePercent >= 100 },
+    { label: 'Answer a Question', karma: `+${KARMA_ACTION_POINTS.answer}`, done: studentsHelped > 0 },
+    { label: 'Make an Introduction', karma: `+${KARMA_ACTION_POINTS.referral_given}`, done: introsMade > 0 },
+    { label: 'Complete Your Profile', karma: `+${KARMA_ACTION_POINTS.best_answer}`, done: profilePercent >= 100 },
   ];
   return (
     <div className="pd-quick-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
@@ -74,7 +69,7 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
   })();
 
   const karma = data.familyKarma || 0;
-  const karmaLevel = getKarmaLevel(karma);
+  const karmaInfo = getKarmaDisplayInfo(karma);
   const hasLinkedStudent = !!data.linkedStudent;
   const studentsHelped = data.studentsHelped || 0;
   const profilePercent = [user?.company, user?.linkedin_url, user?.title || user?.job_title, user?.profile_image, user?.bio].filter(Boolean).length * 20;
@@ -148,14 +143,16 @@ export default function ParentDashboardHero({ user, data, onLinkStudentClick }) 
             background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.12)',
             borderRadius: 14, padding: 16, textAlign: 'center',
           }}>
-            <div style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: karma > 0 ? orange : 'rgba(244,240,232,0.2)' }}>
-              {karma > 0 ? karma : '--'}
-            </div>
-            <div style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(244,240,232,0.5)' }}>
+            <KarmaLadderTooltip
+              tierName={karmaInfo.tierName}
+              points={karmaInfo.points}
+              pointsToNext={karmaInfo.pointsToNext}
+              nextTierName={karmaInfo.nextTierName}
+              variant="parent"
+              dark={true}
+            />
+            <div style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(244,240,232,0.5)', marginTop: 4 }}>
               Family Karma
-            </div>
-            <div style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: 'rgba(244,240,232,0.3)', marginTop: 2 }}>
-              {karmaLevel}
             </div>
           </div>
 
