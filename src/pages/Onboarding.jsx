@@ -70,6 +70,13 @@ export default function Onboarding() {
                    user?.roles?.includes('alumni') || 
                    localStorage.getItem('pending_invite_role') === 'alumni' ||
                    sessionStorage.getItem('pending_invite_role') === 'alumni';
+
+  // REDIRECT: Alumni should use the v2 onboarding flow
+  useEffect(() => {
+    if (isAlumni) {
+      navigate('AlumniOnboarding');
+    }
+  }, [isAlumni]);
   
   // Step 1: Basic Info
   const [company, setCompany] = useState('');
