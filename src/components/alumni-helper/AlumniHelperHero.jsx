@@ -73,6 +73,30 @@ export default function AlumniHelperHero({
       padding: '48px 24px 36px',
     }}>
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        {/* Eyebrow */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase',
+          letterSpacing: '0.1em', color: 'rgba(244,240,232,0.4)', marginBottom: 12,
+        }}>
+          Alumni Dashboard
+        </p>
+
+        {/* H1 */}
+        <h1 style={{
+          fontFamily: playfair, fontSize: 'clamp(28px, 5vw, 38px)', fontWeight: 700,
+          color: '#f4f0e8', marginBottom: 10, lineHeight: 1.2,
+        }}>
+          Welcome back, <span style={{ fontFamily: playfair, fontStyle: 'italic', color: '#E85D20' }}>{firstName}.</span>
+        </h1>
+
+        {/* Subhead */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 15, fontWeight: 300,
+          color: 'rgba(244,240,232,0.55)', marginBottom: 32, maxWidth: 480,
+        }}>
+          Your experience opens doors. Every answer, every intro — it matters.
+        </p>
+
         {/* Stat cards */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 24 }} className="alumni-hero-stats">
           <StatCard>
