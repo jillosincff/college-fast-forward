@@ -18,11 +18,20 @@ function getAvatarColor(name) {
   return colors[Math.abs(hash) % colors.length];
 }
 
-function getDisplayName(fullName) {
-  if (!fullName) return 'Member';
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0];
-  return `${parts[0]} ${parts[parts.length - 1]?.charAt(0)}.`;
+function getDisplayName(input) {
+  if (!input) return 'Member';
+  let name = input.trim();
+  if (name.includes('@')) name = name.split('@')[0];
+  if (!name.includes(' ') && (name.includes('.') || name.includes('_'))) {
+    const parts = name.split(/[._]+/).filter(Boolean);
+    name = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+  }
+  if (!name.includes(' ')) return name.charAt(0).toUpperCase() + name.slice(1);
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+  const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+  const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+  return `${first} ${lastInitial}.`;
 }
 
 function MemberRow({ member, onMessage }) {

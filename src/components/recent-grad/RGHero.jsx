@@ -19,10 +19,12 @@ function StatCard({ label, value, sub, isEmpty }) {
       }}>
         {isEmpty ? '—' : value}
       </p>
-      <p style={{
-        fontFamily: dmSans, fontSize: 12, fontWeight: 400,
-        color: isEmpty ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.5)', margin: 0,
-      }}>{sub}</p>
+      {(!isEmpty || sub) && (
+        <p style={{
+          fontFamily: dmSans, fontSize: 12, fontWeight: 400,
+          color: isEmpty ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)', margin: 0,
+        }}>{sub}</p>
+      )}
     </div>
   );
 }
@@ -34,7 +36,7 @@ export default function RGHero({
 }) {
   return (
     <div style={{
-      backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
+      background: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
       padding: '40px 20px 0',
     }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -71,13 +73,13 @@ export default function RGHero({
           <StatCard
             label="Responses"
             value={responseCount}
-            sub={activeRequestCount > 0 ? `${activeRequestCount} active request` : 'No active requests'}
+            sub={activeRequestCount > 0 ? `${activeRequestCount} active request${activeRequestCount !== 1 ? 's' : ''}` : 'No active requests'}
             isEmpty={!responseCount || responseCount === 0}
           />
           <StatCard
             label="Matches"
             value={matchCount}
-            sub="professionals who can help"
+            sub={matchCount > 0 ? `professional${matchCount !== 1 ? 's' : ''} who can help` : 'Post a request to get matched'}
             isEmpty={!matchCount || matchCount === 0}
           />
         </div>

@@ -45,7 +45,8 @@ export default function RGNav({ user, currentPage }) {
           <img
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
             alt="CFF"
-            style={{ height: 40, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+            style={{ height: 40, objectFit: 'contain' }}
+            onError={(e) => { e.target.style.display = 'none'; }}
           />
         </div>
 
