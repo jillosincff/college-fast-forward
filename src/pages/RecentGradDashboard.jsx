@@ -84,8 +84,10 @@ export default function RecentGradDashboard() {
       try {
         const { getDirectoryUsers } = await import('@/functions/getDirectoryUsers');
         const res = await getDirectoryUsers();
-        directoryUsers = res?.data?.data || [];
-      } catch { }
+        // Handle various response shapes
+        const raw = res?.data?.data || res?.data || res || [];
+        directoryUsers = Array.isArray(raw) ? raw : [];
+      } catch (e) { console.warn('Directory users fetch failed:', e); }
 
       const alumniAndParents = directoryUsers.filter(u =>
         u.email !== user.email &&
