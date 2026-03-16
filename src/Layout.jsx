@@ -55,7 +55,7 @@ const childPageTitles = {
   ApplicationBoost: 'Application Boost',
 };
 
-const APP_VERSION = 'v1.1.7';
+const APP_VERSION = 'v1.1.8';
 
 function handleCacheBusting() {
   try {
