@@ -67,7 +67,12 @@ export default function NetworkSidebar({ stats, user, onFilterForParents }) {
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888', lineHeight: 1.6, marginBottom: 10, margin: '0 0 10px' }}>
             You don't need to know their industry. Every question about networking, first jobs, and career decisions is one you have real answers to — because you've lived it.
           </p>
-          <button onClick={onFilterForParents} style={{
+          <button onClick={() => {
+            onFilterForParents?.();
+            // Scroll to the feed
+            const feed = document.querySelector('.atn-grid');
+            if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }} style={{
             width: '100%', fontFamily: dmSans, fontSize: 12, fontWeight: 500,
             color: '#fff', background: '#E85D20', borderRadius: 100, padding: 9,
             border: 'none', cursor: 'pointer', transition: 'background 0.2s', minHeight: 'auto',

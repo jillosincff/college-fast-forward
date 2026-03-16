@@ -173,9 +173,11 @@ export default function ConnectionsPage() {
   const displayed = filteredRequests.slice(0, visibleCount);
 
   const handleFilterForParents = () => {
-    // Show networking + career_path + first_job, exclude industry
-    setFilter('all');
-    // Simplified: just scroll to feed
+    setFilter('needs_answer');
+    setTimeout(() => {
+      const feed = document.querySelector('.atn-grid');
+      if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   return (
