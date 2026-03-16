@@ -282,17 +282,15 @@ export default function InteractiveTeaserDemo() {
                   style={{ color: '#FFFFFF', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}
                 >
                   {typedText}
-                  {isTyping && (
-                    <span
-                      className="inline-block align-middle ml-0.5"
-                      style={{
-                        width: '2px',
-                        height: '18px',
-                        background: '#FA4616',
-                        animation: 'teaserBlink 0.6s step-end infinite',
-                      }}
-                    />
-                  )}
+                  <span
+                    className="inline-block align-middle ml-0.5"
+                    style={{
+                      width: '2px',
+                      height: '18px',
+                      background: '#FA4616',
+                      animation: 'teaserBlink 0.6s step-end infinite',
+                    }}
+                  />
                 </p>
 
                 <AnimatePresence mode="wait">

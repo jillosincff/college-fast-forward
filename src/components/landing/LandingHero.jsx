@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PrimaryCTA } from '@/components/landing/LandingCTAButton';
+import ConstellationBackground from '@/components/landing/ConstellationBackground';
 
 const FONT_LINK_ID = 'hero-fonts';
 function ensureFonts() {
@@ -22,6 +23,8 @@ export default function LandingHero({ onClaim }) {
 
   return (
     <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-32 px-4" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 25%, #0821A5 60%, #0821A5 100%)', position: 'relative', overflow: 'hidden' }}>
+      {/* constellation dots */}
+      <ConstellationBackground />
       {/* radial warm glow overlay */}
       <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, rgba(8,33,165,0.0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 1 }}>
@@ -149,10 +152,10 @@ export default function LandingHero({ onClaim }) {
           transition={{ delay: 0.4 }}
           className="mt-16 max-w-md mx-auto"
         >
-          <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 16, color: 'rgba(244,240,232,0.55)', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 17, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
             "My daughter landed an internship through a connection she never would have found on a job board."
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)', marginTop: 10 }}>— UF Parent</p>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>— UF Parent</p>
         </motion.div>
       </div>
     </section>
