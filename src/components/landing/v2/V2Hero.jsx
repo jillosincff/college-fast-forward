@@ -91,11 +91,18 @@ export default function V2Hero({ onCTA }) {
 }
 
 export function CTAButton({ text, onClick, variant = 'primary', fullWidth = false }) {
+  const isTeal = variant === 'teal';
   const isOutline = variant === 'outline';
-  const bg = isOutline ? 'transparent' : 'linear-gradient(135deg, #E85D20 0%, #d44e14 100%)';
-  const bgHover = isOutline ? 'rgba(232,93,32,0.1)' : 'linear-gradient(135deg, #FF6B2B 0%, #E85D20 100%)';
-  const border = isOutline ? '2px solid #E85D20' : 'none';
-  const glowColor = 'rgba(232,93,32,0.3)';
+  const isPrimary = !isTeal && !isOutline;
+
+  const accentColor = isTeal ? '#06B6D4' : '#E85D20';
+  const accentDark = isTeal ? '#0891B2' : '#d44e14';
+  const accentLight = isTeal ? '#22D3EE' : '#FF6B2B';
+  const glowColor = isTeal ? 'rgba(6,182,212,0.3)' : 'rgba(232,93,32,0.3)';
+
+  const bg = isOutline ? 'transparent' : `linear-gradient(135deg, ${accentColor} 0%, ${accentDark} 100%)`;
+  const bgHover = isOutline ? `rgba(232,93,32,0.1)` : `linear-gradient(135deg, ${accentLight} 0%, ${accentColor} 100%)`;
+  const border = isOutline ? `2px solid ${accentColor}` : 'none';
 
   return (
     <button
@@ -108,18 +115,19 @@ export function CTAButton({ text, onClick, variant = 'primary', fullWidth = fals
       onMouseLeave={(e) => {
         e.currentTarget.style.background = bg;
         e.currentTarget.style.transform = 'translateY(0) scale(1)';
-        e.currentTarget.style.boxShadow = isOutline ? 'none' : `0 4px 24px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)`;
+        e.currentTarget.style.boxShadow = isPrimary || isTeal ? `0 4px 24px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none';
       }}
       style={{
         fontFamily: dmSans,
         fontSize: 15, fontWeight: 600, color: '#fff',
         background: bg, border, borderRadius: 100,
-        padding: '15px 32px', cursor: 'pointer',
+        padding: '16px 34px', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         transition: 'all 0.25s ease', minHeight: 'auto', minWidth: 'auto',
         width: fullWidth ? '100%' : 'auto',
-        boxShadow: isOutline ? 'none' : `0 4px 24px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+        boxShadow: isPrimary || isTeal ? `0 4px 24px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
         lineHeight: 1.35, textAlign: 'center',
+        backdropFilter: isOutline ? 'blur(12px)' : 'none',
       }}
     >
       {text}
