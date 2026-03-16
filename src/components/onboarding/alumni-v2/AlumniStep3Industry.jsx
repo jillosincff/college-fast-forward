@@ -32,7 +32,7 @@ export default function AlumniStep3Industry({ formData, onUpdate, onNext, onBack
         What's your industry?
       </h2>
       <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', marginBottom: 24 }}>
-        Select all that apply — this helps us match you with the right students.
+        Select all that apply.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
