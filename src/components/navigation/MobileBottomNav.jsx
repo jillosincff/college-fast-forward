@@ -7,15 +7,18 @@ export default function MobileBottomNav({ user, currentPage }) {
     ? 'gator'
     : user?.persona;
 
+  const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
+
   const getDashboardPage = () => {
     if (user?.roles?.includes('admin')) return 'AdminDashboard';
     if (effectivePersona === 'parent' || user?.roles?.includes('parent')) return 'ParentDashboard';
+    if (isRecentGradAlumni) return 'Dashboard';
     if (effectivePersona === 'alumni' || user?.roles?.includes('alumni'))
       return user?.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
     return 'Dashboard';
   };
 
-  const isParent = effectivePersona === 'parent' || user?.roles?.includes('parent');
+  const isParent = (effectivePersona === 'parent' || user?.roles?.includes('parent')) && !isRecentGradAlumni;
 
   const tabs = useMemo(() => {
     if (isParent) {
