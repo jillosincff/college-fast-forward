@@ -10,7 +10,7 @@ for (let y = currentYear; y >= 1960; y--) gradYears.push(y);
 function getSeniorityLabel(year) {
   if (!year) return null;
   const y = parseInt(year);
-  if (y >= currentYear - 1) return { label: 'Recent grad', sub: "We'll tailor your experience for early-career alumni — 6-step seeker path.", color: '#E85D20' };
+  if (y >= 2025) return { label: 'Recent grad', sub: "We'll tailor your experience for early-career alumni — 6-step seeker path.", color: '#E85D20' };
   return { label: 'Established alumni', sub: 'Full 7-step onboarding with helper/seeker options.', color: '#0821A5' };
 }
 
