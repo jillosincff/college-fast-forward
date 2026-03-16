@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          Nearly 1,000 UF families · Alumni at Amazon, Google, Nike and more
+          FASTIQ™ — 7-day free trial · $29/mo founding rate
         </span>
 
         {/* Right — buttons */}
@@ -103,7 +103,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
               whiteSpace: 'nowrap',
             }}
           >
-            Get Started
+            Start Free Trial
           </button>
         </div>
       </div>

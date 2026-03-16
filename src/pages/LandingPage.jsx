@@ -1,42 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
-import { motion } from 'framer-motion';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import LandingHero from '@/components/landing/LandingHero';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
-import LandingTrustBar from '@/components/landing/LandingTrustBar';
-import LandingPainBlock from '@/components/landing/LandingPainBlock';
-import LandingFastIQIntro from '@/components/landing/LandingFastIQIntro';
-import LandingParentRelief from '@/components/landing/LandingParentRelief';
-import LandingTestimonials from '@/components/landing/LandingTestimonials';
-import LandingStudentPivot from '@/components/landing/LandingStudentPivot';
-import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
-import LandingTwoProducts from '@/components/landing/LandingTwoProducts';
-import LandingFooterCTA from '@/components/landing/LandingFooterCTA';
-import FastIQFunnel from '@/components/fastiq-funnel/FastIQFunnel';
-
-const FOUNDING_LIMIT = 1000;
+import V2Hero from '@/components/landing/v2/V2Hero';
+import V2PainProof from '@/components/landing/v2/V2PainProof';
+import V2ParentRelief from '@/components/landing/v2/V2ParentRelief';
+import V2StudentPivot from '@/components/landing/v2/V2StudentPivot';
+import V2Pricing from '@/components/landing/v2/V2Pricing';
+import V2FooterCTA from '@/components/landing/v2/V2FooterCTA';
 
 export default function LandingPage() {
-  const [stats, setStats] = useState({ spots_left: 46, total_families: 954 });
-  const [showFunnel, setShowFunnel] = useState(false);
+  const [stats, setStats] = useState({ spots_left: 46 });
 
   useEffect(() => {
+    // Load fonts
+    if (!document.getElementById('lp-v2-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'lp-v2-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+      document.head.appendChild(link);
+    }
+
     sessionStorage.removeItem('oauth_redirect_in_progress');
     const loadStats = async () => {
       try {
         const response = await base44.functions.invoke('getFoundingStats');
         if (response.data?.success) {
-          setStats(prev => ({
-            ...prev,
-            spots_left: response.data.spots_left || 51,
-            total_families: response.data.total_users || response.data.total_families || 949
-          }));
+          setStats(prev => ({ ...prev, spots_left: response.data.spots_left || 46 }));
         }
       } catch (error) {
         console.error('Failed to load stats:', error);
@@ -51,58 +45,38 @@ export default function LandingPage() {
     }
   }, []);
 
-  const handleClaim = () => { trackEvent('cta_claim_free_spot_clicked'); navigate('GatorAuth'); };
+  const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GatorAuth'); };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GatorAuth'); };
-  const handleFastIQ = () => { trackEvent('cta_fastiq_clicked'); navigate('GatorAuth'); };
-  const handleFunnel = (variant) => { trackEvent(`funnel_${variant}_clicked`); setShowFunnel(true); };
 
   return (
     <>
       <SocialMetaTags
-        title="College Fast Forward - The Private Career Network for UF Families"
-        description="The private career network only UF families can access. Warm introductions, not cold applications."
+        title="College Fast Forward — FASTIQ: AI That Gets Your Kid In The Door"
+        description="FASTIQ finds real UF alumni at target companies, writes personalized messages, and gets your kid in the door. 7-day free trial."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0A1628' }}>
+      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0d1117' }}>
+        <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
-        {/* STICKY NAV (appears after scroll) */}
-        <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleClaim} />
+        {/* 1 — Hero (parent-first, full viewport) */}
+        <V2Hero spotsLeft={stats.spots_left} onCTA={handleCTA} />
 
-        {/* 1 — HERO */}
-        <LandingHero onClaim={handleClaim} />
+        {/* 2 — Pain + FASTIQ Proof */}
+        <V2PainProof onCTA={handleCTA} />
 
-        {/* TRUST BAR */}
-        <LandingTrustBar />
+        {/* 3 — For Parents Who Are Freaking Out */}
+        <V2ParentRelief onCTA={handleCTA} />
 
-        {/* 2 — YOUR KID IS INVISIBLE */}
-        <LandingPainBlock onCTA={handleClaim} />
+        {/* 4 — Student Pivot */}
+        <V2StudentPivot onCTA={handleCTA} />
 
-        {/* 3 — TWO PRODUCTS */}
-        <LandingTwoProducts onClaim={handleClaim} onFastIQ={handleClaim} />
+        {/* 5 — Pricing (single FASTIQ offer) */}
+        <V2Pricing onCTA={handleCTA} />
 
-        {/* 4 — QUIZ */}
-        {showFunnel ? (
-          <FastIQFunnel onClose={() => setShowFunnel(false)} />
-        ) : (
-          <LandingStudentPivot onFunnel={handleFunnel} />
-        )}
-
-        {/* 5 — FASTIQ INTRO */}
-        <LandingFastIQIntro onCTA={handleClaim} />
-
-        {/* 6 — FOR PARENTS */}
-        <LandingParentRelief onCTA={handleClaim} />
-
-        {/* 7 — TESTIMONIALS */}
-        <LandingTestimonials onClaim={handleClaim} />
-
-        {/* 8 — HOW IT WORKS */}
-        <LandingHowItWorks onClaim={handleClaim} />
-
-        {/* 7 — FINAL CTA */}
-        <LandingFooterCTA stats={stats} onClaim={handleClaim} />
+        {/* 6 — Footer CTA */}
+        <V2FooterCTA spotsLeft={stats.spots_left} onCTA={handleCTA} />
       </div>
     </>
   );
