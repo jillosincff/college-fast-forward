@@ -214,7 +214,7 @@ export default function GatorParentInvite() {
             Join College Fast Forward
           </h1>
           <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 400, color: '#999' }}>
-            For Parents & Alumni
+            For Parents &amp; Alumni
           </p>
         </div>
 
@@ -381,7 +381,7 @@ export default function GatorParentInvite() {
         {/* Back link */}
         <div style={{ textAlign: 'center', marginTop: 32 }}>
           <button
-            onClick={() => navigate('GatorRoleSelection')}
+            onClick={() => navigate('LandingPage')}
             style={{
               background: 'none', border: 'none', fontFamily: dmSans,
               fontSize: 13, color: '#aaa', cursor: 'pointer',
@@ -390,7 +390,7 @@ export default function GatorParentInvite() {
             }}
           >
             <ArrowLeft style={{ width: 14, height: 14 }} />
-            Back to signup options
+            Back to homepage
           </button>
         </div>
       </div>
