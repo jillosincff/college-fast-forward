@@ -26,8 +26,7 @@ export default function ParentDashboard() {
   }, [user?.id]);
 
   // Redirect if onboarding not completed
-  const needsOnboarding = user && user.onboarding_completed === false &&
-    (user.persona === 'parent' || (user.persona === 'alumni' && user.alumni_intent === 'help_students'));
+  const needsOnboarding = user && user.onboarding_completed === false && user.persona === 'parent';
 
   useEffect(() => {
     if (needsOnboarding) navigate('ParentOnboarding');

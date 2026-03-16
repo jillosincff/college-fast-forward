@@ -68,7 +68,8 @@ export default function Dashboard() {
     if (!user) { navigate('LandingPage'); return; }
     if (user.persona === 'parent') { navigate('ParentDashboard'); return; }
     if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-      navigate(user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard');
+      if (user.alumni_seniority === 'recent_grad') { navigate('RecentGradDashboard'); }
+      else { navigate('AlumniDashboard'); }
       return;
     }
     if (user.roles?.includes('admin')) { navigate('AdminDashboard'); return; }

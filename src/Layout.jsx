@@ -490,7 +490,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard'];
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'AlumniHelperDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
 
@@ -698,8 +698,8 @@ function AppContent() {
 
     if (user && user.onboarding_completed === false && user.persona) {
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
-      const dashboardPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard'];
-      if (dashboardPages.includes(currentPage)) {
+      const onboardingDashPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard', 'AlumniDashboard'];
+      if (onboardingDashPages.includes(currentPage)) {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
         const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
         if (isParent) { navigate('ParentOnboarding'); return; }
@@ -818,7 +818,7 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
-  const pullRefreshPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'AlumniHelperDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
+  const pullRefreshPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
   return (
