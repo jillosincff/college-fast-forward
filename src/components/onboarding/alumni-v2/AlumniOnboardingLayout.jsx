@@ -63,7 +63,7 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, child
             fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 16,
           }}>
-            {step === 1 ? 'WELCOME TO' : `STEP ${step} OF ${totalSteps}`}
+            {step === 1 ? 'WELCOME TO' : step === 7 ? 'FINAL STEP' : `STEP ${step} OF ${totalSteps}`}
           </p>
           <AlumniLeftPanel step={step} intent={intent} />
         </div>
