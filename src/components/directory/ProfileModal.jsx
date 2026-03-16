@@ -255,6 +255,15 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
                   }}>
                     {roleBadge.label}
                   </span>
+                  {/* Graduation year for alumni */}
+                  {profileUser.persona === 'alumni' && profileUser.graduation_year && (
+                    <p style={{
+                      fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888',
+                      marginTop: 4, margin: '4px 0 0',
+                    }}>
+                      Class of {profileUser.graduation_year}
+                    </p>
+                  )}
                   {companyLine && (
                     <p style={{
                       fontFamily: dmSans, fontSize: 13, color: '#888',

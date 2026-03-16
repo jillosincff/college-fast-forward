@@ -133,6 +133,13 @@ export default function DirectoryMemberCard({ user, onMessage, onViewProfile, vi
           }}>
             {role.label}
           </span>
+          {user.persona === 'alumni' && user.graduation_year && (
+            <span style={{
+              fontFamily: dmSans, fontSize: 10, color: '#888', marginLeft: 6,
+            }}>
+              Class of {user.graduation_year}
+            </span>
+          )}
         </div>
 
         {/* Company · Industry */}
@@ -227,6 +234,16 @@ export default function DirectoryMemberCard({ user, onMessage, onViewProfile, vi
         }}>
           {role.label}
         </span>
+
+        {/* Graduation year for alumni */}
+        {user.persona === 'alumni' && user.graduation_year && (
+          <span style={{
+            fontFamily: dmSans, fontSize: 11, fontWeight: 400,
+            color: '#888', marginBottom: 4,
+          }}>
+            Class of {user.graduation_year}
+          </span>
+        )}
 
         {/* Founding Member badge */}
         {isFoundingMember && (
