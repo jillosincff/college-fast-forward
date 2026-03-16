@@ -1249,8 +1249,10 @@ function AppContent() {
           } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
             if (user.alumni_seniority === 'recent_grad') {
               destination = 'Dashboard';
+            } else if (user.alumni_intent === 'help_students') {
+              destination = 'ParentDashboard';
             } else {
-              destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+              destination = 'Dashboard';
             }
           }
           console.log('🔄 [LandingPage] Authenticated user → redirecting to:', destination);
