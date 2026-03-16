@@ -3,19 +3,19 @@ import { Check } from 'lucide-react';
 import AlumniLeftPanel from './AlumniLeftPanel';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
 
-const STEP_LABELS_FULL = ['Details', 'About', 'Industry', 'Intent', 'Help', 'Pledge', 'Ready'];
-const STEP_LABELS_RECENT = ['Details', 'About', 'Industry', 'Help', 'Pledge', 'Ready'];
+const RG_LABELS = ['Details', 'Looking For', 'Parent', 'Pledge', 'Ready'];
+const EA_LABELS = ['Details', 'About', 'Industry', 'Intent', 'Help', 'Pledge', 'Ready'];
 
-function ProgressDots({ step, totalSteps, isRecentGrad }) {
-  const labels = isRecentGrad ? STEP_LABELS_RECENT : STEP_LABELS_FULL;
-  // Map display index to actual step number for recent grads (skip step 4)
+function ProgressDots({ step, totalSteps, isRecentGrad, stepMap }) {
+  const labels = isRecentGrad ? RG_LABELS : EA_LABELS;
+  // Map display index to actual internal step number
   const stepMapping = isRecentGrad
-    ? [1, 2, 3, 5, 6, 7] // display positions map to these actual steps
-    : [1, 2, 3, 4, 5, 6, 7];
+    ? [1, 2, 3, 4, 5] // RG: 5 visible dots (step 6=notifications is the complete screen)
+    : [1, 2, 3, 4, 5, 6, 7]; // EA: 7 dots
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32, flexWrap: 'wrap' }}>
       {labels.map((label, i) => {
         const actualStep = stepMapping[i];
         const isCompleted = step > actualStep;
@@ -25,7 +25,7 @@ function ProgressDots({ step, totalSteps, isRecentGrad }) {
             {i > 0 && (
               <div style={{
                 width: 16, height: 1.5,
-                background: step > actualStep ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)',
+                background: isCompleted ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)',
               }} />
             )}
             <div style={{
@@ -51,11 +51,20 @@ function ProgressDots({ step, totalSteps, isRecentGrad }) {
   );
 }
 
-export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRecentGrad, children }) {
+function getStepLabel(step, totalSteps, isRecentGrad) {
+  if (step === 1) return 'WELCOME TO';
+  // For RG, step 5 is the final visible panel step
+  if (isRecentGrad && step === 5) return 'FINAL STEP';
+  // For EA, step 7 is the final visible panel step
+  if (!isRecentGrad && step === 7) return 'FINAL STEP';
+  return `STEP ${step} OF ${totalSteps}`;
+}
+
+export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRecentGrad, stepMap, children }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
       <div className="ao-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
-        {/* LEFT PANEL — dark gradient */}
+        {/* LEFT PANEL */}
         <div className="ao-left" style={{
           width: '45%', flexShrink: 0, position: 'sticky', top: 0,
           height: '100vh', overflowY: 'auto',
@@ -64,16 +73,12 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRec
           padding: '40px 36px',
           display: 'flex', flexDirection: 'column',
         }}>
-          <ProgressDots step={step} totalSteps={totalSteps} />
+          <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} stepMap={stepMap} />
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 16,
           }}>
-            {step === 1 ? 'WELCOME TO' : step === 7 ? 'FINAL STEP' : (() => {
-              // For recent grads, compute display step number (skip step 4)
-              const displayStep = isRecentGrad && step >= 5 ? step - 1 : step;
-              return `STEP ${displayStep} OF ${totalSteps}`;
-            })()}
+            {getStepLabel(step, totalSteps, isRecentGrad)}
           </p>
           <AlumniLeftPanel step={step} intent={intent} isRecentGrad={isRecentGrad} />
         </div>
@@ -84,11 +89,11 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRec
             backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
             padding: '24px 20px 20px', textAlign: 'center',
           }}>
-            <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} />
+            <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} stepMap={stepMap} />
           </div>
         </div>
 
-        {/* RIGHT PANEL — white form */}
+        {/* RIGHT PANEL */}
         <div className="ao-right" style={{
           flex: 1, background: '#ffffff', padding: '48px 48px 60px', overflowY: 'auto',
         }}>
