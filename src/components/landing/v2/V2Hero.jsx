@@ -10,7 +10,7 @@ export default function V2Hero({ onCTA }) {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 30%, #0821A5 65%, #0d1117 100%)' }}
+      style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 30%, #0821A5 65%, #0d1117 100%)', minHeight: '100vh' }}
     >
       <ConstellationBackground />
       <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(ellipse, rgba(232,93,32,0.07), transparent 70%)' }} />
@@ -24,72 +24,66 @@ export default function V2Hero({ onCTA }) {
           </span>
         </motion.div>
 
-        {/* H1 */}
+        {/* H1 — massive gradient */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(32px, 6vw, 72px)', letterSpacing: '-0.025em', lineHeight: 1.06, marginBottom: 20, padding: '0 4px' }}
+          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(36px, 7vw, 80px)', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 24, padding: '0 4px' }}
         >
           <span style={{ color: '#fff' }}>It's March. </span>
-          <span style={{ fontStyle: 'italic', color: '#E85D20' }}>No internship yet?</span>
+          <span style={{ fontStyle: 'italic', background: 'linear-gradient(135deg, #FA4616, #FF8A5C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>No internship yet?</span>
         </motion.h1>
 
-        {/* Subhead */}
+        {/* Subhead — xl, pure white */}
         <motion.p
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 21px)', color: '#FFFFFF', lineHeight: 1.6, maxWidth: 580, margin: '0 auto 32px' }}
+          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(18px, 2.4vw, 22px)', color: '#FFFFFF', lineHeight: 1.6, maxWidth: 600, margin: '0 auto 36px' }}
         >
           Your roommate has an offer. Your parents are freaking. Chill. We got you.
         </motion.p>
 
-        {/* Body paragraphs */}
+        {/* Body text — exact copy, pure white, 18px, 1.6 lh */}
         <motion.div
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-          style={{ fontFamily: dmSans, fontWeight: 300, fontSize: 18, color: '#FFFFFF', lineHeight: 1.7, maxWidth: 640, margin: '0 auto 28px', textAlign: 'center' }}
+          style={{ fontFamily: dmSans, fontWeight: 300, fontSize: 18, color: '#FFFFFF', lineHeight: 1.7, maxWidth: 640, margin: '0 auto 36px', textAlign: 'center' }}
         >
           <p style={{ marginBottom: 18 }}>
-            We're College Fast Forward. People get jobs because of <em>who they know</em> — not what they know.
+            People get jobs because of <em style={{ fontStyle: 'italic' }}>who they know</em> — not what they know.
           </p>
           <p style={{ marginBottom: 18 }}>
-            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 500 }}>your parents</strong>. They've spent 20 years building a network. They know everybody. And now that network works for you.
+            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 500 }}>your parents</strong>.{' '}
+            They've spent 20 years building a network. They know everybody.{' '}
+            Now that network works for you.
           </p>
-          <p>
-            Every time a parent helps a student in the network, your visibility goes up. More eyes on your profile. More alumni seeing your requests. More doors opening.
+          <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 28 }}>
+            <span style={{ color: '#fff' }}>Your parents are the fuel.</span><br />
+            <span style={{ color: '#FA4616' }}>FASTIQ is the engine.</span><br />
+            <span style={{ color: '#fff' }}>You're the one who lands the job.</span>
           </p>
         </motion.div>
 
-        {/* Tagline — three visual beats */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
-          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 30px)', color: '#fff', lineHeight: 1.5, maxWidth: 600, margin: '0 auto 44px', textAlign: 'center' }}
-        >
-          <span>Your parents are the fuel.</span><br />
-          <span style={{ color: '#E85D20' }}>FASTIQ is the engine.</span><br />
-          <span>You're the one who lands the job.</span>
-        </motion.div>
-
-        {/* ── Live teaser section ── */}
+        {/* ── Live teaser section — the wow moment ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="mb-12"
+          className="mb-14"
         >
           <InteractiveTeaserDemo />
         </motion.div>
 
-        {/* Dual CTAs */}
+        {/* Dual CTAs — orange primary, teal secondary */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.38 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-5"
+          className="flex flex-col items-center gap-4 mb-6"
         >
-          <CTAButton text="I know where I want to work →" onClick={onCTA} />
-          <CTAButton text="I literally have no clue where to start →" onClick={onCTA} variant="outline" />
+          <CTAButton text="I know where I want to work… but I don't know a single person there →" onClick={onCTA} />
+          <CTAButton text="I literally have no clue where to even start →" onClick={onCTA} variant="teal" />
         </motion.div>
 
-        {/* Fine print */}
+        {/* Micro-text */}
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.44 }}
-          style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.35)' }}
+          style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}
         >
-          7-day free trial · $29/mo after · No card required · Cancel anytime
+          Takes 45 seconds · No sign-up · See real UF people at Amazon, Google, Nike — free
         </motion.p>
       </div>
     </section>
