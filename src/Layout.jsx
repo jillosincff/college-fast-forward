@@ -263,10 +263,11 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
     { name: 'Ask the Network', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
     { name: 'Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
-    { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'recent_grad_alumni'] },
+    { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator'] },
     { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
     { name: 'My Impact', page: 'MyImpact', icon: Users, roles: ['parent', 'established_alumni'] },
     { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator'] },
+    // Note: recent_grad_alumni intentionally excluded from Pipeline and FASTIQ per spec
   ], []);
 
   const filteredNavItems = useMemo(() => {

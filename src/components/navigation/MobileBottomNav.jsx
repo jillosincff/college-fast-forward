@@ -44,7 +44,16 @@ export default function MobileBottomNav({ user, currentPage }) {
         { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
       ];
     }
-    // Students and recent grad alumni
+    // Recent grad alumni — no Pipeline or FASTIQ
+    if (isRecentGradAlumni) {
+      return [
+        { name: 'Home', icon: LayoutDashboard, page: dashPage },
+        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
+        { name: 'Directory', icon: Users, page: 'GatorDirectory' },
+        { name: 'Messages', icon: Mail, page: 'MyMessages' },
+      ];
+    }
+    // Students (gators)
     return [
       { name: 'Home', icon: LayoutDashboard, page: dashPage },
       { name: 'Ask', icon: MessageSquare, page: 'Connections' },
