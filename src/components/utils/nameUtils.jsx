@@ -89,7 +89,7 @@ export function getDisplayName(user) {
     return capitalizeName(cleanName);
   }
   
-  return 'Gator User';
+  return 'Member';
 }
 
 /**
@@ -97,7 +97,7 @@ export function getDisplayName(user) {
  * Always returns first name initial + last name initial (e.g., "LO" for "Lindsey M. Osinoff")
  */
 export function getInitials(user) {
-  if (!user) return 'GU';
+  if (!user) return 'M';
   
   // Priority 1: Use first and last name fields directly
   if (user.first_name && user.last_name) {
@@ -133,7 +133,7 @@ export function getInitials(user) {
     return emailName.slice(0, 2).toUpperCase();
   }
   
-  return 'GU';
+  return 'M';
 }
 
 /**

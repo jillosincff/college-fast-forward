@@ -1,6 +1,7 @@
 import React from 'react';
 import { navigate } from '@/components/utils/navigation';
 import moment from 'moment';
+import formatDisplayName, { getInitialsFromUser } from '@/components/utils/formatDisplayName';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -12,31 +13,12 @@ const CATEGORY_LABELS = {
   career_path: 'Career Path Exploration',
   first_job: 'First Job Advice',
   industry: 'Industry-Specific',
-  // Legacy mapping
   'career_advice': 'Career Path Exploration',
   'internship_leads': 'First Job Advice',
   'resume_review': 'First Job Advice',
   'networking_intros': 'Networking & Outreach',
   'industry_insights': 'Industry-Specific',
 };
-
-function formatName(name, firstName, lastName, email) {
-  if (firstName && lastName && !firstName.includes(',')) {
-    return `${firstName.charAt(0).toUpperCase()}${firstName.slice(1).toLowerCase()} ${lastName.charAt(0).toUpperCase()}.`;
-  }
-  if (name && name.includes(',')) {
-    const [last, rest] = name.split(',').map(s => s.trim());
-    const first = rest?.split(/\s+/)[0] || '';
-    if (first) return `${first.charAt(0).toUpperCase()}${first.slice(1).toLowerCase()} ${last.charAt(0).toUpperCase()}.`;
-  }
-  if (name && name.includes(' ') && !name.includes('@')) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0];
-    const last = parts[parts.length - 1];
-    return `${first.charAt(0).toUpperCase()}${first.slice(1).toLowerCase()} ${last.charAt(0).toUpperCase()}.`;
-  }
-  return name || 'Student';
-}
 
 function getClassYear(gradYear) {
   if (!gradYear) return null;
@@ -55,17 +37,18 @@ function getClassYear(gradYear) {
 export default function NetworkPostCard({ question, gator, index, topAnswer, user }) {
   const answerCount = question.answer_count || 0;
   const isUnanswered = answerCount === 0;
-  const posterName = formatName(
-    gator?.full_name || question.poster_name || question.student_name,
-    gator?.first_name || question.poster_first_name,
-    gator?.last_name || question.poster_last_name,
-    gator?.email || question.created_by
-  );
+  const posterUser = {
+    first_name: gator?.first_name || question.poster_first_name,
+    last_name: gator?.last_name || question.poster_last_name,
+    full_name: gator?.full_name || question.poster_name || question.student_name,
+    email: gator?.email || question.created_by,
+  };
+  const posterName = formatDisplayName(posterUser, 'Student');
   const classYear = getClassYear(question.student_year || gator?.graduation_year);
   const major = question.student_major || gator?.major || question.target_industry || '';
   const minor = question.student_minor || gator?.minor || '';
   const avatarColor = AVATAR_COLORS[(posterName.charCodeAt(0) || 0) % AVATAR_COLORS.length];
-  const initials = posterName.split(/\s+/).map(w => w[0]?.toUpperCase()).join('').slice(0, 2);
+  const initials = getInitialsFromUser(posterUser, 'S');
   const timeAgo = moment(question.created_date).isAfter(moment()) ? 'just now' : moment(question.created_date).fromNow();
 
   const category = question.category || (question.help_types?.[0] ? question.help_types[0] : '');

@@ -1,15 +1,9 @@
 import React from 'react';
 import { navigate } from '@/components/utils/navigation';
+import formatDisplayName, { getInitialsFromUser } from '@/components/utils/formatDisplayName';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
-
-function getInitials(name) {
-  if (!name) return '?';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() || '?';
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 function getAvatarColor(name) {
   const colors = ['#6366f1', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#2563eb'];
@@ -18,26 +12,10 @@ function getAvatarColor(name) {
   return colors[Math.abs(hash) % colors.length];
 }
 
-function getDisplayName(input) {
-  if (!input) return 'Member';
-  let name = input.trim();
-  if (name.includes('@')) name = name.split('@')[0];
-  if (!name.includes(' ') && (name.includes('.') || name.includes('_'))) {
-    const parts = name.split(/[._]+/).filter(Boolean);
-    name = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
-  }
-  if (!name.includes(' ')) return name.charAt(0).toUpperCase() + name.slice(1);
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-  const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-  const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
-  return `${first} ${lastInitial}.`;
-}
-
 function MemberRow({ member, onMessage }) {
-  const name = getDisplayName(member.displayName || member.full_name);
-  const initials = getInitials(member.displayName || member.full_name);
-  const color = getAvatarColor(member.displayName || member.full_name);
+  const name = formatDisplayName(member, 'Member');
+  const initials = getInitialsFromUser(member, 'M');
+  const color = getAvatarColor(member.full_name || member.displayName || '');
   const title = [member.jobTitle, member.company].filter(Boolean).join(' · ');
   const helpTag = (member.matchedCategories || [])[0]?.replace(/_/g, ' ') || '';
 
