@@ -37,36 +37,76 @@ Deno.serve(async (req) => {
         
         console.log('Found user:', userToDisplay.email);
 
+        // Fetch activity stats for parents/alumni helpers
+        let activityStats = { students_helped: 0, answers_given: 0, intros_made: 0 };
+        const isHelper = userToDisplay.persona === 'parent' || 
+          (userToDisplay.persona === 'alumni' && userToDisplay.alumni_intent === 'help_students') ||
+          (userToDisplay.ways_to_help && userToDisplay.ways_to_help.length > 0);
+
+        if (isHelper) {
+          try {
+            const [answers, jobAnswers, intros] = await Promise.all([
+              base44.asServiceRole.entities.Answer.filter({ answerer_email: userToDisplay.email }, undefined, 500).catch(() => []),
+              base44.asServiceRole.entities.JobAnswer.filter({ responder_email: userToDisplay.email }, undefined, 500).catch(() => []),
+              base44.asServiceRole.entities.Intro.filter({ helper_user_id: userToDisplay.id }, undefined, 200).catch(() => []),
+            ]);
+            const uniqueStudents = new Set([
+              ...(answers || []).map(a => a.question_id),
+              ...(jobAnswers || []).map(a => a.job_request_id),
+              ...(intros || []).map(i => i.student_id),
+            ]);
+            activityStats = {
+              students_helped: uniqueStudents.size,
+              answers_given: (answers || []).length + (jobAnswers || []).length,
+              intros_made: (intros || []).length,
+            };
+          } catch (e) {
+            console.log('Could not fetch activity stats:', e.message);
+          }
+        }
+
+        // Fetch karma data if applicable
+        let karmaLevel = null;
+        let karmaPoints = null;
+        if (userToDisplay.family_group_id) {
+          try {
+            const karmaRecords = await base44.asServiceRole.entities.FamilyKarma.filter(
+              { family_group_id: userToDisplay.family_group_id }, undefined, 1
+            );
+            if (karmaRecords && karmaRecords[0]) {
+              karmaLevel = karmaRecords[0].current_level || karmaRecords[0].level;
+              karmaPoints = karmaRecords[0].total_karma || karmaRecords[0].this_month_karma || 0;
+            }
+          } catch (e) {
+            console.log('Could not fetch karma:', e.message);
+          }
+        }
+
         const userData = {
             id: userToDisplay.id,
             first_name: userToDisplay.first_name,
             last_name: userToDisplay.last_name,
             full_name: userToDisplay.full_name,
-            email: userToDisplay.email,
             bio: userToDisplay.bio,
-            headline: userToDisplay.headline,
             persona: userToDisplay.persona,
+            alumni_intent: userToDisplay.alumni_intent,
             major: userToDisplay.major,
             graduation_year: userToDisplay.graduation_year,
-            profile_image: userToDisplay.profile_image,
-            location_city: userToDisplay.location_city,
-            location_state: userToDisplay.location_state,
             company: userToDisplay.company || userToDisplay.current_company,
             job_title: userToDisplay.job_title || userToDisplay.current_position,
             industry: userToDisplay.industry,
-            years_of_experience: userToDisplay.years_of_experience || userToDisplay.years_experience,
             linkedin_url: userToDisplay.linkedin_url,
             expertise_areas: userToDisplay.expertise_areas || [],
             mentorship_topics: userToDisplay.mentorship_topics || [],
             ways_to_help: userToDisplay.ways_to_help || [],
-            companies_worked_at: userToDisplay.companies_worked_at || [],
             can_provide_referrals: userToDisplay.can_provide_referrals || false,
-            skills: userToDisplay.skills || [],
-            industries_of_interest: userToDisplay.industries_of_interest || userToDisplay.industries || [],
-            open_to_coffee_chats: userToDisplay.open_to_coffee_chats,
-            preferred_communication: userToDisplay.preferred_communication,
-            response_time: userToDisplay.response_time,
-            description_of_work: userToDisplay.description_of_work,
+            is_founding_member: userToDisplay.is_founding_member || false,
+            created_date: userToDisplay.created_date,
+            karma_level: karmaLevel,
+            karma_points: karmaPoints,
+            students_helped: activityStats.students_helped,
+            answers_given: activityStats.answers_given,
+            intros_made: activityStats.intros_made,
         };
 
         return Response.json(userData);
