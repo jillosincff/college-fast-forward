@@ -20,6 +20,7 @@ const HELP_MAP = {
 
 export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack, loading }) {
   const isHelper = formData.intent === 'help_students';
+  const isRecentGrad = formData.seniority === 'recent_grad';
 
   return (
     <div>
@@ -36,7 +37,10 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
         border: '1px solid #dbeafe',
       }}>
         <p style={{ fontFamily: dmSans, fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0 }}>
-          <strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.
+          {isRecentGrad
+            ? <><strong>🎓 As a recent grad</strong>, you'll be routed to the student dashboard where you can access FASTIQ, networking tools, and connect with parents and alumni who can help you.</>
+            : <><strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.</>
+          }
         </p>
       </div>
 

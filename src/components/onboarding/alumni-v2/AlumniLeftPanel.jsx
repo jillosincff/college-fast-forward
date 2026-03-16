@@ -135,6 +135,22 @@ export default function AlumniLeftPanel({ step, intent, isRecentGrad }) {
   }
 
   if (step === 7) {
+    if (isRecentGrad) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
+            You're all set! 🎉
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
+            As a recent grad, you'll have access to the full student toolkit — FASTIQ, networking, and a community ready to help.
+          </p>
+          <Callout
+            bold="What happens next?"
+            body="You'll land on the student dashboard with access to FASTIQ career tools, networking pipeline, and direct connections to parents and established alumni."
+          />
+        </div>
+      );
+    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#fff', lineHeight: 1.2, margin: 0 }}>
