@@ -6,9 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V2Hero from '@/components/landing/v2/V2Hero';
-import V2PainProof from '@/components/landing/v2/V2PainProof';
 import V2ParentRelief from '@/components/landing/v2/V2ParentRelief';
-import V2StudentPivot from '@/components/landing/v2/V2StudentPivot';
 import V2Pricing from '@/components/landing/v2/V2Pricing';
 import V2FooterCTA from '@/components/landing/v2/V2FooterCTA';
 
@@ -16,7 +14,6 @@ export default function LandingPage() {
   const [stats, setStats] = useState({ spots_left: 46 });
 
   useEffect(() => {
-    // Load fonts
     if (!document.getElementById('lp-v2-fonts')) {
       const link = document.createElement('link');
       link.id = 'lp-v2-fonts';
@@ -26,17 +23,9 @@ export default function LandingPage() {
     }
 
     sessionStorage.removeItem('oauth_redirect_in_progress');
-    const loadStats = async () => {
-      try {
-        const response = await base44.functions.invoke('getFoundingStats');
-        if (response.data?.success) {
-          setStats(prev => ({ ...prev, spots_left: response.data.spots_left || 46 }));
-        }
-      } catch (error) {
-        console.error('Failed to load stats:', error);
-      }
-    };
-    loadStats();
+    base44.functions.invoke('getFoundingStats').then(r => {
+      if (r.data?.success) setStats(prev => ({ ...prev, spots_left: r.data.spots_left || 46 }));
+    }).catch(() => {});
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
@@ -52,30 +41,24 @@ export default function LandingPage() {
     <>
       <SocialMetaTags
         title="College Fast Forward — FASTIQ: AI That Gets Your Kid In The Door"
-        description="FASTIQ finds real UF alumni at target companies, writes personalized messages, and gets your kid in the door. 7-day free trial."
+        description="FASTIQ finds real UF alumni at target companies, writes personalized outreach, and gets your kid in the door. 7-day free trial."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0d1117' }}>
+      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0F172A' }}>
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
-        {/* 1 — Hero (parent-first, full viewport) */}
-        <V2Hero spotsLeft={stats.spots_left} onCTA={handleCTA} />
+        {/* 1 — Hero: student panic + live teaser + dual CTAs */}
+        <V2Hero onCTA={handleCTA} />
 
-        {/* 2 — Pain + FASTIQ Proof */}
-        <V2PainProof onCTA={handleCTA} />
-
-        {/* 3 — For Parents Who Are Freaking Out */}
+        {/* 2 — Parent Relief */}
         <V2ParentRelief onCTA={handleCTA} />
 
-        {/* 4 — Student Pivot */}
-        <V2StudentPivot onCTA={handleCTA} />
-
-        {/* 5 — Pricing (single FASTIQ offer) */}
+        {/* 3 — Pricing */}
         <V2Pricing onCTA={handleCTA} />
 
-        {/* 6 — Footer CTA */}
+        {/* 4 — Footer */}
         <V2FooterCTA spotsLeft={stats.spots_left} onCTA={handleCTA} />
       </div>
     </>

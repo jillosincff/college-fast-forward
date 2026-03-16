@@ -19,7 +19,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
         left: 0,
         right: 0,
         zIndex: 1000,
-        background: 'rgba(13,17,23,0.92)',
+        background: 'rgba(15,23,42,0.92)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '0.5px solid rgba(255,255,255,0.08)',

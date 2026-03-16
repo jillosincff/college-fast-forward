@@ -18,37 +18,37 @@ export default function V2FooterCTA({ spotsLeft, onCTA }) {
 
   return (
     <>
-      <section ref={ref} style={{ background: '#0a1016', borderTop: '0.5px solid rgba(255,255,255,0.08)', padding: '80px 24px 72px', textAlign: 'center' }}>
+      <section ref={ref} style={{ background: '#0F172A', borderTop: '0.5px solid rgba(255,255,255,0.06)', padding: '80px 24px 72px', textAlign: 'center' }}>
         <style>{`@media(max-width:768px){.v2-footer-links{flex-direction:column !important;align-items:center !important;gap:12px !important;padding:24px 16px !important}}`}</style>
 
-        <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(24px, 3.5vw, 36px)', color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 16, ...f(0) }}>
+        <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(22px, 3vw, 32px)', color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12, ...f(0) }}>
           Only <span style={{ color: '#FA4616' }}>{spotsLeft}</span> founding spots left at founding rate.
         </p>
-        <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: '#E5E7EB', marginBottom: 28, ...f(0.06) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 300, color: '#E5E7EB', marginBottom: 28, ...f(0.06) }}>
           Claim yours before they're gone.
         </p>
 
         <div style={f(0.12)} className="mb-5">
-          <CTAButton text="Start 7-Day Free Trial — $29/mo after" onClick={onCTA} />
+          <CTAButton text="Start 7-Day Free Trial" onClick={onCTA} />
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.25)', ...f(0.18) }}>
-          No credit card required. Cancel anytime.
+          Questions? <span style={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '2px' }}>See FAQ</span>
         </p>
       </section>
 
       {/* Footer links */}
       <footer className="v2-footer-links" style={{ background: '#080c10', padding: '24px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-        <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>College Fast Forward</span>
+        <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.35)' }}>College Fast Forward</span>
         <nav style={{ display: 'flex', gap: 24 }}>
           {[{ label: 'Privacy', href: '#Privacy' }, { label: 'Terms', href: '#Terms' }, { label: 'Cookies', href: '#CookiePolicy' }].map((l) => (
-            <a key={l.label} href={l.href} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', transition: 'color 0.2s', minHeight: 'auto' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.25)'; }}
+            <a key={l.label} href={l.href} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.2)', textDecoration: 'none', transition: 'color 0.2s', minHeight: 'auto' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; }}
             >{l.label}</a>
           ))}
         </nav>
-        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.2)' }}>© {new Date().getFullYear()} College Fast Forward. All rights reserved.</span>
+        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.15)' }}>© {new Date().getFullYear()} College Fast Forward</span>
       </footer>
     </>
   );
