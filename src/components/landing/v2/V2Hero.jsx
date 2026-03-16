@@ -15,7 +15,7 @@ export default function V2Hero({ onCTA }) {
       <ConstellationBackground />
       <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(ellipse, rgba(232,93,32,0.07), transparent 70%)' }} />
 
-      <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
+      <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-32 sm:pt-44 pb-24">
 
         {/* Eyebrow */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -36,7 +36,7 @@ export default function V2Hero({ onCTA }) {
         {/* Subhead */}
         <motion.p
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 21px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.55, maxWidth: 580, margin: '0 auto 32px' }}
+          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 21px)', color: '#FFFFFF', lineHeight: 1.6, maxWidth: 580, margin: '0 auto 32px' }}
         >
           Your roommate has an offer. Your parents are freaking. Chill. We got you.
         </motion.p>

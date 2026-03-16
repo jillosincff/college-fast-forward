@@ -25,7 +25,7 @@ export default function V2Pricing({ onCTA }) {
   const f = (d) => ({ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(14px)', transition: `opacity 0.5s ease ${d}s, transform 0.5s ease ${d}s` });
 
   return (
-    <section ref={ref} style={{ background: '#0d1117', padding: '100px 24px 110px', position: 'relative', overflow: 'hidden' }}>
+    <section ref={ref} style={{ background: '#0d1117', padding: '125px 24px 135px', position: 'relative', overflow: 'hidden' }}>
       <style>{`@media(max-width:768px){.v2-pricing-section{padding:72px 20px !important}}`}</style>
       <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse,rgba(250,70,22,0.05),transparent 70%)' }} />
 

@@ -20,7 +20,7 @@ export default function V2TheNumbers() {
   });
 
   return (
-    <section ref={ref} style={{ background: '#f4f2ee', padding: '100px 24px 110px' }}>
+    <section ref={ref} style={{ background: '#f4f2ee', padding: '125px 24px 135px' }}>
       <style>{`@media(max-width:640px){.v2-numbers-grid{flex-direction:column !important;gap:32px !important}.v2-numbers-vs{display:none !important}}`}</style>
       <div className="max-w-[700px] mx-auto text-center">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 4vw, 44px)', color: '#0d1117', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 48, ...f(0) }}>

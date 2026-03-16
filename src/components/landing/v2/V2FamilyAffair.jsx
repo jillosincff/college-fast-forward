@@ -26,7 +26,7 @@ export default function V2FamilyAffair() {
   });
 
   return (
-    <section ref={ref} style={{ background: '#f4f2ee', padding: '100px 24px 110px' }}>
+    <section ref={ref} style={{ background: '#f4f2ee', padding: '125px 24px 135px' }}>
       <style>{`@media(max-width:768px){.v2-family{padding:72px 20px !important}}`}</style>
       <div className="max-w-[760px] mx-auto">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 4vw, 44px)', color: '#0d1117', lineHeight: 1.15, textAlign: 'center', marginBottom: 40, letterSpacing: '-0.02em', ...f(0) }}>

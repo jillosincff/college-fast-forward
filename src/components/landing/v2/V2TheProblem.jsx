@@ -28,7 +28,7 @@ export default function V2TheProblem() {
   });
 
   return (
-    <section ref={ref} style={{ background: '#0d1117', padding: '100px 24px 110px' }}>
+    <section ref={ref} style={{ background: '#0d1117', padding: '125px 24px 135px' }}>
       <div className="max-w-[600px] mx-auto">
         {/* Eyebrow */}
         <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', textAlign: 'center', marginBottom: 14, ...f(0) }}>

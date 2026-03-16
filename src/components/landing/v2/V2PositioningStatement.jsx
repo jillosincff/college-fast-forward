@@ -13,7 +13,7 @@ export default function V2PositioningStatement() {
   }, []);
 
   return (
-    <section ref={ref} style={{ background: '#0d1117', padding: '100px 24px', textAlign: 'center' }}>
+    <section ref={ref} style={{ background: '#0d1117', padding: '120px 24px', textAlign: 'center' }}>
       <p style={{
         fontFamily: playfair,
         fontStyle: 'italic',

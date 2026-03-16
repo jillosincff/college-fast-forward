@@ -19,7 +19,7 @@ export default function V2FooterCTA({ onCTA }) {
   return (
     <>
       {/* Bottom CTA — white bg */}
-      <section ref={ref} style={{ background: '#f4f2ee', padding: '80px 24px 72px', textAlign: 'center' }}>
+      <section ref={ref} style={{ background: '#f4f2ee', padding: '100px 24px 90px', textAlign: 'center' }}>
         <p style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(16px, 2vw, 19px)', color: '#374151', lineHeight: 1.6, maxWidth: 520, margin: '0 auto 28px', ...f(0) }}>
           Start your 7-day free trial now — <strong style={{ fontWeight: 600, color: '#E85D20' }}>$29/mo after</strong> (cancel anytime). No card required to start.
         </p>

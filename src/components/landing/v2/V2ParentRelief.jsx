@@ -22,7 +22,7 @@ export default function V2ParentRelief({ onCTA }) {
   const f = (d) => ({ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(16px)', transition: `opacity 0.5s ease ${d}s, transform 0.5s ease ${d}s` });
 
   return (
-    <section ref={ref} className="v2-parent" style={{ background: '#0d1117', padding: '110px 24px 120px', position: 'relative', overflow: 'hidden' }}>
+    <section ref={ref} className="v2-parent" style={{ background: '#0d1117', padding: '135px 24px 150px', position: 'relative', overflow: 'hidden' }}>
       <style>{`@media(max-width:768px){.v2-parent{padding:80px 20px !important}.v2-parent-quotes{grid-template-columns:1fr !important}}`}</style>
       <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse,rgba(250,70,22,0.05),transparent 70%)' }} />
 
