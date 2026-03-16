@@ -28,21 +28,26 @@ export default function V2Hero({ onCTA }) {
         {/* Headline — student panic */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(34px, 5.5vw, 62px)', letterSpacing: '-0.025em', lineHeight: 1.08, marginBottom: 28, padding: '0 4px' }}
+          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(36px, 6vw, 72px)', letterSpacing: '-0.025em', lineHeight: 1.06, marginBottom: 20, padding: '0 4px' }}
         >
-          <span style={{ color: '#f4f0e8' }}>It's mid-March and you still have </span>
-          <span style={{ fontStyle: 'italic', color: '#FA4616' }}>zero plans for summer.</span>
+          <span style={{ color: '#f4f0e8' }}>It's March. </span>
+          <span style={{ fontStyle: 'italic', color: '#FA4616' }}>No internship yet?</span>
         </motion.h1>
 
         {/* Subheadline */}
         <motion.p
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
-          style={{ fontFamily: dmSans, fontWeight: 300, fontSize: 19, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 640, margin: '0 auto 44px', padding: '0 8px' }}
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(18px, 2.2vw, 22px)', color: '#FFFFFF', lineHeight: 1.55, maxWidth: 600, margin: '0 auto 20px', padding: '0 8px' }}
         >
-          Your friends are posting offers. Your parents keep asking questions.
-          You have no real experience, no connections, and you're terrified you're the one who ends up back home.
-          <br /><br />
-          <strong style={{ fontWeight: 500, color: '#FFFFFF' }}>We find real UF alumni already inside the companies you want… and write the exact message you can send today.</strong>
+          Your roommate has an offer. Your parents are freaking. Chill. We got you.
+        </motion.p>
+
+        {/* Body text */}
+        <motion.p
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+          style={{ fontFamily: dmSans, fontWeight: 300, fontSize: 18, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 620, margin: '0 auto 44px', padding: '0 8px' }}
+        >
+          FASTIQ finds real UF alumni already inside the companies you want… and writes the exact message you can send today so you're not the one left behind.
         </motion.p>
 
         {/* ── Live teaser section ── */}
