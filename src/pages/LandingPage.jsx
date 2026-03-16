@@ -11,8 +11,6 @@ import V2Pricing from '@/components/landing/v2/V2Pricing';
 import V2FooterCTA from '@/components/landing/v2/V2FooterCTA';
 
 export default function LandingPage() {
-  const [stats, setStats] = useState({ spots_left: 46 });
-
   useEffect(() => {
     if (!document.getElementById('lp-v2-fonts')) {
       const link = document.createElement('link');
@@ -23,9 +21,6 @@ export default function LandingPage() {
     }
 
     sessionStorage.removeItem('oauth_redirect_in_progress');
-    base44.functions.invoke('getFoundingStats').then(r => {
-      if (r.data?.success) setStats(prev => ({ ...prev, spots_left: r.data.spots_left || 46 }));
-    }).catch(() => {});
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
@@ -59,7 +54,7 @@ export default function LandingPage() {
         <V2Pricing onCTA={handleCTA} />
 
         {/* 4 — Footer */}
-        <V2FooterCTA spotsLeft={stats.spots_left} onCTA={handleCTA} />
+        <V2FooterCTA onCTA={handleCTA} />
       </div>
     </>
   );

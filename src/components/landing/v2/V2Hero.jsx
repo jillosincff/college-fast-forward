@@ -72,7 +72,7 @@ export default function V2Hero({ onCTA }) {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.42 }}
           style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.35)' }}
         >
-          Takes 45 seconds · No sign-up · See real UF people at Amazon, Google, Nike — free
+          7-day free trial · $29/mo after · No card required · Cancel anytime
         </motion.p>
       </div>
     </section>
