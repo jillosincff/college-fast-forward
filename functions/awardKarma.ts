@@ -219,7 +219,7 @@ Deno.serve(async (req) => {
         familyKarma = await base44.asServiceRole.entities.FamilyKarma.create({
           family_group_id: effectiveFamilyGroupId,
           total_karma: 0,
-          karma_level: 'none',
+          karma_level: 'Bronze',
           boost_multiplier: 0
         });
       }
