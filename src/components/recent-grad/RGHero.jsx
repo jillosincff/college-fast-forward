@@ -1,4 +1,6 @@
 import React from 'react';
+import { getKarmaDisplayInfo } from '../karma/karmaConfig';
+import KarmaLadderTooltip from '../karma/KarmaLadderTooltip';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -64,12 +66,23 @@ export default function RGHero({
 
         {/* Stat cards */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 20 }} className="flex-col sm:flex-row">
-          <StatCard
-            label="Karma"
-            value={karma}
-            sub="Higher karma = more visibility"
-            isEmpty={!karma || karma === 0}
-          />
+          <div style={{
+            flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 14, padding: '18px 16px', minWidth: 0,
+          }}>
+            <p style={{
+              fontFamily: dmSans, fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 6,
+            }}>Karma</p>
+            <KarmaLadderTooltip
+              tierName={getKarmaDisplayInfo(karma).tierName}
+              points={getKarmaDisplayInfo(karma).points}
+              pointsToNext={getKarmaDisplayInfo(karma).pointsToNext}
+              nextTierName={getKarmaDisplayInfo(karma).nextTierName}
+              variant="alumni"
+              dark={true}
+            />
+          </div>
           <StatCard
             label="Responses"
             value={responseCount}
