@@ -17,7 +17,7 @@ const ALUMNI = [
     year: "UF '21",
     icon: '🔍',
     color: '#4285F4',
-    message: "Hey James, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all.",
+    message: "Hey Sarah, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all.",
     signature: "— Alex, UF '27",
   },
   {
@@ -26,7 +26,7 @@ const ALUMNI = [
     year: "UF '23",
     icon: '📊',
     color: '#D4A843',
-    message: "Hey Maria, I'm a UF '27 Finance major and saw you're an Analyst at Goldman Sachs. I loved your recent deal work — would love 15 minutes of your time to get your advice as a fellow Gator. No pressure at all.",
+    message: "Hey Sarah, I'm a UF '27 Finance major and saw you're an Analyst at Goldman Sachs. I loved your recent deal work — would love 15 minutes of your time to get your advice as a fellow Gator. No pressure at all.",
     signature: "— Alex, UF '27",
   },
 ];
@@ -279,7 +279,7 @@ export default function InteractiveTeaserDemo() {
               >
                 <p
                   className="text-left min-h-[96px]"
-                  style={{ color: '#FFFFFF', fontSize: '16px', lineHeight: 1.7, fontWeight: 500 }}
+                  style={{ color: '#FFFFFF', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}
                 >
                   {typedText}
                   {isTyping && (

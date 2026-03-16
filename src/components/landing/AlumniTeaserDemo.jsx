@@ -15,7 +15,7 @@ const ALUMNI = [
     year: "UF '21",
     icon: '🔍',
     color: '#4285F4',
-    message: "Hey James, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all.",
+    message: "Hey Sarah, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all.",
     signature: "— Alex, UF '27",
   },
   {
@@ -23,12 +23,12 @@ const ALUMNI = [
     year: "UF '23",
     icon: '📊',
     color: '#D4A843',
-    message: "Hey Maria, I'm a UF '27 Finance major exploring IB roles and noticed your path from UF to Goldman. I'd value 10 minutes to learn from your experience as a fellow Gator. No pressure at all.",
+    message: "Hey Sarah, I'm a UF '27 Finance major and saw you're an Analyst at Goldman Sachs. I loved your recent deal work — would love 15 minutes of your time to get your advice as a fellow Gator. No pressure at all.",
     signature: "— Alex, UF '27",
   },
 ];
 
-const TYPE_SPEED = 25;
+const TYPE_SPEED = 70;
 const DEFAULT_CARD = 1; // Google
 
 export default function AlumniTeaserDemo() {
