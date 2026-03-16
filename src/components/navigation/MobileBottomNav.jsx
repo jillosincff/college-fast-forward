@@ -18,7 +18,8 @@ export default function MobileBottomNav({ user, currentPage }) {
     return 'Dashboard';
   };
 
-  const isParent = (effectivePersona === 'parent' || user?.roles?.includes('parent')) && !isRecentGradAlumni;
+  const isAlumniHelper = effectivePersona === 'alumni' && user?.alumni_intent === 'help_students' && !isRecentGradAlumni;
+  const isParent = ((effectivePersona === 'parent' || user?.roles?.includes('parent')) && !isRecentGradAlumni) || isAlumniHelper;
 
   const tabs = useMemo(() => {
     if (isParent) {
