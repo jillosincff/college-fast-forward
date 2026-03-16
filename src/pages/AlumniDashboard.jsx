@@ -173,20 +173,7 @@ export default function AlumniDashboard() {
         />
       </div>
 
-      {/* Footer */}
-      <footer style={{
-        background: '#f4f2ee', borderTop: '1px solid #e5e7eb', padding: '32px 20px',
-        textAlign: 'center',
-      }}>
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#aaa', marginBottom: 8 }}>
-          © {new Date().getFullYear()} College Fast Forward. All Rights Reserved.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-          <a href="#Terms" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="#Privacy" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="#CookiePolicy" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Cookie Policy</a>
-        </div>
-      </footer>
+      {/* Footer rendered by layout */}
     </div>
   );
 }

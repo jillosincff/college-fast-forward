@@ -63,7 +63,7 @@ export default function ConnectionsPage() {
     const [jobRequests, helpRequests, directoryResponse] = await Promise.all([
       JobRequest.filter({ status: 'active' }, '-created_date', 200).catch(() => []),
       HelpRequest.filter({ status: 'active' }, '-created_date', 200).catch(() => []),
-      base44.functions.invoke('getDirectoryUsers', {}).catch(() => ({ data: { data: [] } })),
+      base44.entities.User.filter({ onboarding_completed: true }, '-created_date', 300).then(users => ({ data: { data: users || [] } })).catch(() => ({ data: { data: [] } })),
     ]);
 
     const normalized = (helpRequests || []).map(hr => ({

@@ -35,7 +35,7 @@ function formatName(name, firstName, lastName, email) {
     const last = parts[parts.length - 1];
     return `${first.charAt(0).toUpperCase()}${first.slice(1).toLowerCase()} ${last.charAt(0).toUpperCase()}.`;
   }
-  return name || 'A UF Student';
+  return name || 'Student';
 }
 
 function getClassYear(gradYear) {
@@ -219,7 +219,7 @@ export default function NetworkPostCard({ question, gator, index, topAnswer, use
               <span style={{
                 fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.8)',
                 background: 'rgba(255,255,255,0.15)', borderRadius: 100, padding: '2px 7px',
-              }}>+5</span>
+              }}>+15</span>
             </button>
           ) : (
             <button onClick={e => { e.stopPropagation(); handleClick(); }} style={{

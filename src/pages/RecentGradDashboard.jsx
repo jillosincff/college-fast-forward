@@ -80,17 +80,17 @@ export default function RecentGradDashboard() {
       const mine = jobReqs.filter(r => r.poster_email === user.email);
       setMyRequests(mine);
 
-      // Build matches — fetch directory users
+      // Build matches — direct SDK call (no backend function needed)
       let directoryUsers = [];
       try {
-        const { getDirectoryUsers } = await import('@/functions/getDirectoryUsers');
-        const res = await getDirectoryUsers();
-        // Handle various response shapes
-        const raw = res?.data?.data || res?.data || res || [];
-        directoryUsers = Array.isArray(raw) ? raw : [];
+        directoryUsers = await base44.entities.User.filter(
+          { onboarding_completed: true },
+          '-created_date',
+          300
+        );
       } catch (e) { console.warn('Directory users fetch failed:', e); }
 
-      const alumniAndParents = directoryUsers.filter(u =>
+      const alumniAndParents = (directoryUsers || []).filter(u =>
         u.email !== user.email &&
         (u.persona === 'parent' || u.persona === 'alumni' || u.roles?.includes('parent') || u.roles?.includes('alumni'))
       );
@@ -102,9 +102,11 @@ export default function RecentGradDashboard() {
           id: u.id,
           email: u.email,
           full_name: u.full_name,
+          first_name: u.first_name,
+          last_name: u.last_name,
           displayName: getDisplayName(u.full_name),
-          jobTitle: u.job_title || u.current_position || '',
-          company: u.company || u.current_company || '',
+          jobTitle: u.current_position || u.job_title || '',
+          company: u.current_company || u.company || '',
           matchedCategories: (u.expertise_areas || []).slice(0, 3),
         }))
         .slice(0, 20);
@@ -254,20 +256,7 @@ export default function RecentGradDashboard() {
         onLinked={() => { setShowParentModal(false); loadData(); }}
       />
 
-      {/* Footer */}
-      <footer style={{
-        background: '#f4f2ee', borderTop: '1px solid #e5e7eb', padding: '32px 20px',
-        textAlign: 'center',
-      }}>
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#aaa', marginBottom: 8 }}>
-          © {new Date().getFullYear()} College Fast Forward. All Rights Reserved.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-          <a href="#Terms" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="#Privacy" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="#CookiePolicy" style={{ fontFamily: dmSans, fontSize: 12, color: '#aaa', textDecoration: 'none' }}>Cookie Policy</a>
-        </div>
-      </footer>
+      {/* Footer rendered by layout */}
     </div>
   );
 }
