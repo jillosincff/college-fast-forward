@@ -316,11 +316,27 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                 </button>
               ) : (
                 <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="flex md:hidden items-center cursor-pointer">
-                  <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg" alt="College Fast Forward" className="h-12 w-auto object-contain" />
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                    alt="College Fast Forward"
+                    className="h-12 w-auto object-contain"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                  />
+                  <span style={{ display: 'none', fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, fontWeight: 700, color: '#0d1117', letterSpacing: '-0.02em', alignItems: 'center' }}>
+                    <span>C</span><span style={{ color: '#E85D20' }}>FF</span>
+                  </span>
                 </div>
               )}
               <div onClick={() => onNavigate(user ? 'Dashboard' : 'LandingPage')} className="hidden md:flex items-center cursor-pointer">
-                <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg" alt="College Fast Forward" className="h-20 w-auto object-contain" />
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+                  alt="College Fast Forward"
+                  className="h-20 w-auto object-contain"
+                  onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                />
+                <span style={{ display: 'none', fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 18, fontWeight: 700, color: '#0d1117', letterSpacing: '-0.02em', alignItems: 'center' }}>
+                  <span>C</span><span style={{ color: '#E85D20' }}>FF</span>
+                </span>
               </div>
               {user && (
                 <div className="hidden md:flex space-x-1">
@@ -805,13 +821,17 @@ function AppContent() {
   const PageComponent = getPageComponent(resolvedPage);
 
   // Pages where certain users have their own nav (hide the global header)
+  // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard'];
+  const parentOwnNavPages = ['ParentDashboard'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
   const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
+  const isParentUser = user?.persona === 'parent' || user?.roles?.includes('parent');
   const hasOwnNav =
     ((isStudentUser || isRecentGradAlumni) && studentOwnNavPages.includes(resolvedPage)) ||
-    (isEstablishedAlumniUser && resolvedPage === 'AlumniDashboard');
+    (isEstablishedAlumniUser && resolvedPage === 'AlumniDashboard') ||
+    (isParentUser && parentOwnNavPages.includes(resolvedPage));
 
   const showHeader = user &&
     resolvedPage !== 'LandingPage' &&

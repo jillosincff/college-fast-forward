@@ -16,7 +16,15 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
  */
 export default function KarmaLadderTooltip({ tierName, points, pointsToNext, nextTierName, variant = 'parent', dark = true }) {
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const ref = useRef(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -75,24 +83,47 @@ export default function KarmaLadderTooltip({ tierName, points, pointsToNext, nex
         ) : null}
       </button>
 
-      {/* Tooltip */}
+      {/* Tooltip / Bottom Sheet */}
       {open && (
-        <div style={{
-          position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
-          marginTop: 10, zIndex: 300, minWidth: 260,
-          background: dark ? '#1a1f2e' : '#fff',
-          border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
-          borderRadius: 14, padding: '18px 20px',
-          boxShadow: dark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.12)',
-        }}>
-          {/* Arrow */}
-          <div style={{
-            position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%) rotate(45deg)',
-            width: 12, height: 12,
+        <>
+          {/* Backdrop on mobile */}
+          {isMobile && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+              zIndex: 299, 
+            }} onClick={() => setOpen(false)} />
+          )}
+          <div style={isMobile ? {
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            zIndex: 300, minWidth: '100%',
             background: dark ? '#1a1f2e' : '#fff',
             border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
-            borderBottom: 'none', borderRight: 'none',
-          }} />
+            borderRadius: '20px 20px 0 0', padding: '24px 24px calc(24px + env(safe-area-inset-bottom))',
+            boxShadow: '0 -12px 40px rgba(0,0,0,0.3)',
+          } : {
+            position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+            marginTop: 10, zIndex: 300, minWidth: 260,
+            background: dark ? '#1a1f2e' : '#fff',
+            border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
+            borderRadius: 14, padding: '18px 20px',
+            boxShadow: dark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.12)',
+          }}>
+          {/* Arrow (desktop only) */}
+          {!isMobile && (
+            <div style={{
+              position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%) rotate(45deg)',
+              width: 12, height: 12,
+              background: dark ? '#1a1f2e' : '#fff',
+              border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
+              borderBottom: 'none', borderRight: 'none',
+            }} />
+          )}
+          {/* Drag handle (mobile only) */}
+          {isMobile && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
+            </div>
+          )}
 
           <p style={{
             fontFamily: dmSans, fontSize: 12, fontWeight: 600,
@@ -154,6 +185,7 @@ export default function KarmaLadderTooltip({ tierName, points, pointsToNext, nex
             {bottomLine}
           </p>
         </div>
+        </>
       )}
     </div>
   );
