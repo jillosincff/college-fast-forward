@@ -30,8 +30,8 @@ export default function V2Hero({ onCTA }) {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
           style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(34px, 5.5vw, 62px)', letterSpacing: '-0.025em', lineHeight: 1.08, marginBottom: 28, padding: '0 4px' }}
         >
-          <span style={{ color: '#f4f0e8' }}>It's mid-March and your summer is still </span>
-          <span style={{ fontStyle: 'italic', color: '#FA4616' }}>completely screwed.</span>
+          <span style={{ color: '#f4f0e8' }}>It's mid-March and you still have </span>
+          <span style={{ fontStyle: 'italic', color: '#FA4616' }}>zero plans for summer.</span>
         </motion.h1>
 
         {/* Subheadline */}

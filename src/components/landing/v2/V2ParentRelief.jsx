@@ -36,10 +36,11 @@ export default function V2ParentRelief({ onCTA }) {
 
         <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.7, textAlign: 'center', marginBottom: 20, ...f(0.08) }}>
           You're watching your kid spiral — late nights on Handshake, dodging your questions, stress everywhere.
-          You're spending a fortune on college and terrified they'll graduate with nothing lined up.
         </p>
-        <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.7, textAlign: 'center', marginBottom: 0, ...f(0.12) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.7, textAlign: 'center', marginBottom: 20, ...f(0.12) }}>
           FASTIQ gives them something real to act on: <strong style={{ fontWeight: 500 }}>real UF alumni, ready-to-send messages, visible progress</strong>.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.7, textAlign: 'center', marginBottom: 0, ...f(0.14) }}>
           You stop asking "any updates?" because you see momentum. They stop feeling invisible.
         </p>
 
