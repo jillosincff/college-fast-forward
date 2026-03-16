@@ -74,7 +74,7 @@ export default function AlumniOnboarding() {
   const updateForm = (updates) => {
     if (updates.gradYear) {
       const year = parseInt(updates.gradYear);
-      // Hard cutoff: 2025 or 2026 = recent_grad, 2024 and earlier = established
+      // Hard cutoff: 2025 or later = recent_grad, 2024 and earlier = established
       const seniority = (year >= 2025) ? 'recent_grad' : 'established';
       updates.seniority = seniority;
       if (seniority === 'recent_grad') {
