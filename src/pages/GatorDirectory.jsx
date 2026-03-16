@@ -210,7 +210,7 @@ export default function GatorDirectory() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
       {/* Hero */}
       <DirectoryHero stats={stats} loading={loading} />
 
