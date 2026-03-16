@@ -5,6 +5,7 @@ import UserAvatar from '@/components/common/UserAvatar';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
 import ThisHelpedButton from './ThisHelpedButton';
+import formatDisplayName from '@/components/utils/formatDisplayName';
 // Upvote and Answer operations handled via backend function to bypass RLS
 import moment from 'moment';
 
@@ -175,7 +176,7 @@ export default function AnswerCard({
             />
             <div className="author-details">
               <div className="author-name-row">
-                <span className="author-name">{answer.answerer_name}</span>
+                <span className="author-name">{formatDisplayName(answer.answerer_name, 'Helper')}</span>
                 {answer.is_lightweight_responder ? (
                   <span className="persona-badge guest">✓ Guest (verified)</span>
                 ) : answer.answerer_persona === 'parent' ? (
@@ -234,7 +235,7 @@ export default function AnswerCard({
                 className="action-btn"
               >
                 <Mail className="w-4 h-4 mr-1" />
-                Message {answer.answerer_name?.split(' ')[0]}
+                Message {formatDisplayName(answer.answerer_name, 'Helper').split(' ')[0]}
               </Button>
             )}
 

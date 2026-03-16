@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import formatDisplayName, { getInitialsFromUser } from '@/components/utils/formatDisplayName';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const AVATAR_COLORS = ['#0d1117', '#2a4a8a', '#3a5a3a', '#4a3a6a', '#c62828', '#5a4a2a'];
@@ -10,23 +11,7 @@ function hashStr(s) {
   return Math.abs(h);
 }
 
-function formatName(raw) {
-  if (!raw) return 'Unknown';
-  const s = raw.trim();
-  // "Last, First M." → "First Last"
-  if (s.includes(',')) {
-    const [last, rest] = s.split(',').map(p => p.trim());
-    const first = rest?.split(/\s+/)[0] || '';
-    return `${first} ${last}`.trim();
-  }
-  // Already "First Last"
-  return s.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-}
-
-function getInitials(name) {
-  const parts = formatName(name).split(/\s+/);
-  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || '??';
-}
+// Local formatName and getInitials removed — using shared formatDisplayName utility
 
 function formatTimestamp(dateStr) {
   if (!dateStr) return '';
@@ -50,8 +35,8 @@ function getRole(userData) {
 export default function ThreadCard({ thread, currentUserEmail, index, onClick }) {
   const { contactEmail, contactName, contactData, lastMessage, lastMessageAt, unreadCount, isSentByMe } = thread;
 
-  const displayName = formatName(contactName);
-  const initials = getInitials(contactName);
+  const displayName = formatDisplayName(contactName, 'Unknown');
+  const initials = getInitialsFromUser(contactName, '??');
   const avatarColor = AVATAR_COLORS[hashStr(contactEmail || '') % AVATAR_COLORS.length];
   const role = getRole(contactData);
   const company = contactData?.current_company || contactData?.company || '';
@@ -61,7 +46,7 @@ export default function ThreadCard({ thread, currentUserEmail, index, onClick })
   let preview = (lastMessage?.body || '').replace(/^(Re:|Fwd:|Message from )[^\n]*/i, '').trim();
   preview = preview.slice(0, 80) + (preview.length > 80 ? '...' : '');
 
-  const senderTag = isSentByMe ? 'You: ' : `${formatName(contactName).split(' ')[0]}: `;
+  const senderTag = isSentByMe ? 'You: ' : `${formatDisplayName(contactName, 'Unknown').split(' ')[0]}: `;
 
   return (
     <div onClick={onClick} style={{
