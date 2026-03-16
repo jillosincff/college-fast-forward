@@ -17,15 +17,13 @@ import AlumniOnboardingComplete from '../components/onboarding/alumni-v2/AlumniO
 
 /*
  * RECENT GRAD (2025/2026) — 6 logical steps:
- *   Step 1: Details → Step 2: What looking for + Industry → Step 3: Parent invite
- *   → Step 4: Pledge → Step 5: Ready → Step 6: Notifications (complete screen)
- *   Internal step numbers: 1,2,3,4,5, then complete=true
+ *   1: Details → 2: What looking for + Industry → 3: Parent invite
+ *   → 4: Pledge (full screen) → 5: Ready → complete screen (notifications)
  *
  * ESTABLISHED (≤2024) — 7 logical steps:
- *   Step 1: Details → Step 2: About → Step 3: Industry → Step 4: Intent
- *   → Step 5: Help (helpers only, seekers skip) → Step 6: Pledge → Step 7: Ready
- *   → Notifications (complete screen)
- *   Internal step numbers: 1,2,3,4,5,6,7, then complete=true
+ *   1: Details → 2: About → 3: Industry → 4: Intent fork
+ *   → 5: Help (helpers only, seekers skip) → 6: Pledge (full screen) → 7: Ready
+ *   → complete screen (notifications)
  */
 
 export default function AlumniOnboarding() {
@@ -55,7 +53,6 @@ export default function AlumniOnboarding() {
     invitedParentEmail: '',
   });
 
-  const currentYear = new Date().getFullYear();
   const isRecentGrad = formData.seniority === 'recent_grad';
   const TOTAL_STEPS = isRecentGrad ? 6 : 7;
   const isHelper = formData.intent === 'help_students';
@@ -85,29 +82,19 @@ export default function AlumniOnboarding() {
   };
 
   /*
-   * RECENT GRAD navigation: 1→2→3→4(pledge)→5(ready)→complete
+   * RECENT GRAD navigation: 1→2→3→4(pledge)→5(ready)→finish
    * ESTABLISHED navigation:
-   *   1→2→3→4→ helper:5→6(pledge)→7(ready)→complete
-   *   1→2→3→4→ seeker:skip5→6(pledge)→7(ready)→complete
+   *   1→2→3→4→ helper:5→6(pledge)→7(ready)→finish
+   *   1→2→3→4→ seeker:skip5→6(pledge)→7(ready)→finish
    */
   const goNext = () => {
     if (isRecentGrad) {
-      // RG steps: 1,2,3,4(pledge),5(ready) → complete
-      if (step === 5) {
-        handleFinish();
-        return;
-      }
+      if (step === 5) { handleFinish(); return; }
       setStep(s => s + 1);
     } else {
-      // Established: 1,2,3,4,5,6(pledge),7(ready)
-      if (step === 4 && isSeeker) {
-        setStep(6); // seekers skip Help step 5
-      } else if (step === 7) {
-        handleFinish();
-        return;
-      } else {
-        setStep(s => s + 1);
-      }
+      if (step === 4 && isSeeker) { setStep(6); return; }
+      if (step === 7) { handleFinish(); return; }
+      setStep(s => s + 1);
     }
   };
 
@@ -115,11 +102,8 @@ export default function AlumniOnboarding() {
     if (isRecentGrad) {
       setStep(s => Math.max(1, s - 1));
     } else {
-      if (step === 6 && isSeeker) {
-        setStep(4); // seekers skip back over Help step
-      } else {
-        setStep(s => Math.max(1, s - 1));
-      }
+      if (step === 6 && isSeeker) { setStep(4); return; }
+      setStep(s => Math.max(1, s - 1));
     }
   };
 
@@ -207,16 +191,16 @@ export default function AlumniOnboarding() {
     }
   };
 
-  // Notifications screen
+  // Notifications screen (after onboarding saved)
   if (complete) {
     return <AlumniOnboardingComplete user={user} onDone={goToDashboard} />;
   }
 
   // ═══════════════════════════════════════════════════════
-  // RECENT GRAD PATH
+  // RECENT GRAD PATH — 6 steps
   // ═══════════════════════════════════════════════════════
   if (isRecentGrad) {
-    // RG Step 4 = Pledge (full screen)
+    // RG Step 4 = Pledge (full screen, no two-panel)
     if (step === 4) {
       return (
         <AlumniStep6Pledge
@@ -230,7 +214,7 @@ export default function AlumniOnboarding() {
     }
 
     return (
-      <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent="seeking_help" isRecentGrad={true} stepMap="recent_grad">
+      <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent="seeking_help" isRecentGrad={true}>
         {step === 1 && <AlumniStep1Details formData={formData} onUpdate={updateForm} onNext={goNext} />}
         {step === 2 && <AlumniStep2Seeker formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
         {step === 3 && <AlumniStep3ParentInvite formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
@@ -248,9 +232,9 @@ export default function AlumniOnboarding() {
   }
 
   // ═══════════════════════════════════════════════════════
-  // ESTABLISHED PATH
+  // ESTABLISHED PATH — 7 steps
   // ═══════════════════════════════════════════════════════
-  // EA Step 6 = Pledge (full screen)
+  // EA Step 6 = Pledge (full screen, no two-panel)
   if (step === 6) {
     return (
       <AlumniStep6Pledge
@@ -264,7 +248,7 @@ export default function AlumniOnboarding() {
   }
 
   return (
-    <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent={formData.intent} isRecentGrad={false} stepMap="established">
+    <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent={formData.intent} isRecentGrad={false}>
       {step === 1 && <AlumniStep1Details formData={formData} onUpdate={updateForm} onNext={goNext} />}
       {step === 2 && <AlumniStep2About formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
       {step === 3 && <AlumniStep3Industry formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}

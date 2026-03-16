@@ -30,9 +30,9 @@ function Callout({ bold, body }) {
   );
 }
 
-// ═══════════════════════════════════════════
-// RECENT GRAD left panel content
-// ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
+   RECENT GRAD left panel content
+   ═══════════════════════════════════════════ */
 function RecentGradPanel({ step }) {
   if (step === 1) {
     return (
@@ -85,7 +85,6 @@ function RecentGradPanel({ step }) {
     );
   }
 
-  // Step 5 = Ready (RG)
   if (step === 5) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -109,12 +108,10 @@ function RecentGradPanel({ step }) {
   return null;
 }
 
-// ═══════════════════════════════════════════
-// ESTABLISHED left panel content
-// ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
+   ESTABLISHED left panel content
+   ═══════════════════════════════════════════ */
 function EstablishedPanel({ step, intent }) {
-  const isHelper = intent === 'help_students';
-
   if (step === 1) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

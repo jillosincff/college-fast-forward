@@ -16,7 +16,7 @@ function getAvatarColor(str) {
 export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, onBack }) {
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
-  const [result, setResult] = useState(null); // null = not searched, 'found' | 'not_found'
+  const [result, setResult] = useState(null);
   const [foundParent, setFoundParent] = useState(null);
   const [linking, setLinking] = useState(false);
   const [linked, setLinked] = useState(false);
@@ -44,7 +44,6 @@ export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, on
         setResult('found');
       } else {
         setResult('not_found');
-        // Pre-fill invite email if query looks like an email
         if (query.includes('@')) setInviteEmail(query.trim());
         else setInviteEmail('');
       }
@@ -61,7 +60,6 @@ export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, on
     if (!foundParent) return;
     setLinking(true);
     try {
-      // Store parent link info for post-onboarding processing
       onUpdate({ linkedParentId: foundParent.id, linkedParentEmail: foundParent.email });
       setLinked(true);
     } catch (err) {
@@ -80,7 +78,6 @@ export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, on
       setInvited(true);
     } catch (err) {
       console.error('Invite failed:', err);
-      // Still mark as done so they can proceed
       setInvited(true);
     } finally {
       setInviting(false);
@@ -100,8 +97,8 @@ export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, on
         Search by name or email to find and link them.
       </p>
 
-      {/* Search */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+      {/* Search — single full-width input + orange button */}
+      <div style={{ marginBottom: 20 }}>
         <input
           type="text"
           value={query}
@@ -109,21 +106,21 @@ export default function AlumniStep3ParentInvite({ formData, onUpdate, onNext, on
           onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
           placeholder="e.g., Jane Doe or jane@email.com"
           style={{
-            fontFamily: dmSans, fontSize: 14, flex: 1, height: 48,
+            fontFamily: dmSans, fontSize: 14, width: '100%', height: 48,
             border: '2px solid #e5e7eb', borderRadius: 12, padding: '0 14px',
-            outline: 'none', boxSizing: 'border-box',
+            outline: 'none', boxSizing: 'border-box', marginBottom: 10,
           }}
         />
         <button
           onClick={handleSearch}
           disabled={!query.trim() || searching}
           style={{
-            fontFamily: dmSans, fontSize: 14, fontWeight: 700, padding: '0 24px', height: 48,
+            fontFamily: dmSans, fontSize: 14, fontWeight: 700, width: '100%', height: 48,
             borderRadius: 12, border: 'none',
             background: query.trim() ? '#E85D20' : '#e5e7eb',
             color: query.trim() ? '#fff' : '#aaa',
             cursor: query.trim() ? 'pointer' : 'not-allowed',
-            minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}
         >
           {searching ? <Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} /> : 'Search →'}

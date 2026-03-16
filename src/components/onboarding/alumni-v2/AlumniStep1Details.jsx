@@ -3,9 +3,8 @@ import React from 'react';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
-const currentYear = new Date().getFullYear();
 const gradYears = [];
-for (let y = currentYear; y >= 1960; y--) gradYears.push(y);
+for (let y = 2026; y >= 1960; y--) gradYears.push(y);
 
 function getSeniorityLabel(year) {
   if (!year) return null;

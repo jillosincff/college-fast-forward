@@ -7,12 +7,11 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 const RG_LABELS = ['Details', 'Looking For', 'Parent', 'Pledge', 'Ready'];
 const EA_LABELS = ['Details', 'About', 'Industry', 'Intent', 'Help', 'Pledge', 'Ready'];
 
-function ProgressDots({ step, totalSteps, isRecentGrad, stepMap }) {
+function ProgressDots({ step, totalSteps, isRecentGrad }) {
   const labels = isRecentGrad ? RG_LABELS : EA_LABELS;
-  // Map display index to actual internal step number
   const stepMapping = isRecentGrad
-    ? [1, 2, 3, 4, 5] // RG: 5 visible dots (step 6=notifications is the complete screen)
-    : [1, 2, 3, 4, 5, 6, 7]; // EA: 7 dots
+    ? [1, 2, 3, 4, 5]
+    : [1, 2, 3, 4, 5, 6, 7];
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32, flexWrap: 'wrap' }}>
@@ -53,14 +52,12 @@ function ProgressDots({ step, totalSteps, isRecentGrad, stepMap }) {
 
 function getStepLabel(step, totalSteps, isRecentGrad) {
   if (step === 1) return 'WELCOME TO';
-  // For RG, step 5 is the final visible panel step
   if (isRecentGrad && step === 5) return 'FINAL STEP';
-  // For EA, step 7 is the final visible panel step
   if (!isRecentGrad && step === 7) return 'FINAL STEP';
   return `STEP ${step} OF ${totalSteps}`;
 }
 
-export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRecentGrad, stepMap, children }) {
+export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRecentGrad, children }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
       <div className="ao-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
@@ -73,7 +70,7 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRec
           padding: '40px 36px',
           display: 'flex', flexDirection: 'column',
         }}>
-          <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} stepMap={stepMap} />
+          <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} />
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 16,
@@ -89,7 +86,7 @@ export default function AlumniOnboardingLayout({ step, totalSteps, intent, isRec
             backgroundImage: 'linear-gradient(135deg, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)',
             padding: '24px 20px 20px', textAlign: 'center',
           }}>
-            <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} stepMap={stepMap} />
+            <ProgressDots step={step} totalSteps={totalSteps} isRecentGrad={isRecentGrad} />
           </div>
         </div>
 
