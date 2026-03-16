@@ -31,19 +31,6 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
         Just confirm your visibility settings.
       </p>
 
-      {/* Karma explainer */}
-      <div style={{
-        background: '#eff6ff', borderRadius: 12, padding: '14px 18px', marginBottom: 20,
-        border: '1px solid #dbeafe',
-      }}>
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0 }}>
-          {isRecentGrad
-            ? <><strong>🎓 As a recent grad</strong>, you'll be routed to the student dashboard where you can access FASTIQ, networking tools, and connect with parents and alumni who can help you.</>
-            : <><strong>💡 Your Karma:</strong> Points you earn from helping students boost visibility for your own career requests.</>
-          }
-        </p>
-      </div>
-
       {/* Directory toggle */}
       <div style={{
         background: '#f8fafc', borderRadius: 14, padding: '20px', marginBottom: 16,
@@ -55,7 +42,10 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
               Show my profile in the directory
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
-              Students can discover you and reach out for help
+              {isRecentGrad
+                ? 'Parents and alumni can discover you and reach out to help'
+                : 'Students can discover you and reach out for help'
+              }
             </p>
           </div>
           <Switch
@@ -71,7 +61,7 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
         border: '1px solid #fef08a',
       }}>
         <p style={{ fontFamily: dmSans, fontSize: 13, color: '#854d0e', lineHeight: 1.5, margin: 0 }}>
-          <strong>💡 Tip:</strong> Being visible in the directory means more students can find you based on your expertise. You can always change this later in your profile settings.
+          <strong>💡 Tip:</strong> Being visible in the directory means more {isRecentGrad ? 'people' : 'students'} can find you based on your {isRecentGrad ? 'background' : 'expertise'}. You can always change this later in your profile settings.
         </p>
       </div>
 
@@ -83,14 +73,20 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
           Here's what you've shared:
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {formData.major && (
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
+              🎓 {formData.major}{formData.gradYear ? ` · Class of ${formData.gradYear}` : ''}
+            </p>
+          )}
+          {/* Established: show company/title */}
+          {!isRecentGrad && formData.company && (
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
+              🏢 {formData.company}{formData.jobTitle ? ` · ${formData.jobTitle}` : ''}
+            </p>
+          )}
           {formData.industries.length > 0 && (
             <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
               🏭 {formData.industries.map(i => INDUSTRIES_MAP[i] || i).join(', ')}
-            </p>
-          )}
-          {formData.major && (
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
-              🎓 {formData.major}{formData.gradYear ? ` '${String(formData.gradYear).slice(-2)}` : ''}
             </p>
           )}
           {isHelper && formData.helpTypes.length > 0 && (
@@ -100,12 +96,7 @@ export default function AlumniStep7Ready({ formData, onUpdate, onFinish, onBack,
           )}
           {!isHelper && (
             <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
-              🔍 Looking for: career opportunities
-            </p>
-          )}
-          {formData.company && (
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: 0 }}>
-              🏢 {formData.company}{formData.jobTitle ? ` — ${formData.jobTitle}` : ''}
+              🔍 Looking for: {formData.targetRole?.trim() || 'career opportunities'}
             </p>
           )}
         </div>
