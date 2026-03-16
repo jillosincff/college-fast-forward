@@ -1341,7 +1341,7 @@ function AppContent() {
     console.log('📊 [User State]', { hasNoRole, needsOnboarding, isUFLStudent, pendingRole, inNewUserFlow, userPersona: user.persona, userRoles: user.roles });
 
     // Landing/Dashboard navigation logic - ALWAYS check routing for authenticated users
-    if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard' || currentPage === 'AlumniDashboard')) {
+    if (user && (currentPage === 'LandingPage' || currentPage === 'Dashboard' || currentPage === 'ParentDashboard')) {
       let destination = currentPage;
 
       console.log('🔄 [Routing Check] User on:', currentPage, '| hasNoRole:', hasNoRole, '| needsOnboarding:', needsOnboarding, '| effectiveRole:', effectiveRole);
