@@ -55,7 +55,36 @@ const childPageTitles = {
   ApplicationBoost: 'Application Boost',
 };
 
-const APP_VERSION = 'v1.1.9';
+const APP_VERSION = 'v1.2.0';
+
+/**
+ * SINGLE SOURCE OF TRUTH for dashboard routing.
+ * Rules:
+ *   admin → AdminDashboard
+ *   gator/student → Dashboard
+ *   parent → ParentDashboard
+ *   alumni + graduation_year >= 2025 (recent_grad) → RecentGradDashboard
+ *   alumni + graduation_year <= 2024 (established) → AlumniDashboard
+ *   alumni fallback → AlumniDashboard
+ */
+function getDashboardForUser(user) {
+  if (!user) return 'LandingPage';
+  if (user.roles?.includes('admin')) return 'AdminDashboard';
+
+  const persona = user.persona;
+  if (persona === 'gator' || persona === 'student') return 'Dashboard';
+  if (persona === 'parent') return 'ParentDashboard';
+  if (persona === 'alumni') {
+    if (user.alumni_seniority === 'recent_grad') return 'RecentGradDashboard';
+    // Established alumni (2024 and earlier) — always AlumniDashboard
+    return 'AlumniDashboard';
+  }
+  // Fallback: check roles array
+  if (user.roles?.includes('parent')) return 'ParentDashboard';
+  if (user.roles?.includes('gator')) return 'Dashboard';
+  if (user.roles?.includes('alumni')) return 'AlumniDashboard';
+  return 'Dashboard';
+}
 
 function handleCacheBusting() {
   try {
@@ -226,24 +255,36 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     } catch (error) { console.error('Failed to mark PIF notification as read:', error); }
   };
 
+  // Determine effective alumni sub-type for nav filtering
+  const isEstablishedAlumni = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
+  const isRecentGradAlumniNav = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
+
   const allNavItems = useMemo(() => [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
     { name: 'Ask the Network', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
     { name: 'Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
-    { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'alumni'] },
+    { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator', 'recent_grad_alumni'] },
     { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
-    { name: 'My Impact', page: 'MyImpact', icon: Users, roles: ['parent'] },
+    { name: 'My Impact', page: 'MyImpact', icon: Users, roles: ['parent', 'established_alumni'] },
     { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator'] },
   ], []);
 
   const filteredNavItems = useMemo(() => {
     if (!user) return [];
     const effectivePersona = user.email?.toLowerCase().endsWith('@ufl.edu') ? 'gator' : user.persona;
+    
+    // Build effective roles list including sub-types
+    const effectiveRoles = new Set();
+    if (effectivePersona) effectiveRoles.add(effectivePersona);
+    if (user.roles) user.roles.forEach(r => effectiveRoles.add(r));
+    // Add alumni sub-type roles for nav filtering
+    if (isEstablishedAlumni) effectiveRoles.add('established_alumni');
+    if (isRecentGradAlumniNav) effectiveRoles.add('recent_grad_alumni');
+    
     return allNavItems.filter(item => {
-      return (effectivePersona && item.roles.includes(effectivePersona)) ||
-        (user.roles && user.roles.some(role => item.roles.includes(role)));
+      return item.roles.some(role => effectiveRoles.has(role));
     });
-  }, [user, allNavItems]);
+  }, [user, allNavItems, isEstablishedAlumni, isRecentGradAlumniNav]);
 
   if (!user) {
     return (
@@ -285,14 +326,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                   {filteredNavItems.map((item) => {
                     let targetPageForNav = item.page;
                     if (item.name === 'Dashboard') {
-                      if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
-                      else if (user.persona === 'alumni') {
-                        if (user.alumni_seniority === 'recent_grad') targetPageForNav = 'RecentGradDashboard';
-                        else if (user.alumni_intent === 'help_students') targetPageForNav = 'ParentDashboard';
-                        else targetPageForNav = 'Dashboard';
-                      }
-                      else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
-                      else targetPageForNav = 'Dashboard';
+                      targetPageForNav = getDashboardForUser(user);
                     }
                     const isActive = currentPage === targetPageForNav;
                     return (
@@ -324,14 +358,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                         {filteredNavItems.map((item) => {
                           let targetPageForNav = item.page;
                           if (item.name === 'Dashboard') {
-                            if (user.persona === 'parent') targetPageForNav = 'ParentDashboard';
-                            else if (user.persona === 'alumni') {
-                              if (user.alumni_seniority === 'recent_grad') targetPageForNav = 'RecentGradDashboard';
-                              else if (user.alumni_intent === 'help_students') targetPageForNav = 'ParentDashboard';
-                              else targetPageForNav = 'Dashboard';
-                            }
-                            else if (user.persona === 'admin' || user.roles?.includes('admin')) targetPageForNav = 'AdminDashboard';
-                            else targetPageForNav = 'Dashboard';
+                            targetPageForNav = getDashboardForUser(user);
                           }
                           const Icon = item.icon;
                           const isActive = currentPage === targetPageForNav;
@@ -695,15 +722,7 @@ function AppContent() {
 
     if (currentPage === 'LandingPage') {
       if (user) {
-        let destination = 'Dashboard';
-        if (user.roles?.includes('admin')) destination = 'AdminDashboard';
-        else if (user.persona === 'parent' || user.roles?.includes('parent')) destination = 'ParentDashboard';
-        else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-          if (user.alumni_seniority === 'recent_grad') destination = 'RecentGradDashboard';
-          else if (user.alumni_intent === 'help_students') destination = 'ParentDashboard';
-          else destination = 'Dashboard';
-        }
-        navigate(destination); return;
+        navigate(getDashboardForUser(user)); return;
       }
       setResolvedPage(currentPage); return;
     }
@@ -736,7 +755,8 @@ function AppContent() {
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    if (user && (currentPage === 'Dashboard' || currentPage === 'ParentDashboard' || currentPage === 'RecentGradDashboard')) {
+    const dashboardPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard', 'AlumniDashboard'];
+    if (user && dashboardPages.includes(currentPage)) {
       let destination = currentPage;
 
       if (inNewUserFlow) { destination = 'GatorWelcome'; }
@@ -750,14 +770,7 @@ function AppContent() {
         else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) destination = 'AlumniOnboarding';
         else destination = 'GatorAuth';
       } else {
-        if (user.roles?.includes('admin')) destination = 'AdminDashboard';
-        else if (effectiveRole === 'gator') destination = 'Dashboard';
-        else if (effectiveRole === 'parent' || user.roles?.includes('parent')) destination = 'ParentDashboard';
-        else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
-          if (user.alumni_seniority === 'recent_grad') destination = 'RecentGradDashboard';
-          else if (user.alumni_intent === 'help_students') destination = 'ParentDashboard';
-          else destination = 'Dashboard';
-        } else destination = 'Dashboard';
+        destination = getDashboardForUser(user);
       }
 
       if (destination !== currentPage) { navigate(destination); return; }
@@ -790,14 +803,11 @@ function AppContent() {
 
   const PageComponent = getPageComponent(resolvedPage);
 
-  // Pages where student/gator/recent-grad users have their own nav
-  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard'];
+  // Pages where student/gator/recent-grad users have their own nav (hide the global header)
+  const ownNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
-  const isAlumniSeeker = user?.persona === 'alumni' && user?.alumni_intent !== 'help_students';
-  const isAlumniHelper = user?.persona === 'alumni' && user?.alumni_intent === 'help_students' && !isRecentGradAlumni;
-  const isParentOrAlumniHelper = user?.persona === 'parent' || isAlumniHelper || user?.roles?.includes('parent');
-  const hasOwnNav = (isStudentUser || isRecentGradAlumni || isAlumniSeeker) && !isParentOrAlumniHelper && studentOwnNavPages.includes(resolvedPage);
+  const hasOwnNav = (isStudentUser || isRecentGradAlumni) && ownNavPages.includes(resolvedPage);
 
   const showHeader = user &&
     resolvedPage !== 'LandingPage' &&
