@@ -1391,11 +1391,13 @@ function AppContent() {
         } else if (effectiveRole === 'alumni' || user.roles?.includes('alumni')) {
             // Recent grad alumni → Student Dashboard
             // Alumni helpers → ParentDashboard (help students like parents)
-            // Alumni seekers → AlumniDashboard (need help like students)
+            // Alumni seekers → Student Dashboard
             if (user.alumni_seniority === 'recent_grad') {
               destination = 'Dashboard';
+            } else if (user.alumni_intent === 'help_students') {
+              destination = 'ParentDashboard';
             } else {
-              destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+              destination = 'Dashboard'; // seekers → student dashboard
             }
           } else {
           destination = 'Dashboard';
