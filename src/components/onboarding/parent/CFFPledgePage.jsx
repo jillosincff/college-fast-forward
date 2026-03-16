@@ -194,6 +194,20 @@ export default function CFFPledgePage({ user, onComplete }) {
           </p>
         </motion.div>
 
+        {/* Instruction hint */}
+        {!allChecked && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{ textAlign: 'center', marginBottom: 16 }}
+          >
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: orange }}>
+              ☝️ Check all four boxes above to continue
+            </p>
+          </motion.div>
+        )}
+
         {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -207,16 +221,36 @@ export default function CFFPledgePage({ user, onComplete }) {
             style={{
               width: '100%', maxWidth: 480, padding: '16px 32px',
               borderRadius: 100, border: 'none',
-              background: allChecked ? orange : '#ccc',
-              color: '#fff', fontFamily: dmSans, fontSize: 16, fontWeight: 600,
+              background: allChecked ? orange : '#ddd',
+              color: allChecked ? '#fff' : '#999',
+              fontFamily: dmSans, fontSize: 16, fontWeight: 600,
               cursor: allChecked ? 'pointer' : 'default',
               transition: 'all 0.2s', minHeight: 'auto',
               opacity: submitting ? 0.7 : 1,
             }}
           >
-            {submitting ? 'Saving...' : 'I Care. I Pledge. Let Me In. →'}
+            {submitting ? 'Saving...' : allChecked ? 'I Care. I Pledge. Let Me In. →' : 'Check all pledges above to continue'}
           </button>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#aaa', marginTop: 12 }}>
+
+          {/* Skip option */}
+          <button
+            onClick={async () => {
+              setSubmitting(true);
+              await base44.auth.updateMe({ pledge_taken: true, pledge_skipped: true, pledge_taken_at: new Date().toISOString() });
+              onComplete();
+            }}
+            disabled={submitting}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#aaa',
+              marginTop: 16, padding: '8px 16px', textDecoration: 'underline',
+              minHeight: 'auto',
+            }}
+          >
+            Skip for now →
+          </button>
+
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#aaa', marginTop: 8 }}>
             This isn't a legal contract — it's a promise to a community of parents who are counting on each other.
           </p>
         </motion.div>
