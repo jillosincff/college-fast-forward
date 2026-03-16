@@ -14,7 +14,7 @@ export default function MobileBottomNav({ user, currentPage }) {
     if (effectivePersona === 'parent' || user?.roles?.includes('parent')) return 'ParentDashboard';
     if (isRecentGradAlumni) return 'Dashboard';
     if (effectivePersona === 'alumni' || user?.roles?.includes('alumni'))
-      return user?.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+      return user?.alumni_intent === 'help_students' ? 'ParentDashboard' : 'Dashboard';
     return 'Dashboard';
   };
 
