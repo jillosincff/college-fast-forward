@@ -5,7 +5,7 @@ const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const QUOTES = [
-  { text: 'My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own. Worth every penny.', name: 'Dana G.', role: 'UF Parent' },
+  { text: 'My daughter landed an internship at a legal marketing firm — through a connection she never would have found on her own. Worth every penny.', name: 'Diana G.', role: 'UF Parent' },
   { text: 'I spent weeks messaging people on LinkedIn and literally got no replies. I messaged 8 people on FASTIQ and 6 of them got right back to me. Total game-changer.', name: 'Tyler B.', role: 'UF Senior · Business' },
 ];
 
@@ -22,14 +22,14 @@ export default function V2ParentRelief({ onCTA }) {
   const f = (d) => ({ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(16px)', transition: `opacity 0.5s ease ${d}s, transform 0.5s ease ${d}s` });
 
   return (
-    <section ref={ref} className="v2-parent" style={{ background: '#0F172A', padding: '110px 24px 120px', position: 'relative', overflow: 'hidden' }}>
+    <section ref={ref} className="v2-parent" style={{ background: '#0d1117', padding: '110px 24px 120px', position: 'relative', overflow: 'hidden' }}>
       <style>{`@media(max-width:768px){.v2-parent{padding:80px 20px !important}.v2-parent-quotes{grid-template-columns:1fr !important}}`}</style>
       <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse,rgba(250,70,22,0.05),transparent 70%)' }} />
 
       <div className="max-w-[680px] mx-auto relative">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(30px, 4vw, 48px)', letterSpacing: '-0.02em', lineHeight: 1.12, textAlign: 'center', marginBottom: 14, ...f(0) }}>
           <span style={{ color: '#f4f0e8' }}>For Parents Who Are </span>
-          <span style={{ fontStyle: 'italic', color: '#FA4616' }}>Freaking Out</span>
+          <span style={{ fontStyle: 'italic', color: '#E85D20' }}>Freaking Out</span>
         </h2>
 
         <div style={{ width: 40, height: 2, background: '#FA4616', borderRadius: 1, margin: '0 auto 36px', ...f(0.04) }} />
