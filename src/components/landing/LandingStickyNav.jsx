@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          FASTIQ™ — 7-day free trial · $29/mo founding rate
+          FASTIQ™ — 7-day free trial · $29/mo after
         </span>
 
         {/* Right — buttons */}
@@ -103,7 +103,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
               whiteSpace: 'nowrap',
             }}
           >
-            Start Free Trial
+            Start Free Trial →
           </button>
         </div>
       </div>

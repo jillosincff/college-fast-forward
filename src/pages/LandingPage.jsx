@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
-import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V2Hero from '@/components/landing/v2/V2Hero';
+import V2PositioningStatement from '@/components/landing/v2/V2PositioningStatement';
+import V2FamilyAffair from '@/components/landing/v2/V2FamilyAffair';
+import V2TheProblem from '@/components/landing/v2/V2TheProblem';
+import V2TheNumbers from '@/components/landing/v2/V2TheNumbers';
 import V2ParentRelief from '@/components/landing/v2/V2ParentRelief';
 import V2Pricing from '@/components/landing/v2/V2Pricing';
 import V2FooterCTA from '@/components/landing/v2/V2FooterCTA';
@@ -41,19 +44,33 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0F172A' }}>
+      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0d1117' }}>
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
-        {/* 1 — Hero: student panic + live teaser + dual CTAs */}
+        {/* 1 — Hero */}
         <V2Hero onCTA={handleCTA} />
 
-        {/* 2 — Parent Relief */}
+        {/* 2 — Positioning Statement */}
+        <V2PositioningStatement />
+
+        {/* 3 — Alumni Demo (inside Hero already) */}
+
+        {/* 4 — The Family Affair */}
+        <V2FamilyAffair />
+
+        {/* 5 — The Problem */}
+        <V2TheProblem />
+
+        {/* 6 — The Numbers */}
+        <V2TheNumbers />
+
+        {/* 7 — For Parents Who Are Freaking Out */}
         <V2ParentRelief onCTA={handleCTA} />
 
-        {/* 3 — Pricing */}
+        {/* 8 — Pricing */}
         <V2Pricing onCTA={handleCTA} />
 
-        {/* 4 — Footer */}
+        {/* 9 — Bottom CTA + Footer */}
         <V2FooterCTA onCTA={handleCTA} />
       </div>
     </>
