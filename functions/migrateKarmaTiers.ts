@@ -39,11 +39,13 @@ Deno.serve(async (req) => {
     }
 
     const results = { users_updated: 0, families_updated: 0, users_skipped: 0, families_skipped: 0, errors: [] };
+    
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
     // ── 1. Migrate User records ──
     console.log('Starting user karma migration...');
     let offset = 0;
-    const batchSize = 100;
+    const batchSize = 50;
     let hasMore = true;
 
     while (hasMore) {
@@ -54,18 +56,15 @@ Deno.serve(async (req) => {
         try {
           const points = u.karma_points || u.karma_earned || 0;
           const currentLevel = u.karma_level || '';
-          const oldTierNames = ['none', 'active', 'engaged', 'priority', 'champion', ''];
           
-          // Skip if already migrated to new tier names
-          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel) && !oldTierNames.includes(currentLevel)) {
+          // Skip if already has a valid new tier name
+          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
             results.users_skipped++;
             continue;
           }
 
           const newTier = getTierForPoints(points);
           const updateData = { karma_level: newTier };
-
-          // Also sync karma_points and karma_earned
           if (points > 0) {
             updateData.karma_points = points;
             updateData.karma_earned = points;
@@ -74,14 +73,29 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.User.update(u.id, updateData);
           results.users_updated++;
           
-          if (results.users_updated % 50 === 0) {
+          if (results.users_updated % 25 === 0) {
             console.log(`Migrated ${results.users_updated} users so far...`);
+            await sleep(1000); // Rate limit pause
           }
         } catch (e) {
-          results.errors.push({ type: 'user', id: u.id, email: u.email, error: e.message });
+          if (e.message?.includes('Rate limit')) {
+            console.log('Rate limit hit, pausing 3s...');
+            await sleep(3000);
+            // Retry once
+            try {
+              const newTier = getTierForPoints(u.karma_points || u.karma_earned || 0);
+              await base44.asServiceRole.entities.User.update(u.id, { karma_level: newTier });
+              results.users_updated++;
+            } catch (e2) {
+              results.errors.push({ type: 'user', id: u.id, error: e2.message });
+            }
+          } else {
+            results.errors.push({ type: 'user', id: u.id, email: u.email, error: e.message });
+          }
         }
       }
 
+      await sleep(500); // Pause between batches
       offset += batchSize;
       if (users.length < batchSize) hasMore = false;
     }
@@ -99,9 +113,8 @@ Deno.serve(async (req) => {
         try {
           const points = fk.total_karma || 0;
           const currentLevel = fk.karma_level || '';
-          const oldTierNames = ['none', 'active', 'engaged', 'priority', 'champion', ''];
 
-          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel) && !oldTierNames.includes(currentLevel)) {
+          if (['Bronze', 'Silver', 'Gold', 'Platinum'].includes(currentLevel)) {
             results.families_skipped++;
             continue;
           }
@@ -114,11 +127,19 @@ Deno.serve(async (req) => {
             boost_multiplier: newBoost,
           });
           results.families_updated++;
+          
+          if (results.families_updated % 25 === 0) {
+            await sleep(1000);
+          }
         } catch (e) {
+          if (e.message?.includes('Rate limit')) {
+            await sleep(3000);
+          }
           results.errors.push({ type: 'family', id: fk.id, group: fk.family_group_id, error: e.message });
         }
       }
 
+      await sleep(500);
       offset += batchSize;
       if (families.length < batchSize) hasMore = false;
     }
