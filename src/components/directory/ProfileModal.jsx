@@ -22,8 +22,12 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
         try {
           const response = await base44.functions.invoke('getPublicUserInfo', { userId });
           
-          if (response?.data) {
-            setProfileUser(response.data);
+          // response.data is the axios response body
+          const userData = response?.data;
+          if (userData && userData.id) {
+            setProfileUser(userData);
+          } else if (userData?.error) {
+            throw new Error(userData.error);
           } else {
             throw new Error('Could not load profile data');
           }
