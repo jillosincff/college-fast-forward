@@ -9,21 +9,19 @@ import AlumniStep2About from '../components/onboarding/alumni-v2/AlumniStep2Abou
 import AlumniStep2Seeker from '../components/onboarding/alumni-v2/AlumniStep2Seeker';
 import AlumniStep3Industry from '../components/onboarding/alumni-v2/AlumniStep3Industry';
 import AlumniStep3ParentInvite from '../components/onboarding/alumni-v2/AlumniStep3ParentInvite';
-import AlumniStep4Intent from '../components/onboarding/alumni-v2/AlumniStep4Intent';
 import AlumniStep5Help from '../components/onboarding/alumni-v2/AlumniStep5Help';
 import AlumniStep6Pledge from '../components/onboarding/alumni-v2/AlumniStep6Pledge';
 import AlumniStep7Ready from '../components/onboarding/alumni-v2/AlumniStep7Ready';
 import AlumniOnboardingComplete from '../components/onboarding/alumni-v2/AlumniOnboardingComplete';
 
 /*
- * RECENT GRAD (2025/2026) — 6 logical steps:
- *   1: Details → 2: What looking for + Industry → 3: Parent invite
- *   → 4: Pledge (full screen) → 5: Ready → complete screen (notifications)
+ * RECENT GRAD (2025/2026) — 6 steps, seeker by default:
+ *   1: Details → 2: What looking for → 3: Parent invite
+ *   → 4: Pledge (seeker) → 5: Almost There → finish → Notifications
  *
- * ESTABLISHED (≤2024) — 7 logical steps:
- *   1: Details → 2: About → 3: Industry → 4: Intent fork
- *   → 5: Help (helpers only, seekers skip) → 6: Pledge (full screen) → 7: Ready
- *   → complete screen (notifications)
+ * ESTABLISHED (≤2024) — 6 steps, helper by default:
+ *   1: Details → 2: About → 3: Industry → 4: How to Help
+ *   → 5: Pledge (helper) → 6: Almost There → finish → Notifications
  */
 
 export default function AlumniOnboarding() {
@@ -54,9 +52,7 @@ export default function AlumniOnboarding() {
   });
 
   const isRecentGrad = formData.seniority === 'recent_grad';
-  const TOTAL_STEPS = isRecentGrad ? 6 : 7;
-  const isHelper = formData.intent === 'help_students';
-  const isSeeker = formData.intent === 'seeking_help';
+  const TOTAL_STEPS = 6; // Both paths are now 6 steps
 
   useEffect(() => {
     if (!document.getElementById('alumni-ob-fonts')) {
@@ -71,40 +67,27 @@ export default function AlumniOnboarding() {
   const updateForm = (updates) => {
     if (updates.gradYear) {
       const year = parseInt(updates.gradYear);
-      // Hard cutoff: 2025 or later = recent_grad, 2024 and earlier = established
       const seniority = (year >= 2025) ? 'recent_grad' : 'established';
       updates.seniority = seniority;
-      if (seniority === 'recent_grad') {
-        updates.intent = 'seeking_help';
-      }
+      // Auto-set intent based on seniority — no user choice needed
+      updates.intent = seniority === 'recent_grad' ? 'seeking_help' : 'help_students';
     }
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
   /*
-   * RECENT GRAD navigation: 1→2→3→4(pledge)→5(ready)→finish
-   * ESTABLISHED navigation:
-   *   1→2→3→4→ helper:5→6(pledge)→7(ready)→finish
-   *   1→2→3→4→ seeker:skip5→6(pledge)→7(ready)→finish
+   * Both paths: 6 linear steps, no forks.
+   * Recent Grad: 1→2→3→4(pledge)→5(ready)→finish
+   * Established: 1→2→3→4→5(pledge)→6(ready)→finish
    */
   const goNext = () => {
-    if (isRecentGrad) {
-      if (step === 5) { handleFinish(); return; }
-      setStep(s => s + 1);
-    } else {
-      if (step === 4 && isSeeker) { setStep(6); return; }
-      if (step === 7) { handleFinish(); return; }
-      setStep(s => s + 1);
-    }
+    const lastStep = isRecentGrad ? 5 : 6;
+    if (step === lastStep) { handleFinish(); return; }
+    setStep(s => s + 1);
   };
 
   const goBack = () => {
-    if (isRecentGrad) {
-      setStep(s => Math.max(1, s - 1));
-    } else {
-      if (step === 6 && isSeeker) { setStep(4); return; }
-      setStep(s => Math.max(1, s - 1));
-    }
+    setStep(s => Math.max(1, s - 1));
   };
 
   const handleFinish = async () => {
@@ -184,9 +167,10 @@ export default function AlumniOnboarding() {
   };
 
   const goToDashboard = () => {
-    if (isRecentGrad || isSeeker) {
+    if (isRecentGrad) {
       navigate('Dashboard');
     } else {
+      // Established alumni → parent-like dashboard
       navigate('ParentDashboard');
     }
   };
@@ -197,10 +181,11 @@ export default function AlumniOnboarding() {
   }
 
   // ═══════════════════════════════════════════════════════
-  // RECENT GRAD PATH — 6 steps
+  // RECENT GRAD PATH (2025/2026) — 6 steps, seeker by default
+  //   1: Details → 2: What looking for → 3: Parent invite
+  //   → 4: Pledge (seeker) → 5: Almost There → finish → Notifications
   // ═══════════════════════════════════════════════════════
   if (isRecentGrad) {
-    // RG Step 4 = Pledge (full screen, no two-panel)
     if (step === 4) {
       return (
         <AlumniStep6Pledge
@@ -232,14 +217,15 @@ export default function AlumniOnboarding() {
   }
 
   // ═══════════════════════════════════════════════════════
-  // ESTABLISHED PATH — 7 steps
+  // ESTABLISHED PATH (≤2024) — 6 steps, helper by default
+  //   1: Details → 2: About → 3: Industry → 4: How to Help
+  //   → 5: Pledge (helper) → 6: Almost There → finish → Notifications
   // ═══════════════════════════════════════════════════════
-  // EA Step 6 = Pledge (full screen, no two-panel)
-  if (step === 6) {
+  if (step === 5) {
     return (
       <AlumniStep6Pledge
         user={user}
-        intent={formData.intent}
+        intent="help_students"
         isRecentGrad={false}
         onComplete={goNext}
         onBack={goBack}
@@ -248,13 +234,12 @@ export default function AlumniOnboarding() {
   }
 
   return (
-    <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent={formData.intent} isRecentGrad={false}>
+    <AlumniOnboardingLayout step={step} totalSteps={TOTAL_STEPS} intent="help_students" isRecentGrad={false}>
       {step === 1 && <AlumniStep1Details formData={formData} onUpdate={updateForm} onNext={goNext} />}
       {step === 2 && <AlumniStep2About formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
       {step === 3 && <AlumniStep3Industry formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
-      {step === 4 && <AlumniStep4Intent formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
-      {step === 5 && <AlumniStep5Help formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
-      {step === 7 && (
+      {step === 4 && <AlumniStep5Help formData={formData} onUpdate={updateForm} onNext={goNext} onBack={goBack} />}
+      {step === 6 && (
         <AlumniStep7Ready
           formData={formData}
           onUpdate={updateForm}
