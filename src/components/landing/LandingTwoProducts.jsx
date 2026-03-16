@@ -57,14 +57,14 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
       className="landing-two-products"
       style={{
         background: '#0a1016',
-        padding: '80px 24px 88px',
+        padding: '100px 24px 110px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-two-products { padding: 56px 24px !important; }
+          .landing-two-products { padding: 72px 24px !important; }
           .tp-grid { grid-template-columns: 1fr !important; }
           .tp-connector-circle { display: none !important; }
           .tp-connector-line { display: block !important; }
@@ -88,7 +88,7 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
             <span style={{ color: '#f4f0e8' }}>Built for the Way </span>
             <span style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Careers Actually Start</span>
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 300, color: 'rgba(244,240,232,0.45)', marginTop: 14, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 300, color: 'rgba(255,255,255,0.75)', marginTop: 14, lineHeight: 1.6 }}>
             Not cold applications. Not algorithms. Real people and relentless intelligence — working together.
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function LandingTwoProducts({ onClaim, onFastIQ }) {
 /* ── network card ─────────────────────────────────── */
 function NetworkCard({ features, onClaim, style }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 20, padding: '36px 32px 32px', display: 'flex', flexDirection: 'column', gap: 0, ...style }}>
+    <div style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '36px 32px 32px', display: 'flex', flexDirection: 'column', gap: 0, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)', ...style }}>
       {/* icon */}
       <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -154,7 +154,7 @@ function NetworkCard({ features, onClaim, style }) {
 /* ── fastiq card ──────────────────────────────────── */
 function FastIQCard({ features, onClaim, style }) {
   return (
-    <div style={{ background: 'rgba(232,93,32,0.07)', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 20, padding: '36px 32px 32px', display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', ...style }}>
+    <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 20, padding: '36px 32px 32px', display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 40px rgba(250,70,22,0.08), inset 0 1px 0 rgba(255,255,255,0.08)', ...style }}>
       {/* most popular badge */}
       <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: '#E85D20', color: '#fff', fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap' }}>Most Popular</div>
 
@@ -192,7 +192,7 @@ function FeatureItem({ text, variant }) {
           <path d="M2 5.5L4 7.5L8 3" stroke={isFastiq ? '#E85D20' : 'rgba(244,240,232,0.7)'} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.7)', lineHeight: 1.5 }}>{text}</span>
+      <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>{text}</span>
     </div>
   );
 }

@@ -21,7 +21,7 @@ export default function LandingHero({ onClaim }) {
   useEffect(() => { ensureFonts(); }, []);
 
   return (
-    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-24 px-4" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 25%, #0821A5 60%, #0821A5 100%)', position: 'relative', overflow: 'hidden' }}>
+    <section className="min-h-screen flex flex-col justify-center pt-28 sm:pt-32 pb-32 px-4" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 25%, #0821A5 60%, #0821A5 100%)', position: 'relative', overflow: 'hidden' }}>
       {/* radial warm glow overlay */}
       <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, rgba(8,33,165,0.0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="max-w-3xl mx-auto text-center w-full" style={{ position: 'relative', zIndex: 1 }}>
@@ -117,9 +117,9 @@ export default function LandingHero({ onClaim }) {
           style={{
             fontFamily: dmSans,
             fontWeight: 300,
-            fontSize: 17,
-            color: 'rgba(244,240,232,0.7)',
-            lineHeight: 1.8,
+            fontSize: 19,
+            color: '#FFFFFF',
+            lineHeight: 1.6,
             maxWidth: 560,
             margin: '0 auto 48px',
             padding: '0 8px',

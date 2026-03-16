@@ -45,7 +45,7 @@ export default function LandingStudentPivot({ onFunnel }) {
     >
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 80%, rgba(250,70,22,0.06) 0%, transparent 60%)' }} />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-32 sm:py-48 text-center">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-40 sm:py-56 text-center">
 
         {/* Eyebrow — DM Sans 500, 11px, uppercase */}
         <div style={{ marginBottom: 20, ...fadeUp(0) }}>
@@ -78,7 +78,7 @@ export default function LandingStudentPivot({ onFunnel }) {
         <div style={{ maxWidth: 540, margin: '0 auto 40px', ...fadeUp(0.12) }}>
           <p style={{
             fontFamily: playfair, fontWeight: 400, fontStyle: 'italic',
-            fontSize: 17, color: 'rgba(244,240,232,0.55)', lineHeight: 1.7,
+            fontSize: 19, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6,
           }}>
             "You're not behind because you're not trying hard enough. You're behind because nobody taught you how this actually works."
           </p>

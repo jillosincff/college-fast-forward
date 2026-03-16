@@ -107,14 +107,14 @@ export default function LandingHowItWorks({ onClaim }) {
       className="landing-hiw"
       style={{
         background: '#0d1117',
-        padding: '72px 24px 80px',
+        padding: '96px 24px 104px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-hiw { padding: 56px 24px !important; }
+          .landing-hiw { padding: 72px 24px !important; }
           .hiw-tabs { flex-direction: column !important; }
           .hiw-tabs button { min-width: 100% !important; }
           .hiw-cards-grid { grid-template-columns: 1fr !important; }
@@ -289,13 +289,16 @@ function PanelContent({ panel, onClaim }) {
           <div
             key={c.title}
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '0.5px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '0.5px solid rgba(255,255,255,0.12)',
               borderRadius: 16,
               padding: '30px 24px 26px',
               display: 'flex',
               flexDirection: 'column',
-              transition: 'background 0.25s, border-color 0.25s',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
               ...cardFade(i),
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
@@ -309,8 +312,8 @@ function PanelContent({ panel, onClaim }) {
               {c.title}
             </div>
             <div
-              style={{ fontFamily: dmSans, fontSize: 14.5, fontWeight: 300, color: 'rgba(244,240,232,0.58)', lineHeight: 1.75 }}
-              dangerouslySetInnerHTML={{ __html: c.body.replace(/<b>/g, '<b style="font-weight:400;color:rgba(244,240,232,0.85)">') }}
+              style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}
+              dangerouslySetInnerHTML={{ __html: c.body.replace(/<b>/g, '<b style="font-weight:400;color:#FFFFFF">') }}
             />
           </div>
         ))}

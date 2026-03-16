@@ -49,14 +49,14 @@ export default function LandingParentRelief({ onCTA }) {
       className="landing-parent-relief"
       style={{
         background: '#0d1117',
-        padding: '80px 48px 88px',
+        padding: '100px 48px 110px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-parent-relief { padding: 56px 24px !important; }
+          .landing-parent-relief { padding: 72px 24px !important; }
           .pr-stats-row { flex-direction: column !important; gap: 16px !important; }
           .pr-stats-row .pr-stat-sep { display: none !important; }
         }
@@ -89,7 +89,7 @@ export default function LandingParentRelief({ onCTA }) {
         <div style={{ width: 48, height: 2, background: '#E85D20', borderRadius: 1, margin: '0 auto 36px', ...fadeUp(0.05) }} />
 
         {/* body copy 1 */}
-        <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, textAlign: 'center', marginBottom: 20, ...fadeUp(0.1) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 19, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.6, textAlign: 'center', marginBottom: 20, ...fadeUp(0.1) }}>
           You're watching your kid spend hours applying to everything and hearing nothing back. You want to help — but you don't have connections at the companies they're interested in. And that feeling of helplessness is the worst part.
         </p>
 
@@ -99,10 +99,10 @@ export default function LandingParentRelief({ onCTA }) {
         </p>
 
         {/* body copy 2 */}
-        <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, textAlign: 'center', marginBottom: 52, ...fadeUp(0.18) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 19, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.6, textAlign: 'center', marginBottom: 52, ...fadeUp(0.18) }}>
           College Fast Forward connects your student to a community of UF parents and alumni who've pledged to help — people who work in the fields your kid is exploring, who remember what it felt like to be starting out, and who've committed to showing up when a student reaches out.
           <br /><br />
-          And if nobody in the community is exactly the right fit? <b style={{ fontWeight: 400, color: 'rgba(244,240,232,0.9)' }}>FASTIQ goes further</b> — finding UF alumni worldwide who share your student's school, their values, and a reason to help.
+          And if nobody in the community is exactly the right fit? <b style={{ fontWeight: 500, color: '#FFFFFF' }}>FASTIQ goes further</b> — finding UF alumni worldwide who share your student's school, their values, and a reason to help.
         </p>
 
         {/* pull quote block */}

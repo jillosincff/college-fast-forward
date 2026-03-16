@@ -76,11 +76,11 @@ export default function LandingFastIQIntro({ onCTA }) {
     <section
       ref={sectionRef}
       className="landing-fastiq-intro"
-      style={{ background: '#0a1016', padding: '72px 48px 80px', position: 'relative', overflow: 'hidden' }}
+      style={{ background: '#0a1016', padding: '96px 48px 104px', position: 'relative', overflow: 'hidden' }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-fastiq-intro { padding: 56px 24px !important; }
+          .landing-fastiq-intro { padding: 72px 24px !important; }
           .fiq-cards-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -120,8 +120,8 @@ export default function LandingFastIQIntro({ onCTA }) {
 
         {/* body */}
         <p style={{
-          fontFamily: dmSans, fontSize: 17, fontWeight: 300,
-          color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, textAlign: 'center',
+          fontFamily: dmSans, fontSize: 19, fontWeight: 300,
+          color: '#FFFFFF', lineHeight: 1.6, textAlign: 'center',
           maxWidth: 620, margin: '0 auto 48px', ...fadeUp(0.1),
         }}>
           FASTIQ finds real UF grads at your kid's dream companies, writes the perfect intro message, and gets them in the door — bypassing thousands of cold applicants.
@@ -136,12 +136,15 @@ export default function LandingFastIQIntro({ onCTA }) {
             <div
               key={f.title}
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '0.5px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.05)',
+                border: '0.5px solid rgba(255,255,255,0.12)',
                 borderRadius: 16,
                 padding: '30px 24px 26px',
                 display: 'flex', flexDirection: 'column',
-                transition: 'background 0.25s, border-color 0.25s',
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
                 ...fadeUp(0.14 + i * 0.07),
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
@@ -157,7 +160,7 @@ export default function LandingFastIQIntro({ onCTA }) {
               <div style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 500, color: '#f4f0e8', marginBottom: 10, lineHeight: 1.3 }}>
                 {f.title}
               </div>
-              <div style={{ fontFamily: dmSans, fontSize: 14.5, fontWeight: 300, color: 'rgba(244,240,232,0.58)', lineHeight: 1.75 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
                 {f.body}
               </div>
             </div>

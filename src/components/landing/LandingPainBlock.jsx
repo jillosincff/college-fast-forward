@@ -81,11 +81,11 @@ export default function LandingPainBlock({ onCTA }) {
     <section
       ref={sectionRef}
       className="landing-pain-block"
-      style={{ background: '#0d1117', padding: '72px 48px 80px', position: 'relative', overflow: 'hidden' }}
+      style={{ background: '#0d1117', padding: '96px 48px 104px', position: 'relative', overflow: 'hidden' }}
     >
       <style>{`
         @media (max-width: 768px) {
-          .landing-pain-block { padding: 56px 24px !important; }
+          .landing-pain-block { padding: 72px 24px !important; }
           .pain-stats-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -125,42 +125,45 @@ export default function LandingPainBlock({ onCTA }) {
             <div
               key={s.number}
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '0.5px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.05)',
+                border: '0.5px solid rgba(255,255,255,0.12)',
                 borderRadius: 16,
                 padding: '30px 24px 26px',
                 textAlign: 'center',
-                transition: 'background 0.25s, border-color 0.25s',
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
             >
               <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>{s.icon}</div>
               <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 32, color: '#E85D20', lineHeight: 1, marginBottom: 10 }}>{s.number}</p>
-              <p style={{ fontFamily: dmSans, fontSize: 14.5, fontWeight: 300, color: 'rgba(244,240,232,0.58)', lineHeight: 1.5 }}>{s.line1}</p>
-              <p style={{ fontFamily: dmSans, fontSize: 14.5, fontWeight: 300, color: 'rgba(244,240,232,0.58)', lineHeight: 1.5 }}>{s.line2}</p>
+              <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>{s.line1}</p>
+              <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>{s.line2}</p>
             </div>
           ))}
         </div>
 
         {/* Body copy */}
         <div style={{ maxWidth: 620, margin: '0 auto 40px', ...fadeUp(0.18) }}>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.8, marginBottom: 16 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 19, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.6, marginBottom: 16 }}>
             Their friends who get interviews? They're not smarter.
             <br />
-            They have <span style={{ fontWeight: 400, color: 'rgba(244,240,232,0.85)' }}>connections</span>. Someone made an introduction.
+            They have <span style={{ fontWeight: 500, color: '#FFFFFF' }}>connections</span>. Someone made an introduction.
             <br />
             Someone opened a door.
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 300, color: 'rgba(244,240,232,0.45)', lineHeight: 1.8 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 19, fontWeight: 300, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
             Your student is applying into a black hole.
           </p>
         </div>
 
         {/* Bold callout */}
         <p style={{
-          fontFamily: dmSans, fontSize: 17, fontWeight: 400,
-          color: 'rgba(244,240,232,0.85)', lineHeight: 1.7,
+          fontFamily: dmSans, fontSize: 19, fontWeight: 400,
+          color: '#FFFFFF', lineHeight: 1.6,
           marginBottom: 36, ...fadeUp(0.24),
         }}>
           A perfect resume means nothing without a warm connection.{' '}

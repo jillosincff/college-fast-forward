@@ -13,14 +13,16 @@ export function PrimaryCTA({ text, onClick, fullWidth }) {
     <button
       onClick={onClick}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = '#d44e14';
-        e.currentTarget.style.transform = 'translateY(-1px)';
+        e.currentTarget.style.background = 'linear-gradient(135deg, #FF5722 0%, #E03A0F 100%)';
+        e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+        e.currentTarget.style.boxShadow = '0 6px 32px rgba(250,70,22,0.5), 0 0 80px rgba(250,70,22,0.15), inset 0 1px 0 rgba(255,255,255,0.2)';
         const arrow = e.currentTarget.querySelector('.lcta-arrow');
         if (arrow) arrow.style.transform = 'translateX(3px)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = '#E85D20';
-        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.background = 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)';
+        e.currentTarget.style.transform = 'translateY(0) scale(1)';
+        e.currentTarget.style.boxShadow = '0 4px 24px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1), inset 0 1px 0 rgba(255,255,255,0.15)';
         const arrow = e.currentTarget.querySelector('.lcta-arrow');
         if (arrow) arrow.style.transform = 'translateX(0)';
       }}
@@ -29,7 +31,7 @@ export function PrimaryCTA({ text, onClick, fullWidth }) {
         fontSize: 16,
         fontWeight: 500,
         color: '#fff',
-        background: '#E85D20',
+        background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)',
         border: 'none',
         borderRadius: 100,
         padding: '16px 40px',
@@ -38,10 +40,11 @@ export function PrimaryCTA({ text, onClick, fullWidth }) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        transition: 'all 0.2s ease',
+        transition: 'all 0.25s ease',
         minHeight: 'auto',
         minWidth: 'auto',
         width: fullWidth ? '100%' : 'auto',
+        boxShadow: '0 4px 24px rgba(250,70,22,0.35), 0 0 60px rgba(250,70,22,0.1), inset 0 1px 0 rgba(255,255,255,0.15)',
       }}
     >
       {text}
@@ -72,7 +75,7 @@ export function SecondaryCTA({ text, onClick, fullWidth }) {
         fontWeight: 500,
         color: '#f4f0e8',
         background: 'rgba(255,255,255,0.08)',
-        border: '0.5px solid rgba(255,255,255,0.15)',
+        border: '0.5px solid rgba(255,255,255,0.18)',
         borderRadius: 100,
         padding: '16px 40px',
         cursor: 'pointer',
@@ -80,10 +83,13 @@ export function SecondaryCTA({ text, onClick, fullWidth }) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        transition: 'all 0.2s ease',
+        transition: 'all 0.25s ease',
         minHeight: 'auto',
         minWidth: 'auto',
         width: fullWidth ? '100%' : 'auto',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
       }}
     >
       {text}
