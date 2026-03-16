@@ -19,7 +19,7 @@ export default function LandingPainFastIQ({ onFastIQ }) {
     <section className="relative">
 
       {/* PAIN block */}
-      <div className="py-32 sm:py-44 px-4" style={{ background: 'linear-gradient(180deg, #0F172A 0%, #0A1628 100%)' }}>
+      <div className="py-40 sm:py-52 px-4" style={{ background: 'linear-gradient(180deg, #0F172A 0%, #0A1628 100%)' }}>
         <div className="max-w-3xl mx-auto text-center">
 
           {/* Headline */}
@@ -48,16 +48,16 @@ export default function LandingPainFastIQ({ onFastIQ }) {
                 variants={fade}
                 className="border rounded-2xl p-7 sm:p-8 text-center transition-all duration-300"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                  background: 'rgba(255,255,255,0.05)',
+                  borderColor: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(16px)',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
                 }}
               >
                 <div className="text-4xl mb-4">{s.icon}</div>
                 <p className="text-[#FA4616] text-[36px] sm:text-[44px] font-black tracking-tight leading-none mb-3">{s.number}</p>
-                <p className="text-white/70 text-[15px] sm:text-[16px] leading-[1.5]">{s.line1}</p>
-                <p className="text-white/70 text-[15px] sm:text-[16px] leading-[1.5]">{s.line2}</p>
+                <p className="text-white/80 text-[15px] sm:text-[16px] leading-[1.5]">{s.line1}</p>
+                <p className="text-white/80 text-[15px] sm:text-[16px] leading-[1.5]">{s.line2}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -67,14 +67,14 @@ export default function LandingPainFastIQ({ onFastIQ }) {
             variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="max-w-2xl mx-auto mb-14"
           >
-            <p className="text-white text-[18px] sm:text-[20px] leading-[1.7] mb-6">
+            <p className="text-white text-[19px] sm:text-[21px] leading-[1.6] mb-6">
               Their friends who get interviews? They're not smarter.
               <br />
               They have <span className="font-bold text-white">connections</span>. Someone made an introduction.
               <br />
               Someone opened a door.
             </p>
-            <p className="text-white/60 text-[18px] sm:text-[20px] leading-[1.7]">
+            <p className="text-white/70 text-[19px] sm:text-[21px] leading-[1.6]">
               Your student is applying into a black hole.
             </p>
           </motion.div>
@@ -106,7 +106,7 @@ export default function LandingPainFastIQ({ onFastIQ }) {
       </div>
 
       {/* FASTIQ proof — scanning + interactive teaser */}
-      <div className="py-44 sm:py-56 px-4" style={{ background: 'linear-gradient(180deg, #0A1628 0%, #111827 100%)' }}>
+      <div className="py-48 sm:py-60 px-4" style={{ background: 'linear-gradient(180deg, #0A1628 0%, #111827 100%)' }}>
         <div className="max-w-3xl mx-auto">
           <motion.div variants={fade} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="text-center mb-16"
@@ -117,7 +117,7 @@ export default function LandingPainFastIQ({ onFastIQ }) {
               <Zap className="w-3.5 h-3.5 text-[#FA4616]" />
               <span className="text-[11px] font-bold text-[#FA4616] uppercase tracking-wider">FASTIQ™</span>
             </div>
-            <p className="text-white text-[20px] sm:text-[22px] leading-[1.6] font-bold max-w-2xl mx-auto">
+            <p className="text-white text-[20px] sm:text-[22px] leading-[1.55] font-bold max-w-2xl mx-auto">
               FASTIQ finds real UF grads at your kid's dream companies, writes the perfect intro message, and gets them in the door — bypassing thousands of cold applicants.
             </p>
           </motion.div>
