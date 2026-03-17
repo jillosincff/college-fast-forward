@@ -50,7 +50,7 @@ export default function MobileBottomNav({ user, currentPage }) {
     }
     // Students (gators)
     return [
-      { name: 'Home', icon: LayoutDashboard, page: dashPage },
+      { name: 'Plan', icon: LayoutDashboard, page: dashPage },
       { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
       { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
       { name: 'Messages', icon: Mail, page: 'MyMessages' },
