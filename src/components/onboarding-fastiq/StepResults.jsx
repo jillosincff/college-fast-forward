@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, Send, Copy, Check, ArrowRight } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
+import ConnectionsCheck from '@/components/connections-check/ConnectionsCheck';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
@@ -132,6 +133,15 @@ export default function StepResults({ plan, onGoToPlan, onEdit }) {
         }}>
           {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy message</>}
         </button>
+      </div>
+
+      {/* Network Edge - Optional */}
+      <div style={{ marginBottom: 32 }}>
+        <ConnectionsCheck
+          company={plan.companies[0]?.name || plan.companies[0]}
+          userSchool={plan.school}
+          variant="default"
+        />
       </div>
 
       {/* CTAs */}
