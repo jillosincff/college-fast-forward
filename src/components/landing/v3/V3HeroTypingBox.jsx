@@ -11,10 +11,10 @@ const THINK_DURATION = 1000;
 const CARD_STAGGER = 700;
 
 const SCENARIO_CHIPS = [
-  { label: 'Consulting at Deloitte', idx: 0 },
-  { label: 'Engineering at Google', idx: 1 },
-  { label: 'Banking at Goldman', idx: 2 },
-  { label: 'Tech sales path', idx: 4 },
+  { label: 'Marketing at Nike', idx: 0 },
+  { label: 'Data Science at Stripe', idx: 1 },
+  { label: 'Pre-med → Consulting', idx: 2 },
+  { label: 'Comms → Tech', idx: 4 },
 ];
 
 // Build resolved scenario data with randomized alumni names
