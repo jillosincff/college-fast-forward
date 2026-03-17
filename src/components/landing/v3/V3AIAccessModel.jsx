@@ -165,8 +165,8 @@ export default function V3AIAccessModel({ onCTA }) {
           marginBottom: 8,
           ...fadeStyle(vis, 0.04),
         }}>
-          AI does the work.<br />
-          Access opens the door.
+          AI finds the path.<br />
+          People open the doors.
         </h2>
         <p className="text-center" style={{
           fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)', fontWeight: 500,
@@ -175,7 +175,7 @@ export default function V3AIAccessModel({ onCTA }) {
           transition: 'color 0.4s',
           ...fadeStyle(vis, 0.06),
         }}>
-          Together, that's how students get ahead.
+          One warm introduction beats 100 cold applications.
         </p>
 
         {/* 3-column layout */}
@@ -222,8 +222,8 @@ export default function V3AIAccessModel({ onCTA }) {
           color: '#fff', letterSpacing: '-0.01em',
           ...fadeStyle(vis, 0.24),
         }}>
-          Without access, your student is just another resume.<br />
-          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>With access, they get in the room.</span>
+          This is the difference between being ignored<br />
+          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>and getting in the room.</span>
         </p>
 
         {/* Bottom flow */}

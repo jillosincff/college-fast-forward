@@ -3,8 +3,8 @@ import { playfair, dmSans, DARK_BG } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 
 const BULLETS = [
-  { icon: '✓', text: 'Less guessing' },
-  { icon: '✓', text: 'More action' },
+  { icon: '✓', text: 'Clear direction' },
+  { icon: '✓', text: 'Daily action' },
   { icon: '✓', text: 'Real outreach' },
   { icon: '✓', text: 'Visible momentum' },
 ];
@@ -22,15 +22,15 @@ export default function V3ParentPeace() {
         <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 36px', transition: 'background 0.4s', ...fadeStyle(vis, 0.04) }} />
 
         <p style={{ fontFamily: dmSans, fontSize: 18, color: '#A1A1AA', lineHeight: 1.7, marginBottom: 12, ...fadeStyle(vis, 0.08) }}>
-          You don't need to micromanage your student.
+          You don't need to manage your student.
           <br />
-          You need a system that helps them move.
+          You need a system that works.
         </p>
 
         <p style={{ fontFamily: dmSans, fontSize: 18, color: '#A1A1AA', lineHeight: 1.7, marginBottom: 36, ...fadeStyle(vis, 0.12) }}>
-          FastIQ gives your student direction and daily action.
+          FastIQ gives them direction and daily action.
           <br />
-          You get peace of mind knowing they're finally doing the right things.
+          You get peace of mind knowing they're finally moving.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3" style={fadeStyle(vis, 0.16)}>

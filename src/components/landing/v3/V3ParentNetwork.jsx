@@ -78,20 +78,20 @@ export default function V3ParentNetwork({ onCTA }) {
         <p className="text-center" style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 400,
           color: 'rgba(255,255,255,0.5)', lineHeight: 1.7,
-          maxWidth: 620, margin: '0 auto 56px',
+          maxWidth: 620, margin: '0 auto 20px',
           ...fadeStyle(vis, 0.08),
         }}>
-          College Fast Forward is a parent-powered network where families choose to help — offering introductions, advice, and access to opportunities students would never find on their own.
+          A shared network of parents and alumni who choose to help — offering introductions, insight, and access.
         </p>
 
-        {/* Trust line */}
+        {/* Key line */}
         <p className="text-center" style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 500,
           color: 'rgba(255,255,255,0.65)', lineHeight: 1.7,
           maxWidth: 620, margin: '0 auto 20px',
           ...fadeStyle(vis, 0.09),
         }}>
-          Parents in the network opt in to help students across the community — offering real introductions and real conversations.
+          Because this is still a who-you-know game.
         </p>
 
         {/* Divider */}
@@ -139,7 +139,7 @@ export default function V3ParentNetwork({ onCTA }) {
           transition: 'color 0.4s',
           ...fadeStyle(vis, 0.16),
         }}>
-          When one parent helps a student, every student benefits.
+          Your network isn't just who you know. It's who the network knows.
         </p>
 
         {/* CTA */}
@@ -149,7 +149,7 @@ export default function V3ParentNetwork({ onCTA }) {
             fontFamily: dmSans, fontSize: 13, fontWeight: 300,
             color: 'rgba(255,255,255,0.4)', marginTop: 14, lineHeight: 1.5,
           }}>
-            Free to join the network. FastIQ included.
+            Parents join the network for free. FastIQ included.
           </p>
         </div>
       </div>

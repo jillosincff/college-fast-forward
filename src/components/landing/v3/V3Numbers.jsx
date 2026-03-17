@@ -33,9 +33,9 @@ export default function V3Numbers() {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 17, color: '#FFFFFF', lineHeight: 1.65, ...fadeStyle(vis, 0.14) }}>
-          FastIQ improves direction and execution.
+          We help your student get in front of someone who can actually open the door.
           <br />
-          <span style={{ color: 'rgba(255,255,255,0.6)' }}>The network can increase the odds even more.</span>
+          <span style={{ color: 'rgba(255,255,255,0.6)' }}>That's the difference between being ignored and getting in the room.</span>
         </p>
 
         {/* Testimonial */}

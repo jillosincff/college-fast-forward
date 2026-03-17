@@ -31,7 +31,7 @@ export default function V3Pricing({ onCTA }) {
         </h2>
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.6)', lineHeight: 1.55, maxWidth: 440, margin: '0 auto 0', ...fadeStyle(vis, 0.05) }}>
-          Everything your student needs — from strategy to outreach to real introductions.
+          From strategy to outreach to real introductions — everything your student needs.
         </p>
 
         <div className="text-center" style={fadeStyle(vis, 0.06)}>
@@ -71,7 +71,7 @@ export default function V3Pricing({ onCTA }) {
         </div>
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.4)', marginTop: 16, ...fadeStyle(vis, 0.18) }}>
-          Early families get priority access to the network.
+          Parents join the network for free.
         </p>
       </div>
     </section>

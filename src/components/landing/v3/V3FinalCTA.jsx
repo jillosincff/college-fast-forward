@@ -20,13 +20,13 @@ export default function V3FinalCTA({ onCTA }) {
           </h2>
 
           <p style={{ fontFamily: dmSans, fontSize: 17, color: '#A1A1AA', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 14px', ...fadeStyle(vis, 0.08) }}>
-            This is not a job board. This is not just AI. This is not just networking.
+            Not a job board. Not just AI. Not just networking.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 12px', ...fadeStyle(vis, 0.10) }}>
-            This is AI execution + real access = results.
+            A plan. An edge. And real momentum.
           </p>
           <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 22px)', color: 'var(--accent-primary, #4F8CFF)', lineHeight: 1.5, maxWidth: 520, margin: '0 auto 36px', transition: 'color 0.4s', ...fadeStyle(vis, 0.12) }}>
-            "This gives my kid an unfair advantage."
+            "This is exactly what my kid was missing."
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.16)}>
@@ -36,7 +36,7 @@ export default function V3FinalCTA({ onCTA }) {
             Cancel anytime. No long-term commitment.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.3)', marginTop: 8, ...fadeStyle(vis, 0.18) }}>
-            Spots are limited as we build each school network.
+            Free to join the network. FastIQ included in your trial.
           </p>
         </div>
       </section>
