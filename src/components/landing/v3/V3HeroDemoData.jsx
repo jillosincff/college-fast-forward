@@ -28,6 +28,7 @@ export function getRandomAlumniNames(count = 3) {
 const SCHOOL_SCENARIOS = {
   'University of Florida': [
     {
+      chipLabel: 'Marketing at Nike',
       prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify.",
       companies: [
         { name: 'Nike', tag: 'Brand Marketing', asterisk: true },
@@ -49,6 +50,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Pre-med → Consulting',
       prompt: "I'm pre-med at UF but thinking about switching to healthcare consulting.",
       companies: [
         { name: 'ZS Associates', tag: 'Pharma Consulting', asterisk: true },
@@ -72,6 +74,7 @@ const SCHOOL_SCENARIOS = {
 
   'University of Michigan': [
     {
+      chipLabel: 'Consulting at Deloitte',
       prompt: "I'm interested in consulting and want to work at Deloitte or Bain.",
       companies: [
         { name: 'Deloitte', tag: 'Big Four' },
@@ -92,6 +95,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Product Marketing',
       prompt: "I'm exploring product marketing roles at tech companies.",
       companies: [
         { name: 'Google', tag: 'Big Tech' },
@@ -115,6 +119,7 @@ const SCHOOL_SCENARIOS = {
 
   'UCF': [
     {
+      chipLabel: 'Finance at JPMorgan',
       prompt: "I'm a finance major at UCF and want to work at JPMorgan or Deloitte.",
       companies: [
         { name: 'JPMorgan', tag: 'Investment Banking' },
@@ -135,6 +140,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Brand Marketing',
       prompt: "I'm interested in brand marketing and want to work at Nike or PepsiCo.",
       companies: [
         { name: 'Nike', tag: 'Brand Marketing' },
@@ -158,6 +164,7 @@ const SCHOOL_SCENARIOS = {
 
   'Tulane University': [
     {
+      chipLabel: 'Break into Consulting',
       prompt: "I want to break into consulting and don't know where to start.",
       companies: [
         { name: 'McKinsey', tag: 'Strategy' },
@@ -178,6 +185,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Hospitality & Brands',
       prompt: "I'm interested in hospitality and consumer brands in New Orleans and beyond.",
       companies: [
         { name: 'Marriott', tag: 'Hospitality' },
@@ -201,6 +209,7 @@ const SCHOOL_SCENARIOS = {
 
   'USC': [
     {
+      chipLabel: 'Entertainment Marketing',
       prompt: "I'm exploring entertainment marketing and brand partnerships.",
       companies: [
         { name: 'Disney', tag: 'Entertainment' },
@@ -221,6 +230,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Sports & Media',
       prompt: "I want to work in media, sports, or consumer marketing.",
       companies: [
         { name: 'ESPN', tag: 'Sports Media' },
@@ -244,6 +254,7 @@ const SCHOOL_SCENARIOS = {
 
   'Penn State': [
     {
+      chipLabel: 'Supply Chain & Ops',
       prompt: "I'm interested in supply chain and operations roles.",
       companies: [
         { name: 'Amazon', tag: 'Operations' },
@@ -264,6 +275,7 @@ const SCHOOL_SCENARIOS = {
       },
     },
     {
+      chipLabel: 'Big Four Consulting',
       prompt: "I want to target Big Four consulting firms.",
       companies: [
         { name: 'Deloitte', tag: 'Big Four' },
@@ -337,18 +349,17 @@ const FALLBACK_SCENARIOS = [
 export function getScenariosForSchool(school) {
   const specific = SCHOOL_SCENARIOS[school];
   if (specific) {
-    // School-specific scenarios already have prompt as string (not template)
     return specific.map(s => ({
       ...s,
-      // Normalize: specific scenarios use `prompt` string, fallbacks use `promptTemplate` fn
       promptText: s.prompt,
+      chipLabel: s.chipLabel || s.prompt.slice(0, 30),
       outreachBodyFn: s.outreach.bodyTemplate,
     }));
   }
-  // Fallback: use generic scenarios with school name injected
   return FALLBACK_SCENARIOS.map(s => ({
     ...s,
     promptText: s.promptTemplate(school),
+    chipLabel: s.chipLabel || s.promptTemplate(school).slice(0, 30),
     outreachBodyFn: (alumniName) => s.outreach.bodyTemplate(school, alumniName),
   }));
 }
