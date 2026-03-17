@@ -21,7 +21,7 @@ import AppErrorBoundary from './components/common/AppErrorBoundary';
 import { base44 } from '@/api/base44Client';
 import logger from './components/utils/logger';
 import { Message } from '@/entities/Message';
-import { PayItForwardNotification } from '@/entities/PayItForwardNotification';
+// PayItForwardNotification import kept for notification bell
 import NotificationBell from './components/notifications/NotificationBell';
 import { perfMonitor, reportWebVitals } from './components/utils/performanceMonitor';
 import { errorReporter } from './components/utils/errorReporter';
