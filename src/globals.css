@@ -25,6 +25,12 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-pill: 100px;
+
+  /* School accent tokens — default: Michigan maize/gold */
+  --accent-primary: #D4A843;
+  --accent-soft: rgba(212,168,67,0.12);
+  --accent-border: rgba(212,168,67,0.30);
+  --accent-glow: rgba(212,168,67,0.25);
 }
 
 @layer base {
