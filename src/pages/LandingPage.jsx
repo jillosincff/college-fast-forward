@@ -4,14 +4,16 @@ import { navigate } from '@/components/utils/navigation';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
-import V2Hero from '@/components/landing/v2/V2Hero';
-import V2PositioningStatement from '@/components/landing/v2/V2PositioningStatement';
-import V2FamilyAffair from '@/components/landing/v2/V2FamilyAffair';
-import V2TheProblem from '@/components/landing/v2/V2TheProblem';
-import V2TheNumbers from '@/components/landing/v2/V2TheNumbers';
-import V2ParentRelief from '@/components/landing/v2/V2ParentRelief';
-import V2Pricing from '@/components/landing/v2/V2Pricing';
-import V2FooterCTA from '@/components/landing/v2/V2FooterCTA';
+import V3Hero from '@/components/landing/v3/V3Hero';
+import V3Problem from '@/components/landing/v3/V3Problem';
+import V3HowFastIQWorks from '@/components/landing/v3/V3HowFastIQWorks';
+import V3NetworkAdvantage from '@/components/landing/v3/V3NetworkAdvantage';
+import V3StudentQuiz from '@/components/landing/v3/V3StudentQuiz';
+import V3ParentQuiz from '@/components/landing/v3/V3ParentQuiz';
+import V3Numbers from '@/components/landing/v3/V3Numbers';
+import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
+import V3Pricing from '@/components/landing/v3/V3Pricing';
+import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
 
 export default function LandingPage() {
   useEffect(() => {
@@ -34,12 +36,16 @@ export default function LandingPage() {
 
   const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GatorAuth'); };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GatorAuth'); };
+  const scrollToHowItWorks = () => {
+    const el = document.getElementById('how-it-works');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <>
       <SocialMetaTags
-        title="College Fast Forward — FASTIQ: AI That Gets Your Kid In The Door"
-        description="FASTIQ finds real UF alumni at target companies, writes personalized outreach, and gets your kid in the door. 7-day free trial."
+        title="College Fast Forward — FastIQ: Direction, Action, and Real Progress for Your Student"
+        description="FastIQ gives your student clear direction, daily actions, and real outreach. 7-day free trial. No credit card required."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
@@ -48,28 +54,34 @@ export default function LandingPage() {
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
         {/* 1 — Hero */}
-        <V2Hero onCTA={handleCTA} />
+        <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
 
-        {/* 2 — Positioning Statement */}
-        <V2PositioningStatement />
+        {/* 2 — Problem / Reality Check */}
+        <V3Problem />
 
-        {/* 4 — The Family Affair */}
-        <V2FamilyAffair />
+        {/* 3 — How FastIQ Works */}
+        <V3HowFastIQWorks />
 
-        {/* 5 — The Problem */}
-        <V2TheProblem />
+        {/* 4 — Optional Network Advantage */}
+        <V3NetworkAdvantage />
 
-        {/* 6 — The Numbers */}
-        <V2TheNumbers />
+        {/* 5 — Student Quiz */}
+        <V3StudentQuiz onCTA={handleCTA} />
 
-        {/* 7 — For Parents Who Are Freaking Out */}
-        <V2ParentRelief onCTA={handleCTA} />
+        {/* 6 — Parent Quiz */}
+        <V3ParentQuiz />
 
-        {/* 8 — Pricing */}
-        <V2Pricing onCTA={handleCTA} />
+        {/* 7 — Numbers / Proof */}
+        <V3Numbers />
 
-        {/* 9 — Bottom CTA + Footer */}
-        <V2FooterCTA onCTA={handleCTA} />
+        {/* 8 — Parent Peace of Mind */}
+        <V3ParentPeace />
+
+        {/* 9 — Pricing */}
+        <V3Pricing onCTA={handleCTA} />
+
+        {/* 10 — Final CTA + Footer */}
+        <V3FinalCTA onCTA={handleCTA} onQuiz={handleCTA} />
       </div>
     </>
   );
