@@ -26,11 +26,11 @@
   --radius-xl: 20px;
   --radius-pill: 100px;
 
-  /* School accent tokens — default: Michigan maize/gold */
-  --accent-primary: #D4A843;
-  --accent-soft: rgba(212,168,67,0.12);
-  --accent-border: rgba(212,168,67,0.30);
-  --accent-glow: rgba(212,168,67,0.25);
+  /* School accent tokens — default: refined electric blue */
+  --accent-primary: #4F8CFF;
+  --accent-soft: rgba(79,140,255,0.12);
+  --accent-border: rgba(79,140,255,0.30);
+  --accent-glow: rgba(79,140,255,0.25);
 }
 
 @layer base {

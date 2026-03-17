@@ -97,8 +97,8 @@ export default function V3ParentNetwork({ onCTA }) {
               textAlign: 'center',
               transition: 'border-color 0.3s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border, rgba(232,93,32,0.30))'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border, rgba(79,140,255,0.30))'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#1F1F23'; }}
             >
               <div style={{
                 width: 48, height: 48, borderRadius: 14,

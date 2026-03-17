@@ -42,7 +42,7 @@ function resolveScenario(scenario, schoolName) {
 }
 
 export default function V3HeroTypingBox() {
-  const [selectedSchool, setSelectedSchool] = useState('University of Michigan');
+  const [selectedSchool, setSelectedSchool] = useState('University of Florida');
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [phase, setPhase] = useState('typing');
   const [displayedText, setDisplayedText] = useState('');

@@ -3,7 +3,7 @@ import { playfair, dmSans, DARK_BG } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 import CTAButton from './CTAButton';
 
-export default function V3FinalCTA({ onCTA, onQuiz }) {
+export default function V3FinalCTA({ onCTA }) {
   const { ref, vis } = useFadeIn();
 
   return (
