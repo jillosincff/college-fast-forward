@@ -153,6 +153,7 @@ const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
 const FastIQ = React.lazy(() => import('./pages/FastIQ'));
+const FastIQOnboarding = React.lazy(() => import('./pages/FastIQOnboarding'));
 const RecentGradDashboard = React.lazy(() => import('./pages/RecentGradDashboard'));
 const FollowedCompanies = React.lazy(() => import('./pages/FollowedCompanies'));
 const ActionPlanTracker = React.lazy(() => import('./pages/ActionPlanTracker'));
@@ -563,6 +564,7 @@ const getPageComponent = (pageName) => {
     case 'ParentPledge': return ParentPledge;
     case 'SubmitFeedback': return SubmitFeedback;
     case 'FastIQ': return FastIQ;
+    case 'FastIQOnboarding': return FastIQOnboarding;
     case 'FollowedCompanies': return FollowedCompanies;
     case 'ActionPlanTracker': return ActionPlanTracker;
     case 'ResumeTailoring': return ResumeTailoring;
