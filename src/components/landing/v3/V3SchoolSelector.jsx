@@ -2,11 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SCHOOLS } from './V3HeroDemoData';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
+const DEFAULT_PRIMARY = '#E85D20';
 
-export default function V3SchoolSelector({ selectedSchool, onSelect }) {
+export default function V3SchoolSelector({ selectedSchool, onSelect, accent }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef(null);
+  const primary = accent?.primary || DEFAULT_PRIMARY;
+  const soft = accent?.soft || 'rgba(232,93,32,0.12)';
+  const border = accent?.border || 'rgba(232,93,32,0.30)';
 
   const filtered = query
     ? SCHOOLS.filter(s => s.toLowerCase().includes(query.toLowerCase()))
@@ -20,11 +24,10 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Always show the compact "Showing results for [school]" chip with ability to change
   return (
     <div ref={ref} className="mb-4" style={{ position: 'relative' }}>
       <div className="flex items-center justify-center gap-2 flex-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
         </svg>
         <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>
@@ -33,16 +36,17 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
         <button
           onClick={() => setOpen(!open)}
           style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#E85D20',
-            background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: primary,
+            background: soft, border: `1px solid ${border}`,
             borderRadius: 8, padding: '4px 12px', cursor: 'pointer',
             display: 'inline-flex', alignItems: 'center', gap: 6,
             minHeight: 'auto', minWidth: 'auto', width: 'auto',
+            transition: 'color 0.3s, background 0.3s, border-color 0.3s',
           }}
         >
           {selectedSchool}
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
-            <path d="M2 4L5 7L8 4" stroke="#E85D20" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 4L5 7L8 4" stroke={primary} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
@@ -53,7 +57,7 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
             position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
             width: 320, marginTop: 8,
             background: '#1a1f2e', border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 12, maxHeight: 260, overflowY: 'auto', zIndex: 50,
+            borderRadius: 12, zIndex: 50,
             boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
           }}
         >
@@ -82,14 +86,14 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
                 onClick={() => { onSelect(school); setOpen(false); setQuery(''); }}
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
-                  padding: '10px 16px', background: school === selectedSchool ? 'rgba(232,93,32,0.12)' : 'transparent',
+                  padding: '10px 16px', background: school === selectedSchool ? soft : 'transparent',
                   border: 'none',
                   fontFamily: dmSans, fontSize: 14, fontWeight: school === selectedSchool ? 600 : 500,
-                  color: school === selectedSchool ? '#E85D20' : '#fff',
+                  color: school === selectedSchool ? primary : '#fff',
                   cursor: 'pointer', transition: 'background 0.15s',
                   minHeight: 'auto', minWidth: 'auto',
                 }}
-                onMouseEnter={e => { if (school !== selectedSchool) e.currentTarget.style.background = 'rgba(232,93,32,0.08)'; }}
+                onMouseEnter={e => { if (school !== selectedSchool) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
                 onMouseLeave={e => { if (school !== selectedSchool) e.currentTarget.style.background = 'transparent'; }}
               >
                 {school}
