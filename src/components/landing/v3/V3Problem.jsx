@@ -6,7 +6,7 @@ const PROBLEMS = [
   { icon: '🎯', text: "They don't know what they want" },
   { icon: '🏢', text: "They don't have target companies" },
   { icon: '🤝', text: "They don't know how to network" },
-  { icon: '📄', text: "They send out resumes and hear nothing back" },
+  { icon: '📄', text: "They send out resume after resume and hear nothing back" },
 ];
 
 export default function V3Problem() {
@@ -15,7 +15,6 @@ export default function V3Problem() {
   return (
     <section id="how-it-works" ref={ref} style={{ background: DARK_BG, padding: '120px 24px 130px' }}>
       <div className="max-w-[640px] mx-auto">
-        {/* Eyebrow */}
         <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', textAlign: 'center', marginBottom: 14, ...fadeStyle(vis, 0) }}>
           The Reality
         </p>
@@ -28,23 +27,29 @@ export default function V3Problem() {
           This is not just a resume problem. It's a direction and execution problem.
         </p>
 
-        {/* Problem cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, ...fadeStyle(vis, 0.12) }}>
           {PROBLEMS.map((p, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 16,
-              padding: '20px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 16,
+              borderRadius: 16, padding: '20px 24px',
+              display: 'flex', alignItems: 'center', gap: 16,
             }}>
               <span style={{ fontSize: 28, flexShrink: 0 }}>{p.icon}</span>
               <span style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.5 }}>{p.text}</span>
             </div>
           ))}
         </div>
+
+        {/* Closing line */}
+        <p style={{
+          fontFamily: playfair, fontStyle: 'italic', fontWeight: 400,
+          fontSize: 'clamp(17px, 2.2vw, 21px)', color: 'rgba(255,255,255,0.7)',
+          textAlign: 'center', lineHeight: 1.5, marginTop: 36,
+          ...fadeStyle(vis, 0.16),
+        }}>
+          They don't have a plan — and no one is telling them what to do next.
+        </p>
       </div>
     </section>
   );

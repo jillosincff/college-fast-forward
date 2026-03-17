@@ -12,8 +12,8 @@ const QUESTIONS = [
 
 const RESULTS = [
   { min: 0, max: 1, label: 'Guessing', color: '#EF4444', desc: 'Your student likely has no clear direction. FastIQ can change that.' },
-  { min: 2, max: 2, label: 'Stalled', color: '#F59E0B', desc: 'They have some ideas but aren\'t making real progress yet.' },
-  { min: 3, max: 3, label: 'Starting to Move', color: '#06B6D4', desc: 'They\'re on their way, but could use more structure and outreach help.' },
+  { min: 2, max: 2, label: 'Stalled', color: '#F59E0B', desc: "They have some ideas but aren't making real progress yet." },
+  { min: 3, max: 3, label: 'Starting to Move', color: '#06B6D4', desc: "They're on their way, but could use more structure and outreach help." },
   { min: 4, max: 5, label: 'On the Right Track', color: '#10B981', desc: 'Great signs! FastIQ can help them go further, faster.' },
 ];
 
@@ -43,7 +43,7 @@ export default function V3ParentQuiz() {
         </h2>
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 16, color: '#6B7280', lineHeight: 1.65, marginBottom: 36, ...fadeStyle(vis, 0.08) }}>
-          Take this quick check-in and see where they may be stuck.
+          Take this quick check-in to see if they're stuck, guessing, or making real progress.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, ...fadeStyle(vis, 0.12) }}>
@@ -51,12 +51,8 @@ export default function V3ParentQuiz() {
             <div key={i} style={{
               background: '#fff',
               border: `1px solid ${answers[i] !== undefined ? (answers[i] ? '#10B981' : '#EF4444') + '40' : '#e5e7eb'}`,
-              borderRadius: 14,
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
+              borderRadius: 14, padding: '16px 20px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
             }}>
               <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#0d1117', lineHeight: 1.4, flex: 1 }}>{q}</span>
               <div className="flex gap-2 flex-shrink-0">
@@ -99,7 +95,7 @@ export default function V3ParentQuiz() {
                 minHeight: 'auto', minWidth: 'auto', width: 'auto',
               }}
             >
-              See Results
+              Take the Parent Check-In
             </button>
           </div>
         )}
@@ -108,9 +104,7 @@ export default function V3ParentQuiz() {
           <div className="text-center" style={{
             background: '#fff',
             border: `2px solid ${result.color}40`,
-            borderRadius: 16,
-            padding: '28px 24px',
-            marginTop: 8,
+            borderRadius: 16, padding: '28px 24px', marginTop: 8,
           }}>
             <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your student is</p>
             <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: result.color, marginBottom: 12 }}>{result.label}</p>

@@ -18,7 +18,7 @@ export default function V3StudentQuiz({ onCTA }) {
         </h2>
 
         <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.7)', lineHeight: 1.65, marginBottom: 36, ...fadeStyle(vis, 0.08) }}>
-          Take the 60-second student quiz. We'll help your student identify possible paths, target companies, and where to begin.
+          Take the 60-second student quiz to uncover possible paths, target companies, and where to begin.
         </p>
 
         <div style={fadeStyle(vis, 0.12)}>

@@ -5,18 +5,18 @@ import { useFadeIn, fadeStyle } from './SectionFade';
 const BLOCKS = [
   {
     icon: '🤝',
-    title: 'Community support system',
-    desc: 'Families are part of a broader network that can occasionally open doors.',
+    title: 'Community support',
+    desc: 'Families are part of a broader trusted network.',
   },
   {
     icon: '🔗',
-    title: 'Optional warm introduction',
-    desc: 'When relevant, a connection can help increase the chance of a response.',
+    title: 'Warm introductions',
+    desc: 'When relevant, connections can create higher-quality opportunities.',
   },
   {
     icon: '📈',
     title: 'Better odds',
-    desc: 'FastIQ drives the process. The network can accelerate outcomes.',
+    desc: 'FastIQ drives the process. The network can accelerate the outcome.',
   },
 ];
 
@@ -40,9 +40,7 @@ export default function V3NetworkAdvantage() {
             <div key={i} style={{
               background: '#fff',
               border: '1px solid #e5e7eb',
-              borderRadius: 16,
-              padding: '28px 22px',
-              textAlign: 'center',
+              borderRadius: 16, padding: '28px 22px', textAlign: 'center',
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 14 }}>{b.icon}</span>
               <h3 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 16, color: '#0d1117', marginBottom: 10, lineHeight: 1.3 }}>{b.title}</h3>
