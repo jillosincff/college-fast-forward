@@ -27,7 +27,7 @@ export default function EmptyPlan() {
         Tell FastIQ what you're looking for and it will create a personalized plan with target companies, contacts, and outreach — ready in minutes.
       </p>
 
-      <button onClick={() => navigate('FastIQ')} style={{
+      <button onClick={() => navigate('FastIQOnboarding')} style={{
         background: '#4F8CFF', border: 'none', borderRadius: 12,
         padding: '14px 32px', cursor: 'pointer',
         fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
