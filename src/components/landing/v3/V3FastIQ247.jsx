@@ -5,7 +5,7 @@ import { useFadeIn, fadeStyle } from './SectionFade';
 const FEATURES = [
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
       </svg>
     ),
@@ -14,7 +14,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
     ),
@@ -23,7 +23,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/>
       </svg>
     ),
@@ -32,7 +32,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
       </svg>
     ),
@@ -41,7 +41,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
       </svg>
     ),
@@ -50,7 +50,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
     ),
@@ -59,7 +59,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
       </svg>
     ),
@@ -68,7 +68,7 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z"/>
       </svg>
     ),
@@ -84,7 +84,7 @@ export default function V3FastIQ247() {
     <section ref={ref} style={{ background: '#0E0F14', padding: '120px 24px 130px' }}>
       <style>{`@media(max-width:640px){.v3-feat-grid{grid-template-columns:1fr !important}}`}</style>
       <div className="max-w-[900px] mx-auto">
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #D4A843)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #4F8CFF)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
           Beyond the demo
         </p>
 
@@ -105,12 +105,12 @@ export default function V3FastIQ247() {
               display: 'flex', gap: 14, alignItems: 'flex-start',
               transition: 'border-color 0.3s',
             }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-border, rgba(212,168,67,0.25))'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-border, rgba(79,140,255,0.25))'; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1F1F23'; }}
             >
               <div style={{
                 width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                background: 'var(--accent-soft, rgba(212,168,67,0.08))', border: '1px solid var(--accent-border, rgba(212,168,67,0.15))',
+                background: 'var(--accent-soft, rgba(79,140,255,0.08))', border: '1px solid var(--accent-border, rgba(79,140,255,0.15))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {f.icon}

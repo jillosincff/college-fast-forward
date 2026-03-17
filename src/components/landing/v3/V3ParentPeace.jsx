@@ -19,7 +19,7 @@ export default function V3ParentPeace() {
           For parents who want to see <em>real progress</em>
         </h2>
 
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #D4A843)', borderRadius: 1, margin: '0 auto 36px', transition: 'background 0.4s', ...fadeStyle(vis, 0.04) }} />
+        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 36px', transition: 'background 0.4s', ...fadeStyle(vis, 0.04) }} />
 
         <p style={{ fontFamily: dmSans, fontSize: 18, color: '#A1A1AA', lineHeight: 1.7, marginBottom: 12, ...fadeStyle(vis, 0.08) }}>
           You don't need to micromanage your student.

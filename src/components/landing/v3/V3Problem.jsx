@@ -15,7 +15,7 @@ export default function V3Problem() {
   return (
     <section id="how-it-works" ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
       <div className="max-w-[640px] mx-auto">
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #D4A843)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #4F8CFF)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
           The Reality
         </p>
 
