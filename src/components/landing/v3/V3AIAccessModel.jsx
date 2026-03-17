@@ -1,5 +1,5 @@
 import React from 'react';
-import { playfair, dmSans, DARK_BG } from './LandingConstants';
+import { playfair, dmSans, DARK_BG_ALT } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 import CTAButton from './CTAButton';
 
@@ -125,7 +125,7 @@ export default function V3AIAccessModel({ onCTA }) {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: DARK_BG, padding: '120px 24px 130px' }}>
+    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
       <style>{`
         @media(max-width:768px){
           .v3-aia-row{flex-direction:column !important; gap:0 !important}
@@ -137,23 +137,35 @@ export default function V3AIAccessModel({ onCTA }) {
 
       <div className="max-w-[900px] mx-auto">
         {/* Header */}
+        {/* Transition */}
+        <p className="text-center" style={{
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)', fontWeight: 400,
+          color: 'rgba(255,255,255,0.55)', lineHeight: 1.6,
+          marginBottom: 28,
+          ...fadeStyle(vis, 0),
+        }}>
+          But even the best plan needs one thing to work — <em>access.</em>
+        </p>
+
+        {/* Core statement */}
         <h2 className="text-center" style={{
           fontFamily: playfair, fontWeight: 700,
           fontSize: 'clamp(26px, 4vw, 44px)',
-          color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em',
-          marginBottom: 12,
-          ...fadeStyle(vis, 0),
-        }}>
-          This is how students actually get ahead
-        </h2>
-
-        <p className="text-center" style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 400,
-          color: 'rgba(255,255,255,0.6)', lineHeight: 1.65,
-          maxWidth: 560, margin: '0 auto 52px',
+          color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em',
+          marginBottom: 8,
           ...fadeStyle(vis, 0.04),
         }}>
-          Not by applying online — but by combining AI execution with real access.
+          AI does the work.<br />
+          Access opens the door.
+        </h2>
+        <p className="text-center" style={{
+          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)', fontWeight: 500,
+          color: 'var(--accent-primary, #4F8CFF)', lineHeight: 1.5,
+          maxWidth: 560, margin: '0 auto 52px',
+          transition: 'color 0.4s',
+          ...fadeStyle(vis, 0.06),
+        }}>
+          Together, that's how students get ahead.
         </p>
 
         {/* 3-column layout */}

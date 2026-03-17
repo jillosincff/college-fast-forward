@@ -10,32 +10,31 @@ export default function V3FinalCTA({ onCTA, onQuiz }) {
     <>
       <section ref={ref} style={{ background: DARK_BG, padding: '110px 24px 100px', textAlign: 'center' }}>
         <div className="max-w-[600px] mx-auto">
-          <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.2, marginBottom: 16, letterSpacing: '-0.02em', ...fadeStyle(vis, 0) }}>
-            From "I don't know what I'm doing"<br />
-            to <em style={{ color: 'var(--accent-primary, #D4A843)', transition: 'color 0.4s' }}>"I know exactly what to do next."</em>
-          </h2>
-
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: '#A1A1AA', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 36px', ...fadeStyle(vis, 0.06) }}>
-            FastIQ gives your student a clear path.
-            <br />
-            The College Fast Forward network gives them an extra edge when it matters.
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #4F8CFF)', marginBottom: 18, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
+            The Takeaway
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.12)}>
+          <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.2, marginBottom: 16, letterSpacing: '-0.02em', ...fadeStyle(vis, 0.04) }}>
+            From "I don't know what I'm doing"<br />
+            to <em style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>"I know exactly what to do next."</em>
+          </h2>
+
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: '#A1A1AA', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 14px', ...fadeStyle(vis, 0.08) }}>
+            This is not a job board. This is not just AI. This is not just networking.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 12px', ...fadeStyle(vis, 0.10) }}>
+            This is AI execution + real access = results.
+          </p>
+          <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 22px)', color: 'var(--accent-primary, #4F8CFF)', lineHeight: 1.5, maxWidth: 520, margin: '0 auto 36px', transition: 'color 0.4s', ...fadeStyle(vis, 0.12) }}>
+            "This gives my kid an unfair advantage."
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.16)}>
             <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
-            <button
-              onClick={onQuiz}
-              style={{
-                fontFamily: dmSans, fontSize: 15, fontWeight: 500,
-                color: 'var(--accent-primary, #D4A843)', background: 'none', border: 'none',
-                cursor: 'pointer', padding: '12px 20px',
-                minHeight: 'auto', minWidth: 'auto', width: 'auto',
-                textDecoration: 'underline', textUnderlineOffset: 4,
-              }}
-            >
-              Take the Student Quiz
-            </button>
           </div>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.4)', marginTop: 14, ...fadeStyle(vis, 0.18) }}>
+            Free to join the network. FastIQ included.
+          </p>
         </div>
       </section>
 

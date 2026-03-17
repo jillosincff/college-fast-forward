@@ -68,7 +68,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       style={{ background: 'linear-gradient(180deg, #050505 0%, #0B0B0F 40%, #0E1018 70%, #07080C 100%)', minHeight: '100vh' }}
     >
       <ParticleCanvas />
-      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(rgba(212,168,67,0.04), transparent 70%)' }} />
+      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(var(--accent-glow, rgba(79,140,255,0.04)), transparent 70%)' }} />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
@@ -127,7 +127,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
-          No credit card required. Cancel anytime.
+          Free to join the network. FastIQ included in your trial.
         </p>
       </div>
     </section>

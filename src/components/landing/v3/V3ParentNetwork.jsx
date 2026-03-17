@@ -1,5 +1,6 @@
 import React from 'react';
 import { playfair, dmSans, DARK_BG } from './LandingConstants';
+// Note: this section replaces the old quiz — it's the parent network value proposition
 import { useFadeIn, fadeStyle } from './SectionFade';
 import CTAButton from './CTAButton';
 
@@ -41,23 +42,13 @@ export default function V3ParentNetwork({ onCTA }) {
       <style>{`@media(max-width:640px){.v3-pn-grid{grid-template-columns:1fr !important}}`}</style>
 
       <div className="max-w-[820px] mx-auto">
-        {/* Transition line */}
-        <p className="text-center" style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)', fontWeight: 400,
-          color: 'rgba(255,255,255,0.55)', lineHeight: 1.6,
-          marginBottom: 28,
-          ...fadeStyle(vis, 0),
-        }}>
-          But even the best plan needs one thing to work — <em>access.</em>
-        </p>
-
         {/* Main headline */}
         <h2 className="text-center" style={{
           fontFamily: playfair, fontWeight: 700,
           fontSize: 'clamp(28px, 4.5vw, 48px)',
           color: '#fff', lineHeight: 1.12, letterSpacing: '-0.02em',
           marginBottom: 10,
-          ...fadeStyle(vis, 0.04),
+          ...fadeStyle(vis, 0),
         }}>
           This is College Fast Forward.
         </h2>
@@ -68,7 +59,7 @@ export default function V3ParentNetwork({ onCTA }) {
           marginBottom: 20,
           color: 'var(--accent-primary, #E85D20)',
           transition: 'color 0.4s',
-          ...fadeStyle(vis, 0.06),
+          ...fadeStyle(vis, 0.04),
         }}>
           Where parents turn connections into opportunities&nbsp;for&nbsp;students.
         </h2>
@@ -78,7 +69,7 @@ export default function V3ParentNetwork({ onCTA }) {
           fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 400,
           color: 'rgba(255,255,255,0.75)', lineHeight: 1.65,
           maxWidth: 640, margin: '0 auto 16px',
-          ...fadeStyle(vis, 0.08),
+          ...fadeStyle(vis, 0.06),
         }}>
           Because this is still a who-you-know game — and now your student has a network behind them.
         </p>
@@ -88,20 +79,20 @@ export default function V3ParentNetwork({ onCTA }) {
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 400,
           color: 'rgba(255,255,255,0.5)', lineHeight: 1.7,
           maxWidth: 620, margin: '0 auto 56px',
-          ...fadeStyle(vis, 0.10),
+          ...fadeStyle(vis, 0.08),
         }}>
           College Fast Forward is a parent-powered network where families choose to help — offering introductions, advice, and access to opportunities students would never find on their own.
         </p>
 
         {/* Divider */}
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #E85D20)', borderRadius: 1, margin: '0 auto 48px', transition: 'background 0.4s', ...fadeStyle(vis, 0.12) }} />
+        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 48px', transition: 'background 0.4s', ...fadeStyle(vis, 0.10) }} />
 
         {/* 3-column value block */}
-        <div className="v3-pn-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 48, ...fadeStyle(vis, 0.14) }}>
+        <div className="v3-pn-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 48, ...fadeStyle(vis, 0.12) }}>
           {COLUMNS.map((col, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid #1F1F23',
               borderRadius: 20, padding: '30px 24px',
               textAlign: 'center',
               transition: 'border-color 0.3s',
@@ -136,19 +127,19 @@ export default function V3ParentNetwork({ onCTA }) {
           color: 'var(--accent-primary, #E85D20)',
           lineHeight: 1.5, marginBottom: 48,
           transition: 'color 0.4s',
-          ...fadeStyle(vis, 0.18),
+          ...fadeStyle(vis, 0.16),
         }}>
           When one parent helps a student, every student benefits.
         </p>
 
         {/* CTA */}
-        <div className="text-center" style={fadeStyle(vis, 0.22)}>
-          <CTAButton text="Join the Network + Start Free Trial" onClick={onCTA} />
+        <div className="text-center" style={fadeStyle(vis, 0.20)}>
+          <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
           <p style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 300,
             color: 'rgba(255,255,255,0.4)', marginTop: 14, lineHeight: 1.5,
           }}>
-            Free to join the network. FastIQ included in your 7-day trial.
+            Free to join the network. FastIQ included.
           </p>
         </div>
       </div>

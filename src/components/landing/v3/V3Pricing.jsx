@@ -16,7 +16,7 @@ export default function V3Pricing({ onCTA }) {
 
   return (
     <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px', position: 'relative', overflow: 'hidden' }}>
-      <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse,rgba(250,70,22,0.05),transparent 70%)' }} />
+      <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse, var(--accent-glow, rgba(79,140,255,0.05)), transparent 70%)' }} />
 
       <div className="max-w-[500px] mx-auto relative">
         <div className="text-center mb-4" style={fadeStyle(vis, 0)}>
@@ -64,7 +64,7 @@ export default function V3Pricing({ onCTA }) {
         </div>
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.4)', marginTop: 16, ...fadeStyle(vis, 0.18) }}>
-          Access the network. Activate progress with FastIQ.
+          Free to join the network. FastIQ included.
         </p>
       </div>
     </section>

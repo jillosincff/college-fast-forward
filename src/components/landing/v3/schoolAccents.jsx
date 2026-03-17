@@ -19,7 +19,7 @@ const SCHOOL_ACCENTS = {
   'Clemson University':     { primary: '#E85D20', soft: 'rgba(232,93,32,0.12)', border: 'rgba(232,93,32,0.30)', glow: 'rgba(232,93,32,0.25)' },
 };
 
-const DEFAULT_ACCENT = { primary: '#D4A843', soft: 'rgba(212,168,67,0.12)', border: 'rgba(212,168,67,0.30)', glow: 'rgba(212,168,67,0.25)' };
+const DEFAULT_ACCENT = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
 export function getSchoolAccent(school) {
   return SCHOOL_ACCENTS[school] || DEFAULT_ACCENT;
