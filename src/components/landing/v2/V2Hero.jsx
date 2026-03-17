@@ -41,20 +41,26 @@ export default function V2Hero({ onCTA }) {
           Your roommate has an offer. Your parents are freaking. Chill. We got you.
         </motion.p>
 
-        {/* Body text — exact copy, pure white, 18px, 1.6 lh */}
+        {/* Body text — high-readability, spaced paragraphs */}
         <motion.div
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-          style={{ fontFamily: dmSans, fontWeight: 300, fontSize: 18, color: '#FFFFFF', lineHeight: 1.7, maxWidth: 640, margin: '0 auto 36px', textAlign: 'center' }}
+          style={{ fontFamily: dmSans, fontWeight: 500, fontSize: 19, color: '#FFFFFF', lineHeight: 1.65, letterSpacing: '0.3px', maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '32px 0 44px' }}
         >
-          <p style={{ marginBottom: 18 }}>
+          <p style={{ marginBottom: 28 }}>
             People get jobs because of <em style={{ fontStyle: 'italic' }}>who they know</em> — not what they know.
           </p>
-          <p style={{ marginBottom: 18 }}>
-            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 500 }}>your parents</strong>.{' '}
-            They've spent 20 years building a network. They know everybody.{' '}
-            Now that network works for you.
+          <p style={{ marginBottom: 28 }}>
+            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 600 }}>your parents</strong>.
           </p>
-          <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 28 }}>
+          <p style={{ marginBottom: 28 }}>
+            They've spent 20 years building a network. They know everybody.<br />
+            And now that network works for you.
+          </p>
+          <p style={{ marginBottom: 0 }}>
+            Every time a parent helps a student in the network, your visibility goes up.<br />
+            More eyes on your profile. More alumni seeing your requests. More doors opening.
+          </p>
+          <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 36 }}>
             <span style={{ color: '#fff' }}>Your parents are the fuel.</span><br />
             <span style={{ color: '#FA4616' }}>FASTIQ is the engine.</span><br />
             <span style={{ color: '#fff' }}>You're the one who lands the job.</span>
