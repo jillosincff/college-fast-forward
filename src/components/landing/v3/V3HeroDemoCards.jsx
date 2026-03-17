@@ -13,16 +13,16 @@ function DemoCard({ label, badge, visible, accent, children }) {
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(18px)',
-        transition: 'opacity 0.5s, transform 0.5s, border-color 0.4s',
-        background: 'rgba(255,255,255,0.03)',
-        border: `1px solid ${visible ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)'}`,
+        transition: 'opacity 0.5s, transform 0.5s',
+        background: '#F9F9FB',
+        border: '1px solid rgba(0,0,0,0.06)',
         borderRadius: 16,
         padding: '20px 22px',
-        backdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}
     >
       <div className="flex items-center justify-between mb-3">
-        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)' }}>
+        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(0,0,0,0.4)' }}>
           {label}
         </span>
         {badge && (
@@ -45,9 +45,9 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
           <span
             key={i}
             style={{
-              fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid #1F1F23',
+              fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a',
+              background: '#FFFFFF',
+              border: '1px solid rgba(0,0,0,0.1)',
               borderRadius: 10, padding: '8px 14px',
               display: 'inline-flex', alignItems: 'center', gap: 8,
               opacity: visible ? 1 : 0,
@@ -56,12 +56,12 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
             }}
           >
             {c.name}{c.asterisk ? '*' : ''}
-            <span style={{ fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>{c.tag}</span>
+            <span style={{ fontSize: 11, fontWeight: 400, color: 'rgba(0,0,0,0.35)' }}>{c.tag}</span>
           </span>
         ))}
       </div>
       {hasAsterisk && (
-        <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 10, lineHeight: 1.4 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)', marginTop: 10, lineHeight: 1.4 }}>
           *Sample alumni matches based on similar roles and companies
         </p>
       )}
@@ -82,8 +82,8 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
             key={i}
             className="flex items-center gap-3"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid #1F1F23',
+              background: '#FFFFFF',
+              border: '1px solid rgba(0,0,0,0.08)',
               borderRadius: 12, padding: '12px 16px',
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateX(0)' : 'translateX(-12px)',
@@ -100,13 +100,13 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
               {al.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div className="flex-1 min-w-0">
-              <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', lineHeight: 1.3 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>
                 {al.name}
               </div>
-              <div style={{ fontFamily: dmSans, fontSize: 12, color: '#A1A1AA', lineHeight: 1.4 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 12, color: '#6B7280', lineHeight: 1.4 }}>
                 {schoolName} {al.year} → {al.company} · {al.role}
               </div>
-              <div style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(0,0,0,0.35)', marginTop: 2 }}>
                 {i === 0 ? 'Active 2 days ago · Open to helping students' : i === 1 ? 'Replied recently' : 'Open to helping students'}
               </div>
             </div>
@@ -133,19 +133,19 @@ export function OutreachCard({ outreach, visible, schoolName, accent }) {
     <DemoCard label="Personalized outreach message" badge="Ready to send" visible={visible} accent={accent}>
       <div
         style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid #1F1F23',
+          background: '#FFFFFF',
+          border: '1px solid rgba(0,0,0,0.08)',
           borderRadius: 12, padding: '16px 18px',
         }}
       >
-        <div className="flex items-center gap-2 mb-3 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>To:</span>
-          <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#fff' }}>{outreach.toFull}</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginLeft: 4 }}>at {outreach.company}</span>
+        <div className="flex items-center gap-2 mb-3 pb-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>To:</span>
+          <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{outreach.toFull}</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)', marginLeft: 4 }}>at {outreach.company}</span>
         </div>
         <p style={{
           fontFamily: dmSans, fontSize: 14, fontWeight: 400,
-          color: 'rgba(255,255,255,0.8)', lineHeight: 1.7,
+          color: '#374151', lineHeight: 1.7,
           whiteSpace: 'pre-line', margin: 0,
         }}>
           {body}

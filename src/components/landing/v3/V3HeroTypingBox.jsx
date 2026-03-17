@@ -116,13 +116,14 @@ export default function V3HeroTypingBox() {
       {/* Input box */}
       <div
         style={{
-          background: 'rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(20px)',
-          border: `1px solid ${isDone ? accent.border : '#1F1F23'}`,
-          borderRadius: 20, padding: '22px 24px',
-          boxShadow: isDone ? `0 8px 48px rgba(0,0,0,0.5), 0 0 20px ${accent.glow}` : '0 8px 48px rgba(0,0,0,0.4)',
+          background: '#FFFFFF',
+          border: '1px solid rgba(0,0,0,0.08)',
+          borderRadius: 16, padding: '22px 24px',
+          boxShadow: isDone
+            ? `0 10px 30px rgba(0,0,0,0.25), 0 0 20px ${accent.glow}`
+            : '0 10px 30px rgba(0,0,0,0.25)',
           marginBottom: 16,
-          transition: 'border-color 0.6s, box-shadow 0.6s',
+          transition: 'box-shadow 0.6s',
         }}
       >
         <div className="flex items-center gap-2 mb-4">
@@ -133,11 +134,11 @@ export default function V3HeroTypingBox() {
             <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: accent.primary, letterSpacing: '0.04em' }}>FASTIQ</span>
           </div>
           <div className="flex-1" />
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>Interactive demo</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>Interactive demo</span>
         </div>
-        <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0 }}>
-          {displayedText}
-          {phase === 'typing' && <span className="inline-block w-[2px] h-[18px] bg-white/60 ml-0.5 align-text-bottom" style={{ animation: 'blink 0.9s infinite' }} />}
+        <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#000000', lineHeight: 1.6, margin: 0 }}>
+          {displayedText || <span style={{ color: 'rgba(0,0,0,0.3)' }}>Describe your goal...</span>}
+          {phase === 'typing' && displayedText && <span className="inline-block w-[2px] h-[18px] bg-black/50 ml-0.5 align-text-bottom" style={{ animation: 'blink 0.9s infinite' }} />}
         </p>
       </div>
 
