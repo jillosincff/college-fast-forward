@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getSchoolShort } from './V3HeroDemoData';
-// getSchoolShort still needed for showSchoolBadge=true cases
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
@@ -71,9 +69,8 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
 }
 
 /* ── 2. Alumni Matches ───────────────────────────────── */
-export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false, schoolName = '' }) {
+export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false }) {
   const a = accent || DEFAULT_ACCENT;
-  const shortSchool = showSchoolBadge ? getSchoolShort(schoolName) : null;
 
   return (
     <DemoCard label="Alumni you can contact" badge={`${alumni.length} matches`} visible={visible} accent={accent}>
@@ -121,16 +118,6 @@ export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false, s
                 )}
               </div>
             </div>
-            {showSchoolBadge && shortSchool && (
-              <div style={{
-                fontFamily: dmSans, fontSize: 10, fontWeight: 600,
-                color: a.primary, background: a.soft,
-                padding: '3px 8px', borderRadius: 6, flexShrink: 0,
-                letterSpacing: '0.05em',
-              }}>
-                {shortSchool}
-              </div>
-            )}
           </div>
         ))}
       </div>
@@ -138,47 +125,49 @@ export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false, s
   );
 }
 
-/* ── 3. Personalized Outreach ────────────────────────── */
+/* ── 3. Personalized Outreach (line-by-line reveal) ──── */
 export function OutreachCard({ outreach, visible, accent }) {
-  const body = outreach.body;
-  const [typedChars, setTypedChars] = useState(0);
-  const [showFull, setShowFull] = useState(false);
-  const [showReady, setShowReady] = useState(false);
-  const typeTimer = useRef(null);
-  const prevBody = useRef('');
+  const LINE_DELAY = 120;
+  const REPLY_DELAY = 300;
 
-  const lines = body.split('\n');
-  const typingBoundary = (lines[0] + '\n' + (lines[1] || '')).length;
+  const lines = outreach.body.split('\n');
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [showReady, setShowReady] = useState(false);
+  const timersRef = useRef(new Set());
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (!visible) {
-      setTypedChars(0);
-      setShowFull(false);
-      setShowReady(false);
-      prevBody.current = body;
-      return;
-    }
-    if (prevBody.current === body && typedChars > 0) return;
-    prevBody.current = body;
-    setTypedChars(0);
-    setShowFull(false);
-    setShowReady(false);
-    let i = 0;
-    const type = () => {
-      if (i <= typingBoundary) {
-        setTypedChars(i);
-        i++;
-        typeTimer.current = setTimeout(type, 18);
-      } else {
-        setTimeout(() => setShowFull(true), 200);
-        setTimeout(() => setShowReady(true), 600);
-      }
-    };
-    typeTimer.current = setTimeout(type, 100);
-    return () => clearTimeout(typeTimer.current);
-  }, [visible, body]);
+    if (!visible || hasAnimatedRef.current) return;
+    hasAnimatedRef.current = true;
 
-  const typedText = body.slice(0, typedChars);
+    // Reveal lines one at a time
+    lines.forEach((_, i) => {
+      const id = setTimeout(() => {
+        timersRef.current.delete(id);
+        setVisibleLines(i + 1);
+      }, LINE_DELAY * (i + 1));
+      timersRef.current.add(id);
+    });
+
+    // Show ready badge + reply line after all lines
+    const readyId = setTimeout(() => {
+      timersRef.current.delete(readyId);
+      setShowReady(true);
+    }, LINE_DELAY * lines.length + REPLY_DELAY);
+    timersRef.current.add(readyId);
+
+    return () => {
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current.clear();
+    };
+  }, [visible]);
+
+  // Reset on unmount (Strict Mode)
+  useEffect(() => () => {
+    hasAnimatedRef.current = false;
+    timersRef.current.forEach(id => clearTimeout(id));
+    timersRef.current.clear();
+  }, []);
 
   return (
     <DemoCard label="Personalized outreach message" badge={showReady ? '✔ Ready to send' : 'Drafting…'} visible={visible} accent={accent}>
@@ -187,6 +176,7 @@ export function OutreachCard({ outreach, visible, accent }) {
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid rgba(255,255,255,0.06)',
           borderRadius: 12, padding: '16px 18px',
+          textAlign: 'left',
         }}
       >
         <div className="flex items-center gap-2 mb-3 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -194,19 +184,25 @@ export function OutreachCard({ outreach, visible, accent }) {
           <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E5E7EB' }}>{outreach.toFull}</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginLeft: 4 }}>at {outreach.company}</span>
         </div>
-        <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
-          {!showFull ? (
-            <>
-              {typedText}
-              {typedChars < typingBoundary && <span style={{ display: 'inline-block', width: 2, height: 16, background: 'rgba(255,255,255,0.5)', marginLeft: 1, verticalAlign: 'text-bottom', animation: 'blink 0.9s infinite' }} />}
-            </>
-          ) : (
-            <span style={{ animation: 'msgFadeIn 0.5s ease' }}>{body}</span>
-          )}
+        <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0, textAlign: 'left' }}>
+          {lines.map((line, i) => (
+            <span
+              key={i}
+              style={{
+                display: 'block',
+                opacity: i < visibleLines ? 1 : 0,
+                transform: i < visibleLines ? 'translateY(0)' : 'translateY(4px)',
+                transition: 'opacity 0.3s ease, transform 0.3s ease',
+                minHeight: line === '' ? 10 : undefined,
+              }}
+            >
+              {line || '\u00A0'}
+            </span>
+          ))}
         </div>
       </div>
       {/* Success signal */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, opacity: showReady ? 1 : 0, transform: showReady ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.4s, transform 0.4s' }}>
+      <div style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, opacity: showReady ? 1 : 0, transform: showReady ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.4s, transform 0.4s' }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="7" cy="7" r="6.5" stroke="#10B981" strokeWidth="1"/>
           <path d="M4 7.2L6 9.2L10 5" stroke="#10B981" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
