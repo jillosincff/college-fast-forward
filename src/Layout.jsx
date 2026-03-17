@@ -55,7 +55,7 @@ const childPageTitles = {
   ApplicationBoost: 'Application Boost',
 };
 
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.3.0';
 
 /**
  * SINGLE SOURCE OF TRUTH for dashboard routing.
