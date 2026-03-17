@@ -56,7 +56,7 @@ export default function V3SchoolSelector({ selectedSchool, onSelect, accent }) {
           style={{
             position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
             width: 320, marginTop: 8,
-            background: '#1a1f2e', border: '1px solid rgba(255,255,255,0.12)',
+            background: '#141417', border: '1px solid #1F1F23',
             borderRadius: 12, zIndex: 50,
             boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
           }}
