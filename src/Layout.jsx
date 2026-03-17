@@ -422,7 +422,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                       ) : (recentMessages.length > 0 || payItForwardNotifications.length > 0) ? (
                         <div className="divide-y">
                           {payItForwardNotifications.map((notif) => (
-                            <div key={`pif-${notif.id}`} className="p-4 hover:bg-orange-50 cursor-pointer transition-colors bg-gradient-to-r from-orange-50 to-pink-50 border-l-4 border-orange-400" onClick={() => { markPIFAsRead(notif.id); onNavigate('Connections'); }}>
+                            <div key={`pif-${notif.id}`} className="p-4 hover:bg-orange-50 cursor-pointer transition-colors bg-gradient-to-r from-orange-50 to-pink-50 border-l-4 border-orange-400" onClick={() => { markPIFAsRead(notif.id); onNavigate('MyMessages'); }}>
                               <div className="flex items-start gap-3">
                                 <div className="text-2xl">❤️</div>
                                 <div className="flex-1 min-w-0">
@@ -504,7 +504,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard'];
-const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyImpact', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
+const bottomNavPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
 
@@ -833,7 +833,7 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
-  const pullRefreshPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'Connections', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
+  const pullRefreshPages = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
   return (
