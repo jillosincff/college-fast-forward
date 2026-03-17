@@ -8,9 +8,8 @@ import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
 import V3HowFastIQWorks from '@/components/landing/v3/V3HowFastIQWorks';
 import V3FastIQ247 from '@/components/landing/v3/V3FastIQ247';
-import V3NetworkAdvantage from '@/components/landing/v3/V3NetworkAdvantage';
+import V3ParentNetwork from '@/components/landing/v3/V3ParentNetwork';
 import V3StudentQuiz from '@/components/landing/v3/V3StudentQuiz';
-import V3ParentQuiz from '@/components/landing/v3/V3ParentQuiz';
 import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
@@ -66,25 +65,22 @@ export default function LandingPage() {
         {/* 4 — FastIQ Works 24/7 */}
         <V3FastIQ247 />
 
-        {/* 5 — Network Edge */}
-        <V3NetworkAdvantage />
+        {/* 5 — Parent Network (Access + Action) */}
+        <V3ParentNetwork onCTA={handleCTA} />
 
         {/* 6 — Student Quiz */}
         <V3StudentQuiz onCTA={handleCTA} />
 
-        {/* 7 — Parent Quiz */}
-        <V3ParentQuiz />
-
-        {/* 8 — Numbers / Proof */}
+        {/* 7 — Numbers / Proof */}
         <V3Numbers />
 
-        {/* 9 — Parent Peace of Mind */}
+        {/* 8 — Parent Peace of Mind */}
         <V3ParentPeace />
 
-        {/* 10 — Pricing */}
+        {/* 9 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
-        {/* 11 — Final CTA + Footer */}
+        {/* 10 — Final CTA + Footer */}
         <V3FinalCTA onCTA={handleCTA} onQuiz={handleCTA} />
       </div>
     </>
