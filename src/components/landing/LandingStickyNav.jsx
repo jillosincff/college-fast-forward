@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          FastIQ™ — 7-day free trial · Works for any college
+          AI execution + real access · Free to join
         </span>
 
         {/* Right — buttons */}
@@ -84,13 +84,13 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
           </button>
           <button
             onClick={onGetStarted}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#d44e14'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#E85D20'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.15)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
             style={{
               fontFamily: dmSans,
               fontSize: 14,
               fontWeight: 500,
-              background: '#E85D20',
+              background: 'var(--accent-primary, #4F8CFF)',
               color: '#fff',
               padding: '8px 20px',
               borderRadius: 100,
