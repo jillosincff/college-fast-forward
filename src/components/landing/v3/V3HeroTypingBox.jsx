@@ -60,12 +60,14 @@ export default function V3HeroTypingBox() {
     clearTimeout(typingRef.current);
   }, []);
 
-  const runDemo = useCallback((text, scIdx, school) => {
+  const runDemo = useCallback((scIdx, school) => {
     clearAllTimers();
     setDisplayedText('');
     setPhase('typing');
+    const sc = DEMO_SCENARIOS[scIdx];
+    const text = sc.promptTemplate(school);
     // Resolve new randomized data
-    setResolvedData(resolveScenario(DEMO_SCENARIOS[scIdx], school));
+    setResolvedData(resolveScenario(sc, school));
     let i = 0;
     const type = () => {
       if (i <= text.length) {
@@ -87,18 +89,18 @@ export default function V3HeroTypingBox() {
     return () => clearTimeout(timerRef.current);
   }, [phase]);
 
-  useEffect(() => { runDemo(DEMO_SCENARIOS[0].prompt, 0, selectedSchool); }, []);
+  useEffect(() => { runDemo(0, selectedSchool); }, []);
 
   const switchScenario = useCallback((idx) => {
     if (idx === scenarioIdx && phase === 'done') return;
     setScenarioIdx(idx);
-    runDemo(DEMO_SCENARIOS[idx].prompt, idx, selectedSchool);
+    runDemo(idx, selectedSchool);
   }, [scenarioIdx, phase, runDemo, selectedSchool]);
 
   const handleSchoolChange = useCallback((school) => {
     if (!school) return;
     setSelectedSchool(school);
-    runDemo(DEMO_SCENARIOS[scenarioIdx].prompt, scenarioIdx, school);
+    runDemo(scenarioIdx, school);
   }, [scenarioIdx, runDemo]);
 
   const showCompanies = ['companies', 'alumni', 'outreach', 'done'].includes(phase);
