@@ -2,26 +2,94 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
-const TYPING_SPEED = 30; // ~30ms per character as specified
+const TYPING_SPEED = 30;
+
+/* ── School rotation data ──────────────────────────── */
+const SCHOOLS = [
+  {
+    name: 'University of Florida',
+    abbr: 'UF',
+    prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify.",
+  },
+  {
+    name: 'Florida State University',
+    abbr: 'FSU',
+    prompt: "I'm interested in sports marketing agencies in New York.",
+  },
+  {
+    name: 'Wake Forest University',
+    abbr: 'Wake Forest',
+    prompt: "I'm exploring careers in wealth management and financial advising.",
+  },
+  {
+    name: 'University of Michigan',
+    abbr: 'U of M',
+    prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York.",
+  },
+  {
+    name: 'University of Southern California',
+    abbr: 'USC',
+    prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA.",
+  },
+];
+
+function getNextSchool() {
+  let idx = 0;
+  try {
+    const stored = sessionStorage.getItem('cff_demo_school_idx');
+    if (stored !== null) {
+      idx = (parseInt(stored, 10) + 1) % SCHOOLS.length;
+    }
+    sessionStorage.setItem('cff_demo_school_idx', String(idx));
+  } catch (e) { /* private browsing */ }
+  return SCHOOLS[idx];
+}
+
+/* ── Fixed demo content (same across all schools) ──── */
+const COMPANIES = [
+  { name: 'Nike', tag: 'Brand Marketing' },
+  { name: 'Spotify', tag: 'Music/Tech' },
+  { name: 'Ogilvy', tag: 'Creative Agency' },
+  { name: 'PepsiCo', tag: 'CPG' },
+  { name: 'Lululemon', tag: 'DTC Brand' },
+];
+
+function buildDemoData(school) {
+  return {
+    companies: COMPANIES,
+    hasAsterisk: false,
+    schoolAbbr: school.abbr,
+    alumni: [
+      { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator', year: `${school.abbr} '23` },
+      { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate', year: `${school.abbr} '22` },
+      { name: 'Priya Patel', company: 'Ogilvy', role: 'Account Coordinator', year: `${school.abbr} '21` },
+    ],
+    outreach: {
+      to: 'Tyler',
+      toFull: 'Tyler Moreno',
+      company: 'Nike',
+      from: 'Olivia',
+      body: `Hi Tyler,\n\nI'm a student exploring brand marketing and noticed you're at Nike — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\nOlivia`,
+    },
+  };
+}
 
 /* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
-  // No school branding for landing page (logged-out visitors)
+  const [school] = useState(() => getNextSchool());
   const [displayedText, setDisplayedText] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
   const [showAlumni, setShowAlumni] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [resolvedData, setResolvedData] = useState(null);
+  const [demoData] = useState(() => buildDemoData(school));
   const [hasStarted, setHasStarted] = useState(false);
 
-  // Use a Set of timer ids so we can cancel ALL pending timers on reset
   const timersRef = useRef(new Set());
   const containerRef = useRef(null);
   const hasPlayedRef = useRef(false);
 
-  // Neutral accent for logged-out state (no school branding)
   const accent = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
   const schedule = useCallback((fn, ms) => {
@@ -38,40 +106,13 @@ export default function V3HeroTypingBox() {
     timersRef.current.clear();
   }, []);
 
-  /* ── Orchestrated sequence per spec ────────────────────────── */
   const runDemo = useCallback(() => {
     if (hasPlayedRef.current) return;
     hasPlayedRef.current = true;
     setHasStarted(true);
 
-    // Fixed demo data — no school branding, 3 unique alumni
-    const promptText = "I'm a marketing major and want to work at a top brand like Nike or Spotify.";
-    const data = {
-      companies: [
-        { name: 'Nike', tag: 'Brand Marketing' },
-        { name: 'Spotify', tag: 'Music/Tech' },
-        { name: 'Ogilvy', tag: 'Creative Agency' },
-        { name: 'PepsiCo', tag: 'CPG' },
-        { name: 'Lululemon', tag: 'DTC Brand' },
-      ],
-      hasAsterisk: false,
-      alumni: [
-        { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator', year: "'23" },
-        { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate', year: "'22" },
-        { name: 'Priya Patel', company: 'Ogilvy', role: 'Account Coordinator', year: "'21" },
-      ],
-      outreach: {
-        to: 'Tyler',
-        toFull: 'Tyler Moreno',
-        company: 'Nike',
-        from: 'Olivia',
-        body: `Hi Tyler,\n\nI'm a marketing major and brand strategy is exactly where I want to build my career — I noticed you're at Nike and would love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\nOlivia`,
-      },
-    };
+    const promptText = school.prompt;
 
-    setResolvedData(data);
-
-    // Step 1 — Type prompt (0ms delay start)
     setIsTyping(true);
     let charIdx = 0;
     const typeChar = () => {
@@ -80,34 +121,33 @@ export default function V3HeroTypingBox() {
         charIdx++;
         schedule(typeChar, TYPING_SPEED);
       } else {
-        // Typing complete — no cursor after
         setIsTyping(false);
-        
-        // Step 2 — Companies card (500ms after typing completes)
+
+        // Step 3 — Companies card (500ms after typing completes)
         schedule(() => {
           setShowCompanies(true);
-          
-          // Step 3 — Alumni card (400ms after companies)
+
+          // Step 4 — Alumni card (400ms after companies)
           schedule(() => {
             setShowAlumni(true);
-            
-            // Step 4 — Outreach card (500ms after last alumni row ~450ms)
+
+            // Step 5 — Outreach card (500ms after last alumni row ~450ms)
             schedule(() => {
               setShowOutreach(true);
-              
-              // Step 5 — Footer line (300ms after outreach completes ~800ms)
+
+              // Step 6 — Footer line (300ms after outreach completes ~800ms)
               schedule(() => {
                 setShowProof(true);
               }, 800);
-            }, 500 + 450); // 450ms for 3 alumni rows at 150ms each
+            }, 500 + 450);
           }, 400);
         }, 500);
       }
     };
     typeChar();
-  }, [schedule]);
+  }, [schedule, school]);
 
-  // Intersection Observer — trigger demo when scrolled into view (once only)
+  // Intersection Observer — trigger once
   useEffect(() => {
     const container = containerRef.current;
     if (!container || hasPlayedRef.current) return;
@@ -125,9 +165,8 @@ export default function V3HeroTypingBox() {
     observer.observe(container);
     return () => {
       observer.disconnect();
-      // On unmount (including Strict Mode remount), clear timers and reset state
-      // so the component doesn't end up with stale partial state from a prior mount
       clearAllTimers();
+      // Reset for Strict Mode double-mount
       hasPlayedRef.current = false;
       setDisplayedText('');
       setShowCompanies(false);
@@ -135,7 +174,6 @@ export default function V3HeroTypingBox() {
       setShowOutreach(false);
       setShowProof(false);
       setIsTyping(false);
-      setResolvedData(null);
       setHasStarted(false);
     };
   }, [runDemo, clearAllTimers]);
@@ -174,23 +212,21 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── Demo disclaimer ──────────────────────── */}
+      {/* ── Demo disclaimer (static, always visible once demo starts) ── */}
       <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, fontStyle: 'italic', lineHeight: 1.5, margin: '0 0 16px' }}>
         <span style={{ color: 'rgba(255,255,255,0.35)' }}>For demo purposes only.</span>{' '}
         <span style={{ color: '#E85D20' }}>FastIQ works for any school.</span>
       </p>
 
       {/* ── Dark result cards ──────────────────────── */}
-      {resolvedData && (
-        <div className="flex flex-col gap-3">
-          <CompaniesCard companies={resolvedData.companies} visible={showCompanies} accent={accent} hasAsterisk={resolvedData.hasAsterisk} />
-          <AlumniCard alumni={resolvedData.alumni} visible={showAlumni} accent={accent} showSchoolBadge={false} />
-          <OutreachCard outreach={resolvedData.outreach} visible={showOutreach} accent={accent} />
-        </div>
-      )}
+      <div className="flex flex-col gap-3">
+        <CompaniesCard companies={demoData.companies} visible={showCompanies} accent={accent} hasAsterisk={demoData.hasAsterisk} />
+        <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} showSchoolBadge={false} />
+        <OutreachCard outreach={demoData.outreach} visible={showOutreach} accent={accent} />
+      </div>
 
       {/* ── Proof line ─────────────────────────────── */}
-      <div className="text-center mt-6" style={{ opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
+      <div className="mt-6" style={{ textAlign: 'left', opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}
           <span style={{ color: accent.primary }}>who to contact</span> and{' '}
