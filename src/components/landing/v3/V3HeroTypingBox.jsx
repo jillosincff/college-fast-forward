@@ -163,6 +163,12 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
+      {/* ── Demo disclaimer ──────────────────────── */}
+      <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, fontStyle: 'italic', lineHeight: 1.5, margin: '0 0 16px' }}>
+        <span style={{ color: 'rgba(255,255,255,0.35)' }}>For demo purposes only.</span>{' '}
+        <span style={{ color: '#E85D20' }}>FastIQ works for any school.</span>
+      </p>
+
       {/* ── Dark result cards ──────────────────────── */}
       {resolvedData && (
         <div className="flex flex-col gap-3">
