@@ -177,10 +177,10 @@ export default function V3AIAccessModel({ onCTA }) {
             tagline="AI does the work"
             bullets={AI_BULLETS}
             icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #E85D20)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/>
                 <path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/>
-                <circle cx="12" cy="6" r="1" fill="var(--accent-primary, #E85D20)" stroke="none"/>
+                <circle cx="12" cy="6" r="1" fill="var(--accent-primary, #4F8CFF)" stroke="none"/>
               </svg>
             }
           />
@@ -196,7 +196,7 @@ export default function V3AIAccessModel({ onCTA }) {
             tagline="Access opens the door"
             bullets={NETWORK_BULLETS}
             icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #E85D20)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
@@ -227,7 +227,7 @@ export default function V3AIAccessModel({ onCTA }) {
             fontFamily: dmSans, fontSize: 13, fontWeight: 300,
             color: 'rgba(255,255,255,0.4)', marginTop: 14, lineHeight: 1.5,
           }}>
-            Free network access. FastIQ included.
+            Free to join the network. FastIQ included.
           </p>
         </div>
       </div>
