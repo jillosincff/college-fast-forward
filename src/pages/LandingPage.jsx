@@ -56,22 +56,22 @@ export default function LandingPage() {
         {/* 1 — Hero */}
         <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
 
-        {/* 2 — Problem / Reality Check */}
+        {/* 2 — Problem + bridge statement */}
         <V3Problem />
 
-        {/* 3 — Stats / Proof (moved up) */}
+        {/* 3 — Stats / Proof */}
         <V3Numbers />
 
-        {/* 4 — How It Actually Works (Clarity) */}
+        {/* 4 — How your student moves forward */}
         <V3HowItActuallyWorks />
 
-        {/* 5 — AI + Access = Results */}
+        {/* 5 — AI + Access */}
         <V3AIAccessModel onCTA={handleCTA} />
 
-        {/* 6 — Parent Network */}
+        {/* 6 — This is College Fast Forward */}
         <V3ParentNetwork onCTA={handleCTA} />
 
-        {/* 7 — FastIQ Works 24/7 (8-feature grid) */}
+        {/* 7 — FastIQ 8-feature grid */}
         <V3FastIQ247 />
 
         {/* 8 — Parent Peace of Mind */}

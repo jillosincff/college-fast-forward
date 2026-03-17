@@ -117,7 +117,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
 
         {/* Demo framing */}
         <div className="text-center mb-8">
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 6 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 4 }}>
             Your student enters their career goals.
           </p>
           <p style={{ fontFamily: playfair, fontStyle: 'italic', fontSize: 17, fontWeight: 400, color: 'var(--accent-primary, #4F8CFF)', lineHeight: 1.5 }}>
