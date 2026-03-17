@@ -7,8 +7,7 @@ const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const NAV_LINKS = [
-  { label: 'Dashboard', page: 'Dashboard' },
-  { label: 'Ask the Network', page: 'Connections' },
+  { label: 'Your Plan', page: 'Dashboard' },
   { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Pipeline', page: 'MyApplications' },
   { label: 'Messages', page: 'MyMessages' },

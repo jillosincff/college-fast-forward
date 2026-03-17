@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { LayoutDashboard, MessageSquare, Users, Mail, Zap, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Users, Mail, Zap, Briefcase } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
 export default function MobileBottomNav({ user, currentPage }) {
