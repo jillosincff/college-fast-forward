@@ -3,6 +3,17 @@ import { getSchoolShort } from './V3HeroDemoData';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
+// Inject keyframes once
+if (typeof document !== 'undefined' && !document.getElementById('demo-card-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'demo-card-keyframes';
+  style.textContent = `
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes msgFadeIn { from{opacity:0} to{opacity:1} }
+  `;
+  document.head.appendChild(style);
+}
+
 const DEFAULT_ACCENT = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
 /* ── Shared card wrapper ────────────────────────────── */
