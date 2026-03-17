@@ -46,12 +46,12 @@ function HeroCTA({ text, onClick, variant = 'primary' }) {
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; }}
       style={{
         fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
-        background: isPrimary ? 'var(--accent-primary, #D4A843)' : 'transparent',
+        background: isPrimary ? 'var(--accent-primary, #4F8CFF)' : 'transparent',
         border: isPrimary ? 'none' : '1px solid rgba(255,255,255,0.15)',
         borderRadius: 100, padding: '16px 34px', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         transition: 'all 0.35s ease', minHeight: 'auto', minWidth: 'auto',
-        boxShadow: isPrimary ? '0 4px 24px var(--accent-glow, rgba(212,168,67,0.25)), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
+        boxShadow: isPrimary ? '0 4px 24px var(--accent-glow, rgba(79,140,255,0.25)), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
         lineHeight: 1.35, textAlign: 'center',
         backdropFilter: isPrimary ? 'none' : 'blur(12px)',
       }}
@@ -73,7 +73,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
         <div className="mb-7">
-          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #D4A843)', transition: 'color 0.4s' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>
             College Fast Forward
           </span>
         </div>
@@ -88,7 +88,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           Your student doesn't need more resumes.{' '}
           <span style={{
             fontStyle: 'italic',
-            color: 'var(--accent-primary, #D4A843)',
+            color: 'var(--accent-primary, #4F8CFF)',
             transition: 'color 0.4s',
           }}>
             They need a plan.
