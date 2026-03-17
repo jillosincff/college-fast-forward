@@ -6,7 +6,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Direction',
-    desc: 'FastIQ helps your student figure out where to focus instead of guessing.',
+    desc: 'FastIQ helps your student figure out where to focus — instead of guessing.',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
@@ -16,7 +16,7 @@ const STEPS = [
   {
     num: '02',
     title: 'Action',
-    desc: 'It gives them a clear daily plan so they know exactly what to do next.',
+    desc: 'A clear daily plan so they know exactly what to do next.',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -26,7 +26,7 @@ const STEPS = [
   {
     num: '03',
     title: 'Outreach',
-    desc: 'It identifies alumni, prioritizes who to contact, and crafts personalized outreach.',
+    desc: 'Identifies alumni, prioritizes who to contact, and writes personalized messages.',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/>
@@ -36,7 +36,7 @@ const STEPS = [
   {
     num: '04',
     title: 'Momentum',
-    desc: "It keeps the process moving so your student builds traction instead of stalling out.",
+    desc: "Keeps the process moving so your student builds traction instead of stalling out.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z"/>
@@ -61,7 +61,7 @@ export default function V3HowFastIQWorks() {
         </h2>
 
         <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: 56, lineHeight: 1.6, maxWidth: 550, marginLeft: 'auto', marginRight: 'auto', ...fadeStyle(vis, 0.08) }}>
-          This isn't another tool. It's a system your student follows.
+          Not another tool. A system your student actually follows.
         </p>
 
         <div className="v3-steps-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, ...fadeStyle(vis, 0.12) }}>

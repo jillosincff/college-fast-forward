@@ -105,25 +105,14 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           In minutes, your student gets target companies, alumni to contact, and personalized messages ready to send.
         </p>
 
-        {/* Trust line */}
-        <p style={{
-          fontFamily: dmSans, fontWeight: 500,
-          fontSize: 'clamp(14px, 1.6vw, 16px)',
-          color: 'rgba(255,255,255,0.5)', lineHeight: 1.6,
-          maxWidth: 580, margin: '0 auto 16px',
-        }}>
-          Not another job board. Not another course. This is how students actually get hired.
-        </p>
-
-        {/* Proof line */}
+        {/* Support line */}
         <p style={{
           fontFamily: dmSans, fontWeight: 400,
-          fontSize: 'clamp(13px, 1.4vw, 14px)',
-          color: 'rgba(255,255,255,0.35)', lineHeight: 1.6,
+          fontSize: 'clamp(14px, 1.6vw, 16px)',
+          color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
           maxWidth: 580, margin: '0 auto 44px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         }}>
-          <span style={{ color: '#10B981' }}>✔</span> Built around how hiring actually works today
+          FastIQ works 24/7 to uncover opportunities most students never see.
         </p>
 
         {/* Product Demo */}
@@ -137,11 +126,8 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="outline" />
         </div>
 
-        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, marginBottom: 6 }}>
-          Try it risk-free for 7 days. No long-term commitment.
-        </p>
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.25)', lineHeight: 1.5 }}>
-          Join parents from 50+ schools already helping students get ahead.
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, marginBottom: 6 }}>
+          Free to join the network. FastIQ included in your trial.
         </p>
       </div>
     </section>

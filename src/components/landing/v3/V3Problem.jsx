@@ -3,10 +3,10 @@ import { playfair, dmSans, DARK_BG_ALT } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 
 const PROBLEMS = [
-  { icon: '🎯', text: "They don't know what they want" },
+  { icon: '🎯', text: "They have no direction" },
   { icon: '🏢', text: "They don't have target companies" },
-  { icon: '🤝', text: "They don't know how to network" },
-  { icon: '📄', text: "They send resumes into a black hole — and hear nothing back" },
+  { icon: '🤝', text: "They have no idea how to network" },
+  { icon: '📄', text: "They're sending resumes into a black hole" },
 ];
 
 export default function V3Problem() {
@@ -20,11 +20,11 @@ export default function V3Problem() {
         </p>
 
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 4vw, 44px)', color: '#fff', textAlign: 'center', lineHeight: 1.15, marginBottom: 12, letterSpacing: '-0.02em', ...fadeStyle(vis, 0.04) }}>
-          Most students aren't lazy. <em>They're lost.</em>
+          Most students aren't lazy. <em>They're stuck.</em>
         </h2>
 
         <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: 48, lineHeight: 1.6, ...fadeStyle(vis, 0.08) }}>
-          This is not just a resume problem. It's a direction and execution problem.
+          This isn't a resume problem. It's a direction and execution problem.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, ...fadeStyle(vis, 0.12) }}>
@@ -48,7 +48,7 @@ export default function V3Problem() {
           textAlign: 'center', lineHeight: 1.5, marginTop: 36,
           ...fadeStyle(vis, 0.16),
         }}>
-          They don't have a plan — and no one is telling them what to do next.
+          And no one is telling them what to do next.
         </p>
       </div>
     </section>

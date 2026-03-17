@@ -9,8 +9,8 @@ const FEATURES = [
         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
       </svg>
     ),
-    title: 'Finds opportunities beyond job boards',
-    desc: 'Surfaces roles, companies, and paths your student would miss on their own.',
+    title: 'Finds hidden opportunities',
+    desc: 'Surfaces roles, companies, and paths your student would never find on their own.',
   },
   {
     icon: (
@@ -19,7 +19,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Identifies alumni everywhere',
-    desc: "Finds relevant alumni from your student's school across companies and industries.",
+    desc: "Finds alumni from your student's school at companies and industries that matter.",
   },
   {
     icon: (
@@ -64,7 +64,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Suggests follow-ups',
-    desc: 'Keeps conversations alive after first outreach.',
+    desc: 'Keeps conversations alive and momentum going after first outreach.',
   },
   {
     icon: (
@@ -73,7 +73,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Keeps momentum going',
-    desc: "Shows the next best steps so progress doesn't stall.",
+    desc: "Daily next steps so progress never stalls.",
   },
 ];
 
@@ -93,7 +93,7 @@ export default function V3FastIQ247() {
         </h2>
 
         <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: 56, lineHeight: 1.6, maxWidth: 580, marginLeft: 'auto', marginRight: 'auto', ...fadeStyle(vis, 0.08) }}>
-          Not just advice — a system that keeps uncovering opportunities and moving them forward.
+          Not just advice — a system that uncovers opportunities and keeps your student moving forward.
         </p>
 
         <div className="v3-feat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, ...fadeStyle(vis, 0.12) }}>
