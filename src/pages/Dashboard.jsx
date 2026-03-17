@@ -147,10 +147,6 @@ ${user.full_name?.split(' ')[0] || 'Student'}` : null;
     document.getElementById('message-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleCheckConnections = () => {
-    navigate('GatorDirectory');
-  };
-
   if (isLoading || !user || loadingData) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0B0B0F' }}>
@@ -217,7 +213,8 @@ ${user.full_name?.split(' ')[0] || 'Student'}` : null;
             {/* Section 5: Network Edge - shows after interaction */}
             <NetworkEdge
               visible={hasInteracted}
-              onCheckConnections={handleCheckConnections}
+              company={selectedCompany}
+              userSchool={user?.school}
             />
           </div>
         )}
