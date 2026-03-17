@@ -590,13 +590,13 @@ export default function GatorAuth() {
         <AuthCard>
           <LogoBlock />
           <h1 style={S.headline}>Welcome back, {firstName}.</h1>
-          <p style={S.subhead}>You're already registered. Taking you to your dashboard...</p>
+          <p style={S.subhead}>Taking you to your dashboard...</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '24px 0' }}>
-            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(244,240,232,0.4)' }} />
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.35)' }} />
             <span style={{ ...S.finePrint, fontSize: 14 }}>Redirecting...</span>
           </div>
           <button onClick={() => navigate(dashboardUrl)} style={S.primaryBtn}>
-            Go to Dashboard Now
+            Go to Dashboard
             <ArrowSVG color="#fff" />
           </button>
         </AuthCard>
@@ -612,8 +612,8 @@ export default function GatorAuth() {
     return (
       <AuthPageShell>
         <div style={{ textAlign: 'center' }}>
-          <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#E85D20', margin: '0 auto 16px' }} />
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.5)' }}>Setting up your account...</p>
+          <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
         </div>
       </AuthPageShell>
     );
@@ -624,42 +624,40 @@ export default function GatorAuth() {
   // ═══════════════════════════════════════════════════════════
   
   if (step === 'oauth') {
-    const roleLabel = selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alumni';
+    const roleLabel = selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alum';
     return (
       <AuthPageShell>
         <AuthCard delay={0}>
           <LogoBlock delay={0.05} />
-          <h1 style={{ ...S.headline, animDelay: '0.1s' }}>Almost there.</h1>
+          <h1 style={S.headline}>Almost there.</h1>
           <p style={{ ...S.subhead, marginBottom: 32 }}>Sign in to continue as {roleLabel}</p>
 
           <button
             onClick={() => handleGoogleSignIn(false)}
             disabled={loading}
             style={{ ...S.googleBtn, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
           >
             {loading ? (
-              <><Loader2 className="w-5 h-5 animate-spin" style={{ color: '#f4f0e8', marginRight: 10 }} />Connecting...</>
+              <><Loader2 className="w-5 h-5 animate-spin" style={{ color: '#fff', marginRight: 10 }} />Connecting...</>
             ) : (
               <><GoogleIcon /><span>Continue with Google</span></>
             )}
           </button>
 
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)', textAlign: 'center', marginTop: 12, marginBottom: 20 }}>
-            Works with any email — Gmail, UFL, Outlook, etc.
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 12, marginBottom: 24 }}>
+            Works with any email — Gmail, school, Outlook, etc.
           </p>
-
-
 
           <button
             onClick={() => setStep('role-select')}
-            style={{ ...S.linkBtn, display: 'block', margin: '0 auto 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)', textDecoration: 'underline', minHeight: 'auto', width: 'auto' }}
+            style={{ display: 'block', margin: '0 auto 24px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', minHeight: 'auto', width: 'auto' }}
           >
-            ← Back to role selection
+            ← Choose a different role
           </button>
 
-          <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
           <FinePrint />
         </AuthCard>
       </AuthPageShell>
@@ -674,27 +672,28 @@ export default function GatorAuth() {
     const roles = [
       {
         id: 'gator',
-        name: "I'm a UF Student",
-        desc: 'Find warm intros, build your network, and land the job.',
-        encouraged: 'Any email works',
-        iconBg: 'rgba(232,93,32,0.1)',
-        iconBorder: 'rgba(232,93,32,0.2)',
+        name: "I'm a Student",
+        desc: 'Use FastIQ to identify target companies, find alumni, and send personalized outreach.',
+        micro: 'Any college email works',
+        iconBg: 'rgba(79,140,255,0.1)',
+        iconBorder: 'rgba(79,140,255,0.2)',
         icon: <GradCapSVG />,
+        primary: true,
       },
       {
         id: 'parent',
-        name: "I'm a UF Parent",
-        desc: "Support your student's career journey. Take the pledge.",
-        iconBg: 'rgba(255,255,255,0.06)',
-        iconBorder: 'rgba(255,255,255,0.1)',
+        name: "I'm a Parent",
+        desc: "Support your student's career journey and join a network that opens doors.",
+        iconBg: 'rgba(255,255,255,0.04)',
+        iconBorder: 'rgba(255,255,255,0.08)',
         icon: <HeartSVG />,
       },
       {
         id: 'alumni',
-        name: "I'm a UF Alumni",
-        desc: "Give back or get help with your own career.",
-        iconBg: 'rgba(255,255,255,0.06)',
-        iconBorder: 'rgba(255,255,255,0.1)',
+        name: "I'm an Alum",
+        desc: 'Help students get ahead through advice, introductions, and career support.',
+        iconBg: 'rgba(255,255,255,0.04)',
+        iconBorder: 'rgba(255,255,255,0.08)',
         icon: <AwardSVG />,
       },
     ];
@@ -742,45 +741,54 @@ export default function GatorAuth() {
           <LogoBlock delay={0.05} />
 
           {error && (
-            <div style={{ background: 'rgba(220,38,38,0.1)', border: '0.5px solid rgba(220,38,38,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}>
+            <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}>
               <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#f87171', lineHeight: 1.5 }}>{error}</p>
             </div>
           )}
 
           <div style={{ textAlign: 'center', marginBottom: 8, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.1s' }}>
-            <h1 style={S.headline}>Welcome.</h1>
-            <p style={S.subhead}>You're in the right place. Tell us who you are.</p>
+            <h1 style={S.headline}>Welcome to College Fast Forward</h1>
+            <p style={S.subhead}>Choose how you're joining so we can personalize your experience.</p>
+            <p style={S.supportLine}>
+              Students use FastIQ to build a smarter job search.<br />
+              Parents and alumni help create access and opportunity.
+            </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
             {roles.map((r, i) => (
-              <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />
+              <RoleCard key={r.id} role={r} index={i} isPrimary={!!r.primary} onClick={() => handleCardClick(r.id)} />
             ))}
           </div>
 
+          {/* Reassurance line */}
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>
+            Free to join the network. FastIQ is available with a free 7-day trial.
+          </p>
+
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}>
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#E85D20' }} />
-              <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.4)' }}>Setting up...</span>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: ACCENT }} />
+              <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>Setting up...</span>
             </div>
           )}
 
-          <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
           <FinePrint />
 
           <div style={{ textAlign: 'center', marginTop: 16, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.3s' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.3)' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>
               Already have an account?{' '}
               <button
                 onClick={() => {
                   try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* private browsing */ }
                   handleGoogleSignIn(true);
                 }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E85D20', minHeight: 'auto', width: 'auto', padding: 0 }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: ACCENT, minHeight: 'auto', width: 'auto', padding: 0 }}
                 onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
               >
-                Sign in here →
+                Sign in
               </button>
             </p>
           </div>
@@ -793,8 +801,8 @@ export default function GatorAuth() {
   return (
     <AuthPageShell>
       <div style={{ textAlign: 'center' }}>
-        <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#E85D20', margin: '0 auto 16px' }} />
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.5)' }}>Loading...</p>
+        <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Loading...</p>
       </div>
     </AuthPageShell>
   );
