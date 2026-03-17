@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getScenariosForSchool, resolveScenario } from './V3HeroDemoData';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
-import { getSchoolAccent, setAccentVars } from './schoolAccents';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const TYPING_SPEED = 30; // ~30ms per character as specified

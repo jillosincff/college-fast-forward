@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getSchoolShort } from './V3HeroDemoData';
+// getSchoolShort still needed for showSchoolBadge=true cases
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
@@ -52,7 +53,7 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
               display: 'inline-flex', alignItems: 'center', gap: 8,
               opacity: visible ? 1 : 0,
               transform: visible ? 'scale(1)' : 'scale(0.92)',
-              transition: `opacity 0.35s ${0.06 * i}s, transform 0.35s ${0.06 * i}s`,
+              transition: `opacity 0.35s ${0.1 * i}s, transform 0.35s ${0.1 * i}s`,
             }}
           >
             {c.name}{c.asterisk ? '*' : ''}
