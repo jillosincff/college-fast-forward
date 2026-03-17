@@ -3,41 +3,30 @@ import { getSchoolShort } from './V3HeroDemoData';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
-// Inject keyframes once
-if (typeof document !== 'undefined' && !document.getElementById('demo-card-keyframes')) {
-  const style = document.createElement('style');
-  style.id = 'demo-card-keyframes';
-  style.textContent = `
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    @keyframes msgFadeIn { from{opacity:0} to{opacity:1} }
-  `;
-  document.head.appendChild(style);
-}
-
 const DEFAULT_ACCENT = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
-/* ── Shared card wrapper ────────────────────────────── */
+/* ── Dark card wrapper ─────────────────────────────────── */
 function DemoCard({ label, badge, visible, accent, children }) {
   const a = accent || DEFAULT_ACCENT;
   return (
     <div
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(18px)',
-        transition: 'opacity 0.5s, transform 0.5s',
-        background: '#F9F9FB',
-        border: '1px solid rgba(0,0,0,0.06)',
+        transform: visible ? 'translateY(0)' : 'translateY(14px)',
+        transition: 'opacity 0.45s ease, transform 0.45s ease',
+        pointerEvents: visible ? 'auto' : 'none',
+        background: '#111216',
+        border: '1px solid #23252B',
         borderRadius: 16,
         padding: '20px 22px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}
     >
       <div className="flex items-center justify-between mb-3">
-        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(0,0,0,0.4)' }}>
+        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)' }}>
           {label}
         </span>
         {badge && (
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: a.primary, background: a.soft, padding: '3px 10px', borderRadius: 100, letterSpacing: '0.02em', transition: 'color 0.3s, background 0.3s' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: a.primary, background: a.soft, padding: '3px 10px', borderRadius: 100, letterSpacing: '0.02em' }}>
             {badge}
           </span>
         )}
@@ -56,23 +45,23 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
           <span
             key={i}
             style={{
-              fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a',
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,0,0,0.1)',
+              fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#E5E7EB',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 10, padding: '8px 14px',
               display: 'inline-flex', alignItems: 'center', gap: 8,
               opacity: visible ? 1 : 0,
               transform: visible ? 'scale(1)' : 'scale(0.92)',
-              transition: `opacity 0.35s ${0.08 * i}s, transform 0.35s ${0.08 * i}s`,
+              transition: `opacity 0.35s ${0.06 * i}s, transform 0.35s ${0.06 * i}s`,
             }}
           >
             {c.name}{c.asterisk ? '*' : ''}
-            <span style={{ fontSize: 11, fontWeight: 400, color: 'rgba(0,0,0,0.35)' }}>{c.tag}</span>
+            <span style={{ fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>{c.tag}</span>
           </span>
         ))}
       </div>
       {hasAsterisk && (
-        <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)', marginTop: 10, lineHeight: 1.4 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 10, lineHeight: 1.4 }}>
           *Sample alumni matches based on similar roles and companies
         </p>
       )}
@@ -93,11 +82,11 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
             key={i}
             className="flex items-center gap-3"
             style={{
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,0,0,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
               borderRadius: 12, padding: '12px 16px',
               opacity: visible ? 1 : 0,
-              transform: visible ? 'translateX(0)' : 'translateX(-12px)',
+              transform: visible ? 'translateX(0)' : 'translateX(-10px)',
               transition: `opacity 0.4s ${0.1 * i}s, transform 0.4s ${0.1 * i}s`,
             }}
           >
@@ -106,29 +95,28 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
               background: `linear-gradient(135deg, ${a.primary} 0%, ${a.primary}99 100%)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
-              transition: 'background 0.4s',
             }}>
               {al.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div className="flex-1 min-w-0">
-              <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#E5E7EB', lineHeight: 1.3 }}>
                 {al.name}
               </div>
-              <div style={{ fontFamily: dmSans, fontSize: 12, color: '#6B7280', lineHeight: 1.4 }}>
+              <div style={{ fontFamily: dmSans, fontSize: 12, color: '#9CA3AF', lineHeight: 1.4 }}>
                 {schoolName} {al.year} → {al.company} · {al.role}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                 {i === 0 && (
                   <>
-                    <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#10B981', background: 'rgba(16,185,129,0.08)', padding: '2px 7px', borderRadius: 100 }}>Active recently</span>
-                    <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#6366F1', background: 'rgba(99,102,241,0.08)', padding: '2px 7px', borderRadius: 100 }}>Likely to respond</span>
+                    <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding: '2px 7px', borderRadius: 100 }}>Active recently</span>
+                    <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#818CF8', background: 'rgba(129,140,248,0.1)', padding: '2px 7px', borderRadius: 100 }}>Likely to respond</span>
                   </>
                 )}
                 {i === 1 && (
-                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#10B981', background: 'rgba(16,185,129,0.08)', padding: '2px 7px', borderRadius: 100 }}>Open to helping students</span>
+                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding: '2px 7px', borderRadius: 100 }}>Open to helping students</span>
                 )}
                 {i === 2 && (
-                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#F59E0B', background: 'rgba(245,158,11,0.08)', padding: '2px 7px', borderRadius: 100 }}>Active recently</span>
+                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#FBBF24', background: 'rgba(251,191,36,0.1)', padding: '2px 7px', borderRadius: 100 }}>Active recently</span>
                 )}
               </div>
             </div>
@@ -136,7 +124,7 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
               fontFamily: dmSans, fontSize: 10, fontWeight: 600,
               color: a.primary, background: a.soft,
               padding: '3px 8px', borderRadius: 6, flexShrink: 0,
-              letterSpacing: '0.05em', transition: 'color 0.3s, background 0.3s',
+              letterSpacing: '0.05em',
             }}>
               {shortSchool}
             </div>
@@ -147,7 +135,7 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
   );
 }
 
-/* ── 3. Personalized Outreach with typing effect ─────── */
+/* ── 3. Personalized Outreach ────────────────────────── */
 export function OutreachCard({ outreach, visible, schoolName, accent }) {
   const body = outreach.body;
   const [typedChars, setTypedChars] = useState(0);
@@ -156,12 +144,10 @@ export function OutreachCard({ outreach, visible, schoolName, accent }) {
   const typeTimer = useRef(null);
   const prevBody = useRef('');
 
-  // Find end of 2nd line for typing boundary
   const lines = body.split('\n');
   const typingBoundary = (lines[0] + '\n' + (lines[1] || '')).length;
 
   useEffect(() => {
-    // Reset when body changes or card becomes hidden
     if (!visible) {
       setTypedChars(0);
       setShowFull(false);
@@ -169,7 +155,6 @@ export function OutreachCard({ outreach, visible, schoolName, accent }) {
       prevBody.current = body;
       return;
     }
-    // Only run typing when card first becomes visible
     if (prevBody.current === body && typedChars > 0) return;
     prevBody.current = body;
     setTypedChars(0);
@@ -191,27 +176,26 @@ export function OutreachCard({ outreach, visible, schoolName, accent }) {
   }, [visible, body]);
 
   const typedText = body.slice(0, typedChars);
-  const restText = body.slice(typingBoundary);
 
   return (
     <DemoCard label="Personalized outreach message" badge={showReady ? '✔ Ready to send' : 'Drafting…'} visible={visible} accent={accent}>
       <div
         style={{
-          background: '#FFFFFF',
-          border: '1px solid rgba(0,0,0,0.08)',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.06)',
           borderRadius: 12, padding: '16px 18px',
         }}
       >
-        <div className="flex items-center gap-2 mb-3 pb-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>To:</span>
-          <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{outreach.toFull}</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)', marginLeft: 4 }}>at {outreach.company}</span>
+        <div className="flex items-center gap-2 mb-3 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>To:</span>
+          <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#E5E7EB' }}>{outreach.toFull}</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginLeft: 4 }}>at {outreach.company}</span>
         </div>
-        <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#374151', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+        <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
           {!showFull ? (
             <>
               {typedText}
-              {typedChars < typingBoundary && <span style={{ display: 'inline-block', width: 2, height: 16, background: 'rgba(0,0,0,0.4)', marginLeft: 1, verticalAlign: 'text-bottom', animation: 'blink 0.9s infinite' }} />}
+              {typedChars < typingBoundary && <span style={{ display: 'inline-block', width: 2, height: 16, background: 'rgba(255,255,255,0.5)', marginLeft: 1, verticalAlign: 'text-bottom', animation: 'blink 0.9s infinite' }} />}
             </>
           ) : (
             <span style={{ animation: 'msgFadeIn 0.5s ease' }}>{body}</span>
