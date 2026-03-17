@@ -12,6 +12,7 @@ import V3ParentNetwork from '@/components/landing/v3/V3ParentNetwork';
 import V3StudentQuiz from '@/components/landing/v3/V3StudentQuiz';
 import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
+import V3AIAccessModel from '@/components/landing/v3/V3AIAccessModel';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
 import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
 
@@ -77,7 +78,10 @@ export default function LandingPage() {
         {/* 8 — Parent Peace of Mind */}
         <V3ParentPeace />
 
-        {/* 9 — Pricing */}
+        {/* 9 — AI + Access Model */}
+        <V3AIAccessModel onCTA={handleCTA} />
+
+        {/* 10 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
         {/* 10 — Final CTA + Footer */}
