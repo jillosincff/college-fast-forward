@@ -70,16 +70,16 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
 }
 
 /* ── 2. Alumni Matches ───────────────────────────────── */
-export function AlumniCard({ alumni, visible, schoolName, accent }) {
+export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false, schoolName = '' }) {
   const a = accent || DEFAULT_ACCENT;
-  const shortSchool = getSchoolShort(schoolName);
+  const shortSchool = showSchoolBadge ? getSchoolShort(schoolName) : null;
 
   return (
     <DemoCard label="Alumni you can contact" badge={`${alumni.length} matches`} visible={visible} accent={accent}>
       <div className="flex flex-col gap-2">
         {alumni.map((al, i) => (
           <div
-            key={i}
+            key={al.name}
             className="flex items-center gap-3"
             style={{
               background: 'rgba(255,255,255,0.04)',
@@ -87,7 +87,7 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
               borderRadius: 12, padding: '12px 16px',
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateX(0)' : 'translateX(-10px)',
-              transition: `opacity 0.4s ${0.1 * i}s, transform 0.4s ${0.1 * i}s`,
+              transition: `opacity 0.4s ${0.15 * i}s, transform 0.4s ${0.15 * i}s`,
             }}
           >
             <div style={{
@@ -103,9 +103,9 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
                 {al.name}
               </div>
               <div style={{ fontFamily: dmSans, fontSize: 12, color: '#9CA3AF', lineHeight: 1.4 }}>
-                {schoolName} {al.year} → {al.company} · {al.role}
+                {al.year} → {al.company} · {al.role}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4, opacity: visible ? 1 : 0, transition: `opacity 0.3s ${0.15 * i + 0.1}s` }}>
                 {i === 0 && (
                   <>
                     <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 500, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding: '2px 7px', borderRadius: 100 }}>Active recently</span>
@@ -120,14 +120,16 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
                 )}
               </div>
             </div>
-            <div style={{
-              fontFamily: dmSans, fontSize: 10, fontWeight: 600,
-              color: a.primary, background: a.soft,
-              padding: '3px 8px', borderRadius: 6, flexShrink: 0,
-              letterSpacing: '0.05em',
-            }}>
-              {shortSchool}
-            </div>
+            {showSchoolBadge && shortSchool && (
+              <div style={{
+                fontFamily: dmSans, fontSize: 10, fontWeight: 600,
+                color: a.primary, background: a.soft,
+                padding: '3px 8px', borderRadius: 6, flexShrink: 0,
+                letterSpacing: '0.05em',
+              }}>
+                {shortSchool}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -136,7 +138,7 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
 }
 
 /* ── 3. Personalized Outreach ────────────────────────── */
-export function OutreachCard({ outreach, visible, schoolName, accent }) {
+export function OutreachCard({ outreach, visible, accent }) {
   const body = outreach.body;
   const [typedChars, setTypedChars] = useState(0);
   const [showFull, setShowFull] = useState(false);

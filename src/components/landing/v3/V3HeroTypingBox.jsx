@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getScenariosForSchool, resolveScenario } from './V3HeroDemoData';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
-import V3SchoolSelector from './V3SchoolSelector';
 import { getSchoolAccent, setAccentVars } from './schoolAccents';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
-const TYPING_SPEED = 32;
-const INITIAL_DELAY = 2200;
-const SCHOOL_CHANGE_DELAY = 500;
+const TYPING_SPEED = 30; // ~30ms per character as specified
 
 /* ── Skeleton ──────────────────────────────────────── */
 function DemoSkeleton() {
@@ -34,25 +31,23 @@ function DemoSkeleton() {
 
 /* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
-  const [selectedSchool, setSelectedSchool] = useState('University of Florida');
-  const [scenarioIdx, setScenarioIdx] = useState(0);
-  const [isReady, setIsReady] = useState(false);
-
+  // No school branding for landing page (logged-out visitors)
   const [displayedText, setDisplayedText] = useState('');
-  const [statusMsg, setStatusMsg] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
   const [showAlumni, setShowAlumni] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [resolvedData, setResolvedData] = useState(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
   // Use a Set of timer ids so we can cancel ALL pending timers on reset
   const timersRef = useRef(new Set());
-  const mountedRef = useRef(false);
+  const containerRef = useRef(null);
+  const hasPlayedRef = useRef(false);
 
-  const accent = getSchoolAccent(selectedSchool);
-  useEffect(() => { setAccentVars(selectedSchool); }, [selectedSchool]);
+  // Neutral accent for logged-out state (no school branding)
+  const accent = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
   const schedule = useCallback((fn, ms) => {
     const id = setTimeout(() => {
@@ -68,121 +63,101 @@ export default function V3HeroTypingBox() {
     timersRef.current.clear();
   }, []);
 
-  const resetState = useCallback(() => {
-    clearAllTimers();
-    setDisplayedText('');
-    setStatusMsg('');
-    setShowCompanies(false);
-    setShowAlumni(false);
-    setShowOutreach(false);
-    setShowProof(false);
-    setIsTyping(false);
-    setResolvedData(null);
-  }, [clearAllTimers]);
+  /* ── Orchestrated sequence per spec ────────────────────────── */
+  const runDemo = useCallback(() => {
+    if (hasPlayedRef.current) return;
+    hasPlayedRef.current = true;
+    setHasStarted(true);
 
-  /* ── Orchestrated sequence ────────────────────────── */
-  const runDemo = useCallback((school, scIdx, delay) => {
-    resetState();
+    // Fixed demo data — no school branding, 3 unique alumni
+    const promptText = "I'm a marketing major and want to work at a top brand like Nike or Spotify.";
+    const data = {
+      companies: [
+        { name: 'Nike', tag: 'Brand Marketing' },
+        { name: 'Spotify', tag: 'Music/Tech' },
+        { name: 'Ogilvy', tag: 'Creative Agency' },
+        { name: 'PepsiCo', tag: 'CPG' },
+        { name: 'Lululemon', tag: 'DTC Brand' },
+      ],
+      hasAsterisk: false,
+      alumni: [
+        { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator', year: "'23" },
+        { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate', year: "'22" },
+        { name: 'Priya Patel', company: 'Ogilvy', role: 'Account Coordinator', year: "'21" },
+      ],
+      outreach: {
+        to: 'Tyler',
+        toFull: 'Tyler Moreno',
+        company: 'Nike',
+        from: 'Olivia',
+        body: `Hi Tyler,\n\nI'm a marketing major and brand strategy is exactly where I want to build my career — I noticed you're at Nike and would love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\nOlivia`,
+      },
+    };
 
-    const scenarios = getScenariosForSchool(school);
-    const idx = scIdx % scenarios.length;
-    const scenario = scenarios[idx];
-    const data = resolveScenario(scenario);
-    const promptText = scenario.promptText;
+    setResolvedData(data);
 
-    schedule(() => {
-      setResolvedData(data);
-      setIsTyping(true);
-
-      // Type prompt char by char
-      let charIdx = 0;
-      const typeChar = () => {
-        if (charIdx <= promptText.length) {
-          setDisplayedText(promptText.slice(0, charIdx));
-          charIdx++;
-          schedule(typeChar, TYPING_SPEED);
-        } else {
-          setIsTyping(false);
-          // Pause after typing — let user read the prompt
+    // Step 1 — Type prompt (0ms delay start)
+    setIsTyping(true);
+    let charIdx = 0;
+    const typeChar = () => {
+      if (charIdx <= promptText.length) {
+        setDisplayedText(promptText.slice(0, charIdx));
+        charIdx++;
+        schedule(typeChar, TYPING_SPEED);
+      } else {
+        // Typing complete — no cursor after
+        setIsTyping(false);
+        
+        // Step 2 — Companies card (500ms after typing completes)
+        schedule(() => {
+          setShowCompanies(true);
+          
+          // Step 3 — Alumni card (400ms after companies)
           schedule(() => {
-            // Show status: Building target list
-            setStatusMsg('Building target list…');
+            setShowAlumni(true);
+            
+            // Step 4 — Outreach card (500ms after last alumni row ~450ms)
             schedule(() => {
-              // Reveal companies while status is still visible
-              setShowCompanies(true);
-              // Fade out status after card starts appearing
+              setShowOutreach(true);
+              
+              // Step 5 — Footer line (300ms after outreach completes ~800ms)
               schedule(() => {
-                setStatusMsg('');
-                // Pause before next status
-                schedule(() => {
-                  setStatusMsg('Searching for alumni…');
-                  schedule(() => {
-                    setShowAlumni(true);
-                    schedule(() => {
-                      setStatusMsg('');
-                      schedule(() => {
-                        setStatusMsg('Composing outreach…');
-                        schedule(() => {
-                          setShowOutreach(true);
-                          schedule(() => {
-                            setStatusMsg('');
-                            schedule(() => {
-                              setShowProof(true);
-                            }, 400);
-                          }, 300);
-                        }, 900);
-                      }, 700);
-                    }, 300);
-                  }, 900);
-                }, 700);
-              }, 300);
-            }, 900);
-          }, 900);
-        }
-      };
-      typeChar();
-    }, delay);
-  }, [resetState, schedule]);
+                setShowProof(true);
+              }, 800);
+            }, 500 + 450); // 450ms for 3 alumni rows at 150ms each
+          }, 400);
+        }, 500);
+      }
+    };
+    typeChar();
+  }, [schedule]);
 
-  // Mount
+  // Intersection Observer — trigger demo when scrolled into view (once only)
   useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-    const t = setTimeout(() => {
-      setIsReady(true);
-      runDemo('University of Florida', 0, INITIAL_DELAY);
-    }, 80);
-    return () => clearTimeout(t);
-  }, []);
+    const container = containerRef.current;
+    if (!container || hasPlayedRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasPlayedRef.current) {
+          runDemo();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [runDemo]);
 
   // Cleanup on unmount
   useEffect(() => () => clearAllTimers(), [clearAllTimers]);
 
-  const handleSchoolChange = useCallback((school) => {
-    if (!school || school === selectedSchool) return;
-    setSelectedSchool(school);
-    setScenarioIdx(0);
-    runDemo(school, 0, SCHOOL_CHANGE_DELAY);
-  }, [selectedSchool, runDemo]);
-
-  const handleChipClick = useCallback((idx) => {
-    if (idx === scenarioIdx && showProof) return;
-    setScenarioIdx(idx);
-    runDemo(selectedSchool, idx, SCHOOL_CHANGE_DELAY);
-  }, [selectedSchool, scenarioIdx, showProof, runDemo]);
-
-  // Chip labels from scenario data
-  const scenarios = getScenariosForSchool(selectedSchool);
-  const chips = scenarios.map((s, i) => ({ label: s.chipLabel, idx: i }));
-
   const isDone = showProof;
 
-  if (!isReady) return <DemoSkeleton />;
-
   return (
-    <div className="max-w-2xl mx-auto" style={{ animation: 'demoFadeIn 0.4s ease-out' }}>
-      <V3SchoolSelector selectedSchool={selectedSchool} onSelect={handleSchoolChange} accent={accent} />
-
+    <div ref={containerRef} className="max-w-2xl mx-auto" style={{ opacity: hasStarted ? 1 : 0, transition: 'opacity 0.4s ease-out' }}>
       {/* ── White input box ─────────────────────────── */}
       <div
         style={{
@@ -213,31 +188,12 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── Status label ───────────────────────────── */}
-      <div style={{
-        height: statusMsg ? 40 : 0,
-        opacity: statusMsg ? 1 : 0,
-        overflow: 'hidden',
-        transition: 'height 0.3s ease, opacity 0.3s ease',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        marginBottom: statusMsg ? 10 : 0,
-      }}>
-        <div className="flex gap-1.5">
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: accent.primary, animation: `pulseDot 1.2s ${i * 0.2}s infinite ease-in-out` }} />
-          ))}
-        </div>
-        <span key={statusMsg} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.5)', animation: 'fadeUp 0.25s ease' }}>
-          {statusMsg}
-        </span>
-      </div>
-
       {/* ── Dark result cards ──────────────────────── */}
       {resolvedData && (
         <div className="flex flex-col gap-3">
           <CompaniesCard companies={resolvedData.companies} visible={showCompanies} accent={accent} hasAsterisk={resolvedData.hasAsterisk} />
-          <AlumniCard alumni={resolvedData.alumni} visible={showAlumni} schoolName={selectedSchool} accent={accent} />
-          <OutreachCard outreach={resolvedData.outreach} visible={showOutreach} schoolName={selectedSchool} accent={accent} />
+          <AlumniCard alumni={resolvedData.alumni} visible={showAlumni} accent={accent} showSchoolBadge={false} />
+          <OutreachCard outreach={resolvedData.outreach} visible={showOutreach} accent={accent} />
         </div>
       )}
 
@@ -250,40 +206,9 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── Scenario chips ─────────────────────────── */}
-      {chips.length > 1 && (
-        <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: isDone ? 1 : 0.3, transition: 'opacity 0.5s' }}>
-          {chips.map((chip) => {
-            const isActive = chip.idx === scenarioIdx;
-            return (
-              <button
-                key={chip.idx}
-                onClick={() => handleChipClick(chip.idx)}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = accent.border; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#23252B'; }}
-                style={{
-                  fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-                  color: isActive ? accent.primary : '#71717A',
-                  background: isActive ? accent.soft : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${isActive ? accent.border : '#23252B'}`,
-                  borderRadius: 100, padding: '8px 16px',
-                  cursor: 'pointer', transition: 'all 0.2s',
-                  minHeight: 'auto', minWidth: 'auto', width: 'auto',
-                }}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       <style>{`
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-        @keyframes pulseDot{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.3);opacity:1}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
         @keyframes msgFadeIn{from{opacity:0}to{opacity:1}}
-        @keyframes demoFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
     </div>
   );
