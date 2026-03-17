@@ -63,25 +63,28 @@ export default function LandingPage() {
         {/* 3 — How FastIQ Works */}
         <V3HowFastIQWorks />
 
-        {/* 4 — Optional Network Advantage */}
+        {/* 4 — FastIQ Works 24/7 */}
+        <V3FastIQ247 />
+
+        {/* 5 — Network Edge */}
         <V3NetworkAdvantage />
 
-        {/* 5 — Student Quiz */}
+        {/* 6 — Student Quiz */}
         <V3StudentQuiz onCTA={handleCTA} />
 
-        {/* 6 — Parent Quiz */}
+        {/* 7 — Parent Quiz */}
         <V3ParentQuiz />
 
-        {/* 7 — Numbers / Proof */}
+        {/* 8 — Numbers / Proof */}
         <V3Numbers />
 
-        {/* 8 — Parent Peace of Mind */}
+        {/* 9 — Parent Peace of Mind */}
         <V3ParentPeace />
 
-        {/* 9 — Pricing */}
+        {/* 10 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
-        {/* 10 — Final CTA + Footer */}
+        {/* 11 — Final CTA + Footer */}
         <V3FinalCTA onCTA={handleCTA} onQuiz={handleCTA} />
       </div>
     </>
