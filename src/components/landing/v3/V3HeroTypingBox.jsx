@@ -45,17 +45,53 @@ function resolveScenario(scenario, schoolName) {
   };
 }
 
+function DemoSkeleton() {
+  return (
+    <div className="max-w-2xl mx-auto">
+      {/* School selector placeholder */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+        <div style={{ width: 180, height: 32, borderRadius: 100, background: 'rgba(255,255,255,0.06)' }} />
+      </div>
+      {/* Input box skeleton */}
+      <div style={{
+        background: '#FFFFFF', borderRadius: 16, padding: '22px 24px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.25)', border: '1px solid rgba(0,0,0,0.08)',
+      }}>
+        <div className="flex items-center gap-2 mb-4">
+          <div style={{ width: 80, height: 14, borderRadius: 4, background: '#E5E7EB' }} />
+          <div className="flex-1" />
+          <div style={{ width: 90, height: 10, borderRadius: 4, background: '#F3F4F6' }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="demo-skeleton-line" style={{ width: '85%', height: 14, borderRadius: 4, background: '#E5E7EB' }} />
+          <div className="demo-skeleton-line" style={{ width: '60%', height: 14, borderRadius: 4, background: '#F3F4F6', animationDelay: '0.15s' }} />
+        </div>
+      </div>
+      <style>{`
+        .demo-skeleton-line {
+          animation: demoShimmer 1.5s ease-in-out infinite;
+        }
+        @keyframes demoShimmer {
+          0%,100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function V3HeroTypingBox() {
   const [selectedSchool, setSelectedSchool] = useState('University of Florida');
   const [scenarioIdx, setScenarioIdx] = useState(0);
-  const [phase, setPhase] = useState('typing');
+  const [phase, setPhase] = useState('idle');
   const [displayedText, setDisplayedText] = useState('');
   const [resolvedData, setResolvedData] = useState(null);
+  const [isReady, setIsReady] = useState(false);
   const timerRef = useRef(null);
   const typingRef = useRef(null);
+  const mountRef = useRef(false);
 
   const accent = getSchoolAccent(selectedSchool);
-  const scenario = DEMO_SCENARIOS[scenarioIdx];
 
   useEffect(() => { setAccentVars(selectedSchool); }, [selectedSchool]);
 
@@ -67,22 +103,29 @@ export default function V3HeroTypingBox() {
   const runDemo = useCallback((scIdx, school) => {
     clearAllTimers();
     setDisplayedText('');
-    setPhase('typing');
+    setResolvedData(null);
+    setPhase('idle');
+
+    // Prep data first, then start animation in next frame
     const sc = DEMO_SCENARIOS[scIdx];
     const text = sc.promptTemplate(school);
-    // Resolve new randomized data
-    setResolvedData(resolveScenario(sc, school));
-    let i = 0;
-    const type = () => {
-      if (i <= text.length) {
-        setDisplayedText(text.slice(0, i));
-        i++;
-        typingRef.current = setTimeout(type, TYPING_SPEED);
-      } else {
-        timerRef.current = setTimeout(() => setPhase('think_goal'), 300);
-      }
-    };
-    type();
+    const data = resolveScenario(sc, school);
+
+    requestAnimationFrame(() => {
+      setResolvedData(data);
+      setPhase('typing');
+      let i = 0;
+      const type = () => {
+        if (i <= text.length) {
+          setDisplayedText(text.slice(0, i));
+          i++;
+          typingRef.current = setTimeout(type, TYPING_SPEED);
+        } else {
+          timerRef.current = setTimeout(() => setPhase('think_goal'), 300);
+        }
+      };
+      type();
+    });
   }, [clearAllTimers]);
 
   useEffect(() => {
@@ -95,6 +138,7 @@ export default function V3HeroTypingBox() {
       think_outreach: 'outreach',
       outreach: 'done',
     };
+    if (phase === 'idle') return;
     const dur = PHASE_DURATIONS[phase] || 500;
     if (next[phase]) {
       timerRef.current = setTimeout(() => setPhase(next[phase]), dur);
@@ -102,7 +146,17 @@ export default function V3HeroTypingBox() {
     return () => clearTimeout(timerRef.current);
   }, [phase]);
 
-  useEffect(() => { runDemo(0, selectedSchool); }, []);
+  // Mount: show skeleton briefly, then reveal and start demo
+  useEffect(() => {
+    if (mountRef.current) return;
+    mountRef.current = true;
+    const readyTimer = setTimeout(() => {
+      setIsReady(true);
+      // Small delay so fade-in is visible before typing starts
+      setTimeout(() => runDemo(0, selectedSchool), 150);
+    }, 100);
+    return () => clearTimeout(readyTimer);
+  }, []);
 
   const switchScenario = useCallback((idx) => {
     if (idx === scenarioIdx && phase === 'done') return;
@@ -130,8 +184,10 @@ export default function V3HeroTypingBox() {
   };
   const thinkingMessage = THINKING_MESSAGES[phase] || '';
 
+  if (!isReady) return <DemoSkeleton />;
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto" style={{ animation: 'demoFadeIn 0.4s ease-out' }}>
       <V3SchoolSelector selectedSchool={selectedSchool} onSelect={handleSchoolChange} accent={accent} />
 
       {/* Input box */}
@@ -224,6 +280,7 @@ export default function V3HeroTypingBox() {
         @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:0.4} 50%{transform:scale(1.3);opacity:1} }
         @keyframes fadeInText { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
         @keyframes msgFadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes demoFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
     </div>
   );
