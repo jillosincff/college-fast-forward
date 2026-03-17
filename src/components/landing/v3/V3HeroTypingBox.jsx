@@ -2,50 +2,19 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
+const playfair = '"Playfair Display", Georgia, serif';
 const TYPING_SPEED = 30;
+const ORANGE = '#E85D20';
 
-/* ── School rotation data ──────────────────────────── */
+/* ── School data ───────────────────────────────────── */
 const SCHOOLS = [
-  {
-    name: 'University of Florida',
-    abbr: 'UF',
-    prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify.",
-  },
-  {
-    name: 'Florida State University',
-    abbr: 'FSU',
-    prompt: "I'm interested in sports marketing agencies in New York.",
-  },
-  {
-    name: 'Wake Forest University',
-    abbr: 'Wake Forest',
-    prompt: "I'm exploring careers in wealth management and financial advising.",
-  },
-  {
-    name: 'University of Michigan',
-    abbr: 'U of M',
-    prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York.",
-  },
-  {
-    name: 'University of Southern California',
-    abbr: 'USC',
-    prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA.",
-  },
+  { abbr: 'UF', prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify." },
+  { abbr: 'FSU', prompt: "I'm interested in sports marketing agencies in New York." },
+  { abbr: 'Wake Forest', prompt: "I'm exploring careers in wealth management and financial advising." },
+  { abbr: 'U of M', prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York." },
+  { abbr: 'USC', prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA." },
 ];
 
-function getNextSchool() {
-  let idx = 0;
-  try {
-    const stored = sessionStorage.getItem('cff_demo_school_idx');
-    if (stored !== null) {
-      idx = (parseInt(stored, 10) + 1) % SCHOOLS.length;
-    }
-    sessionStorage.setItem('cff_demo_school_idx', String(idx));
-  } catch (e) { /* private browsing */ }
-  return SCHOOLS[idx];
-}
-
-/* ── Fixed demo content (same across all schools) ──── */
 const COMPANIES = [
   { name: 'Nike', tag: 'Brand Marketing' },
   { name: 'Spotify', tag: 'Music/Tech' },
@@ -58,7 +27,6 @@ function buildDemoData(school) {
   return {
     companies: COMPANIES,
     hasAsterisk: false,
-    schoolAbbr: school.abbr,
     alumni: [
       { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator', year: `${school.abbr} '23` },
       { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate', year: `${school.abbr} '22` },
@@ -76,19 +44,72 @@ function buildDemoData(school) {
 
 /* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
-  const [school] = useState(() => getNextSchool());
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [playKey, setPlayKey] = useState(0); // increments to force replay
+
+  const school = SCHOOLS[selectedIdx];
+  const demoData = buildDemoData(school);
+
+  const handleChipClick = (idx) => {
+    if (idx === selectedIdx) return;
+    setSelectedIdx(idx);
+    setPlayKey(k => k + 1);
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      {/* ── Framing lines ──────────────────────────── */}
+      <div className="text-center mb-6">
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 4 }}>
+          Watch how FastIQ works for your student.
+        </p>
+        <p style={{ fontFamily: playfair, fontStyle: 'italic', fontSize: 17, fontWeight: 400, color: ORANGE, lineHeight: 1.5 }}>
+          Select a school to see a real example.
+        </p>
+      </div>
+
+      {/* ── School chips ───────────────────────────── */}
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {SCHOOLS.map((s, i) => {
+          const active = i === selectedIdx;
+          return (
+            <button
+              key={s.abbr}
+              onClick={() => handleChipClick(i)}
+              data-chip="true"
+              style={{
+                fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+                color: active ? '#fff' : ORANGE,
+                background: active ? ORANGE : 'transparent',
+                border: `1.5px solid ${ORANGE}`,
+                borderRadius: 100, padding: '8px 18px',
+                cursor: 'pointer', transition: 'all 0.2s',
+                minHeight: 'auto', minWidth: 'auto',
+              }}
+            >
+              {s.abbr}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Animated demo (keyed for replay) ────── */}
+      <DemoPlayer key={playKey} school={school} demoData={demoData} />
+    </div>
+  );
+}
+
+/* ── Isolated demo player (unmounts/remounts on key change) ── */
+function DemoPlayer({ school, demoData }) {
   const [displayedText, setDisplayedText] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
   const [showAlumni, setShowAlumni] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [demoData] = useState(() => buildDemoData(school));
   const [hasStarted, setHasStarted] = useState(false);
 
   const timersRef = useRef(new Set());
-  const containerRef = useRef(null);
-  const hasPlayedRef = useRef(false);
 
   const accent = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
@@ -101,20 +122,14 @@ export default function V3HeroTypingBox() {
     return id;
   }, []);
 
-  const clearAllTimers = useCallback(() => {
-    timersRef.current.forEach(id => clearTimeout(id));
-    timersRef.current.clear();
-  }, []);
-
-  const runDemo = useCallback(() => {
-    if (hasPlayedRef.current) return;
-    hasPlayedRef.current = true;
+  // Auto-play on mount
+  useEffect(() => {
     setHasStarted(true);
+    setIsTyping(true);
 
     const promptText = school.prompt;
-
-    setIsTyping(true);
     let charIdx = 0;
+
     const typeChar = () => {
       if (charIdx <= promptText.length) {
         setDisplayedText(promptText.slice(0, charIdx));
@@ -122,66 +137,32 @@ export default function V3HeroTypingBox() {
         schedule(typeChar, TYPING_SPEED);
       } else {
         setIsTyping(false);
-
-        // Step 3 — Companies card (500ms after typing completes)
         schedule(() => {
           setShowCompanies(true);
-
-          // Step 4 — Alumni card (400ms after companies)
           schedule(() => {
             setShowAlumni(true);
-
-            // Step 5 — Outreach card (500ms after last alumni row ~450ms)
             schedule(() => {
               setShowOutreach(true);
-
-              // Step 6 — Footer line (300ms after outreach completes ~800ms)
               schedule(() => {
                 setShowProof(true);
               }, 800);
-            }, 500 + 450);
+            }, 950);
           }, 400);
         }, 500);
       }
     };
     typeChar();
-  }, [schedule, school]);
 
-  // Intersection Observer — trigger once
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || hasPlayedRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !hasPlayedRef.current) {
-          runDemo();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(container);
     return () => {
-      observer.disconnect();
-      clearAllTimers();
-      // Reset for Strict Mode double-mount
-      hasPlayedRef.current = false;
-      setDisplayedText('');
-      setShowCompanies(false);
-      setShowAlumni(false);
-      setShowOutreach(false);
-      setShowProof(false);
-      setIsTyping(false);
-      setHasStarted(false);
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current.clear();
     };
-  }, [runDemo, clearAllTimers]);
+  }, []); // runs once per mount
 
   const isDone = showProof;
 
   return (
-    <div ref={containerRef} className="max-w-2xl mx-auto" style={{ opacity: hasStarted ? 1 : 0, transition: 'opacity 0.4s ease-out' }}>
+    <div style={{ opacity: hasStarted ? 1 : 0, transition: 'opacity 0.3s ease-out' }}>
       {/* ── White input box ─────────────────────────── */}
       <div
         style={{
@@ -212,16 +193,16 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── Demo disclaimer (static, always visible once demo starts) ── */}
+      {/* ── Disclaimer (static) ────────────────────── */}
       <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, fontStyle: 'italic', lineHeight: 1.5, margin: '0 0 16px' }}>
-        <span style={{ color: 'rgba(255,255,255,0.35)' }}>For demo purposes only.</span>{' '}
-        <span style={{ color: '#E85D20' }}>FastIQ works for any school.</span>
+        <span style={{ color: 'rgba(255,255,255,0.35)' }}>This is a sample scenario.</span>{' '}
+        <span style={{ color: '#E85D20' }}>FastIQ works for any student at any school.</span>
       </p>
 
-      {/* ── Dark result cards ──────────────────────── */}
+      {/* ── Result cards ───────────────────────────── */}
       <div className="flex flex-col gap-3">
         <CompaniesCard companies={demoData.companies} visible={showCompanies} accent={accent} hasAsterisk={demoData.hasAsterisk} />
-        <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} showSchoolBadge={false} />
+        <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} />
         <OutreachCard outreach={demoData.outreach} visible={showOutreach} accent={accent} />
       </div>
 
@@ -229,15 +210,12 @@ export default function V3HeroTypingBox() {
       <div className="mt-6" style={{ textAlign: 'left', opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}
-          <span style={{ color: accent.primary }}>who to contact</span> and{' '}
-          <span style={{ color: accent.primary }}>what to say</span>.
+          <span style={{ color: '#E85D20' }}>who to contact</span> and{' '}
+          <span style={{ color: '#E85D20' }}>what to say</span>.
         </p>
       </div>
 
-      <style>{`
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-        @keyframes msgFadeIn{from{opacity:0}to{opacity:1}}
-      `}</style>
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
     </div>
   );
 }
