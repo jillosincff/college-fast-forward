@@ -60,11 +60,7 @@ export default function V2Hero({ onCTA }) {
             Every time a parent helps a student, your visibility goes up.<br />
             <strong style={{ fontWeight: 600, color: '#FA4616' }}>More eyes. More alumni. More doors.</strong>
           </p>
-          <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 36 }}>
-            <span style={{ color: '#fff' }}>Your parents are the fuel.</span><br />
-            <span style={{ color: '#FA4616' }}>FASTIQ is the engine.</span><br />
-            <span style={{ color: '#fff' }}>You're the one who lands the job.</span>
-          </p>
+
         </motion.div>
 
         {/* ── Live teaser section — the wow moment ── */}

@@ -38,7 +38,7 @@ export default function V2TheProblem() {
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 4vw, 44px)', color: '#fff', textAlign: 'center', lineHeight: 1.15, marginBottom: 8, letterSpacing: '-0.02em', ...f(0.04) }}>
           Your Student Is Invisible to Employers
         </h2>
-        <p style={{ fontFamily: dmSans, fontStyle: 'italic', fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', marginBottom: 48, ...f(0.06) }}>
+        <p style={{ fontFamily: dmSans, fontStyle: 'italic', fontSize: 16, color: 'rgba(255,255,255,0.7)', textAlign: 'center', marginBottom: 48, ...f(0.06) }}>
           (And it's not their fault. The system is broken.)
         </p>
 

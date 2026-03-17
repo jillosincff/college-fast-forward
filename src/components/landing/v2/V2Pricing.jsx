@@ -39,7 +39,7 @@ export default function V2Pricing({ onCTA }) {
         </div>
 
         <h2 className="text-center" style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.5vw, 38px)', color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 6, ...f(0.04) }}>
-          $29/mo <span style={{ fontFamily: dmSans, fontSize: '0.55em', fontWeight: 300, color: 'rgba(255,255,255,0.45)' }}>or</span> $249/year
+          $29/mo <span style={{ fontFamily: dmSans, fontSize: '0.55em', fontWeight: 300, color: 'rgba(255,255,255,0.7)' }}>or</span> $249/year
         </h2>
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#c9a84c', marginBottom: 0, ...f(0.06) }}>Save 28% with annual</p>
 
@@ -58,7 +58,7 @@ export default function V2Pricing({ onCTA }) {
                 <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', border: '0.5px solid rgba(232,93,32,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5.5L4 7.5L8 3" stroke="#E85D20" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
-                <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{b}</span>
+                <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.5 }}>{b}</span>
               </div>
             ))}
           </div>

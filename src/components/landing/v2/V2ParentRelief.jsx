@@ -28,7 +28,7 @@ export default function V2ParentRelief({ onCTA }) {
 
       <div className="max-w-[680px] mx-auto relative">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(30px, 4vw, 48px)', letterSpacing: '-0.02em', lineHeight: 1.12, textAlign: 'center', marginBottom: 14, ...f(0) }}>
-          <span style={{ color: '#f4f0e8' }}>For Parents Who Are </span>
+          <span style={{ color: '#FFFFFF' }}>For Parents Who Are </span>
           <span style={{ fontStyle: 'italic', color: '#E85D20' }}>Freaking Out</span>
         </h2>
 
