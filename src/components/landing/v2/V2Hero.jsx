@@ -92,7 +92,10 @@ export default function V2Hero({ onCTA }) {
   );
 }
 
-export function CTAButton({ text, onClick, variant = 'primary', fullWidth = false }) {
+// Re-export for backward compatibility
+export { default as CTAButton } from '@/components/landing/v3/CTAButton';
+
+export function CTAButton_LEGACY({ text, onClick, variant = 'primary', fullWidth = false }) {
   const isTeal = variant === 'teal';
   const isOutline = variant === 'outline';
   const isPrimary = !isTeal && !isOutline;
