@@ -1,5 +1,5 @@
 import React from 'react';
-import { playfair, dmSans, DARK_BG } from './LandingConstants';
+import { playfair, dmSans, DARK_BG_ALT } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 import CTAButton from './CTAButton';
 
@@ -7,9 +7,9 @@ export default function V3StudentQuiz({ onCTA }) {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: DARK_BG, padding: '110px 24px 120px' }}>
+    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '110px 24px 120px' }}>
       <div className="max-w-[560px] mx-auto text-center">
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', marginBottom: 14, ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #D4A843)', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
           For Students
         </p>
 

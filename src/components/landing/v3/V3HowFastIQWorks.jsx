@@ -49,10 +49,10 @@ export default function V3HowFastIQWorks() {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: '#0a0f18', padding: '120px 24px 130px' }}>
+    <section ref={ref} style={{ background: '#07080C', padding: '120px 24px 130px' }}>
       <style>{`@media(max-width:768px){.v3-steps-grid{grid-template-columns:1fr !important}}`}</style>
       <div className="max-w-[820px] mx-auto">
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', textAlign: 'center', marginBottom: 14, ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #D4A843)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
           The FastIQ System
         </p>
 
@@ -68,12 +68,12 @@ export default function V3HowFastIQWorks() {
           {STEPS.map((s) => (
             <div key={s.num} style={{
               background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid #1F1F23',
               borderRadius: 20, padding: '28px 24px',
               transition: 'border-color 0.3s, box-shadow 0.3s',
             }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.35)'; e.currentTarget.style.boxShadow = '0 0 24px rgba(232,93,32,0.08)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-border, rgba(212,168,67,0.30))'; e.currentTarget.style.boxShadow = '0 0 24px var(--accent-glow, rgba(212,168,67,0.08))'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1F1F23'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

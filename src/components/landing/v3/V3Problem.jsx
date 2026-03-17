@@ -1,5 +1,5 @@
 import React from 'react';
-import { playfair, dmSans, DARK_BG } from './LandingConstants';
+import { playfair, dmSans, DARK_BG_ALT } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 
 const PROBLEMS = [
@@ -13,9 +13,9 @@ export default function V3Problem() {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section id="how-it-works" ref={ref} style={{ background: DARK_BG, padding: '120px 24px 130px' }}>
+    <section id="how-it-works" ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
       <div className="max-w-[640px] mx-auto">
-        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', textAlign: 'center', marginBottom: 14, ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #D4A843)', textAlign: 'center', marginBottom: 14, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
           The Reality
         </p>
 
@@ -31,7 +31,7 @@ export default function V3Problem() {
           {PROBLEMS.map((p, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid #1F1F23',
               borderRadius: 16, padding: '20px 24px',
               display: 'flex', alignItems: 'center', gap: 16,
             }}>

@@ -1,12 +1,12 @@
 import React from 'react';
-import { playfair, dmSans, DARK_BG } from './LandingConstants';
+import { playfair, dmSans, DARK_BG_ALT } from './LandingConstants';
 import { useFadeIn, fadeStyle } from './SectionFade';
 
 export default function V3Numbers() {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: DARK_BG, padding: '120px 24px 130px' }}>
+    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
       <style>{`@media(max-width:640px){.v3-stats-row{flex-direction:column !important;gap:32px !important}.v3-stats-vs{display:none !important}}`}</style>
       <div className="max-w-[700px] mx-auto text-center">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.15, marginBottom: 14, letterSpacing: '-0.02em', ...fadeStyle(vis, 0) }}>
@@ -26,8 +26,8 @@ export default function V3Numbers() {
           <div className="v3-stats-vs" style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: 'rgba(255,255,255,0.3)' }}>vs</div>
 
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(40px, 6vw, 60px)', color: '#E85D20', lineHeight: 1, marginBottom: 8 }}>1 in 5</p>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Referral</p>
+            <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(40px, 6vw, 60px)', color: 'var(--accent-primary, #D4A843)', lineHeight: 1, marginBottom: 8, transition: 'color 0.4s' }}>1 in 5</p>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'var(--accent-primary, #D4A843)', textTransform: 'uppercase', letterSpacing: '0.04em', transition: 'color 0.4s' }}>Referral</p>
             <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>can lead to an interview</p>
           </div>
         </div>
