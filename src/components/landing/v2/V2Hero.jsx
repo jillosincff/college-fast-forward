@@ -47,18 +47,18 @@ export default function V2Hero({ onCTA }) {
           style={{ fontFamily: dmSans, fontWeight: 500, fontSize: 19, color: '#FFFFFF', lineHeight: 1.65, letterSpacing: '0.3px', maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '32px 0 44px' }}
         >
           <p style={{ marginBottom: 28 }}>
-            People get jobs because of <em style={{ fontStyle: 'italic' }}>who they know</em> — not what they know.
+            People get jobs because of <strong style={{ fontWeight: 600, color: '#FA4616' }}>who they know</strong> — not what they know.
           </p>
           <p style={{ marginBottom: 28 }}>
-            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 600 }}>your parents</strong>.
+            So we invited your biggest supporters into the process: <strong style={{ fontWeight: 600, color: '#FA4616' }}>your parents</strong>.
           </p>
           <p style={{ marginBottom: 28 }}>
             They've spent 20 years building a network. They know everybody.<br />
-            Now that network works for you.
+            Now that network works <strong style={{ fontWeight: 600, color: '#FA4616' }}>for you</strong>.
           </p>
           <p style={{ marginBottom: 0 }}>
             Every time a parent helps a student, your visibility goes up.<br />
-            More eyes. More alumni. More doors.
+            <strong style={{ fontWeight: 600, color: '#FA4616' }}>More eyes. More alumni. More doors.</strong>
           </p>
           <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 36 }}>
             <span style={{ color: '#fff' }}>Your parents are the fuel.</span><br />
