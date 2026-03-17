@@ -140,7 +140,6 @@ export function OutreachCard({ outreach, visible, accent }) {
     if (!visible || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
 
-    // Reveal lines one at a time
     lines.forEach((_, i) => {
       const id = setTimeout(() => {
         timersRef.current.delete(id);
@@ -149,7 +148,6 @@ export function OutreachCard({ outreach, visible, accent }) {
       timersRef.current.add(id);
     });
 
-    // Show ready badge + reply line after all lines
     const readyId = setTimeout(() => {
       timersRef.current.delete(readyId);
       setShowReady(true);
@@ -161,13 +159,6 @@ export function OutreachCard({ outreach, visible, accent }) {
       timersRef.current.clear();
     };
   }, [visible]);
-
-  // Reset on unmount (Strict Mode)
-  useEffect(() => () => {
-    hasAnimatedRef.current = false;
-    timersRef.current.forEach(id => clearTimeout(id));
-    timersRef.current.clear();
-  }, []);
 
   return (
     <DemoCard label="Personalized outreach message" badge={showReady ? '✔ Ready to send' : 'Drafting…'} visible={visible} accent={accent}>
