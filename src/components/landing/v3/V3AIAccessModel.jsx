@@ -46,8 +46,8 @@ function ColumnCard({ icon, header, bullets, tagline, delay, vis }) {
       ...fadeStyle(vis, delay),
     }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'var(--accent-border, rgba(232,93,32,0.30))';
-        e.currentTarget.style.boxShadow = '0 0 30px var(--accent-glow, rgba(232,93,32,0.08))';
+        e.currentTarget.style.borderColor = 'var(--accent-border, rgba(79,140,255,0.30))';
+        e.currentTarget.style.boxShadow = '0 0 30px var(--accent-glow, rgba(79,140,255,0.08))';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
