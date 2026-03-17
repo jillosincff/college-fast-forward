@@ -4,29 +4,6 @@ import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const TYPING_SPEED = 30; // ~30ms per character as specified
 
-/* ── Skeleton ──────────────────────────────────────── */
-function DemoSkeleton() {
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-        <div style={{ width: 180, height: 32, borderRadius: 100, background: 'rgba(255,255,255,0.06)' }} />
-      </div>
-      <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '22px 24px', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
-        <div className="flex items-center gap-2 mb-4">
-          <div style={{ width: 80, height: 14, borderRadius: 4, background: '#E5E7EB' }} />
-          <div className="flex-1" />
-          <div style={{ width: 80, height: 10, borderRadius: 4, background: '#F3F4F6' }} />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div className="demo-skel" style={{ width: '85%', height: 14, borderRadius: 4, background: '#E5E7EB' }} />
-          <div className="demo-skel" style={{ width: '55%', height: 14, borderRadius: 4, background: '#F3F4F6', animationDelay: '0.15s' }} />
-        </div>
-      </div>
-      <style>{`.demo-skel{animation:demoShimmer 1.5s ease-in-out infinite}@keyframes demoShimmer{0%,100%{opacity:.5}50%{opacity:1}}`}</style>
-    </div>
-  );
-}
-
 /* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
   // No school branding for landing page (logged-out visitors)
