@@ -7,8 +7,12 @@ import { getSchoolAccent, setAccentVars } from './schoolAccents';
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
 const TYPING_SPEED = 30;
-const THINK_DURATION = 1000;
-const CARD_STAGGER = 700;
+const PHASE_DURATIONS = {
+  think_goal: 900,
+  think_companies: 800,
+  think_alumni: 800,
+  think_outreach: 700,
+};
 
 const SCENARIO_CHIPS = [
   { label: 'Marketing at Nike', idx: 0 },
@@ -75,17 +79,26 @@ export default function V3HeroTypingBox() {
         i++;
         typingRef.current = setTimeout(type, TYPING_SPEED);
       } else {
-        timerRef.current = setTimeout(() => setPhase('thinking'), 300);
+        timerRef.current = setTimeout(() => setPhase('think_goal'), 300);
       }
     };
     type();
   }, [clearAllTimers]);
 
   useEffect(() => {
-    if (phase === 'thinking') timerRef.current = setTimeout(() => setPhase('companies'), THINK_DURATION);
-    else if (phase === 'companies') timerRef.current = setTimeout(() => setPhase('alumni'), CARD_STAGGER);
-    else if (phase === 'alumni') timerRef.current = setTimeout(() => setPhase('outreach'), CARD_STAGGER);
-    else if (phase === 'outreach') timerRef.current = setTimeout(() => setPhase('done'), CARD_STAGGER);
+    const next = {
+      think_goal: 'think_companies',
+      think_companies: 'companies',
+      companies: 'think_alumni',
+      think_alumni: 'alumni',
+      alumni: 'think_outreach',
+      think_outreach: 'outreach',
+      outreach: 'done',
+    };
+    const dur = PHASE_DURATIONS[phase] || 500;
+    if (next[phase]) {
+      timerRef.current = setTimeout(() => setPhase(next[phase]), dur);
+    }
     return () => clearTimeout(timerRef.current);
   }, [phase]);
 
@@ -103,11 +116,19 @@ export default function V3HeroTypingBox() {
     runDemo(scenarioIdx, school);
   }, [scenarioIdx, runDemo]);
 
-  const showCompanies = ['companies', 'alumni', 'outreach', 'done'].includes(phase);
-  const showAlumni = ['alumni', 'outreach', 'done'].includes(phase);
+  const showCompanies = ['companies', 'think_alumni', 'alumni', 'think_outreach', 'outreach', 'done'].includes(phase);
+  const showAlumni = ['alumni', 'think_outreach', 'outreach', 'done'].includes(phase);
   const showOutreach = ['outreach', 'done'].includes(phase);
-  const isThinking = phase === 'thinking';
+  const isThinking = phase.startsWith('think_');
   const isDone = phase === 'done';
+
+  const THINKING_MESSAGES = {
+    think_goal: 'Analyzing your goal…',
+    think_companies: 'Finding target companies…',
+    think_alumni: 'Identifying alumni…',
+    think_outreach: 'Drafting outreach…',
+  };
+  const thinkingMessage = THINKING_MESSAGES[phase] || '';
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -143,14 +164,14 @@ export default function V3HeroTypingBox() {
       </div>
 
       {/* Thinking */}
-      <div style={{ height: isThinking ? 44 : 0, opacity: isThinking ? 1 : 0, overflow: 'hidden', transition: 'height 0.3s, opacity 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: isThinking ? 12 : 0 }}>
+      <div style={{ height: isThinking ? 44 : 0, opacity: isThinking ? 1 : 0, overflow: 'hidden', transition: 'height 0.25s, opacity 0.25s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: isThinking ? 12 : 0 }}>
         <div className="flex gap-1.5">
           {[0, 1, 2].map(i => (
             <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: accent.primary, opacity: 0.6, animation: `pulse-dot 1.2s ${i * 0.2}s infinite ease-in-out` }} />
           ))}
         </div>
-        <span style={{ fontFamily: dmSans, fontSize: 13, color: '#A1A1AA' }}>
-          Analyzing {selectedSchool} alumni network…
+        <span key={phase} style={{ fontFamily: dmSans, fontSize: 13, color: '#A1A1AA', animation: 'fadeInText 0.3s ease' }}>
+          {thinkingMessage}
         </span>
       </div>
 
@@ -173,7 +194,7 @@ export default function V3HeroTypingBox() {
       </div>
 
       {/* Scenario chips */}
-      <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: isDone ? 1 : 0, transition: 'opacity 0.4s 0.5s' }}>
+      <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: (isDone || phase === 'typing') ? 1 : 0.4, transition: 'opacity 0.4s 0.3s' }}>
         {SCENARIO_CHIPS.map((chip) => {
           const isActive = chip.idx === scenarioIdx;
           return (
@@ -201,6 +222,8 @@ export default function V3HeroTypingBox() {
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:0.4} 50%{transform:scale(1.3);opacity:1} }
+        @keyframes fadeInText { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes msgFadeIn { from{opacity:0} to{opacity:1} }
       `}</style>
     </div>
   );
