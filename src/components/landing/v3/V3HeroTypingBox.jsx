@@ -123,11 +123,22 @@ export default function V3HeroTypingBox() {
     );
 
     observer.observe(container);
-    return () => observer.disconnect();
-  }, [runDemo]);
-
-  // Cleanup on unmount
-  useEffect(() => () => clearAllTimers(), [clearAllTimers]);
+    return () => {
+      observer.disconnect();
+      // On unmount (including Strict Mode remount), clear timers and reset state
+      // so the component doesn't end up with stale partial state from a prior mount
+      clearAllTimers();
+      hasPlayedRef.current = false;
+      setDisplayedText('');
+      setShowCompanies(false);
+      setShowAlumni(false);
+      setShowOutreach(false);
+      setShowProof(false);
+      setIsTyping(false);
+      setResolvedData(null);
+      setHasStarted(false);
+    };
+  }, [runDemo, clearAllTimers]);
 
   const isDone = showProof;
 
