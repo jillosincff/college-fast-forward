@@ -16,13 +16,15 @@ console.log('🔵 [GatorAuth] Module loaded');
 /* ── design tokens ──────────────────────────────────── */
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
+const ACCENT = '#4F8CFF';
 
 const S = {
-  headline: { fontFamily: playfair, fontWeight: 700, fontSize: 36, color: '#f4f0e8', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 8, textAlign: 'center' },
-  subhead: { fontFamily: dmSans, fontSize: 15, fontWeight: 300, color: 'rgba(244,240,232,0.55)', lineHeight: 1.6, textAlign: 'center', marginTop: 10, marginBottom: 36 },
-  finePrint: { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.2)', lineHeight: 1.6, textAlign: 'center' },
-  primaryBtn: { fontFamily: dmSans, fontSize: 16, fontWeight: 500, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 100, padding: '16px 40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', transition: 'background 0.2s', minHeight: 'auto' },
-  googleBtn: { fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8', background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 100, padding: '16px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', transition: 'all 0.2s', minHeight: 'auto' },
+  headline: { fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(30px, 5vw, 40px)', color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 8, textAlign: 'center' },
+  subhead: { fontFamily: dmSans, fontSize: 16, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, textAlign: 'center', marginTop: 10, marginBottom: 12 },
+  supportLine: { fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, textAlign: 'center', marginBottom: 36 },
+  finePrint: { fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.2)', lineHeight: 1.6, textAlign: 'center' },
+  primaryBtn: { fontFamily: dmSans, fontSize: 16, fontWeight: 500, color: '#fff', background: ACCENT, border: 'none', borderRadius: 100, padding: '16px 40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', transition: 'background 0.2s', minHeight: 'auto' },
+  googleBtn: { fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '16px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', transition: 'all 0.2s', minHeight: 'auto' },
 };
 
 const FONT_LINK_ID = 'gator-auth-fonts';
@@ -55,18 +57,17 @@ function ensureKeyframes() {
 function AuthPageShell({ children }) {
   React.useEffect(() => { ensureFonts(); ensureKeyframes(); }, []);
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
-      {/* radial glow */}
-      <div aria-hidden style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)', width: 600, height: 600, background: 'radial-gradient(ellipse at center, rgba(220,85,30,0.07), transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 480 }}>{children}</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#050505', position: 'relative', overflow: 'hidden' }}>
+      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 700, background: 'radial-gradient(ellipse at center, rgba(79,140,255,0.04), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 500 }}>{children}</div>
     </div>
   );
 }
 
 function AuthCard({ children, delay = 0 }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 24, padding: '48px 40px', animation: `authFadeUp 0.4s ease both ${delay}s` }}>
-      <style>{`@media (max-width: 480px) { .auth-card-inner { padding: 36px 24px !important; } }`}</style>
+    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '48px 36px', animation: `authFadeUp 0.4s ease both ${delay}s` }}>
+      <style>{`@media (max-width: 480px) { .auth-card-inner { padding: 36px 20px !important; } }`}</style>
       {children}
     </div>
   );
@@ -74,14 +75,8 @@ function AuthCard({ children, delay = 0 }) {
 
 function LogoBlock({ delay = 0.05 }) {
   return (
-    <div style={{ textAlign: 'center', marginBottom: 32, animation: `authFadeUp 0.4s ease both ${delay}s` }}>
-      {/* CFF monogram mark — text only, no white box */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, marginBottom: 10 }}>
-        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em' }}>C</span>
-        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#E85D20', letterSpacing: '-0.02em' }}>F</span>
-        <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 28, color: '#f4f0e8', letterSpacing: '-0.02em' }}>F</span>
-      </div>
-      <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(244,240,232,0.3)' }}>
+    <div style={{ textAlign: 'center', marginBottom: 36, animation: `authFadeUp 0.4s ease both ${delay}s` }}>
+      <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.3)' }}>
         College Fast Forward
       </span>
     </div>
@@ -92,17 +87,18 @@ function FinePrint() {
   return (
     <p style={{ ...S.finePrint, marginBottom: 0 }}>
       By continuing you agree to our{' '}
-      <button onClick={() => navigate('Terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.4)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Terms</button>
+      <button onClick={() => navigate('Terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.35)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Terms</button>
       {' '}and{' '}
-      <button onClick={() => navigate('Privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(244,240,232,0.4)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Privacy Policy</button>
+      <button onClick={() => navigate('Privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.35)', textDecoration: 'underline', padding: 0, minHeight: 'auto', width: 'auto' }}>Privacy Policy</button>
     </p>
   );
 }
 
 /* ── role card ──────────────────────────────────────── */
-function RoleCard({ role, index, onClick }) {
+function RoleCard({ role, index, onClick, isPrimary }) {
   const [hovered, setHovered] = React.useState(false);
-  const delay = 0.15 + index * 0.05;
+  const delay = 0.15 + index * 0.06;
+  const hoverBorder = isPrimary ? `rgba(79,140,255,0.4)` : 'rgba(255,255,255,0.18)';
   return (
     <button
       onClick={onClick}
@@ -110,27 +106,35 @@ function RoleCard({ role, index, onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 16, width: '100%',
-        background: hovered ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
-        border: hovered ? '0.5px solid rgba(232,93,32,0.35)' : '0.5px solid rgba(255,255,255,0.1)',
-        borderRadius: 16, padding: '20px 20px', cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        transform: hovered ? 'translateX(3px)' : 'translateX(0)',
+        background: hovered ? 'rgba(255,255,255,0.06)' : (isPrimary ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)'),
+        border: `1px solid ${hovered ? hoverBorder : (isPrimary ? 'rgba(79,140,255,0.2)' : 'rgba(255,255,255,0.07)')}`,
+        borderRadius: 18, padding: isPrimary ? '24px 22px' : '20px 22px', cursor: 'pointer',
+        transition: 'all 0.25s ease',
+        transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
+        boxShadow: hovered && isPrimary ? '0 4px 20px rgba(79,140,255,0.08)' : 'none',
         textAlign: 'left', minHeight: 'auto',
         animation: `authFadeUp 0.4s ease both ${delay}s`,
+        position: 'relative',
       }}
     >
+      {/* Recommended badge for primary */}
+      {isPrimary && (
+        <div style={{ position: 'absolute', top: -10, right: 20, fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: ACCENT, background: 'rgba(79,140,255,0.12)', border: '1px solid rgba(79,140,255,0.25)', borderRadius: 100, padding: '3px 10px' }}>
+          Recommended
+        </div>
+      )}
       {/* icon */}
-      <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: role.iconBg, border: `0.5px solid ${role.iconBorder}` }}>
+      <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: role.iconBg, border: `1px solid ${role.iconBorder}` }}>
         {role.icon}
       </div>
       {/* text */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#f4f0e8' }}>{role.name}</span>
-        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.6)', lineHeight: 1.4 }}>{role.desc}</span>
-        {role.encouraged && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#E85D20', marginTop: 4 }}>{role.encouraged}</span>}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>{role.name}</span>
+        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{role.desc}</span>
+        {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: ACCENT, marginTop: 2 }}>{role.micro}</span>}
       </div>
       {/* arrow */}
-      <ArrowSVG color={hovered ? 'rgba(232,93,32,0.8)' : 'rgba(244,240,232,0.25)'} />
+      <ArrowSVG color={hovered ? (isPrimary ? ACCENT : 'rgba(255,255,255,0.5)') : 'rgba(255,255,255,0.2)'} />
     </button>
   );
 }
@@ -146,7 +150,7 @@ function ArrowSVG({ color = 'rgba(244,240,232,0.25)' }) {
 
 function GradCapSVG() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3L2 8l10 5 10-5-10-5z" />
       <path d="M2 8v6c0 2 4 4 10 4s10-2 10-4V8" />
       <path d="M22 8v6" />
