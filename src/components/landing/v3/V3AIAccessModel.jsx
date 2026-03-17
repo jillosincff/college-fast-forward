@@ -125,7 +125,7 @@ export default function V3AIAccessModel({ onCTA }) {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
+    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 100px' }}>
       <style>{`
         @media(max-width:768px){
           .v3-aia-row{flex-direction:column !important; gap:0 !important}
@@ -230,7 +230,7 @@ export default function V3AIAccessModel({ onCTA }) {
         <p className="text-center" style={{
           fontFamily: dmSans, fontWeight: 500,
           fontSize: 'clamp(15px, 2vw, 18px)',
-          lineHeight: 1.5, marginBottom: 48,
+          lineHeight: 1.5, marginBottom: 0,
           color: 'rgba(255,255,255,0.5)',
           ...fadeStyle(vis, 0.26),
         }}>

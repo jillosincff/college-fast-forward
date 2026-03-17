@@ -78,24 +78,13 @@ export default function V3ParentNetwork({ onCTA }) {
         <p className="text-center" style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 400,
           color: 'rgba(255,255,255,0.5)', lineHeight: 1.7,
-          maxWidth: 620, margin: '0 auto 20px',
+          maxWidth: 620, margin: '0 auto 56px',
           ...fadeStyle(vis, 0.08),
         }}>
-          A shared network of parents and alumni who choose to help — offering introductions, insight, and access.
+          A shared network of parents and alumni who choose to help — offering introductions, insight, and access. Because this is still a who-you-know game.
         </p>
 
-        {/* Key line */}
-        <p className="text-center" style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 500,
-          color: 'rgba(255,255,255,0.65)', lineHeight: 1.7,
-          maxWidth: 620, margin: '0 auto 20px',
-          ...fadeStyle(vis, 0.09),
-        }}>
-          Because this is still a who-you-know game.
-        </p>
 
-        {/* Divider */}
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 48px', transition: 'background 0.4s', ...fadeStyle(vis, 0.10) }} />
 
         {/* 3-column value block */}
         <div className="v3-pn-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 48, ...fadeStyle(vis, 0.12) }}>
