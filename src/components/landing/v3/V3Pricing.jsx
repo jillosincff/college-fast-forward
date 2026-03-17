@@ -19,7 +19,6 @@ export default function V3Pricing({ onCTA }) {
       <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse,rgba(250,70,22,0.05),transparent 70%)' }} />
 
       <div className="max-w-[500px] mx-auto relative">
-        {/* Badge */}
         <div className="text-center mb-4" style={fadeStyle(vis, 0)}>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', background: 'rgba(232,93,32,0.08)', border: '0.5px solid rgba(232,93,32,0.2)', borderRadius: 100, padding: '5px 14px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" /></svg>
@@ -40,7 +39,6 @@ export default function V3Pricing({ onCTA }) {
 
         <div style={{ width: 40, height: 2, background: '#FA4616', borderRadius: 1, margin: '20px auto 28px', ...fadeStyle(vis, 0.08) }} />
 
-        {/* Card */}
         <div style={{
           background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: '1px solid rgba(232,93,32,0.25)', borderRadius: 20, padding: '32px 28px',

@@ -11,8 +11,8 @@ export default function V3FinalCTA({ onCTA, onQuiz }) {
       <section ref={ref} style={{ background: LIGHT_BG, padding: '110px 24px 100px', textAlign: 'center' }}>
         <div className="max-w-[600px] mx-auto">
           <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#0d1117', lineHeight: 1.2, marginBottom: 16, letterSpacing: '-0.02em', ...fadeStyle(vis, 0) }}>
-            From stuck and uncertain<br />
-            to <em style={{ color: '#E85D20' }}>focused, active, and moving forward</em>
+            From "I don't know what I'm doing"<br />
+            to <em style={{ color: '#E85D20' }}>"I know exactly what to do next."</em>
           </h2>
 
           <p style={{ fontFamily: dmSans, fontSize: 17, color: '#374151', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 36px', ...fadeStyle(vis, 0.06) }}>
@@ -39,7 +39,6 @@ export default function V3FinalCTA({ onCTA, onQuiz }) {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="v3-footer" style={{ background: '#0d1117', padding: '24px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <style>{`@media(max-width:768px){.v3-footer{flex-direction:column !important;align-items:center !important;gap:12px !important;padding:24px 16px !important}}`}</style>
         <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.35)' }}>College Fast Forward</span>
