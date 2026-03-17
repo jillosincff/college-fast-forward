@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import V3HeroTypingBox from './V3HeroTypingBox';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
@@ -14,7 +14,7 @@ function ParticleCanvas() {
     const particles = Array.from({ length: 40 }, () => ({
       x: Math.random() * 1920, y: Math.random() * 1200,
       r: Math.random() * 1.5 + 0.5, dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.2, o: Math.random() * 0.35 + 0.1,
+      dy: (Math.random() - 0.5) * 0.2, o: Math.random() * 0.2 + 0.05,
     }));
     const draw = () => {
       canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
@@ -27,38 +27,31 @@ function ParticleCanvas() {
         if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
         if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(232,93,32,${p.o})`; ctx.fill();
+        ctx.fillStyle = `rgba(160,160,170,${p.o})`; ctx.fill();
       });
       raf = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(raf);
   }, []);
-  return <canvas ref={canvasRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.6 }} />;
+  return <canvas ref={canvasRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.5 }} />;
 }
 
 function HeroCTA({ text, onClick, variant = 'primary' }) {
   const isPrimary = variant === 'primary';
-  // Use CSS var accent for the primary CTA, fallback to default orange
-  const accentPrimary = 'var(--accent-primary, #E85D20)';
-  const accentGlow = 'var(--accent-glow, rgba(232,93,32,0.25))';
   return (
     <button
       onClick={onClick}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; }}
       style={{
         fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
-        background: isPrimary ? `linear-gradient(135deg, ${accentPrimary} 0%, ${accentPrimary} 100%)` : 'transparent',
-        border: isPrimary ? 'none' : '2px solid rgba(255,255,255,0.2)',
+        background: isPrimary ? 'var(--accent-primary, #D4A843)' : 'transparent',
+        border: isPrimary ? 'none' : '1px solid rgba(255,255,255,0.15)',
         borderRadius: 100, padding: '16px 34px', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         transition: 'all 0.35s ease', minHeight: 'auto', minWidth: 'auto',
-        boxShadow: isPrimary ? `0 4px 24px ${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
+        boxShadow: isPrimary ? '0 4px 24px var(--accent-glow, rgba(212,168,67,0.25)), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
         lineHeight: 1.35, textAlign: 'center',
         backdropFilter: isPrimary ? 'none' : 'blur(12px)',
       }}
@@ -72,15 +65,15 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ background: 'linear-gradient(#0d1117 0%, #0a1a6e 30%, #0821a5 65%, #0d1117 100%)', minHeight: '100vh' }}
+      style={{ background: 'linear-gradient(180deg, #050505 0%, #0B0B0F 40%, #0E1018 70%, #07080C 100%)', minHeight: '100vh' }}
     >
       <ParticleCanvas />
-      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(rgba(232,93,32,0.07), transparent 70%)' }} />
+      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(rgba(212,168,67,0.04), transparent 70%)' }} />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
         <div className="mb-7">
-          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #E85D20)', transition: 'color 0.4s' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #D4A843)', transition: 'color 0.4s' }}>
             College Fast Forward
           </span>
         </div>
@@ -92,11 +85,11 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           letterSpacing: '-0.03em', lineHeight: 1.1,
           marginBottom: 22, padding: '0 4px', color: '#fff',
         }}>
-          Your student doesn't need to send more resumes.{' '}
+          Your student doesn't need more resumes.{' '}
           <span style={{
             fontStyle: 'italic',
-            background: 'linear-gradient(135deg, #FA4616, #FF8A5C)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            color: 'var(--accent-primary, #D4A843)',
+            transition: 'color 0.4s',
           }}>
             They need a plan.
           </span>
@@ -107,19 +100,19 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           fontFamily: dmSans, fontWeight: 400,
           fontSize: 'clamp(16px, 2.2vw, 20px)',
           color: '#FFFFFF', lineHeight: 1.65,
-          maxWidth: 640, margin: '0 auto 16px',
-        }}>
-          FastIQ gives your student clear direction, identifies alumni from their school, and writes personalized outreach they can actually send.
-        </p>
-
-        {/* Supporting line */}
-        <p style={{
-          fontFamily: dmSans, fontWeight: 400,
-          fontSize: 'clamp(15px, 1.8vw, 17px)',
-          color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
-          maxWidth: 620, margin: '0 auto 44px',
+          maxWidth: 640, margin: '0 auto 12px',
         }}>
           In minutes, your student gets target companies, alumni to contact, and personalized messages ready to send.
+        </p>
+
+        {/* Micro line */}
+        <p style={{
+          fontFamily: dmSans, fontWeight: 400,
+          fontSize: 'clamp(14px, 1.6vw, 16px)',
+          color: '#A1A1AA', lineHeight: 1.6,
+          maxWidth: 580, margin: '0 auto 44px',
+        }}>
+          FastIQ works 24/7 to uncover opportunities most students never see.
         </p>
 
         {/* Product Demo */}
@@ -133,7 +126,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="outline" />
         </div>
 
-        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
           No credit card required. Cancel anytime.
         </p>
       </div>

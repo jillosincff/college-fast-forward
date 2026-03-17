@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import DEMO_SCENARIOS from './V3HeroDemoData';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import DEMO_SCENARIOS, { getRandomAlumniNames } from './V3HeroDemoData';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 import V3SchoolSelector from './V3SchoolSelector';
 import { getSchoolAccent, setAccentVars } from './schoolAccents';
@@ -17,18 +17,42 @@ const SCENARIO_CHIPS = [
   { label: 'Tech sales path', idx: 4 },
 ];
 
+// Build resolved scenario data with randomized alumni names
+function resolveScenario(scenario, schoolName) {
+  const names = getRandomAlumniNames(scenario.alumniRoles.length);
+  const alumni = scenario.alumniRoles.map((r, i) => ({
+    name: names[i],
+    company: r.company,
+    role: r.role,
+    year: r.year,
+  }));
+  const firstAlumni = alumni[0];
+  const body = scenario.outreach.bodyTemplate(schoolName, firstAlumni.name);
+  return {
+    ...scenario,
+    alumni,
+    outreach: {
+      to: firstAlumni.name.split(' ')[0],
+      toFull: firstAlumni.name,
+      company: scenario.outreach.company,
+      from: scenario.outreach.from,
+      body,
+    },
+  };
+}
+
 export default function V3HeroTypingBox() {
   const [selectedSchool, setSelectedSchool] = useState('University of Michigan');
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [phase, setPhase] = useState('typing');
   const [displayedText, setDisplayedText] = useState('');
+  const [resolvedData, setResolvedData] = useState(null);
   const timerRef = useRef(null);
   const typingRef = useRef(null);
 
   const accent = getSchoolAccent(selectedSchool);
   const scenario = DEMO_SCENARIOS[scenarioIdx];
 
-  // Set CSS vars on mount and school change
   useEffect(() => { setAccentVars(selectedSchool); }, [selectedSchool]);
 
   const clearAllTimers = useCallback(() => {
@@ -36,10 +60,12 @@ export default function V3HeroTypingBox() {
     clearTimeout(typingRef.current);
   }, []);
 
-  const runDemo = useCallback((text) => {
+  const runDemo = useCallback((text, scIdx, school) => {
     clearAllTimers();
     setDisplayedText('');
     setPhase('typing');
+    // Resolve new randomized data
+    setResolvedData(resolveScenario(DEMO_SCENARIOS[scIdx], school));
     let i = 0;
     const type = () => {
       if (i <= text.length) {
@@ -61,19 +87,19 @@ export default function V3HeroTypingBox() {
     return () => clearTimeout(timerRef.current);
   }, [phase]);
 
-  useEffect(() => { runDemo(DEMO_SCENARIOS[0].prompt); }, []);
+  useEffect(() => { runDemo(DEMO_SCENARIOS[0].prompt, 0, selectedSchool); }, []);
 
   const switchScenario = useCallback((idx) => {
     if (idx === scenarioIdx && phase === 'done') return;
     setScenarioIdx(idx);
-    runDemo(DEMO_SCENARIOS[idx].prompt);
-  }, [scenarioIdx, phase, runDemo]);
+    runDemo(DEMO_SCENARIOS[idx].prompt, idx, selectedSchool);
+  }, [scenarioIdx, phase, runDemo, selectedSchool]);
 
   const handleSchoolChange = useCallback((school) => {
     if (!school) return;
     setSelectedSchool(school);
-    runDemo(scenario.prompt);
-  }, [scenario.prompt, runDemo]);
+    runDemo(DEMO_SCENARIOS[scenarioIdx].prompt, scenarioIdx, school);
+  }, [scenarioIdx, runDemo]);
 
   const showCompanies = ['companies', 'alumni', 'outreach', 'done'].includes(phase);
   const showAlumni = ['alumni', 'outreach', 'done'].includes(phase);
@@ -88,11 +114,11 @@ export default function V3HeroTypingBox() {
       {/* Input box */}
       <div
         style={{
-          background: 'rgba(255,255,255,0.06)',
+          background: 'rgba(255,255,255,0.04)',
           backdropFilter: 'blur(20px)',
-          border: `1px solid ${isDone ? accent.border : 'rgba(255,255,255,0.14)'}`,
+          border: `1px solid ${isDone ? accent.border : '#1F1F23'}`,
           borderRadius: 20, padding: '22px 24px',
-          boxShadow: isDone ? `0 8px 48px rgba(0,0,0,0.35), 0 0 20px ${accent.glow}, inset 0 1px 0 rgba(255,255,255,0.08)` : '0 8px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
+          boxShadow: isDone ? `0 8px 48px rgba(0,0,0,0.5), 0 0 20px ${accent.glow}` : '0 8px 48px rgba(0,0,0,0.4)',
           marginBottom: 16,
           transition: 'border-color 0.6s, box-shadow 0.6s',
         }}
@@ -105,11 +131,11 @@ export default function V3HeroTypingBox() {
             <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: accent.primary, letterSpacing: '0.04em' }}>FASTIQ</span>
           </div>
           <div className="flex-1" />
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Interactive demo</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>Interactive demo</span>
         </div>
         <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0 }}>
           {displayedText}
-          {phase === 'typing' && <span className="inline-block w-[2px] h-[18px] bg-white/70 ml-0.5 align-text-bottom" style={{ animation: 'blink 0.9s infinite' }} />}
+          {phase === 'typing' && <span className="inline-block w-[2px] h-[18px] bg-white/60 ml-0.5 align-text-bottom" style={{ animation: 'blink 0.9s infinite' }} />}
         </p>
       </div>
 
@@ -120,17 +146,19 @@ export default function V3HeroTypingBox() {
             <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: accent.primary, opacity: 0.6, animation: `pulse-dot 1.2s ${i * 0.2}s infinite ease-in-out` }} />
           ))}
         </div>
-        <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+        <span style={{ fontFamily: dmSans, fontSize: 13, color: '#A1A1AA' }}>
           Analyzing {selectedSchool} alumni network…
         </span>
       </div>
 
       {/* Output cards */}
-      <div className="flex flex-col gap-3">
-        <CompaniesCard companies={scenario.companies} visible={showCompanies} accent={accent} />
-        <AlumniCard alumni={scenario.alumni} visible={showAlumni} schoolName={selectedSchool} accent={accent} />
-        <OutreachCard outreach={scenario.outreach} visible={showOutreach} schoolName={selectedSchool} accent={accent} />
-      </div>
+      {resolvedData && (
+        <div className="flex flex-col gap-3">
+          <CompaniesCard companies={resolvedData.companies} visible={showCompanies} accent={accent} hasAsterisk={resolvedData.hasAsterisk} />
+          <AlumniCard alumni={resolvedData.alumni} visible={showAlumni} schoolName={selectedSchool} accent={accent} />
+          <OutreachCard outreach={resolvedData.outreach} visible={showOutreach} schoolName={selectedSchool} accent={accent} />
+        </div>
+      )}
 
       {/* Microcopy */}
       <div className="text-center mt-6" style={{ opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.3s, transform 0.5s 0.3s' }}>
@@ -150,12 +178,12 @@ export default function V3HeroTypingBox() {
               key={chip.idx}
               onClick={() => switchScenario(chip.idx)}
               onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = accent.border; }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#1F1F23'; }}
               style={{
                 fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-                color: isActive ? accent.primary : 'rgba(255,255,255,0.55)',
-                background: isActive ? accent.soft : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isActive ? accent.border : 'rgba(255,255,255,0.12)'}`,
+                color: isActive ? accent.primary : '#A1A1AA',
+                background: isActive ? accent.soft : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isActive ? accent.border : '#1F1F23'}`,
                 borderRadius: 100, padding: '8px 16px',
                 cursor: 'pointer', transition: 'all 0.2s',
                 minHeight: 'auto', minWidth: 'auto', width: 'auto',
