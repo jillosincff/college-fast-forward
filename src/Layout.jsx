@@ -667,6 +667,8 @@ function AppContent() {
       let pageHash = hashFragment.split('?')[0] || 'LandingPage';
       if (pageHash.includes('access_token') || pageHash.includes('&')) pageHash = hashFragment.split('&')[0].split('?')[0] || 'LandingPage';
       if (pageHash.startsWith('/')) pageHash = pageHash.slice(1);
+      // Alias: #GetStarted → GatorAuth
+      if (pageHash === 'GetStarted') pageHash = 'GatorAuth';
       setCurrentPage(pageHash || 'LandingPage');
       setResolvedPage(null);
     };
