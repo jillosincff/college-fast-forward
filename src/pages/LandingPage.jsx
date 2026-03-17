@@ -34,8 +34,8 @@ export default function LandingPage() {
     }
   }, []);
 
-  const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GatorAuth'); };
-  const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GatorAuth'); };
+  const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GetStarted'); };
+  const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GetStarted'); };
   const scrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
