@@ -68,7 +68,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       style={{ background: 'linear-gradient(180deg, #050505 0%, #0B0B0F 40%, #0E1018 70%, #07080C 100%)', minHeight: '100vh' }}
     >
       <ParticleCanvas />
-      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(var(--accent-glow, rgba(79,140,255,0.04)), transparent 70%)' }} />
+      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(var(--accent-glow, rgba(79,140,255,0.06)), transparent 70%)' }} />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
