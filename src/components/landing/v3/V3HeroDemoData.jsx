@@ -1,5 +1,5 @@
 // Pre-scripted demo scenarios for the hero product demo
-// Each scenario maps a prompt to structured output
+// School name is injected dynamically via the school selector
 
 const DEMO_SCENARIOS = [
   {
@@ -12,16 +12,17 @@ const DEMO_SCENARIOS = [
       { name: 'KPMG', tag: 'Consulting' },
     ],
     alumni: [
-      { name: 'Sarah Chen', school: 'UF \'22', company: 'Deloitte', role: 'Consulting Analyst' },
-      { name: 'Michael Ross', school: 'UF \'21', company: 'Accenture', role: 'Strategy Associate' },
-      { name: 'David Klein', school: 'UF \'23', company: 'EY-Parthenon', role: 'Senior Analyst' },
+      { name: 'Sarah Chen', year: "'22", company: 'Deloitte', role: 'Consulting Analyst' },
+      { name: 'Michael Ross', year: "'21", company: 'Accenture', role: 'Strategy Associate' },
+      { name: 'David Klein', year: "'23", company: 'EY-Parthenon', role: 'Senior Analyst' },
     ],
     outreach: {
       to: 'Sarah',
       toFull: 'Sarah Chen',
       company: 'Deloitte',
       from: 'Olivia',
-      body: `Hi Sarah,\n\nI'm a junior at UF studying business and exploring consulting — I noticed you're at Deloitte and would love to hear how you got started.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice on breaking in.\n\nThanks so much,\nOlivia`,
+      bodyTemplate: (school) =>
+        `Hi Sarah,\n\nI'm a junior at ${school} studying business and exploring consulting — I noticed you're at Deloitte and would love to hear how you got started.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice on breaking in.\n\nThanks so much,\nOlivia`,
     },
   },
   {
@@ -34,16 +35,17 @@ const DEMO_SCENARIOS = [
       { name: 'VaynerMedia', tag: 'Digital' },
     ],
     alumni: [
-      { name: 'Jessica Torres', school: 'UF \'21', company: 'Nike', role: 'Brand Marketing Coordinator' },
-      { name: 'Ryan Patel', school: 'UF \'22', company: 'Spotify', role: 'Growth Marketing Associate' },
-      { name: 'Amanda Liu', school: 'UF \'20', company: 'Ogilvy', role: 'Account Executive' },
+      { name: 'Jessica Torres', year: "'21", company: 'Nike', role: 'Brand Marketing Coordinator' },
+      { name: 'Ryan Patel', year: "'22", company: 'Spotify', role: 'Growth Marketing Associate' },
+      { name: 'Amanda Liu', year: "'20", company: 'Ogilvy', role: 'Account Executive' },
     ],
     outreach: {
       to: 'Jessica',
       toFull: 'Jessica Torres',
       company: 'Nike',
       from: 'Marcus',
-      body: `Hi Jessica,\n\nI'm a marketing major at UF and saw you're doing brand marketing at Nike — that's exactly the space I'm trying to break into.\n\nWould you be open to a brief chat? I'd love to hear what the day-to-day looks like and how you landed the role.\n\nReally appreciate it,\nMarcus`,
+      bodyTemplate: (school) =>
+        `Hi Jessica,\n\nI'm a marketing major at ${school} and saw you're doing brand marketing at Nike — that's exactly the space I'm trying to break into.\n\nWould you be open to a brief chat? I'd love to hear what the day-to-day looks like and how you landed the role.\n\nReally appreciate it,\nMarcus`,
     },
   },
   {
@@ -56,16 +58,17 @@ const DEMO_SCENARIOS = [
       { name: 'BlackRock', tag: 'Asset Mgmt' },
     ],
     alumni: [
-      { name: 'Kevin Nguyen', school: 'UF \'22', company: 'JP Morgan', role: 'Investment Banking Analyst' },
-      { name: 'Rachel Adams', school: 'UF \'21', company: 'Raymond James', role: 'Equity Research Associate' },
-      { name: 'Chris Hernandez', school: 'UF \'23', company: 'Goldman Sachs', role: 'Operations Analyst' },
+      { name: 'Kevin Nguyen', year: "'22", company: 'JP Morgan', role: 'Investment Banking Analyst' },
+      { name: 'Rachel Adams', year: "'21", company: 'Raymond James', role: 'Equity Research Associate' },
+      { name: 'Chris Hernandez', year: "'23", company: 'Goldman Sachs', role: 'Operations Analyst' },
     ],
     outreach: {
       to: 'Kevin',
       toFull: 'Kevin Nguyen',
       company: 'JP Morgan',
       from: 'Sophie',
-      body: `Hi Kevin,\n\nI'm a finance major at UF and still figuring out which area of finance to focus on. I saw you're at JP Morgan and would love to hear how you decided on investment banking.\n\nWould you have time for a quick 15-minute call?\n\nThanks so much,\nSophie`,
+      bodyTemplate: (school) =>
+        `Hi Kevin,\n\nI'm a finance major at ${school} and still figuring out which area of finance to focus on. I saw you're at JP Morgan and would love to hear how you decided on investment banking.\n\nWould you have time for a quick 15-minute call?\n\nThanks so much,\nSophie`,
     },
   },
   {
@@ -78,16 +81,17 @@ const DEMO_SCENARIOS = [
       { name: 'Notion', tag: 'Productivity' },
     ],
     alumni: [
-      { name: 'Taylor Brooks', school: 'UF \'22', company: 'HubSpot', role: 'Business Development Rep' },
-      { name: 'Jordan Lee', school: 'UF \'21', company: 'Salesforce', role: 'Account Executive' },
-      { name: 'Maya Singh', school: 'UF \'23', company: 'Adobe', role: 'Customer Success Associate' },
+      { name: 'Taylor Brooks', year: "'22", company: 'HubSpot', role: 'Business Development Rep' },
+      { name: 'Jordan Lee', year: "'21", company: 'Salesforce', role: 'Account Executive' },
+      { name: 'Maya Singh', year: "'23", company: 'Adobe', role: 'Customer Success Associate' },
     ],
     outreach: {
       to: 'Taylor',
       toFull: 'Taylor Brooks',
       company: 'HubSpot',
       from: 'Alex',
-      body: `Hi Taylor,\n\nI'm a UF student trying to break into SaaS and noticed you're at HubSpot. I've been applying broadly but want to be more strategic.\n\nWould you have a few minutes to share how you landed your role? Any advice would mean a lot.\n\nBest,\nAlex`,
+      bodyTemplate: (school) =>
+        `Hi Taylor,\n\nI'm a ${school} student trying to break into SaaS and noticed you're at HubSpot. I've been applying broadly but want to be more strategic.\n\nWould you have a few minutes to share how you landed your role? Any advice would mean a lot.\n\nBest,\nAlex`,
     },
   },
   {
@@ -100,18 +104,59 @@ const DEMO_SCENARIOS = [
       { name: 'ZoomInfo', tag: 'Sales Intel' },
     ],
     alumni: [
-      { name: 'Brandon Park', school: 'UF \'22', company: 'Salesforce', role: 'SDR' },
-      { name: 'Mia Gonzalez', school: 'UF \'21', company: 'Datadog', role: 'Account Executive' },
-      { name: 'Jake Williams', school: 'UF \'23', company: 'Gong', role: 'Business Development Rep' },
+      { name: 'Brandon Park', year: "'22", company: 'Salesforce', role: 'SDR' },
+      { name: 'Mia Gonzalez', year: "'21", company: 'Datadog', role: 'Account Executive' },
+      { name: 'Jake Williams', year: "'23", company: 'Gong', role: 'Business Development Rep' },
     ],
     outreach: {
       to: 'Brandon',
       toFull: 'Brandon Park',
       company: 'Salesforce',
       from: 'Emma',
-      body: `Hi Brandon,\n\nI'm at UF and really interested in getting into tech sales — I saw you're an SDR at Salesforce and that's exactly the kind of role I'm targeting.\n\nWould you be open to a quick chat about how you broke in? I'd love any tips.\n\nThanks,\nEmma`,
+      bodyTemplate: (school) =>
+        `Hi Brandon,\n\nI'm at ${school} and really interested in getting into tech sales — I saw you're an SDR at Salesforce and that's exactly the kind of role I'm targeting.\n\nWould you be open to a quick chat about how you broke in? I'd love any tips.\n\nThanks,\nEmma`,
     },
   },
 ];
+
+export const SCHOOLS = [
+  'University of Florida',
+  'University of Michigan',
+  'UCF',
+  'Tulane University',
+  'USC',
+  'Penn State',
+  'University of Miami',
+  'Ohio State University',
+  'University of Georgia',
+  'University of Texas at Austin',
+  'University of Wisconsin',
+  'Boston University',
+  'NYU',
+  'Vanderbilt University',
+  'Clemson University',
+];
+
+// Short name for alumni badge display
+export function getSchoolShort(school) {
+  const map = {
+    'University of Florida': 'UF',
+    'University of Michigan': 'UMich',
+    'UCF': 'UCF',
+    'Tulane University': 'Tulane',
+    'USC': 'USC',
+    'Penn State': 'PSU',
+    'University of Miami': 'Miami',
+    'Ohio State University': 'OSU',
+    'University of Georgia': 'UGA',
+    'University of Texas at Austin': 'UT',
+    'University of Wisconsin': 'UW',
+    'Boston University': 'BU',
+    'NYU': 'NYU',
+    'Vanderbilt University': 'Vandy',
+    'Clemson University': 'Clemson',
+  };
+  return map[school] || school.split(' ').map(w => w[0]).join('');
+}
 
 export default DEMO_SCENARIOS;
