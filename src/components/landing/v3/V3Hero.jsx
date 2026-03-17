@@ -85,7 +85,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           letterSpacing: '-0.03em', lineHeight: 1.1,
           marginBottom: 22, padding: '0 4px', color: '#fff',
         }}>
-          Your student doesn't need more resumes.{' '}
+          Your kid doesn't need to send more resumes.{' '}
           <span style={{
             fontStyle: 'italic',
             color: 'var(--accent-primary, #4F8CFF)',
@@ -115,14 +115,15 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           Not another job board. Not another course. This is how students actually get hired.
         </p>
 
-        {/* Micro line */}
+        {/* Proof line */}
         <p style={{
           fontFamily: dmSans, fontWeight: 400,
           fontSize: 'clamp(13px, 1.4vw, 14px)',
           color: 'rgba(255,255,255,0.35)', lineHeight: 1.6,
           maxWidth: 580, margin: '0 auto 44px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         }}>
-          FastIQ works 24/7 to uncover opportunities most students never see.
+          <span style={{ color: '#10B981' }}>✔</span> Built around how hiring actually works today
         </p>
 
         {/* Product Demo */}
