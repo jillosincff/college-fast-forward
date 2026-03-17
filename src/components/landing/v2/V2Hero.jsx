@@ -54,11 +54,11 @@ export default function V2Hero({ onCTA }) {
           </p>
           <p style={{ marginBottom: 28 }}>
             They've spent 20 years building a network. They know everybody.<br />
-            And now that network works for you.
+            Now that network works for you.
           </p>
           <p style={{ marginBottom: 0 }}>
-            Every time a parent helps a student in the network, your visibility goes up.<br />
-            More eyes on your profile. More alumni seeing your requests. More doors opening.
+            Every time a parent helps a student, your visibility goes up.<br />
+            More eyes. More alumni. More doors.
           </p>
           <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(20px, 3vw, 28px)', lineHeight: 1.5, marginTop: 36 }}>
             <span style={{ color: '#fff' }}>Your parents are the fuel.</span><br />
