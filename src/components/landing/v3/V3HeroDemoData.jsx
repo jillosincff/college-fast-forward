@@ -28,7 +28,7 @@ export function getRandomAlumniNames(count = 3) {
 
 const DEMO_SCENARIOS = [
   {
-    prompt: "I'm a junior interested in consulting and want to work at Deloitte.",
+    promptTemplate: (school) => `I'm a junior at ${school} interested in consulting and want to work at Deloitte.`,
     companies: [
       { name: 'Deloitte', tag: 'Big 4', asterisk: true },
       { name: 'Accenture', tag: 'Strategy' },
@@ -50,7 +50,7 @@ const DEMO_SCENARIOS = [
     },
   },
   {
-    prompt: "I'm a marketing major and want to work at Nike or Spotify.",
+    promptTemplate: (school) => `I'm a marketing major at ${school} and want to work at Nike or Spotify.`,
     companies: [
       { name: 'Nike', tag: 'Sportswear', asterisk: true },
       { name: 'Spotify', tag: 'Music/Tech', asterisk: true },
@@ -72,7 +72,7 @@ const DEMO_SCENARIOS = [
     },
   },
   {
-    prompt: "I'm studying finance and don't know which companies to target.",
+    promptTemplate: (school) => `I'm studying finance at ${school} and don't know which companies to target.`,
     companies: [
       { name: 'JP Morgan', tag: 'Investment Banking' },
       { name: 'Goldman Sachs', tag: 'Finance' },
@@ -94,7 +94,7 @@ const DEMO_SCENARIOS = [
     },
   },
   {
-    prompt: "I've sent 100 resumes and heard nothing back. What should I do next?",
+    promptTemplate: (_school) => `I've sent 100 resumes and heard nothing back. What should I do next?`,
     companies: [
       { name: 'HubSpot', tag: 'SaaS' },
       { name: 'Salesforce', tag: 'Enterprise' },
@@ -116,7 +116,7 @@ const DEMO_SCENARIOS = [
     },
   },
   {
-    prompt: "I want to break into tech sales but don't know where to start.",
+    promptTemplate: (school) => `I'm at ${school} and want to break into tech sales — where do I start?`,
     companies: [
       { name: 'Salesforce', tag: 'CRM' },
       { name: 'Datadog', tag: 'Monitoring' },
