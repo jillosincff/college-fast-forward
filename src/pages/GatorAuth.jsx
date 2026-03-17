@@ -131,7 +131,7 @@ function RoleCard({ role, index, onClick, isPrimary }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>{role.name}</span>
         <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{role.desc}</span>
-        {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: ACCENT, marginTop: 2 }}>{role.micro}</span>}
+        {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: 'rgba(79,140,255,0.8)', marginTop: 2 }}>{role.micro}</span>}
       </div>
       {/* arrow */}
       <ArrowSVG color={hovered ? (isPrimary ? ACCENT : 'rgba(255,255,255,0.5)') : 'rgba(255,255,255,0.2)'} />
