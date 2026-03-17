@@ -8,8 +8,10 @@ import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
 import V3HowFastIQWorks from '@/components/landing/v3/V3HowFastIQWorks';
 import V3FastIQ247 from '@/components/landing/v3/V3FastIQ247';
+import V3HowItActuallyWorks from '@/components/landing/v3/V3HowItActuallyWorks';
 import V3AIAccessModel from '@/components/landing/v3/V3AIAccessModel';
 import V3ParentNetwork from '@/components/landing/v3/V3ParentNetwork';
+import V3WhyThisWorks from '@/components/landing/v3/V3WhyThisWorks';
 import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
@@ -59,22 +61,28 @@ export default function LandingPage() {
         {/* 2 — Problem / Reality Check */}
         <V3Problem />
 
-        {/* 3 — How FastIQ Works */}
+        {/* 3 — How FastIQ Works (System) */}
         <V3HowFastIQWorks />
 
         {/* 4 — FastIQ Works 24/7 */}
         <V3FastIQ247 />
 
-        {/* 5 — AI + Access = Results */}
+        {/* 5 — How It Actually Works (Clarity) */}
+        <V3HowItActuallyWorks />
+
+        {/* 6 — AI + Access = Results */}
         <V3AIAccessModel onCTA={handleCTA} />
 
-        {/* 6 — Parent Network */}
+        {/* 7 — Parent Network */}
         <V3ParentNetwork onCTA={handleCTA} />
 
-        {/* 7 — Numbers / Proof */}
+        {/* 8 — Why This Works */}
+        <V3WhyThisWorks />
+
+        {/* 9 — Numbers / Proof */}
         <V3Numbers />
 
-        {/* 8 — Parent Peace of Mind */}
+        {/* 10 — Parent Peace of Mind */}
         <V3ParentPeace />
 
         {/* 9 — Pricing */}
