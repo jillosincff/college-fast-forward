@@ -12,8 +12,8 @@ const CARD_STAGGER = 700;
 
 const SCENARIO_CHIPS = [
   { label: 'Consulting at Deloitte', idx: 0 },
-  { label: 'Marketing at Nike', idx: 1 },
-  { label: 'Finance target list', idx: 2 },
+  { label: 'Engineering at Google', idx: 1 },
+  { label: 'Banking at Goldman', idx: 2 },
   { label: 'Tech sales path', idx: 4 },
 ];
 
