@@ -301,6 +301,7 @@ const SCHOOL_SCENARIOS = {
 // ── Fallback scenario for schools without specific data ──
 const FALLBACK_SCENARIOS = [
   {
+    chipLabel: 'Break into Tech',
     promptTemplate: (school) => `I'm a student at ${school} and want to break into tech — where should I start?`,
     companies: [
       { name: 'Google', tag: 'Big Tech' },
@@ -321,6 +322,7 @@ const FALLBACK_SCENARIOS = [
     },
   },
   {
+    chipLabel: '100 Resumes, No Replies',
     promptTemplate: (school) => `I've sent 100 resumes and heard nothing back. What should I do next?`,
     companies: [
       { name: 'HubSpot', tag: 'SaaS' },

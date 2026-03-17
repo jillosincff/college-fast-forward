@@ -6,13 +6,10 @@ import { getSchoolAccent, setAccentVars } from './schoolAccents';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const TYPING_SPEED = 32;
-
-// Initial delay before demo starts on first load (let user read headline)
 const INITIAL_DELAY = 2200;
-// Delay before demo restarts on school change
 const SCHOOL_CHANGE_DELAY = 500;
 
-/* ── Skeleton for initial load ─────────────────────── */
+/* ── Skeleton ──────────────────────────────────────── */
 function DemoSkeleton() {
   return (
     <div className="max-w-2xl mx-auto">
@@ -35,13 +32,12 @@ function DemoSkeleton() {
   );
 }
 
-/* ── Main orchestrated demo ────────────────────────── */
+/* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
   const [selectedSchool, setSelectedSchool] = useState('University of Florida');
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [isReady, setIsReady] = useState(false);
 
-  // Animation state
   const [displayedText, setDisplayedText] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
@@ -51,21 +47,29 @@ export default function V3HeroTypingBox() {
   const [isTyping, setIsTyping] = useState(false);
   const [resolvedData, setResolvedData] = useState(null);
 
-  const timerRef = useRef(null);
-  const typingRef = useRef(null);
+  // Use a Set of timer ids so we can cancel ALL pending timers on reset
+  const timersRef = useRef(new Set());
   const mountedRef = useRef(false);
 
   const accent = getSchoolAccent(selectedSchool);
   useEffect(() => { setAccentVars(selectedSchool); }, [selectedSchool]);
 
-  const clearTimers = useCallback(() => {
-    clearTimeout(timerRef.current);
-    clearTimeout(typingRef.current);
+  const schedule = useCallback((fn, ms) => {
+    const id = setTimeout(() => {
+      timersRef.current.delete(id);
+      fn();
+    }, ms);
+    timersRef.current.add(id);
+    return id;
   }, []);
 
-  // Reset all visual state to blank
+  const clearAllTimers = useCallback(() => {
+    timersRef.current.forEach(id => clearTimeout(id));
+    timersRef.current.clear();
+  }, []);
+
   const resetState = useCallback(() => {
-    clearTimers();
+    clearAllTimers();
     setDisplayedText('');
     setStatusMsg('');
     setShowCompanies(false);
@@ -74,9 +78,9 @@ export default function V3HeroTypingBox() {
     setShowProof(false);
     setIsTyping(false);
     setResolvedData(null);
-  }, [clearTimers]);
+  }, [clearAllTimers]);
 
-  /* ── The orchestrated sequence ────────────────────── */
+  /* ── Orchestrated sequence ────────────────────────── */
   const runDemo = useCallback((school, scIdx, delay) => {
     resetState();
 
@@ -86,60 +90,61 @@ export default function V3HeroTypingBox() {
     const data = resolveScenario(scenario);
     const promptText = scenario.promptText;
 
-    // Schedule the entire sequence as a chain
-    timerRef.current = setTimeout(() => {
-      // Prep resolved data (hidden until cards reveal)
+    schedule(() => {
       setResolvedData(data);
-
-      // Stage 1: Start typing
       setIsTyping(true);
+
+      // Type prompt char by char
       let charIdx = 0;
       const typeChar = () => {
         if (charIdx <= promptText.length) {
           setDisplayedText(promptText.slice(0, charIdx));
           charIdx++;
-          typingRef.current = setTimeout(typeChar, TYPING_SPEED);
+          schedule(typeChar, TYPING_SPEED);
         } else {
           setIsTyping(false);
-          // Stage 2: Pause after typing completes
-          timerRef.current = setTimeout(() => {
-            // Stage 3: Show "Building target list…" → reveal companies
+          // Pause after typing — let user read the prompt
+          schedule(() => {
+            // Show status: Building target list
             setStatusMsg('Building target list…');
-            timerRef.current = setTimeout(() => {
+            schedule(() => {
+              // Reveal companies while status is still visible
               setShowCompanies(true);
-              setStatusMsg('');
-
-              // Stage 4: Pause → "Searching for alumni…" → reveal alumni
-              timerRef.current = setTimeout(() => {
-                setStatusMsg('Searching for alumni…');
-                timerRef.current = setTimeout(() => {
-                  setShowAlumni(true);
-                  setStatusMsg('');
-
-                  // Stage 5: Pause → "Composing outreach…" → reveal outreach
-                  timerRef.current = setTimeout(() => {
-                    setStatusMsg('Composing outreach…');
-                    timerRef.current = setTimeout(() => {
-                      setShowOutreach(true);
+              // Fade out status after card starts appearing
+              schedule(() => {
+                setStatusMsg('');
+                // Pause before next status
+                schedule(() => {
+                  setStatusMsg('Searching for alumni…');
+                  schedule(() => {
+                    setShowAlumni(true);
+                    schedule(() => {
                       setStatusMsg('');
-
-                      // Stage 6: Show proof line
-                      timerRef.current = setTimeout(() => {
-                        setShowProof(true);
-                      }, 500);
-                    }, 800);
-                  }, 800);
-                }, 800);
-              }, 800);
-            }, 800);
+                      schedule(() => {
+                        setStatusMsg('Composing outreach…');
+                        schedule(() => {
+                          setShowOutreach(true);
+                          schedule(() => {
+                            setStatusMsg('');
+                            schedule(() => {
+                              setShowProof(true);
+                            }, 400);
+                          }, 300);
+                        }, 900);
+                      }, 700);
+                    }, 300);
+                  }, 900);
+                }, 700);
+              }, 300);
+            }, 900);
           }, 900);
         }
       };
       typeChar();
     }, delay);
-  }, [resetState]);
+  }, [resetState, schedule]);
 
-  // Mount: skeleton → ready → start with initial delay
+  // Mount
   useEffect(() => {
     if (mountedRef.current) return;
     mountedRef.current = true;
@@ -150,6 +155,9 @@ export default function V3HeroTypingBox() {
     return () => clearTimeout(t);
   }, []);
 
+  // Cleanup on unmount
+  useEffect(() => () => clearAllTimers(), [clearAllTimers]);
+
   const handleSchoolChange = useCallback((school) => {
     if (!school || school === selectedSchool) return;
     setSelectedSchool(school);
@@ -157,20 +165,15 @@ export default function V3HeroTypingBox() {
     runDemo(school, 0, SCHOOL_CHANGE_DELAY);
   }, [selectedSchool, runDemo]);
 
-  const handleChipClick = useCallback((school, idx) => {
+  const handleChipClick = useCallback((idx) => {
+    if (idx === scenarioIdx && showProof) return;
     setScenarioIdx(idx);
-    runDemo(school, idx, SCHOOL_CHANGE_DELAY);
-  }, [runDemo]);
+    runDemo(selectedSchool, idx, SCHOOL_CHANGE_DELAY);
+  }, [selectedSchool, scenarioIdx, showProof, runDemo]);
 
-  // Build chip labels from current school's scenarios
+  // Chip labels from scenario data
   const scenarios = getScenariosForSchool(selectedSchool);
-  const chipLabels = scenarios.map((s, i) => {
-    // Extract a short label from the prompt
-    const text = s.promptText;
-    // Take first meaningful phrase (up to 40 chars)
-    const short = text.length > 45 ? text.slice(0, 42) + '…' : text;
-    return { label: short, idx: i };
-  });
+  const chips = scenarios.map((s, i) => ({ label: s.chipLabel, idx: i }));
 
   const isDone = showProof;
 
@@ -210,14 +213,14 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── Status label (one at a time) ───────────── */}
+      {/* ── Status label ───────────────────────────── */}
       <div style={{
         height: statusMsg ? 40 : 0,
         opacity: statusMsg ? 1 : 0,
         overflow: 'hidden',
         transition: 'height 0.3s ease, opacity 0.3s ease',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        marginBottom: statusMsg ? 12 : 0,
+        marginBottom: statusMsg ? 10 : 0,
       }}>
         <div className="flex gap-1.5">
           {[0, 1, 2].map(i => (
@@ -229,7 +232,7 @@ export default function V3HeroTypingBox() {
         </span>
       </div>
 
-      {/* ── Dark result cards (revealed one at a time) */}
+      {/* ── Dark result cards ──────────────────────── */}
       {resolvedData && (
         <div className="flex flex-col gap-3">
           <CompaniesCard companies={resolvedData.companies} visible={showCompanies} accent={accent} hasAsterisk={resolvedData.hasAsterisk} />
@@ -239,7 +242,7 @@ export default function V3HeroTypingBox() {
       )}
 
       {/* ── Proof line ─────────────────────────────── */}
-      <div className="text-center mt-6" style={{ opacity: showProof ? 1 : 0, transform: showProof ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
+      <div className="text-center mt-6" style={{ opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}
           <span style={{ color: accent.primary }}>who to contact</span> and{' '}
@@ -248,25 +251,24 @@ export default function V3HeroTypingBox() {
       </div>
 
       {/* ── Scenario chips ─────────────────────────── */}
-      {chipLabels.length > 1 && (
+      {chips.length > 1 && (
         <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: isDone ? 1 : 0.3, transition: 'opacity 0.5s' }}>
-          {chipLabels.map((chip) => {
+          {chips.map((chip) => {
             const isActive = chip.idx === scenarioIdx;
             return (
               <button
                 key={chip.idx}
-                onClick={() => handleChipClick(selectedSchool, chip.idx)}
+                onClick={() => handleChipClick(chip.idx)}
                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = accent.border; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#23252B'; }}
                 style={{
-                  fontFamily: dmSans, fontSize: 12, fontWeight: 500,
+                  fontFamily: dmSans, fontSize: 13, fontWeight: 500,
                   color: isActive ? accent.primary : '#71717A',
                   background: isActive ? accent.soft : 'rgba(255,255,255,0.03)',
                   border: `1px solid ${isActive ? accent.border : '#23252B'}`,
                   borderRadius: 100, padding: '8px 16px',
                   cursor: 'pointer', transition: 'all 0.2s',
                   minHeight: 'auto', minWidth: 'auto', width: 'auto',
-                  maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}
               >
                 {chip.label}
