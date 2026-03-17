@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import V3HeroTypingBox from './V3HeroTypingBox';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
@@ -39,25 +39,26 @@ function ParticleCanvas() {
 
 function HeroCTA({ text, onClick, variant = 'primary' }) {
   const isPrimary = variant === 'primary';
+  // Use CSS var accent for the primary CTA, fallback to default orange
+  const accentPrimary = 'var(--accent-primary, #E85D20)';
+  const accentGlow = 'var(--accent-glow, rgba(232,93,32,0.25))';
   return (
     <button
       onClick={onClick}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-        if (isPrimary) e.currentTarget.style.boxShadow = '0 6px 32px rgba(232,93,32,0.4), inset 0 1px 0 rgba(255,255,255,0.15)';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0) scale(1)';
-        if (isPrimary) e.currentTarget.style.boxShadow = '0 4px 24px rgba(232,93,32,0.3), inset 0 1px 0 rgba(255,255,255,0.1)';
       }}
       style={{
         fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
-        background: isPrimary ? 'linear-gradient(135deg, #E85D20 0%, #d44e14 100%)' : 'transparent',
+        background: isPrimary ? `linear-gradient(135deg, ${accentPrimary} 0%, ${accentPrimary} 100%)` : 'transparent',
         border: isPrimary ? 'none' : '2px solid rgba(255,255,255,0.2)',
         borderRadius: 100, padding: '16px 34px', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        transition: 'all 0.25s ease', minHeight: 'auto', minWidth: 'auto',
-        boxShadow: isPrimary ? '0 4px 24px rgba(232,93,32,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
+        transition: 'all 0.35s ease', minHeight: 'auto', minWidth: 'auto',
+        boxShadow: isPrimary ? `0 4px 24px ${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
         lineHeight: 1.35, textAlign: 'center',
         backdropFilter: isPrimary ? 'none' : 'blur(12px)',
       }}
@@ -79,7 +80,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
         <div className="mb-7">
-          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #E85D20)', transition: 'color 0.4s' }}>
             College Fast Forward
           </span>
         </div>
