@@ -3,7 +3,7 @@ import { getSchoolShort } from './V3HeroDemoData';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
-const DEFAULT_ACCENT = { primary: '#D4A843', soft: 'rgba(212,168,67,0.12)', border: 'rgba(212,168,67,0.30)', glow: 'rgba(212,168,67,0.25)' };
+const DEFAULT_ACCENT = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
 /* ── Shared card wrapper ────────────────────────────── */
 function DemoCard({ label, badge, visible, accent, children }) {
@@ -106,6 +106,9 @@ export function AlumniCard({ alumni, visible, schoolName, accent }) {
               <div style={{ fontFamily: dmSans, fontSize: 12, color: '#A1A1AA', lineHeight: 1.4 }}>
                 {schoolName} {al.year} → {al.company} · {al.role}
               </div>
+              <div style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                {i === 0 ? 'Active 2 days ago · Open to helping students' : i === 1 ? 'Replied recently' : 'Open to helping students'}
+              </div>
             </div>
             <div style={{
               fontFamily: dmSans, fontSize: 10, fontWeight: 600,
@@ -147,6 +150,16 @@ export function OutreachCard({ outreach, visible, schoolName, accent }) {
         }}>
           {body}
         </p>
+      </div>
+      {/* Success signal */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6.5" stroke="#10B981" strokeWidth="1"/>
+          <path d="M4 7.2L6 9.2L10 5" stroke="#10B981" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#10B981' }}>
+          Students typically get replies within 48 hours
+        </span>
       </div>
     </DemoCard>
   );

@@ -84,6 +84,16 @@ export default function V3ParentNetwork({ onCTA }) {
           College Fast Forward is a parent-powered network where families choose to help — offering introductions, advice, and access to opportunities students would never find on their own.
         </p>
 
+        {/* Trust line */}
+        <p className="text-center" style={{
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.7vw, 17px)', fontWeight: 500,
+          color: 'rgba(255,255,255,0.65)', lineHeight: 1.7,
+          maxWidth: 620, margin: '0 auto 20px',
+          ...fadeStyle(vis, 0.09),
+        }}>
+          Parents in the network opt in to help students across the community — offering real introductions and real conversations.
+        </p>
+
         {/* Divider */}
         <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 48px', transition: 'background 0.4s', ...fadeStyle(vis, 0.10) }} />
 

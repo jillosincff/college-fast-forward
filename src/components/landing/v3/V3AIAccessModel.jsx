@@ -137,12 +137,22 @@ export default function V3AIAccessModel({ onCTA }) {
 
       <div className="max-w-[900px] mx-auto">
         {/* Header */}
+        {/* Micro headline */}
+        <p className="text-center" style={{
+          fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase',
+          letterSpacing: '0.1em', color: 'var(--accent-primary, #4F8CFF)',
+          marginBottom: 14, transition: 'color 0.4s',
+          ...fadeStyle(vis, 0),
+        }}>
+          This is the difference most students don't have
+        </p>
+
         {/* Transition */}
         <p className="text-center" style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)', fontWeight: 400,
           color: 'rgba(255,255,255,0.55)', lineHeight: 1.6,
           marginBottom: 28,
-          ...fadeStyle(vis, 0),
+          ...fadeStyle(vis, 0.02),
         }}>
           But even the best plan needs one thing to work — <em>access.</em>
         </p>
@@ -204,20 +214,31 @@ export default function V3AIAccessModel({ onCTA }) {
           />
         </div>
 
-        {/* Bottom statement */}
+        {/* Key insight */}
         <p className="text-center" style={{
           fontFamily: playfair, fontWeight: 700,
-          fontSize: 'clamp(18px, 2.5vw, 26px)',
-          lineHeight: 1.35, marginBottom: 48,
+          fontSize: 'clamp(17px, 2.3vw, 24px)',
+          lineHeight: 1.4, marginBottom: 16,
           color: '#fff', letterSpacing: '-0.01em',
           ...fadeStyle(vis, 0.24),
         }}>
-          Together, this is how students go from{' '}
-          <span style={{ color: 'rgba(255,255,255,0.4)' }}>ignored</span>
+          Without access, your student is just another resume.<br />
+          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>With access, they get in the room.</span>
+        </p>
+
+        {/* Bottom flow */}
+        <p className="text-center" style={{
+          fontFamily: dmSans, fontWeight: 500,
+          fontSize: 'clamp(15px, 2vw, 18px)',
+          lineHeight: 1.5, marginBottom: 48,
+          color: 'rgba(255,255,255,0.5)',
+          ...fadeStyle(vis, 0.26),
+        }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)' }}>Ignored</span>
           {' → '}
-          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>connected</span>
+          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>Connected</span>
           {' → '}
-          <span style={{ color: '#10B981' }}>hired.</span>
+          <span style={{ color: '#10B981' }}>Hired.</span>
         </p>
 
         {/* CTA */}

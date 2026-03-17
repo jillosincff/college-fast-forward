@@ -37,6 +37,16 @@ export default function V3Numbers() {
           <br />
           <span style={{ color: 'rgba(255,255,255,0.6)' }}>The network can increase the odds even more.</span>
         </p>
+
+        {/* Testimonial */}
+        <div style={{ marginTop: 36, ...fadeStyle(vis, 0.18) }}>
+          <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(16px, 2vw, 20px)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55, marginBottom: 8 }}>
+            "My son got 3 responses in a week after using this."
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)' }}>
+            — Parent, Class of 2026
+          </p>
+        </div>
       </div>
     </section>
   );

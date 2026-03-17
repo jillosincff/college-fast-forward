@@ -6,7 +6,7 @@ const PROBLEMS = [
   { icon: '🎯', text: "They don't know what they want" },
   { icon: '🏢', text: "They don't have target companies" },
   { icon: '🤝', text: "They don't know how to network" },
-  { icon: '📄', text: "They send out resume after resume and hear nothing back" },
+  { icon: '📄', text: "They send resumes into a black hole — and hear nothing back" },
 ];
 
 export default function V3Problem() {

@@ -30,10 +30,13 @@ export default function V3FinalCTA({ onCTA }) {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.16)}>
-            <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
+            <CTAButton text="Try It Risk-Free for 7 Days" onClick={onCTA} />
           </div>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.4)', marginTop: 14, ...fadeStyle(vis, 0.18) }}>
-            Free to join the network. FastIQ included.
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 10, ...fadeStyle(vis, 0.17) }}>
+            Cancel anytime. No long-term commitment.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: 'rgba(255,255,255,0.3)', marginTop: 8, ...fadeStyle(vis, 0.18) }}>
+            Spots are limited as we build each school network.
           </p>
         </div>
       </section>

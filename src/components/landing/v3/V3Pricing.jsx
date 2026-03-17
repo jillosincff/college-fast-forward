@@ -30,6 +30,10 @@ export default function V3Pricing({ onCTA }) {
           Give your student a real advantage
         </h2>
 
+        <p className="text-center" style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.6)', lineHeight: 1.55, maxWidth: 440, margin: '0 auto 0', ...fadeStyle(vis, 0.05) }}>
+          Everything your student needs — from strategy to outreach to real introductions.
+        </p>
+
         <div className="text-center" style={fadeStyle(vis, 0.06)}>
           <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(24px, 3vw, 34px)', color: '#f4f0e8', marginBottom: 4, marginTop: 20 }}>
             $29/mo <span style={{ fontFamily: dmSans, fontSize: '0.55em', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>or</span> $249/year
@@ -60,11 +64,14 @@ export default function V3Pricing({ onCTA }) {
             ))}
           </div>
 
-          <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} fullWidth />
+          <CTAButton text="Try It Risk-Free for 7 Days" onClick={onCTA} fullWidth />
+          <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 12, lineHeight: 1.5 }}>
+            Cancel anytime. No long-term commitment.
+          </p>
         </div>
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.4)', marginTop: 16, ...fadeStyle(vis, 0.18) }}>
-          Free to join the network. FastIQ included.
+          Early families get priority access to the network.
         </p>
       </div>
     </section>
