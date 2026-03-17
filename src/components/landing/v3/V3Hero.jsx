@@ -1,137 +1,159 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import ConstellationBackground from '@/components/landing/ConstellationBackground';
-import CTAButton from './CTAButton';
-import { playfair, dmSans } from './LandingConstants';
+import React, { useEffect, useRef } from 'react';
+import V3HeroTypingBox from './V3HeroTypingBox';
 
-const PROMPTS = [
-  "I'm a sophomore interested in marketing but I don't know where to start.",
-  "I want to work at Nike or Spotify. What should I do next?",
-  "I've sent out 100 resumes and heard nothing back. What am I doing wrong?",
-  "I have no idea what jobs fit my major.",
-];
+const dmSans = '"DM Sans", system-ui, sans-serif';
+const playfair = '"Playfair Display", Georgia, serif';
 
-function TypingBox() {
-  const [promptIdx, setPromptIdx] = useState(0);
-  const [typed, setTyped] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-  const timerRef = useRef(null);
+/* ── Floating particle canvas (subtle atmosphere) ───── */
+function ParticleCanvas() {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    const prompt = PROMPTS[promptIdx];
-    let idx = 0;
-    setTyped('');
-    setIsTyping(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    const particles = Array.from({ length: 40 }, () => ({
+      x: Math.random() * 1920,
+      y: Math.random() * 1200,
+      r: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.2,
+      o: Math.random() * 0.35 + 0.1,
+    }));
 
-    const tick = () => {
-      idx++;
-      if (idx > prompt.length) {
-        setIsTyping(false);
-        timerRef.current = setTimeout(() => {
-          setPromptIdx((prev) => (prev + 1) % PROMPTS.length);
-        }, 2800);
-        return;
-      }
-      setTyped(prompt.slice(0, idx));
-      timerRef.current = setTimeout(tick, 50);
+    const draw = () => {
+      canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+      canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+      const w = canvas.offsetWidth, h = canvas.offsetHeight;
+
+      particles.forEach(p => {
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(232,93,32,${p.o})`;
+        ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
     };
-    timerRef.current = setTimeout(tick, 400);
-    return () => clearTimeout(timerRef.current);
-  }, [promptIdx]);
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
-    <div
-      className="rounded-2xl p-5 sm:p-6 text-left"
-      style={{
-        background: 'rgba(255,255,255,0.06)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
-      }}
-    >
-      {/* Header bar */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex items-center gap-1.5">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" /></svg>
-          <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#E85D20', letterSpacing: '0.04em' }}>FASTIQ</span>
-        </div>
-        <div className="flex-1" />
-        <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Try it — type anything</span>
-      </div>
-
-      {/* Typing area */}
-      <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.6 }}>
-        {typed}
-        {isTyping && (
-          <span className="inline-block align-middle ml-0.5" style={{ width: 2, height: 18, background: '#E85D20', animation: 'heroBlink 0.6s step-end infinite' }} />
-        )}
-      </p>
-    </div>
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.6 }}
+    />
   );
 }
 
+/* ── CTA button (inline) ─────────────────────────────── */
+function HeroCTA({ text, onClick, variant = 'primary' }) {
+  const isPrimary = variant === 'primary';
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+        if (isPrimary) e.currentTarget.style.boxShadow = '0 6px 32px rgba(232,93,32,0.4), inset 0 1px 0 rgba(255,255,255,0.15)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0) scale(1)';
+        if (isPrimary) e.currentTarget.style.boxShadow = '0 4px 24px rgba(232,93,32,0.3), inset 0 1px 0 rgba(255,255,255,0.1)';
+      }}
+      style={{
+        fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
+        background: isPrimary ? 'linear-gradient(135deg, #E85D20 0%, #d44e14 100%)' : 'transparent',
+        border: isPrimary ? 'none' : '2px solid rgba(255,255,255,0.2)',
+        borderRadius: 100, padding: '16px 34px', cursor: 'pointer',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        transition: 'all 0.25s ease', minHeight: 'auto', minWidth: 'auto',
+        boxShadow: isPrimary ? '0 4px 24px rgba(232,93,32,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
+        lineHeight: 1.35, textAlign: 'center',
+        backdropFilter: isPrimary ? 'none' : 'blur(12px)',
+      }}
+    >
+      {text}
+    </button>
+  );
+}
+
+/* ── Main Hero Section ───────────────────────────────── */
 export default function V3Hero({ onCTA, onHowItWorks }) {
   return (
-    <section className="relative overflow-hidden" style={{ background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 30%, #0821A5 65%, #0d1117 100%)', minHeight: '100vh' }}>
-      <ConstellationBackground />
-      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(ellipse, rgba(232,93,32,0.07), transparent 70%)' }} />
+    <section
+      className="relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(#0d1117 0%, #0a1a6e 30%, #0821a5 65%, #0d1117 100%)',
+        minHeight: '100vh',
+      }}
+    >
+      <ParticleCanvas />
 
-      <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-40 pb-20">
+      {/* Subtle radial glow */}
+      <div
+        aria-hidden="true"
+        className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0"
+        style={{ background: 'radial-gradient(rgba(232,93,32,0.07), transparent 70%)' }}
+      />
+
+      <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-7">
+        <div className="mb-7" style={{ opacity: 1 }}>
           <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20' }}>
             College Fast Forward · Exclusively for UF Families
           </span>
-        </motion.div>
+        </div>
 
-        {/* H1 */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-          style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(30px, 5.5vw, 62px)', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 22, padding: '0 4px', color: '#fff' }}
-        >
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: playfair, fontWeight: 700,
+          fontSize: 'clamp(30px, 5.5vw, 62px)',
+          letterSpacing: '-0.03em', lineHeight: 1.1,
+          marginBottom: 22, padding: '0 4px', color: '#fff',
+        }}>
           Your student doesn't need to send more resumes.{' '}
-          <span style={{ fontStyle: 'italic', background: 'linear-gradient(135deg, #FA4616, #FF8A5C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <span style={{
+            fontStyle: 'italic',
+            background: 'linear-gradient(135deg, #FA4616, #FF8A5C)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
             They need a plan.
           </span>
-        </motion.h1>
+        </h1>
 
         {/* Subheadline */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-          style={{ fontFamily: dmSans, fontWeight: 400, fontSize: 'clamp(16px, 2.2vw, 20px)', color: '#FFFFFF', lineHeight: 1.65, maxWidth: 620, margin: '0 auto 40px' }}
-        >
-          FastIQ gives your student clear direction, daily actions, and real outreach — so they stop guessing and start moving.
-          <br />
-          <span style={{ color: 'rgba(255,255,255,0.6)' }}>College Fast Forward adds a network advantage when it matters.</span>
-        </motion.p>
+        <p style={{
+          fontFamily: dmSans, fontWeight: 400,
+          fontSize: 'clamp(16px, 2.2vw, 20px)',
+          color: '#FFFFFF', lineHeight: 1.65,
+          maxWidth: 640, margin: '0 auto 44px',
+        }}>
+          FastIQ gives your student clear direction, identifies alumni at target companies, and writes personalized outreach they can actually send.
+        </p>
 
-        {/* Product typing box */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="max-w-xl mx-auto mb-10"
-        >
-          <TypingBox />
-        </motion.div>
+        {/* ── Product Demo ─────────────────────────────── */}
+        <div className="mb-12">
+          <V3HeroTypingBox />
+        </div>
 
         {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-5"
-        >
-          <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
-          <CTAButton text="See How It Works" onClick={onHowItWorks} variant="ghost" />
-        </motion.div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-5">
+          <HeroCTA text="Start Free 7-Day Trial" onClick={onCTA} variant="primary" />
+          <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="outline" />
+        </div>
 
-        {/* Micro-text */}
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.38 }}
-          style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}
-        >
+        {/* Supporting line */}
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
           No credit card required. Cancel anytime.
-        </motion.p>
+        </p>
       </div>
-
-      <style>{`@keyframes heroBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
     </section>
   );
 }
