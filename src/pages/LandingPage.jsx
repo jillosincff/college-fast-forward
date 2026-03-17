@@ -51,7 +51,7 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#0d1117' }}>
+      <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#050505' }}>
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
         {/* 1 — Hero */}

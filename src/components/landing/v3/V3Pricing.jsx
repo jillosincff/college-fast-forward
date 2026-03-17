@@ -34,10 +34,10 @@ export default function V3Pricing({ onCTA }) {
           <p style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(24px, 3vw, 34px)', color: '#f4f0e8', marginBottom: 4, marginTop: 20 }}>
             $29/mo <span style={{ fontFamily: dmSans, fontSize: '0.55em', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>or</span> $249/year
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#c9a84c', marginBottom: 0 }}>Save 28% with annual</p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'var(--accent-primary, #D4A843)', marginBottom: 0, transition: 'color 0.4s' }}>Save 28% with annual</p>
         </div>
 
-        <div style={{ width: 40, height: 2, background: '#FA4616', borderRadius: 1, margin: '20px auto 28px', ...fadeStyle(vis, 0.08) }} />
+        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #D4A843)', borderRadius: 1, margin: '20px auto 28px', transition: 'background 0.4s', ...fadeStyle(vis, 0.08) }} />
 
         <div style={{
           background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',

@@ -8,7 +8,7 @@ const STEPS = [
     title: 'Direction',
     desc: 'FastIQ helps your student figure out where to focus instead of guessing.',
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
       </svg>
     ),
@@ -18,7 +18,7 @@ const STEPS = [
     title: 'Action',
     desc: 'It gives them a clear daily plan so they know exactly what to do next.',
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
     ),
@@ -28,7 +28,7 @@ const STEPS = [
     title: 'Outreach',
     desc: 'It identifies alumni, prioritizes who to contact, and crafts personalized outreach.',
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/>
       </svg>
     ),
@@ -38,7 +38,7 @@ const STEPS = [
     title: 'Momentum',
     desc: "It keeps the process moving so your student builds traction instead of stalling out.",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #D4A843)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z"/>
       </svg>
     ),
@@ -76,7 +76,7 @@ export default function V3HowFastIQWorks() {
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1F1F23'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--accent-soft, rgba(212,168,67,0.1))', border: '1px solid var(--accent-border, rgba(212,168,67,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.4s, border-color 0.4s' }}>
                   {s.icon}
                 </div>
                 <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em' }}>{s.num}</span>
