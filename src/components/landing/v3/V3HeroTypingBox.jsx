@@ -1,45 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import DEMO_SCENARIOS, { getRandomAlumniNames } from './V3HeroDemoData';
+import { getScenariosForSchool, resolveScenario } from './V3HeroDemoData';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 import V3SchoolSelector from './V3SchoolSelector';
 import { getSchoolAccent, setAccentVars } from './schoolAccents';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
-const TYPING_SPEED = 30;
+const TYPING_SPEED = 32;
 
-const SCENARIO_CHIPS = [
-  { label: 'Marketing at Nike', idx: 0 },
-  { label: 'Data Science at Stripe', idx: 1 },
-  { label: 'Pre-med → Consulting', idx: 2 },
-  { label: 'Comms → Tech', idx: 4 },
-];
+// Initial delay before demo starts on first load (let user read headline)
+const INITIAL_DELAY = 2200;
+// Delay before demo restarts on school change
+const SCHOOL_CHANGE_DELAY = 500;
 
-const THINKING_STEPS = [
-  { key: 'think_companies', msg: 'Finding target companies…', dur: 800 },
-  { key: 'think_alumni',    msg: 'Identifying alumni…',       dur: 750 },
-  { key: 'think_outreach',  msg: 'Drafting outreach…',        dur: 700 },
-];
-
-function resolveScenario(scenario, schoolName) {
-  const names = getRandomAlumniNames(scenario.alumniRoles.length);
-  const alumni = scenario.alumniRoles.map((r, i) => ({
-    name: names[i], company: r.company, role: r.role, year: r.year,
-  }));
-  const firstAlumni = alumni[0];
-  return {
-    ...scenario,
-    alumni,
-    outreach: {
-      to: firstAlumni.name.split(' ')[0],
-      toFull: firstAlumni.name,
-      company: scenario.outreach.company,
-      from: scenario.outreach.from,
-      body: scenario.outreach.bodyTemplate(schoolName, firstAlumni.name),
-    },
-  };
-}
-
-/* ── Skeleton shown before first paint ─────────────── */
+/* ── Skeleton for initial load ─────────────────────── */
 function DemoSkeleton() {
   return (
     <div className="max-w-2xl mx-auto">
@@ -62,17 +35,21 @@ function DemoSkeleton() {
   );
 }
 
-/* ── Main component ────────────────────────────────── */
+/* ── Main orchestrated demo ────────────────────────── */
 export default function V3HeroTypingBox() {
   const [selectedSchool, setSelectedSchool] = useState('University of Florida');
   const [scenarioIdx, setScenarioIdx] = useState(0);
-  const [resolvedData, setResolvedData] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
   // Animation state
   const [displayedText, setDisplayedText] = useState('');
-  const [phase, setPhase] = useState('idle');          // idle | typing | thinking | companies | alumni | outreach | done
-  const [thinkMsg, setThinkMsg] = useState('');
+  const [statusMsg, setStatusMsg] = useState('');
+  const [showCompanies, setShowCompanies] = useState(false);
+  const [showAlumni, setShowAlumni] = useState(false);
+  const [showOutreach, setShowOutreach] = useState(false);
+  const [showProof, setShowProof] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [resolvedData, setResolvedData] = useState(null);
 
   const timerRef = useRef(null);
   const typingRef = useRef(null);
@@ -86,92 +63,116 @@ export default function V3HeroTypingBox() {
     clearTimeout(typingRef.current);
   }, []);
 
-  /* ── Orchestrated demo sequence ───────────────────── */
-  const runDemo = useCallback((scIdx, school) => {
+  // Reset all visual state to blank
+  const resetState = useCallback(() => {
     clearTimers();
     setDisplayedText('');
+    setStatusMsg('');
+    setShowCompanies(false);
+    setShowAlumni(false);
+    setShowOutreach(false);
+    setShowProof(false);
+    setIsTyping(false);
     setResolvedData(null);
-    setPhase('idle');
-    setThinkMsg('');
+  }, [clearTimers]);
 
-    const sc = DEMO_SCENARIOS[scIdx];
-    const text = sc.promptTemplate(school);
-    const data = resolveScenario(sc, school);
+  /* ── The orchestrated sequence ────────────────────── */
+  const runDemo = useCallback((school, scIdx, delay) => {
+    resetState();
 
-    // Use rAF to ensure clean slate before starting
-    requestAnimationFrame(() => {
+    const scenarios = getScenariosForSchool(school);
+    const idx = scIdx % scenarios.length;
+    const scenario = scenarios[idx];
+    const data = resolveScenario(scenario);
+    const promptText = scenario.promptText;
+
+    // Schedule the entire sequence as a chain
+    timerRef.current = setTimeout(() => {
+      // Prep resolved data (hidden until cards reveal)
       setResolvedData(data);
-      setPhase('typing');
 
-      // Step 1: Type prompt
-      let i = 0;
+      // Stage 1: Start typing
+      setIsTyping(true);
+      let charIdx = 0;
       const typeChar = () => {
-        if (i <= text.length) {
-          setDisplayedText(text.slice(0, i));
-          i++;
+        if (charIdx <= promptText.length) {
+          setDisplayedText(promptText.slice(0, charIdx));
+          charIdx++;
           typingRef.current = setTimeout(typeChar, TYPING_SPEED);
         } else {
-          // Step 2: Pause, then run thinking → reveal sequence
-          timerRef.current = setTimeout(() => runThinkingSequence(0), 800);
+          setIsTyping(false);
+          // Stage 2: Pause after typing completes
+          timerRef.current = setTimeout(() => {
+            // Stage 3: Show "Building target list…" → reveal companies
+            setStatusMsg('Building target list…');
+            timerRef.current = setTimeout(() => {
+              setShowCompanies(true);
+              setStatusMsg('');
+
+              // Stage 4: Pause → "Searching for alumni…" → reveal alumni
+              timerRef.current = setTimeout(() => {
+                setStatusMsg('Searching for alumni…');
+                timerRef.current = setTimeout(() => {
+                  setShowAlumni(true);
+                  setStatusMsg('');
+
+                  // Stage 5: Pause → "Composing outreach…" → reveal outreach
+                  timerRef.current = setTimeout(() => {
+                    setStatusMsg('Composing outreach…');
+                    timerRef.current = setTimeout(() => {
+                      setShowOutreach(true);
+                      setStatusMsg('');
+
+                      // Stage 6: Show proof line
+                      timerRef.current = setTimeout(() => {
+                        setShowProof(true);
+                      }, 500);
+                    }, 800);
+                  }, 800);
+                }, 800);
+              }, 800);
+            }, 800);
+          }, 900);
         }
       };
       typeChar();
+    }, delay);
+  }, [resetState]);
 
-      function runThinkingSequence(stepIdx) {
-        if (stepIdx >= THINKING_STEPS.length) {
-          // All cards revealed — done
-          timerRef.current = setTimeout(() => setPhase('done'), 200);
-          return;
-        }
-        const step = THINKING_STEPS[stepIdx];
-        setPhase('thinking');
-        setThinkMsg(step.msg);
-
-        timerRef.current = setTimeout(() => {
-          // Reveal the card for this step
-          const cardPhase = step.key.replace('think_', '');
-          setPhase(cardPhase);
-
-          // Stagger: wait, then move to next thinking step
-          timerRef.current = setTimeout(() => {
-            runThinkingSequence(stepIdx + 1);
-          }, 300);
-        }, step.dur);
-      }
-    });
-  }, [clearTimers]);
-
-  // Mount: skeleton → reveal → start
+  // Mount: skeleton → ready → start with initial delay
   useEffect(() => {
     if (mountedRef.current) return;
     mountedRef.current = true;
     const t = setTimeout(() => {
       setIsReady(true);
-      setTimeout(() => runDemo(0, 'University of Florida'), 120);
+      runDemo('University of Florida', 0, INITIAL_DELAY);
     }, 80);
     return () => clearTimeout(t);
   }, []);
 
-  const switchScenario = useCallback((idx) => {
-    if (idx === scenarioIdx && phase === 'done') return;
-    setScenarioIdx(idx);
-    runDemo(idx, selectedSchool);
-  }, [scenarioIdx, phase, runDemo, selectedSchool]);
-
   const handleSchoolChange = useCallback((school) => {
-    if (!school) return;
+    if (!school || school === selectedSchool) return;
     setSelectedSchool(school);
-    runDemo(scenarioIdx, school);
-  }, [scenarioIdx, runDemo]);
+    setScenarioIdx(0);
+    runDemo(school, 0, SCHOOL_CHANGE_DELAY);
+  }, [selectedSchool, runDemo]);
 
-  // Derived visibility — cards stay visible once revealed
-  const PHASE_ORDER = ['idle', 'typing', 'thinking', 'companies', 'alumni', 'outreach', 'done'];
-  const phaseGte = (target) => PHASE_ORDER.indexOf(phase) >= PHASE_ORDER.indexOf(target);
-  const showCompanies = phaseGte('companies');
-  const showAlumni    = phaseGte('alumni');
-  const showOutreach  = phaseGte('outreach');
-  const isThinking    = phase === 'thinking';
-  const isDone        = phase === 'done';
+  const handleChipClick = useCallback((school, idx) => {
+    setScenarioIdx(idx);
+    runDemo(school, idx, SCHOOL_CHANGE_DELAY);
+  }, [runDemo]);
+
+  // Build chip labels from current school's scenarios
+  const scenarios = getScenariosForSchool(selectedSchool);
+  const chipLabels = scenarios.map((s, i) => {
+    // Extract a short label from the prompt
+    const text = s.promptText;
+    // Take first meaningful phrase (up to 40 chars)
+    const short = text.length > 45 ? text.slice(0, 42) + '…' : text;
+    return { label: short, idx: i };
+  });
+
+  const isDone = showProof;
 
   if (!isReady) return <DemoSkeleton />;
 
@@ -203,32 +204,32 @@ export default function V3HeroTypingBox() {
         </div>
         <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#111111', lineHeight: 1.6, margin: 0 }}>
           {displayedText || <span style={{ color: 'rgba(0,0,0,0.25)' }}>Describe your goal...</span>}
-          {phase === 'typing' && displayedText && (
+          {isTyping && displayedText && (
             <span className="inline-block w-[2px] h-[18px] ml-0.5 align-text-bottom" style={{ background: 'rgba(0,0,0,0.45)', animation: 'blink 0.9s infinite' }} />
           )}
         </p>
       </div>
 
-      {/* ── Thinking indicator ─────────────────────── */}
+      {/* ── Status label (one at a time) ───────────── */}
       <div style={{
-        height: isThinking ? 40 : 0,
-        opacity: isThinking ? 1 : 0,
+        height: statusMsg ? 40 : 0,
+        opacity: statusMsg ? 1 : 0,
         overflow: 'hidden',
-        transition: 'height 0.25s, opacity 0.25s',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        marginBottom: isThinking ? 12 : 0,
+        transition: 'height 0.3s ease, opacity 0.3s ease',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        marginBottom: statusMsg ? 12 : 0,
       }}>
         <div className="flex gap-1.5">
           {[0, 1, 2].map(i => (
             <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: accent.primary, animation: `pulseDot 1.2s ${i * 0.2}s infinite ease-in-out` }} />
           ))}
         </div>
-        <span key={thinkMsg} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.5)', animation: 'fadeUp 0.25s ease' }}>
-          {thinkMsg}
+        <span key={statusMsg} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.5)', animation: 'fadeUp 0.25s ease' }}>
+          {statusMsg}
         </span>
       </div>
 
-      {/* ── Dark result cards ──────────────────────── */}
+      {/* ── Dark result cards (revealed one at a time) */}
       {resolvedData && (
         <div className="flex flex-col gap-3">
           <CompaniesCard companies={resolvedData.companies} visible={showCompanies} accent={accent} hasAsterisk={resolvedData.hasAsterisk} />
@@ -238,7 +239,7 @@ export default function V3HeroTypingBox() {
       )}
 
       {/* ── Proof line ─────────────────────────────── */}
-      <div className="text-center mt-6" style={{ opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
+      <div className="text-center mt-6" style={{ opacity: showProof ? 1 : 0, transform: showProof ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}
           <span style={{ color: accent.primary }}>who to contact</span> and{' '}
@@ -247,30 +248,33 @@ export default function V3HeroTypingBox() {
       </div>
 
       {/* ── Scenario chips ─────────────────────────── */}
-      <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: (isDone || phase === 'typing') ? 1 : 0.35, transition: 'opacity 0.4s' }}>
-        {SCENARIO_CHIPS.map((chip) => {
-          const isActive = chip.idx === scenarioIdx;
-          return (
-            <button
-              key={chip.idx}
-              onClick={() => switchScenario(chip.idx)}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = accent.border; }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#23252B'; }}
-              style={{
-                fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-                color: isActive ? accent.primary : '#71717A',
-                background: isActive ? accent.soft : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${isActive ? accent.border : '#23252B'}`,
-                borderRadius: 100, padding: '8px 16px',
-                cursor: 'pointer', transition: 'all 0.2s',
-                minHeight: 'auto', minWidth: 'auto', width: 'auto',
-              }}
-            >
-              {chip.label}
-            </button>
-          );
-        })}
-      </div>
+      {chipLabels.length > 1 && (
+        <div className="flex flex-wrap justify-center gap-2 mt-6" style={{ opacity: isDone ? 1 : 0.3, transition: 'opacity 0.5s' }}>
+          {chipLabels.map((chip) => {
+            const isActive = chip.idx === scenarioIdx;
+            return (
+              <button
+                key={chip.idx}
+                onClick={() => handleChipClick(selectedSchool, chip.idx)}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = accent.border; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#23252B'; }}
+                style={{
+                  fontFamily: dmSans, fontSize: 12, fontWeight: 500,
+                  color: isActive ? accent.primary : '#71717A',
+                  background: isActive ? accent.soft : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${isActive ? accent.border : '#23252B'}`,
+                  borderRadius: 100, padding: '8px 16px',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                  minHeight: 'auto', minWidth: 'auto', width: 'auto',
+                  maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <style>{`
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
