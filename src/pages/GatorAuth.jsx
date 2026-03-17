@@ -674,7 +674,7 @@ export default function GatorAuth() {
         id: 'gator',
         name: "I'm a Student",
         desc: 'Use FastIQ to identify target companies, find alumni, and send personalized outreach.',
-        micro: 'Any college email works',
+        micro: 'Get started instantly — any email works',
         iconBg: 'rgba(79,140,255,0.1)',
         iconBorder: 'rgba(79,140,255,0.2)',
         icon: <GradCapSVG />,
