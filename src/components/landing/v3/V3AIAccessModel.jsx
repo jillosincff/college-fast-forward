@@ -24,8 +24,8 @@ function Bullet({ text }) {
     <li style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
       <div style={{
         width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 7,
-        background: 'var(--accent-primary, #E85D20)',
-        boxShadow: '0 0 6px var(--accent-glow, rgba(232,93,32,0.3))',
+        background: 'var(--accent-primary, #4F8CFF)',
+        boxShadow: '0 0 6px var(--accent-glow, rgba(79,140,255,0.3))',
         transition: 'background 0.4s, box-shadow 0.4s',
       }} />
       <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.55 }}>
@@ -57,8 +57,8 @@ function ColumnCard({ icon, header, bullets, tagline, delay, vis }) {
       {/* Icon */}
       <div style={{
         width: 48, height: 48, borderRadius: 14,
-        background: 'var(--accent-soft, rgba(232,93,32,0.12))',
-        border: '1px solid var(--accent-border, rgba(232,93,32,0.25))',
+        background: 'var(--accent-soft, rgba(79,140,255,0.12))',
+        border: '1px solid var(--accent-border, rgba(79,140,255,0.25))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         marginBottom: 18,
         transition: 'background 0.4s, border-color 0.4s',
@@ -79,7 +79,7 @@ function ColumnCard({ icon, header, bullets, tagline, delay, vis }) {
       {/* Tagline */}
       <p style={{
         fontFamily: dmSans, fontWeight: 700, fontSize: 16,
-        color: 'var(--accent-primary, #E85D20)',
+        color: 'var(--accent-primary, #4F8CFF)',
         transition: 'color 0.4s',
         lineHeight: 1.4, marginTop: 'auto',
       }}>
@@ -98,15 +98,15 @@ function Connector({ vis }) {
     }}>
       <div style={{
         width: 56, height: 56, borderRadius: '50%',
-        background: 'var(--accent-soft, rgba(232,93,32,0.12))',
-        border: '1.5px solid var(--accent-border, rgba(232,93,32,0.30))',
+        background: 'var(--accent-soft, rgba(79,140,255,0.12))',
+        border: '1.5px solid var(--accent-border, rgba(79,140,255,0.30))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 0 24px var(--accent-glow, rgba(232,93,32,0.15))',
+        boxShadow: '0 0 24px var(--accent-glow, rgba(79,140,255,0.15))',
         transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s',
       }}>
         <span style={{
           fontFamily: dmSans, fontWeight: 300, fontSize: 28,
-          color: 'var(--accent-primary, #E85D20)',
+          color: 'var(--accent-primary, #4F8CFF)',
           lineHeight: 1, transition: 'color 0.4s',
         }}>+</span>
       </div>
@@ -215,7 +215,7 @@ export default function V3AIAccessModel({ onCTA }) {
           Together, this is how students go from{' '}
           <span style={{ color: 'rgba(255,255,255,0.4)' }}>ignored</span>
           {' → '}
-          <span style={{ color: 'var(--accent-primary, #E85D20)', transition: 'color 0.4s' }}>connected</span>
+          <span style={{ color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>connected</span>
           {' → '}
           <span style={{ color: '#10B981' }}>hired.</span>
         </p>

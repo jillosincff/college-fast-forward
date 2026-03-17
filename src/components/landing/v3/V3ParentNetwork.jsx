@@ -9,7 +9,7 @@ const COLUMNS = [
     title: 'Networking at scale',
     text: "Your student isn't starting from zero. They tap into a growing network of parents and alumni across schools and industries.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #E85D20)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
     ),
@@ -18,7 +18,7 @@ const COLUMNS = [
     title: 'Warm introductions',
     text: "Real opportunities don't come from job boards. They come from conversations — and knowing the right person.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #E85D20)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/>
       </svg>
     ),
@@ -27,7 +27,7 @@ const COLUMNS = [
     title: 'One network, every school',
     text: "This isn't limited to one campus. Your student gains access to a national network of families.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #E85D20)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
       </svg>
     ),
@@ -57,7 +57,7 @@ export default function V3ParentNetwork({ onCTA }) {
           fontSize: 'clamp(24px, 3.8vw, 42px)',
           lineHeight: 1.15, letterSpacing: '-0.02em',
           marginBottom: 20,
-          color: 'var(--accent-primary, #E85D20)',
+          color: 'var(--accent-primary, #4F8CFF)',
           transition: 'color 0.4s',
           ...fadeStyle(vis, 0.04),
         }}>
@@ -102,8 +102,8 @@ export default function V3ParentNetwork({ onCTA }) {
             >
               <div style={{
                 width: 48, height: 48, borderRadius: 14,
-                background: 'var(--accent-soft, rgba(232,93,32,0.12))',
-                border: '1px solid var(--accent-border, rgba(232,93,32,0.25))',
+                background: 'var(--accent-soft, rgba(79,140,255,0.12))',
+                border: '1px solid var(--accent-border, rgba(79,140,255,0.25))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 18px',
                 transition: 'background 0.4s, border-color 0.4s',
@@ -124,7 +124,7 @@ export default function V3ParentNetwork({ onCTA }) {
         <p className="text-center" style={{
           fontFamily: playfair, fontStyle: 'italic', fontWeight: 400,
           fontSize: 'clamp(17px, 2.2vw, 22px)',
-          color: 'var(--accent-primary, #E85D20)',
+          color: 'var(--accent-primary, #4F8CFF)',
           lineHeight: 1.5, marginBottom: 48,
           transition: 'color 0.4s',
           ...fadeStyle(vis, 0.16),
