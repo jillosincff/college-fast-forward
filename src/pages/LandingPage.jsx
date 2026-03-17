@@ -7,6 +7,7 @@ import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
 import V3HowFastIQWorks from '@/components/landing/v3/V3HowFastIQWorks';
+import V3FastIQ247 from '@/components/landing/v3/V3FastIQ247';
 import V3NetworkAdvantage from '@/components/landing/v3/V3NetworkAdvantage';
 import V3StudentQuiz from '@/components/landing/v3/V3StudentQuiz';
 import V3ParentQuiz from '@/components/landing/v3/V3ParentQuiz';

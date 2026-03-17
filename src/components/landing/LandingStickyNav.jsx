@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          FastIQ™ — 7-day free trial · No credit card required
+          FastIQ™ — 7-day free trial · Works for any college
         </span>
 
         {/* Right — buttons */}
