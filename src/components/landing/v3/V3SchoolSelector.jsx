@@ -20,9 +20,10 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  if (selectedSchool) {
-    return (
-      <div className="flex items-center justify-center gap-2 mb-4">
+  // Always show the compact "Showing results for [school]" chip with ability to change
+  return (
+    <div ref={ref} className="mb-4" style={{ position: 'relative' }}>
+      <div className="flex items-center justify-center gap-2 flex-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E85D20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
         </svg>
@@ -30,7 +31,7 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
           Showing results for
         </span>
         <button
-          onClick={() => { onSelect(null); setQuery(''); }}
+          onClick={() => setOpen(!open)}
           style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#E85D20',
             background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
@@ -40,73 +41,61 @@ export default function V3SchoolSelector({ selectedSchool, onSelect }) {
           }}
         >
           {selectedSchool}
-          <span style={{ fontSize: 11, opacity: 0.6 }}>✕</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+            <path d="M2 4L5 7L8 4" stroke="#E85D20" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={ref} className="mb-5" style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
-      <label style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textAlign: 'center' }}>
-        What school does your student attend?
-      </label>
-      <div
-        onClick={() => setOpen(true)}
-        style={{
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.14)',
-          borderRadius: 12, padding: '12px 16px',
-          display: 'flex', alignItems: 'center', gap: 10,
-          cursor: 'text',
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        </svg>
-        <input
-          value={query}
-          onChange={e => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          placeholder="Search or select school"
-          style={{
-            fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff',
-            background: 'transparent', border: 'none', outline: 'none',
-            width: '100%', padding: 0, margin: 0,
-          }}
-        />
       </div>
 
       {open && (
         <div
           style={{
-            position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 6,
+            position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+            width: 320, marginTop: 8,
             background: '#1a1f2e', border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 12, maxHeight: 220, overflowY: 'auto', zIndex: 50,
+            borderRadius: 12, maxHeight: 260, overflowY: 'auto', zIndex: 50,
             boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
           }}
         >
-          {filtered.length === 0 ? (
-            <div style={{ padding: '14px 16px', fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>
-              No schools found
-            </div>
-          ) : filtered.map(school => (
-            <button
-              key={school}
-              onClick={() => { onSelect(school); setOpen(false); setQuery(''); }}
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              autoFocus
+              placeholder="Search schools…"
               style={{
-                display: 'block', width: '100%', textAlign: 'left',
-                padding: '12px 16px', background: 'transparent', border: 'none',
-                fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff',
-                cursor: 'pointer', transition: 'background 0.15s',
-                minHeight: 'auto', minWidth: 'auto',
+                fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#fff',
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8, padding: '8px 12px', width: '100%',
+                outline: 'none',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.12)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-            >
-              {school}
-            </button>
-          ))}
+            />
+          </div>
+          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+            {filtered.length === 0 ? (
+              <div style={{ padding: '14px 16px', fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>
+                No schools found
+              </div>
+            ) : filtered.map(school => (
+              <button
+                key={school}
+                onClick={() => { onSelect(school); setOpen(false); setQuery(''); }}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '10px 16px', background: school === selectedSchool ? 'rgba(232,93,32,0.12)' : 'transparent',
+                  border: 'none',
+                  fontFamily: dmSans, fontSize: 14, fontWeight: school === selectedSchool ? 600 : 500,
+                  color: school === selectedSchool ? '#E85D20' : '#fff',
+                  cursor: 'pointer', transition: 'background 0.15s',
+                  minHeight: 'auto', minWidth: 'auto',
+                }}
+                onMouseEnter={e => { if (school !== selectedSchool) e.currentTarget.style.background = 'rgba(232,93,32,0.08)'; }}
+                onMouseLeave={e => { if (school !== selectedSchool) e.currentTarget.style.background = 'transparent'; }}
+              >
+                {school}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

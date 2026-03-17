@@ -5,113 +5,102 @@ import V3SchoolSelector from './V3SchoolSelector';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 
-const PHASE_TYPING    = 'typing';
-const PHASE_THINKING  = 'thinking';
-const PHASE_COMPANIES = 'companies';
-const PHASE_ALUMNI    = 'alumni';
-const PHASE_OUTREACH  = 'outreach';
-const PHASE_DONE      = 'done';
-const PHASE_IDLE      = 'idle';
+const TYPING_SPEED = 30;
+const THINK_DURATION = 1000;
+const CARD_STAGGER = 700;
+const DONE_PAUSE = 8000;
 
-const TYPING_SPEED = 35;
-const THINK_DURATION = 1400;
-const COMPANY_REVEAL = 900;
-const ALUMNI_REVEAL = 1000;
-const OUTREACH_REVEAL = 1100;
-const PAUSE_AFTER = 6000;
+const SCENARIO_CHIPS = [
+  { label: 'Consulting at Deloitte', idx: 0 },
+  { label: 'Marketing at Nike', idx: 1 },
+  { label: 'Finance target list', idx: 2 },
+  { label: 'Tech sales path', idx: 4 },
+];
+
+// Phases: typing → thinking → companies → alumni → outreach → done
+// "done" stays visible indefinitely until user switches scenario
 
 export default function V3HeroTypingBox() {
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [selectedSchool, setSelectedSchool] = useState('University of Michigan');
   const [scenarioIdx, setScenarioIdx] = useState(0);
-  const [phase, setPhase] = useState(PHASE_IDLE);
+  const [phase, setPhase] = useState('typing');
   const [displayedText, setDisplayedText] = useState('');
   const timerRef = useRef(null);
-  const hasStartedRef = useRef(false);
+  const typingRef = useRef(null);
 
-  const schoolName = selectedSchool || 'University of Florida';
+  const schoolName = selectedSchool;
   const scenario = DEMO_SCENARIOS[scenarioIdx];
 
-  // When school is selected, start the demo
-  useEffect(() => {
-    if (selectedSchool && !hasStartedRef.current) {
-      hasStartedRef.current = true;
-      startTyping();
-    }
-  }, [selectedSchool]);
-
-  // Also auto-start after 4 seconds if no school selected
-  useEffect(() => {
-    const autoStart = setTimeout(() => {
-      if (!hasStartedRef.current) {
-        hasStartedRef.current = true;
-        startTyping();
-      }
-    }, 4000);
-    return () => clearTimeout(autoStart);
+  // Clear all pending timers
+  const clearAllTimers = useCallback(() => {
+    clearTimeout(timerRef.current);
+    clearTimeout(typingRef.current);
   }, []);
 
-  const startTyping = useCallback(() => {
-    const text = scenario.prompt;
-    let i = 0;
+  // Start the typing animation for the current scenario
+  const runDemo = useCallback((text) => {
+    clearAllTimers();
     setDisplayedText('');
-    setPhase(PHASE_TYPING);
+    setPhase('typing');
 
+    let i = 0;
     const type = () => {
       if (i <= text.length) {
         setDisplayedText(text.slice(0, i));
         i++;
-        timerRef.current = setTimeout(type, TYPING_SPEED);
+        typingRef.current = setTimeout(type, TYPING_SPEED);
       } else {
-        timerRef.current = setTimeout(() => setPhase(PHASE_THINKING), 400);
+        timerRef.current = setTimeout(() => setPhase('thinking'), 300);
       }
     };
     type();
-  }, [scenario.prompt]);
+  }, [clearAllTimers]);
 
+  // Phase progression: thinking → companies → alumni → outreach → done
   useEffect(() => {
-    if (phase === PHASE_THINKING) {
-      timerRef.current = setTimeout(() => setPhase(PHASE_COMPANIES), THINK_DURATION);
-    } else if (phase === PHASE_COMPANIES) {
-      timerRef.current = setTimeout(() => setPhase(PHASE_ALUMNI), COMPANY_REVEAL);
-    } else if (phase === PHASE_ALUMNI) {
-      timerRef.current = setTimeout(() => setPhase(PHASE_OUTREACH), ALUMNI_REVEAL);
-    } else if (phase === PHASE_OUTREACH) {
-      timerRef.current = setTimeout(() => setPhase(PHASE_DONE), OUTREACH_REVEAL);
-    } else if (phase === PHASE_DONE) {
-      timerRef.current = setTimeout(() => setPhase(PHASE_IDLE), PAUSE_AFTER);
-    } else if (phase === PHASE_IDLE && hasStartedRef.current) {
-      const next = (scenarioIdx + 1) % DEMO_SCENARIOS.length;
-      setScenarioIdx(next);
+    if (phase === 'thinking') {
+      timerRef.current = setTimeout(() => setPhase('companies'), THINK_DURATION);
+    } else if (phase === 'companies') {
+      timerRef.current = setTimeout(() => setPhase('alumni'), CARD_STAGGER);
+    } else if (phase === 'alumni') {
+      timerRef.current = setTimeout(() => setPhase('outreach'), CARD_STAGGER);
+    } else if (phase === 'outreach') {
+      timerRef.current = setTimeout(() => setPhase('done'), CARD_STAGGER);
     }
+    // "done" phase: stay visible, no auto-advance
     return () => clearTimeout(timerRef.current);
-  }, [phase, scenarioIdx]);
+  }, [phase]);
 
+  // Auto-start on mount
   useEffect(() => {
-    if (hasStartedRef.current) {
-      startTyping();
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [scenarioIdx, startTyping]);
+    runDemo(DEMO_SCENARIOS[0].prompt);
+  }, []);
 
-  const showCompanies = [PHASE_COMPANIES, PHASE_ALUMNI, PHASE_OUTREACH, PHASE_DONE, PHASE_IDLE].includes(phase) && hasStartedRef.current;
-  const showAlumni = [PHASE_ALUMNI, PHASE_OUTREACH, PHASE_DONE, PHASE_IDLE].includes(phase) && hasStartedRef.current;
-  const showOutreach = [PHASE_OUTREACH, PHASE_DONE, PHASE_IDLE].includes(phase) && hasStartedRef.current;
-  const isThinking = phase === PHASE_THINKING;
+  // When scenario changes (from chip click), restart
+  const switchScenario = useCallback((idx) => {
+    if (idx === scenarioIdx && phase === 'done') return; // already showing
+    setScenarioIdx(idx);
+    runDemo(DEMO_SCENARIOS[idx].prompt);
+  }, [scenarioIdx, phase, runDemo]);
+
+  // When school changes, replay current scenario
+  const handleSchoolChange = useCallback((school) => {
+    if (!school) return;
+    setSelectedSchool(school);
+    // Re-run current scenario with new school (cards will auto-update via prop)
+    runDemo(scenario.prompt);
+  }, [scenario.prompt, runDemo]);
+
+  const showCompanies = ['companies', 'alumni', 'outreach', 'done'].includes(phase);
+  const showAlumni = ['alumni', 'outreach', 'done'].includes(phase);
+  const showOutreach = ['outreach', 'done'].includes(phase);
+  const isThinking = phase === 'thinking';
+  const isDone = phase === 'done';
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Label */}
-      <div className="text-center mb-4">
-        <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20' }}>
-          See FastIQ in action
-        </span>
-        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 6, lineHeight: 1.5 }}>
-          FastIQ tailors everything to your student's school.
-        </p>
-      </div>
-
-      {/* School selector */}
-      <V3SchoolSelector selectedSchool={selectedSchool} onSelect={setSelectedSchool} />
+      {/* School selector chip */}
+      <V3SchoolSelector selectedSchool={selectedSchool} onSelect={handleSchoolChange} />
 
       {/* Input box */}
       <div
@@ -132,20 +121,18 @@ export default function V3HeroTypingBox() {
             <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', letterSpacing: '0.04em' }}>FASTIQ</span>
           </div>
           <div className="flex-1" />
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Live demo</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Interactive demo</span>
         </div>
 
         <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0 }}>
-          {hasStartedRef.current ? displayedText : (
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>Select a school above to see FastIQ in action…</span>
-          )}
-          {phase === PHASE_TYPING && (
+          {displayedText}
+          {phase === 'typing' && (
             <span className="inline-block w-[2px] h-[18px] bg-white/70 ml-0.5 align-text-bottom" style={{ animation: 'blink 0.9s infinite' }} />
           )}
         </p>
       </div>
 
-      {/* Thinking */}
+      {/* Thinking indicator */}
       <div
         style={{
           height: isThinking ? 44 : 0, opacity: isThinking ? 1 : 0,
@@ -164,28 +151,59 @@ export default function V3HeroTypingBox() {
         </span>
       </div>
 
-      {/* Output cards */}
+      {/* Output cards — always rendered, visibility controlled by phase */}
       <div className="flex flex-col gap-3">
-        {hasStartedRef.current && <CompaniesCard companies={scenario.companies} visible={showCompanies} />}
-        {hasStartedRef.current && <AlumniCard alumni={scenario.alumni} visible={showAlumni} schoolName={schoolName} />}
-        {hasStartedRef.current && <OutreachCard outreach={scenario.outreach} visible={showOutreach} schoolName={schoolName} />}
+        <CompaniesCard companies={scenario.companies} visible={showCompanies} />
+        <AlumniCard alumni={scenario.alumni} visible={showAlumni} schoolName={schoolName} />
+        <OutreachCard outreach={scenario.outreach} visible={showOutreach} schoolName={schoolName} />
       </div>
 
       {/* Bottom microcopy */}
       <div
         className="text-center mt-6"
         style={{
-          opacity: showOutreach ? 1 : 0,
-          transform: showOutreach ? 'translateY(0)' : 'translateY(8px)',
-          transition: 'opacity 0.5s 0.4s, transform 0.5s 0.4s',
+          opacity: isDone ? 1 : 0,
+          transform: isDone ? 'translateY(0)' : 'translateY(8px)',
+          transition: 'opacity 0.5s 0.3s, transform 0.5s 0.3s',
         }}
       >
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, marginBottom: 4 }}>
-          FastIQ doesn't just give advice.
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
+          FastIQ doesn't just give advice — it shows your student{' '}
+          <span style={{ color: '#E85D20' }}>who to contact</span> and{' '}
+          <span style={{ color: '#E85D20' }}>what to say</span>.
         </p>
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55 }}>
-          It shows your student <span style={{ color: '#E85D20' }}>who to contact</span> and <span style={{ color: '#E85D20' }}>what to say</span>.
-        </p>
+      </div>
+
+      {/* Scenario switcher chips */}
+      <div
+        className="flex flex-wrap justify-center gap-2 mt-6"
+        style={{
+          opacity: isDone ? 1 : 0,
+          transition: 'opacity 0.4s 0.5s',
+        }}
+      >
+        {SCENARIO_CHIPS.map((chip) => {
+          const isActive = chip.idx === scenarioIdx;
+          return (
+            <button
+              key={chip.idx}
+              onClick={() => switchScenario(chip.idx)}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(232,93,32,0.5)'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+              style={{
+                fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+                color: isActive ? '#E85D20' : 'rgba(255,255,255,0.55)',
+                background: isActive ? 'rgba(232,93,32,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${isActive ? 'rgba(232,93,32,0.35)' : 'rgba(255,255,255,0.12)'}`,
+                borderRadius: 100, padding: '8px 16px',
+                cursor: 'pointer', transition: 'all 0.2s',
+                minHeight: 'auto', minWidth: 'auto', width: 'auto',
+              }}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
       </div>
 
       <style>{`
