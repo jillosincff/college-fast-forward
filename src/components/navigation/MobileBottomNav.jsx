@@ -29,26 +29,21 @@ export default function MobileBottomNav({ user, currentPage }) {
     if (isParent) {
       return [
         { name: 'Home', icon: LayoutDashboard, page: dashPage },
-        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
         { name: 'Directory', icon: Users, page: 'GatorDirectory' },
         { name: 'Messages', icon: Mail, page: 'MyMessages' },
-        { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
       ];
     }
     if (isEstablishedAlumni) {
       return [
         { name: 'Home', icon: LayoutDashboard, page: dashPage },
-        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
         { name: 'Directory', icon: Users, page: 'GatorDirectory' },
         { name: 'Messages', icon: Mail, page: 'MyMessages' },
-        { name: 'Impact', icon: Briefcase, page: 'MyImpact' },
       ];
     }
-    // Recent grad alumni — no Pipeline or FASTIQ
+    // Recent grad alumni
     if (isRecentGradAlumni) {
       return [
         { name: 'Home', icon: LayoutDashboard, page: dashPage },
-        { name: 'Ask', icon: MessageSquare, page: 'Connections' },
         { name: 'Directory', icon: Users, page: 'GatorDirectory' },
         { name: 'Messages', icon: Mail, page: 'MyMessages' },
       ];
@@ -56,7 +51,6 @@ export default function MobileBottomNav({ user, currentPage }) {
     // Students (gators)
     return [
       { name: 'Home', icon: LayoutDashboard, page: dashPage },
-      { name: 'Ask', icon: MessageSquare, page: 'Connections' },
       { name: 'FASTIQ', icon: Zap, page: 'FastIQ' },
       { name: 'Pipeline', icon: Briefcase, page: 'MyApplications' },
       { name: 'Messages', icon: Mail, page: 'MyMessages' },

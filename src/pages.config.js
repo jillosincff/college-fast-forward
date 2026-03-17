@@ -55,7 +55,7 @@ import AdminSetup from './pages/AdminSetup';
 import AlumniDashboard from './pages/AlumniDashboard';
 import AuthTest from './pages/AuthTest';
 import CompanyProfile from './pages/CompanyProfile';
-import Connections from './pages/Connections';
+// Connections removed
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
 import FastIQ from './pages/FastIQ';
@@ -71,7 +71,7 @@ import LandingPage from './pages/LandingPage';
 import MatchesReview from './pages/MatchesReview';
 import MessageComposer from './pages/MessageComposer';
 import MyApplications from './pages/MyApplications';
-import MyImpact from './pages/MyImpact';
+// MyImpact removed
 import MyMatches from './pages/MyMatches';
 import MyMessages from './pages/MyMessages';
 import MyRequests from './pages/MyRequests';
@@ -111,7 +111,7 @@ export const PAGES = {
     "AlumniDashboard": AlumniDashboard,
     "AuthTest": AuthTest,
     "CompanyProfile": CompanyProfile,
-    "Connections": Connections,
+
     "CookiePolicy": CookiePolicy,
     "Dashboard": Dashboard,
     "FastIQ": FastIQ,
@@ -127,7 +127,7 @@ export const PAGES = {
     "MatchesReview": MatchesReview,
     "MessageComposer": MessageComposer,
     "MyApplications": MyApplications,
-    "MyImpact": MyImpact,
+
     "MyMatches": MyMatches,
     "MyMessages": MyMessages,
     "MyRequests": MyRequests,

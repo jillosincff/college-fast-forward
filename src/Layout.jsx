@@ -114,7 +114,7 @@ function PageLoader() {
 
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Connections = React.lazy(() => import('./pages/Connections'));
+// Connections (Ask the Network) removed
 const Profile = React.lazy(() => import('./pages/Profile'));
 const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
@@ -129,7 +129,7 @@ const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
 const AlumniDashboard = React.lazy(() => import('./pages/AlumniDashboard'));
 const GatorDirectory = React.lazy(() => import('./pages/GatorDirectory'));
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
-const MyImpact = React.lazy(() => import('./pages/MyImpact'));
+// MyImpact removed
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 const MyMessages = React.lazy(() => import('./pages/MyMessages'));
 const MessageComposer = React.lazy(() => import('./pages/MessageComposer'));
@@ -261,13 +261,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
   const allNavItems = useMemo(() => [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
-    { name: 'Ask the Network', page: 'Connections', icon: MessageSquare, roles: ['gator', 'parent', 'alumni'] },
     { name: 'Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
     { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator'] },
     { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
-    { name: 'My Impact', page: 'MyImpact', icon: Users, roles: ['parent', 'established_alumni'] },
     { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator'] },
-    // Note: recent_grad_alumni intentionally excluded from Pipeline and FASTIQ per spec
   ], []);
 
   const filteredNavItems = useMemo(() => {
@@ -528,7 +525,6 @@ const getPageComponent = (pageName) => {
     case 'AlumniDashboard': return AlumniDashboard;
     case 'RecentGradDashboard': return RecentGradDashboard;
     case 'AdminDashboard': return AdminDashboard;
-    case 'Connections': return Connections;
     case 'CompanyProfile': return CompanyProfile;
     case 'Opportunities': return MyApplications;
     case 'PostOpportunity': return PostOpportunity;
@@ -543,7 +539,6 @@ const getPageComponent = (pageName) => {
     case 'ShareExpertise': return ShareExpertise;
     case 'GatorDirectory': return GatorDirectory;
     case 'MyRequests': return MyRequests;
-    case 'MyImpact': return MyImpact;
     case 'MyApplications': return MyApplications;
     case 'MyMessages': return MyMessages;
     case 'MessageComposer': return MessageComposer;
