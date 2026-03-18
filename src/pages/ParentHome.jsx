@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { navigate } from '@/components/utils/navigation';
+import { navigate, useParams } from '@/components/utils/navigation';
 import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
 import ParentHomeHero from '@/components/parent-home/ParentHomeHero';
 import IntroRequestCard from '@/components/parent-home/IntroRequestCard';
