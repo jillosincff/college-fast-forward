@@ -70,6 +70,9 @@ export default function V3Pricing({ onCTA }) {
 
           <CTAButton text="Try It Risk-Free for 7 Days" onClick={onCTA} fullWidth />
           <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 12, lineHeight: 1.5 }}>
+            Join <span style={{ color: '#E85D20', fontWeight: 500 }}>1,200+</span> families already inside.
+          </p>
+          <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 6, lineHeight: 1.5 }}>
             Cancel anytime. No long-term commitment.
           </p>
         </div>

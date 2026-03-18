@@ -43,10 +43,17 @@ export default function V3Numbers() {
 
         {/* Testimonial */}
         <div style={{ marginTop: 36, ...fadeStyle(vis, 0.18) }}>
-          <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(16px, 2vw, 20px)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55, marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 12 }}>
+            {[...Array(5)].map((_, i) => (
+              <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="#E85D20" stroke="none">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            ))}
+          </div>
+          <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(16px, 2vw, 20px)', color: '#fff', lineHeight: 1.55, marginBottom: 8 }}>
             "My son got 3 responses in a week after using this."
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             — Parent, Class of 2026
           </p>
         </div>

@@ -109,6 +109,11 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           <V3HeroTypingBox />
         </div>
 
+        {/* Social proof */}
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 20 }}>
+          👨‍👩‍👧 Join <span style={{ color: '#fff', fontWeight: 500 }}>1,200+</span> families already inside.
+        </p>
+
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-5">
           <HeroCTA text="Start Free 7-Day Trial" onClick={onCTA} variant="primary" />

@@ -22,12 +22,33 @@ export default function V3FinalCTA({ onCTA }) {
           <p style={{ fontFamily: dmSans, fontSize: 17, color: '#A1A1AA', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 14px', ...fadeStyle(vis, 0.08) }}>
             Not a job board. Not just AI. Not just networking.
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 12px', ...fadeStyle(vis, 0.10) }}>
+          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 500, color: '#FFFFFF', lineHeight: 1.65, maxWidth: 520, margin: '0 auto 32px', ...fadeStyle(vis, 0.10) }}>
             A plan. An edge. And real momentum.
           </p>
-          <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(17px, 2.2vw, 22px)', color: 'var(--accent-primary, #4F8CFF)', lineHeight: 1.5, maxWidth: 520, margin: '0 auto 36px', transition: 'color 0.4s', ...fadeStyle(vis, 0.12) }}>
-            "This is exactly what my kid was missing."
-          </p>
+
+          {/* Testimonial cards */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-10" style={{ maxWidth: 600, margin: '0 auto 40px', ...fadeStyle(vis, 0.12) }}>
+            {[
+              { quote: 'My son got 3 responses in a week after using this.', attr: 'Parent, Class of 2026' },
+              { quote: 'Finally — something that actually helps my kid move forward.', attr: 'Parent, University of Florida' },
+            ].map((t, i) => (
+              <div key={i} style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid #1F1F23', borderRadius: 16, padding: '22px 20px', textAlign: 'left' }}>
+                <div style={{ display: 'flex', gap: 2, marginBottom: 10 }}>
+                  {[...Array(5)].map((_, s) => (
+                    <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="#E85D20" stroke="none">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  ))}
+                </div>
+                <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 15, color: '#fff', lineHeight: 1.55, marginBottom: 10 }}>
+                  "{t.quote}"
+                </p>
+                <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                  — {t.attr}
+                </p>
+              </div>
+            ))}
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.16)}>
             <CTAButton text="Try It Risk-Free for 7 Days" onClick={onCTA} />
