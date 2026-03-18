@@ -176,7 +176,7 @@ export default function V3ParentPeace({ onCTA }) {
 
         {/* CTA */}
         <div className="flex justify-center" style={fadeStyle(vis, 0.20)}>
-          <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
+          <CTAButton text="Start Free — It Takes 2 Minutes" onClick={onCTA} />
         </div>
       </div>
     </section>

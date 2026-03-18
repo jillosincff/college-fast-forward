@@ -115,14 +115,23 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-5">
-          <HeroCTA text="Start Free 7-Day Trial" onClick={onCTA} variant="primary" />
-          <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="outline" />
+        <div className="flex flex-col items-center gap-3 mb-5">
+          <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="primary" />
+          <button
+            onClick={onCTA}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: dmSans, fontSize: 14, fontWeight: 400,
+              color: 'rgba(255,255,255,0.7)', textDecoration: 'underline',
+              transition: 'color 0.2s', minHeight: 'auto', minWidth: 'auto',
+              textAlign: 'center',
+            }}
+          >
+            Already convinced? Start free today →
+          </button>
         </div>
-
-        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, marginBottom: 6 }}>
-          Free to join the network. FastIQ included in your trial.
-        </p>
       </div>
     </section>
   );

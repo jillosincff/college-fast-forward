@@ -174,7 +174,7 @@ export default function V3Pricing({ onCTA }) {
             price="$29/mo"
             descriptor="7-day free trial included"
             subhead="The full system. For families ready to act."
-            cta={{ text: 'Start 7-Day Free Trial', onClick: onCTA }}
+            cta={{ text: 'Start Your Free Trial', onClick: onCTA }}
             ctaStyle="solid"
             finePrint="Cancel anytime. No long-term commitment."
           >

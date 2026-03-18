@@ -57,6 +57,23 @@ export default function V3Numbers() {
             — Parent, Class of 2026
           </p>
         </div>
+
+        {/* CTA text link */}
+        <div style={{ marginTop: 32, ...fadeStyle(vis, 0.22) }}>
+          <button
+            onClick={() => { const el = document.getElementById('pricing'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else window.location.hash = '#GetStarted'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#d44e14'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#E85D20'; }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+              color: '#E85D20', transition: 'color 0.2s',
+              minHeight: 'auto', minWidth: 'auto', textAlign: 'center',
+            }}
+          >
+            Try FastIQ Free for 7 Days →
+          </button>
+        </div>
       </div>
     </section>
   );

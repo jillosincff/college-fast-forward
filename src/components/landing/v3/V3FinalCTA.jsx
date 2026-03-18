@@ -51,7 +51,7 @@ export default function V3FinalCTA({ onCTA }) {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4" style={fadeStyle(vis, 0.16)}>
-            <CTAButton text="Try It Risk-Free for 7 Days" onClick={onCTA} />
+            <CTAButton text="Join 1,200+ Families — Start Free Today" onClick={onCTA} />
           </div>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 10, ...fadeStyle(vis, 0.17) }}>
             Cancel anytime. No long-term commitment.
