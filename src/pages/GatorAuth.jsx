@@ -740,7 +740,7 @@ export default function GatorAuth() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
             {roles.map((r, i) => (
-              <RoleCard key={r.id} role={r} index={i} isPrimary={!!r.primary} onClick={() => handleCardClick(r.id)} />
+              <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />
             ))}
           </div>
 
