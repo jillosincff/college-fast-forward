@@ -51,7 +51,7 @@ export default function ParentProfileHeader({ user }) {
   return (
     <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12, overflow: 'hidden' }}>
       {/* Banner */}
-      <div style={{ height: 90, background: 'linear-gradient(135deg, #111 0%, #0d1117 100%)', position: 'relative' }}>
+      <div style={{ height: 120, background: 'linear-gradient(135deg, #111 0%, #0d1117 100%)', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 80%, rgba(232,93,32,0.08), transparent 70%)' }} />
         <button onClick={() => navigate('ProfileEdit')} style={{
           position: 'absolute', top: 16, right: 16,
