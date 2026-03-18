@@ -75,7 +75,7 @@ export default function LandingPage() {
         <V3FastIQ247 />
 
         {/* 8 — Parent Peace of Mind */}
-        <V3ParentPeace />
+        <V3ParentPeace onCTA={handleCTA} />
 
         {/* 9 — Pricing */}
         <V3Pricing onCTA={handleCTA} />

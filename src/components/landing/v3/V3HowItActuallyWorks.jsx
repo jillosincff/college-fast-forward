@@ -54,7 +54,7 @@ export default function V3HowItActuallyWorks() {
           AI finds the path. People open the doors.
         </p>
 
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 52px', transition: 'background 0.4s', ...fadeStyle(vis, 0.08) }} />
+        <div style={{ width: 40, height: 2, background: '#E85D20', borderRadius: 1, margin: '0 auto 52px', ...fadeStyle(vis, 0.08) }} />
 
         <div className="v3-hiaw-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 48, ...fadeStyle(vis, 0.12) }}>
           {STEPS.map((s, i) => (
