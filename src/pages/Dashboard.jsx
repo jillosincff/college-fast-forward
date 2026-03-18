@@ -1,54 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
-
-import PlanNav from '@/components/your-plan/PlanNav';
-import TargetCompanies from '@/components/your-plan/TargetCompanies';
-import PeopleToContact from '@/components/your-plan/PeopleToContact';
-import OutreachMessage from '@/components/your-plan/OutreachMessage';
-import WhatToDoNext from '@/components/your-plan/WhatToDoNext';
-import NetworkEdge from '@/components/your-plan/NetworkEdge';
-import EmptyPlan from '@/components/your-plan/EmptyPlan';
+import { ensureFonts, BG } from '@/components/student-dashboard/constants';
+import DashboardHero from '@/components/student-dashboard/DashboardHero';
+import TabBar from '@/components/student-dashboard/TabBar';
+import WelcomeCard from '@/components/student-dashboard/WelcomeCard';
+import LockedTabModal from '@/components/student-dashboard/LockedTabModal';
+import TabCompanyIntel from '@/components/student-dashboard/TabCompanyIntel';
+import TabCareerPath from '@/components/student-dashboard/TabCareerPath';
+import TabCareerCenter from '@/components/student-dashboard/TabCareerCenter';
+import TabCareerGoals from '@/components/student-dashboard/TabCareerGoals';
+import TabAlumniNetwork from '@/components/student-dashboard/TabAlumniNetwork';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
-// Dynamic alumni name pool
-const ALUMNI_NAMES = [
-  'Sarah Chen', 'Michael Ross', 'David Klein', 'Priya Patel', 'Daniel Green',
-  'Alex Martinez', 'Jordan Blake', 'Emily Carter', 'Ryan Goldberg', 'Hannah Lee',
-  'Kevin Shah', 'Lauren Brooks', 'Marcus Rivera', 'Nicole Tran', 'Chris Walker',
-  'Tyler Moreno', 'Rachel Adams', 'Brandon Kim', 'Mia Gonzalez', 'Jake Williams',
-];
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function ensureFonts() {
-  if (typeof document === 'undefined') return;
-  if (document.getElementById('yourplan-fonts')) return;
-  const link = document.createElement('link');
-  link.id = 'yourplan-fonts';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap';
-  document.head.appendChild(link);
-}
-
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
-  const [loadingData, setLoadingData] = useState(true);
-  const [plan, setPlan] = useState(null);
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const loadStartedRef = useRef(false);
+  const [activeTab, setActiveTab] = useState('company-intel');
+  const [lockedModal, setLockedModal] = useState(null);
 
   useEffect(() => { ensureFonts(); }, []);
 
@@ -66,165 +36,76 @@ export default function Dashboard() {
       navigate('AdminDashboard');
       return;
     }
-    if (loadStartedRef.current) return;
-    loadStartedRef.current = true;
-    loadPlanData();
   }, [user, isLoading]);
 
-  const loadPlanData = async () => {
-    setLoadingData(true);
-    try {
-      // Check for FastTrackProProfile for target companies
-      const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
-      const profile = profiles?.[0];
-      
-      if (profile && profile.target_companies?.length > 0) {
-        // Generate contacts from alumni pool
-        const shuffledNames = shuffle(ALUMNI_NAMES);
-        const companies = profile.target_companies.slice(0, 6);
-        const contacts = companies.slice(0, 4).map((company, i) => ({
-          name: shuffledNames[i],
-          company: typeof company === 'string' ? company : company.name,
-          role: ['Marketing Manager', 'Senior Analyst', 'Product Lead', 'Account Executive'][i % 4],
-          badge: i < 2 ? ['Active recently', 'Likely to respond'][i] : null,
-        }));
-        
-        // Generate sample outreach
-        const firstContact = contacts[0];
-        const outreachMessage = firstContact ? `Hi ${firstContact.name.split(' ')[0]},
-
-I'm a student at ${user.school || 'university'} exploring careers in your field. I noticed you're at ${firstContact.company} and would love to hear how you got started there.
-
-Would you have 15 minutes for a quick call? I'd really appreciate any advice.
-
-Thanks so much,
-${user.full_name?.split(' ')[0] || 'Student'}` : null;
-
-        setPlan({
-          companies: companies.map((c, i) => typeof c === 'string' ? { name: c, userTyped: i === 0 } : c),
-          contacts,
-          outreachMessage,
-          recipientName: firstContact?.name,
-          actions: [
-            'Reach out to 3 people today',
-            'Follow up with 2 contacts',
-            'Apply to 1 targeted role',
-            'Update LinkedIn summary',
-          ],
-        });
-        setSelectedCompany(companies[0]?.name || companies[0]);
-        setSelectedPerson(firstContact);
-      } else {
-        setPlan(null);
-      }
-    } catch (error) {
-      console.error('Failed to load plan:', error);
-      setPlan(null);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
-  const handleSelectCompany = (company) => {
-    setSelectedCompany(company);
-    setHasInteracted(true);
-  };
-
-  const handleViewContacts = (company) => {
-    setHasInteracted(true);
-    // Scroll to contacts
-    document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleGenerateOutreach = (company) => {
-    setHasInteracted(true);
-    navigate(`FastIQ?company=${encodeURIComponent(company)}`);
-  };
-
-  const handleUseMessage = (person) => {
-    setSelectedPerson(person);
-    setHasInteracted(true);
-    document.getElementById('message-section')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  if (isLoading || !user || loadingData) {
+  if (isLoading || !user) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0B0B0F' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: BG }}>
         <div style={{ textAlign: 'center' }}>
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#4F8CFF', margin: '0 auto 12px' }} />
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>
-            Loading your plan...
-          </p>
+          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#E85D20', margin: '0 auto 12px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Loading...</p>
         </div>
       </div>
     );
   }
 
-  const hasPlan = plan && plan.companies?.length > 0;
+  // Determine if user has FastIQ (paid)
+  const isPaid = user?.fastiq_active === true || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq';
+
+  const handleUnlock = () => navigate('GetStarted');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'company-intel': return <TabCompanyIntel user={user} />;
+      case 'career-path': return <TabCareerPath />;
+      case 'career-center': return <TabCareerCenter user={user} />;
+      case 'career-goals': return <TabCareerGoals user={user} onGoalsSaved={() => {}} onUnlock={handleUnlock} isPaid={isPaid} />;
+      case 'alumni-network': return <TabAlumniNetwork user={user} isPaid={isPaid} onUnlock={handleUnlock} onNavigateGoals={() => setActiveTab('career-goals')} />;
+      // Paid-only tabs — placeholder content for now
+      case 'alumni-contacts': return isPaid ? <div style={{ color: '#888', fontFamily: dmSans }}>Alumni Contacts — coming soon.</div> : null;
+      case 'resume-tailoring': return isPaid ? <div style={{ color: '#888', fontFamily: dmSans }}>Resume Tailoring — coming soon.</div> : null;
+      case 'linkedin-review': return isPaid ? <div style={{ color: '#888', fontFamily: dmSans }}>LinkedIn Review — coming soon.</div> : null;
+      case 'job-search-crm': return isPaid ? <div style={{ color: '#888', fontFamily: dmSans }}>Job Search CRM — coming soon.</div> : null;
+      case 'follow-up-alerts': return isPaid ? <div style={{ color: '#888', fontFamily: dmSans }}>Follow-up Alerts — coming soon.</div> : null;
+      default: return <TabCompanyIntel user={user} />;
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0B0B0F' }}>
-      <PlanNav user={user} currentPage="Dashboard" />
+    <div style={{ minHeight: '100vh', background: BG }}>
+      {/* Hero */}
+      <DashboardHero user={user} isPaid={isPaid} onUnlock={handleUnlock} />
 
-      {/* Header */}
-      <div style={{ padding: '32px 24px 0', maxWidth: 800, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: dmSans, fontSize: 28, fontWeight: 600, color: '#fff', marginBottom: 6 }}>
-          Your Plan
-        </h1>
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.35)' }}>
-          FastIQ is guiding you step-by-step.
-        </p>
-      </div>
+      {/* Tabs + Content */}
+      <div style={{ padding: '16px 0 0' }}>
+        {/* Mobile tab bar */}
+        <div className="md:hidden">
+          <TabBar activeTab={activeTab} onTabChange={setActiveTab} isPaid={isPaid} onLockedClick={(id) => setLockedModal(id)} />
+        </div>
 
-      {/* Content */}
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '28px 24px 80px' }}>
-        {!hasPlan ? (
-          <EmptyPlan />
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Section 1: Target Companies */}
-            <TargetCompanies
-              companies={plan.companies}
-              selectedCompany={selectedCompany}
-              onSelect={handleSelectCompany}
-              onViewContacts={handleViewContacts}
-              onGenerateOutreach={handleGenerateOutreach}
-            />
-
-            {/* Section 2: People to Contact */}
-            <div id="contacts-section">
-              <PeopleToContact
-                contacts={plan.contacts}
-                onUseMessage={handleUseMessage}
-              />
-            </div>
-
-            {/* Section 3: Outreach Message */}
-            <div id="message-section">
-              <OutreachMessage
-                message={plan.outreachMessage}
-                recipientName={selectedPerson?.name || plan.recipientName}
-              />
-            </div>
-
-            {/* Section 4: What to Do Next */}
-            <WhatToDoNext actions={plan.actions} />
-
-            {/* Section 5: Network Edge - shows after interaction */}
-            <NetworkEdge
-              visible={hasInteracted}
-              company={selectedCompany}
-              userSchool={user?.school}
-            />
+        {/* Desktop: sidebar + content */}
+        <div className="max-w-5xl mx-auto" style={{ display: 'flex', gap: 24, padding: '0 24px 80px' }}>
+          {/* Desktop sidebar */}
+          <div className="hidden md:block">
+            <TabBar activeTab={activeTab} onTabChange={setActiveTab} isPaid={isPaid} onLockedClick={(id) => setLockedModal(id)} />
           </div>
-        )}
+
+          {/* Content area */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Welcome card for newly activated paid users */}
+            {isPaid && (
+              <WelcomeCard onBuildPlan={() => setActiveTab('career-goals')} />
+            )}
+
+            {renderTabContent()}
+          </div>
+        </div>
       </div>
 
-      <style>{`
-        @media(max-width:768px) {
-          h1 { font-size: 24px !important; }
-        }
-      `}</style>
+      {/* Locked tab modal */}
+      {lockedModal && (
+        <LockedTabModal tabId={lockedModal} user={user} onClose={() => setLockedModal(null)} onUnlock={handleUnlock} />
+      )}
     </div>
   );
 }
