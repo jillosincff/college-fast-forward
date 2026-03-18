@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 import Stripe from 'npm:stripe@14.21.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
@@ -8,24 +8,25 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 // ═══════════════════════════════════════════════════════════════
 // CFF + FASTIQ Checkout — Family-First Billing
 // ═══════════════════════════════════════════════════════════════
-// The subscription is created on the FAMILY entity.
-// One subscription covers all linked family members.
-// Both parents and students can initiate checkout.
+// Supports: monthly, annual standard, annual founding member
+// Founding member price is server-side validated against expiry
 // ═══════════════════════════════════════════════════════════════
 
 const PRICE_MAP = {
-  cff_monthly:     'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
-  fastiq_monthly:  'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
-  fastiq_annual:   'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
+  cff_monthly:            'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
+  fastiq_monthly:         'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
+  fastiq_annual:          'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
+  fastiq_founding_annual: 'price_FOUNDING_187',               // $187/year — REPLACE with real Stripe price ID
 };
 
 const TIER_MAP = {
-  cff_monthly:    'cff',
-  fastiq_monthly: 'fastiq',
-  fastiq_annual:  'fastiq',
+  cff_monthly:            'cff',
+  fastiq_monthly:         'fastiq',
+  fastiq_annual:          'fastiq',
+  fastiq_founding_annual: 'fastiq',
 };
 
-const TRIAL_DAYS = 7; // 7-day free trial
+const TRIAL_DAYS = 7;
 
 Deno.serve(async (req) => {
   try {
@@ -37,10 +38,40 @@ Deno.serve(async (req) => {
 
     const { plan, successUrl, cancelUrl, metadata } = await req.json();
 
-    const stripePriceId = PRICE_MAP[plan];
+    // ── Founding member server-side validation ──
+    let resolvedPlan = plan;
+    let isFoundingRedemption = false;
+
+    if (plan === 'fastiq_founding_annual') {
+      // Validate that founding offer is still active
+      const startedAt = user.founding_offer_started_at;
+      const expired = user.founding_offer_expired === true;
+      const dismissed = user.founding_offer_dismissed === true;
+      const alreadyRedeemed = user.founding_offer_redeemed === true;
+
+      if (!startedAt || expired || dismissed || alreadyRedeemed) {
+        console.log('Founding offer not valid, falling back to standard annual:', {
+          startedAt, expired, dismissed, alreadyRedeemed
+        });
+        resolvedPlan = 'fastiq_annual';
+      } else {
+        const expiresAt = new Date(startedAt).getTime() + 24 * 60 * 60 * 1000;
+        if (Date.now() > expiresAt) {
+          console.log('Founding offer expired (server-side), falling back to standard annual');
+          // Mark as expired in DB
+          await base44.asServiceRole.entities.User.update(user.id, { founding_offer_expired: true });
+          resolvedPlan = 'fastiq_annual';
+        } else {
+          isFoundingRedemption = true;
+          console.log('Founding offer VALID, using $187 price. Expires at:', new Date(expiresAt).toISOString());
+        }
+      }
+    }
+
+    const stripePriceId = PRICE_MAP[resolvedPlan];
     if (!stripePriceId) {
       return Response.json({
-        error: `Invalid plan: ${plan}. Must be one of: ${Object.keys(PRICE_MAP).join(', ')}`,
+        error: `Invalid plan: ${resolvedPlan}. Must be one of: ${Object.keys(PRICE_MAP).join(', ')}`,
       }, { status: 400 });
     }
 
@@ -48,13 +79,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing successUrl or cancelUrl' }, { status: 400 });
     }
 
-    const subscriptionTier = TIER_MAP[plan];
-    console.log('Checkout request:', { plan, subscriptionTier, userId: user.id, email: user.email });
+    const subscriptionTier = TIER_MAP[resolvedPlan];
+    console.log('Checkout request:', { originalPlan: plan, resolvedPlan, subscriptionTier, userId: user.id, email: user.email, isFoundingRedemption });
 
     // ── Resolve the user's Family entity ──
     let familyId = metadata?.family_id || '';
     if (!familyId) {
-      // Try to find family by user ID (parent or student)
       const isParent = user.persona === 'parent' || user.roles?.includes('parent');
 
       if (isParent) {
@@ -62,19 +92,16 @@ Deno.serve(async (req) => {
         if (families.length > 0) {
           familyId = families[0].id;
         } else {
-          // Check parent_ids array
           const allFamilies = await base44.asServiceRole.entities.Family.filter({});
           const match = allFamilies.find(f => f.parent_ids?.includes(user.id));
           if (match) familyId = match.id;
         }
       } else {
-        // Student — check student_ids
         const allFamilies = await base44.asServiceRole.entities.Family.filter({});
         const match = allFamilies.find(f => f.student_ids?.includes(user.id));
         if (match) familyId = match.id;
       }
 
-      // If user has family_id on their profile
       if (!familyId && user.family_id) {
         familyId = user.family_id;
       }
@@ -82,12 +109,11 @@ Deno.serve(async (req) => {
       console.log('Resolved family_id:', familyId || '(none)');
     }
 
-    // ── Check if family already has an active subscription (prevent duplicate) ──
+    // ── Check if family already has an active subscription ──
     if (familyId) {
       try {
         const family = await base44.asServiceRole.entities.Family.get(familyId);
         if (family.stripe_subscription_id && (family.subscription_status === 'active' || family.subscription_status === 'trialing')) {
-          // Family already has active subscription — check if this is an upgrade
           const existingTier = family.subscription_tier;
           if (existingTier === subscriptionTier || (existingTier === 'fastiq' && subscriptionTier === 'cff')) {
             return Response.json({
@@ -96,7 +122,6 @@ Deno.serve(async (req) => {
               existing_status: family.subscription_status,
             }, { status: 409 });
           }
-          // If upgrading from cff to fastiq, use Stripe portal for upgrade
           console.log('Family upgrading from', existingTier, 'to', subscriptionTier);
         }
       } catch (e) {
@@ -120,11 +145,31 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Build customer metadata
+    const customerMeta = {
+      user_id: user.id,
+      app_user_email: user.email,
+      family_id: familyId,
+      user_type: user.persona || 'parent',
+    };
+
+    // Add founding offer metadata for parents
+    if (user.founding_offer_started_at) {
+      const expiresAt = new Date(user.founding_offer_started_at).getTime() + 24 * 60 * 60 * 1000;
+      customerMeta.founding_offer_eligible = 'true';
+      customerMeta.founding_offer_start = user.founding_offer_started_at;
+      customerMeta.founding_offer_expiry = new Date(expiresAt).toISOString();
+      customerMeta.founding_offer_redeemed = isFoundingRedemption ? 'true' : 'false';
+      if (user.student_emails?.length > 0) {
+        customerMeta.linked_student_email = user.student_emails[0];
+      }
+    }
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.full_name,
-        metadata: { user_id: user.id, app_user_email: user.email, family_id: familyId },
+        metadata: customerMeta,
       });
       customerId = customer.id;
 
@@ -132,7 +177,6 @@ Deno.serve(async (req) => {
         stripe_customer_id: customerId,
       });
 
-      // Also store on Family if we have one
       if (familyId) {
         try {
           await base44.asServiceRole.entities.Family.update(familyId, {
@@ -142,10 +186,25 @@ Deno.serve(async (req) => {
           console.log('Could not update family with customer ID:', e.message);
         }
       }
+    } else if (isFoundingRedemption) {
+      // Update existing customer metadata with founding redemption
+      await stripe.customers.update(customerId, { metadata: customerMeta });
+    }
+
+    // ── Compute checkout session expiry ──
+    // If founding offer, set checkout expiry to match offer expiry so initiated sessions are honored
+    let expiresAt = undefined;
+    if (isFoundingRedemption && user.founding_offer_started_at) {
+      const offerExpiry = new Date(user.founding_offer_started_at).getTime() + 24 * 60 * 60 * 1000;
+      const secondsUntilExpiry = Math.floor((offerExpiry - Date.now()) / 1000);
+      // Stripe requires min 30 min, max 24 hours
+      if (secondsUntilExpiry > 1800) {
+        expiresAt = Math.floor(offerExpiry / 1000);
+      }
     }
 
     // ── Create Checkout Session ──
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [{ price: stripePriceId, quantity: 1 }],
@@ -154,8 +213,9 @@ Deno.serve(async (req) => {
         trial_period_days: TRIAL_DAYS,
         metadata: {
           subscription_tier: subscriptionTier,
-          plan,
+          plan: resolvedPlan,
           family_id: familyId,
+          is_founding_member: isFoundingRedemption ? 'true' : 'false',
         },
       },
       success_url: successUrl,
@@ -164,13 +224,26 @@ Deno.serve(async (req) => {
         user_id: user.id,
         user_email: user.email,
         subscription_tier: subscriptionTier,
-        plan,
+        plan: resolvedPlan,
         family_id: familyId,
+        is_founding_member: isFoundingRedemption ? 'true' : 'false',
       },
-    });
+    };
 
-    console.log('Checkout session created:', session.id, 'plan:', plan, 'family:', familyId);
-    return Response.json({ sessionId: session.id, url: session.url });
+    if (expiresAt) {
+      sessionConfig.expires_at = expiresAt;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    console.log('Checkout session created:', session.id, 'plan:', resolvedPlan, 'family:', familyId, 'founding:', isFoundingRedemption);
+
+    return Response.json({
+      sessionId: session.id,
+      url: session.url,
+      resolvedPlan,
+      isFoundingRedemption,
+    });
 
   } catch (error) {
     console.error('Stripe checkout error:', error.message, error.type, error.code);
