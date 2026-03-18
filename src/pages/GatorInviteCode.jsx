@@ -188,7 +188,7 @@ export default function GatorInviteCode() {
             }}
             value={referralCode}
             onChange={e => { setReferralCode(e.target.value.toUpperCase()); setError(''); setShowJoinWithout(false); }}
-            placeholder="e.g. UF-SARAH"
+            placeholder="e.g. FRIEND2026"
             onKeyDown={e => e.key === 'Enter' && handleContinue()}
           />
           {error ? (
