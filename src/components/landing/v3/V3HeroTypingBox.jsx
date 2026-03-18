@@ -8,36 +8,120 @@ const ORANGE = '#E85D20';
 
 /* ── School data ───────────────────────────────────── */
 const SCHOOLS = [
-  { abbr: 'UF', prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify." },
-  { abbr: 'FSU', prompt: "I'm interested in sports marketing agencies in New York." },
-  { abbr: 'Wake Forest', prompt: "I'm exploring careers in wealth management and financial advising." },
-  { abbr: 'U of M', prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York." },
-  { abbr: 'USC', prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA." },
-];
-
-const COMPANIES = [
-  { name: 'Nike', tag: 'Brand Marketing' },
-  { name: 'Spotify', tag: 'Music/Tech' },
-  { name: 'Ogilvy', tag: 'Creative Agency' },
-  { name: 'PepsiCo', tag: 'CPG' },
-  { name: 'Lululemon', tag: 'DTC Brand' },
+  {
+    abbr: 'UF',
+    prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify.",
+    companies: [
+      { name: 'Nike', tag: 'Brand Marketing' },
+      { name: 'Spotify', tag: 'Music/Tech' },
+      { name: 'Ogilvy', tag: 'Creative Agency' },
+      { name: 'PepsiCo', tag: 'CPG' },
+      { name: 'Lululemon', tag: 'DTC Brand' },
+    ],
+    alumni: [
+      { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator' },
+      { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate' },
+      { name: 'Priya Patel', company: 'Ogilvy', role: 'Account Coordinator' },
+    ],
+    outreach: {
+      to: 'Tyler', toFull: 'Tyler Moreno', company: 'Nike', from: 'Olivia',
+      field: 'brand marketing',
+    },
+  },
+  {
+    abbr: 'FSU',
+    prompt: "I'm interested in sports marketing agencies in New York.",
+    companies: [
+      { name: 'IMG Academy', tag: 'Sports Marketing' },
+      { name: 'Wasserman', tag: 'Sports Agency' },
+      { name: 'ESPN', tag: 'Media/Sports' },
+      { name: 'Endeavor', tag: 'Talent Agency' },
+      { name: 'Nike', tag: 'Sports Division' },
+    ],
+    alumni: [
+      { name: 'Tyler Moreno', company: 'IMG Academy', role: 'Sports Marketing Coordinator' },
+      { name: 'Michael Ross', company: 'Wasserman', role: 'Client Services Associate' },
+      { name: 'Priya Patel', company: 'ESPN', role: 'Content Marketing Specialist' },
+    ],
+    outreach: {
+      to: 'Tyler', toFull: 'Tyler Moreno', company: 'IMG Academy', from: 'Olivia',
+      field: 'sports marketing',
+    },
+  },
+  {
+    abbr: 'Wake Forest',
+    prompt: "I'm exploring careers in wealth management and financial advising.",
+    companies: [
+      { name: 'Morgan Stanley', tag: 'Wealth Management' },
+      { name: 'Merrill Lynch', tag: 'Financial Advisory' },
+      { name: 'Raymond James', tag: 'Wealth Management' },
+      { name: 'UBS', tag: 'Private Banking' },
+      { name: 'Edward Jones', tag: 'Financial Services' },
+    ],
+    alumni: [
+      { name: 'Tyler Moreno', company: 'Morgan Stanley', role: 'Wealth Management Analyst' },
+      { name: 'Michael Ross', company: 'Merrill Lynch', role: 'Financial Advisor Associate' },
+      { name: 'Priya Patel', company: 'Raymond James', role: 'Client Associate' },
+    ],
+    outreach: {
+      to: 'Tyler', toFull: 'Tyler Moreno', company: 'Morgan Stanley', from: 'Olivia',
+      field: 'wealth management',
+    },
+  },
+  {
+    abbr: 'U of M',
+    prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York.",
+    companies: [
+      { name: 'Goldman Sachs', tag: 'Investment Banking' },
+      { name: 'JP Morgan', tag: 'Banking' },
+      { name: 'Morgan Stanley', tag: 'IB Division' },
+      { name: 'Lazard', tag: 'M&A Advisory' },
+      { name: 'Evercore', tag: 'Investment Banking' },
+    ],
+    alumni: [
+      { name: 'Tyler Moreno', company: 'Goldman Sachs', role: 'Investment Banking Analyst' },
+      { name: 'Michael Ross', company: 'JP Morgan', role: 'Associate Analyst' },
+      { name: 'Priya Patel', company: 'Lazard', role: 'M&A Analyst' },
+    ],
+    outreach: {
+      to: 'Tyler', toFull: 'Tyler Moreno', company: 'Goldman Sachs', from: 'Olivia',
+      field: 'investment banking',
+    },
+  },
+  {
+    abbr: 'USC',
+    prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA.",
+    companies: [
+      { name: 'WME', tag: 'Talent Agency' },
+      { name: 'CAA', tag: 'Creative Agency' },
+      { name: 'Disney', tag: 'Entertainment' },
+      { name: 'Netflix', tag: 'Streaming/Marketing' },
+      { name: 'Universal', tag: 'Entertainment Marketing' },
+    ],
+    alumni: [
+      { name: 'Tyler Moreno', company: 'WME', role: 'Talent Agency Assistant' },
+      { name: 'Michael Ross', company: 'CAA', role: 'Marketing Coordinator' },
+      { name: 'Priya Patel', company: 'Disney', role: 'Entertainment Marketing Associate' },
+    ],
+    outreach: {
+      to: 'Tyler', toFull: 'Tyler Moreno', company: 'WME', from: 'Olivia',
+      field: 'entertainment marketing',
+    },
+  },
 ];
 
 function buildDemoData(school) {
+  const yr = school.abbr;
   return {
-    companies: COMPANIES,
+    companies: school.companies,
     hasAsterisk: false,
-    alumni: [
-      { name: 'Tyler Moreno', company: 'Nike', role: 'Brand Marketing Coordinator', year: `${school.abbr} '23` },
-      { name: 'Michael Ross', company: 'Spotify', role: 'Marketing Associate', year: `${school.abbr} '22` },
-      { name: 'Priya Patel', company: 'Ogilvy', role: 'Account Coordinator', year: `${school.abbr} '21` },
-    ],
+    alumni: school.alumni.map((a, i) => ({ ...a, year: `${yr} '${23 - i}` })),
     outreach: {
-      to: 'Tyler',
-      toFull: 'Tyler Moreno',
-      company: 'Nike',
-      from: 'Olivia',
-      body: `Hi Tyler,\n\nI'm a student exploring brand marketing and noticed you're at Nike — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\nOlivia`,
+      to: school.outreach.to,
+      toFull: school.outreach.toFull,
+      company: school.outreach.company,
+      from: school.outreach.from,
+      body: `Hi ${school.outreach.to},\n\nI'm a student exploring ${school.outreach.field} and noticed you're at ${school.outreach.company} — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\n${school.outreach.from}`,
     },
   };
 }
