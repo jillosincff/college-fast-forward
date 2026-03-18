@@ -274,7 +274,7 @@ export default function ParentStep2InviteStudent({
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
           >
-            No, I'm done → Continue to your profile
+            No, I'm done. Continue to my profile.
           </button>
         </>
       ) : (
