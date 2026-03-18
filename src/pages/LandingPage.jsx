@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
-import V3ParentNetwork from '@/components/landing/v3/V3ParentNetwork';
+
 import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
@@ -59,10 +59,7 @@ export default function LandingPage() {
         {/* 3 — Stats / Proof */}
         <V3Numbers />
 
-        {/* 4 — This is College Fast Forward */}
-        <V3ParentNetwork onCTA={handleCTA} />
-
-        {/* 5 — This is how CFF actually works */}
+        {/* 4 — This is how CFF actually works */}
         <V3ParentPeace onCTA={handleCTA} />
 
         {/* 9 — Pricing */}
