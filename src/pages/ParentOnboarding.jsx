@@ -57,7 +57,6 @@ export default function ParentOnboarding() {
   const handleInviteStudent = async () => {
     setIsSending(true);
     try {
-      // Send the invitation email
       const parentFirstName = formData.fullName.split(' ')[0] || formData.fullName;
       await base44.functions.invoke('sendStudentInviteEmail', {
         student_email: formData.studentEmail.trim(),
@@ -72,23 +71,34 @@ export default function ParentOnboarding() {
         await base44.auth.updateMe({
           student_emails: [...currentStudentEmails, newEmail],
         });
+        if (refreshUser) await refreshUser();
       }
 
+      // Track this invitation and reset form for next student
+      setInvitedStudents(prev => [...prev, {
+        name: formData.studentFirstName.trim(),
+        email: newEmail,
+        university: formData.studentUniversity || '',
+      }]);
+      setFormData(prev => ({ ...prev, studentFirstName: '', studentEmail: '', studentUniversity: '' }));
       setInvited(true);
-      completeOnboarding(true);
     } catch (error) {
       console.error('Failed to send invite:', error);
-      // Still proceed even if email fails
+      // Still track on failure so user isn't stuck
+      setInvitedStudents(prev => [...prev, {
+        name: formData.studentFirstName.trim(),
+        email: formData.studentEmail.trim().toLowerCase(),
+        university: formData.studentUniversity || '',
+      }]);
+      setFormData(prev => ({ ...prev, studentFirstName: '', studentEmail: '', studentUniversity: '' }));
       setInvited(true);
-      completeOnboarding(true);
     } finally {
       setIsSending(false);
     }
   };
 
   const handleSkipInvite = () => {
-    setInvited(false);
-    completeOnboarding(false);
+    completeOnboarding(invitedStudents.length > 0);
   };
 
   const completeOnboarding = async (didInvite) => {
@@ -160,6 +170,7 @@ export default function ParentOnboarding() {
         onSkip={handleSkipInvite}
         onBack={() => setStep(1)}
         isLoading={isSending}
+        invitedStudents={invitedStudents}
       />
     );
   }
