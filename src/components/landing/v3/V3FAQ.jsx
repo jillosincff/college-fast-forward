@@ -4,7 +4,7 @@ import { useFadeIn, fadeStyle } from './SectionFade';
 
 const QUESTIONS = [
   {
-    q: 'Is this only for UF students?',
+    q: 'Does my student have to be at a specific school to benefit from this?',
     a: "Not at all. College Fast Forward works for students at any school. The demo defaults to a few schools to show examples but FastIQ is built to work with any university, any major, and any career path.",
   },
   {
