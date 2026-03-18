@@ -85,14 +85,13 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           letterSpacing: '-0.03em', lineHeight: 1.1,
           marginBottom: 22, padding: '0 4px', color: '#fff',
         }}>
-          Your kid doesn't need to send more resumes.{' '}
           <span style={{
             fontStyle: 'italic',
-            color: 'var(--accent-primary, #4F8CFF)',
-            transition: 'color 0.4s',
+            color: '#E85D20',
           }}>
-            They need a plan.
-          </span>
+            Relax.
+          </span>{' '}
+          Your student's job search just got way easier.
         </h1>
 
         {/* Subheadline */}
@@ -100,19 +99,9 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           fontFamily: dmSans, fontWeight: 400,
           fontSize: 'clamp(16px, 2.2vw, 20px)',
           color: '#FFFFFF', lineHeight: 1.65,
-          maxWidth: 640, margin: '0 auto 12px',
+          maxWidth: 640, margin: '0 auto 44px',
         }}>
-          In minutes, your student gets target companies, alumni to contact, and personalized messages ready to send.
-        </p>
-
-        {/* Support line */}
-        <p style={{
-          fontFamily: dmSans, fontWeight: 400,
-          fontSize: 'clamp(14px, 1.6vw, 16px)',
-          color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
-          maxWidth: 580, margin: '0 auto 44px',
-        }}>
-          FastIQ works 24/7 to uncover opportunities most students never see.
+          The tech they want with the human connections they actually need.
         </p>
 
         {/* Product Demo */}
