@@ -1,5 +1,5 @@
 import React from 'react';
-import FoundingOfferBanner from '@/components/founding-offer/FoundingOfferBanner';
+import FoundingOfferScreen2Card from '@/components/founding-offer/FoundingOfferScreen2Card';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const ORANGE = '#E85D20';
@@ -58,7 +58,7 @@ export default function PostInviteConfirmation({ invitedStudents, offer, onInvit
 
       {/* Founding Member Offer */}
       {offer.active && (
-        <FoundingOfferBanner display={offer.display} studentName={studentName} />
+        <FoundingOfferScreen2Card display={offer.display} studentName={studentName} />
       )}
 
       {/* Invite another student option */}
