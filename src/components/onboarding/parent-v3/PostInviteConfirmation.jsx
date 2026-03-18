@@ -1,18 +1,31 @@
 import React from 'react';
-import FoundingOfferScreen2Card from '@/components/founding-offer/FoundingOfferScreen2Card';
+import InvitationUpgradeScreen from '@/components/founding-offer/InvitationUpgradeScreen';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const ORANGE = '#E85D20';
 
 /**
  * Post-invite confirmation state for Screen 2.
- * Shows success confirmation + founding offer + option to invite another or skip.
+ * When founding offer is active → renders the full InvitationUpgradeScreen (light bg).
+ * When offer is inactive → simple confirmation + invite another.
  */
 export default function PostInviteConfirmation({ invitedStudents, offer, onInviteAnother, onSkip }) {
   const latest = invitedStudents[invitedStudents.length - 1];
   const studentName = latest?.name || 'your student';
-  const university = latest?.university || '';
 
+  // Full upgrade screen when offer is active
+  if (offer.active) {
+    return (
+      <InvitationUpgradeScreen
+        studentName={studentName}
+        display={offer.display}
+        onInviteAnother={onInviteAnother}
+        onSkip={onSkip}
+      />
+    );
+  }
+
+  // Simple confirmation when no offer
   return (
     <div style={{ textAlign: 'center' }}>
       {/* Success checkmark */}
@@ -25,12 +38,11 @@ export default function PostInviteConfirmation({ invitedStudents, offer, onInvit
         </svg>
       </div>
 
-      {/* Confirmation text */}
       <h2 style={{
         fontFamily: dmSans, fontSize: 18, fontWeight: 600, color: '#fff',
         lineHeight: 1.4, marginBottom: 8,
       }}>
-        Invitation sent to {studentName}{university ? ` at ${university}` : ''}. ✓
+        Invitation sent to {studentName}. ✓
       </h2>
       <p style={{
         fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: 'rgba(244,240,232,0.45)',
@@ -53,35 +65,15 @@ export default function PostInviteConfirmation({ invitedStudents, offer, onInvit
         </div>
       )}
 
-      {/* Orange divider */}
-      <div style={{ height: 1, background: ORANGE, opacity: 0.4, margin: '0 0 24px' }} />
+      <button onClick={onInviteAnother} style={{
+        width: '100%', padding: '13px 24px', borderRadius: 100,
+        background: 'transparent', border: `1.5px solid ${ORANGE}`,
+        fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: ORANGE,
+        cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
+      }}>
+        Invite Another Student →
+      </button>
 
-      {/* Founding Member Offer */}
-      {offer.active && (
-        <FoundingOfferScreen2Card display={offer.display} studentName={studentName} />
-      )}
-
-      {/* Invite another student option */}
-      <div style={{ marginTop: offer.active ? 24 : 0 }}>
-        {offer.active && (
-          <p style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 400,
-            color: 'rgba(244,240,232,0.5)', marginBottom: 12,
-          }}>
-            Want to invite another student before deciding?
-          </p>
-        )}
-        <button onClick={onInviteAnother} style={{
-          width: '100%', padding: '13px 24px', borderRadius: 100,
-          background: 'transparent', border: `1.5px solid ${ORANGE}`,
-          fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: ORANGE,
-          cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
-        }}>
-          Invite Another Student →
-        </button>
-      </div>
-
-      {/* Skip link */}
       <button
         type="button"
         onClick={onSkip}
