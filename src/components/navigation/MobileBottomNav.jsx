@@ -11,12 +11,12 @@ export default function MobileBottomNav({ user, currentPage }) {
 
   const getDashboardPage = () => {
     if (user?.roles?.includes('admin')) return 'AdminDashboard';
-    if (effectivePersona === 'parent') return 'ParentDashboard';
+    if (effectivePersona === 'parent') return 'ParentHome';
     if (effectivePersona === 'alumni') {
       if (isRecentGradAlumni) return 'RecentGradDashboard';
       return 'AlumniDashboard'; // Established alumni always go to AlumniDashboard
     }
-    if (user?.roles?.includes('parent')) return 'ParentDashboard';
+    if (user?.roles?.includes('parent')) return 'ParentHome';
     if (user?.roles?.includes('alumni')) return 'AlumniDashboard';
     return 'Dashboard';
   };
@@ -58,7 +58,7 @@ export default function MobileBottomNav({ user, currentPage }) {
   }, [user, isParent, isEstablishedAlumni]);
 
   const isActive = (tabPage) => {
-    const allDashboards = ['Dashboard', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'AdminDashboard'];
+    const allDashboards = ['Dashboard', 'ParentHome', 'ParentDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'AdminDashboard'];
     if (allDashboards.includes(tabPage)) {
       return allDashboards.includes(currentPage);
     }

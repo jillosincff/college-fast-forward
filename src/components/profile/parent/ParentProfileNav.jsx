@@ -7,7 +7,7 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 const ORANGE = '#E85D20';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', page: 'ParentDashboard' },
+  { label: 'Dashboard', page: 'ParentHome' },
   { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Messages', page: 'MyMessages' },
 ];
@@ -42,7 +42,7 @@ export default function ParentProfileNav({ user, currentPage = 'Profile' }) {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-        <button onClick={() => navigate('ParentDashboard')} style={{
+        <button onClick={() => navigate('ParentHome')} style={{
           background: 'none', border: 'none', cursor: 'pointer', padding: 0,
           fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#f4f0e8',
           minHeight: 'auto', width: 'auto', display: 'flex',
