@@ -754,7 +754,7 @@ export default function GatorAuth() {
 
           {/* Reassurance line */}
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>
-            Free to join the network. FastIQ is available with a free 7-day trial.
+            Free to join. FastIQ unlocks the full AI career engine — try it free for 7 days.
           </p>
 
           {loading && (
