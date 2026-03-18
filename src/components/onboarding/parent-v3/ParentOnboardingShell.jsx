@@ -14,7 +14,7 @@ export function OnboardingShell({ children }) {
       padding: '40px 20px',
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         @keyframes poFadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
         .po3-field:focus { border-color: rgba(232,93,32,0.5) !important; outline: none; box-shadow: 0 0 0 2px rgba(232,93,32,0.1); }
         .po3-field::placeholder { color: rgba(244,240,232,0.25); }
