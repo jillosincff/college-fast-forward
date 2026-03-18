@@ -73,14 +73,14 @@ function getDashboardForUser(user) {
 
   const persona = user.persona;
   if (persona === 'gator' || persona === 'student') return 'Dashboard';
-  if (persona === 'parent') return 'ParentDashboard';
+  if (persona === 'parent') return 'Profile';
   if (persona === 'alumni') {
     if (user.alumni_seniority === 'recent_grad') return 'RecentGradDashboard';
     // Established alumni (2024 and earlier) — always AlumniDashboard
     return 'AlumniDashboard';
   }
   // Fallback: check roles array
-  if (user.roles?.includes('parent')) return 'ParentDashboard';
+  if (user.roles?.includes('parent')) return 'Profile';
   if (user.roles?.includes('gator')) return 'Dashboard';
   if (user.roles?.includes('alumni')) return 'AlumniDashboard';
   return 'Dashboard';
@@ -125,7 +125,7 @@ const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
-const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
+// ParentDashboard removed — parents now go to Profile
 const AlumniDashboard = React.lazy(() => import('./pages/AlumniDashboard'));
 const GatorDirectory = React.lazy(() => import('./pages/GatorDirectory'));
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
@@ -818,7 +818,7 @@ function AppContent() {
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard'];
-  const parentOwnNavPages = ['ParentDashboard'];
+  const parentOwnNavPages = ['Profile'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
   const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';

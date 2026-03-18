@@ -79,7 +79,7 @@ import MyRequests from './pages/MyRequests';
 import Notifications from './pages/Notifications';
 import Onboarding from './pages/Onboarding';
 import Opportunities from './pages/Opportunities';
-import ParentDashboard from './pages/ParentDashboard';
+// ParentDashboard removed
 import ParentOnboarding from './pages/ParentOnboarding';
 import ParentPledge from './pages/ParentPledge';
 import PaymentCancel from './pages/PaymentCancel';
@@ -136,7 +136,7 @@ export const PAGES = {
     "Notifications": Notifications,
     "Onboarding": Onboarding,
     "Opportunities": Opportunities,
-    "ParentDashboard": ParentDashboard,
+
     "ParentOnboarding": ParentOnboarding,
     "ParentPledge": ParentPledge,
     "PaymentCancel": PaymentCancel,
