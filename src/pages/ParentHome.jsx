@@ -44,13 +44,6 @@ export default function ParentHome() {
   const offer = useFoundingOffer(user);
   const [showActivationConfirm, setShowActivationConfirm] = useState(false);
 
-  // Mark offer as expired in backend when timer runs out
-  useEffect(() => {
-    if (offer.justExpired && user && !user.founding_offer_expired) {
-      base44.auth.updateMe({ founding_offer_expired: true }).catch(() => {});
-    }
-  }, [offer.justExpired]);
-
   // Show first-visit-only: only when offer is active and parent hasn't seen it before on home
   const showFoundingHome = offer.active && studentsNeedingFastIQ.length > 0 && !user?.founding_offer_home_seen;
 
