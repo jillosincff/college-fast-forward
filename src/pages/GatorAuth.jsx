@@ -95,10 +95,9 @@ function FinePrint() {
 }
 
 /* ── role card ──────────────────────────────────────── */
-function RoleCard({ role, index, onClick, isPrimary }) {
+function RoleCard({ role, index, onClick }) {
   const [hovered, setHovered] = React.useState(false);
   const delay = 0.15 + index * 0.06;
-  const hoverBorder = isPrimary ? `rgba(79,140,255,0.4)` : 'rgba(255,255,255,0.18)';
   return (
     <button
       onClick={onClick}
@@ -106,23 +105,16 @@ function RoleCard({ role, index, onClick, isPrimary }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 16, width: '100%',
-        background: hovered ? 'rgba(255,255,255,0.06)' : (isPrimary ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)'),
-        border: `1px solid ${hovered ? hoverBorder : (isPrimary ? 'rgba(79,140,255,0.2)' : 'rgba(255,255,255,0.07)')}`,
-        borderRadius: 18, padding: isPrimary ? '24px 22px' : '20px 22px', cursor: 'pointer',
+        background: hovered ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${hovered ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 18, padding: '24px 22px', cursor: 'pointer',
         transition: 'all 0.25s ease',
         transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
-        boxShadow: hovered && isPrimary ? '0 4px 20px rgba(79,140,255,0.08)' : 'none',
         textAlign: 'left', minHeight: 'auto',
         animation: `authFadeUp 0.4s ease both ${delay}s`,
         position: 'relative',
       }}
     >
-      {/* Recommended badge for primary */}
-      {isPrimary && (
-        <div style={{ position: 'absolute', top: -10, right: 20, fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: ACCENT, background: 'rgba(79,140,255,0.12)', border: '1px solid rgba(79,140,255,0.25)', borderRadius: 100, padding: '3px 10px' }}>
-          Recommended
-        </div>
-      )}
       {/* icon */}
       <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: role.iconBg, border: `1px solid ${role.iconBorder}` }}>
         {role.icon}
@@ -131,10 +123,10 @@ function RoleCard({ role, index, onClick, isPrimary }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>{role.name}</span>
         <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{role.desc}</span>
-        {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: 'rgba(79,140,255,0.8)', marginTop: 2 }}>{role.micro}</span>}
+        {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, marginTop: 2, ...(role.microStyle || { color: 'rgba(255,255,255,0.35)' }) }}>{role.micro}</span>}
       </div>
       {/* arrow */}
-      <ArrowSVG color={hovered ? (isPrimary ? ACCENT : 'rgba(255,255,255,0.5)') : 'rgba(255,255,255,0.2)'} />
+      <ArrowSVG color={hovered ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)'} />
     </button>
   );
 }
