@@ -10,8 +10,7 @@ export default function V3Numbers() {
       <style>{`@media(max-width:640px){.v3-stats-row{flex-direction:column !important;gap:32px !important}.v3-stats-vs{display:none !important}}`}</style>
       <div className="max-w-[700px] mx-auto text-center">
         <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.15, marginBottom: 14, letterSpacing: '-0.02em', ...fadeStyle(vis, 0) }}>
-          The difference isn't effort.{' '}
-          <em>It's direction, action, and access.</em>
+          Most resumes never reach a human.
         </h2>
 
         <div style={{ width: 40, height: 2, background: '#E85D20', borderRadius: 1, margin: '0 auto 48px', ...fadeStyle(vis, 0.04) }} />

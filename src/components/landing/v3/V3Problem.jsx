@@ -51,16 +51,6 @@ export default function V3Problem() {
           And no one is telling them what to do next.
         </p>
 
-        {/* Bridge statement */}
-        <p style={{
-          fontFamily: playfair, fontWeight: 700,
-          fontSize: 'clamp(20px, 2.8vw, 28px)', color: '#fff',
-          textAlign: 'center', lineHeight: 1.3, marginTop: 56,
-          letterSpacing: '-0.02em',
-          ...fadeStyle(vis, 0.20),
-        }}>
-          Most resumes never reach a human.
-        </p>
       </div>
     </section>
   );

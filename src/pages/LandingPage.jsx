@@ -53,14 +53,14 @@ export default function LandingPage() {
         {/* 1 — Hero */}
         <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
 
-        {/* 2 — Problem + bridge statement */}
+        {/* 2 — The Reality */}
         <V3Problem />
 
-        {/* 3 — Stats / Proof */}
-        <V3Numbers />
-
-        {/* 4 — This is how CFF actually works */}
+        {/* 3 — How It Actually Works */}
         <V3ParentPeace onCTA={handleCTA} />
+
+        {/* 4 — The Stats */}
+        <V3Numbers />
 
         {/* 9 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
