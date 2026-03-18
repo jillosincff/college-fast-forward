@@ -19,9 +19,10 @@ const FOUNDING_LIMIT = 1000;
 
 // Stripe Price IDs — update these with your actual IDs
 const STRIPE_PRICES = {
-  cff_monthly:    'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
-  fastiq_monthly: 'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
-  fastiq_annual:  'price_1T7pQp873TV7WMcTdp7SsboC',     // $249/year
+  cff_monthly:            'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
+  fastiq_monthly:         'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
+  fastiq_annual:          'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
+  fastiq_founding_annual: 'price_FOUNDING_187',               // $187/year — REPLACE with real Stripe price ID
 };
 
 const TRIAL_DAYS = 7;
