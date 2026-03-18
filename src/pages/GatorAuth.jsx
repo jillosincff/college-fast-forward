@@ -748,10 +748,9 @@ export default function GatorAuth() {
 
           <div style={{ textAlign: 'center', marginBottom: 8, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.1s' }}>
             <h1 style={S.headline}>Welcome to College Fast Forward</h1>
-            <p style={S.subhead}>Choose how you're joining so we can personalize your experience.</p>
+            <p style={S.subhead}>Tell us who you are so we can personalize your experience.</p>
             <p style={S.supportLine}>
-              Students use FastIQ to build a smarter job search.<br />
-              Parents and alumni help create access and opportunity.
+              Two different roles. One shared goal. Getting your student hired.
             </p>
           </div>
 
