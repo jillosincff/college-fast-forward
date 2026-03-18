@@ -167,7 +167,7 @@ export default function GatorInviteCode() {
           fontFamily: dmSans, fontSize: 14, fontWeight: 300,
           color: 'rgba(244,240,232,0.55)', lineHeight: 1.7, marginBottom: 32,
         }}>
-          Parents and alumni help each other's students land jobs through real connections. If you have a referral code, enter it below.
+          You're joining a community of parents who help each other's students land jobs through real connections. If you have a referral code from an ambassador, enter it below.
         </p>
 
         {/* Referral code field */}
