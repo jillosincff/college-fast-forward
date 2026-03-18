@@ -6,6 +6,7 @@ import DashboardNav from '@/components/dashboard-v2/DashboardNav';
 import ProfileCard from '@/components/profile/ProfileCard';
 import DarkFooter from '@/components/common/DarkFooter';
 import NotificationSettings from '@/components/notifications/NotificationSettings';
+import DirectoryConsentBanner from '@/components/profile/DirectoryConsentBanner';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
@@ -110,6 +111,7 @@ export default function Profile() {
       <DashboardNav user={currentUser} currentPage="Profile" />
 
       <main style={{ flex: 1, maxWidth: 860, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
+        {isMyProfile && <DirectoryConsentBanner />}
         <ProfileCard user={profileUser} isMyProfile={isMyProfile} />
 
         {showNotifSettings && (

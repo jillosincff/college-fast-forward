@@ -35,7 +35,8 @@ export default function ParentOnboarding() {
       industry: formData.industry,
       industries: [formData.industry],
       intro_willingness: formData.introWillingness,
-      visible_in_directory: true,
+      visible_in_directory: false,
+      directory_consent_given: false,
     };
 
     // Map intro willingness to ways_to_help
