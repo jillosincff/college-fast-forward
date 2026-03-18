@@ -87,7 +87,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       </div>
 
       {/* Intro willingness */}
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 24 }}>
         <FieldLabel>Are you open to making introductions for students?</FieldLabel>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
           {INTRO_OPTIONS.map(opt => {
@@ -113,6 +113,38 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
           })}
         </div>
         <HelperText>You can change this anytime in your profile settings.</HelperText>
+      </div>
+
+      {/* Directory Visibility Toggle */}
+      <div style={{ marginBottom: 28 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 12 }}>
+          Directory Visibility
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#f4f0e8', lineHeight: 1.5 }}>
+            Make my profile visible to students and parents in the network
+          </span>
+          <button
+            type="button"
+            onClick={() => onUpdate({ directoryVisible: formData.directoryVisible === false ? true : !(formData.directoryVisible ?? true) })}
+            style={{
+              width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+              background: (formData.directoryVisible ?? true) ? ORANGE : '#444',
+              position: 'relative', transition: 'background 0.2s', flexShrink: 0, minHeight: 'auto', minWidth: 44,
+            }}
+          >
+            <span style={{
+              width: 18, height: 18, borderRadius: '50%', background: '#fff',
+              position: 'absolute', top: 3, left: (formData.directoryVisible ?? true) ? 23 : 3,
+              transition: 'left 0.2s',
+            }} />
+          </button>
+        </div>
+        <HelperText>
+          {(formData.directoryVisible ?? true)
+            ? "Visible by default — students targeting your industry can find and contact you. Toggle off to stay hidden."
+            : "Your profile is hidden — you won't appear in search results or receive intro requests."}
+        </HelperText>
       </div>
 
       {/* CTA */}

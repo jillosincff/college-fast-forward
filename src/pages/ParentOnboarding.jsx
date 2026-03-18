@@ -14,7 +14,7 @@ export default function ParentOnboarding() {
   const [invitedStudents, setInvitedStudents] = useState([]);
 
   const [formData, setFormData] = useState({
-    fullName: '', company: '', industry: '', introWillingness: 'yes',
+    fullName: '', company: '', industry: '', introWillingness: 'yes', directoryVisible: true,
     studentFirstName: '', studentEmail: '', studentUniversity: '',
   });
 
@@ -44,8 +44,8 @@ export default function ParentOnboarding() {
       industry: formData.industry,
       industries: [formData.industry],
       intro_willingness: formData.introWillingness,
-      visible_in_directory: false,
-      directory_consent_given: false,
+      visible_in_directory: formData.directoryVisible !== false,
+      directory_consent_given: formData.directoryVisible !== false,
     };
 
     // Map intro willingness to ways_to_help

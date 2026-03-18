@@ -1,6 +1,6 @@
 import React from 'react';
 import WelcomeExpectationCard from './WelcomeExpectationCard';
-import DirectoryConsentButton from './DirectoryConsentButton';
+// DirectoryConsentButton removed — visibility handled during onboarding
 import { MockNotification, MockWeeklyUpdate } from './WelcomeMockPreviews';
 import { FastIQNotActivated, FastIQActivated } from './WelcomeFastIQSection';
 
@@ -37,10 +37,8 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
           <WelcomeExpectationCard
             icon="👥"
             title="You're in the directory."
-            body="Your professional background is now visible to students and other parents in the network. Students targeting your industry may reach out directly for advice or introductions. You decide how much you engage."
-          >
-            <DirectoryConsentButton user={user} />
-          </WelcomeExpectationCard>
+            body="Your professional background is now visible to students and other parents in the network. Students targeting your industry may reach out directly for advice or introductions. You can update your visibility anytime from your profile settings."
+          />
 
           <WelcomeExpectationCard
             icon="🔔"
