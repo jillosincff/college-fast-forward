@@ -23,7 +23,7 @@ export default function ParentHome() {
       const link = document.createElement('link');
       link.id = 'parent-home-fonts';
       link.rel = 'stylesheet';
-      link.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap";
+      link.href = "https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap";
       document.head.appendChild(link);
     }
   }, []);
