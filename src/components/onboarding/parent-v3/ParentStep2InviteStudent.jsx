@@ -5,7 +5,6 @@ import {
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
 
-/* ── US university list (loaded lazily via LLM-known common schools + free text) ── */
 const COMMON_UNIVERSITIES = [
   'University of Florida', 'Florida State University', 'University of Central Florida',
   'University of Miami', 'University of South Florida', 'Florida Atlantic University',
@@ -36,12 +35,28 @@ const COMMON_UNIVERSITIES = [
   'University of Pittsburgh', 'Carnegie Mellon University', 'University of Rochester',
 ];
 
-export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite, onSkip, onBack, isLoading }) {
+const MAX_STUDENTS = 4;
+
+export default function ParentStep2InviteStudent({
+  formData, onUpdate, onInvite, onSkip, onBack, isLoading,
+  invitedStudents = [],
+}) {
   const [errors, setErrors] = useState({});
   const [universitySearch, setUniversitySearch] = useState(formData.studentUniversity || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredSchools, setFilteredSchools] = useState([]);
   const dropdownRef = useRef(null);
+
+  const totalInvited = invitedStudents.length;
+  const atMax = totalInvited >= MAX_STUDENTS;
+
+  // Reset form fields when invitedStudents changes (new invite was sent)
+  useEffect(() => {
+    if (totalInvited > 0) {
+      setUniversitySearch('');
+      setErrors({});
+    }
+  }, [totalInvited]);
 
   useEffect(() => {
     if (universitySearch.length >= 2) {
@@ -56,9 +71,7 @@ export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite,
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -83,22 +96,74 @@ export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite,
 
   const handleInvite = () => {
     if (!validate()) return;
-    // Ensure university is saved even if they typed without selecting
     if (!formData.studentUniversity) onUpdate({ studentUniversity: universitySearch.trim() });
     onInvite();
   };
+
+  // After max invitations reached
+  if (atMax) {
+    return (
+      <OnboardingShell>
+        <ProgressDots current={1} total={2} />
+
+        {/* Confirmation list */}
+        <div style={{ marginBottom: 28 }}>
+          {invitedStudents.map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+              <span style={{ color: '#4CAF50', fontSize: 14 }}>✓</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#fff' }}>
+                Invitation sent to <strong>{s.name}</strong> at {s.university}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
+          You've invited {MAX_STUDENTS} students — that's the maximum per account.
+        </p>
+
+        <PrimaryButton onClick={onSkip}>
+          Continue to your profile →
+        </PrimaryButton>
+      </OnboardingShell>
+    );
+  }
+
+  // After at least one invite — show confirmation + option to add more
+  const showPostInviteState = totalInvited > 0;
 
   return (
     <OnboardingShell>
       <ProgressDots current={1} total={2} />
 
+      {/* Confirmation lines for already-invited students */}
+      {invitedStudents.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          {invitedStudents.map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+              <span style={{ color: '#4CAF50', fontSize: 14 }}>✓</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#fff' }}>
+                Invitation sent to <strong>{s.name}</strong> at {s.university}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Header */}
       <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
-        Now let's get your student set up.
+        {showPostInviteState ? 'Do you have another student to invite?' : "Now let's get your student set up."}
       </h1>
-      <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
-        Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ.
-      </p>
+      {!showPostInviteState && (
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+          Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ.
+        </p>
+      )}
+      {showPostInviteState && (
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+          You can invite up to {MAX_STUDENTS} students total.
+        </p>
+      )}
 
       {/* Student First Name */}
       <div style={{ marginBottom: 20 }}>
@@ -127,7 +192,7 @@ export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite,
         )}
       </div>
 
-      {/* University (type-ahead) */}
+      {/* University */}
       <div style={{ marginBottom: 28, position: 'relative' }} ref={dropdownRef}>
         <FieldLabel required>Where do they go to school?</FieldLabel>
         <input
@@ -149,7 +214,6 @@ export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite,
         />
         {errors.studentUniversity && <HelperText error>{errors.studentUniversity}</HelperText>}
 
-        {/* Dropdown */}
         {showDropdown && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
@@ -180,28 +244,63 @@ export default function ParentStep2InviteStudent({ formData, onUpdate, onInvite,
       </div>
 
       {/* CTA */}
-      <PrimaryButton onClick={handleInvite} disabled={isLoading}>
-        {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Invitation →'}
-      </PrimaryButton>
+      {showPostInviteState ? (
+        <>
+          <button
+            onClick={handleInvite}
+            disabled={isLoading}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              width: '100%', padding: '14px 24px', borderRadius: 100,
+              fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+              color: ORANGE, background: 'transparent',
+              border: `1.5px solid ${ORANGE}`, cursor: 'pointer',
+              transition: 'all 0.2s', minHeight: 'auto',
+              opacity: isLoading ? 0.5 : 1,
+            }}
+          >
+            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Invite Another Student →'}
+          </button>
+          <button
+            type="button"
+            onClick={onSkip}
+            style={{
+              display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
+              background: 'none', border: 'none',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+              color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
+              transition: 'color 0.2s', minHeight: 'auto',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
+          >
+            No, I'm done → Continue to your profile
+          </button>
+        </>
+      ) : (
+        <>
+          <PrimaryButton onClick={handleInvite} disabled={isLoading}>
+            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Invitation →'}
+          </PrimaryButton>
+          <button
+            type="button"
+            onClick={onSkip}
+            style={{
+              display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
+              background: 'none', border: 'none',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 300,
+              color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
+              transition: 'color 0.2s', minHeight: 'auto',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
+          >
+            I'll invite them later
+          </button>
+        </>
+      )}
 
-      {/* Skip link */}
-      <button
-        type="button"
-        onClick={onSkip}
-        style={{
-          display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
-          background: 'none', border: 'none',
-          fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-          color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
-          transition: 'color 0.2s', minHeight: 'auto',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
-      >
-        I'll invite them later
-      </button>
-
-      <BackLink onClick={onBack} />
+      {!showPostInviteState && <BackLink onClick={onBack} />}
     </OnboardingShell>
   );
 }

@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useAuth } from '@/components/auth/AuthContext';
-import StudentRow from './StudentRow';
-import AddStudentForm from './AddStudentForm';
+import { navigate } from '@/components/utils/navigation';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const ORANGE = '#E85D20';
 const CARD_BG = '#1A1A1A';
 const BORDER = '#2A2A2A';
-const MAX_STUDENTS = 4;
+
+function getStudentStatus(student) {
+  if (!student) return { label: 'Invitation Pending', color: '#888', dot: '#888' };
+  const hasFastIQ = student.fastiq_active === true || student.subscription_status === 'active' || student.membership_tier === 'fastiq';
+  if (hasFastIQ || student.onboarding_completed === true) return { label: 'Active', color: '#4CAF50', dot: '#4CAF50' };
+  return { label: 'Not yet started', color: '#F59E0B', dot: '#F59E0B' };
+}
+
+function StudentStatusRow({ email, student }) {
+  const firstName = student?.full_name?.split(' ')[0] || email?.split('@')[0] || 'Student';
+  const university = student?.university || '';
+  const status = getStudentStatus(student);
+  const uniLabel = university ? ` at ${university}` : '';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0' }}>
+      <span style={{ color: status.dot === '#4CAF50' ? '#4CAF50' : status.dot, fontSize: 14, marginTop: 1, flexShrink: 0 }}>
+        {status.dot === '#4CAF50' ? '✓' : '•'}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.5 }}>
+          Invitation sent to <strong>{firstName}</strong>{uniLabel}
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: status.color, margin: '2px 0 0', lineHeight: 1.4 }}>
+          {status.label} {status.dot === '#4CAF50' && '✓'}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function ParentStudentCard({ user }) {
-  const { refreshUser } = useAuth();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [confirmMsg, setConfirmMsg] = useState('');
-
   const emails = user?.student_emails || [];
 
   useEffect(() => {
@@ -37,21 +60,6 @@ export default function ParentStudentCard({ user }) {
     load();
   }, [emails.join(',')]);
 
-  const handleRemoveStudent = async (emailToRemove) => {
-    const updated = emails.filter(e => e !== emailToRemove);
-    await base44.auth.updateMe({ student_emails: updated });
-    setStudents(prev => prev.filter(s => s.email !== emailToRemove));
-    if (refreshUser) await refreshUser();
-  };
-
-  const handleStudentAdded = (newEmail, firstName) => {
-    setStudents(prev => [...prev, { email: newEmail, student: null }]);
-    setShowAddForm(false);
-    setConfirmMsg(`Invitation sent to ${firstName} ✓`);
-    setTimeout(() => setConfirmMsg(''), 3000);
-    if (refreshUser) refreshUser();
-  };
-
   return (
     <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 24 }}>
       <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 6 }}>
@@ -61,60 +69,26 @@ export default function ParentStudentCard({ user }) {
 
       {loading ? (
         <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888' }}>Loading…</p>
-      ) : students.length === 0 && !showAddForm ? (
-        <div>
-          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 12 }}>You haven't linked a student yet.</p>
-          <button onClick={() => setShowAddForm(true)} style={{
-            fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: ORANGE,
-            background: 'transparent', border: `1.5px dashed ${ORANGE}`, borderRadius: 12,
-            padding: '14px 20px', cursor: 'pointer', width: '100%', minHeight: 'auto',
-            textAlign: 'center',
-          }}>+ Add a Student</button>
-        </div>
+      ) : students.length === 0 ? (
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 12 }}>You haven't linked a student yet.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 12 }}>
           {students.map(({ email, student }) => (
-            <StudentRow
-              key={email}
-              email={email}
-              student={student}
-              parentUser={user}
-              onRemove={!student ? handleRemoveStudent : undefined}
-            />
+            <StudentStatusRow key={email} email={email} student={student} />
           ))}
-
-          {/* Confirmation message */}
-          {confirmMsg && (
-            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#4CAF50', textAlign: 'center', margin: '4px 0 0' }}>{confirmMsg}</p>
-          )}
-
-          {/* Add another or max reached */}
-          {!showAddForm && students.length < MAX_STUDENTS && (
-            <button onClick={() => setShowAddForm(true)} style={{
-              fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: ORANGE,
-              background: 'transparent', border: `1.5px dashed ${ORANGE}`, borderRadius: 12,
-              padding: '14px 20px', cursor: 'pointer', width: '100%', minHeight: 'auto',
-              textAlign: 'center', marginTop: 4,
-            }}>+ Add Another Student</button>
-          )}
-
-          {!showAddForm && students.length >= MAX_STUDENTS && (
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: '#666', textAlign: 'center', marginTop: 4 }}>
-              You've reached the maximum of {MAX_STUDENTS} linked students.
-            </p>
-          )}
         </div>
       )}
 
-      {showAddForm && (
-        <div style={{ marginTop: students.length > 0 ? 12 : 0 }}>
-          <AddStudentForm
-            parentUser={user}
-            onAdded={handleStudentAdded}
-            onCancel={() => setShowAddForm(false)}
-          />
-        </div>
-      )}
+      <button
+        onClick={() => navigate('ParentOnboarding', { step: 'invite' })}
+        style={{
+          fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: ORANGE,
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          minHeight: 'auto', marginTop: 8,
+        }}
+      >
+        Need to invite another student? Go to Invitations →
+      </button>
     </div>
   );
 }

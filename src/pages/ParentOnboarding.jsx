@@ -11,6 +11,7 @@ export default function ParentOnboarding() {
   const [step, setStep] = useState(1);
   const [isSending, setIsSending] = useState(false);
   const [invited, setInvited] = useState(false);
+  const [invitedStudents, setInvitedStudents] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: '', company: '', industry: '', introWillingness: 'yes',
