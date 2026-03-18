@@ -148,7 +148,7 @@ export default function ParentOnboarding() {
     setStep(3);
   };
 
-  const handleProfile = () => navigate('Profile');
+  const handleProfile = () => navigate('ParentHome');
   const handleActivateFastIQ = () => navigate('GetStarted');
 
   // Check if FastIQ is active for the student
