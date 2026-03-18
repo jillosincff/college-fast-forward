@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import ParentStep1AboutYou from '../components/onboarding/parent-v3/ParentStep1AboutYou';
 import ParentStep2InviteStudent from '../components/onboarding/parent-v3/ParentStep2InviteStudent';
-import ParentStep3Confirmation from '../components/onboarding/parent-v3/ParentStep3Confirmation';
+import ParentWelcomeScreen from '../components/onboarding/parent-v3/ParentWelcomeScreen';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
@@ -132,9 +132,11 @@ export default function ParentOnboarding() {
     setStep(3);
   };
 
-  const handleDashboard = () => {
-    navigate('ParentDashboard');
-  };
+  const handleProfile = () => navigate('Profile');
+  const handleActivateFastIQ = () => navigate('GetStarted');
+
+  // Check if FastIQ is active for the student
+  const isFastIQActive = user?.fastiq_active === true || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq';
 
   if (step === 1) {
     return (
@@ -161,9 +163,13 @@ export default function ParentOnboarding() {
   }
 
   return (
-    <ParentStep3Confirmation
-      invited={invited}
-      onDashboard={handleDashboard}
+    <ParentWelcomeScreen
+      user={user}
+      studentName={formData.studentFirstName || null}
+      isFastIQActive={isFastIQActive}
+      onActivate={handleActivateFastIQ}
+      onSkip={handleProfile}
+      onProfile={handleProfile}
     />
   );
 }
