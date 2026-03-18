@@ -6,9 +6,6 @@ import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
-import V3FastIQ247 from '@/components/landing/v3/V3FastIQ247';
-import V3HowItActuallyWorks from '@/components/landing/v3/V3HowItActuallyWorks';
-import V3AIAccessModel from '@/components/landing/v3/V3AIAccessModel';
 import V3ParentNetwork from '@/components/landing/v3/V3ParentNetwork';
 import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
@@ -62,19 +59,10 @@ export default function LandingPage() {
         {/* 3 — Stats / Proof */}
         <V3Numbers />
 
-        {/* 4 — How your student moves forward */}
-        <V3HowItActuallyWorks />
-
-        {/* 5 — AI + Access */}
-        <V3AIAccessModel onCTA={handleCTA} />
-
-        {/* 6 — This is College Fast Forward */}
+        {/* 4 — This is College Fast Forward */}
         <V3ParentNetwork onCTA={handleCTA} />
 
-        {/* 7 — FastIQ 8-feature grid */}
-        <V3FastIQ247 />
-
-        {/* 8 — Parent Peace of Mind */}
+        {/* 5 — This is how CFF actually works */}
         <V3ParentPeace onCTA={handleCTA} />
 
         {/* 9 — Pricing */}

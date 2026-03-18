@@ -98,7 +98,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
         <p style={{
           fontFamily: dmSans, fontWeight: 400,
           fontSize: 'clamp(16px, 2.2vw, 20px)',
-          color: '#FFFFFF', lineHeight: 1.65,
+          color: '#4F8CFF', lineHeight: 1.65,
           maxWidth: 640, margin: '0 auto 44px',
         }}>
           The tech they want with the human connections they actually need.
