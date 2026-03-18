@@ -7,7 +7,7 @@ const TABS = [
   { key: 'all', label: 'All' },
   { key: 'unread', label: 'Unread' },
   { key: 'direct', label: 'Direct Messages' },
-  { key: 'intros', label: 'Intros I've Made' },
+  { key: 'intros', label: "Intros I've Made" },
 ];
 
 export default function ParentMessageFilterTabs({ active, onChange }) {
