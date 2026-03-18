@@ -2,200 +2,168 @@ import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Loader2 } from 'lucide-react';
-import ParentProgressBar from '../components/onboarding/parent/ParentProgressBar';
-import ParentStep1LeftPanel from '../components/onboarding/parent/ParentStep1LeftPanel';
-import ParentStep2LeftPanel from '../components/onboarding/parent/ParentStep2LeftPanel';
-import ParentStep3LeftPanel from '../components/onboarding/parent/ParentStep3LeftPanel';
-import ParentOnboardingStep1 from '../components/onboarding/parent/ParentOnboardingStep1';
-import ParentOnboardingStep2 from '../components/onboarding/parent/ParentOnboardingStep2';
-import LinkStudentStep from '../components/onboarding/parent/LinkStudentStep';
-import CFFPledgePage from '../components/onboarding/parent/CFFPledgePage';
-import PostPledgeQuestion from '../components/onboarding/parent/PostPledgeQuestion';
+import ParentStep1AboutYou from '../components/onboarding/parent-v3/ParentStep1AboutYou';
+import ParentStep2InviteStudent from '../components/onboarding/parent-v3/ParentStep2InviteStudent';
+import ParentStep3Confirmation from '../components/onboarding/parent-v3/ParentStep3Confirmation';
 
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
-
-  const getInitialStep = () => {
-    if (user?.pledge_taken === true && user?.first_question_shown === false) return 5;
-    if (user?.onboarding_completed && !user?.pledge_taken) return 4;
-    if (!user?.pledge_taken && user?.current_position) return 4;
-    return 1;
-  };
-
-  const [step, setStep] = useState(getInitialStep);
-  const [loading, setLoading] = useState(false);
-  const [linkedStudentEmail, setLinkedStudentEmail] = useState(null);
+  const [step, setStep] = useState(1);
+  const [isSending, setIsSending] = useState(false);
+  const [invited, setInvited] = useState(false);
 
   const [formData, setFormData] = useState({
-    studentName: '', jobTitle: '', company: '', yearsExperience: '',
-    linkedinUrl: '', bio: '', industries: [], waysToHelp: [],
+    fullName: '', company: '', industry: '', introWillingness: 'yes',
+    studentFirstName: '', studentEmail: '', studentUniversity: '',
   });
 
-  // Inject fonts
+  // Pre-fill name from user profile
   useEffect(() => {
-    if (!document.getElementById('parent-onboarding-fonts')) {
-      const link = document.createElement('link');
-      link.id = 'parent-onboarding-fonts';
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
-      document.head.appendChild(link);
+    if (user?.full_name && !formData.fullName) {
+      setFormData(prev => ({ ...prev, fullName: user.full_name }));
     }
-  }, []);
+  }, [user?.full_name]);
 
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
-  const handleLinkStudentComplete = (result) => {
-    if (result?.studentEmail) setLinkedStudentEmail(result.studentEmail);
-    saveProfileAndGoToPledge();
+  const saveProfileAndContinue = async () => {
+    // Save parent profile data
+    const updateData = {
+      full_name: formData.fullName.trim(),
+      current_company: formData.company.trim(),
+      company: formData.company.trim(),
+      industry: formData.industry,
+      industries: [formData.industry],
+      intro_willingness: formData.introWillingness,
+      visible_in_directory: true,
+    };
+
+    // Map intro willingness to ways_to_help
+    if (formData.introWillingness === 'yes') {
+      updateData.ways_to_help = ['networking_intros', 'career_advice'];
+      updateData.help_types = ['networking_intros', 'career_advice'];
+    } else if (formData.introWillingness === 'occasionally') {
+      updateData.ways_to_help = ['career_advice'];
+      updateData.help_types = ['career_advice'];
+    }
+
+    await base44.auth.updateMe(updateData);
+    if (refreshUser) await refreshUser();
+    setStep(2);
   };
 
-  const handleLinkStudentSkip = () => saveProfileAndGoToPledge();
-
-  const saveProfileAndGoToPledge = async () => {
-    setLoading(true);
+  const handleInviteStudent = async () => {
+    setIsSending(true);
     try {
-      const updateData = {
-        current_position: formData.jobTitle?.trim() || undefined,
-        current_company: formData.company?.trim() || undefined,
-        job_title: formData.jobTitle?.trim() || undefined,
-        company: formData.company?.trim() || undefined,
-        years_experience: formData.yearsExperience || undefined,
-        linkedin_url: formData.linkedinUrl?.trim() || undefined,
-        bio: formData.bio?.trim() || undefined,
-        industries: formData.industries,
-        industry: formData.industries[0] || undefined,
-        ways_to_help: formData.waysToHelp,
-        expertise_areas: formData.waysToHelp,
-        help_types: formData.waysToHelp,
-        visible_in_directory: true,
-      };
-      Object.keys(updateData).forEach(key => { if (updateData[key] === undefined) delete updateData[key]; });
-      await base44.auth.updateMe(updateData);
-      if (refreshUser) await refreshUser();
-      setStep(4);
+      // Send the invitation email
+      const parentFirstName = formData.fullName.split(' ')[0] || formData.fullName;
+      await base44.functions.invoke('sendStudentInviteEmail', {
+        student_email: formData.studentEmail.trim(),
+        student_name: formData.studentFirstName.trim(),
+        parent_name: parentFirstName,
+      });
+
+      // Link student email to parent profile
+      const currentStudentEmails = user?.student_emails || [];
+      const newEmail = formData.studentEmail.trim().toLowerCase();
+      if (!currentStudentEmails.includes(newEmail)) {
+        await base44.auth.updateMe({
+          student_emails: [...currentStudentEmails, newEmail],
+        });
+      }
+
+      setInvited(true);
+      completeOnboarding(true);
     } catch (error) {
-      console.error('Failed to save profile:', error);
+      console.error('Failed to send invite:', error);
+      // Still proceed even if email fails
+      setInvited(true);
+      completeOnboarding(true);
     } finally {
-      setLoading(false);
+      setIsSending(false);
     }
   };
 
-  const handlePledgeComplete = () => setStep(5);
+  const handleSkipInvite = () => {
+    setInvited(false);
+    completeOnboarding(false);
+  };
 
-  const handlePostPledgeComplete = async (result) => {
-    setLoading(true);
+  const completeOnboarding = async (didInvite) => {
     try {
-      const updateData = { onboarding_completed: true, onboarding_completed_at: new Date().toISOString() };
-      if (result?.answered) updateData.onboarding_question_answered = true;
-      await base44.auth.updateMe(updateData);
+      await base44.auth.updateMe({
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
+        onboarding_flow_type: 'parent_v3',
+        pledge_taken: true,
+        pledge_taken_at: new Date().toISOString(),
+        first_question_shown: true,
+      });
 
+      // Award karma (non-blocking)
       try {
-        await base44.functions.invoke('awardKarma', {
-          parentUserId: user.id, parentEmail: user.email, parentName: user.full_name,
+        base44.functions.invoke('awardKarma', {
+          parentUserId: user.id, parentEmail: user.email, parentName: formData.fullName,
           actionType: 'onboarding_complete', referenceType: 'onboarding', referenceId: user.id,
           description: 'Completed parent onboarding',
-        });
-      } catch (e) { console.log('Onboarding karma failed:', e.message); }
-
-      try {
-        base44.functions.invoke('sendWelcomeEmail', {
-          userId: user.id, userEmail: user.email, userName: user.full_name,
-          persona: 'parent', userIndustries: user.industries || formData?.industries || [],
         }).catch(() => {});
       } catch {}
 
+      // Send welcome email (non-blocking)
+      try {
+        base44.functions.invoke('sendWelcomeEmail', {
+          userId: user.id, userEmail: user.email, userName: formData.fullName,
+          persona: 'parent', userIndustries: [formData.industry],
+        }).catch(() => {});
+      } catch {}
+
+      // Clean up invite session data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 
-      try {
-        const utmSource = sessionStorage.getItem('utm_source');
-        const utmCampaign = sessionStorage.getItem('utm_campaign');
-        let source = 'organic';
-        if (utmSource === 'newsletter' && utmCampaign) source = `newsletter_${utmCampaign}`;
-        else if (utmSource) source = utmSource;
-        await base44.entities.ActivationPrompt.create({
-          user_id: user.id, user_type: 'parent', user_email: user.email,
-          prompt_stage: 'welcome', status: result?.answered ? 'acted' : 'pending',
-          action_taken: !!result?.answered, action_type: result?.answered ? 'answered_question' : null,
-          acted_at: result?.answered ? new Date().toISOString() : null, source,
-        });
-      } catch {}
-
       if (refreshUser) await refreshUser();
-      navigate('ParentDashboard');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
-    } finally {
-      setLoading(false);
     }
+
+    setStep(3);
   };
 
-  // Step 5: Post-pledge question
-  if (step === 5) return <PostPledgeQuestion user={user} formData={formData} onComplete={handlePostPledgeComplete} />;
+  const handleDashboard = () => {
+    navigate('ParentDashboard');
+  };
 
-  // Step 4: Pledge (full screen)
-  if (step === 4) return <CFFPledgePage user={user} onComplete={handlePledgeComplete} />;
+  if (step === 1) {
+    return (
+      <ParentStep1AboutYou
+        formData={formData}
+        onUpdate={updateFormData}
+        onNext={saveProfileAndContinue}
+        onBack={() => navigate('GatorAuth')}
+      />
+    );
+  }
 
-  // Steps 1–3: Two-column layout
-  const LeftPanel = step === 1 ? ParentStep1LeftPanel : step === 2 ? ParentStep2LeftPanel : ParentStep3LeftPanel;
-
-  const mobileCSS = `
-    @media(max-width:768px) {
-      .po-layout { flex-direction: column !important; }
-      .po-left { display: none !important; }
-      .po-mobile-header { display: block !important; }
-      .po-right { padding: 24px 20px !important; }
-    }
-  `;
-
-  const mobileTitle = step === 1 ? 'Help students find you' : step === 2 ? "What's your background?" : 'Link your student';
-  const mobileSub = step === 1 ? 'Set up your profile so students can reach out' : step === 2 ? 'Help us match you with the right students' : 'Connect your accounts to activate Karma boosts';
+  if (step === 2) {
+    return (
+      <ParentStep2InviteStudent
+        formData={formData}
+        onUpdate={updateFormData}
+        onInvite={handleInviteStudent}
+        onSkip={handleSkipInvite}
+        onBack={() => setStep(1)}
+        isLoading={isSending}
+      />
+    );
+  }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f2ee' }}>
-      <style dangerouslySetInnerHTML={{ __html: mobileCSS }} />
-
-      <ParentProgressBar currentStep={step} />
-
-      <div className="po-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
-        <div className="po-left" style={{ width: '45%', flexShrink: 0, minHeight: '100%', position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
-          <div style={{ height: '100%' }}>
-            <LeftPanel />
-          </div>
-        </div>
-
-        <div className="po-mobile-header" style={{ display: 'none', background: 'linear-gradient(to bottom, #0d1117 0%, #0a1a6e 50%, #0821A5 100%)', padding: '24px 20px', minHeight: 140, textAlign: 'center' }}>
-          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 18, color: '#f4f0e8', marginBottom: 6 }}>{mobileTitle}</h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.6)' }}>{mobileSub}</p>
-        </div>
-
-        <div className="po-right" style={{ flex: 1, background: '#f4f2ee', padding: '48px 48px 60px', overflowY: 'auto' }}>
-          <div style={{ maxWidth: 520, margin: '0 auto' }}>
-            {loading ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
-                <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#E85D20', marginBottom: 12 }} />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 300, color: '#888' }}>Setting up your account...</p>
-              </div>
-            ) : (
-              <>
-                {step === 1 && (
-                  <ParentOnboardingStep1 formData={formData} onUpdate={updateFormData} onNext={() => setStep(2)} userName={user?.full_name} />
-                )}
-                {step === 2 && (
-                  <ParentOnboardingStep2 formData={formData} onUpdate={updateFormData} onNext={() => setStep(3)} onBack={() => setStep(1)} />
-                )}
-                {step === 3 && (
-                  <LinkStudentStep user={user} onNext={handleLinkStudentComplete} onSkip={handleLinkStudentSkip} />
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <ParentStep3Confirmation
+      invited={invited}
+      onDashboard={handleDashboard}
+    />
   );
 }
