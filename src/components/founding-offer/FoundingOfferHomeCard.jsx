@@ -15,18 +15,10 @@ export default function FoundingOfferHomeCard({ display, studentName }) {
     <div style={{ marginBottom: 24 }}>
       <div style={{
         background: CARD_BG,
-        border: '2px solid transparent',
-        borderImage: 'linear-gradient(135deg, #E85D20, #C94E1A) 1',
-        borderRadius: 0, // borderImage doesn't work with borderRadius
+        border: '2px solid #E85D20',
+        borderRadius: 14,
         padding: 24,
-        position: 'relative',
-        overflow: 'hidden',
       }}>
-        {/* Use an inner wrapper with rounded corners */}
-        <div style={{
-          position: 'absolute', inset: -2, borderRadius: 14,
-          border: '2px solid #E85D20', pointerEvents: 'none',
-        }} />
 
         <p style={{
           fontFamily: dmSans, fontSize: 10, fontWeight: 700,
