@@ -41,7 +41,7 @@ export default function V3Pricing({ onCTA }) {
           <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'var(--accent-primary, #4F8CFF)', marginBottom: 0, transition: 'color 0.4s' }}>Save 28% with annual</p>
         </div>
 
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '20px auto 28px', transition: 'background 0.4s', ...fadeStyle(vis, 0.08) }} />
+        <div style={{ width: 40, height: 2, background: '#E85D20', borderRadius: 1, margin: '20px auto 28px', ...fadeStyle(vis, 0.08) }} />
 
         <div style={{
           background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',

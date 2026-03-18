@@ -14,7 +14,7 @@ export default function V3Numbers() {
           <em>It's direction, action, and access.</em>
         </h2>
 
-        <div style={{ width: 40, height: 2, background: 'var(--accent-primary, #4F8CFF)', borderRadius: 1, margin: '0 auto 48px', transition: 'background 0.4s', ...fadeStyle(vis, 0.04) }} />
+        <div style={{ width: 40, height: 2, background: '#E85D20', borderRadius: 1, margin: '0 auto 48px', ...fadeStyle(vis, 0.04) }} />
 
         <div className="v3-stats-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48, marginBottom: 40, ...fadeStyle(vis, 0.08) }}>
           <div style={{ flex: 1, textAlign: 'center' }}>
