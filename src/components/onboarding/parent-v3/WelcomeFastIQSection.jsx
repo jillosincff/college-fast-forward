@@ -1,7 +1,8 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
 import FoundingOfferWelcomeCard from '@/components/founding-offer/FoundingOfferWelcomeCard';
+import useCheckout from '@/components/founding-offer/useCheckout';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 
