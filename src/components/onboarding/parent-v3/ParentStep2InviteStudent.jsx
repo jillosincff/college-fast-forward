@@ -242,41 +242,8 @@ export default function ParentStep2InviteStudent({
         )}
       </div>
 
-      {/* CTA */}
-      {showPostInviteState ? (
-        <>
-          <button
-            onClick={handleInvite}
-            disabled={isLoading}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              width: '100%', padding: '14px 24px', borderRadius: 100,
-              fontFamily: dmSans, fontSize: 15, fontWeight: 600,
-              color: ORANGE, background: 'transparent',
-              border: `1.5px solid ${ORANGE}`, cursor: 'pointer',
-              transition: 'all 0.2s', minHeight: 'auto',
-              opacity: isLoading ? 0.5 : 1,
-            }}
-          >
-            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Invite Another Student →'}
-          </button>
-          <button
-            type="button"
-            onClick={onSkip}
-            style={{
-              display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
-              background: 'none', border: 'none',
-              fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-              color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
-              transition: 'color 0.2s', minHeight: 'auto',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
-          >
-            No, I'm done. Continue to my profile.
-          </button>
-        </>
-      ) : (
+      {/* CTA — only shown in form view (pre-invite) */}
+      {!showPostInviteState && (
         <>
           <PrimaryButton onClick={handleInvite} disabled={isLoading}>
             {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Invitation →'}
@@ -296,13 +263,9 @@ export default function ParentStep2InviteStudent({
           >
             I'll invite them later
           </button>
+          <BackLink onClick={onBack} />
         </>
       )}
-
-      {/* Founding Member Offer Banner */}
-      {offer.active && <FoundingOfferBanner display={offer.display} studentName={formData.studentFirstName} />}
-
-      {!showPostInviteState && <BackLink onClick={onBack} />}
     </OnboardingShell>
   );
 }
