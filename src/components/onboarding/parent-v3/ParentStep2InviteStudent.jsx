@@ -5,7 +5,7 @@ import {
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
 import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
-import FoundingOfferBanner from '@/components/founding-offer/FoundingOfferBanner';
+import PostInviteConfirmation from './PostInviteConfirmation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 const COMMON_UNIVERSITIES = [
@@ -50,16 +50,18 @@ export default function ParentStep2InviteStudent({
   const [universitySearch, setUniversitySearch] = useState(formData.studentUniversity || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredSchools, setFilteredSchools] = useState([]);
+  const [showInviteForm, setShowInviteForm] = useState(false);
   const dropdownRef = useRef(null);
 
   const totalInvited = invitedStudents.length;
   const atMax = totalInvited >= MAX_STUDENTS;
 
-  // Reset form fields when invitedStudents changes (new invite was sent)
+  // When a new invite succeeds, reset form and go to confirmation view
   useEffect(() => {
     if (totalInvited > 0) {
       setUniversitySearch('');
       setErrors({});
+      setShowInviteForm(false); // Return to confirmation view
     }
   }, [totalInvited]);
 
@@ -105,13 +107,15 @@ export default function ParentStep2InviteStudent({
     onInvite();
   };
 
-  // After max invitations reached
+  // Determine view: confirmation (post-invite) vs form
+  const showConfirmation = totalInvited > 0 && !showInviteForm && !atMax;
+  const showForm = !showConfirmation;
+
+  // Max reached state
   if (atMax) {
     return (
       <OnboardingShell>
         <ProgressDots current={1} total={2} />
-
-        {/* Confirmation list */}
         <div style={{ marginBottom: 28 }}>
           {invitedStudents.map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
@@ -122,135 +126,146 @@ export default function ParentStep2InviteStudent({
             </div>
           ))}
         </div>
-
         <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
-          You've invited {MAX_STUDENTS} students — that's the maximum per account.
+          {"You've invited"} {MAX_STUDENTS} {"students — that's the maximum per account."}
         </p>
 
-        <PrimaryButton onClick={onSkip}>
-          Continue to your profile →
-        </PrimaryButton>
+        {/* Show founding offer on max state too */}
+        {offer.active && (
+          <>
+            <div style={{ height: 1, background: ORANGE, opacity: 0.4, margin: '0 0 24px' }} />
+            <PostInviteConfirmation
+              invitedStudents={invitedStudents}
+              offer={offer}
+              onInviteAnother={() => {}}
+              onSkip={onSkip}
+            />
+          </>
+        )}
+        {!offer.active && (
+          <PrimaryButton onClick={onSkip}>
+            Continue to your profile →
+          </PrimaryButton>
+        )}
       </OnboardingShell>
     );
   }
-
-  // After at least one invite — show confirmation + option to add more
-  const showPostInviteState = totalInvited > 0;
 
   return (
     <OnboardingShell>
       <ProgressDots current={1} total={2} />
 
       {/* Post-invite confirmation state with founding offer */}
-      {showPostInviteState && (
+      {showConfirmation && (
         <PostInviteConfirmation
           invitedStudents={invitedStudents}
           offer={offer}
-          formData={formData}
           onInviteAnother={() => setShowInviteForm(true)}
           onSkip={onSkip}
         />
       )}
 
-      {/* Pre-invite header (form view) */}
-      {!showPostInviteState && (
+      {/* Invite form view */}
+      {showForm && (
         <>
+          {/* Header */}
           <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
-            {"Now let's get your student set up."}
+            {totalInvited > 0 ? 'Invite another student.' : "Now let's get your student set up."}
           </h1>
           <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
-            Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ.
+            {totalInvited > 0
+              ? `You can invite up to ${MAX_STUDENTS} students total.`
+              : "Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ."
+            }
           </p>
-        </>
-      )}
 
-      {/* Student First Name */}
-      <div style={{ marginBottom: 20 }}>
-        <FieldLabel required>Your student's first name</FieldLabel>
-        <FieldInput
-          value={formData.studentFirstName || ''}
-          onChange={e => { onUpdate({ studentFirstName: e.target.value }); setErrors(p => ({ ...p, studentFirstName: null })); }}
-          placeholder="First name only"
-          error={errors.studentFirstName}
-        />
-        {errors.studentFirstName && <HelperText error>{errors.studentFirstName}</HelperText>}
-      </div>
-
-      {/* Student Email */}
-      <div style={{ marginBottom: 20 }}>
-        <FieldLabel required>Their email address</FieldLabel>
-        <FieldInput
-          value={formData.studentEmail || ''}
-          onChange={e => { onUpdate({ studentEmail: e.target.value }); setErrors(p => ({ ...p, studentEmail: null })); }}
-          placeholder="student@university.edu"
-          type="email"
-          error={errors.studentEmail}
-        />
-        {errors.studentEmail ? <HelperText error>{errors.studentEmail}</HelperText> : (
-          <HelperText>We'll send them a personal invitation from you.</HelperText>
-        )}
-      </div>
-
-      {/* University */}
-      <div style={{ marginBottom: 28, position: 'relative' }} ref={dropdownRef}>
-        <FieldLabel required>Where do they go to school?</FieldLabel>
-        <input
-          className="po3-field"
-          value={universitySearch}
-          onChange={e => {
-            setUniversitySearch(e.target.value);
-            onUpdate({ studentUniversity: e.target.value });
-            setErrors(p => ({ ...p, studentUniversity: null }));
-          }}
-          placeholder="Start typing their school..."
-          style={{
-            width: '100%', background: 'rgba(255,255,255,0.06)',
-            border: `0.5px solid ${errors.studentUniversity ? 'rgba(229,57,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 12, padding: '12px 16px',
-            fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-            color: '#f4f0e8', boxSizing: 'border-box', transition: 'border-color 0.2s',
-          }}
-        />
-        {errors.studentUniversity && <HelperText error>{errors.studentUniversity}</HelperText>}
-
-        {showDropdown && (
-          <div style={{
-            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-          }}>
-            {filteredSchools.map(school => (
-              <button
-                key={school}
-                type="button"
-                onClick={() => selectUniversity(school)}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  padding: '10px 16px', background: 'none', border: 'none',
-                  fontFamily: dmSans, fontSize: 13, fontWeight: 400,
-                  color: '#f4f0e8', cursor: 'pointer', minHeight: 'auto',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-              >
-                {school}
-              </button>
-            ))}
+          {/* Student First Name */}
+          <div style={{ marginBottom: 20 }}>
+            <FieldLabel required>{"Your student's first name"}</FieldLabel>
+            <FieldInput
+              value={formData.studentFirstName || ''}
+              onChange={e => { onUpdate({ studentFirstName: e.target.value }); setErrors(p => ({ ...p, studentFirstName: null })); }}
+              placeholder="First name only"
+              error={errors.studentFirstName}
+            />
+            {errors.studentFirstName && <HelperText error>{errors.studentFirstName}</HelperText>}
           </div>
-        )}
-      </div>
 
-      {/* CTA — only shown in form view (pre-invite) */}
-      {!showPostInviteState && (
-        <>
+          {/* Student Email */}
+          <div style={{ marginBottom: 20 }}>
+            <FieldLabel required>Their email address</FieldLabel>
+            <FieldInput
+              value={formData.studentEmail || ''}
+              onChange={e => { onUpdate({ studentEmail: e.target.value }); setErrors(p => ({ ...p, studentEmail: null })); }}
+              placeholder="student@university.edu"
+              type="email"
+              error={errors.studentEmail}
+            />
+            {errors.studentEmail ? <HelperText error>{errors.studentEmail}</HelperText> : (
+              <HelperText>{"We'll send them a personal invitation from you."}</HelperText>
+            )}
+          </div>
+
+          {/* University */}
+          <div style={{ marginBottom: 28, position: 'relative' }} ref={dropdownRef}>
+            <FieldLabel required>Where do they go to school?</FieldLabel>
+            <input
+              className="po3-field"
+              value={universitySearch}
+              onChange={e => {
+                setUniversitySearch(e.target.value);
+                onUpdate({ studentUniversity: e.target.value });
+                setErrors(p => ({ ...p, studentUniversity: null }));
+              }}
+              placeholder="Start typing their school..."
+              style={{
+                width: '100%', background: 'rgba(255,255,255,0.06)',
+                border: `0.5px solid ${errors.studentUniversity ? 'rgba(229,57,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 12, padding: '12px 16px',
+                fontFamily: dmSans, fontSize: 14, fontWeight: 300,
+                color: '#f4f0e8', boxSizing: 'border-box', transition: 'border-color 0.2s',
+              }}
+            />
+            {errors.studentUniversity && <HelperText error>{errors.studentUniversity}</HelperText>}
+
+            {showDropdown && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              }}>
+                {filteredSchools.map(school => (
+                  <button
+                    key={school}
+                    type="button"
+                    onClick={() => selectUniversity(school)}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '10px 16px', background: 'none', border: 'none',
+                      fontFamily: dmSans, fontSize: 13, fontWeight: 400,
+                      color: '#f4f0e8', cursor: 'pointer', minHeight: 'auto',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    {school}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
           <PrimaryButton onClick={handleInvite} disabled={isLoading}>
             {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Invitation →'}
           </PrimaryButton>
+
+          {/* Skip / back */}
           <button
             type="button"
-            onClick={onSkip}
+            onClick={totalInvited > 0 ? () => setShowInviteForm(false) : onSkip}
             style={{
               display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
               background: 'none', border: 'none',
@@ -261,9 +276,10 @@ export default function ParentStep2InviteStudent({
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
           >
-            I'll invite them later
+            {totalInvited > 0 ? '← Back to confirmation' : "I'll invite them later"}
           </button>
-          <BackLink onClick={onBack} />
+
+          {totalInvited === 0 && <BackLink onClick={onBack} />}
         </>
       )}
     </OnboardingShell>
