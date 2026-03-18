@@ -77,7 +77,7 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
 
         {/* FOOTER CTA */}
         <div style={{ marginTop: 36 }}>
-          <button onClick={onSkip || onProfile} style={{
+          <button onClick={onProfile} style={{
             fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: ORANGE,
             background: 'transparent', border: `1.5px solid ${ORANGE}`,
             borderRadius: 100, padding: '14px 28px', cursor: 'pointer',
