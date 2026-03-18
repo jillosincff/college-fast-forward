@@ -72,15 +72,15 @@ export default function Profile() {
     fetchProfile();
   }, [id, currentUser, authIsLoading]);
 
+  const isParent = currentUser?.persona === 'parent' || currentUser?.roles?.includes('parent');
+
   if (authIsLoading || isLoading) {
+    const bg = isParent ? '#0A0A0A' : '#f4f2ee';
     return (
-      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
-        <DashboardNav user={currentUser} currentPage="Profile" />
+      <div style={{ minHeight: '100vh', background: bg, display: 'flex', flexDirection: 'column' }}>
+        {isParent ? <ParentProfileNav user={currentUser} /> : <DashboardNav user={currentUser} currentPage="Profile" />}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{
-            width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent',
-            borderRadius: '50%', animation: 'spin 0.8s linear infinite',
-          }} />
+          <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -88,9 +88,10 @@ export default function Profile() {
   }
 
   if (error || !profileUser) {
+    const bg = isParent ? '#0A0A0A' : '#f4f2ee';
     return (
-      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
-        <DashboardNav user={currentUser} currentPage="Profile" />
+      <div style={{ minHeight: '100vh', background: bg, display: 'flex', flexDirection: 'column' }}>
+        {isParent ? <ParentProfileNav user={currentUser} /> : <DashboardNav user={currentUser} currentPage="Profile" />}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', padding: 32 }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: '#888' }}>{error || 'Please log in to see your profile.'}</p>
@@ -106,9 +107,29 @@ export default function Profile() {
   }
 
   const isMyProfile = currentUser && profileUser && currentUser.id === profileUser.id;
+  const showParentProfile = isParent && isMyProfile && !id;
+
+  // Parent-specific dark profile
+  if (showParentProfile) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
+        <ParentProfileNav user={currentUser} currentPage="Profile" />
+        <main style={{ flex: 1, maxWidth: 700, margin: '0 auto', width: '100%', padding: '32px 24px 80px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <ParentProfileHeader user={profileUser} />
+            <ParentVisibilityCard user={profileUser} />
+            <ParentIntroCard user={profileUser} />
+            <ParentStudentCard user={profileUser} />
+            <ParentNotificationCard user={profileUser} />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Default profile (students, alumni, etc.)
   const showNotifSettings = isMyProfile && (
-    profileUser.persona === 'parent' || profileUser.persona === 'alumni' ||
-    profileUser.roles?.includes('parent') || profileUser.roles?.includes('alumni')
+    profileUser.persona === 'alumni' || profileUser.roles?.includes('alumni')
   );
 
   return (
@@ -116,7 +137,6 @@ export default function Profile() {
       <DashboardNav user={currentUser} currentPage="Profile" />
 
       <main style={{ flex: 1, maxWidth: 860, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
-        {isMyProfile && <DirectoryConsentBanner />}
         <ProfileCard user={profileUser} isMyProfile={isMyProfile} />
 
         {showNotifSettings && (
