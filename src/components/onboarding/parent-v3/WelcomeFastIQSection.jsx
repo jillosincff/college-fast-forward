@@ -78,21 +78,28 @@ export function FastIQNotActivated({ studentName, onActivate, onSkip }) {
       {/* Founding Offer or Standard Pricing */}
       {offer.active ? (
         <>
-          <FoundingOfferWelcomeCard display={offer.display} studentName={name} onActivate={onActivate} />
+          <FoundingOfferWelcomeCard display={offer.display} studentName={name} />
 
-          <button onClick={() => navigate('GatorWelcome', { plan: 'annual', founding: 'true' })} style={{
+          {checkoutError && (
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: '#f87171', textAlign: 'center', marginBottom: 12 }}>
+              {checkoutError}
+            </p>
+          )}
+
+          <button onClick={() => startCheckout('fastiq_founding_annual')} disabled={checkoutLoading} style={{
             fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff',
             background: ORANGE, border: 'none', borderRadius: 100,
-            padding: '16px 32px', cursor: 'pointer', width: '100%',
-            minHeight: 'auto',
+            padding: '16px 32px', cursor: checkoutLoading ? 'not-allowed' : 'pointer', width: '100%',
+            minHeight: 'auto', opacity: checkoutLoading ? 0.7 : 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}>
-            Activate Annual Plan for {name} — $187 →
+            {checkoutLoading ? <><Loader2 size={16} className="animate-spin" /> Processing...</> : `Activate Annual Plan for ${name} — $187 →`}
           </button>
 
-          <button onClick={() => navigate('GatorWelcome', { plan: 'monthly' })} style={{
+          <button onClick={() => startCheckout('fastiq_monthly')} disabled={checkoutLoading} style={{
             display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
             background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13,
-            fontWeight: 400, color: '#666', cursor: 'pointer', minHeight: 'auto',
+            fontWeight: 400, color: '#666', cursor: checkoutLoading ? 'not-allowed' : 'pointer', minHeight: 'auto',
           }}>
             Continue with monthly at $29/mo →
           </button>
