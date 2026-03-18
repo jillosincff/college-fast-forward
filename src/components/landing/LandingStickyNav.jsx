@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          AI execution + real access · Free to join
+          Free to join · FastIQ from $29/mo
         </span>
 
         {/* Right — buttons */}
