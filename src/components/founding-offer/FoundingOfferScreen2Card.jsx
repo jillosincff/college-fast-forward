@@ -65,20 +65,44 @@ export default function FoundingOfferScreen2Card({ display, studentName }) {
         {"HERE'S WHAT HAPPENS NEXT"}
       </p>
 
+      {/* Hook line */}
       <p style={{
-        fontFamily: dmSans, fontSize: 13, fontWeight: 400,
-        color: '#CCCCCC', textAlign: 'center',
-        lineHeight: 1.7, marginBottom: 12,
+        fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+        color: '#fff', textAlign: 'center',
+        lineHeight: 1.4, marginTop: 8, marginBottom: 20,
       }}>
-        {"FastIQ will build "}{name}{"'s personalized career plan — target companies, alumni to contact, and outreach messages ready to send."}
+        While {name} sleeps, FastIQ is working.
       </p>
 
+      {/* Three benefit lines — rhythmic */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#CCCCCC', lineHeight: 1.8, margin: 0 }}>
+          Scouting target companies.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#CCCCCC', lineHeight: 1.8, margin: 0 }}>
+          Discovering high-value alumni.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#CCCCCC', lineHeight: 1.8, margin: 0 }}>
+          Tailoring her resume into an ATS-optimized match for every specific role she wants.
+        </p>
+      </div>
+
+      {/* Pause line */}
+      <p style={{
+        fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+        color: '#fff', textAlign: 'center',
+        marginBottom: 20,
+      }}>
+        No more generic applications disappearing into a black hole.
+      </p>
+
+      {/* Warm path line */}
       <p style={{
         fontFamily: dmSans, fontSize: 13, fontWeight: 400,
         color: '#CCCCCC', textAlign: 'center',
         lineHeight: 1.7, marginBottom: 16,
       }}>
-        The College Fast Forward network will make sure the right doors open — because other parents are here doing exactly what you just did.
+        {"FastIQ finds the warm path into her dream companies — and drafts the perfect outreach to get her there."}
       </p>
 
       {/* Stat line */}
