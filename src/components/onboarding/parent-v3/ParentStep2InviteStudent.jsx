@@ -151,11 +151,25 @@ export default function ParentStep2InviteStudent({
     );
   }
 
+  // When offer is active and showing confirmation, render outside the dark shell
+  if (showConfirmation && offer.active) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+        <PostInviteConfirmation
+          invitedStudents={invitedStudents}
+          offer={offer}
+          onInviteAnother={() => setShowInviteForm(true)}
+          onSkip={onSkip}
+        />
+      </div>
+    );
+  }
+
   return (
     <OnboardingShell>
       <ProgressDots current={1} total={2} />
 
-      {/* Post-invite confirmation state with founding offer */}
+      {/* Post-invite confirmation (no offer) */}
       {showConfirmation && (
         <PostInviteConfirmation
           invitedStudents={invitedStudents}
