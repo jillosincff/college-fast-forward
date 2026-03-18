@@ -4,6 +4,9 @@ import {
   OnboardingShell, ProgressDots, FieldLabel, FieldInput,
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
+import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
+import FoundingOfferBanner from '@/components/founding-offer/FoundingOfferBanner';
+import { useAuth } from '@/components/auth/AuthContext';
 
 const COMMON_UNIVERSITIES = [
   'University of Florida', 'Florida State University', 'University of Central Florida',
@@ -41,6 +44,8 @@ export default function ParentStep2InviteStudent({
   formData, onUpdate, onInvite, onSkip, onBack, isLoading,
   invitedStudents = [],
 }) {
+  const { user } = useAuth();
+  const offer = useFoundingOffer(user);
   const [errors, setErrors] = useState({});
   const [universitySearch, setUniversitySearch] = useState(formData.studentUniversity || '');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -299,6 +304,9 @@ export default function ParentStep2InviteStudent({
           </button>
         </>
       )}
+
+      {/* Founding Member Offer Banner */}
+      {offer.active && <FoundingOfferBanner display={offer.display} studentName={formData.studentFirstName} />}
 
       {!showPostInviteState && <BackLink onClick={onBack} />}
     </OnboardingShell>

@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
+import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
 import ParentHomeHero from '@/components/parent-home/ParentHomeHero';
@@ -10,6 +11,8 @@ import ProfileIncompleteCard from '@/components/parent-home/ProfileIncompleteCar
 import AllClearCard from '@/components/parent-home/AllClearCard';
 import StudentProgressSection from '@/components/parent-home/StudentProgressCard';
 import useParentHomeData from '@/components/parent-home/useParentHomeData';
+import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
+import FoundingOfferHomeCard from '@/components/founding-offer/FoundingOfferHomeCard';
 import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function ParentHome() {
@@ -38,6 +41,29 @@ export default function ParentHome() {
     profileScore, profileTotal, profileComplete, profileNudge, allClear,
   } = useParentHomeData(user);
 
+  const offer = useFoundingOffer(user);
+  const [showActivationConfirm, setShowActivationConfirm] = useState(false);
+
+  // Mark offer as expired in backend when timer runs out
+  useEffect(() => {
+    if (offer.justExpired && user && !user.founding_offer_expired) {
+      base44.auth.updateMe({ founding_offer_expired: true }).catch(() => {});
+    }
+  }, [offer.justExpired]);
+
+  // Show first-visit-only: only when offer is active and parent hasn't seen it before on home
+  const showFoundingHome = offer.active && studentsNeedingFastIQ.length > 0 && !user?.founding_offer_home_seen;
+
+  // Mark home as seen on first render
+  useEffect(() => {
+    if (showFoundingHome && user && !user.founding_offer_home_seen) {
+      base44.auth.updateMe({ founding_offer_home_seen: true }).catch(() => {});
+    }
+  }, [showFoundingHome]);
+
+  // Get first student name for offer display
+  const firstStudentName = studentsNeedingFastIQ[0]?.student?.full_name?.split(' ')[0] || null;
+
   if (!user || loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
@@ -58,9 +84,28 @@ export default function ParentHome() {
         <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '0 24px 80px' }}>
           <ParentHomeHero user={user} />
 
+          {/* Activation confirmation toast */}
+          {showActivationConfirm && (
+            <div style={{
+              background: 'rgba(76,175,80,0.15)', border: '1px solid rgba(76,175,80,0.3)',
+              borderRadius: 12, padding: '14px 20px', marginBottom: 16,
+              display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <span style={{ color: '#4CAF50', fontSize: 16 }}>✓</span>
+              <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: '#fff' }}>
+                Founding member rate locked in — $187/year. FastIQ is now active for {firstStudentName || 'your student'}.
+              </span>
+            </div>
+          )}
+
           {/* Priority 1 — Intro Requests */}
           {pendingMatches.length > 0 && (
             <IntroRequestCard matches={pendingMatches} onRespond={refresh} />
+          )}
+
+          {/* Founding Member Offer — between intro requests and FastIQ nudge */}
+          {showFoundingHome && (
+            <FoundingOfferHomeCard display={offer.display} studentName={firstStudentName} />
           )}
 
           {/* Priority 2 — FastIQ not activated */}

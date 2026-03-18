@@ -36,7 +36,7 @@ export default function ParentOnboarding() {
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const saveProfileAndContinue = async () => {
-    // Save parent profile data
+    // Save parent profile data + founding offer timestamp
     const updateData = {
       full_name: formData.fullName.trim(),
       current_company: formData.company.trim(),
@@ -46,6 +46,7 @@ export default function ParentOnboarding() {
       intro_willingness: formData.introWillingness,
       visible_in_directory: formData.directoryVisible !== false,
       directory_consent_given: formData.directoryVisible !== false,
+      founding_offer_started_at: new Date().toISOString(),
     };
 
     // Map intro willingness to ways_to_help

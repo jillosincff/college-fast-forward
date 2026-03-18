@@ -1,5 +1,9 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
+import FoundingOfferWelcomeCard from '@/components/founding-offer/FoundingOfferWelcomeCard';
+import { useAuth } from '@/components/auth/AuthContext';
+import { navigate } from '@/components/utils/navigation';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -24,6 +28,8 @@ const WITH = [
 ];
 
 export function FastIQNotActivated({ studentName, onActivate, onSkip }) {
+  const { user } = useAuth();
+  const offer = useFoundingOffer(user);
   const name = studentName || 'your student';
   return (
     <div>
@@ -67,28 +73,52 @@ export function FastIQNotActivated({ studentName, onActivate, onSkip }) {
         </div>
       </div>
 
-      {/* Pricing */}
-      <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: ORANGE, textAlign: 'center', marginBottom: 24 }}>
-        $29/month or $249/year — 7-day free trial included. Save 28% with annual.
-      </p>
+      {/* Founding Offer or Standard Pricing */}
+      {offer.active ? (
+        <>
+          <FoundingOfferWelcomeCard display={offer.display} studentName={name} onActivate={onActivate} />
 
-      {/* CTA */}
-      <button onClick={onActivate} style={{
-        fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff',
-        background: ORANGE, border: 'none', borderRadius: 100,
-        padding: '16px 32px', cursor: 'pointer', width: '100%',
-        minHeight: 'auto',
-      }}>
-        Activate FastIQ for {name} →
-      </button>
+          <button onClick={() => navigate('GatorWelcome', { plan: 'annual', founding: 'true' })} style={{
+            fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff',
+            background: ORANGE, border: 'none', borderRadius: 100,
+            padding: '16px 32px', cursor: 'pointer', width: '100%',
+            minHeight: 'auto',
+          }}>
+            Activate Annual Plan for {name} — $187 →
+          </button>
 
-      <button onClick={onSkip} style={{
-        display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
-        background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13,
-        fontWeight: 400, color: '#666', cursor: 'pointer', minHeight: 'auto',
-      }}>
-        I'll do this later
-      </button>
+          <button onClick={() => navigate('GatorWelcome', { plan: 'monthly' })} style={{
+            display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
+            background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13,
+            fontWeight: 400, color: '#666', cursor: 'pointer', minHeight: 'auto',
+          }}>
+            Continue with monthly at $29/mo →
+          </button>
+        </>
+      ) : (
+        <>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: ORANGE, textAlign: 'center', marginBottom: 24 }}>
+            $29/month or $249/year — 7-day free trial included. Save 28% with annual.
+          </p>
+
+          <button onClick={onActivate} style={{
+            fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff',
+            background: ORANGE, border: 'none', borderRadius: 100,
+            padding: '16px 32px', cursor: 'pointer', width: '100%',
+            minHeight: 'auto',
+          }}>
+            Activate FastIQ for {name} →
+          </button>
+
+          <button onClick={onSkip} style={{
+            display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
+            background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13,
+            fontWeight: 400, color: '#666', cursor: 'pointer', minHeight: 'auto',
+          }}>
+            I'll do this later
+          </button>
+        </>
+      )}
 
       <p style={{ fontFamily: dmSans, fontSize: 12, color: '#555', textAlign: 'center', lineHeight: 1.6, marginTop: 16 }}>
         Cancel anytime. No long-term commitment. Your student gets an email the moment you activate — letting them know their job search just got a serious upgrade.
