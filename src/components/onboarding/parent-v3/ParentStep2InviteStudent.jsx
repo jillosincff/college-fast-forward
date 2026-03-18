@@ -113,6 +113,20 @@ export default function ParentStep2InviteStudent({
 
   // Max reached state
   if (atMax) {
+    // If offer active, render upgrade screen on light bg
+    if (offer.active) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+          <PostInviteConfirmation
+            invitedStudents={invitedStudents}
+            offer={offer}
+            onInviteAnother={() => {}}
+            onSkip={onSkip}
+          />
+        </div>
+      );
+    }
+
     return (
       <OnboardingShell>
         <ProgressDots current={1} total={2} />
@@ -129,24 +143,9 @@ export default function ParentStep2InviteStudent({
         <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
           {"You've invited"} {MAX_STUDENTS} {"students — that's the maximum per account."}
         </p>
-
-        {/* Show founding offer on max state too */}
-        {offer.active && (
-          <>
-            <div style={{ height: 1, background: ORANGE, opacity: 0.4, margin: '0 0 24px' }} />
-            <PostInviteConfirmation
-              invitedStudents={invitedStudents}
-              offer={offer}
-              onInviteAnother={() => {}}
-              onSkip={onSkip}
-            />
-          </>
-        )}
-        {!offer.active && (
-          <PrimaryButton onClick={onSkip}>
-            Continue to your profile →
-          </PrimaryButton>
-        )}
+        <PrimaryButton onClick={onSkip}>
+          Continue to your profile →
+        </PrimaryButton>
       </OnboardingShell>
     );
   }
