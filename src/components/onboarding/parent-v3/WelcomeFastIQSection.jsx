@@ -31,6 +31,7 @@ const WITH = [
 export function FastIQNotActivated({ studentName, onActivate, onSkip }) {
   const { user } = useAuth();
   const offer = useFoundingOffer(user);
+  const { startCheckout, loading: checkoutLoading, error: checkoutError } = useCheckout();
   const name = studentName || 'your student';
   return (
     <div>
