@@ -72,32 +72,28 @@ export default function ParentOnboarding() {
         parent_name: parentFirstName,
       });
 
-      // Link student email to parent profile
+      // Link student email to parent profile (don't refreshUser to avoid remounting)
       const currentStudentEmails = user?.student_emails || [];
       const newEmail = formData.studentEmail.trim().toLowerCase();
       if (!currentStudentEmails.includes(newEmail)) {
         await base44.auth.updateMe({
           student_emails: [...currentStudentEmails, newEmail],
         });
-        if (refreshUser) await refreshUser();
       }
 
       // Track this invitation and reset form for next student
-      setInvitedStudents(prev => [...prev, {
-        name: formData.studentFirstName.trim(),
-        email: newEmail,
-        university: formData.studentUniversity || '',
-      }]);
+      const invitedName = formData.studentFirstName.trim();
+      const invitedUni = formData.studentUniversity || '';
+      setInvitedStudents(prev => [...prev, { name: invitedName, email: newEmail, university: invitedUni }]);
       setFormData(prev => ({ ...prev, studentFirstName: '', studentEmail: '', studentUniversity: '' }));
       setInvited(true);
     } catch (error) {
       console.error('Failed to send invite:', error);
       // Still track on failure so user isn't stuck
-      setInvitedStudents(prev => [...prev, {
-        name: formData.studentFirstName.trim(),
-        email: formData.studentEmail.trim().toLowerCase(),
-        university: formData.studentUniversity || '',
-      }]);
+      const invitedName = formData.studentFirstName.trim();
+      const invitedEmail = formData.studentEmail.trim().toLowerCase();
+      const invitedUni = formData.studentUniversity || '';
+      setInvitedStudents(prev => [...prev, { name: invitedName, email: invitedEmail, university: invitedUni }]);
       setFormData(prev => ({ ...prev, studentFirstName: '', studentEmail: '', studentUniversity: '' }));
       setInvited(true);
     } finally {
