@@ -1,0 +1,9 @@
+export const dmSans = "'DM Sans', system-ui, sans-serif";
+export const playfair = "'Playfair Display', Georgia, serif";
+export const ORANGE = '#E85D20';
+export const CARD_BG = '#1A1A1A';
+export const BORDER = '#2A2A2A';
+export const BG = '#0A0A0A';
+export const MUTED = '#888888';
+export const AMBER = '#F59E0B';
+export const GREEN = '#4CAF50';
