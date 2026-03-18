@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/components/auth/AuthContext';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -40,6 +42,29 @@ function getNudge(user) {
 }
 
 export default function ParentProfileHeader({ user }) {
+  const { refreshUser } = useAuth();
+  const [editingLinkedIn, setEditingLinkedIn] = useState(false);
+  const [linkedInValue, setLinkedInValue] = useState(user?.linkedin_url || '');
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioValue, setBioValue] = useState(user?.bio || '');
+  const [saving, setSaving] = useState(false);
+
+  const saveLinkedIn = async () => {
+    setSaving(true);
+    await base44.auth.updateMe({ linkedin_url: linkedInValue.trim() });
+    if (refreshUser) await refreshUser();
+    setSaving(false);
+    setEditingLinkedIn(false);
+  };
+
+  const saveBio = async () => {
+    setSaving(true);
+    await base44.auth.updateMe({ bio: bioValue.trim() });
+    if (refreshUser) await refreshUser();
+    setSaving(false);
+    setEditingBio(false);
+  };
+
   const name = formatName(user);
   const initials = getInitials(user);
   const company = user?.current_company || user?.company || '';
@@ -85,10 +110,28 @@ export default function ParentProfileHeader({ user }) {
               <InfoRow icon="🏢" label={company || 'No company'} muted={!company} />
               <InfoRow icon="🏷️" label={industry ? industry.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'No industry'} muted={!industry} />
               <InfoRow icon="✉️" label={user?.email} />
-              {user?.linkedin_url ? (
+              {editingLinkedIn ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, flexShrink: 0 }}>💼</span>
+                  <input
+                    value={linkedInValue}
+                    onChange={e => setLinkedInValue(e.target.value)}
+                    placeholder="https://linkedin.com/in/yourname"
+                    autoFocus
+                    style={{
+                      flex: 1, background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)',
+                      borderRadius: 8, padding: '6px 10px', fontFamily: dmSans, fontSize: 13, color: '#f4f0e8',
+                      outline: 'none', minWidth: 0,
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter') saveLinkedIn(); if (e.key === 'Escape') setEditingLinkedIn(false); }}
+                  />
+                  <button onClick={saveLinkedIn} disabled={saving} style={{ background: ORANGE, border: 'none', borderRadius: 6, padding: '5px 12px', fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', opacity: saving ? 0.5 : 1 }}>Save</button>
+                  <button onClick={() => setEditingLinkedIn(false)} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 12, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>Cancel</button>
+                </div>
+              ) : user?.linkedin_url ? (
                 <InfoRow icon="💼" label={<a href={user.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: ORANGE, textDecoration: 'none', fontFamily: dmSans, fontSize: 13 }}>{user.linkedin_url.replace(/https?:\/\/(www\.)?/, '').slice(0, 40)}</a>} />
               ) : (
-                <InfoRow icon="💼" label={<button onClick={() => navigate('ProfileEdit')} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add LinkedIn →</button>} />
+                <InfoRow icon="💼" label={<button onClick={() => setEditingLinkedIn(true)} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add LinkedIn →</button>} />
               )}
             </div>
           </div>
@@ -96,12 +139,34 @@ export default function ParentProfileHeader({ user }) {
           {/* Right — About */}
           <div>
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 14 }}>About</p>
-            {user?.bio ? (
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', lineHeight: 1.65, margin: 0, whiteSpace: 'pre-wrap' }}>{user.bio}</p>
+            {editingBio ? (
+              <div>
+                <textarea
+                  value={bioValue}
+                  onChange={e => setBioValue(e.target.value)}
+                  placeholder="Tell students a bit about your background..."
+                  autoFocus
+                  rows={4}
+                  style={{
+                    width: '100%', background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)',
+                    borderRadius: 8, padding: '8px 12px', fontFamily: dmSans, fontSize: 13, color: '#f4f0e8',
+                    outline: 'none', resize: 'vertical', lineHeight: 1.6, boxSizing: 'border-box',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button onClick={saveBio} disabled={saving} style={{ background: ORANGE, border: 'none', borderRadius: 6, padding: '5px 14px', fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', opacity: saving ? 0.5 : 1 }}>Save</button>
+                  <button onClick={() => setEditingBio(false)} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 12, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>Cancel</button>
+                </div>
+              </div>
+            ) : user?.bio ? (
+              <div>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', lineHeight: 1.65, margin: 0, whiteSpace: 'pre-wrap' }}>{user.bio}</p>
+                <button onClick={() => { setBioValue(user.bio); setEditingBio(true); }} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 12, color: ORANGE, cursor: 'pointer', minHeight: 'auto', marginTop: 8 }}>Edit bio</button>
+              </div>
             ) : (
               <div>
                 <p style={{ fontFamily: dmSans, fontSize: 13, color: '#666', fontStyle: 'italic', margin: '0 0 8px' }}>No bio yet.</p>
-                <button onClick={() => navigate('ProfileEdit')} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add a bio →</button>
+                <button onClick={() => setEditingBio(true)} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add a bio →</button>
               </div>
             )}
           </div>
