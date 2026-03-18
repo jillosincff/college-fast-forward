@@ -3,6 +3,8 @@ import WelcomeExpectationCard from './WelcomeExpectationCard';
 // DirectoryConsentButton removed — visibility handled during onboarding
 import { MockNotification, MockWeeklyUpdate } from './WelcomeMockPreviews';
 import { FastIQNotActivated, FastIQActivated } from './WelcomeFastIQSection';
+import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
+import FoundingOfferWelcomeCard from '@/components/founding-offer/FoundingOfferWelcomeCard';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -11,6 +13,7 @@ const ORANGE = '#E85D20';
 export default function ParentWelcomeScreen({ user, studentName, isFastIQActive, onActivate, onSkip, onProfile }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const studentFirst = studentName || 'your student';
+  const offer = useFoundingOffer(user);
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', padding: '48px 20px 60px' }}>
@@ -67,6 +70,13 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
           </WelcomeExpectationCard>
 
         </div>
+
+        {/* Founding Member Offer — between expectation cards and FastIQ */}
+        {offer.active && (
+          <div style={{ marginTop: 32 }}>
+            <FoundingOfferWelcomeCard display={offer.display} studentName={studentFirst} />
+          </div>
+        )}
 
         {/* SECTION 2 — FastIQ */}
         {isFastIQActive ? (

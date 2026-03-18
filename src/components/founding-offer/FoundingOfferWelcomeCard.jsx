@@ -25,10 +25,10 @@ export default function FoundingOfferWelcomeCard({ display, studentName }) {
       </p>
 
       <p style={{
-        fontFamily: dmSans, fontSize: 16, fontWeight: 600,
-        color: '#fff', marginBottom: 16,
+        fontFamily: dmSans, fontSize: 14, fontWeight: 400,
+        color: '#fff', textAlign: 'center', lineHeight: 1.5, marginBottom: 16,
       }}>
-        Your founding member discount expires in:
+        Before you explore FastIQ — lock in your founding member rate.
       </p>
 
       {/* Timer */}
