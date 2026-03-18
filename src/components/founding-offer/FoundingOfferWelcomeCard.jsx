@@ -1,5 +1,4 @@
 import React from 'react';
-import { navigate } from '@/components/utils/navigation';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const mono = "'DM Mono', 'Courier New', monospace";
@@ -9,10 +8,9 @@ const CARD_BG = '#1A1A1A';
 /**
  * Founding member offer card for the Parent Welcome Screen.
  * Replaces standard pricing in the FastIQ sell section.
+ * Display-only card — CTAs are rendered by WelcomeFastIQSection.
  */
-export default function FoundingOfferWelcomeCard({ display, studentName, onActivate }) {
-  const name = studentName || 'your student';
-
+export default function FoundingOfferWelcomeCard({ display, studentName }) {
   return (
     <div style={{
       background: CARD_BG, borderRadius: 14, padding: 24, marginBottom: 24,
@@ -64,7 +62,7 @@ export default function FoundingOfferWelcomeCard({ display, studentName, onActiv
             $187<span style={{ fontSize: 13, fontWeight: 400, color: '#999' }}>/year</span>
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: ORANGE, margin: 0 }}>
-            Save $62 — 25% off
+            Save $62 — locks in forever
           </p>
         </div>
 
@@ -87,7 +85,7 @@ export default function FoundingOfferWelcomeCard({ display, studentName, onActiv
         fontFamily: dmSans, fontSize: 12, color: '#555',
         textAlign: 'center', lineHeight: 1.6, marginBottom: 0,
       }}>
-        This offer appears once and won't be available after it expires.
+        Both plans include a 7-day free trial. The founding rate locks in permanently for all future renewals.
       </p>
     </div>
   );
