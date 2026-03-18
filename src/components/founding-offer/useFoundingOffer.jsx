@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 
 /**
  * Computes founding member offer state from user record.
@@ -8,6 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 export default function useFoundingOffer(user) {
   const [now, setNow] = useState(Date.now());
   const intervalRef = useRef(null);
+  const expiredFlaggedRef = useRef(false);
 
   // Tick every second for live countdown
   useEffect(() => {
@@ -29,8 +31,15 @@ export default function useFoundingOffer(user) {
   const expiresAt = new Date(startedAt).getTime() + 24 * 60 * 60 * 1000;
   const remaining = Math.max(0, expiresAt - now);
 
+  // Auto-flag expired in backend (once)
+  if (remaining <= 0 && !expiredFlaggedRef.current) {
+    expiredFlaggedRef.current = true;
+    base44.auth.updateMe({ founding_offer_expired: true }).catch(() => {});
+    return { active: false, remaining: 0, display: '00:00:00' };
+  }
+
   if (remaining <= 0) {
-    return { active: false, remaining: 0, display: '00:00:00', justExpired: true };
+    return { active: false, remaining: 0, display: '00:00:00' };
   }
 
   const hours = Math.floor(remaining / 3600000);
