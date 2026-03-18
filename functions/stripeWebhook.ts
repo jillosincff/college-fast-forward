@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 import Stripe from 'npm:stripe@14.21.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
@@ -10,9 +10,10 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 // ═══════════════════════════════════════════════════════════════
 // Family entity is the SOURCE OF TRUTH for billing.
 // One subscription per family covers all linked members.
+// Handles: checkout, subscription lifecycle, founding member,
+//          payment failures, cancellation emails.
 // ═══════════════════════════════════════════════════════════════
 
-// These will be set per-request in the handler
 let base44;
 
 async function findUserByCustomerId(customerId) {
@@ -20,12 +21,7 @@ async function findUserByCustomerId(customerId) {
   return users?.length > 0 ? users[0] : null;
 }
 
-/**
- * Find the Family entity associated with a Stripe customer.
- * Checks: metadata family_id first, then Family.stripe_customer_id, then user.family_id.
- */
 async function findFamily(familyId, customerId) {
-  // 1. Direct family_id from metadata
   if (familyId) {
     try {
       const family = await base44.asServiceRole.entities.Family.get(familyId);
@@ -34,12 +30,10 @@ async function findFamily(familyId, customerId) {
       console.log('Family not found by ID:', familyId);
     }
   }
-  // 2. By stripe_customer_id on Family
   if (customerId) {
     const families = await base44.asServiceRole.entities.Family.filter({ stripe_customer_id: customerId });
     if (families?.length > 0) return families[0];
   }
-  // 3. By billing user's family_id
   const user = await findUserByCustomerId(customerId);
   if (user?.family_id) {
     try {
@@ -51,9 +45,6 @@ async function findFamily(familyId, customerId) {
   return null;
 }
 
-/**
- * Propagate subscription changes to ALL family members (parents + students).
- */
 async function updateAllFamilyMembers(family, updates) {
   if (!family) return;
   const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
@@ -62,6 +53,64 @@ async function updateAllFamilyMembers(family, updates) {
       await base44.asServiceRole.entities.User.update(memberId, updates);
     } catch (err) {
       console.error('Failed to update family member:', memberId, err.message);
+    }
+  }
+}
+
+/**
+ * Find linked student emails for a parent user.
+ */
+async function getLinkedStudentEmails(billingUser, family) {
+  const emails = [];
+  // From user record
+  if (billingUser?.student_emails?.length) {
+    emails.push(...billingUser.student_emails);
+  }
+  // From family student_ids
+  if (family?.student_ids?.length) {
+    for (const sid of family.student_ids) {
+      try {
+        const student = await base44.asServiceRole.entities.User.get(sid);
+        if (student?.email && !emails.includes(student.email)) {
+          emails.push(student.email);
+        }
+      } catch (e) {}
+    }
+  }
+  return emails;
+}
+
+/**
+ * Send activation email to linked students.
+ */
+async function sendStudentActivationEmails(billingUser, family) {
+  const studentEmails = await getLinkedStudentEmails(billingUser, family);
+  const parentName = billingUser?.full_name?.split(' ')[0] || 'Your parent';
+
+  for (const email of studentEmails) {
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: email,
+        subject: 'Your parent just turbocharged your job search 🚀',
+        body: `
+<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#0A0A0A;color:#fff;">
+  <h1 style="font-size:26px;font-weight:700;margin-bottom:20px;color:#fff;">Your parent just turbocharged your job search 🚀</h1>
+  <p style="font-size:16px;line-height:1.65;color:#ccc;margin-bottom:24px;">${parentName} just activated FastIQ for you.</p>
+  <p style="font-size:16px;line-height:1.65;color:#ccc;margin-bottom:8px;">You now have access to:</p>
+  <ul style="font-size:15px;line-height:1.8;color:#ccc;margin-bottom:24px;padding-left:0;list-style:none;">
+    <li>✓ Full alumni names and contacts at your target companies</li>
+    <li>✓ Personalized outreach messages ready to send</li>
+    <li>✓ A daily action plan built around your goals</li>
+    <li>✓ Resume tailoring, LinkedIn review, and interview prep</li>
+  </ul>
+  <p style="font-size:16px;line-height:1.65;color:#fff;font-weight:600;margin-bottom:28px;">Your competition doesn't have this. You do.</p>
+  <a href="https://www.collegefastforward.com/#Dashboard" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Start My Job Search →</a>
+  <p style="font-size:13px;color:#666;margin-top:32px;">— The College Fast Forward Team</p>
+</div>`,
+      });
+      console.log('Sent activation email to student:', email);
+    } catch (e) {
+      console.error('Failed to send activation email to:', email, e.message);
     }
   }
 }
@@ -91,24 +140,51 @@ Deno.serve(async (req) => {
         const familyId = session.metadata?.family_id;
         const billingUserEmail = session.metadata?.user_email;
         const billingUserId = session.metadata?.user_id;
+        const isFoundingMember = session.metadata?.is_founding_member === 'true';
+        const plan = session.metadata?.plan;
 
-        console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail });
+        console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
 
         // Update billing user
         const billingUser = await findUserByCustomerId(customerId);
         if (billingUser) {
-          await base44.asServiceRole.entities.User.update(billingUser.id, {
+          const userUpdates = {
             stripe_subscription_id: subscriptionId,
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
-          });
-          console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier);
+            fastiq_active: subscriptionTier === 'fastiq',
+            membership_tier: subscriptionTier === 'fastiq' ? 'fastiq' : billingUser.membership_tier,
+          };
+
+          // Founding member metadata
+          if (isFoundingMember) {
+            userUpdates.founding_offer_redeemed = true;
+            userUpdates.founding_offer_redeemed_at = new Date().toISOString();
+            userUpdates.founding_member_plan = 'fastiq_founding_annual';
+          }
+
+          await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
+          console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier, 'founding:', isFoundingMember);
+
+          // Update Stripe customer metadata
+          if (isFoundingMember) {
+            try {
+              await stripe.customers.update(customerId, {
+                metadata: {
+                  founding_offer_redeemed: 'true',
+                  founding_offer_redeemed_at: new Date().toISOString(),
+                },
+              });
+            } catch (e) {
+              console.log('Could not update Stripe customer metadata:', e.message);
+            }
+          }
         }
 
         // Update Family record (source of truth)
         const family = await findFamily(familyId, customerId);
         if (family) {
-          await base44.asServiceRole.entities.Family.update(family.id, {
+          const familyUpdates = {
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             subscription_status: 'active',
@@ -116,15 +192,32 @@ Deno.serve(async (req) => {
             billing_owner_id: billingUserId || billingUser?.id || '',
             billing_owner_email: billingUserEmail || billingUser?.email || '',
             billing_owner_name: billingUser?.full_name || '',
-          });
+          };
+          if (isFoundingMember) {
+            familyUpdates.is_founding_subscriber = true;
+            familyUpdates.founding_plan = 'fastiq_founding_annual';
+          }
+
+          await base44.asServiceRole.entities.Family.update(family.id, familyUpdates);
           console.log('Updated family:', family.id, 'tier:', subscriptionTier);
 
           // Propagate to ALL family members
-          await updateAllFamilyMembers(family, {
+          const memberUpdates = {
             subscription_status: 'active',
             subscription_tier: subscriptionTier,
-          });
+            fastiq_active: subscriptionTier === 'fastiq',
+          };
+          if (subscriptionTier === 'fastiq') {
+            memberUpdates.membership_tier = 'fastiq';
+          }
+          await updateAllFamilyMembers(family, memberUpdates);
         }
+
+        // Send activation emails to linked students
+        if (subscriptionTier === 'fastiq' && billingUser) {
+          await sendStudentActivationEmails(billingUser, family);
+        }
+
         break;
       }
 
@@ -135,13 +228,12 @@ Deno.serve(async (req) => {
         const customerId = subscription.customer;
         const subscriptionTier = subscription.metadata?.subscription_tier;
         const familyId = subscription.metadata?.family_id;
-        const status = subscription.status; // active, trialing, past_due, canceled, etc.
+        const status = subscription.status;
 
         console.log('Subscription event:', event.type, { status, subscriptionTier, familyId });
 
         const billingUser = await findUserByCustomerId(customerId);
 
-        // Build update payload
         const userUpdates = {
           stripe_subscription_id: subscription.id,
           subscription_status: status,
@@ -150,13 +242,17 @@ Deno.serve(async (req) => {
         if (subscription.trial_end) userUpdates.trial_end_date = new Date(subscription.trial_end * 1000).toISOString();
         if (subscription.current_period_end) userUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-        // Update billing user
+        // Set fastiq_active based on status
+        if (subscriptionTier === 'fastiq') {
+          userUpdates.fastiq_active = (status === 'active' || status === 'trialing');
+          userUpdates.membership_tier = (status === 'active' || status === 'trialing') ? 'fastiq' : billingUser?.membership_tier;
+        }
+
         if (billingUser) {
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user subscription:', billingUser.id, status);
         }
 
-        // Update Family (source of truth)
         const family = await findFamily(familyId, customerId);
         if (family) {
           const familyUpdates = {
@@ -170,9 +266,11 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.Family.update(family.id, familyUpdates);
           console.log('Updated family subscription:', family.id, status, subscriptionTier);
 
-          // Propagate to ALL family members (not just billing user)
           const memberUpdates = { subscription_status: status };
           if (subscriptionTier) memberUpdates.subscription_tier = subscriptionTier;
+          if (subscriptionTier === 'fastiq') {
+            memberUpdates.fastiq_active = (status === 'active' || status === 'trialing');
+          }
           await updateAllFamilyMembers(family, memberUpdates);
         }
         break;
@@ -186,22 +284,40 @@ Deno.serve(async (req) => {
 
         const billingUser = await findUserByCustomerId(customerId);
 
-        // Don't cancel founding members
         if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member || billingUser.price_tier === 'founding')) {
           console.log('Skipping cancellation for founding member:', billingUser.id);
           break;
         }
 
-        // Update billing user
         if (billingUser) {
-          await base44.asServiceRole.entities.User.update(billingUser.id, { subscription_status: 'canceled' });
+          await base44.asServiceRole.entities.User.update(billingUser.id, {
+            subscription_status: 'canceled',
+            fastiq_active: false,
+          });
           console.log('Subscription canceled for billing user:', billingUser.id);
+
+          // Send cancellation email
+          try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: billingUser.email,
+              subject: 'Your FastIQ subscription has been canceled',
+              body: `
+<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Your FastIQ subscription has been canceled</h1>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${billingUser.full_name?.split(' ')[0] || 'there'},</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Your FastIQ subscription has been canceled. Your student will revert to the free tier and lose access to full alumni contacts, personalized outreach, and the AI career engine.</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">If this was a mistake, you can reactivate anytime from your dashboard.</p>
+  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Go to Dashboard →</a>
+  <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
+</div>`,
+            });
+          } catch (e) {
+            console.error('Failed to send cancellation email:', e.message);
+          }
         }
 
-        // Update Family and propagate to all members
         const family = await findFamily(familyId, customerId);
         if (family) {
-          // Don't cancel if family is founding
           if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') {
             console.log('Skipping cancellation for founding family:', family.id);
             break;
@@ -210,18 +326,11 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'canceled' });
           console.log('Family subscription canceled:', family.id);
 
-          // Cancel all non-founding members
-          const allMemberIds = [...(family.parent_ids || []), ...(family.student_ids || [])];
-          for (const memberId of allMemberIds) {
-            try {
-              const member = await base44.asServiceRole.entities.User.get(memberId);
-              if (!member.is_founding_member && member.subscription_tier !== 'free_founding') {
-                await base44.asServiceRole.entities.User.update(memberId, { subscription_status: 'canceled' });
-              }
-            } catch (err) {
-              console.error('Failed to cancel member:', memberId, err.message);
-            }
-          }
+          // Deactivate all family members
+          await updateAllFamilyMembers(family, {
+            subscription_status: 'canceled',
+            fastiq_active: false,
+          });
         }
         break;
       }
@@ -231,6 +340,7 @@ Deno.serve(async (req) => {
         const invoice = event.data.object;
         const customerId = invoice.customer;
         const subscriptionId = invoice.subscription;
+        const attemptCount = invoice.attempt_count || 1;
 
         const billingUser = await findUserByCustomerId(customerId);
         if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member)) {
@@ -238,7 +348,6 @@ Deno.serve(async (req) => {
           break;
         }
 
-        // Find family via subscription metadata or customer
         let familyId = null;
         if (subscriptionId) {
           try {
@@ -250,8 +359,34 @@ Deno.serve(async (req) => {
         }
 
         if (billingUser) {
-          await base44.asServiceRole.entities.User.update(billingUser.id, { subscription_status: 'past_due' });
-          console.log('Marked billing user as past_due:', billingUser.id);
+          await base44.asServiceRole.entities.User.update(billingUser.id, {
+            subscription_status: 'past_due',
+            payment_failed_at: new Date().toISOString(),
+            payment_failure_count: attemptCount,
+          });
+          console.log('Marked billing user as past_due:', billingUser.id, 'attempt:', attemptCount);
+
+          // Send payment failure email
+          const isDay1 = attemptCount <= 1;
+          const isDay3 = attemptCount >= 2;
+          const urgency = isDay3 ? 'Your access will be deactivated soon' : 'Please update your payment method';
+
+          try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: billingUser.email,
+              subject: `Action required: Payment failed for FastIQ — ${urgency}`,
+              body: `
+<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Payment failed</h1>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${billingUser.full_name?.split(' ')[0] || 'there'},</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">We couldn't process your payment for FastIQ. ${isDay3 ? 'Your student\'s access will be deactivated within 24 hours unless payment is resolved.' : 'Please update your payment method to keep your student\'s access active.'}</p>
+  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Update Payment →</a>
+  <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
+</div>`,
+            });
+          } catch (e) {
+            console.error('Failed to send payment failure email:', e.message);
+          }
         }
 
         const family = await findFamily(familyId, customerId);
