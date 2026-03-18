@@ -109,10 +109,10 @@ const FASTIQ_STUDENT = [
 ];
 
 const FASTIQ_PARENT = [
-  'FastIQ activated for their student',
+  'FastIQ activated for your student',
   'Full alumni visibility',
-  'Intro requests for their student surfaced to the network',
-  'Progress dashboard — see exactly what their student is working on',
+  'Intro requests for your student surfaced to the network',
+  'Progress dashboard — see exactly what your student is working on',
 ];
 
 /* ── University tier features ──────────────────────── */
