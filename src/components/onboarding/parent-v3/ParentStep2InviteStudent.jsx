@@ -141,33 +141,27 @@ export default function ParentStep2InviteStudent({
     <OnboardingShell>
       <ProgressDots current={1} total={2} />
 
-      {/* Confirmation lines for already-invited students */}
-      {invitedStudents.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          {invitedStudents.map((s, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
-              <span style={{ color: '#4CAF50', fontSize: 14 }}>✓</span>
-              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#fff' }}>
-                Invitation sent to <strong>{s.name}</strong> at {s.university}
-              </span>
-            </div>
-          ))}
-        </div>
+      {/* Post-invite confirmation state with founding offer */}
+      {showPostInviteState && (
+        <PostInviteConfirmation
+          invitedStudents={invitedStudents}
+          offer={offer}
+          formData={formData}
+          onInviteAnother={() => setShowInviteForm(true)}
+          onSkip={onSkip}
+        />
       )}
 
-      {/* Header */}
-      <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
-        {showPostInviteState ? 'Do you have another student to invite?' : "Now let's get your student set up."}
-      </h1>
+      {/* Pre-invite header (form view) */}
       {!showPostInviteState && (
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
-          Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ.
-        </p>
-      )}
-      {showPostInviteState && (
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
-          You can invite up to {MAX_STUDENTS} students total.
-        </p>
+        <>
+          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
+            {"Now let's get your student set up."}
+          </h1>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+            Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ.
+          </p>
+        </>
       )}
 
       {/* Student First Name */}
