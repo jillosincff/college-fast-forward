@@ -51,11 +51,12 @@ export default function ParentProfileNav({ user, currentPage = 'Profile' }) {
         </button>
         <div className="hidden md:flex" style={{ gap: 24, display: 'flex', alignItems: 'center' }}>
           {NAV_LINKS.map(l => {
-            const active = l.page === currentPage;
+            const active = l.page === currentPage || (l.page === 'ParentHome' && currentPage === 'ParentHome');
             return (
               <button key={l.page} onClick={() => navigate(l.page)} style={{
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                fontFamily: dmSans, fontSize: 13, fontWeight: active ? 500 : 400,
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '0 0 4px', borderBottom: active ? `2px solid ${ORANGE}` : '2px solid transparent',
+                fontFamily: dmSans, fontSize: 13, fontWeight: active ? 600 : 400,
                 color: active ? '#f4f0e8' : 'rgba(244,240,232,0.45)',
                 transition: 'color 0.15s', minHeight: 'auto',
               }}>
