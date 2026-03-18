@@ -213,7 +213,7 @@ export default function GatorAuth() {
       const timer = setTimeout(() => {
         const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
                                   user.roles?.includes('parent') || user.roles?.includes('alumni');
-        navigate(isParentOrAlumni ? 'ParentDashboard' : 'Dashboard');
+        navigate(isParentOrAlumni ? 'Profile' : 'Dashboard');
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -574,7 +574,7 @@ export default function GatorAuth() {
   if (step === 'welcome-back') {
     const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' || 
                               user?.roles?.includes('parent') || user?.roles?.includes('alumni');
-    const dashboardUrl = isParentOrAlumni ? 'ParentDashboard' : 'Dashboard';
+    const dashboardUrl = isParentOrAlumni ? 'Profile' : 'Dashboard';
     const firstName = user?.first_name || (user?.full_name && user.full_name.includes(' ') ? user.full_name.split(' ')[0] : null) || 'there';
     
     return (
