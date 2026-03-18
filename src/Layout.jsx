@@ -714,7 +714,7 @@ function AppContent() {
 
     if (user && user.onboarding_completed === false && user.persona) {
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
-      const onboardingDashPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard', 'AlumniDashboard'];
+      const onboardingDashPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard'];
       if (onboardingDashPages.includes(currentPage)) {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
         const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
@@ -767,7 +767,7 @@ function AppContent() {
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    const dashboardPages = ['Dashboard', 'ParentDashboard', 'RecentGradDashboard', 'AlumniDashboard'];
+    const dashboardPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard'];
     if (user && dashboardPages.includes(currentPage)) {
       let destination = currentPage;
 
