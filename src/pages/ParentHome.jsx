@@ -43,6 +43,19 @@ export default function ParentHome() {
 
   const offer = useFoundingOffer(user);
   const [showActivationConfirm, setShowActivationConfirm] = useState(false);
+  const params = useParams();
+
+  // Detect payment success from Stripe redirect
+  useEffect(() => {
+    if (params.payment === 'success' && user) {
+      setShowActivationConfirm(true);
+      // Auto-fade after 8 seconds
+      const t = setTimeout(() => setShowActivationConfirm(false), 8000);
+      // Clean URL
+      window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
+      return () => clearTimeout(t);
+    }
+  }, [params.payment, user]);
 
   // Show first-visit-only: only when offer is active and parent hasn't seen it before on home
   const showFoundingHome = offer.active && studentsNeedingFastIQ.length > 0 && !user?.founding_offer_home_seen;
