@@ -46,8 +46,12 @@ export default function ParentOnboarding() {
       intro_willingness: formData.introWillingness,
       visible_in_directory: formData.directoryVisible !== false,
       directory_consent_given: formData.directoryVisible !== false,
-      founding_offer_started_at: new Date().toISOString(),
     };
+
+    // Only set founding offer timestamp if not already set (prevents reset on back-navigation)
+    if (!user?.founding_offer_started_at) {
+      updateData.founding_offer_started_at = new Date().toISOString();
+    }
 
     // Map intro willingness to ways_to_help
     if (formData.introWillingness === 'yes') {
