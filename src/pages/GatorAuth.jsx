@@ -672,29 +672,21 @@ export default function GatorAuth() {
     const roles = [
       {
         id: 'gator',
-        name: "I'm a Student",
-        desc: 'Use FastIQ to identify target companies, find alumni, and send personalized outreach.',
-        micro: 'Get started instantly — any email works',
-        iconBg: 'rgba(79,140,255,0.1)',
-        iconBorder: 'rgba(79,140,255,0.2)',
+        name: "I'm a Job Seeker",
+        desc: 'Looking for internships or my first job. I want a plan and real connections.',
+        micro: 'Students and recent grads welcome.',
+        microStyle: { color: 'rgba(255,255,255,0.35)' },
+        iconBg: 'rgba(255,255,255,0.04)',
+        iconBorder: 'rgba(255,255,255,0.08)',
         icon: <GradCapSVG />,
-        primary: true,
       },
       {
         id: 'parent',
         name: "I'm a Parent",
-        desc: "Support your student's career journey and join a network that opens doors.",
+        desc: "Supporting my student's career journey and joining a network that opens real doors.",
         iconBg: 'rgba(255,255,255,0.04)',
         iconBorder: 'rgba(255,255,255,0.08)',
         icon: <HeartSVG />,
-      },
-      {
-        id: 'alumni',
-        name: "I'm an Alum",
-        desc: 'Help students get ahead through advice, introductions, and career support.',
-        iconBg: 'rgba(255,255,255,0.04)',
-        iconBorder: 'rgba(255,255,255,0.08)',
-        icon: <AwardSVG />,
       },
     ];
 
