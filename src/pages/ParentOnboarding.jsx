@@ -25,6 +25,14 @@ export default function ParentOnboarding() {
     }
   }, [user?.full_name]);
 
+  // Allow deep-linking to invite step from profile page
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    if (hashParams.get('step') === 'invite' && user?.onboarding_completed === true) {
+      setStep(2);
+    }
+  }, [user?.onboarding_completed]);
+
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const saveProfileAndContinue = async () => {
