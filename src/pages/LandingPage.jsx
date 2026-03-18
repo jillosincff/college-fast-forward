@@ -6,10 +6,11 @@ import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
-
-import V3Numbers from '@/components/landing/v3/V3Numbers';
+import V3ComparisonTable from '@/components/landing/v3/V3ComparisonTable';
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
+import V3Numbers from '@/components/landing/v3/V3Numbers';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
+import V3FAQ from '@/components/landing/v3/V3FAQ';
 import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
 
 export default function LandingPage() {
@@ -56,16 +57,22 @@ export default function LandingPage() {
         {/* 2 — The Reality */}
         <V3Problem />
 
-        {/* 3 — How It Actually Works */}
+        {/* 3 — Comparison Table */}
+        <V3ComparisonTable />
+
+        {/* 4 — How It Actually Works */}
         <V3ParentPeace onCTA={handleCTA} />
 
-        {/* 4 — The Stats */}
+        {/* 5 — The Stats */}
         <V3Numbers />
 
-        {/* 9 — Pricing */}
+        {/* 6 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
-        {/* 10 — Final CTA + Footer */}
+        {/* 7 — FAQ */}
+        <V3FAQ />
+
+        {/* 8 — Final CTA + Footer */}
         <V3FinalCTA onCTA={handleCTA} />
       </div>
     </>

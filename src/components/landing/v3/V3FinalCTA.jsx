@@ -10,8 +10,8 @@ export default function V3FinalCTA({ onCTA }) {
     <>
       <section ref={ref} style={{ background: DARK_BG, padding: '110px 24px 100px', textAlign: 'center' }}>
         <div className="max-w-[600px] mx-auto">
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-primary, #4F8CFF)', marginBottom: 18, transition: 'color 0.4s', ...fadeStyle(vis, 0) }}>
-            The Takeaway
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 18, ...fadeStyle(vis, 0) }}>
+            Your Student's Future
           </p>
 
           <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.2, marginBottom: 16, letterSpacing: '-0.02em', ...fadeStyle(vis, 0.04) }}>

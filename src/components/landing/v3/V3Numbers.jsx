@@ -9,7 +9,11 @@ export default function V3Numbers() {
     <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
       <style>{`@media(max-width:640px){.v3-stats-row{flex-direction:column !important;gap:32px !important}.v3-stats-vs{display:none !important}}`}</style>
       <div className="max-w-[700px] mx-auto text-center">
-        <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.15, marginBottom: 14, letterSpacing: '-0.02em', ...fadeStyle(vis, 0) }}>
+        <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 14, ...fadeStyle(vis, 0) }}>
+          The Difference
+        </p>
+
+        <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.8vw, 42px)', color: '#fff', lineHeight: 1.15, marginBottom: 14, letterSpacing: '-0.02em', ...fadeStyle(vis, 0.02) }}>
           Most resumes never reach a human.
         </h2>
 

@@ -19,7 +19,11 @@ export default function V3Pricing({ onCTA }) {
       <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse, var(--accent-glow, rgba(79,140,255,0.05)), transparent 70%)' }} />
 
       <div className="max-w-[500px] mx-auto relative">
-        <div className="text-center mb-4" style={fadeStyle(vis, 0)}>
+        <p className="text-center" style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 14, ...fadeStyle(vis, 0) }}>
+          Get Started
+        </p>
+
+        <div className="text-center mb-4" style={fadeStyle(vis, 0.02)}>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent-primary, #4F8CFF)', background: 'var(--accent-soft, rgba(79,140,255,0.08))', border: '0.5px solid var(--accent-border, rgba(79,140,255,0.2))', borderRadius: 100, padding: '5px 14px', display: 'inline-flex', alignItems: 'center', gap: 6, transition: 'color 0.4s, background 0.4s, border-color 0.4s' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary, #4F8CFF)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4.5 13.5H12L11 22L19.5 10.5H12L13 2Z" /></svg>
             FASTIQ™
