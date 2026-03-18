@@ -7,6 +7,7 @@ import DarkFooter from '@/components/common/DarkFooter';
 import ThreadCard from '@/components/messages/ThreadCard';
 import MessageFilterTabs from '@/components/messages/MessageFilterTabs';
 import FastIQNudgeBar from '@/components/messages/FastIQNudgeBar';
+import ParentMessagesView from '@/components/messages/ParentMessagesView';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -24,6 +25,10 @@ function formatNameClean(raw) {
 
 export default function MyMessagesPage() {
   const { user } = useAuth();
+
+  // Parents get the dark CFF design system messages view
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  if (isParent) return <ParentMessagesView user={user} />;
   const [messages, setMessages] = useState([]);
   const [userLookup, setUserLookup] = useState({});
   const [loading, setLoading] = useState(true);
