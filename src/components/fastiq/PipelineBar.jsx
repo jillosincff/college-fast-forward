@@ -1,11 +1,11 @@
 import React from 'react';
 
 const STAGES = [
-  { key: 'identified', icon: '🔍', label: 'Identified', color: '#0021A5' },
-  { key: 'reached_out', icon: '✉️', label: 'Intro Sent', color: '#8B5CF6' },
-  { key: 'replied', icon: '💬', label: 'Replies', color: '#10B981' },
-  { key: 'interview', icon: '📅', label: 'Interviews', color: '#FA4616' },
-  { key: 'offer', icon: '🎉', label: 'Offers', color: '#EAB308' },
+{ key: 'identified', icon: '🔍', label: 'Identified', color: '#E85D20' },
+{ key: 'reached_out', icon: '✉️', label: 'Intro Sent', color: '#F59E0B' },
+{ key: 'replied', icon: '💬', label: 'Replies', color: '#22C55E' },
+{ key: 'interview', icon: '📅', label: 'Interviews', color: '#E85D20' },
+{ key: 'offer', icon: '🎉', label: 'Offers', color: '#22C55E' },
 ];
 
 export default function PipelineBar({ counts, noResponseContacts = [], onOpenChat }) {
@@ -50,14 +50,15 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
   return (
     <div className="fiq-animate fiq-delay-4" style={{ marginBottom: 32 }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: '#334155',
-        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
+        fontSize: 11, fontWeight: 700, color: '#E85D20',
+        textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 16,
+        fontFamily: "'DM Sans', sans-serif",
       }}>Your Pipeline</h2>
 
       {(
         <div style={{
-          background: '#fff', borderRadius: 16, padding: '24px 16px',
-          border: '0.5px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center',
+          background: '#1A1A1A', borderRadius: 12, padding: '24px 16px',
+          border: '1px solid #2A2A2A', display: 'flex', alignItems: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
           {STAGES.map((s, i) => {
@@ -68,23 +69,23 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
                 <div style={{ textAlign: 'center', flex: 1 }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 12,
-                    background: active ? `${s.color}12` : '#F1F5F9',
+                    background: active ? `${s.color}20` : '#2A2A2A',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 8px', fontSize: 18, transition: 'all 0.3s',
                   }}>{s.icon}</div>
                   <div className="fiq-mono" style={{
                     fontSize: 24, fontWeight: 700,
-                    color: active ? s.color : '#94A3B8',
+                    color: active ? s.color : '#555',
                   }}>{count}</div>
                   <div style={{
-                    fontSize: 10, fontWeight: 600, color: '#475569',
+                    fontSize: 10, fontWeight: 600, color: '#888',
                     textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2,
                   }}>{s.label}</div>
                 </div>
                 {i < STAGES.length - 1 && (
                   <div style={{
                     width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#E2E8F0', fontSize: 18, marginTop: -20, flexShrink: 0,
+                    color: '#555', fontSize: 18, marginTop: -20, flexShrink: 0,
                   }}>→</div>
                 )}
               </React.Fragment>
@@ -96,11 +97,11 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
       {/* P2 FIX: Show no_response contacts as separate archived section */}
       {noResponseContacts.length > 0 && (
         <div style={{
-          marginTop: 12, background: '#F8FAFC', borderRadius: 12,
-          border: '1px solid #E2E8F0', padding: '14px 16px',
+          marginTop: 12, background: '#1A1A1A', borderRadius: 12,
+          border: '1px solid #2A2A2A', padding: '14px 16px',
         }}>
           <div style={{
-            fontSize: 10, fontWeight: 700, color: '#475569',
+            fontSize: 10, fontWeight: 700, color: '#888',
             textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
             display: 'flex', alignItems: 'center', gap: 6,
           }}>
@@ -110,19 +111,19 @@ export default function PipelineBar({ counts, noResponseContacts = [], onOpenCha
             {noResponseContacts.slice(0, 5).map(c => (
               <div key={c.id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                fontSize: 12, color: '#64748B',
+                fontSize: 12, color: '#888',
               }}>
                 <span>{c.alumni_name} at {c.company}</span>
-                <span style={{ fontSize: 10, color: '#64748B' }}>No response</span>
+                <span style={{ fontSize: 10, color: '#555' }}>No response</span>
               </div>
             ))}
             {noResponseContacts.length > 5 && (
-              <div style={{ fontSize: 11, color: '#64748B', textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: '#555', textAlign: 'center' }}>
                 +{noResponseContacts.length - 5} more
               </div>
             )}
           </div>
-          <p style={{ fontSize: 10, color: '#64748B', marginTop: 8, lineHeight: 1.4 }}>
+          <p style={{ fontSize: 10, color: '#555', marginTop: 8, lineHeight: 1.4 }}>
             These contacts didn't respond after 2 attempts. FASTIQ suggested alternative strategies.
           </p>
         </div>

@@ -33,8 +33,8 @@ export default function PipelineNudge({ pipelineCounts, onOpenChat }) {
 
   return (
     <div style={{
-      background: '#FFFBEB',
-      border: '1px solid #FDE68A',
+      background: 'rgba(245,158,11,0.08)',
+      border: '1px solid rgba(245,158,11,0.2)',
       borderRadius: 12,
       padding: '14px 18px',
       marginTop: -20,
@@ -47,7 +47,7 @@ export default function PipelineNudge({ pipelineCounts, onOpenChat }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: 1 }}>
         <span style={{ fontSize: 18, lineHeight: 1 }}>{nudgeEmoji}</span>
-        <p style={{ fontSize: 12, fontWeight: 500, color: '#92400E', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, fontWeight: 500, color: '#F59E0B', margin: 0, lineHeight: 1.5 }}>
           {nudgeText}
         </p>
       </div>
