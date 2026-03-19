@@ -330,8 +330,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           <InterviewPrepTab />
         </div>
 
-        {/* FIX 9: FASTIQ-specific footer tagline */}
-        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: '#aaa' }}>
+        {/* Footer tagline */}
+        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: '#555' }}>
           <span style={{ fontWeight: 500, color: '#E85D20' }}>FASTIQ™</span> by College Fast Forward. Because applying isn't a strategy.
         </div>
       </div>
