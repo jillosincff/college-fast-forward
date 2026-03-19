@@ -574,6 +574,7 @@ const getPageComponent = (pageName) => {
     case 'MockInterview': return MockInterview;
     case 'LinkedInReview': return LinkedInReview;
     case 'ApplicationBoost': return ApplicationBoost;
+    case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     default: return LandingPage;
   }
 };
