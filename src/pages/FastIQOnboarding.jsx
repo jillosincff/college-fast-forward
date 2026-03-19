@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { navigate } from '@/components/utils/navigation';
+import { navigate, useParams } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 
 import OnboardingProgress from '@/components/onboarding-fastiq/OnboardingProgress';
