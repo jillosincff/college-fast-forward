@@ -1,0 +1,93 @@
+import React from 'react';
+import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Zap, Settings, LogOut, Lock } from 'lucide-react';
+import UserAvatar from '@/components/common/UserAvatar';
+import { base44 } from '@/api/base44Client';
+
+const NAV_ITEMS = [
+  { id: 'home', icon: Home, label: 'Home' },
+  { id: 'company_intel', icon: Building2, label: 'Company Intel' },
+  { id: 'career_path', icon: Map, label: 'Career Path Research' },
+  { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
+  { id: 'career_goals', icon: Target, label: 'Career Goals' },
+  { id: 'alumni_network', icon: Users, label: 'Alumni Network' },
+  { id: 'messages', icon: MessageSquare, label: 'Messages' },
+];
+
+export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade }) {
+  const firstName = user?.full_name?.split(' ')[0] || 'Student';
+  const university = user?.school || user?.university || 'UF';
+
+  return (
+    <div className="w-60 h-full bg-white border-r border-[#E0E0E0] flex flex-col">
+      {/* Header */}
+      <div className="p-6 border-b border-[#E0E0E0]">
+        <img
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
+          alt="CFF"
+          className="h-12 w-auto mb-3"
+        />
+        <p className="text-xs text-[#666666]">{firstName} · {university}</p>
+      </div>
+
+      {/* Nav Items */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {NAV_ITEMS.map(item => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-[#FFF5F0] text-[#E85D20] border-l-3 border-[#E85D20]'
+                  : 'text-[#666666] hover:bg-[#F5F5F5]'
+              }`}
+              style={{ minHeight: 'auto', borderLeftWidth: isActive ? '3px' : '0' }}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[#E85D20]' : 'text-[#999999]'}`} />
+              {item.label}
+            </button>
+          );
+        })}
+
+        {/* FastIQ Locked Item */}
+        <button
+          onClick={onOpenUpgrade}
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#E85D20] hover:bg-[#FFF5F0] transition-all mt-4"
+          style={{ minHeight: 'auto' }}
+        >
+          <Lock className="w-4 h-4 text-[#E85D20]" />
+          <span className="flex-1 text-left">FastIQ</span>
+          <span className="px-2 py-0.5 bg-[#E85D20] text-white text-[9px] font-bold rounded-full uppercase">
+            Upgrade
+          </span>
+        </button>
+      </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-[#E0E0E0] space-y-2">
+        <button
+          onClick={() => navigate('ProfileEdit')}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#666666] hover:text-[#1A1A1A] transition-colors"
+          style={{ minHeight: 'auto' }}
+        >
+          <Settings className="w-4 h-4" />
+          Settings
+        </button>
+        <button
+          onClick={() => base44.auth.logout()}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#666666] hover:text-[#1A1A1A] transition-colors"
+          style={{ minHeight: 'auto' }}
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
+        <div className="flex items-center gap-3 px-3 py-2 mt-3">
+          <UserAvatar user={user} className="h-8 w-8" showFallback={true} />
+          <p className="text-xs font-medium text-[#1A1A1A]">{firstName}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
