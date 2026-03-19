@@ -44,10 +44,10 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
   const profileLine = ['UF', major, gradYear, location].filter(Boolean).join(' · ');
 
   const rings = [
-    { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#FF6B3D' },
-    { value: statValues.insiders, max: 15, label: 'Alumni\nFound', color: '#22D3EE' },
-    { value: statValues.messages, max: 10, label: 'Intros\nSent', color: '#A78BFA' },
-    { value: statValues.warmPaths, max: 5, label: 'Replies', color: '#4ADE80' },
+    { value: statValues.targets, max: 5, label: 'Targets\nLocked', color: '#E85D20' },
+    { value: statValues.insiders, max: 15, label: 'Alumni\nFound', color: '#E85D20' },
+    { value: statValues.messages, max: 10, label: 'Intros\nSent', color: '#22C55E' },
+    { value: statValues.warmPaths, max: 5, label: 'Replies', color: '#F59E0B' },
   ];
 
   return (
