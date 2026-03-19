@@ -82,11 +82,11 @@ function AlumniRow({ alumni, onOpenChat }) {
       <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2 }}>
         <button
           onClick={() => onOpenChat(`Tell me about ${alumni.name} at ${alumni.company}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #2A2A2A', background: '#0A0A0A', color: '#888', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
         >View Profile →</button>
         <button
           onClick={() => onOpenChat(`Draft a warm intro message to ${alumni.name}, ${alumni.role_title || 'professional'} at ${alumni.company}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: alumni.uf_verified === false && alumni.confidence === 'low' ? '#94A3B8' : '#0021A5', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: alumni.uf_verified === false && alumni.confidence === 'low' ? '#555' : '#E85D20', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
           disabled={alumni.uf_verified === false && alumni.confidence === 'low'}
           title={alumni.uf_verified === false && alumni.confidence === 'low' ? 'Verify UF connection first' : ''}
         >Draft Message →</button>
