@@ -1,29 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle2, Circle, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, ArrowRight, Loader2, X } from 'lucide-react';
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [checklist, setChecklist] = useState({ goals: false, intel: false, alumni: false });
   const [parentEmail, setParentEmail] = useState('');
   const [nudgeSent, setNudgeSent] = useState(false);
   const [sendingNudge, setSendingNudge] = useState(false);
+  const [showParentModal, setShowParentModal] = useState(false);
+  const [alumniCount, setAlumniCount] = useState(null);
 
   useEffect(() => {
-    // Check completion status
     const hasGoals = !!(user?.target_industries?.length || user?.target_companies?.length);
     setChecklist({
       goals: hasGoals,
-      intel: hasGoals, // Auto-complete when goals are set
-      alumni: hasGoals, // Auto-complete when goals are set
+      intel: hasGoals,
+      alumni: hasGoals,
     });
   }, [user]);
 
-  const handleAskParent = async () => {
-    if (!parentEmail.trim()) return;
+  useEffect(() => {
+    // Fetch dynamic alumni count
+    base44.entities.User.filter({}).then(users => {
+      const school = (user?.school || user?.university || '').toLowerCase();
+      const relevant = users.filter(u => {
+        if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
+        const uSchool = (u.school || u.university || '').toLowerCase();
+        return school && uSchool && uSchool.includes(school.split(' ')[0]);
+      });
+      setAlumniCount(relevant.length > 0 ? relevant.length : null);
+    }).catch(() => setAlumniCount(null));
+  }, [user]);
+
+  const handleAskParent = async (emailOverride) => {
+    const toEmail = emailOverride || parentEmail.trim();
+    if (!toEmail) return;
     setSendingNudge(true);
     try {
       await base44.integrations.Core.SendEmail({
-        to: parentEmail.trim(),
+        to: toEmail,
         subject: `${user.full_name?.split(' ')[0] || 'Your student'} is ready to activate FastIQ`,
         body: `Hi,
 
@@ -36,10 +51,19 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 — The College Fast Forward Team`,
       });
       setNudgeSent(true);
+      setShowParentModal(false);
     } catch (err) {
       console.error('Failed to send parent nudge:', err);
     }
     setSendingNudge(false);
+  };
+
+  const handleAskParentClick = () => {
+    if (user?.parent_emails?.length > 0) {
+      handleAskParent(user.parent_emails[0]);
+    } else {
+      setShowParentModal(true);
+    }
   };
 
   const completedCount = Object.values(checklist).filter(Boolean).length;
@@ -50,8 +74,11 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       {/* Hero Section */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%)' }}>
         <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 16 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 2 }}>
             COLLEGE FAST FORWARD
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 400, color: '#888888', marginBottom: 20 }}>
+            powered by <span style={{ color: '#E85D20' }}>FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup></span>
           </p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: 12 }}>
             Your career doesn't start with a resume.
@@ -65,58 +92,34 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
           {/* Upgrade Banner */}
           <div className="max-w-2xl mx-auto bg-[#1A1A1A] border border-[#E85D20] rounded-xl p-6">
-            <div className="flex flex-col md:flex-row gap-6 items-center">
-              <div className="flex-1 text-left">
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
-                  🚀 Ready for the full plan?
-                </p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.5 }}>
-                  FastIQ is your 24/7 personal career agent — alumni contacts, personalized outreach, and a daily action plan built around your goals.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 w-full md:w-auto">
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
+              🚀 Ready for the full plan?
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.5, marginBottom: 20 }}>
+              FastIQ is your 24/7 personal career agent — alumni contacts, personalized outreach, and a daily action plan built around your goals.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={onOpenUpgrade}
+                className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
+                style={{ minHeight: 'auto' }}
+              >
+                Unlock FastIQ →
+              </button>
+              {nudgeSent ? (
+                <div className="text-green-400 text-sm font-medium text-center py-2">
+                  ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
+                </div>
+              ) : (
                 <button
-                  onClick={onOpenUpgrade}
-                  className="bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors whitespace-nowrap"
+                  onClick={handleAskParentClick}
+                  disabled={sendingNudge}
+                  className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                   style={{ minHeight: 'auto' }}
                 >
-                  Unlock FastIQ →
+                  {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Ask My Parent to Activate →'}
                 </button>
-                {!nudgeSent ? (
-                  user?.parent_emails?.length > 0 ? (
-                    <button
-                      onClick={handleAskParent}
-                      disabled={sendingNudge}
-                      className="border border-[#E85D20] text-[#E85D20] px-6 py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors whitespace-nowrap"
-                      style={{ minHeight: 'auto' }}
-                    >
-                      {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Ask My Parent to Activate →'}
-                    </button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="email"
-                        placeholder="Parent's email"
-                        value={parentEmail}
-                        onChange={(e) => setParentEmail(e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-full border border-[#2A2A2A] bg-[#0A0A0A] text-white text-sm"
-                      />
-                      <button
-                        onClick={handleAskParent}
-                        disabled={!parentEmail.trim() || sendingNudge}
-                        className="border border-[#E85D20] text-[#E85D20] px-4 py-2 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50"
-                        style={{ minHeight: 'auto' }}
-                      >
-                        {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send →'}
-                      </button>
-                    </div>
-                  )
-                ) : (
-                  <div className="text-green-400 text-sm font-medium text-center">
-                    ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 12, textAlign: 'center' }}>
               Free 7-day trial included. Cancel anytime.
@@ -124,6 +127,34 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           </div>
         </div>
       </div>
+
+      {/* Parent Email Modal */}
+      {showParentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowParentModal(false)}>
+          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff' }}>Ask Your Parent</h3>
+              <button onClick={() => setShowParentModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', color: '#888' }}><X className="w-4 h-4" /></button>
+            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 16, lineHeight: 1.5 }}>Enter your parent's email and we'll send them a note about activating FastIQ for you.</p>
+            <input
+              type="email"
+              placeholder="Parent's email address"
+              value={parentEmail}
+              onChange={e => setParentEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-[#0A0A0A] border border-[#2A2A2A] text-white text-sm mb-4"
+            />
+            <button
+              onClick={() => handleAskParent()}
+              disabled={!parentEmail.trim() || sendingNudge}
+              className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
+              style={{ minHeight: 'auto' }}
+            >
+              {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Send Invite →'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Body Sections */}
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
@@ -197,30 +228,29 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
         {/* Company Intel Preview */}
         <section>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-            COMPANY INTEL
-          </p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-            What's happening at companies that matter.
-          </h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {['Google', 'Nike', 'Goldman Sachs'].map(company => (
-              <div key={company} className="bg-white rounded-xl p-4 border border-[#E0E0E0]">
-                <h3 className="font-bold text-[#1A1A1A] mb-2">{company}</h3>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">🟢 Hot</span>
-                </div>
-                <p className="text-xs text-[#666666] mb-3">Actively hiring for entry-level roles across multiple teams.</p>
-                <button
-                  onClick={() => onTabChange('company_intel')}
-                  className="text-xs text-[#E85D20] font-medium hover:underline"
-                  style={{ minHeight: 'auto' }}
-                >
-                  View Full Intel →
-                </button>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
+          COMPANY INTEL
+        </p>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
+          What's happening at companies that matter.
+        </h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {['Google', 'Nike', 'Goldman Sachs'].map(company => (
+            <div key={company} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: 16 }}>
+              <h3 style={{ fontWeight: 700, color: '#fff', marginBottom: 8 }}>{company}</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs bg-green-900/40 text-green-400 px-2 py-1 rounded-full">🟢 Hot</span>
               </div>
-            ))}
-          </div>
+              <p style={{ fontSize: 12, color: '#888', marginBottom: 12, lineHeight: 1.5 }}>Actively hiring for entry-level roles across multiple teams.</p>
+              <button
+                onClick={() => onTabChange('company_intel')}
+                style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+              >
+                View Full Intel →
+              </button>
+            </div>
+          ))}
+        </div>
         </section>
 
         {/* Alumni Network Teaser */}
@@ -232,12 +262,14 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             Your school's alumni are already inside.
           </h2>
           <div className="bg-white rounded-xl p-6 border border-[#E0E0E0] mb-4">
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-              1,200+ alumni from {user?.school || 'UF'} are in the College Fast Forward network.
-            </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
+            {alumniCount
+              ? `${alumniCount}+ alumni from ${user?.school || 'your school'} are in the College Fast Forward network.`
+              : 'Alumni from your school are joining every day.'}
+          </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666' }}>
-              The more parents who join, the more possibilities you have.
-            </p>
+            The more parents who join, the more possibilities you have.
+          </p>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             {[1, 2, 3].map(i => (
