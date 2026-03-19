@@ -57,23 +57,23 @@ function AlumniRow({ alumni, onOpenChat }) {
           }}>💡 {relevanceHint} at {company}</span>
           {alumni.uf_verified === false && alumni.confidence === 'low' ? (
             <span title="School connection unverified — check LinkedIn" style={{
-              fontSize: 10, fontWeight: 600, color: '#92400E', background: '#FEF3C7',
+              fontSize: 10, fontWeight: 600, color: '#F59E0B', background: 'rgba(245,158,11,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>⚠️ UF Unverified</span>
           ) : alumni.verified || alumni.uf_verified ? (
             <span title="Confirmed University of Florida graduate/alum" style={{
-              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              fontSize: 10, fontWeight: 600, color: '#22C55E', background: 'rgba(34,197,94,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>✅ UF Alum</span>
           ) : (
             <span title="Likely UF connection — verify on LinkedIn" style={{
-              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              fontSize: 10, fontWeight: 600, color: '#22C55E', background: 'rgba(34,197,94,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>🐊 UF Alum</span>
           )}
           {alumni.match_score >= 70 && alumni.confidence !== 'low' && (
             <span title="Strong fit for your interests + UF connection" style={{
-              fontSize: 10, fontWeight: 600, color: '#9333EA', background: '#F3E8FF',
+              fontSize: 10, fontWeight: 600, color: '#E85D20', background: 'rgba(232,93,32,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>⭐ High match</span>
           )}
