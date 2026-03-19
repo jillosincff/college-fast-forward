@@ -55,12 +55,12 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
       {/* Decorative orbs */}
       <div style={{
         position: 'absolute', top: -60, right: -40, width: 300, height: 300, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(250,70,22,0.15), transparent 70%)',
+        background: 'radial-gradient(circle, rgba(232,93,32,0.1), transparent 70%)',
         animation: 'fiq-heroGlow 4s ease-in-out infinite', pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: -80, left: -60, width: 250, height: 250, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0,33,165,0.3), transparent 70%)',
+        background: 'radial-gradient(circle, rgba(232,93,32,0.06), transparent 70%)',
         animation: 'fiq-heroGlow 5s ease-in-out infinite 1s', pointerEvents: 'none',
       }} />
 
