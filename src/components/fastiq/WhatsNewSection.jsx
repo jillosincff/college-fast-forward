@@ -52,7 +52,7 @@ function AlumniRow({ alumni, onOpenChat }) {
         {/* Quick relevance bullets */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 5 }}>
           <span style={{
-            fontSize: 10, fontWeight: 600, color: '#0369A1', background: '#E0F2FE',
+            fontSize: 10, fontWeight: 600, color: '#E85D20', background: 'rgba(232,93,32,0.1)',
             padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
           }}>💡 {relevanceHint} at {company}</span>
           {alumni.uf_verified === false && alumni.confidence === 'low' ? (
