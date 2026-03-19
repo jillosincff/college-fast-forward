@@ -224,7 +224,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
     <div className="fiq-root">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=Space+Mono:wght@400;700&display=swap');
-        .fiq-root { font-family: 'DM Sans', sans-serif; background: #f4f2ee; min-height: 100vh; }
+        .fiq-root { font-family: 'DM Sans', sans-serif; background: #0A0A0A; min-height: 100vh; }
         .fiq-root * { box-sizing: border-box; }
         .fiq-mono { font-family: 'Space Mono', monospace; }
         @keyframes fiq-fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
