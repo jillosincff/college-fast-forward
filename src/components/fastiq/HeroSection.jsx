@@ -173,9 +173,9 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
         <div className="fiq-animate fiq-delay-1 fiq-rings-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 28 }}>
           {rings.map((r, i) => (
             <div key={i} style={{
-              background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)',
-              borderRadius: 16, padding: '20px 12px 16px',
-              border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center',
+              background: '#1A1A1A', backdropFilter: 'blur(10px)',
+              borderRadius: 12, padding: '20px 12px 16px',
+              border: '1px solid #2A2A2A', textAlign: 'center',
               display: 'flex', flexDirection: 'column', alignItems: 'center',
             }}>
               <div style={{ position: 'relative', marginBottom: 10 }}>
