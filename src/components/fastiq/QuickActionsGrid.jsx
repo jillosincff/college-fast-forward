@@ -155,12 +155,12 @@ function ActionCard({ action, onOpenChat }) {
       <div style={{
         fontSize: action.primary ? 14 : 13,
         fontWeight: 700,
-        color: '#1E293B',
+        color: '#fff',
         lineHeight: 1.3,
       }}>{action.label}</div>
       <div style={{
         fontSize: 11,
-        color: '#64748B',
+        color: '#888',
         lineHeight: 1.4,
       }}>{action.description}</div>
     </div>
