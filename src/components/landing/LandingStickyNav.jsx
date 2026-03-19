@@ -103,7 +103,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
               whiteSpace: 'nowrap',
             }}
           >
-            Start Free 7-Day Trial
+            Join For Free
           </button>
         </div>
       </div>
