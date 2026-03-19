@@ -18,6 +18,17 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
       intel: hasGoals,
       alumni: hasGoals,
     });
+
+    // State A: first visit with no actions taken → hide banner, mark for next visit
+    // State B: returning visitor OR has completed any action → show banner
+    const isReturnVisit = user?.firstVisitComplete === true;
+    if (isReturnVisit || hasGoals) {
+      setShowUpgradeBanner(true);
+    } else {
+      setShowUpgradeBanner(false);
+      // Mark so next visit shows State B
+      base44.auth.updateMe({ firstVisitComplete: true }).catch(() => {});
+    }
   }, [user]);
 
   useEffect(() => {
@@ -91,41 +102,47 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             You have access to powerful career research tools below. Unlock FastIQ to get your full personalized plan.
           </p>
 
-          {/* Upgrade Banner */}
-          <div className="max-w-2xl mx-auto bg-[#1A1A1A] border border-[#E85D20] rounded-xl p-6">
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
-              🚀 Ready for the full plan?
-            </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.5, marginBottom: 20 }}>
-              FastIQ is your 24/7 personal career agent — alumni contacts, personalized outreach, and a daily action plan built around your goals.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={onOpenUpgrade}
-                className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
-                style={{ minHeight: 'auto' }}
-              >
-                Unlock FastIQ →
-              </button>
-              {nudgeSent ? (
-                <div className="text-green-400 text-sm font-medium text-center py-2">
-                  ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
-                </div>
-              ) : (
+          {/* Upgrade Banner — conditional on visit/engagement state */}
+          {showUpgradeBanner ? (
+            <div className="max-w-2xl mx-auto bg-[#1A1A1A] border border-[#E85D20] rounded-xl p-6">
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
+                🚀 Ready for the full plan?
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.5, marginBottom: 20 }}>
+                FastIQ is your 24/7 personal career agent — alumni contacts, personalized outreach, and a daily action plan built around your goals.
+              </p>
+              <div className="flex flex-col gap-3">
                 <button
-                  onClick={handleAskParentClick}
-                  disabled={sendingNudge}
-                  className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
+                  onClick={onOpenUpgrade}
+                  className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
                   style={{ minHeight: 'auto' }}
                 >
-                  {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Ask My Parent to Activate →'}
+                  Unlock FastIQ →
                 </button>
-              )}
+                {nudgeSent ? (
+                  <div className="text-green-400 text-sm font-medium text-center py-2">
+                    ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleAskParentClick}
+                    disabled={sendingNudge}
+                    className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
+                    style={{ minHeight: 'auto' }}
+                  >
+                    {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Ask My Parent to Activate →'}
+                  </button>
+                )}
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 12, textAlign: 'center' }}>
+                Free 7-day trial included. Cancel anytime.
+              </p>
             </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 12, textAlign: 'center' }}>
-              Free 7-day trial included. Cancel anytime.
+          ) : (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 8 }}>
+              Let's build yours. Start with the three steps below.
             </p>
-          </div>
+          )}
         </div>
       </div>
 
