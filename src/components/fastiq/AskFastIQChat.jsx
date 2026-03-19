@@ -76,9 +76,9 @@ export default function AskFastIQChat({ onOpenChat }) {
             <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 10 }}>
               <div style={{
                 maxWidth: '85%', borderRadius: 14, padding: '10px 14px',
-                background: m.role === 'user' ? '#0d1117' : '#f8f8f6',
-                color: m.role === 'user' ? '#fff' : '#1a1a1a',
-                border: m.role === 'user' ? 'none' : '0.5px solid rgba(0,0,0,0.08)',
+                background: m.role === 'user' ? '#2A2A2A' : '#1E1E1E',
+                color: '#fff',
+                border: m.role === 'user' ? 'none' : '1px solid #2A2A2A',
                 fontFamily: dmSans, fontSize: 14, lineHeight: 1.6,
               }}>
                 {m.role === 'user' ? m.content : (
