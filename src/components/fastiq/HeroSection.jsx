@@ -81,10 +81,10 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
           <button
             onClick={() => onOpenChat()}
             style={{
-              background: '#FA4616', color: '#fff', border: 'none',
-              padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+              background: '#E85D20', color: '#fff', border: 'none',
+              padding: '10px 24px', borderRadius: 100, fontSize: 13, fontWeight: 700,
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-              transition: 'all 0.2s', boxShadow: '0 0 20px rgba(250,70,22,0.4)',
+              transition: 'all 0.2s', boxShadow: '0 0 20px rgba(232,93,32,0.4)',
               minHeight: 'auto',
             }}
           >
