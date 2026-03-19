@@ -121,8 +121,9 @@ export default function StudentInvitedOnboarding() {
   };
 
   const handleActivationComplete = useCallback(() => {
-    navigate('Dashboard');
-  }, []);
+    // Route into FastIQOnboarding at step 2 (skip welcome)
+    navigate('FastIQOnboarding?skip_welcome=true&prefill_school=' + encodeURIComponent(school));
+  }, [school]);
 
   // Handle OAuth error
   useEffect(() => {

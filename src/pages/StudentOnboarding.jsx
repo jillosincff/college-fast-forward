@@ -135,6 +135,7 @@ export default function StudentOnboarding() {
   };
 
   const handleWelcomeComplete = useCallback(() => {
+    // Flow B: Free tier — skip FastIQOnboarding, go to Dashboard
     navigate('Dashboard');
   }, []);
 

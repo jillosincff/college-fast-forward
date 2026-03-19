@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import ProAssessment from '../components/fast-track-pro/ProAssessment';
+// ProAssessment deprecated — using FastIQOnboarding exclusively
+// import ProAssessment from '../components/fast-track-pro/ProAssessment';
 import FastIQCommandCenter from '../components/fastiq/FastIQCommandCenter';
 import ProAgentChat from '../components/fast-track-pro/ProAgentChat';
 import ParentFastIQView from '../components/fasttrack/ParentFastIQView';
@@ -67,7 +68,9 @@ export default function FastIQ() {
       setProfile(profiles[0]);
       setView('dashboard');
     } else {
-      setView('assessment');
+      // Redirect to FastIQOnboarding instead of showing inline assessment
+      navigate('FastIQOnboarding');
+      return;
     }
     setLoading(false);
   };
@@ -95,7 +98,8 @@ export default function FastIQ() {
 
   const handleAssessmentRerun = () => {
     setChatInitialMessage('');
-    setView('assessment');
+    // Redirect to FastIQOnboarding for re-assessment
+    navigate('FastIQOnboarding');
   };
 
   if (user === undefined) {
@@ -137,9 +141,7 @@ export default function FastIQ() {
     );
   }
 
-  if (view === 'assessment') {
-    return <ProAssessment user={user} existingProfile={profile} onComplete={handleAssessmentComplete} />;
-  }
+  // Assessment view removed — redirects to FastIQOnboarding in loadProfile
 
   if (view === 'chat') {
     // Fixed overlay covers EVERYTHING — footer, nav, body background

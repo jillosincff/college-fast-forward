@@ -59,13 +59,26 @@ function ensureFonts() {
 
 export default function FastIQOnboarding() {
   const { user } = useAuth();
-  const [step, setStep] = useState(0); // 0=welcome, 1=school, 2=interests, 3=companies, 4=loading, 5=results
-  const [school, setSchool] = useState(user?.school || '');
+  const params = useParams();
+  
+  // Check if we should skip welcome (from StudentInvitedOnboarding)
+  const skipWelcome = params.skip_welcome === 'true';
+  const prefilledSchool = params.prefill_school || user?.school || '';
+  
+  const [step, setStep] = useState(skipWelcome ? 1 : 0); // Skip to step 1 if from Flow A
+  const [school, setSchool] = useState(prefilledSchool);
   const [interests, setInterests] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [plan, setPlan] = useState(null);
 
   useEffect(() => { ensureFonts(); }, []);
+  
+  // Pre-populate school if coming from Flow A
+  useEffect(() => {
+    if (skipWelcome && prefilledSchool && !school) {
+      setSchool(prefilledSchool);
+    }
+  }, [skipWelcome, prefilledSchool]);
 
   const buildPlan = useCallback(() => {
     setStep(4); // loading
@@ -118,6 +131,8 @@ ${firstName}`;
           user_email: user.email,
           target_companies: plan.companies.map(c => c.name || c),
           target_industries: interests,
+          assessment_complete: true,
+          pro_tier: 'free_trial',
         };
         if (profiles?.[0]) {
           base44.entities.FastTrackProProfile.update(profiles[0].id, data).catch(() => {});
@@ -134,7 +149,12 @@ ${firstName}`;
   }, [user, plan, interests, school]);
 
   const handleGoToPlan = () => {
-    navigate('Dashboard');
+    // Mark setup complete and route to FastIQ
+    base44.auth.updateMe({
+      fastiq_setup_complete: true,
+      fastiq_activated_at: new Date().toISOString(),
+    }).catch(() => {});
+    navigate('FastIQ');
   };
 
   const handleEdit = () => {
