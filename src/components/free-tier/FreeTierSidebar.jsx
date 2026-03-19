@@ -1,7 +1,8 @@
-import React from 'react';
-import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Zap, Settings, LogOut, Lock } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Home' },
@@ -16,6 +17,16 @@ const NAV_ITEMS = [
 export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade }) {
   const firstName = user?.full_name?.split(' ')[0] || 'Student';
   const university = user?.school || user?.university || 'UF';
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
+    };
+    if (showMenu) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   return (
     <div className="w-60 h-full bg-white border-r border-[#E0E0E0] flex flex-col">
@@ -65,28 +76,41 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
         </button>
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-[#E0E0E0] space-y-2">
+      {/* Footer — Avatar popover */}
+      <div className="p-4 border-t border-[#E0E0E0]" ref={menuRef}>
+        {showMenu && (
+          <div style={{
+            position: 'absolute', bottom: 72, left: 12, width: 180,
+            background: '#1E1E1E', border: '1px solid #2A2A2A',
+            borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            overflow: 'hidden', zIndex: 100,
+          }}>
+            <button
+              onClick={() => { navigate('ProfileEdit'); setShowMenu(false); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 13, minHeight: 'auto' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#2A2A2A'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              <Settings style={{ width: 14, height: 14, color: '#888' }} /> Settings
+            </button>
+            <button
+              onClick={() => base44.auth.logout()}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 13, minHeight: 'auto' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#2A2A2A'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              <LogOut style={{ width: 14, height: 14, color: '#888' }} /> Sign Out
+            </button>
+          </div>
+        )}
         <button
-          onClick={() => navigate('ProfileEdit')}
-          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#666666] hover:text-[#1A1A1A] transition-colors"
-          style={{ minHeight: 'auto' }}
+          onClick={() => setShowMenu(prev => !prev)}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', borderRadius: 8 }}
+          className="hover:bg-[#F5F5F5] transition-colors"
         >
-          <Settings className="w-4 h-4" />
-          Settings
-        </button>
-        <button
-          onClick={() => base44.auth.logout()}
-          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#666666] hover:text-[#1A1A1A] transition-colors"
-          style={{ minHeight: 'auto' }}
-        >
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </button>
-        <div className="flex items-center gap-3 px-3 py-2 mt-3">
           <UserAvatar user={user} className="h-8 w-8" showFallback={true} />
           <p className="text-xs font-medium text-[#1A1A1A]">{firstName}</p>
-        </div>
+        </button>
       </div>
     </div>
   );
