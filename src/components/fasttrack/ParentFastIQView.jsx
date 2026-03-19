@@ -4,7 +4,6 @@ import { Loader2, UserPlus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
-import ParentFastIQSalesPage from './ParentFastIQSalesPage';
 import ParentProgressRings from '../fastiq/parent/ParentProgressRings';
 import ParentPipelineSummary from '../fastiq/parent/ParentPipelineSummary';
 import ParentTargetCompanies from '../fastiq/parent/ParentTargetCompanies';
@@ -243,7 +242,9 @@ export default function ParentFastIQView({ user }) {
   }
 
   if (state === 'upsell') {
-    return <ParentFastIQSalesPage user={user} studentName={studentName} familyId={familyId} />;
+    // Redirect to ParentHome where founding offer card will handle upsell
+    navigate('ParentHome');
+    return null;
   }
 
   return <LinkStudentFirstView />;
