@@ -110,7 +110,7 @@ export default function AskFastIQChat({ onOpenChat }) {
             borderRadius: 100, fontFamily: dmSans, fontSize: 14, fontWeight: 300,
             color: '#fff', outline: 'none', background: '#0A0A0A',
           }}
-          onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.5)'}
+          onFocus={e => e.currentTarget.style.borderColor = '#E85D20'}
           onBlur={e => e.currentTarget.style.borderColor = '#2A2A2A'}
         />
         <button onClick={() => ask()} disabled={!query.trim() || loading} style={{
