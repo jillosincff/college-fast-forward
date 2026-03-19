@@ -178,13 +178,13 @@ export default function QuickActionsGrid({ onOpenChat, isNewUser }) {
 
       {isNewUser && (
         <div style={{
-          background: '#F0F4FA', borderRadius: 10, padding: '10px 14px',
+          background: 'rgba(232,93,32,0.06)', borderRadius: 12, padding: '10px 14px',
           marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8,
-          border: '1px solid #E2E8F0',
+          border: '1px solid rgba(232,93,32,0.15)',
         }}>
           <span style={{ fontSize: 16 }}>👋</span>
-          <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.4 }}>
-            <b>Not sure where to start?</b> Try <b>"Find Warm Intros"</b> or <b>"Explore Careers"</b> — FASTIQ will guide you step by step.
+          <span style={{ fontSize: 12, color: '#888', lineHeight: 1.4 }}>
+            <b style={{ color: '#fff' }}>Not sure where to start?</b> Try <b style={{ color: '#E85D20' }}>"Find Warm Intros"</b> or <b style={{ color: '#E85D20' }}>"Explore Careers"</b> — FASTIQ will guide you step by step.
           </span>
         </div>
       )}
