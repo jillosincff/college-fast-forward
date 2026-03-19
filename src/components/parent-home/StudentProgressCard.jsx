@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { dmSans, playfair, ORANGE, CARD_BG, BORDER, MUTED, AMBER, GREEN } from './constants';
+import { ChevronDown, ChevronRight, Zap } from 'lucide-react';
 import moment from 'moment';
+import ParentProgressRings from '../fastiq/parent/ParentProgressRings';
+import ParentPipelineSummary from '../fastiq/parent/ParentPipelineSummary';
+import ParentTargetCompanies from '../fastiq/parent/ParentTargetCompanies';
+import ParentNudgeButton from '../fastiq/parent/ParentNudgeButton';
 
 function StatCell({ label, value }) {
   return (
@@ -12,10 +17,16 @@ function StatCell({ label, value }) {
   );
 }
 
-function ActiveStudentCard({ student, daysSinceActive }) {
+function ActiveStudentCard({ student, daysSinceActive, profile, parentUser }) {
+  const [showDetails, setShowDetails] = useState(false);
   const name = student?.full_name?.split(' ')[0] || 'Student';
   const uni = student?.university || '';
   const lastActive = daysSinceActive != null ? (daysSinceActive === 0 ? 'Today' : `${daysSinceActive} day${daysSinceActive > 1 ? 's' : ''} ago`) : 'Unknown';
+
+  // Extract pipeline counts and companies from profile
+  const pipelineCounts = profile?.pipeline_counts || {};
+  const targetCompanies = profile?.target_companies || [];
+  const hasTargets = targetCompanies.length > 0;
 
   return (
     <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
@@ -26,14 +37,39 @@ function ActiveStudentCard({ student, daysSinceActive }) {
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, color: GREEN }}>Active</span>
         </div>
+        {hasTargets && (
+          <button onClick={() => setShowDetails(!showDetails)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto',
+          }}>
+            {showDetails ? <ChevronDown style={{ width: 16, height: 16, color: '#888' }} /> : <ChevronRight style={{ width: 16, height: 16, color: '#888' }} />}
+          </button>
+        )}
       </div>
       <p style={{ fontFamily: dmSans, fontSize: 11, color: MUTED, marginBottom: 16 }}>Last active: {lastActive}</p>
 
-      <div style={{ display: 'flex', gap: 8, padding: '12px 0', borderTop: '1px solid #2A2A2A', borderBottom: '1px solid #2A2A2A' }}>
-        <StatCell label="Companies targeted" value={student?.targeted_companies_count || 0} />
-        <StatCell label="Messages this week" value={student?.messages_sent_this_week || 0} />
-        <StatCell label="Responses" value={student?.responses_received || 0} />
-      </div>
+      {/* Embedded progress rings */}
+      {profile && <ParentProgressRings profile={profile} />}
+
+      {/* Embedded pipeline summary */}
+      {profile && <ParentPipelineSummary counts={pipelineCounts} studentName={name} />}
+
+      {/* Expandable target companies */}
+      {showDetails && hasTargets && (
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #2A2A2A' }}>
+          <ParentTargetCompanies
+            companies={targetCompanies}
+            intelCache={{}}
+            alumniCounts={{}}
+          />
+        </div>
+      )}
+
+      {/* Nudge button for stalled students */}
+      {daysSinceActive > 7 && profile && parentUser && (
+        <div style={{ marginTop: 16 }}>
+          <ParentNudgeButton studentName={name} studentEmail={student?.email} parentUser={parentUser} />
+        </div>
+      )}
 
       <p style={{ fontFamily: playfair, fontStyle: 'italic', fontSize: 13, color: MUTED, marginTop: 12 }}>
         {name} is moving forward.
@@ -123,8 +159,8 @@ export default function StudentProgressSection({ students }) {
         YOUR STUDENT'S PROGRESS
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {students.map(({ email, student, status, daysSinceActive }) => {
-          if (status === 'active') return <ActiveStudentCard key={email} student={student} daysSinceActive={daysSinceActive} />;
+        {students.map(({ email, student, status, daysSinceActive, profile, parentUser }) => {
+          if (status === 'active') return <ActiveStudentCard key={email} student={student} daysSinceActive={daysSinceActive} profile={profile} parentUser={parentUser} />;
           if (status === 'inactive') return <InactiveStudentCard key={email} student={student} daysSinceActive={daysSinceActive} />;
           if (status === 'no_fastiq' && student) return <NoFastIQStudentCard key={email} student={student} email={email} />;
           return <PendingStudentCard key={email} email={email} />;
