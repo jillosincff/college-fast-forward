@@ -1,65 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import V3HeroTypingBox from './V3HeroTypingBox';
+import React from 'react';
+import { Users, Zap } from 'lucide-react';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const playfair = '"Playfair Display", Georgia, serif';
-
-function ParticleCanvas() {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let raf;
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * 1920, y: Math.random() * 1200,
-      r: Math.random() * 1.5 + 0.5, dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.2, o: Math.random() * 0.2 + 0.05,
-    }));
-    const draw = () => {
-      canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
-      canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      const w = canvas.offsetWidth, h = canvas.offsetHeight;
-      particles.forEach(p => {
-        p.x += p.dx; p.y += p.dy;
-        if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(160,160,170,${p.o})`; ctx.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, []);
-  return <canvas ref={canvasRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.5 }} />;
-}
-
-function HeroCTA({ text, onClick, variant = 'primary' }) {
-  const isPrimary = variant === 'primary';
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; }}
-      style={{
-        fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff',
-        background: isPrimary ? 'var(--accent-primary, #4F8CFF)' : 'transparent',
-        border: isPrimary ? 'none' : '1px solid rgba(255,255,255,0.15)',
-        borderRadius: 100, padding: '16px 34px', cursor: 'pointer',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        transition: 'all 0.35s ease', minHeight: 'auto', minWidth: 'auto',
-        boxShadow: isPrimary ? '0 4px 24px var(--accent-glow, rgba(79,140,255,0.25)), inset 0 1px 0 rgba(255,255,255,0.1)' : 'none',
-        lineHeight: 1.35, textAlign: 'center',
-        backdropFilter: isPrimary ? 'none' : 'blur(12px)',
-      }}
-    >
-      {text}
-    </button>
-  );
-}
 
 export default function V3Hero({ onCTA, onHowItWorks }) {
   return (
@@ -67,74 +10,174 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       className="relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #050505 0%, #0B0B0F 40%, #0E1018 70%, #07080C 100%)', minHeight: '100vh' }}
     >
-      <ParticleCanvas />
-      <div aria-hidden className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none z-0" style={{ background: 'radial-gradient(var(--accent-glow, rgba(79,140,255,0.06)), transparent 70%)' }} />
+      <style>{`
+        @keyframes heroFadeIn {
+          from { opacity: 0; transform: translateY(0); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes heroFadeUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-fade { opacity: 0; animation: heroFadeIn 0.6s ease-in-out forwards; }
+        .hero-fade-up { opacity: 0; animation: heroFadeUp 0.6s ease-in-out forwards; }
+        @media (max-width: 768px) {
+          .hero-fade { animation-duration: 0.3s !important; }
+          .hero-fade-up { animation-duration: 0.3s !important; }
+          .hero-cards-row { flex-direction: column !important; }
+          .hero-magic-text { font-size: clamp(28px, 7vw, 48px) !important; }
+        }
+      `}</style>
 
-      <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
-        {/* Eyebrow */}
-        <div className="mb-7">
-          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s', display: 'block' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: 'clamp(80px, 12vw, 140px) 24px 80px', textAlign: 'center' }}>
+
+        {/* TOP LABEL */}
+        <div className="hero-fade" style={{ animationDelay: '0ms', marginBottom: 32 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: 0 }}>
             College Fast Forward
-          </span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888888', letterSpacing: 'normal', textTransform: 'none', display: 'block', marginTop: 2 }}>
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888888', marginTop: 4, marginBottom: 0 }}>
             powered by <span style={{ color: '#E85D20' }}>FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup></span>
-          </span>
+          </p>
         </div>
 
-        {/* Headline */}
-        <h1 style={{
-          fontFamily: playfair, fontWeight: 700,
-          fontSize: 'clamp(30px, 5.5vw, 62px)',
-          letterSpacing: '-0.03em', lineHeight: 1.1,
-          marginBottom: 22, padding: '0 4px', color: '#fff',
-        }}>
-          <span style={{
-            fontStyle: 'italic',
-            color: '#E85D20',
+        {/* EYEBROW */}
+        <div className="hero-fade" style={{ animationDelay: '80ms', marginBottom: 24 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#E85D20', margin: 0 }}>
+            The Synchronized Advantage: Human Advocacy + AI Intelligence
+          </p>
+        </div>
+
+        {/* HEADLINE */}
+        <div className="hero-fade" style={{ animationDelay: '380ms', marginBottom: 32 }}>
+          <h1 style={{
+            fontFamily: playfair, fontWeight: 700,
+            fontSize: 'clamp(28px, 5vw, 58px)',
+            letterSpacing: '-0.02em', lineHeight: 1.15,
+            color: '#fff', margin: 0, padding: '0 4px',
           }}>
-            Relax.
-          </span>{' '}
-          Your student's job search just got way easier.
-        </h1>
-
-        {/* Subheadline */}
-        <p style={{
-          fontFamily: dmSans, fontWeight: 400,
-          fontSize: 'clamp(16px, 2.2vw, 20px)',
-          color: '#4F8CFF', lineHeight: 1.65,
-          maxWidth: 640, margin: '0 auto 44px',
-        }}>
-          The tech they want with the human connections they actually need.
-        </p>
-
-        {/* Product Demo */}
-        <div className="mb-12">
-          <V3HeroTypingBox />
+            The world's first career ecosystem that integrates a parent's professional network directly into the job search equation.
+          </h1>
         </div>
 
-        {/* Social proof */}
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 20 }}>
-          👨‍👩‍👧 Join <span style={{ color: '#fff', fontWeight: 500 }}>1,200+</span> families already inside.
-        </p>
+        {/* SUBHEAD — 3 staggered lines */}
+        <div style={{ marginBottom: 56 }}>
+          {[
+            { text: 'We’ve moved past the black hole of cold applications.', delay: '780ms' },
+            { text: 'Your experience provides the warm path.', delay: '930ms' },
+            { text: 'Our technology provides the execution.', delay: '1080ms' },
+          ].map((line, i) => (
+            <p key={i} className="hero-fade" style={{
+              animationDelay: line.delay,
+              fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
+              fontWeight: 400, color: '#fff',
+              lineHeight: 1.5, margin: '0 0 6px',
+            }}>
+              {line.text}
+            </p>
+          ))}
+        </div>
 
-        {/* CTAs */}
-        <div className="flex flex-col items-center gap-3 mb-5">
-          <HeroCTA text="See How It Works" onClick={onHowItWorks} variant="primary" />
+        {/* TWO-FORCE CARDS */}
+        <div className="hero-cards-row" style={{ display: 'flex', flexDirection: 'row', gap: 24, marginBottom: 72 }}>
+          {[
+            {
+              label: 'You Provide',
+              title: 'The network.',
+              body: 'Your connections, your advocacy, and your word open doors that cold applications never will.',
+              Icon: Users,
+              delay: '1480ms',
+            },
+            {
+              label: 'FastIQ Provides',
+              title: 'The speed.',
+              body: 'AI handles the research, tailoring, and follow-up that usually takes hundreds of hours.',
+              Icon: Zap,
+              delay: '1480ms',
+            },
+          ].map((card, i) => (
+            <div key={i} className="hero-fade" style={{
+              animationDelay: card.delay,
+              flex: 1,
+              background: '#1A1A1A',
+              border: '1px solid #2A2A2A',
+              borderRadius: 12,
+              padding: 24,
+              textAlign: 'left',
+            }}>
+              <card.Icon style={{ width: 22, height: 22, color: '#E85D20', marginBottom: 14 }} />
+              <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>
+                {card.label}
+              </p>
+              <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 10px' }}>
+                {card.title}
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>
+                {card.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* THE MAGIC */}
+        <div style={{ marginBottom: 72 }}>
+          <p className="hero-fade" style={{ animationDelay: '1980ms', fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', margin: '0 0 6px' }}>
+            One parent has a network.
+          </p>
+          <p className="hero-fade" style={{ animationDelay: '2180ms', fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', margin: '0 0 10px' }}>
+            A community has{' '}
+            <span className="hero-fade-up" style={{
+              animationDelay: '2380ms',
+              fontFamily: playfair, fontStyle: 'italic',
+              fontSize: 'clamp(28px, 4.5vw, 52px)',
+              color: '#E85D20', display: 'inline',
+            }}>
+              infinite possibilities.
+            </span>
+          </p>
+          <p className="hero-fade" style={{ animationDelay: '2580ms', fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#666666', lineHeight: 1.6, margin: '16px 0 0' }}>
+            Every parent who joins expands the pool for every student inside it.
+          </p>
+        </div>
+
+        {/* CLOSING MANIFESTO */}
+        <div style={{ marginBottom: 72 }}>
+          <p className="hero-fade" style={{ animationDelay: '2980ms', fontFamily: dmSans, fontSize: 'clamp(16px, 2.2vw, 20px)', fontWeight: 700, color: '#fff', margin: '0 0 12px' }}>
+            This isn’t just a job search. It’s a strategic advantage.
+          </p>
+          <p className="hero-fade" style={{ animationDelay: '3130ms', fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 400, color: '#fff', lineHeight: 1.65, maxWidth: 680, margin: '0 auto 24px' }}>
+            We take the nagging out of parenting and replace it with a high-tech pipeline that moves your student from the bottom of the pile to the top of the list.
+          </p>
+          <p className="hero-fade" style={{ animationDelay: '3280ms', fontFamily: playfair, fontStyle: 'italic', fontSize: 'clamp(22px, 3.5vw, 38px)', color: '#E85D20', margin: 0 }}>
+            College Fast Forward provides the engine that syncs them.
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div className="hero-fade" style={{ animationDelay: '3680ms' }}>
           <button
             onClick={onCTA}
-            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+            onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+            onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: dmSans, fontSize: 14, fontWeight: 400,
-              color: 'rgba(255,255,255,0.7)', textDecoration: 'underline',
-              transition: 'color 0.2s', minHeight: 'auto', minWidth: 'auto',
-              textAlign: 'center',
+              fontFamily: dmSans, fontSize: 16, fontWeight: 600,
+              background: '#E85D20', color: '#fff',
+              padding: '16px 44px', borderRadius: 100, border: 'none',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+              minHeight: 'auto', minWidth: 'auto', width: 'auto',
+              display: 'inline-block',
             }}
           >
-            Already convinced? Start free today →
+            Join For Free →
           </button>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#666666', marginTop: 14, marginBottom: 6 }}>
+            Free to join. FastIQ from $29/mo. 7-day trial included.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontStyle: 'italic', fontWeight: 300, color: '#555555', margin: 0 }}>
+            The first and only platform of its kind.
+          </p>
         </div>
+
       </div>
     </section>
   );
