@@ -23,6 +23,7 @@ export default function useParentHomeData(user) {
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState([]);
   const [pendingMatches, setPendingMatches] = useState([]);
+  const [profiles, setProfiles] = useState([]);
 
   const load = useCallback(async () => {
     if (!user?.email) return;
@@ -30,17 +31,21 @@ export default function useParentHomeData(user) {
 
     const emails = user.student_emails || [];
 
-    // Load students and matches in parallel
-    const [studentResults, matchResults] = await Promise.all([
+    // Load students, matches, and FastIQ profiles in parallel
+    const [studentResults, matchResults, profileResults] = await Promise.all([
       Promise.all(emails.map(async (email) => {
         const found = await base44.entities.User.filter({ email }).catch(() => []);
         return { email, student: found?.length ? found[0] : null };
       })),
       base44.entities.Match.filter({ parent_id: user.id, status: 'pending' }, '-created_date', 10).catch(() => []),
+      emails.length > 0
+        ? base44.entities.FastTrackProProfile.filter({ user_email: { $in: emails } }).catch(() => [])
+        : Promise.resolve([]),
     ]);
 
     setStudents(studentResults);
     setPendingMatches(matchResults || []);
+    setProfiles(profileResults || []);
     setLoading(false);
   }, [user?.email, user?.id, (user?.student_emails || []).join(',')]);
 
@@ -55,6 +60,8 @@ export default function useParentHomeData(user) {
       ? Math.floor((Date.now() - new Date(student.last_active_at).getTime()) / (1000 * 60 * 60 * 24))
       : null,
     hasFastIQ: student ? hasFastIQ(student) : false,
+    profile: profiles.find(p => p.user_email === email),
+    parentUser: user,
   }));
 
   const studentsNeedingFastIQ = studentsWithStatus.filter(s => s.status === 'no_fastiq' && s.student);
