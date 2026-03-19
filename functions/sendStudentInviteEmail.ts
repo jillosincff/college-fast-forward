@@ -49,26 +49,27 @@ Deno.serve(async (req) => {
     const inviteLink = `https://www.collegefastforward.com/#StudentInvitedOnboarding?${inviteParams.toString()}`;
 
     const emailBody = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #374151; background-color: #f9fafb; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);">
-          <h2 style="color: #0021A5; text-align: center; font-size: 24px; margin-top: 0;">🎓 Your next step starts here</h2>
-          <p style="font-size: 16px;">Hi ${student_name},</p>
-          <p style="font-size: 16px;">Your parent, ${parent_name}, invited you to join <strong>College Fast Forward</strong> — a platform built exclusively for UF students, parents, and alumni.</p>
-          <p style="font-size: 16px;">Here, you can:</p>
-          <ul style="list-style-type: none; padding: 0; font-size: 16px;">
-            <li style="margin-bottom: 12px; display: flex; align-items: flex-start;"><span style="margin-right: 10px;">🌟</span><span>Connect with alumni & parents who want to help you succeed</span></li>
-            <li style="margin-bottom: 12px; display: flex; align-items: flex-start;"><span style="margin-right: 10px;">💼</span><span>Discover internships and job opportunities shared by the Gator community</span></li>
-            <li style="margin-bottom: 12px; display: flex; align-items: flex-start;"><span style="margin-right: 10px;">💬</span><span>Ask for advice or mentorship from people who've been where you are</span></li>
-          </ul>
-          <p style="font-size: 16px;">At College Fast Forward, we believe it takes a village. This is your chance to tap into the power of Gator Nation and take the next step toward your future.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteLink}" style="background-color: #FA4616; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-              👉 Join College Fast Forward
+      <div style="font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #ffffff; background-color: #0A0A0A; padding: 40px 20px;">
+        <div style="max-width: 520px; margin: 0 auto; text-align: center;">
+          <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #E85D20; margin-bottom: 24px;">
+            ${parentFirstName} invited you to College Fast Forward
+          </p>
+          <h1 style="font-size: 28px; font-weight: 700; color: #ffffff; line-height: 1.3; margin-bottom: 12px;">
+            ${parentFirstName} just set something up for you.
+          </h1>
+          <p style="font-size: 18px; font-style: italic; color: #E85D20; margin-bottom: 24px;">
+            Your job search just got a serious upgrade.
+          </p>
+          <p style="font-size: 15px; color: #ffffff; line-height: 1.7; margin-bottom: 36px;">
+            FastIQ is ready to build your career plan — target companies, alumni to contact, and personalized outreach messages. All you need to do is get started.
+          </p>
+          <div style="margin: 0 0 24px;">
+            <a href="${inviteLink}" style="background-color: #E85D20; color: white; padding: 16px 40px; text-decoration: none; border-radius: 100px; font-weight: 600; font-size: 16px; display: inline-block;">
+              Get Started →
             </a>
           </div>
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-          <p style="font-size: 14px; color: #6b7280; text-align: center;">
-            Your parent won't be posting on your behalf — this journey is yours. But they wanted to make sure you had access to the Gator community that's here to support you. 💙🐊
+          <p style="font-size: 13px; color: #888888;">
+            Takes less than 60 seconds.
           </p>
         </div>
       </div>
