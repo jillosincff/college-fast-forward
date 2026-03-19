@@ -248,8 +248,8 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         }
       `}</style>
 
-      {/* HERO (kept as-is) */}
-      <div style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0021A5 50%, #1a3a8f 100%)', position: 'relative', overflow: 'hidden' }}>
+      {/* HERO */}
+      <div style={{ background: 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%)', position: 'relative', overflow: 'hidden' }}>
         <HeroSection
           userName={userFirstName}
           user={user}
@@ -259,8 +259,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
           statusLines={buildStatusLines(pipelineData, newOpportunities, weeklyStats)}
           onEditProfile={() => setShowProfileEdit(true)}
         />
-        {/* FIX 4: Gradient transition from dark header to light body */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(to bottom, transparent, #f4f2ee)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(to bottom, transparent, #0A0A0A)', pointerEvents: 'none' }} />
       </div>
 
       {/* CONTENT — structured top-to-bottom flow */}
