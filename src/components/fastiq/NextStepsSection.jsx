@@ -38,28 +38,27 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <span style={{
-            width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+            width: 22, height: 22, borderRadius: '50%', background: '#E85D20',
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
           }}>1</span>
-          <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+          <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: 0 }}>
             Find UF alumni at {names}
           </p>
         </div>
-        <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12, color: '#888', margin: '4px 0 14px', lineHeight: 1.6 }}>
           One warm intro is worth more than 100 cold applications. Let's find people at your target companies who share your UF connection.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             onClick={() => onOpenChat(`Find UF alumni at all my target companies: ${targetCompanies.join(', ')}`)}
             style={{
-              padding: '13px 18px', borderRadius: 12, border: 'none',
-              background: 'linear-gradient(135deg, #0021A5 0%, #1a3a8f 100%)',
+              padding: '13px 18px', borderRadius: 100, border: 'none',
+              background: '#E85D20',
               color: '#fff', fontSize: 15, fontWeight: 800,
               cursor: 'pointer', minHeight: 'auto', width: '100%',
-              boxShadow: '0 4px 16px rgba(0,33,165,0.35)',
+              boxShadow: '0 4px 16px rgba(232,93,32,0.35)',
               textAlign: 'center', letterSpacing: '0.01em',
-              animation: 'fiq-cta-glow 3s ease-in-out infinite',
             }}
           >
             Find My Warm Intros →
@@ -77,44 +76,44 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
-      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
+      background: '#1A1A1A',
+      borderRadius: 12, border: '1px solid #2A2A2A', borderLeft: '5px solid #E85D20',
       padding: '20px 22px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
         <span style={{
-          width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+          width: 22, height: 22, borderRadius: '50%', background: '#E85D20',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
         }}>1</span>
-        <span style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+        <span style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>
           🎓 Your Warm Intros — {totalCount} UF Alumni Found
         </span>
       </div>
-      <p style={{ fontSize: 12, color: '#475569', margin: '0 0 12px 32px', lineHeight: 1.5 }}>
+      <p style={{ fontSize: 12, color: '#888', margin: '0 0 12px 32px', lineHeight: 1.5 }}>
         These UF alumni work at your target companies. Each one is a warm path in — no cold applications needed.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {visible.map((a, i) => (
           <div key={a.id || i} style={{
             display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
-            background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0',
+            background: '#0A0A0A', borderRadius: 12, border: '1px solid #2A2A2A',
           }}>
             <img
               src={`https://logo.clearbit.com/${guessDomain(a.company)}`}
-              alt="" style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'contain', background: '#F1F5F9' }}
+              alt="" style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'contain', background: '#2A2A2A' }}
               onError={e => { e.target.style.display = 'none'; }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {a.name || a.alumni_name}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 11, color: '#64748B' }}>
+                <span style={{ fontSize: 11, color: '#888' }}>
                   {a.role_title || a.alumni_role} at {titleCase(a.company)}
                 </span>
                 {a.greek_organization && (
-                  <span style={{ fontSize: 10, color: '#8B5CF6', fontWeight: 600 }}>🏛️ {a.greek_organization}</span>
+                  <span style={{ fontSize: 10, color: '#E85D20', fontWeight: 600 }}>🏛️ {a.greek_organization}</span>
                 )}
               </div>
             </div>
@@ -122,7 +121,7 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
               onClick={() => onOpenChat(`Draft a message to ${a.name || a.alumni_name} at ${a.company}`)}
               style={{
                 padding: '5px 12px', borderRadius: 6, border: 'none',
-                background: '#0021A5', color: '#fff', fontSize: 11, fontWeight: 700,
+                background: '#E85D20', color: '#fff', fontSize: 11, fontWeight: 700,
                 cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
@@ -134,7 +133,7 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
       {totalCount > 5 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#0021A5', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
+          style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
         >
           See all {totalCount} alumni →
         </button>
@@ -145,14 +144,14 @@ function AlumniFoundCard({ alumni, totalCount, onOpenChat }) {
 
 /* ─── HERO CARD: All scanned, alumni identified but not contacted ─── */
 function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
-  return (
+return (
+  <div style={{
+    background: '#1A1A1A',
+    borderRadius: 12, border: '1px solid #2A2A2A', borderLeft: '5px solid #E85D20',
+    padding: '22px 22px', display: 'flex', alignItems: 'flex-start', gap: 16,
+  }}>
     <div style={{
-      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
-      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
-      padding: '22px 22px', display: 'flex', alignItems: 'flex-start', gap: 16,
-    }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 12, background: '#0021A5',
+      width: 44, height: 44, borderRadius: 12, background: 'rgba(232,93,32,0.15)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 22, flexShrink: 0, marginTop: 2,
       }}>
@@ -161,24 +160,24 @@ function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <span style={{
-            width: 22, height: 22, borderRadius: '50%', background: '#0021A5',
+            width: 22, height: 22, borderRadius: '50%', background: '#E85D20',
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0,
           }}>1</span>
-          <p style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+          <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: 0 }}>
             {identifiedCount} warm intros waiting — time to reach out
           </p>
         </div>
-        <p style={{ fontSize: 12, color: '#475569', margin: '4px 0 14px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12, color: '#888', margin: '4px 0 14px', lineHeight: 1.6 }}>
           The hardest part is the first message. Pick someone and I'll draft a warm, personalized intro for you — no cold applications needed.
         </p>
         <button
           onClick={() => onOpenChat('Show me my identified alumni so I can pick who to message')}
           style={{
-            padding: '9px 18px', borderRadius: 10, border: 'none',
-            background: '#0021A5', color: '#fff', fontSize: 13, fontWeight: 700,
+            padding: '9px 18px', borderRadius: 100, border: 'none',
+            background: '#E85D20', color: '#fff', fontSize: 13, fontWeight: 700,
             cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 2px 8px rgba(0,33,165,0.25)',
+            boxShadow: '0 2px 8px rgba(232,93,32,0.25)',
           }}
         >
           Choose an Alumni & Draft Intro →
@@ -192,21 +191,21 @@ function AlumniOutreachNudgeCard({ identifiedCount, onOpenChat }) {
 function StepCard({ stepNumber, emoji, title, description, actions, _stacked }) {
   return (
     <div style={{
-      background: '#fff', borderRadius: 12, border: '0.5px solid rgba(0,0,0,0.08)',
+      background: '#1A1A1A', borderRadius: 12, border: '1px solid #2A2A2A',
       padding: '16px 18px', display: 'flex', alignItems: 'flex-start', gap: 14,
     }}>
       <div style={{
-        width: 28, height: 28, borderRadius: '50%', background: '#0021A5',
+        width: 28, height: 28, borderRadius: '50%', background: '#E85D20',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0, marginTop: 2,
       }}>
         {stepNumber}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: '0 0 3px', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 3px', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>{emoji}</span> {title}
         </p>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>{description}</p>
+        <p style={{ fontSize: 12, color: '#888', margin: '0 0 10px', lineHeight: 1.5 }}>{description}</p>
         <div style={{ display: 'flex', flexDirection: _stacked ? 'column' : 'row', gap: 8, flexWrap: 'wrap' }}>
           {actions.map((a, i) => (
             <button
@@ -215,9 +214,9 @@ function StepCard({ stepNumber, emoji, title, description, actions, _stacked }) 
               style={{
                 padding: a.secondary ? '10px 14px' : (_stacked ? '12px 14px' : '7px 14px'),
                 borderRadius: _stacked ? 100 : 8,
-                border: a.secondary ? '0.5px solid rgba(0,0,0,0.12)' : 'none',
-                background: a.secondary ? 'rgba(0,0,0,0.04)' : (i === 0 ? '#E85D20' : '#F1F5F9'),
-                color: a.secondary ? '#555' : (i === 0 ? '#fff' : '#475569'),
+                border: a.secondary ? '1px solid #2A2A2A' : 'none',
+                background: a.secondary ? 'transparent' : (i === 0 ? '#E85D20' : '#2A2A2A'),
+                color: a.secondary ? '#888' : (i === 0 ? '#fff' : '#ccc'),
                 fontSize: _stacked ? 14 : 12,
                 fontWeight: a.secondary ? 400 : (i === 0 && _stacked ? 500 : 700),
                 cursor: 'pointer', minHeight: 'auto',
@@ -363,8 +362,8 @@ export default function NextStepsSection({ profile, pipelineCounts, pipelineData
 
   return (
     <div className="fiq-animate fiq-delay-2" style={{
-      marginBottom: 28, background: '#fff',
-      borderRadius: 16, padding: '20px 18px', border: '0.5px solid rgba(0,0,0,0.08)',
+      marginBottom: 28, background: '#0A0A0A',
+      borderRadius: 12, padding: '20px 18px', border: '1px solid #2A2A2A',
     }}>
       <h2 style={{
         fontSize: 11, fontWeight: 500, color: '#bbb',
