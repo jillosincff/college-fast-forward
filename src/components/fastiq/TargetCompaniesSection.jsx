@@ -21,7 +21,7 @@ function guessDomain(name) {
 
 function CompanyInitial({ name }) {
   const letter = (name || '?')[0].toUpperCase();
-  const colors = ['#0021A5','#FA4616','#8B5CF6','#10B981','#EAB308','#06B6D4'];
+  const colors = ['#E85D20','#F59E0B','#22C55E','#E85D20','#F59E0B','#22C55E'];
   const colorIdx = (name || '').charCodeAt(0) % colors.length;
   return (
     <div style={{
@@ -47,23 +47,23 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
 
   if (researched) {
     if (signal === 'hot') {
-      borderColor = '#F97316';
-      glowShadow = '0 0 12px rgba(249,115,22,0.15)';
-      statusColor = '#EA580C';
-      statusBg = '#FFF7ED';
+      borderColor = '#22C55E';
+      glowShadow = '0 0 12px rgba(34,197,94,0.15)';
+      statusColor = '#22C55E';
+      statusBg = 'rgba(34,197,94,0.1)';
       statusLabel = '🔥 Hot';
     } else if (signal === 'warm') {
-      borderColor = '#EAB308';
-      glowShadow = '0 0 8px rgba(234,179,8,0.10)';
-      statusColor = '#CA8A04';
-      statusBg = '#FEFCE8';
+      borderColor = '#F59E0B';
+      glowShadow = '0 0 8px rgba(245,158,11,0.10)';
+      statusColor = '#F59E0B';
+      statusBg = 'rgba(245,158,11,0.1)';
       statusLabel = '🟡 Warm';
     } else {
-      borderColor = '#3B82F6';
+      borderColor = '#EF4444';
       glowShadow = 'none';
-      statusColor = '#2563EB';
-      statusBg = '#EFF6FF';
-      statusLabel = '🔵 Cool';
+      statusColor = '#EF4444';
+      statusBg = 'rgba(239,68,68,0.1)';
+      statusLabel = '❄️ Cool';
     }
   }
 
@@ -72,10 +72,10 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
       className={`fiq-animate fiq-delay-${delay}`}
       style={{
         padding: '14px 16px',
-        background: researched ? '#fff' : '#FFFBF5',
+        background: '#1A1A1A',
         borderRadius: 12,
-        border: researched ? `1.5px solid ${borderColor}` : '1.5px dashed #E2C9A6',
-        borderLeft: researched ? `4px solid ${borderColor}` : '4px dashed #E2A54A',
+        border: researched ? `1px solid ${borderColor}` : '1px dashed #555',
+        borderLeft: researched ? `4px solid ${borderColor}` : '4px dashed #E85D20',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -96,10 +96,10 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{name}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{name}</span>
           {/* Unresearched label */}
           {!researched && (
-            <span style={{ fontSize: 10, fontWeight: 600, color: '#B45309', fontStyle: 'italic' }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#E85D20', fontStyle: 'italic' }}>
               Not yet scanned — let's find your insiders 🔍
             </span>
           )}
@@ -112,12 +112,12 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             }}>{statusLabel}</span>
           )}
           {!researched && (
-            <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>
+            <span style={{ fontSize: 10, color: '#555', fontStyle: 'italic' }}>
               UF alumni likely present · recent postings detected
             </span>
           )}
           {alumniCount > 0 && (
-            <span style={{ fontSize: 10, color: '#64748B' }}>
+            <span style={{ fontSize: 10, color: '#888' }}>
               {alumniCount} alumni
             </span>
           )}
@@ -136,23 +136,23 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
               relevantLabel = 'new grad role' + (entry > 1 ? 's' : '');
             }
             if (relevantCount > 0) {
-              return <span style={{ fontSize: 10, color: '#64748B' }}>{relevantCount} {relevantLabel}</span>;
+              return <span style={{ fontSize: 10, color: '#888' }}>{relevantCount} {relevantLabel}</span>;
             }
             if (alumniCount === 0 && !(intel?.open_roles_count > 0)) {
-              return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>No matches yet — many roles open seasonally</span>;
+              return <span style={{ fontSize: 10, color: '#555', fontStyle: 'italic' }}>No matches yet — many roles open seasonally</span>;
             }
             if (intel?.open_roles_count > 0) {
               return (
                 <span style={{
-                  fontSize: 10, fontWeight: 700, color: '#EA580C',
-                  background: '#FFF7ED', padding: '2px 10px', borderRadius: 20,
-                  border: '1px solid #FDBA74',
+                  fontSize: 10, fontWeight: 700, color: '#E85D20',
+                  background: 'rgba(232,93,32,0.1)', padding: '2px 10px', borderRadius: 20,
+                  border: '1px solid rgba(232,93,32,0.3)',
                 }}>
                   📅 {ptConfig.rolesFoundLabel} open seasonally · {intel.open_roles_count} other role{intel.open_roles_count > 1 ? 's' : ''} posted
                 </span>
               );
             }
-            return <span style={{ fontSize: 10, color: '#94A3B8', fontStyle: 'italic' }}>Many roles open seasonally — let's scan now?</span>;
+            return <span style={{ fontSize: 10, color: '#555', fontStyle: 'italic' }}>Many roles open seasonally — let's scan now?</span>;
           })()}
         </div>
       </div>
@@ -164,9 +164,9 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             onClick={() => onOpenChat(`Research ${name} hiring`)}
             style={{
               fontSize: 13, fontWeight: 700, color: '#fff',
-              background: '#FA4616', padding: '10px 22px',
-              borderRadius: 10, border: 'none', cursor: 'pointer', minHeight: 'auto',
-              boxShadow: '0 0 16px rgba(250,70,22,0.4)',
+              background: '#E85D20', padding: '10px 22px',
+              borderRadius: 100, border: 'none', cursor: 'pointer', minHeight: 'auto',
+              boxShadow: '0 0 16px rgba(232,93,32,0.4)',
               display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
@@ -182,8 +182,8 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             <button
               onClick={() => onOpenChat(`Find companies similar to ${name} that are hiring`)}
               style={{
-                fontSize: 10, fontWeight: 600, color: '#0021A5',
-                background: 'rgba(0,33,165,0.06)', padding: '5px 10px',
+                fontSize: 10, fontWeight: 600, color: '#E85D20',
+                background: 'rgba(232,93,32,0.08)', padding: '5px 10px',
                 borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
               }}
             >
@@ -192,8 +192,8 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
             <button
               onClick={() => onOpenChat(`Research ${name} hiring`)}
               style={{
-                fontSize: 10, fontWeight: 600, color: '#64748B',
-                background: '#F1F5F9', padding: '5px 10px',
+                fontSize: 10, fontWeight: 600, color: '#888',
+                background: '#2A2A2A', padding: '5px 10px',
                 borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
               }}
             >
@@ -206,19 +206,19 @@ function CompanyRow({ name, intel, alumniCount, onOpenChat, delay, positionType 
               <button
                 onClick={() => onOpenChat(`Find UF alumni at ${name}`)}
                 style={{
-                  fontSize: 10, fontWeight: 600, color: '#0021A5',
-                  background: 'rgba(0,33,165,0.06)', padding: '5px 10px',
-                  borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
-                }}
-              >
-                View {alumniCount} Alumni →
+                  fontSize: 10, fontWeight: 600, color: '#E85D20',
+                    background: 'rgba(232,93,32,0.08)', padding: '5px 10px',
+                    borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
+                  }}
+                  >
+                  View {alumniCount} Alumni →
               </button>
             )}
             <button
               onClick={() => onOpenChat(`Research ${name} hiring`)}
               style={{
-                fontSize: 10, fontWeight: 600, color: '#64748B',
-                background: '#F1F5F9', padding: '5px 10px',
+                fontSize: 10, fontWeight: 600, color: '#888',
+                background: '#2A2A2A', padding: '5px 10px',
                 borderRadius: 6, border: 'none', cursor: 'pointer', minHeight: 'auto',
               }}
             >
@@ -291,8 +291,8 @@ export default function TargetCompaniesSection({ companies, companyIntel, alumni
         <button
           onClick={onAddTargets}
           style={{
-            fontSize: 11, fontWeight: 700, color: '#0021A5',
-            background: 'rgba(0,33,165,0.06)', padding: '6px 14px',
+            fontSize: 11, fontWeight: 700, color: '#E85D20',
+            background: 'rgba(232,93,32,0.08)', padding: '6px 14px',
             borderRadius: 8, border: 'none', cursor: 'pointer', minHeight: 'auto',
             display: 'flex', alignItems: 'center', gap: 4,
           }}
