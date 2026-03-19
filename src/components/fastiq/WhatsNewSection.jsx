@@ -43,10 +43,10 @@ function AlumniRow({ alumni, onOpenChat }) {
         onError={e => { e.target.style.display = 'none'; }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {alumni.name}
         </p>
-        <p style={{ fontSize: 11, color: '#64748B', margin: '1px 0 0' }}>
+        <p style={{ fontSize: 11, color: '#888', margin: '1px 0 0' }}>
           {alumni.role_title} at {company}
         </p>
         {/* Quick relevance bullets */}
