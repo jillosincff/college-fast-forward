@@ -45,7 +45,7 @@ export default function AskFastIQChat({ onOpenChat }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
         <span style={{ fontSize: 20 }}>⚡</span>
         <div>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a', margin: 0 }}>Ask FASTIQ™</p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>Ask FASTIQ™</p>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
             Ask anything about companies, careers, salaries, or interview prep.
           </p>
