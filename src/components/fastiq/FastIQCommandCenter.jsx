@@ -232,7 +232,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         @keyframes fiq-heroGlow { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
         @keyframes fiq-ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes fiq-ringPulse { 0%, 100% { filter: drop-shadow(0 0 2px transparent); } 50% { filter: drop-shadow(0 0 8px currentColor); } }
-        @keyframes fiq-cta-glow { 0%, 100% { box-shadow: 0 4px 16px rgba(0,33,165,0.35); } 50% { box-shadow: 0 4px 24px rgba(0,33,165,0.55), 0 0 40px rgba(0,33,165,0.2); } }
+        @keyframes fiq-cta-glow { 0%, 100% { box-shadow: 0 4px 16px rgba(232,93,32,0.35); } 50% { box-shadow: 0 4px 24px rgba(232,93,32,0.55), 0 0 40px rgba(232,93,32,0.2); } }
         .fiq-animate { animation: fiq-fadeSlideUp 0.6s ease-out both; }
         .fiq-delay-1 { animation-delay: 0.15s; }
         .fiq-delay-2 { animation-delay: 0.3s; }
@@ -331,7 +331,7 @@ export default function FastIQCommandCenter({ user, profile, onOpenChat, onProfi
         </div>
 
         {/* Footer tagline */}
-        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: '#555' }}>
+        <div style={{ textAlign: 'center', padding: '40px 0 10px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 300, color: '#888' }}>
           <span style={{ fontWeight: 500, color: '#E85D20' }}>FASTIQ™</span> by College Fast Forward. Because applying isn't a strategy.
         </div>
       </div>
