@@ -162,6 +162,7 @@ const ResumeTailoring = React.lazy(() => import('./pages/ResumeTailoring'));
 const MockInterview = React.lazy(() => import('./pages/MockInterview'));
 const LinkedInReview = React.lazy(() => import('./pages/LinkedInReview'));
 const ApplicationBoost = React.lazy(() => import('./pages/ApplicationBoost'));
+const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvitedOnboarding'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
