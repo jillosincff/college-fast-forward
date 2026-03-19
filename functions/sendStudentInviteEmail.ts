@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
             });
         }
 
-    const subject = `🌟 ${student_name}, unlock opportunities through the Gator network`;
+    const subject = `${student_name}, ${parent_name} just set something up for you`;
     
     // Build invite link with parent context for Flow A
     const parentFirstName = parent_name.split(' ')[0] || parent_name;
