@@ -509,7 +509,7 @@ const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
-const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail'];
+const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail', 'StudentInvitedOnboarding'];
 
 const isUserVerified = (user) => {
   if (!user) return false;
