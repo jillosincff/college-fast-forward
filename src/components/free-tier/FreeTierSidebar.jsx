@@ -49,12 +49,15 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-[#FFF5F0] text-[#E85D20] border-l-3 border-[#E85D20]'
-                  : 'text-[#666666] hover:bg-[#F5F5F5]'
-              }`}
-              style={{ minHeight: 'auto', borderLeftWidth: isActive ? '3px' : '0' }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all"
+              style={{
+                minHeight: 'auto',
+                background: 'transparent',
+                border: 'none',
+                borderLeft: isActive ? '3px solid #E85D20' : '3px solid transparent',
+                color: isActive ? '#E85D20' : '#666666',
+                cursor: 'pointer',
+              }}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-[#E85D20]' : 'text-[#999999]'}`} />
               {item.label}

@@ -98,9 +98,11 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontStyle: 'italic', color: '#E85D20', marginBottom: 16 }}>
             It starts with a plan.
           </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', maxWidth: 600, margin: '0 auto 32px', lineHeight: 1.6 }}>
-            You have access to powerful career research tools below. Unlock FastIQ to get your full personalized plan.
-          </p>
+          {showUpgradeBanner && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', maxWidth: 600, margin: '0 auto 32px', lineHeight: 1.6 }}>
+              You have access to powerful career research tools below. Unlock FastIQ to get your full personalized plan.
+            </p>
+          )}
 
           {/* Upgrade Banner — conditional on visit/engagement state */}
           {showUpgradeBanner ? (
@@ -289,14 +291,14 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             The more parents who join, the more possibilities you have.
           </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: 16 }}>
             {[1, 2, 3].map(i => (
-              <div key={i} className="relative bg-white rounded-xl p-4 border border-[#E0E0E0]">
+              <div key={i} className="relative" style={{ background: '#242424', border: '1px solid #2A2A2A', borderRadius: 8, padding: 16 }}>
                 <div className="filter blur-sm">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full mb-3" />
+                  <div className="w-12 h-12 bg-gray-600 rounded-full mb-3" />
                   <p className="font-bold text-gray-400 mb-1">Profile Hidden</p>
-                  <p className="text-xs text-gray-400">Senior Analyst</p>
-                  <p className="text-xs text-gray-400">Goldman Sachs</p>
+                  <p className="text-xs text-gray-500">Senior Analyst</p>
+                  <p className="text-xs text-gray-500">Goldman Sachs</p>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
