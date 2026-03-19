@@ -148,7 +148,7 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
           <p className="hero-fade" style={{ animationDelay: '3130ms', fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 400, color: '#fff', lineHeight: 1.65, maxWidth: 680, margin: '0 auto 24px' }}>
             We take the nagging out of parenting and replace it with a high-tech pipeline that moves your student from the bottom of the pile to the top of the list.
           </p>
-          <p className="hero-fade" style={{ animationDelay: '3280ms', fontFamily: playfair, fontStyle: 'italic', fontSize: 'clamp(22px, 3.5vw, 38px)', color: '#E85D20', margin: 0 }}>
+          <p className="hero-fade" style={{ animationDelay: '3280ms', fontFamily: playfair, fontStyle: 'italic', fontSize: 'clamp(18px, 2.5vw, 28px)', color: '#E85D20', margin: 0 }}>
             College Fast Forward provides the engine that syncs them.
           </p>
         </div>

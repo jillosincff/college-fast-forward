@@ -13,7 +13,7 @@ import V3ParentStory from '@/components/landing/v3/V3ParentStory';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
 import V3FAQ from '@/components/landing/v3/V3FAQ';
 import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
-import V3Manifesto from '@/components/landing/v3/V3Manifesto';
+
 
 export default function LandingPage() {
   useEffect(() => {
@@ -56,8 +56,7 @@ export default function LandingPage() {
         {/* 1 — Hero */}
         <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
 
-        {/* 2 — The Manifesto */}
-        <V3Manifesto />
+
 
         {/* 3 — The Reality */}
         <V3Problem />
