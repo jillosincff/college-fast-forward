@@ -33,47 +33,47 @@ function AlumniRow({ alumni, onOpenChat }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 14px',
-      background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0',
+      background: '#1A1A1A', borderRadius: 12, border: '1px solid #2A2A2A',
       transition: 'all 0.15s',
     }}>
       <img
         src={`https://logo.clearbit.com/${guessDomain(alumni.company)}`}
         alt=""
-        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#F1F5F9', marginTop: 2 }}
+        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#2A2A2A', marginTop: 2 }}
         onError={e => { e.target.style.display = 'none'; }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {alumni.name}
         </p>
-        <p style={{ fontSize: 11, color: '#64748B', margin: '1px 0 0' }}>
+        <p style={{ fontSize: 11, color: '#888', margin: '1px 0 0' }}>
           {alumni.role_title} at {company}
         </p>
         {/* Quick relevance bullets */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 5 }}>
           <span style={{
-            fontSize: 10, fontWeight: 600, color: '#0369A1', background: '#E0F2FE',
+            fontSize: 10, fontWeight: 600, color: '#E85D20', background: 'rgba(232,93,32,0.1)',
             padding: '2px 8px', borderRadius: 6, lineHeight: '16px',
           }}>💡 {relevanceHint} at {company}</span>
           {alumni.uf_verified === false && alumni.confidence === 'low' ? (
             <span title="School connection unverified — check LinkedIn" style={{
-              fontSize: 10, fontWeight: 600, color: '#92400E', background: '#FEF3C7',
+              fontSize: 10, fontWeight: 600, color: '#F59E0B', background: 'rgba(245,158,11,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>⚠️ UF Unverified</span>
           ) : alumni.verified || alumni.uf_verified ? (
             <span title="Confirmed University of Florida graduate/alum" style={{
-              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              fontSize: 10, fontWeight: 600, color: '#22C55E', background: 'rgba(34,197,94,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>✅ UF Alum</span>
           ) : (
             <span title="Likely UF connection — verify on LinkedIn" style={{
-              fontSize: 10, fontWeight: 600, color: '#166534', background: '#DCFCE7',
+              fontSize: 10, fontWeight: 600, color: '#22C55E', background: 'rgba(34,197,94,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>🐊 UF Alum</span>
           )}
           {alumni.match_score >= 70 && alumni.confidence !== 'low' && (
             <span title="Strong fit for your interests + UF connection" style={{
-              fontSize: 10, fontWeight: 600, color: '#9333EA', background: '#F3E8FF',
+              fontSize: 10, fontWeight: 600, color: '#E85D20', background: 'rgba(232,93,32,0.1)',
               padding: '2px 8px', borderRadius: 6, lineHeight: '16px', cursor: 'help',
             }}>⭐ High match</span>
           )}
@@ -82,11 +82,11 @@ function AlumniRow({ alumni, onOpenChat }) {
       <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2 }}>
         <button
           onClick={() => onOpenChat(`Tell me about ${alumni.name} at ${alumni.company}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #2A2A2A', background: '#0A0A0A', color: '#888', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
         >View Profile →</button>
         <button
           onClick={() => onOpenChat(`Draft a warm intro message to ${alumni.name}, ${alumni.role_title || 'professional'} at ${alumni.company}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: alumni.uf_verified === false && alumni.confidence === 'low' ? '#94A3B8' : '#0021A5', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: alumni.uf_verified === false && alumni.confidence === 'low' ? '#555' : '#E85D20', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
           disabled={alumni.uf_verified === false && alumni.confidence === 'low'}
           title={alumni.uf_verified === false && alumni.confidence === 'low' ? 'Verify UF connection first' : ''}
         >Draft Message →</button>
@@ -99,30 +99,30 @@ function OpportunityRow({ opp, onOpenChat, onDismiss }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-      background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0',
+      background: '#1A1A1A', borderRadius: 12, border: '1px solid #2A2A2A',
     }}>
       <img
         src={`https://logo.clearbit.com/${guessDomain(opp.company_name)}`}
         alt=""
-        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#F1F5F9' }}
+        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#2A2A2A' }}
         onError={e => { e.target.style.display = 'none'; }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {opp.role_title}
         </p>
-        <p style={{ fontSize: 11, color: '#64748B', margin: 0 }}>
+        <p style={{ fontSize: 11, color: '#888', margin: 0 }}>
           {titleCase(opp.company_name)} {opp.scouted_date ? `· Found ${moment(opp.scouted_date).fromNow()}` : ''}
         </p>
       </div>
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
         <button
           onClick={() => onOpenChat(`Research ${opp.company_name} for the ${opp.role_title} role`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: '#0021A5', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: '#E85D20', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
         >Research →</button>
         <button
           onClick={() => onOpenChat(`Tailor my resume for the ${opp.role_title} role at ${opp.company_name}`)}
-          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #2A2A2A', background: '#0A0A0A', color: '#888', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
         >Tailor Resume →</button>
       </div>
     </div>
@@ -148,8 +148,8 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
         <div style={{ marginBottom: hasOpps ? 20 : 0 }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12,
-            padding: '10px 14px', background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
-            borderRadius: 12, border: '1.5px solid #FB923C',
+            padding: '10px 14px', background: 'rgba(232,93,32,0.08)',
+            borderRadius: 12, border: '1.5px solid rgba(232,93,32,0.3)',
             boxShadow: '0 0 20px rgba(250,70,22,0.12)',
             animation: 'fiq-alumni-glow 2.5s ease-in-out infinite',
           }}>
@@ -167,12 +167,12 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
               width: 8, height: 8, borderRadius: '50%', background: '#FA4616', flexShrink: 0,
               animation: 'fiq-alumni-dot 1.5s ease-in-out infinite',
             }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#C2410C' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#E85D20' }}>
               {newAlumni.length} new UF {newAlumni.length === 1 ? 'alum' : 'alumni'} found at your target companies
             </span>
             <span style={{
               marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#fff',
-              background: '#FA4616', padding: '3px 10px', borderRadius: 20, flexShrink: 0,
+              background: '#E85D20', padding: '3px 10px', borderRadius: 20, flexShrink: 0,
               letterSpacing: '0.02em',
             }}>NEW</span>
           </div>
@@ -184,7 +184,7 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
           {newAlumni.length > 5 && !showAllAlumni && (
             <button
               onClick={() => setShowAllAlumni(true)}
-              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#0021A5', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
+              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
             >
               See all {newAlumni.length} →
             </button>
@@ -197,10 +197,10 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
         <div>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
-            padding: '8px 12px', background: '#FFF7ED', borderRadius: 8, borderLeft: '3px solid #FA4616',
+            padding: '8px 12px', background: 'rgba(232,93,32,0.08)', borderRadius: 12, borderLeft: '3px solid #E85D20',
           }}>
             <span style={{ fontSize: 16 }}>💼</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#C2410C' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#E85D20' }}>
               {newOpportunities.length} new entry-level role{newOpportunities.length > 1 ? 's' : ''} match your profile
             </span>
           </div>
@@ -212,7 +212,7 @@ export default function WhatsNewSection({ newAlumni, newOpportunities, onOpenCha
           {newOpportunities.length > 4 && !showAllOpps && (
             <button
               onClick={() => setShowAllOpps(true)}
-              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#C2410C', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
+              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0' }}
             >
               See all {newOpportunities.length} →
             </button>
