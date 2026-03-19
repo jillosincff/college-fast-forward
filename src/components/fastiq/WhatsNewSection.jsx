@@ -39,7 +39,7 @@ function AlumniRow({ alumni, onOpenChat }) {
       <img
         src={`https://logo.clearbit.com/${guessDomain(alumni.company)}`}
         alt=""
-        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#F1F5F9', marginTop: 2 }}
+        style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, objectFit: 'contain', background: '#2A2A2A', marginTop: 2 }}
         onError={e => { e.target.style.display = 'none'; }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
