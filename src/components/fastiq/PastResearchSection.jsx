@@ -23,7 +23,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
         }}
       >
         <span style={{ fontSize: 14 }}>📁</span>
-        <span style={{ fontSize: 11, fontWeight: 500, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Sans', sans-serif" }}>
+        <span style={{ fontSize: 11, fontWeight: 500, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: "'DM Sans', sans-serif" }}>
           Companies FASTIQ is watching ({meaningfulResearch.length})
         </span>
         {!expanded && meaningfulResearch.length > 0 && (() => {
@@ -31,23 +31,23 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
           const preview = uniqueNames.slice(0, 3).join(' · ');
           const remaining = Math.max(0, uniqueNames.length - 3);
           return (
-            <span style={{ fontSize: 10, color: '#64748B', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
+            <span style={{ fontSize: 10, color: '#888', fontWeight: 500, fontStyle: 'italic', marginLeft: 4 }}>
               — {preview}{remaining > 0 ? ` +${remaining} more` : ''} ›
             </span>
           );
         })()}
         {expanded
-          ? <ChevronDown style={{ width: 14, height: 14, color: '#475569' }} />
-          : <ChevronRight style={{ width: 14, height: 14, color: '#475569' }} />
+          ? <ChevronDown style={{ width: 14, height: 14, color: '#888' }} />
+          : <ChevronRight style={{ width: 14, height: 14, color: '#888' }} />
         }
       </button>
 
       {expanded && (
         <div style={{
-          background: '#FAFBFC', borderRadius: 14, border: '1px solid #E2E8F0',
+          background: '#0A0A0A', borderRadius: 12, border: '1px solid #2A2A2A',
           padding: '16px', marginTop: 8,
         }}>
-          <p style={{ fontSize: 11, color: '#64748B', marginBottom: 14, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11, color: '#888', marginBottom: 14, lineHeight: 1.5 }}>
             Companies you previously researched that are no longer targets. Your data is preserved.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -63,23 +63,23 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
               return (
                 <div key={name} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '12px 14px', background: '#fff', borderRadius: 10,
-                  border: '1px solid #E2E8F0', gap: 10,
+                  padding: '12px 14px', background: '#1A1A1A', borderRadius: 12,
+                  border: '1px solid #2A2A2A', gap: 10,
                 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>{name}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{name}</span>
                       {signal && (
                         <span style={{
                           fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
-                          background: signal === 'hot' ? '#FFF7ED' : signal === 'warm' ? '#FEFCE8' : '#F1F5F9',
-                          color: signal === 'hot' ? '#EA580C' : signal === 'warm' ? '#CA8A04' : '#64748B',
+                          background: signal === 'hot' ? 'rgba(34,197,94,0.1)' : signal === 'warm' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                          color: signal === 'hot' ? '#22C55E' : signal === 'warm' ? '#F59E0B' : '#EF4444',
                         }}>
                           {signal === 'hot' ? '🔥' : signal === 'warm' ? '🟡' : '🔵'} {signal}
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
                       {alumni > 0 && `${alumni} alumni found`}
                       {alumni > 0 && reached > 0 && ' · '}
                       {reached > 0 && `${reached} reached out`}
@@ -90,7 +90,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
                     <button
                       onClick={() => onOpenChat(`Research ${name} hiring`)}
                       style={{
-                        fontSize: 10, fontWeight: 600, color: '#64748B', background: '#F1F5F9',
+                        fontSize: 10, fontWeight: 600, color: '#888', background: '#2A2A2A',
                         padding: '5px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
                         minHeight: 'auto',
                       }}
@@ -100,7 +100,7 @@ export default function PastResearchSection({ pastResearch, onReAddCompany, onOp
                     <button
                       onClick={() => onReAddCompany(name)}
                       style={{
-                        fontSize: 10, fontWeight: 600, color: '#0021A5', background: 'rgba(0,33,165,0.06)',
+                        fontSize: 10, fontWeight: 600, color: '#E85D20', background: 'rgba(232,93,32,0.08)',
                         padding: '5px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
                         minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 3,
                       }}

@@ -7,11 +7,11 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
 const TYPE_STYLES = {
-  behavioral: { bg: 'rgba(33,150,243,0.08)', color: '#1565c0' },
-  technical: { bg: 'rgba(156,39,176,0.08)', color: '#6a1b9a' },
-  product: { bg: 'rgba(232,93,32,0.08)', color: '#E85D20' },
-  case: { bg: 'rgba(76,175,80,0.08)', color: '#2e7d32' },
-  other: { bg: 'rgba(0,0,0,0.04)', color: '#888' },
+behavioral: { bg: 'rgba(232,93,32,0.08)', color: '#E85D20' },
+technical: { bg: 'rgba(232,93,32,0.08)', color: '#E85D20' },
+product: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B' },
+case: { bg: 'rgba(34,197,94,0.1)', color: '#22C55E' },
+other: { bg: 'rgba(255,255,255,0.04)', color: '#888' },
 };
 
 const TYPE_OPTIONS = ['behavioral', 'technical', 'product', 'case', 'other'];
@@ -23,8 +23,8 @@ function Pill({ label, active, onClick }) {
     <button onClick={onClick} style={{
       fontFamily: dmSans, fontSize: 12, fontWeight: active ? 500 : 400,
       color: active ? '#fff' : '#888',
-      background: active ? '#E85D20' : '#fff',
-      border: `0.5px solid ${active ? '#E85D20' : 'rgba(0,0,0,0.1)'}`,
+      background: active ? '#E85D20' : '#1A1A1A',
+      border: `1px solid ${active ? '#E85D20' : '#2A2A2A'}`,
       borderRadius: 100, padding: '6px 14px', cursor: 'pointer',
       transition: 'all 0.2s', minHeight: 'auto', width: 'auto',
     }}>{label}</button>
@@ -159,7 +159,7 @@ export default function InterviewPrepTab() {
 
       {/* Question cards */}
       {filtered.length === 0 ? (
-        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 12, padding: '32px 24px', textAlign: 'center' }}>
+        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '32px 24px', textAlign: 'center' }}>
           <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888' }}>No questions match this filter.</p>
         </div>
       ) : filtered.slice(0, 20).map(q => {
@@ -167,33 +167,33 @@ export default function InterviewPrepTab() {
         const isExpanded = expanded === q.id;
         return (
           <div key={q.id} style={{
-            background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 12,
+            background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12,
             padding: '16px 18px', marginBottom: 8, cursor: 'pointer',
             transition: 'all 0.2s',
           }}
             onClick={() => setExpanded(isExpanded ? null : q.id)}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.2)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.transform = 'translateY(0)'; }}
           >
             {/* Top row badges */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '2px 8px', color: '#555' }}>{q.company}</span>
+              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid #2A2A2A', borderRadius: 100, padding: '2px 8px', color: '#ccc' }}>{q.company}</span>
               <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, background: ts.bg, borderRadius: 100, padding: '2px 8px', color: ts.color }}>{q.type.charAt(0).toUpperCase() + q.type.slice(1)}</span>
-              {q.level && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, background: 'rgba(0,0,0,0.04)', borderRadius: 100, padding: '2px 8px', color: '#888' }}>{LEVEL_LABELS[q.level] || q.level}</span>}
+              {q.level && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, background: 'rgba(255,255,255,0.04)', borderRadius: 100, padding: '2px 8px', color: '#888' }}>{LEVEL_LABELS[q.level] || q.level}</span>}
             </div>
             {/* Question text */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#1a1a1a', lineHeight: 1.5, margin: 0, flex: 1 }}>{q.text}</p>
+              <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', lineHeight: 1.5, margin: 0, flex: 1 }}>{q.text}</p>
               {isExpanded ? <ChevronUp size={16} color="#aaa" style={{ flexShrink: 0, marginLeft: 8 }} /> : <ChevronDown size={16} color="#aaa" style={{ flexShrink: 0, marginLeft: 8 }} />}
             </div>
             {/* Expanded */}
             {isExpanded && (
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                {q.role && <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', marginBottom: 4 }}><strong>Role:</strong> {q.role}</p>}
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #2A2A2A' }}>
+                {q.role && <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888', marginBottom: 4 }}><strong style={{ color: '#ccc' }}>Role:</strong> {q.role}</p>}
                 {q.tips && (
-                  <div style={{ background: 'rgba(76,175,80,0.06)', borderRadius: 8, padding: '10px 12px', marginTop: 8 }}>
-                    <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#2e7d32', marginBottom: 4 }}>💡 Tips</p>
-                    <p style={{ fontFamily: dmSans, fontSize: 13, color: '#2e7d32', margin: 0 }}>{q.tips}</p>
+                  <div style={{ background: 'rgba(34,197,94,0.06)', borderRadius: 8, padding: '10px 12px', marginTop: 8 }}>
+                    <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#22C55E', marginBottom: 4 }}>💡 Tips</p>
+                    <p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{q.tips}</p>
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 16, marginTop: 10, alignItems: 'center' }}>
