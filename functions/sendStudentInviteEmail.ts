@@ -37,8 +37,25 @@ Deno.serve(async (req) => {
 
     const subject = `🌟 ${student_name}, unlock opportunities through the Gator network`;
     
-    // Use www.collegefastforward.com
-    const inviteLink = `https://www.collegefastforward.com/#PreAuth?email=${encodeURIComponent(student_email)}`;
+    // Build invite link with parent context for Flow A
+    const parentFirstName = parent_name.split(' ')[0] || parent_name;
+    // Get student's university from parent's onboarding data if available
+    let studentSchool = '';
+    try {
+      const parentUser = await base44.asServiceRole.entities.User.filter({ email: user.email });
+      if (parentUser?.[0]) {
+        // Check for student university stored during parent onboarding
+        const studentEmails = parentUser[0].student_emails || [];
+        studentSchool = body.student_university || parentUser[0].student_university || '';
+      }
+    } catch (e) { /* non-critical */ }
+
+    const inviteParams = new URLSearchParams({
+      email: student_email,
+      parent: parentFirstName,
+      ...(studentSchool ? { school: studentSchool } : {}),
+    });
+    const inviteLink = `https://www.collegefastforward.com/#StudentInvitedOnboarding?${inviteParams.toString()}`;
 
     const emailBody = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #374151; background-color: #f9fafb; padding: 20px;">
