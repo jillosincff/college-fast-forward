@@ -51,27 +51,27 @@ const icons = {
 };
 
 const ICON_BG_MAP = {
-  'Find Warm Intros': 'rgba(232,93,32,0.1)',
-  'Draft Intro': 'rgba(33,150,243,0.08)',
-  'Resume Review & Tailor': 'rgba(156,39,176,0.08)',
-  'Mock Interview': 'rgba(76,175,80,0.08)',
-  'Explore Careers': 'rgba(255,167,38,0.08)',
+  'Find Warm Intros': 'rgba(232,93,32,0.12)',
+  'Draft Intro': 'rgba(232,93,32,0.08)',
+  'Resume Review & Tailor': 'rgba(232,93,32,0.08)',
+  'Mock Interview': 'rgba(232,93,32,0.08)',
+  'Explore Careers': 'rgba(232,93,32,0.08)',
   'Salary Intel': 'rgba(232,93,32,0.08)',
-  'LinkedIn Review': 'rgba(33,150,243,0.08)',
-  'Application Boost': 'rgba(232,93,32,0.1)',
-  'Action Plan': 'rgba(76,175,80,0.08)',
+  'LinkedIn Review': 'rgba(232,93,32,0.08)',
+  'Application Boost': 'rgba(232,93,32,0.12)',
+  'Action Plan': 'rgba(232,93,32,0.08)',
 };
 
 const ICON_COLOR_MAP = {
   'Find Warm Intros': '#E85D20',
-  'Draft Intro': '#2196F3',
-  'Resume Review & Tailor': '#9C27B0',
-  'Mock Interview': '#4CAF50',
-  'Explore Careers': '#FFA726',
+  'Draft Intro': '#E85D20',
+  'Resume Review & Tailor': '#E85D20',
+  'Mock Interview': '#E85D20',
+  'Explore Careers': '#E85D20',
   'Salary Intel': '#E85D20',
-  'LinkedIn Review': '#2196F3',
+  'LinkedIn Review': '#E85D20',
   'Application Boost': '#E85D20',
-  'Action Plan': '#4CAF50',
+  'Action Plan': '#E85D20',
 };
 
 const ICON_FN_MAP = {
