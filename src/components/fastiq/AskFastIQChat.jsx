@@ -106,12 +106,12 @@ export default function AskFastIQChat({ onOpenChat }) {
           placeholder="Ask FASTIQ anything..."
           disabled={loading}
           style={{
-            flex: 1, padding: '11px 18px', border: '0.5px solid rgba(0,0,0,0.1)',
+            flex: 1, padding: '11px 18px', border: '1px solid #2A2A2A',
             borderRadius: 100, fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-            color: '#1a1a1a', outline: 'none', background: '#f4f2ee',
+            color: '#fff', outline: 'none', background: '#0A0A0A',
           }}
-          onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'}
-          onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'}
+          onFocus={e => e.currentTarget.style.borderColor = 'rgba(232,93,32,0.5)'}
+          onBlur={e => e.currentTarget.style.borderColor = '#2A2A2A'}
         />
         <button onClick={() => ask()} disabled={!query.trim() || loading} style={{
           width: 36, height: 36, borderRadius: '50%', background: '#E85D20',

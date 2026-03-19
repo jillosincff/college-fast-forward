@@ -51,27 +51,27 @@ const icons = {
 };
 
 const ICON_BG_MAP = {
-  'Find Warm Intros': 'rgba(232,93,32,0.1)',
-  'Draft Intro': 'rgba(33,150,243,0.08)',
-  'Resume Review & Tailor': 'rgba(156,39,176,0.08)',
-  'Mock Interview': 'rgba(76,175,80,0.08)',
-  'Explore Careers': 'rgba(255,167,38,0.08)',
+  'Find Warm Intros': 'rgba(232,93,32,0.12)',
+  'Draft Intro': 'rgba(232,93,32,0.08)',
+  'Resume Review & Tailor': 'rgba(232,93,32,0.08)',
+  'Mock Interview': 'rgba(34,197,94,0.1)',
+  'Explore Careers': 'rgba(245,158,11,0.1)',
   'Salary Intel': 'rgba(232,93,32,0.08)',
-  'LinkedIn Review': 'rgba(33,150,243,0.08)',
-  'Application Boost': 'rgba(232,93,32,0.1)',
-  'Action Plan': 'rgba(76,175,80,0.08)',
+  'LinkedIn Review': 'rgba(232,93,32,0.08)',
+  'Application Boost': 'rgba(232,93,32,0.12)',
+  'Action Plan': 'rgba(34,197,94,0.1)',
 };
 
 const ICON_COLOR_MAP = {
   'Find Warm Intros': '#E85D20',
-  'Draft Intro': '#2196F3',
-  'Resume Review & Tailor': '#9C27B0',
-  'Mock Interview': '#4CAF50',
-  'Explore Careers': '#FFA726',
+  'Draft Intro': '#E85D20',
+  'Resume Review & Tailor': '#E85D20',
+  'Mock Interview': '#22C55E',
+  'Explore Careers': '#F59E0B',
   'Salary Intel': '#E85D20',
-  'LinkedIn Review': '#2196F3',
+  'LinkedIn Review': '#E85D20',
   'Application Boost': '#E85D20',
-  'Action Plan': '#4CAF50',
+  'Action Plan': '#22C55E',
 };
 
 const ICON_FN_MAP = {
@@ -87,15 +87,15 @@ const ICON_FN_MAP = {
 };
 
 const ALL_ACTIONS = [
-  { label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#0021A5', prompt: 'Find UF alumni at my target companies', primary: true },
-  { label: 'Draft Intro', description: "I'll write a personalized message for you", color: '#FA4616', prompt: 'Draft an outreach message', primary: true },
-  { label: 'Resume Review & Tailor', description: 'Tailor your resume to any job listing', color: '#8B5CF6', prompt: '__navigate_resume_tailoring__', primary: true },
-  { label: 'Mock Interview', description: 'Practice with FASTIQ as your interviewer', color: '#EF4444', prompt: '__navigate_mock_interview__', primary: true },
-  { label: 'Explore Careers', description: "Not sure what direction to go? Let's explore", color: '#06B6D4', prompt: 'Explore career paths for my major', primary: false },
-  { label: 'Salary Intel', description: 'What should you expect to earn?', color: '#10B981', prompt: 'Help me negotiate salary', primary: false },
-  { label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#0077B5', prompt: '__navigate_linkedin_review__', primary: false },
+  { label: 'Find Warm Intros', description: 'Find UF alumni at any company', color: '#E85D20', prompt: 'Find UF alumni at my target companies', primary: true },
+  { label: 'Draft Intro', description: "I'll write a personalized message for you", color: '#E85D20', prompt: 'Draft an outreach message', primary: true },
+  { label: 'Resume Review & Tailor', description: 'Tailor your resume to any job listing', color: '#E85D20', prompt: '__navigate_resume_tailoring__', primary: true },
+  { label: 'Mock Interview', description: 'Practice with FASTIQ as your interviewer', color: '#22C55E', prompt: '__navigate_mock_interview__', primary: true },
+  { label: 'Explore Careers', description: "Not sure what direction to go? Let's explore", color: '#F59E0B', prompt: 'Explore career paths for my major', primary: false },
+  { label: 'Salary Intel', description: 'What should you expect to earn?', color: '#E85D20', prompt: 'Help me negotiate salary', primary: false },
+  { label: 'LinkedIn Review', description: 'Optimize your profile to get noticed', color: '#E85D20', prompt: '__navigate_linkedin_review__', primary: false },
   { label: 'Application Boost', description: "Know what to write — and whether it's worth writing", color: '#E85D20', prompt: '__navigate_application_boost__', primary: false },
-  { label: 'Action Plan', description: 'Your goals, milestones & activity', color: '#E85D20', prompt: '__navigate_action_plan__', primary: false },
+  { label: 'Action Plan', description: 'Your goals, milestones & activity', color: '#22C55E', prompt: '__navigate_action_plan__', primary: false },
 ];
 
 function ActionCard({ action, onOpenChat }) {
@@ -128,14 +128,14 @@ function ActionCard({ action, onOpenChat }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         padding: action.primary ? '18px 14px 16px' : '14px 12px 12px',
-        background: '#fff',
-        borderRadius: 14,
-        border: `1px solid ${hovered ? action.color : '#E2E8F0'}`,
+        background: '#1A1A1A',
+        borderRadius: 12,
+        border: `1px solid ${hovered ? action.color : '#2A2A2A'}`,
         borderTop: `3px solid ${action.color}`,
         cursor: 'pointer',
         transition: 'all 0.25s',
         transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered ? `0 8px 24px ${action.color}20` : action.primary ? '0 1px 4px rgba(0,0,0,0.04)' : 'none',
+        boxShadow: hovered ? `0 8px 24px ${action.color}20` : 'none',
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
@@ -156,12 +156,12 @@ function ActionCard({ action, onOpenChat }) {
       <div style={{
         fontSize: action.primary ? 14 : 13,
         fontWeight: 700,
-        color: '#1E293B',
+        color: '#fff',
         lineHeight: 1.3,
       }}>{action.label}</div>
       <div style={{
         fontSize: 11,
-        color: '#64748B',
+        color: '#888',
         lineHeight: 1.4,
       }}>{action.description}</div>
     </div>
@@ -179,13 +179,13 @@ export default function QuickActionsGrid({ onOpenChat, isNewUser }) {
 
       {isNewUser && (
         <div style={{
-          background: '#F0F4FA', borderRadius: 10, padding: '10px 14px',
+          background: 'rgba(232,93,32,0.06)', borderRadius: 12, padding: '10px 14px',
           marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8,
-          border: '1px solid #E2E8F0',
+          border: '1px solid rgba(232,93,32,0.15)',
         }}>
           <span style={{ fontSize: 16 }}>👋</span>
-          <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.4 }}>
-            <b>Not sure where to start?</b> Try <b>"Find Warm Intros"</b> or <b>"Explore Careers"</b> — FASTIQ will guide you step by step.
+          <span style={{ fontSize: 12, color: '#888', lineHeight: 1.4 }}>
+            <b style={{ color: '#fff' }}>Not sure where to start?</b> Try <b style={{ color: '#E85D20' }}>"Find Warm Intros"</b> or <b style={{ color: '#E85D20' }}>"Explore Careers"</b> — FASTIQ will guide you step by step.
           </span>
         </div>
       )}
