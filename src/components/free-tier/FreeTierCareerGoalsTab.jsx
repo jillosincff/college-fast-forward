@@ -2,7 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
-const INDUSTRIES = ['Finance & Banking', 'Technology & Software', 'Marketing', 'Consulting', 'Healthcare', 'Engineering', 'Law & Legal', 'Education', 'Media & Entertainment', 'Real Estate', 'Other'];
+const INDUSTRIES = [
+  'Technology, Information & Media',
+  'Healthcare & Pharmaceuticals',
+  'Manufacturing & Industrial',
+  'Finance & Insurance',
+  'Professional Services',
+  'Retail & Consumer Goods',
+  'Construction & Agriculture',
+  'Transportation & Logistics',
+  'Education & Training',
+  'Government & Public Sector',
+  'Advertising & PR',
+  'Sports & Entertainment',
+  'Other',
+];
 const LOCATIONS = ['Remote', 'New York', 'Los Angeles', 'Chicago', 'Boston', 'Miami', 'San Francisco', 'Other'];
 const GRAD_YEARS = ['2025', '2026', '2027', '2028', '2029', '2030'];
 
@@ -14,6 +28,8 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
   const [locations, setLocations] = useState([]);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [companyInput, setCompanyInput] = useState('');
+  const [companySkipped, setCompanySkipped] = useState(false);
 
   useEffect(() => {
     setRole(user?.target_role || '');
@@ -104,32 +120,61 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
             What are your target companies?
           </label>
-          <input
-            type="text"
-            placeholder="Start typing company names..."
-            className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A] mb-2"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && e.target.value.trim()) {
-                setCompanies(prev => [...prev, e.target.value.trim()]);
-                e.target.value = '';
-              }
-            }}
-          />
-          <div className="flex flex-wrap gap-2">
-            {companies.map((c, i) => (
-              <span key={i} className="px-3 py-1 bg-[#E85D20]/10 text-[#E85D20] text-sm rounded-full flex items-center gap-2">
-                {c}
-                <button
-                  onClick={() => setCompanies(prev => prev.filter((_, idx) => idx !== i))}
-                  className="text-[#E85D20] hover:text-[#d44e14]"
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <p className="text-xs text-[#999999] mt-2">Don't worry if you're not sure — FastIQ will help you find them.</p>
+          {companySkipped ? (
+            <p style={{ fontSize: 13, color: '#999', fontStyle: 'italic' }}>
+              <span style={{ color: '#E85D20' }}>✓</span> Skipped — FastIQ will suggest companies for you after setup.
+            </p>
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Start typing company names..."
+                value={companyInput}
+                onChange={e => setCompanyInput(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A] mb-2"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && companyInput.trim()) {
+                    setCompanies(prev => [...prev, companyInput.trim()]);
+                    setCompanyInput('');
+                  }
+                }}
+              />
+              <div className="flex flex-wrap gap-2 mb-2">
+                {companies.map((c, i) => (
+                  <span key={i} className="px-3 py-1 bg-[#E85D20]/10 text-[#E85D20] text-sm rounded-full flex items-center gap-2">
+                    {c}
+                    <button
+                      onClick={() => setCompanies(prev => prev.filter((_, idx) => idx !== i))}
+                      className="text-[#E85D20] hover:text-[#d44e14]"
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {companyInput.length === 0 && companies.length === 0 && (
+                <div className="rounded-lg border border-[#E0E0E0] bg-[#FAFAFA] p-4 mt-1">
+                  <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', marginBottom: 8 }}>NOT SURE WHERE TO START?</p>
+                  <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 0 }}>
+                    Think about:
+                  </p>
+                  <ul style={{ fontSize: 13, color: '#555', lineHeight: 1.8, paddingLeft: 18, margin: '4px 0 12px' }}>
+                    <li>Companies you've seen in your major's coursework</li>
+                    <li>Brands you use or admire</li>
+                    <li>Places your friends or family work</li>
+                    <li>Companies that come up when you search "[your major] jobs"</li>
+                  </ul>
+                  <button
+                    onClick={() => setCompanySkipped(true)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', minHeight: 'auto', padding: 0 }}
+                  >
+                    Or skip for now — FastIQ will suggest target companies based on your major and interests once you save your goals.
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Graduation Year */}
