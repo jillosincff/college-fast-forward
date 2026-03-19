@@ -89,7 +89,7 @@ export default function AskFastIQChat({ onOpenChat }) {
           ))}
           {loading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 10 }}>
-              <div style={{ background: '#f8f8f6', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '10px 14px' }}>
+              <div style={{ background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 14, padding: '10px 14px' }}>
                 <div style={{ width: 20, height: 20, border: '2px solid #E85D20', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               </div>
             </div>
