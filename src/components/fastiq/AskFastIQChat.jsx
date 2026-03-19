@@ -57,13 +57,13 @@ export default function AskFastIQChat({ onOpenChat }) {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
           {SUGGESTIONS.map((s, i) => (
             <button key={i} onClick={() => ask(s)} style={{
-              fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#555',
-              background: 'rgba(0,0,0,0.04)', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 8,
+              fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888',
+              background: 'rgba(255,255,255,0.04)', border: '1px solid #2A2A2A', borderRadius: 8,
               padding: '6px 12px', cursor: 'pointer', transition: 'all 0.2s',
               minHeight: 'auto', width: 'auto', textAlign: 'left',
             }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.04)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#555'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#888'; e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
             >{s}</button>
           ))}
         </div>
