@@ -24,12 +24,12 @@ function AlumniHeroCard({ targetCompanies, onOpenChat }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #EFF6FF 0%, #F0F4FA 100%)',
-      borderRadius: 14, border: '1px solid #BFDBFE', borderLeft: '5px solid #0021A5',
+      background: '#1A1A1A',
+      borderRadius: 12, border: '1px solid #2A2A2A', borderLeft: '5px solid #E85D20',
       padding: '22px 22px', display: 'flex', alignItems: 'flex-start', gap: 16,
     }}>
       <div style={{
-        width: 44, height: 44, borderRadius: 12, background: '#0021A5',
+        width: 44, height: 44, borderRadius: 12, background: 'rgba(232,93,32,0.15)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 22, flexShrink: 0, marginTop: 2,
       }}>
