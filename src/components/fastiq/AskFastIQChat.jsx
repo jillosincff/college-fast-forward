@@ -38,8 +38,8 @@ export default function AskFastIQChat({ onOpenChat }) {
 
   return (
     <div style={{
-      background: '#ffffff', border: '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: 16, padding: '20px 24px', marginBottom: 24,
+      background: '#1A1A1A', border: '1px solid #2A2A2A',
+      borderRadius: 12, padding: '20px 24px', marginBottom: 24,
     }}>
       {/* Top row: icon + label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
