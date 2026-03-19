@@ -73,8 +73,11 @@ export default function V3Hero({ onCTA, onHowItWorks }) {
       <div className="relative z-10 max-w-3xl mx-auto text-center px-5 pt-28 sm:pt-36 pb-16">
         {/* Eyebrow */}
         <div className="mb-7">
-          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent-primary, #4F8CFF)', transition: 'color 0.4s', display: 'block' }}>
             College Fast Forward
+          </span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888888', letterSpacing: 'normal', textTransform: 'none', display: 'block', marginTop: 2 }}>
+            powered by <span style={{ color: '#E85D20' }}>FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup></span>
           </span>
         </div>
 
