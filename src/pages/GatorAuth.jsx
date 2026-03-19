@@ -696,16 +696,8 @@ export default function GatorAuth() {
       }
 
       if (roleId === 'gator') {
-        const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-        setLoading(true);
-        base44.auth.updateMe({
-          persona: 'gator', roles: ['gator'], onboarding_completed: false,
-          is_new_signup: true, invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
-        }).then(() => {
-          localStorage.removeItem('pending_invite_role');
-          if (refreshUser) refreshUser();
-          navigate('StudentOnboarding');
-        });
+        // Navigate directly to StudentOnboarding — it handles its own OAuth
+        navigate('StudentOnboarding');
         return;
       }
 
