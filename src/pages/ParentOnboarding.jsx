@@ -75,6 +75,7 @@ export default function ParentOnboarding() {
         student_email: formData.studentEmail.trim(),
         student_name: formData.studentFirstName.trim(),
         parent_name: parentFirstName,
+        student_university: formData.studentUniversity || '',
       });
 
       // Link student email to parent profile (don't refreshUser to avoid remounting)
