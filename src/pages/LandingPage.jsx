@@ -56,28 +56,31 @@ export default function LandingPage() {
         {/* 1 — Hero */}
         <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
 
-        {/* 2 — The Reality */}
+        {/* 2 — The Manifesto */}
+        <V3Manifesto />
+
+        {/* 3 — The Reality */}
         <V3Problem />
 
-        {/* 3 — Comparison Table */}
+        {/* 4 — Comparison Table */}
         <V3ComparisonTable />
 
-        {/* 4 — How It Actually Works */}
+        {/* 5 — How It Actually Works */}
         <V3ParentPeace onCTA={handleCTA} />
 
-        {/* 5 — The Stats */}
+        {/* 6 — The Stats */}
         <V3Numbers />
 
-        {/* 5.5 — Parent Story */}
+        {/* 6.5 — Parent Story */}
         <V3ParentStory />
 
-        {/* 6 — Pricing */}
+        {/* 7 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
-        {/* 7 — FAQ */}
+        {/* 8 — FAQ */}
         <V3FAQ />
 
-        {/* 8 — Final CTA + Footer */}
+        {/* 9 — Final CTA + Footer */}
         <V3FinalCTA onCTA={handleCTA} />
       </div>
     </>
