@@ -509,24 +509,9 @@ export default function GatorAuth() {
     const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
     const hasInviteCode = localStorage.getItem('pending_invite_code');
     
-    // Students selecting gator can proceed directly (any email allowed)
+    // Students go to StudentOnboarding which handles everything
     if (selectedRole === 'gator') {
-      try {
-        console.log('🎓 [GatorAuth] Student selecting gator role, proceeding directly');
-        await base44.auth.updateMe({
-          persona: 'gator',
-          roles: ['gator'],
-          onboarding_completed: false,
-          is_new_signup: true,
-          invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
-        });
-        localStorage.removeItem('pending_invite_role');
-        if (refreshUser) await refreshUser();
-        navigate('StudentOnboarding');
-      } catch (err) {
-        console.error('Failed to set role:', err);
-        setLoading(false);
-      }
+      navigate('StudentOnboarding');
       return;
     }
     
