@@ -242,9 +242,25 @@ export default function ParentFastIQView({ user }) {
   }
 
   if (state === 'upsell') {
-    // Redirect to ParentHome where founding offer card will handle upsell
-    navigate('ParentHome');
-    return null;
+    return (
+      <motion.div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0F172A' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="bg-[#1A1A1A] border border-[#E85D20] rounded-xl p-6 text-center max-w-md">
+          <p className="text-white font-semibold text-lg mb-2">
+            Activate FastIQ for your student
+          </p>
+          <p className="text-[#888888] text-sm mb-4">
+            $29/month or $187/year — 7-day free trial included.
+          </p>
+          <button
+            onClick={() => navigate('ParentHome')}
+            className="bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold w-full hover:bg-[#d44e14] transition-colors"
+            style={{ minHeight: 'auto' }}
+          >
+            Activate FastIQ →
+          </button>
+        </div>
+      </motion.div>
+    );
   }
 
   return <LinkStudentFirstView />;
