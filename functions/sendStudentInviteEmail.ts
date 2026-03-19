@@ -39,16 +39,7 @@ Deno.serve(async (req) => {
     
     // Build invite link with parent context for Flow A
     const parentFirstName = parent_name.split(' ')[0] || parent_name;
-    // Get student's university from parent's onboarding data if available
-    let studentSchool = '';
-    try {
-      const parentUser = await base44.asServiceRole.entities.User.filter({ email: user.email });
-      if (parentUser?.[0]) {
-        // Check for student university stored during parent onboarding
-        const studentEmails = parentUser[0].student_emails || [];
-        studentSchool = body.student_university || parentUser[0].student_university || '';
-      }
-    } catch (e) { /* non-critical */ }
+    const studentSchool = body.student_university || '';
 
     const inviteParams = new URLSearchParams({
       email: student_email,
