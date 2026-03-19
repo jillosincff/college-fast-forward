@@ -59,7 +59,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
                 cursor: 'pointer',
               }}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[#E85D20]' : 'text-[#999999]'}`} />
+              <Icon style={{ width: 16, height: 16, color: isActive ? '#E85D20' : '#999999', flexShrink: 0 }} />
               {item.label}
             </button>
           );
