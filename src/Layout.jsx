@@ -61,8 +61,9 @@ const APP_VERSION = 'v1.3.0';
  * SINGLE SOURCE OF TRUTH for dashboard routing.
  * Rules:
  *   admin → AdminDashboard
- *   gator/student → Dashboard
- *   parent → ParentDashboard
+ *   gator/student + FastIQ active → FastIQ
+ *   gator/student + no FastIQ → FreeTierDashboard
+ *   parent → ParentHome
  *   alumni + graduation_year >= 2025 (recent_grad) → RecentGradDashboard
  *   alumni + graduation_year <= 2024 (established) → AlumniDashboard
  *   alumni fallback → AlumniDashboard
@@ -72,18 +73,27 @@ function getDashboardForUser(user) {
   if (user.roles?.includes('admin')) return 'AdminDashboard';
 
   const persona = user.persona;
-  if (persona === 'gator' || persona === 'student') return 'Dashboard';
+  
+  // Students/Gators — route based on FastIQ status
+  if (persona === 'gator' || persona === 'student') {
+    const hasFastIQ = user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq';
+    return hasFastIQ ? 'FastIQ' : 'FreeTierDashboard';
+  }
+  
   if (persona === 'parent') return 'ParentHome';
   if (persona === 'alumni') {
     if (user.alumni_seniority === 'recent_grad') return 'RecentGradDashboard';
-    // Established alumni (2024 and earlier) — always AlumniDashboard
     return 'AlumniDashboard';
   }
+  
   // Fallback: check roles array
   if (user.roles?.includes('parent')) return 'ParentHome';
-  if (user.roles?.includes('gator')) return 'Dashboard';
+  if (user.roles?.includes('gator')) {
+    const hasFastIQ = user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq';
+    return hasFastIQ ? 'FastIQ' : 'FreeTierDashboard';
+  }
   if (user.roles?.includes('alumni')) return 'AlumniDashboard';
-  return 'Dashboard';
+  return 'FreeTierDashboard';
 }
 
 function handleCacheBusting() {
@@ -163,6 +173,7 @@ const MockInterview = React.lazy(() => import('./pages/MockInterview'));
 const LinkedInReview = React.lazy(() => import('./pages/LinkedInReview'));
 const ApplicationBoost = React.lazy(() => import('./pages/ApplicationBoost'));
 const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvitedOnboarding'));
+const FreeTierDashboard = React.lazy(() => import('./pages/FreeTierDashboard'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -506,7 +517,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding'];
-const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome'];
+const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail', 'StudentInvitedOnboarding'];
@@ -575,6 +586,7 @@ const getPageComponent = (pageName) => {
     case 'LinkedInReview': return LinkedInReview;
     case 'ApplicationBoost': return ApplicationBoost;
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
+    case 'FreeTierDashboard': return FreeTierDashboard;
     default: return LandingPage;
   }
 };
@@ -822,7 +834,7 @@ function AppContent() {
 
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
-  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard'];
+  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard'];
   const parentOwnNavPages = ['Profile', 'ParentHome'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
