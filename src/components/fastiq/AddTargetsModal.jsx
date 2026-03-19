@@ -76,27 +76,28 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
 
       {/* Modal */}
       <div style={{
-        position: 'relative', background: '#fff', borderRadius: 20,
+        position: 'relative', background: '#0A0A0A', borderRadius: 16,
         width: '100%', maxWidth: 480, maxHeight: '90vh', overflow: 'auto',
-        boxShadow: '0 25px 50px rgba(0,0,0,0.2)', padding: '28px 24px',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.5)', padding: '28px 24px',
+        border: '1px solid #2A2A2A',
       }}>
         {/* Close */}
         <button onClick={onClose} style={{
-          position: 'absolute', top: 16, right: 16, background: '#F1F5F9',
+          position: 'absolute', top: 16, right: 16, background: '#1A1A1A',
           border: 'none', borderRadius: 10, width: 36, height: 36,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
         }}>
-          <X style={{ width: 18, height: 18, color: '#64748B' }} />
+          <X style={{ width: 18, height: 18, color: '#888' }} />
         </button>
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 28, marginBottom: 8 }}>🎯</div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', marginBottom: 6 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
             Add Target Companies
           </h2>
-          <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 13, color: '#888', lineHeight: 1.5 }}>
             Tell FASTIQ which companies you're interested in and it will find UF alumni, track hiring signals, and scout opportunities.
           </p>
         </div>
@@ -111,11 +112,11 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
             disabled={companies.length >= 5}
             style={{
               flex: 1, height: 44, padding: '0 14px', borderRadius: 12,
-              border: '2px solid #E2E8F0', fontSize: 14, outline: 'none',
-              transition: 'border-color 0.2s',
+              border: '1px solid #2A2A2A', fontSize: 14, outline: 'none',
+              transition: 'border-color 0.2s', background: '#1A1A1A', color: '#fff',
             }}
-            onFocus={e => { e.target.style.borderColor = '#0021A5'; }}
-            onBlur={e => { e.target.style.borderColor = '#E2E8F0'; }}
+            onFocus={e => { e.target.style.borderColor = '#E85D20'; }}
+            onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
             autoFocus
           />
           <button
@@ -123,8 +124,8 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
             disabled={!input.trim() || companies.length >= 5}
             style={{
               height: 44, padding: '0 18px', borderRadius: 12, border: 'none',
-              background: (!input.trim() || companies.length >= 5) ? '#E2E8F0' : '#0021A5',
-              color: (!input.trim() || companies.length >= 5) ? '#64748B' : '#fff',
+              background: (!input.trim() || companies.length >= 5) ? '#2A2A2A' : '#E85D20',
+              color: (!input.trim() || companies.length >= 5) ? '#555' : '#fff',
               fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 'auto',
               transition: 'all 0.2s',
             }}
@@ -136,23 +137,23 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
         {/* Added companies */}
         {companies.length > 0 && (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 8 }}>
               Your targets ({companies.length}/5)
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {companies.map(c => (
                 <div key={c} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 14px', background: '#F8FAFC', borderRadius: 12,
-                  border: '1px solid #E2E8F0',
+                  padding: '10px 14px', background: '#1A1A1A', borderRadius: 12,
+                  border: '1px solid #2A2A2A',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Building2 style={{ width: 16, height: 16, color: '#0021A5' }} />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>{c}</span>
+                    <Building2 style={{ width: 16, height: 16, color: '#E85D20' }} />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{c}</span>
                   </div>
                   <button onClick={() => removeCompany(c)} style={{
                     width: 28, height: 28, borderRadius: 8, border: 'none',
-                    background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
                     transition: 'all 0.2s',
                   }}>
@@ -167,7 +168,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
         {/* Suggestions */}
         {companies.length < 5 && suggestions.length > 0 && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 8 }}>
               {primaryIndustry ? `Popular in ${primaryIndustry}` : 'Popular with UF students'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -176,13 +177,13 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
                   key={c}
                   onClick={() => addCompany(c)}
                   style={{
-                    padding: '6px 14px', borderRadius: 20, border: '1.5px solid #E2E8F0',
-                    background: '#fff', fontSize: 12, fontWeight: 600, color: '#475569',
+                    padding: '6px 14px', borderRadius: 20, border: '1px solid #2A2A2A',
+                    background: '#1A1A1A', fontSize: 12, fontWeight: 600, color: '#888',
                     cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
                     transition: 'all 0.2s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#0021A5'; e.currentTarget.style.color = '#0021A5'; e.currentTarget.style.background = '#EFF6FF'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = '#fff'; }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.color = '#888'; e.currentTarget.style.background = '#1A1A1A'; }}
                 >
                   + {c}
                 </button>
@@ -197,7 +198,7 @@ export default function AddTargetsModal({ profile, onClose, onSaved }) {
           disabled={saving}
           style={{
             width: '100%', height: 48, borderRadius: 14, border: 'none',
-            background: saving ? '#CBD5E1' : '#0021A5',
+            background: saving ? '#555' : '#E85D20',
             color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             transition: 'all 0.2s', minHeight: 'auto',

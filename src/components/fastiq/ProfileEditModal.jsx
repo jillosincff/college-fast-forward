@@ -73,20 +73,20 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
   };
 
   const selectStyle = {
-    width: '100%', padding: '10px 12px', borderRadius: 10,
-    border: '1.5px solid #E2E8F0', fontSize: 14, background: '#fff',
-    color: '#1E293B', outline: 'none', appearance: 'none',
+    width: '100%', padding: '10px 12px', borderRadius: 12,
+    border: '1px solid #2A2A2A', fontSize: 14, background: '#1A1A1A',
+    color: '#fff', outline: 'none', appearance: 'none',
     backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")',
     backgroundPosition: 'right 8px center', backgroundRepeat: 'no-repeat', backgroundSize: '20px',
   };
   const inputStyle = { ...selectStyle, appearance: 'auto', backgroundImage: 'none' };
-  const labelStyle = { fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6, display: 'block' };
+  const labelStyle = { fontSize: 11, fontWeight: 700, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6, display: 'block' };
 
   const chipStyle = (selected) => ({
     padding: '6px 14px', borderRadius: 20,
-    border: selected ? '2px solid #0021A5' : '1.5px solid #E2E8F0',
-    background: selected ? '#EFF6FF' : '#fff',
-    color: selected ? '#0021A5' : '#64748B',
+    border: selected ? '2px solid #E85D20' : '1px solid #2A2A2A',
+    background: selected ? 'rgba(232,93,32,0.1)' : '#1A1A1A',
+    color: selected ? '#E85D20' : '#888',
     fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
   });
 
@@ -96,18 +96,18 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
       background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: 16,
     }} onClick={onClose}>
       <div style={{
-        background: '#fff', borderRadius: 20, width: '100%', maxWidth: 520,
+        background: '#0A0A0A', borderRadius: 16, width: '100%', maxWidth: 520,
         maxHeight: '90vh', overflow: 'auto', padding: '28px 24px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.5)', border: '1px solid #2A2A2A',
       }} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', margin: 0 }}>Edit Profile</h2>
-            <p style={{ fontSize: 12, color: '#64748B', margin: '4px 0 0' }}>Update your career preferences</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>Edit Profile</h2>
+            <p style={{ fontSize: 12, color: '#888', margin: '4px 0 0' }}>Update your career preferences</p>
           </div>
-          <button onClick={onClose} style={{ background: '#F1F5F9', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', minHeight: 'auto' }}>
-            <X style={{ width: 18, height: 18, color: '#64748B' }} />
+          <button onClick={onClose} style={{ background: '#1A1A1A', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', minHeight: 'auto' }}>
+            <X style={{ width: 18, height: 18, color: '#888' }} />
           </button>
         </div>
 
@@ -133,7 +133,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
               ))}
             </div>
             {industries.length > 0 && (
-              <p style={{ fontSize: 10, color: '#64748B', marginTop: 6 }}>{industries.length} selected</p>
+              <p style={{ fontSize: 10, color: '#888', marginTop: 6 }}>{industries.length} selected</p>
             )}
           </div>
 
@@ -146,7 +146,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
               ))}
             </div>
             {roles.length > 0 && (
-              <p style={{ fontSize: 10, color: '#64748B', marginTop: 6 }}>{roles.length} selected</p>
+              <p style={{ fontSize: 10, color: '#888', marginTop: 6 }}>{roles.length} selected</p>
             )}
           </div>
 
@@ -159,7 +159,7 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
                 placeholder="Add a company..." style={{ ...inputStyle, flex: 1 }}
                 disabled={companies.length >= 5} />
               <button onClick={addCompany} disabled={companies.length >= 5 || !companyInput.trim()} style={{
-                background: '#0021A5', color: '#fff', border: 'none', borderRadius: 10, padding: '0 14px',
+                background: '#E85D20', color: '#fff', border: 'none', borderRadius: 10, padding: '0 14px',
                 cursor: companies.length >= 5 ? 'not-allowed' : 'pointer', opacity: companies.length >= 5 ? 0.5 : 1,
                 minHeight: 'auto', display: 'flex', alignItems: 'center',
               }}>
@@ -170,13 +170,13 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
               {companies.map((c, i) => (
                 <span key={i} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
-                  background: '#EFF6FF', color: '#0021A5', padding: '5px 12px',
+                  background: 'rgba(232,93,32,0.1)', color: '#E85D20', padding: '5px 12px',
                   borderRadius: 20, fontSize: 12, fontWeight: 600,
                 }}>
                   {c}
                   <button onClick={() => removeCompany(i)} style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    color: '#64748B', minHeight: 'auto', display: 'flex',
+                    color: '#888', minHeight: 'auto', display: 'flex',
                   }}>
                     <Trash2 style={{ width: 12, height: 12 }} />
                   </button>
@@ -213,14 +213,14 @@ export default function ProfileEditModal({ user, profile, onClose, onSaved }) {
           <div>
             <label style={labelStyle}>Fraternity / Sorority (optional)</label>
             <input value={greekOrg} onChange={e => setGreekOrg(e.target.value)} placeholder="e.g. Kappa Delta, Sigma Chi" style={inputStyle} />
-            <p style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Greek connections respond at 3× the rate of cold outreach</p>
+            <p style={{ fontSize: 10, color: '#555', marginTop: 4 }}>Greek connections respond at 3× the rate of cold outreach</p>
           </div>
         </div>
 
         {/* Save */}
         <button onClick={handleSave} disabled={saving} style={{
           marginTop: 24, width: '100%', padding: '14px', borderRadius: 12,
-          background: saving ? '#94A3B8' : '#0021A5', color: '#fff', border: 'none',
+          background: saving ? '#555' : '#E85D20', color: '#fff', border: 'none',
           fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
           minHeight: 'auto', transition: 'all 0.2s',
         }}>
