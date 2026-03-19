@@ -9,6 +9,7 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [sendingNudge, setSendingNudge] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
   const [alumniCount, setAlumniCount] = useState(null);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
 
   useEffect(() => {
     const hasGoals = !!(user?.target_industries?.length || user?.target_companies?.length);
