@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const EXTERNAL_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const INTERNAL_TTL_MS = 60 * 60 * 1000;       // 1 hour
 
 function getCacheKey(user) {
   const goals = user?.career_goals || {};
@@ -14,6 +15,9 @@ function getCacheKey(user) {
   });
 }
 
+// In-memory cache (survives re-renders, not page refresh)
+const memCache = { data: null, externalAt: null, internalAt: null, key: null };
+
 export function useCompanyRecs(user) {
   const [companies, setCompanies] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,16 +26,13 @@ export function useCompanyRecs(user) {
   const fetchRecs = useCallback(async () => {
     if (!user?.email) return;
 
-    // Check in-memory cache stored on user object
-    const cached = user?.company_recs_cache;
     const cacheKey = getCacheKey(user);
-    if (
-      cached &&
-      cached.key === cacheKey &&
-      cached.generated_at &&
-      Date.now() - new Date(cached.generated_at).getTime() < CACHE_TTL_MS
-    ) {
-      setCompanies(cached.companies);
+    const now = Date.now();
+    const externalFresh = memCache.key === cacheKey && memCache.externalAt && (now - memCache.externalAt < EXTERNAL_TTL_MS);
+    const internalFresh = memCache.key === cacheKey && memCache.internalAt && (now - memCache.internalAt < INTERNAL_TTL_MS);
+
+    if (externalFresh && internalFresh && memCache.data) {
+      setCompanies(memCache.data);
       return;
     }
 
@@ -49,12 +50,17 @@ export function useCompanyRecs(user) {
       try {
         result = await makeCall();
       } catch (firstErr) {
-        // Retry once after 3 seconds
         await new Promise(r => setTimeout(r, 3000));
         result = await makeCall();
       }
       const data = result?.data || result;
       const list = data?.companies || [];
+
+      memCache.data = list;
+      memCache.key = cacheKey;
+      memCache.externalAt = now;
+      memCache.internalAt = now;
+
       setCompanies(list);
     } catch (e) {
       setError(true);
