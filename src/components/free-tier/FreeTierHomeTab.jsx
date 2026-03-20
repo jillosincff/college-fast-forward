@@ -189,6 +189,9 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             error={recsError}
             onRefetch={refetch}
             onTabChange={onTabChange}
+            onOpenUpgrade={onOpenUpgrade}
+            user={user}
+            isFastIQ={false}
             dark={true}
           />
         </section>
