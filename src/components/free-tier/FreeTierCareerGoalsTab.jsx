@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import CompanySizeRankField from '@/components/free-tier/CompanySizeRankField';
 
 const INDUSTRIES = [
   'Technology, Information & Media',
@@ -57,6 +58,8 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [locations, setLocations] = useState([]);
   const [companyInput, setCompanyInput] = useState('');
   const [companySkipped, setCompanySkipped] = useState(false);
+  const [companySizePref, setCompanySizePref] = useState(['large', 'mid', 'startup']);
+  const [companySizeSkipped, setCompanySizeSkipped] = useState(false);
   const [btnState, setBtnState] = useState(BTN.idle);
   const [btnError, setBtnError] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -74,6 +77,11 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       setGradYear(g.graduation_year?.toString() || user?.graduation_year?.toString() || '');
       setLocations(g.locations || user?.location_preferences || []);
       setCompanySkipped(g.companies_skipped || false);
+      if (g.company_size_preference) {
+        setCompanySizePref(g.company_size_preference);
+      } else if (g.company_size_preference === null) {
+        setCompanySizeSkipped(true);
+      }
       if (g.saved_at) {
         setSavedIndustries(g.industries || []);
         setSavedCompanies(g.target_companies || []);
@@ -130,6 +138,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           graduation_year: gradYear ? parseInt(gradYear) : null,
           locations,
           companies_skipped: companySkipped,
+          company_size_preference: companySizeSkipped ? null : companySizePref,
           saved_at: new Date().toISOString(),
         },
       });
@@ -263,6 +272,14 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
             </>
           )}
         </div>
+
+        {/* Company Size Preference */}
+        <CompanySizeRankField
+          value={companySizePref}
+          skipped={companySizeSkipped}
+          onChange={(newOrder) => { setCompanySizePref(newOrder); setCompanySizeSkipped(false); }}
+          onSkip={() => setCompanySizeSkipped(true)}
+        />
 
         {/* Graduation Year */}
         <div>
