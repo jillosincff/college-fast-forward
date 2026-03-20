@@ -26,6 +26,14 @@ export function useCompanyRecs(user) {
   const fetchRecs = useCallback(async () => {
     if (!user?.email) return;
 
+    // Guard: verify function exists before calling
+    if (typeof getFreeTierCompanyRecs !== 'function') {
+      console.error('getFreeTierCompanyRecs not found — showing fallback');
+      setError(true);
+      setLoading(false);
+      return;
+    }
+
     const cacheKey = getCacheKey(user);
     const now = Date.now();
     const externalFresh = memCache.key === cacheKey && memCache.externalAt && (now - memCache.externalAt < EXTERNAL_TTL_MS);
