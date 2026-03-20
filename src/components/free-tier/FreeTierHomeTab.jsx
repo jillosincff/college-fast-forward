@@ -133,8 +133,8 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             </div>
           ) : (
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 8 }}>
-              Let's build yours. Start with the three steps below.
-            </p>
+              Let's build yours. Follow the six steps below — in order.
+          </p>
           )}
         </div>
       </div>
