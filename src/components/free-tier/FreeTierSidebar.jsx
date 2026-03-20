@@ -1,23 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock } from 'lucide-react';
+import { Home, Building2, Map, GraduationCap, Target, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
-const NAV_ITEMS = [
+const FREE_NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Home' },
   { id: 'company_intel', icon: Building2, label: 'Company Intel' },
   { id: 'career_path', icon: Map, label: 'Career Path Research' },
   { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
   { id: 'career_goals', icon: Target, label: 'Career Goals' },
-  { id: 'alumni_network', icon: Users, label: 'Alumni Network' },
   { id: 'messages', icon: MessageSquare, label: 'Messages' },
 ];
 
-export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade }) {
+const CONCIERGE_SUBTABS = [
+  { id: 'resumes', icon: FileText, label: 'Résumés & Cover Letters' },
+  { id: 'mock_interviews', icon: Mic, label: 'Mock Interviews' },
+  { id: 'linkedin', icon: Linkedin, label: 'LinkedIn Profile Review' },
+];
+
+export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade, onOpenConcierge }) {
   const firstName = user?.full_name?.split(' ')[0] || 'Student';
   const university = user?.school || user?.university || 'UF';
   const [showMenu, setShowMenu] = useState(false);
+  const [conciergeOpen, setConciergeOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -42,7 +48,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
 
       {/* Nav Items */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map(item => {
+        {FREE_NAV_ITEMS.map(item => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
@@ -65,17 +71,51 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           );
         })}
 
-        {/* FastIQ Locked Item */}
+        {/* Divider + upgrade label */}
+        <div style={{ margin: '12px 4px 8px' }}>
+          <div style={{ height: 1, background: '#E0E0E0', marginBottom: 8 }} />
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>UNLOCK WITH FASTIQ</p>
+        </div>
+
+        {/* Career Concierge locked item + subtabs */}
+        <button
+          onClick={() => { setConciergeOpen(p => !p); onOpenConcierge && onOpenConcierge(); }}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
+          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
+        >
+          <Sparkles style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
+          <span className="flex-1 text-left">Career Concierge</span>
+          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+        </button>
+        {conciergeOpen && (
+          <div style={{ marginLeft: 16 }}>
+            {CONCIERGE_SUBTABS.map(sub => {
+              const Icon = sub.icon;
+              return (
+                <button
+                  key={sub.id}
+                  onClick={onOpenConcierge}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-[#999999] hover:text-[#666] transition-all"
+                  style={{ minHeight: 'auto', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <Icon style={{ width: 13, height: 13, color: '#BBBBBB', flexShrink: 0 }} />
+                  <span className="flex-1 text-left">{sub.label}</span>
+                  <Lock style={{ width: 11, height: 11, color: '#CCCCCC' }} />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* FastIQ locked item */}
         <button
           onClick={onOpenUpgrade}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#E85D20] hover:bg-[#FFF5F0] transition-all mt-4"
-          style={{ minHeight: 'auto' }}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
+          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
-          <Lock className="w-4 h-4 text-[#E85D20]" />
+          <Zap style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
           <span className="flex-1 text-left">FastIQ</span>
-          <span className="px-2 py-0.5 bg-[#E85D20] text-white text-[9px] font-bold rounded-full uppercase">
-            Upgrade
-          </span>
+          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
         </button>
       </nav>
 
