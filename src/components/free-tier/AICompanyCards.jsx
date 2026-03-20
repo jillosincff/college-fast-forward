@@ -70,7 +70,7 @@ export default function AICompanyCards({ companies, loading, error, onRefetch, o
     );
   }
 
-  if (error || !companies) {
+  if (error || !companies || companies.length === 0) {
     return (
       <div style={{ background: dark ? '#1A1A1A' : '#F9F9F9', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: 20, textAlign: 'center' }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 12 }}>
@@ -87,6 +87,8 @@ export default function AICompanyCards({ companies, loading, error, onRefetch, o
     );
   }
 
+  const isFallback = companies?.some(c => c.is_fallback);
+
   const handleWarmPathClick = (companyName) => {
     if (isFastIQ) {
       onTabChange && onTabChange('company_intel');
@@ -96,6 +98,12 @@ export default function AICompanyCards({ companies, loading, error, onRefetch, o
   };
 
   return (
+    <div>
+      {isFallback && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontStyle: 'italic', color: '#999', marginBottom: 12 }}>
+          Based on your saved industries — AI-powered matches coming soon.
+        </p>
+      )}
     <div className="grid md:grid-cols-3 gap-4">
       {companies.slice(0, 3).map(company => {
         const sig = sigConfig[company.hiring_signal] || sigConfig.warm;
@@ -150,6 +158,7 @@ export default function AICompanyCards({ companies, loading, error, onRefetch, o
           </div>
         );
       })}
+    </div>
     </div>
   );
 }
