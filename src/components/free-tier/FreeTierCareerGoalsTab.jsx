@@ -308,6 +308,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
 
       {/* ── POST-SAVE RESULTS ── */}
       {showResults && (
+        <>
         <div ref={resultsRef} />
         <div style={{ marginTop: 24 }}>
 
