@@ -324,6 +324,20 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
             </p>
             <div className="grid md:grid-cols-3 gap-4 mb-3">
               {[1, 2, 3].map((i) => (
+                <div key={i} className="relative rounded-lg p-4 border border-[#E0E0E0] bg-[#F5F5F5]">
+                  <div className="filter blur-sm">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full mb-2" />
+                    <p style={{ fontWeight: 700, fontSize: 13, color: '#888', margin: '0 0 2px' }}>Profile Hidden</p>
+                    <p style={{ fontSize: 12, color: '#999' }}>Alumni</p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button onClick={onOpenUpgrade} className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold" style={{ minHeight: 'auto' }}>
+                      🔒 See who to contact →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
             <button
               onClick={() => onTabChange && onTabChange('alumni_network')}
               style={{ fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
