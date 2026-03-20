@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle2, Circle, ArrowRight, Loader2, X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
+import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [checklist, setChecklist] = useState({ goals: false, intel: false, alumni: false });
@@ -12,21 +13,12 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
 
   useEffect(() => {
-    const hasGoals = !!(user?.target_industries?.length || user?.target_companies?.length);
-    setChecklist({
-      goals: hasGoals,
-      intel: hasGoals,
-      alumni: hasGoals,
-    });
-
-    // State A: first visit with no actions taken → hide banner, mark for next visit
-    // State B: returning visitor OR has completed any action → show banner
+    const hasGoals = !!(user?.career_goals?.saved_at);
     const isReturnVisit = user?.firstVisitComplete === true;
     if (isReturnVisit || hasGoals) {
       setShowUpgradeBanner(true);
     } else {
       setShowUpgradeBanner(false);
-      // Mark so next visit shows State B
       base44.auth.updateMe({ firstVisitComplete: true }).catch(() => {});
     }
   }, [user]);
@@ -78,8 +70,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
     }
   };
 
-  const completedCount = Object.values(checklist).filter(Boolean).length;
-  const allComplete = completedCount === 3;
+
 
   return (
     <div>
@@ -178,73 +169,8 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
       {/* Body Sections */}
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
-        {/* Getting Started Checklist */}
-        <section>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-            GET STARTED
-          </p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-            Three steps to a stronger job search.
-          </h2>
-          <div className="space-y-3">
-            <button
-              onClick={() => onTabChange('career_goals')}
-              className="w-full flex items-center gap-4 bg-white rounded-xl p-4 border border-[#E0E0E0] hover:border-[#E85D20] transition-all text-left"
-              style={{ minHeight: 'auto' }}
-            >
-              {checklist.goals ? (
-                <CheckCircle2 className="w-5 h-5 text-[#E85D20] flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-[#CCCCCC] flex-shrink-0" />
-              )}
-              <span className="flex-1 text-sm font-medium text-[#1A1A1A]">Complete your career goals</span>
-              <ArrowRight className="w-4 h-4 text-[#999999]" />
-            </button>
-            <button
-              onClick={() => onTabChange('company_intel')}
-              className="w-full flex items-center gap-4 bg-white rounded-xl p-4 border border-[#E0E0E0] hover:border-[#E85D20] transition-all text-left"
-              style={{ minHeight: 'auto' }}
-            >
-              {checklist.intel ? (
-                <CheckCircle2 className="w-5 h-5 text-[#E85D20] flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-[#CCCCCC] flex-shrink-0" />
-              )}
-              <span className="flex-1 text-sm font-medium text-[#1A1A1A]">Explore company intel</span>
-              <ArrowRight className="w-4 h-4 text-[#999999]" />
-            </button>
-            <button
-              onClick={() => onTabChange('alumni_network')}
-              className="w-full flex items-center gap-4 bg-white rounded-xl p-4 border border-[#E0E0E0] hover:border-[#E85D20] transition-all text-left"
-              style={{ minHeight: 'auto' }}
-            >
-              {checklist.alumni ? (
-                <CheckCircle2 className="w-5 h-5 text-[#E85D20] flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-[#CCCCCC] flex-shrink-0" />
-              )}
-              <span className="flex-1 text-sm font-medium text-[#1A1A1A]">See who's in your alumni network</span>
-              <ArrowRight className="w-4 h-4 text-[#999999]" />
-            </button>
-          </div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', marginTop: 12 }}>
-            {completedCount} of 3 completed
-          </p>
-          {allComplete && (
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#22C55E', marginBottom: 8 }}>
-                ✓ You're set up. Now unlock FastIQ to take action.
-              </p>
-              <button
-                onClick={onOpenUpgrade}
-                className="bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors w-full"
-                style={{ minHeight: 'auto' }}
-              >
-                Unlock FastIQ →
-              </button>
-            </div>
-          )}
-        </section>
+        {/* Career Roadmap */}
+        <CareerRoadmap user={user} onTabChange={onTabChange} onOpenUpgrade={onOpenUpgrade} />
 
         {/* Company Intel Preview */}
         <section>
