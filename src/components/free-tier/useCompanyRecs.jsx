@@ -39,13 +39,20 @@ export function useCompanyRecs(user) {
     setError(false);
     setCompanies(null);
 
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
+    const makeCall = () => Promise.race([
+      getFreeTierCompanyRecs({ career_goals: user?.career_goals }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000)),
+    ]);
 
     try {
-      const result = await Promise.race([
-        getFreeTierCompanyRecs({ career_goals: user?.career_goals }),
-        timeout,
-      ]);
+      let result;
+      try {
+        result = await makeCall();
+      } catch (firstErr) {
+        // Retry once after 3 seconds
+        await new Promise(r => setTimeout(r, 3000));
+        result = await makeCall();
+      }
       const data = result?.data || result;
       const list = data?.companies || [];
       setCompanies(list);
