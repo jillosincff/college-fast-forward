@@ -10,6 +10,7 @@ import FreeTierCareerPathTab from '@/components/free-tier/FreeTierCareerPathTab'
 import FreeTierCareerCenterTab from '@/components/free-tier/FreeTierCareerCenterTab';
 import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTab';
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
+import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
@@ -75,6 +76,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={setActiveTab} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
       </div>
 

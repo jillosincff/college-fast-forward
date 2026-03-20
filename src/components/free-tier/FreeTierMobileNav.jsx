@@ -3,9 +3,9 @@ import React from 'react';
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', emoji: '🏠' },
   { id: 'company_intel', label: 'Companies', emoji: '🏢' },
+  { id: 'directory', label: 'Directory', emoji: '👥' },
   { id: 'career_goals', label: 'Goals', emoji: '🎯' },
-  { id: 'career_concierge', label: 'Concierge', emoji: '✨', upgrade: true },
-  { id: 'fastiq', label: 'FastIQ', emoji: '⚡', upgrade: true },
+  { id: 'messages', label: 'Messages', emoji: '💬' },
 ];
 
 export default function FreeTierMobileNav({ activeTab, onTabChange, onOpenUpgrade, onOpenConcierge }) {

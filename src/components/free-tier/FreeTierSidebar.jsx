@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Building2, Map, GraduationCap, Target, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin } from 'lucide-react';
+import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -10,6 +10,7 @@ const FREE_NAV_ITEMS = [
   { id: 'career_path', icon: Map, label: 'Career Path Research' },
   { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
   { id: 'career_goals', icon: Target, label: 'Career Goals' },
+  { id: 'directory', icon: Users, label: 'Directory' },
   { id: 'messages', icon: MessageSquare, label: 'Messages' },
 ];
 
