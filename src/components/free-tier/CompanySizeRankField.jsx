@@ -54,8 +54,6 @@ const CARDS = {
 
 const SIZE_LABELS = { large: 'Large Company', mid: 'Mid-Size Company', startup: 'Startup' };
 
-const isMobile = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-
 export default function CompanySizeRankField({ value, skipped, isSaved, onChange, onSkip }) {
   const [order, setOrder] = useState(value || ['large', 'mid', 'startup']);
   const [isSkipped, setIsSkipped] = useState(skipped || false);
@@ -66,11 +64,8 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
   const [showTooltip, setShowTooltip] = useState(false);
   const [bouncing, setBouncing] = useState(false);
   const dragItem = useRef(null);
-  const touchStartY = useRef(null);
   const itemRefs = useRef([]);
-  const mobile = isMobile();
 
-  // Single bounce animation on first load
   useEffect(() => {
     if (collapsed) return;
     const t = setTimeout(() => {
@@ -80,6 +75,7 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
     return () => clearTimeout(t);
   }, [collapsed]);
 
+  // Desktop drag handlers
   const handleDragStart = (e, idx) => {
     dragItem.current = idx;
     setDraggingIdx(idx);
@@ -112,18 +108,16 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
     dragItem.current = null;
   };
 
-  // Touch drag support
+  // Touch drag handlers
   const handleTouchStart = (e, idx) => {
     dragItem.current = idx;
     setDraggingIdx(idx);
-    touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e) => {
     e.preventDefault();
     if (dragItem.current === null) return;
     const touchY = e.touches[0].clientY;
-    // Find which item we're hovering over
     let overIdx = null;
     itemRefs.current.forEach((el, i) => {
       if (!el) return;
@@ -224,17 +218,13 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
         </div>
       </div>
 
-      {/* Helper text */}
       <p style={{ fontSize: 12, color: '#999', marginBottom: 10 }}>
         This helps us find companies that actually fit how you like to work — not just the biggest names everyone already knows.
       </p>
 
-      {/* Instruction line */}
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#444444', textAlign: 'center', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
         <span style={{ fontSize: 16 }}>↕</span>
-        {mobile
-          ? 'Tap and hold to reorder from most to least preferred.'
-          : 'Drag to rank from most preferred to least preferred. Your #1 choice shapes which companies we surface first.'}
+        Drag to rank from most preferred to least preferred. Your #1 choice shapes which companies we surface first.
       </p>
 
       <div className="space-y-3">
@@ -255,10 +245,26 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
               onTouchStart={e => handleTouchStart(e, idx)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              className={isFirstCard && bouncing ? 'card-bounce' : ''}
+              style={{
+                background: '#fff',
+                border: isDragOver ? '1.5px solid #E85D20' : '1px solid #E5E5E5',
+                borderRadius: 12,
+                padding: 16,
+                cursor: 'grab',
+                transform: isDragging ? 'scale(1.02)' : undefined,
+                boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.12)' : '0 1px 3px rgba(0,0,0,0.05)',
+                opacity: isDragging ? 0.85 : 1,
+                transition: 'box-shadow 0.15s, border-color 0.15s, opacity 0.15s',
+                userSelect: 'none',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                {/* Drag handle + rank */}
                 <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0" style={{ minWidth: 28 }}>
                   <GripVertical style={{ width: 20, height: 20, color: '#E85D20' }} />
                   {!hasDragged && (
-                    <span className="drag-label" style={{ fontSize: 9, fontWeight: 700, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: hasDragged ? 0 : 1 }}>
+                    <span className="drag-label" style={{ fontSize: 9, fontWeight: 700, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       DRAG
                     </span>
                   )}
@@ -295,7 +301,6 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
         })}
       </div>
 
-      {/* Skip option */}
       <div style={{ marginTop: 10, textAlign: 'center' }}>
         <p style={{ fontSize: 12, color: '#999', margin: '0 0 2px', fontStyle: 'italic' }}>
           Not sure yet? That's completely normal.
