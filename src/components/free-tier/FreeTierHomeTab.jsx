@@ -4,7 +4,7 @@ import { Loader2, X } from 'lucide-react';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
-  const [checklist, setChecklist] = useState({ goals: false, intel: false, alumni: false });
+
   const [parentEmail, setParentEmail] = useState('');
   const [nudgeSent, setNudgeSent] = useState(false);
   const [sendingNudge, setSendingNudge] = useState(false);
