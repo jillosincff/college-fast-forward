@@ -12,6 +12,7 @@ import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTa
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
+import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
 import { Loader2 } from 'lucide-react';
 
 export default function FreeTierDashboard() {
@@ -24,6 +25,7 @@ export default function FreeTierDashboard() {
     setSavedGoals(Date.now()); // trigger re-render on tabs
   };
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function FreeTierDashboard() {
   }
 
   const handleOpenUpgrade = () => setShowUpgradeModal(true);
+  const handleOpenConcierge = () => setShowConciergeModal(true);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
@@ -60,6 +63,7 @@ export default function FreeTierDashboard() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onOpenUpgrade={handleOpenUpgrade}
+          onOpenConcierge={handleOpenConcierge}
         />
       </div>
 
@@ -80,6 +84,7 @@ export default function FreeTierDashboard() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onOpenUpgrade={handleOpenUpgrade}
+          onOpenConcierge={handleOpenConcierge}
         />
       </div>
 
@@ -88,6 +93,12 @@ export default function FreeTierDashboard() {
         <FastIQUpgradeModal
           user={user}
           onClose={() => setShowUpgradeModal(false)}
+        />
+      )}
+      {showConciergeModal && (
+        <CareerConciergeUpgradeModal
+          onClose={() => setShowConciergeModal(false)}
+          onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }}
         />
       )}
     </div>
