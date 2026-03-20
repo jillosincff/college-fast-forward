@@ -13,7 +13,7 @@ const CARDS = {
     ],
     cons: [
       'Slower advancement — more people competing for the same roles',
-      'Less ownership — you're one of thousands',
+      "Less ownership — you're one of thousands",
       'Harder to stand out and get noticed by leadership',
     ],
     bestFor: 'Students who want stability, structure, and a proven path',
