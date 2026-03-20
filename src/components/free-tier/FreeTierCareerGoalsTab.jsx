@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import CompanySizeRankField from '@/components/free-tier/CompanySizeRankField';
+import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
+import AICompanyCards from '@/components/free-tier/AICompanyCards';
 
 const INDUSTRIES = [
   'Technology, Information & Media',
@@ -21,36 +23,10 @@ const INDUSTRIES = [
 const LOCATIONS = ['Remote', 'New York', 'Los Angeles', 'Chicago', 'Boston', 'Miami', 'San Francisco', 'Other'];
 const GRAD_YEARS = ['2025', '2026', '2027', '2028', '2029', '2030'];
 
-const SAMPLE_COMPANIES = [
-  { name: 'Google', industry: 'Technology, Information & Media', signal: 'hot', insight: 'Actively hiring for entry-level roles across multiple teams.' },
-  { name: 'Nike', industry: 'Retail & Consumer Goods', signal: 'warm', insight: 'Selective hiring — focus on brand marketing and product roles.' },
-  { name: 'Goldman Sachs', industry: 'Finance & Insurance', signal: 'warm', insight: 'Summer analyst applications open for investment banking division.' },
-  { name: 'Deloitte', industry: 'Professional Services', signal: 'hot', insight: 'Hiring consultants and business analysts nationwide.' },
-  { name: 'Apple', industry: 'Technology, Information & Media', signal: 'cool', insight: 'Limited entry-level openings — internship pipeline preferred.' },
-  { name: 'Amazon', industry: 'Technology, Information & Media', signal: 'hot', insight: 'Large-scale hiring for operations, tech, and business roles.' },
-  { name: 'Johnson & Johnson', industry: 'Healthcare & Pharmaceuticals', signal: 'warm', insight: 'Consistent hiring in medical devices and consumer health.' },
-  { name: 'McKinsey', industry: 'Professional Services', signal: 'warm', insight: 'Recruiting analysts from top universities across all majors.' },
-  { name: 'ESPN', industry: 'Sports & Entertainment', signal: 'warm', insight: 'Content and production roles available for new grads.' },
-  { name: 'Target', industry: 'Retail & Consumer Goods', signal: 'hot', insight: 'Strong merchandising and supply chain hiring pipeline.' },
-];
-
-const SAMPLE_ALUMNI = [
-  { company: 'Goldman Sachs', role: 'Analyst', industry: 'Finance & Insurance' },
-  { company: 'Google', role: 'Product Manager', industry: 'Technology, Information & Media' },
-  { company: 'Nike', role: 'Brand Manager', industry: 'Retail & Consumer Goods' },
-  { company: 'Deloitte', role: 'Business Analyst', industry: 'Professional Services' },
-  { company: 'Amazon', role: 'Operations Manager', industry: 'Technology, Information & Media' },
-];
-
-const SIGNAL_CONFIG = {
-  hot: { emoji: '🟢', label: 'Actively Hiring', bg: '#DCFCE7', text: '#15803D' },
-  warm: { emoji: '🟡', label: 'Selective', bg: '#FEF9C3', text: '#A16207' },
-  cool: { emoji: '🔴', label: 'Freeze', bg: '#FEE2E2', text: '#B91C1C' },
-};
-
 const BTN = { idle: 'idle', saving: 'saving', saved: 'saved', error: 'error' };
 
 export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSaved, onTabChange }) {
+  const { companies: aiCompanies, loading: recsLoading, error: recsError, refetch: refetchRecs } = useCompanyRecs(user);
   const [role, setRole] = useState('');
   const [industries, setIndustries] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -64,8 +40,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [btnError, setBtnError] = useState('');
   const [showResults, setShowResults] = useState(false);
   const resultsRef = useRef(null);
-  const [savedIndustries, setSavedIndustries] = useState([]);
-  const [savedCompanies, setSavedCompanies] = useState([]);
 
   // Pre-populate from saved values
   useEffect(() => {
@@ -82,11 +56,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       } else if (g.company_size_preference === null) {
         setCompanySizeSkipped(true);
       }
-      if (g.saved_at) {
-        setSavedIndustries(g.industries || []);
-        setSavedCompanies(g.target_companies || []);
-        setShowResults(true);
-      }
+      if (g.saved_at) setShowResults(true);
     } else {
       setRole(user?.target_role || '');
       setIndustries(user?.target_industries || []);
@@ -96,29 +66,8 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
     }
   }, [user]);
 
-  // Compute personalized companies for post-save display
-  const getPersonalizedCompanies = (inds, comps) => {
-    const targetFirst = SAMPLE_COMPANIES.filter(c =>
-      comps.some(t => c.name.toLowerCase().includes(t.toLowerCase()))
-    );
-    const industryMatch = SAMPLE_COMPANIES.filter(c =>
-      inds.some(i => c.industry === i) &&
-      !comps.some(t => c.name.toLowerCase().includes(t.toLowerCase()))
-    );
-    const rest = SAMPLE_COMPANIES.filter(c =>
-      !targetFirst.includes(c) && !industryMatch.includes(c)
-    );
-    return [...targetFirst, ...industryMatch, ...rest].slice(0, 3);
-  };
 
-  const getPersonalizedAlumni = (inds, comps) => {
-    const matched = SAMPLE_ALUMNI.filter(a =>
-      comps.some(c => a.company.toLowerCase().includes(c.toLowerCase())) ||
-      inds.some(i => a.industry === i)
-    );
-    const rest = SAMPLE_ALUMNI.filter(a => !matched.includes(a));
-    return [...matched, ...rest].slice(0, 3);
-  };
+
 
   const handleSave = async () => {
     setBtnState(BTN.saving);
@@ -143,9 +92,8 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
         },
       });
       setBtnState(BTN.saved);
-      setSavedIndustries(industries);
-      setSavedCompanies(companies);
       setShowResults(true);
+      refetchRecs();
       if (onGoalsSaved) onGoalsSaved();
       setTimeout(() => setBtnState(BTN.idle), 3000);
     } catch (err) {
@@ -173,9 +121,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
     }
   }, [showResults]);
 
-  const primaryIndustry = savedIndustries[0] || industries[0] || 'your target industry';
-  const personalizedCompanies = getPersonalizedCompanies(savedIndustries, savedCompanies);
-  const personalizedAlumni = getPersonalizedAlumni(savedIndustries, savedCompanies);
+  const primaryIndustry = industries[0] || user?.career_goals?.industries?.[0] || 'your target industry';
   const school = user?.school || user?.university || 'your school';
 
   return (
@@ -341,39 +287,25 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
             </p>
           </div>
 
-          {/* Section 2 — Personalized company intel */}
+          {/* Section 2 — AI company recommendations */}
           <section style={{ marginBottom: 40 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
               COMPANIES HIRING IN YOUR INDUSTRIES
             </p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-              Based on your goals, these companies are actively hiring.
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
+              Based on your goals, FastIQ found these companies actively hiring right now.
             </h2>
-            <div className="space-y-3">
-              {personalizedCompanies.map(company => {
-                const s = SIGNAL_CONFIG[company.signal];
-                return (
-                  <div key={company.name} className="bg-white rounded-xl p-5 border border-[#E0E0E0]">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 style={{ fontWeight: 700, color: '#1A1A1A', fontSize: 16, margin: 0 }}>{company.name}</h3>
-                        <p style={{ fontSize: 12, color: '#999', margin: '2px 0 0' }}>{company.industry}</p>
-                      </div>
-                      <span style={{ background: s.bg, color: s.text, padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {s.emoji} {s.label}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 13, color: '#666', marginBottom: 10 }}>{company.insight}</p>
-                    <button
-                      onClick={() => onTabChange && onTabChange('company_intel')}
-                      style={{ fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}
-                    >
-                      View Full Intel <ArrowRight style={{ width: 13, height: 13 }} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#999', marginBottom: 16 }}>
+              Updated every 24 hours. The more specific your goals, the better the matches.
+            </p>
+            <AICompanyCards
+              companies={aiCompanies}
+              loading={recsLoading}
+              error={recsError}
+              onRefetch={refetchRecs}
+              onTabChange={onTabChange}
+              dark={false}
+            />
             <button
               onClick={() => onTabChange && onTabChange('company_intel')}
               style={{ marginTop: 12, fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
@@ -388,29 +320,10 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               YOUR NETWORK
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', marginBottom: 16 }}>
-              <strong>{personalizedAlumni.length * 4}+ alumni</strong> from {school} work at companies in your target industries. The more parents who join, the more possibilities you have.
+              <strong>Alumni</strong> from {school} work at companies in your target industries. The more parents who join, the more possibilities you have.
             </p>
             <div className="grid md:grid-cols-3 gap-4 mb-3">
-              {personalizedAlumni.map((a, i) => (
-                <div key={i} className="relative rounded-lg p-4 border border-[#E0E0E0] bg-[#F5F5F5]">
-                  <div className="filter blur-sm select-none">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full mb-2" />
-                    <p style={{ fontWeight: 700, fontSize: 13, color: '#888', margin: '0 0 2px' }}>Profile Hidden</p>
-                    <p style={{ fontSize: 12, color: '#999' }}>{a.role}</p>
-                    <p style={{ fontSize: 12, color: '#999' }}>{a.company}</p>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      onClick={onOpenUpgrade}
-                      className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#d44e14] transition-colors"
-                      style={{ minHeight: 'auto' }}
-                    >
-                      🔒 See who to contact →
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+              {[1, 2, 3].map((i) => (
             <button
               onClick={() => onTabChange && onTabChange('alumni_network')}
               style={{ fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
