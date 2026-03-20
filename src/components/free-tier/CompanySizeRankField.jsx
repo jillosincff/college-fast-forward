@@ -246,27 +246,15 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
           return (
             <div
               key={id}
+              ref={el => itemRefs.current[idx] = el}
               draggable
               onDragStart={e => handleDragStart(e, idx)}
               onDragOver={e => handleDragOver(e, idx)}
               onDrop={e => handleDrop(e, idx)}
               onDragEnd={handleDragEnd}
-              className={isFirstCard && bouncing ? 'card-bounce' : ''}
-              style={{
-                background: '#fff',
-                border: isDragOver ? '1.5px solid #E85D20' : '1px solid #E5E5E5',
-                borderRadius: 12,
-                padding: 16,
-                cursor: 'grab',
-                transform: isDragging ? 'scale(1.02)' : undefined,
-                boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.12)' : '0 1px 3px rgba(0,0,0,0.05)',
-                opacity: isDragging ? 0.85 : 1,
-                transition: 'box-shadow 0.15s, border-color 0.15s, opacity 0.15s',
-                userSelect: 'none',
-              }}
-            >
-              <div className="flex items-start gap-3">
-                {/* Drag handle + rank */}
+              onTouchStart={e => handleTouchStart(e, idx)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
                 <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0" style={{ minWidth: 28 }}>
                   <GripVertical style={{ width: 20, height: 20, color: '#E85D20' }} />
                   {!hasDragged && (
